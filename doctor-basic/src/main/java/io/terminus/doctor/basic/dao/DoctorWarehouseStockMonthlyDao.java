@@ -57,6 +57,9 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
         params.put("warehouseId", warehouseId);
         params.put("handleDate", handleDate);
         DoctorWarehouseStockMonthly monthly = this.getSqlSession().selectOne(this.sqlId("statisticsWarehouse"), params);
+        if (null == monthly || null == monthly.getBalanceQuantity() || null == monthly.getBalacneAmount())
+            return new AmountAndQuantityDto(0, new BigDecimal(0));
+
         return new AmountAndQuantityDto(monthly.getBalacneAmount(), monthly.getBalanceQuantity());
     }
 

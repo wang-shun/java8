@@ -35,11 +35,10 @@ public class DoctorWarehouseStockMonthlyDaoTest extends BaseDaoTest {
     }
 
     @Test
-    public void test() {
-        int year = 2017;
-        int month = 4;
-        Date d=DateUtil.toYYYYMM(year + "-" + month);
-        System.out.println(DateUtil.toDateString(d));
+    public void testMonthlyOnNull() {
+        AmountAndQuantityDto amountAndQuantityDto = doctorWarehouseStockMonthlyDao.statistics(1L, DateUtil.toYYYYMM("2015-04"));
+        Assert.assertEquals(0, amountAndQuantityDto.getAmount());
+        Assert.assertEquals(0, amountAndQuantityDto.getQuantity().doubleValue(), 2);
     }
 
 }
