@@ -19,6 +19,7 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.warehouseV2.*;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
@@ -149,18 +150,20 @@ public class ReportController {
             List<WarehouseReportVo.WarehouseReportMonthDetail> outDetails = new ArrayList<>(warehouseResponse.getResult().size());
             long totalBalance = 0, totalIn = 0, totalOut = 0;
             for (DoctorWareHouse wareHouse : warehouseResponse.getResult()) {
-                AmountAndQuantityDto balance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countWarehouseBalance(wareHouse.getId(), year, month));
+//                AmountAndQuantityDto balance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countWarehouseBalance(wareHouse.getId(), year, month));
+//
+//                balanceDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
+//                        .name(wareHouse.getWareHouseName())
+//                        .amount((lastMonthBalance.containsKey(wareHouse.getId()) ? lastMonthBalance.get(wareHouse.getId()).getAmount() : 0) + balance.getAmount())
+//                        .build());
+//
+//                if (lastMonthBalance.containsKey(wareHouse.getId())) {
+//                    AmountAndQuantityDto a = lastMonthBalance.get(wareHouse.getId());
+//                    lastMonthBalance.put(wareHouse.getId(), new AmountAndQuantityDto(balance.getAmount() + a.getAmount(), balance.getQuantity().add(a.getQuantity())));
+//                } else
+//                    lastMonthBalance.put(wareHouse.getId(), new AmountAndQuantityDto(balance.getAmount(), balance.getQuantity()));
 
-                balanceDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
-                        .name(wareHouse.getWareHouseName())
-                        .amount((lastMonthBalance.containsKey(wareHouse.getId()) ? lastMonthBalance.get(wareHouse.getId()).getAmount() : 0) + balance.getAmount())
-                        .build());
-
-                if (lastMonthBalance.containsKey(wareHouse.getId())) {
-                    AmountAndQuantityDto a = lastMonthBalance.get(wareHouse.getId());
-                    lastMonthBalance.put(wareHouse.getId(), new AmountAndQuantityDto(balance.getAmount() + a.getAmount(), balance.getQuantity().add(a.getQuantity())));
-                } else
-                    lastMonthBalance.put(wareHouse.getId(), new AmountAndQuantityDto(balance.getAmount(), balance.getQuantity()));
+                AmountAndQuantityDto balance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countWarehouseBalance(wareHouse.getId(), DateUtil.toYYYYMM(year + "-" + month)));
 
                 long inAmount;
                 if (!inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.IN))

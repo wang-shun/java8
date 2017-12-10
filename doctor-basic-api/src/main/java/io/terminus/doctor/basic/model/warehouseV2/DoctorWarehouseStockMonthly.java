@@ -11,7 +11,7 @@ import java.util.Date;
 /**
  * Desc:
  * Mail: [ your email ]
- * Date: 2017-09-29 13:22:37
+ * Date: 2017-12-10 15:21:37
  * Created by [ your name ]
  */
 @Data
@@ -20,7 +20,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class DoctorWarehouseStockMonthly implements Serializable {
 
-    private static final long serialVersionUID = 260174866031166018L;
+    private static final long serialVersionUID = -5611630923930815284L;
 
     /**
      * 自增主键
@@ -56,6 +56,11 @@ public class DoctorWarehouseStockMonthly implements Serializable {
      * 余额
      */
     private Long balacneAmount;
+    
+    /**
+     * 处理日期
+     */
+    private Date handleDate;
     
     /**
      * 创建时间
