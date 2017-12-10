@@ -152,10 +152,12 @@ public class ReportController {
             for (DoctorWareHouse wareHouse : warehouseResponse.getResult()) {
 //                AmountAndQuantityDto balance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countWarehouseBalance(wareHouse.getId(), year, month));
 //
-//                balanceDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
-//                        .name(wareHouse.getWareHouseName())
-//                        .amount((lastMonthBalance.containsKey(wareHouse.getId()) ? lastMonthBalance.get(wareHouse.getId()).getAmount() : 0) + balance.getAmount())
-//                        .build());
+                AmountAndQuantityDto balance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countWarehouseBalance(wareHouse.getId(), DateUtil.toYYYYMM(year + "-" + month)));
+
+                balanceDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
+                        .name(wareHouse.getWareHouseName())
+                        .amount((balance.getAmount()))
+                        .build());
 //
 //                if (lastMonthBalance.containsKey(wareHouse.getId())) {
 //                    AmountAndQuantityDto a = lastMonthBalance.get(wareHouse.getId());
@@ -163,7 +165,6 @@ public class ReportController {
 //                } else
 //                    lastMonthBalance.put(wareHouse.getId(), new AmountAndQuantityDto(balance.getAmount(), balance.getQuantity()));
 
-                AmountAndQuantityDto balance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countWarehouseBalance(wareHouse.getId(), DateUtil.toYYYYMM(year + "-" + month)));
 
                 long inAmount;
                 if (!inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.IN))
