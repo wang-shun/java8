@@ -303,9 +303,12 @@ CREATE TABLE `doctor_warehouse_stock_monthly` (
   `balacne_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT '余额',
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
+  `handle_date` date DEFAULT NULL COMMENT '处理日期',
   PRIMARY KEY (`id`),
   KEY `warehouse_id_year_month_material_id_index` (`warehouse_id`,`handle_year`,`handle_month`,`material_id`)
 ) COMMENT='仓库物料月度结余表';
+
+
 CREATE TABLE `doctor_warehouse_material_apply` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
   `material_handle_id` bigint(20) NOT NULL COMMENT '物料处理编号',

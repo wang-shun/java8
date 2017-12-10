@@ -1,10 +1,11 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
 import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockMonthly;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockMonthly;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.List;
 
@@ -23,6 +24,7 @@ public interface DoctorWarehouseStockMonthlyReadService {
      * @return doctorWarehouseStockMonthly
      */
     Response<DoctorWarehouseStockMonthly> findById(Long id);
+
 
     /**
      * 分页
@@ -44,7 +46,9 @@ public interface DoctorWarehouseStockMonthlyReadService {
 
     Response<DoctorWarehouseStockMonthly> findByWarehouseAndMaterial(Long warehouseId, Long materialId);
 
-    Response<AmountAndQuantityDto> countWarehouseBalance(Long warehouseId, int handleYear, int handleMonth);
+//    Response<AmountAndQuantityDto> countWarehouseBalance(Long warehouseId, int handleYear, int handleMonth);
 
-    Response<AmountAndQuantityDto> countMaterialBalance(Long warehouseId,Long materialId,int handleYear,int handleMonth);
+    Response<AmountAndQuantityDto> countWarehouseBalance(Long warehouseId, Date handleDate);
+
+    Response<AmountAndQuantityDto> countMaterialBalance(Long warehouseId, Long materialId, int handleYear, int handleMonth);
 }
