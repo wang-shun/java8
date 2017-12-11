@@ -1712,3 +1712,8 @@ create table doctor_pig_dailies (
 ALTER TABLE `doctor_pig_events` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `remark`;
 ALTER TABLE `doctor_group_events` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `remark`;
 ALTER TABLE `doctor_pigs` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `pig_code`;
+-- 标识处猪群转场触发的转入，刷新历史数据
+update
+doctor_group_events a left join doctor_group_events b on a.rel_group_event_id = b.id
+set a.in_type = 5, a.extra = replace(replace(a.extra, '"inType":3', '"inType":5'), '群间转移', '转场转入')
+where a.type = 2 and b.type = 9 and a.status = 1;
