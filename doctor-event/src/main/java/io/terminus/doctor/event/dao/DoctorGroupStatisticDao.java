@@ -7,16 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired;
  * Created by xjn on 17/12/11.
  * email:xiaojiannan@terminus.io
  */
-public class DoctorStatisticDao {
+public class DoctorGroupStatisticDao {
     private final SqlSessionTemplate sqlSession;
 
     @Autowired
-    public DoctorStatisticDao(SqlSessionTemplate sqlSession) {
+    public DoctorGroupStatisticDao(SqlSessionTemplate sqlSession) {
         this.sqlSession = sqlSession;
     }
 
     private static String sqlId(String id) {
-        return "DoctorStatistic." + id;
+        return "DoctorGroupStatistic." + id;
     }
 
 
