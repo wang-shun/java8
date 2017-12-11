@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2017-09-29 13:22:37
+ ~ Date: 2017-12-10 15:21:37
  ~ Created by [ your name ]
 -->
 
@@ -16,6 +16,7 @@
         <result property="handleMonth" column="handle_month"/>
         <result property="balanceQuantity" column="balance_quantity"/>
         <result property="balacneAmount" column="balacne_amount"/>
+        <result property="handleDate" column="handle_date"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
@@ -30,12 +31,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `warehouse_id`, `material_id`, `handle_year`, `handle_month`, `balance_quantity`, `balacne_amount`,
+        `warehouse_id`, `material_id`, `handle_year`, `handle_month`, `balance_quantity`, `balacne_amount`, `handle_date`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{warehouseId}, #{materialId}, #{handleYear}, #{handleMonth}, #{balanceQuantity}, #{balacneAmount},
+        #{warehouseId}, #{materialId}, #{handleYear}, #{handleMonth}, #{balanceQuantity}, #{balacneAmount}, #{handleDate}, 
         now(), now()
     </sql>
 
@@ -47,6 +48,7 @@
             <if test="handleMonth != null">AND `handle_month` = #{handleMonth}</if>
             <if test="balanceQuantity != null">AND `balance_quantity` = #{balanceQuantity}</if>
             <if test="balacneAmount != null">AND `balacne_amount` = #{balacneAmount}</if>
+            <if test="handleDate != null">AND `handle_date` = #{handleDate}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
         </where>
@@ -89,39 +91,34 @@
             <if test="handleMonth != null">`handle_month` = #{handleMonth},</if>
             <if test="balanceQuantity != null">`balance_quantity` = #{balanceQuantity},</if>
             <if test="balacneAmount != null">`balacne_amount` = #{balacneAmount},</if>
+            <if test="handleDate != null">`handle_date` = #{handleDate},</if>
             updated_at = now()
         </set>
         WHERE id = #{id}
     </update>
 
     <delete id="delete" parameterType="long">
-        DELETE FROM
-        <include refid="tb"/>
+        DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
-
+    
     <select id="count" parameterType="map" resultType="long">
         SELECT COUNT(1)
-        FROM
-        <include refid="tb"/>
+        FROM <include refid="tb"/>
         <include refid="criteria"/>
     </select>
 
     <select id="paging" parameterType="map" resultMap="DoctorWarehouseStockMonthlyMap">
-        SELECT
-        <include refid="cols_all"/>
-        FROM
-        <include refid="tb"/>
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
         LIMIT #{offset}, #{limit}
     </select>
 
     <select id="list" parameterType="map" resultMap="DoctorWarehouseStockMonthlyMap">
-        SELECT
-        <include refid="cols_all"/>
-        FROM
-        <include refid="tb"/>
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
     </select>
@@ -156,5 +153,15 @@
         where warehouse_id =#{warehouseId}
         GROUP BY material_id
     </select>
+
+    <select id="statisticsWarehouse" parameterType="map" resultMap="DoctorWarehouseStockMonthlyMap">
+        SELECT
+        warehouse_id,sum(balacne_amount) as balacneAmount,sum(balance_quantity) as balanceQuantity
+        FROM
+        <include refid="tb"/>
+        WHERE warehouse_id=#{warehouseId}
+        and <![CDATA[handle_date<=#{handleDate}]]>
+    </select>
+
 
 </mapper>

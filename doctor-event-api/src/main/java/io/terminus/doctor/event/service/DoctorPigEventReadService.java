@@ -218,6 +218,14 @@ public interface DoctorPigEventReadService {
     Response<Paging<DoctorPigSalesExportDto>> pagingFindSales(Map<String, Object> map, Integer offset, Integer limit);
 
     /**
+     * 查询猪的销售情况
+     *
+     * @param map
+     * @return
+     */
+    Response<List<DoctorPigSalesExportDto>> listFindSales(Map<String, Object> map);
+
+    /**
      * 查询猪的利润情况
      *
      * @param map

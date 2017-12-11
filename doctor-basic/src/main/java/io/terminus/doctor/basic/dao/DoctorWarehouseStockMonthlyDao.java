@@ -1,14 +1,12 @@
 package io.terminus.doctor.basic.dao;
 
 import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockMonthly;
 import io.terminus.common.mysql.dao.MyBatisDao;
 
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockMonthly;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -50,6 +48,19 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
         }
 
         return statistics;
+    }
+
+
+    public AmountAndQuantityDto statistics(Long warehouseId, Date handleDate) {
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("warehouseId", warehouseId);
+        params.put("handleDate", handleDate);
+        DoctorWarehouseStockMonthly monthly = this.getSqlSession().selectOne(this.sqlId("statisticsWarehouse"), params);
+        if (null == monthly || null == monthly.getBalanceQuantity() || null == monthly.getBalacneAmount())
+            return new AmountAndQuantityDto(0, new BigDecimal(0));
+
+        return new AmountAndQuantityDto(monthly.getBalacneAmount(), monthly.getBalanceQuantity());
     }
 
 }

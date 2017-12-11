@@ -1591,5 +1591,13 @@ ALTER TABLE doctor_warehouse_material_handle ADD before_inventory_quantity DECIM
 
 
 -- 物料领用添加领用类型 2017-11-28
-ALTER TABLE `pig_doctor`.`doctor_warehouse_material_apply`
+ALTER TABLE `doctor_warehouse_material_apply`
 ADD COLUMN `apply_type` TINYINT(4) NOT NULL COMMENT '领用类型。0猪舍，1猪群，2母猪' AFTER `updated_at`;
+
+-- 物料领用添加领用人编号 2017-12-08
+ALTER TABLE `doctor_warehouse_material_apply`
+ADD COLUMN `apply_staff_id` BIGINT(20) NULL COMMENT '领用人编号' AFTER `apply_date`;
+
+-- 物料月度统计添加处理日期 2017-12-10
+ALTER TABLE `doctor_warehouse_stock_monthly`
+ADD COLUMN `handle_date` DATE NULL COMMENT '处理日期' AFTER `updated_at`;

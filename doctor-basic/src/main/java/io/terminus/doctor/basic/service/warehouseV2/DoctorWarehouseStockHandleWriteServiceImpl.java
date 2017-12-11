@@ -1,9 +1,7 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
-import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
-import io.terminus.doctor.basic.dao.DoctorWarehouseSkuDao;
-import io.terminus.doctor.basic.dao.DoctorWarehouseStockDao;
-import io.terminus.doctor.basic.dao.DoctorWarehouseStockHandleDao;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.doctor.basic.dao.*;
 
 import io.terminus.common.model.Response;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
@@ -11,10 +9,12 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import com.google.common.base.Throwables;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.manager.DoctorWarehouseMaterialHandleManager;
+import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
+import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.exception.InvalidException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,6 +49,8 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
     private DoctorWarehouseStockDao doctorWarehouseStockDao;
     @Autowired
     private DoctorWarehouseSkuDao doctorWarehouseSkuDao;
+    @RpcConsumer
+    private DoctorBasicDao doctorBasicDao;
 
     @Override
     public Response<Long> create(DoctorWarehouseStockHandle doctorWarehouseStockHandle) {
@@ -87,16 +89,19 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
             if (null == sku)
                 throw new InvalidException("warehouse.sku.not.found", needValidSkuHandle.get(skuId).get(0).getMaterialId());
 
+
             List<DoctorWarehouseMaterialHandle> thisSkuHandles = needValidSkuHandle.get(skuId);
             BigDecimal thisSkuAllOutQuantity = thisSkuHandles.stream().filter(h -> WarehouseMaterialHandleType.isBigOut(h.getType())).map(DoctorWarehouseMaterialHandle::getQuantity).reduce((a, b) -> a.add(b)).orElse(new BigDecimal(0));
             BigDecimal thisSkuAllInQuantity = thisSkuHandles.stream().filter(h -> WarehouseMaterialHandleType.isBigIn(h.getType())).map(DoctorWarehouseMaterialHandle::getQuantity).reduce((a, b) -> a.add(b)).orElse(new BigDecimal(0));
             log.debug("check stock is enough for delete,stock[{}],out[{}],in[{}]", stock.getQuantity(), thisSkuAllOutQuantity, thisSkuAllInQuantity);
-            if (stock.getQuantity().add(thisSkuAllOutQuantity).compareTo(thisSkuAllInQuantity) < 0)
+            if (stock.getQuantity().add(thisSkuAllOutQuantity).compareTo(thisSkuAllInQuantity) < 0) {
+                DoctorBasic unit = doctorBasicDao.findById(Long.parseLong(sku.getUnit()));
                 throw new InvalidException("stock.not.enough.rollback",
                         needValidSkuHandle.get(skuId).get(0).getWarehouseName(),
                         needValidSkuHandle.get(skuId).get(0).getMaterialName(),
                         stock.getQuantity(),
-                        sku.getUnit(), thisSkuAllInQuantity);
+                        null == unit ? "" : unit.getName(), thisSkuAllInQuantity);
+            }
         }
 
         handles.stream().forEach(h -> {

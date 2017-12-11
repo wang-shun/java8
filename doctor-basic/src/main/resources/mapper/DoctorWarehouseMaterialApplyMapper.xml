@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2017-11-28 14:18:26
+ ~ Date: 2017-12-08 01:02:02
  ~ Created by [ your name ]
 -->
 
@@ -21,6 +21,7 @@
         <result property="pigGroupName" column="pig_group_name"/>
         <result property="materialId" column="material_id"/>
         <result property="applyDate" column="apply_date"/>
+        <result property="applyStaffId" column="apply_staff_id"/>
         <result property="applyStaffName" column="apply_staff_name"/>
         <result property="applyYear" column="apply_year"/>
         <result property="applyMonth" column="apply_month"/>
@@ -44,16 +45,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `material_handle_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `pig_barn_id`,
-        `pig_barn_name`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_name`,
-        `apply_year`, `apply_month`, `material_name`, `type`, `unit`, `quantity`, `unit_price`, `apply_type`,
+        `material_handle_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `pig_barn_id`, `pig_barn_name`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_id`, `apply_staff_name`, `apply_year`, `apply_month`, `material_name`, `type`, `unit`, `quantity`, `unit_price`, `apply_type`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{materialHandleId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{pigBarnId},
-        #{pigBarnName}, #{pigGroupId}, #{pigGroupName}, #{materialId}, #{applyDate}, #{applyStaffName}, #{applyYear},
-        #{applyMonth}, #{materialName}, #{type}, #{unit}, #{quantity}, #{unitPrice}, #{applyType},
+        #{materialHandleId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{pigBarnId}, #{pigBarnName}, #{pigGroupId}, #{pigGroupName}, #{materialId}, #{applyDate}, #{applyStaffId}, #{applyStaffName}, #{applyYear}, #{applyMonth}, #{materialName}, #{type}, #{unit}, #{quantity}, #{unitPrice}, #{applyType}, 
         now(), now()
     </sql>
 
@@ -70,6 +67,7 @@
             <if test="pigGroupName != null">AND `pig_group_name` = #{pigGroupName}</if>
             <if test="materialId != null">AND `material_id` = #{materialId}</if>
             <if test="applyDate != null">AND `apply_date` = #{applyDate}</if>
+            <if test="applyStaffId != null">AND `apply_staff_id` = #{applyStaffId}</if>
             <if test="applyStaffName != null">AND `apply_staff_name` = #{applyStaffName}</if>
             <if test="applyYear != null">AND `apply_year` = #{applyYear}</if>
             <if test="applyMonth != null">AND `apply_month` = #{applyMonth}</if>
@@ -97,6 +95,7 @@
             <if test="pigGroupName != null">AND `pig_group_name` = #{pigGroupName}</if>
             <if test="materialId != null">AND `material_id` = #{materialId}</if>
             <if test="applyDate != null">AND `apply_date` = #{applyDate}</if>
+            <if test="applyStaffId != null">AND `apply_staff_id` = #{applyStaffId}</if>
             <if test="applyStaffName != null">AND `apply_staff_name` = #{applyStaffName}</if>
             <if test="applyYear != null">AND `apply_year` = #{applyYear}</if>
             <if test="applyMonth != null">AND `apply_month` = #{applyMonth}</if>
@@ -135,6 +134,7 @@
             </if>
         </where>
     </sql>
+
 
     <insert id="create" parameterType="DoctorWarehouseMaterialApply" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO
@@ -178,6 +178,7 @@
             <if test="pigGroupName != null">`pig_group_name` = #{pigGroupName},</if>
             <if test="materialId != null">`material_id` = #{materialId},</if>
             <if test="applyDate != null">`apply_date` = #{applyDate},</if>
+            <if test="applyStaffId != null">`apply_staff_id` = #{applyStaffId},</if>
             <if test="applyStaffName != null">`apply_staff_name` = #{applyStaffName},</if>
             <if test="applyYear != null">`apply_year` = #{applyYear},</if>
             <if test="applyMonth != null">`apply_month` = #{applyMonth},</if>
@@ -193,33 +194,27 @@
     </update>
 
     <delete id="delete" parameterType="long">
-        DELETE FROM
-        <include refid="tb"/>
+        DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
-
+    
     <select id="count" parameterType="map" resultType="long">
         SELECT COUNT(1)
-        FROM
-        <include refid="tb"/>
+        FROM <include refid="tb"/>
         <include refid="criteria"/>
     </select>
 
     <select id="paging" parameterType="map" resultMap="DoctorWarehouseMaterialApplyMap">
-        SELECT
-        <include refid="cols_all"/>
-        FROM
-        <include refid="tb"/>
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
         LIMIT #{offset}, #{limit}
     </select>
 
     <select id="list" parameterType="map" resultMap="DoctorWarehouseMaterialApplyMap">
-        SELECT
-        <include refid="cols_all"/>
-        FROM
-        <include refid="tb"/>
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
     </select>

@@ -1254,6 +1254,31 @@
         limit #{offset}, #{limit}
     </select>
 
+    <select id="findSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
+        SELECT
+        barn_name AS barnName,
+        event_at AS salesDate,
+        count(1) AS pigNumber,
+        '种猪' AS pigTypeName,
+        sum(weight) AS pigWeight,
+        sum(amount)/count(1) AS pigPrice,
+        sum(amount) AS pigAmount,
+        customer_name AS client
+        FROM <include refid="tb"/>
+        where
+        `type` = 6
+        and change_type_id = 109
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="barnId != null">AND barn_id = #{barnId}</if>
+        <if test="barnName != null">AND barn_name = #{barnName}</if>
+        <if test="pigTypeId != null">AND pig_type = #{pigTypeId}</if>
+        <if test="client != null">AND customer_id = #{client}</if>
+        <if test="startDate != null">AND <![CDATA[ event_at >= #{startDate} ]]> </if>
+        <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
+        group by barn_id, event_at, customer_id
+
+    </select>
+
     <select id="getFarrowEventByParity" parameterType="map" resultMap="DoctorPigEventMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb"/>

@@ -43,4 +43,13 @@ public class DoctorWarehouseApplyDaoTest extends BaseDaoTest {
         Assert.assertNull(apply);
     }
 
+    @Test
+    @Sql(statements = "insert into doctor_warehouse_material_apply(material_handle_id,pig_group_id)values(2,null)")
+    @Sql(statements = "delete from doctor_warehouse_material_apply where material_handle_id=2", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    public void testFindByMaterialHandleOnBarn() {
+        DoctorWarehouseMaterialApply apply = doctorWarehouseMaterialApplyDao.findMaterialHandle(2L);
+        Assert.assertNotNull(apply);
+        Assert.assertNull(apply.getPigGroupId());
+    }
+
 }
