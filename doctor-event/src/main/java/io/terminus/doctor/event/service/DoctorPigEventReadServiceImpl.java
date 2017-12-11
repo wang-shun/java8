@@ -404,10 +404,24 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     public Response<List<DoctorPigSalesExportDto>> listFindSales(Map<String, Object> map) {
         try {
             List<DoctorPigSalesExportDto> list = Lists.newArrayList();
-            list.addAll(doctorPigEventDao.findSales(map));
-            list.addAll(doctorGroupEventDao.findFattenSales(map));
-            list.addAll(doctorGroupEventDao.findNurseSales(map));
-            list.addAll(doctorGroupEventDao.findReverseSales(map));
+            if(map.containsKey("pigTypeId")) {
+                List<Integer> pigTypes = Splitters.splitToInteger((String)map.get("pigTypeId"), Splitters.UNDERSCORE);
+                if (pigTypes.contains(PigType.FATTEN_PIG.getValue())) {
+                    list.addAll(doctorGroupEventDao.findFattenSales(map));
+                } else if (pigTypes.contains(PigType.NURSERY_PIGLET.getValue())
+                        || pigTypes.contains(PigType.DELIVER_SOW.getValue())) {
+                    list.addAll(doctorGroupEventDao.findNurseSales(map));
+                } else if (pigTypes.contains(PigType.RESERVE.getValue())) {
+                    list.addAll(doctorGroupEventDao.findReverseSales(map));
+                } else {
+                    list.addAll(doctorPigEventDao.findSales(map));
+                }
+            } else {
+                list.addAll(doctorPigEventDao.findSales(map));
+                list.addAll(doctorGroupEventDao.findFattenSales(map));
+                list.addAll(doctorGroupEventDao.findNurseSales(map));
+                list.addAll(doctorGroupEventDao.findReverseSales(map));
+            }
             return Response.ok(list);
         } catch (Exception e) {
             log.error("list.find.sales.failed,cause:{}", Throwables.getStackTraceAsString(e));
