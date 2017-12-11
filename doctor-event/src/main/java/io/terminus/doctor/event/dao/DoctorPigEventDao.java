@@ -668,4 +668,8 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         sqlSession.update(sqlId("insertNestCode"), ImmutableMap.of("farmId", farmId
                 , "begin", begin, "end", end));
     }
+
+    public List<DoctorPigSalesExportDto> findSales(Map<String, Object> map) {
+        return sqlSession.selectList(sqlId("findSales"), map);
+    }
 }

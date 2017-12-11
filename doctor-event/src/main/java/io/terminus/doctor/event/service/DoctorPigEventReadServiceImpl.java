@@ -16,6 +16,7 @@ import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorNpdExportDto;
@@ -66,6 +67,8 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
 
     private final DoctorPigTrackDao doctorPigTrackDao;
 
+    private final DoctorGroupEventDao doctorGroupEventDao;
+
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
     @Autowired
@@ -82,9 +85,10 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
 
     @Autowired
     public DoctorPigEventReadServiceImpl(DoctorPigEventDao doctorPigEventDao,
-                                         DoctorPigTrackDao doctorPigTrackDao) {
+                                         DoctorPigTrackDao doctorPigTrackDao, DoctorGroupEventDao doctorGroupEventDao) {
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
+        this.doctorGroupEventDao = doctorGroupEventDao;
     }
 
     @Override
@@ -393,6 +397,21 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         } catch (Exception e) {
             log.error("find.sales.event, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("find sales fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorPigSalesExportDto>> listFindSales(Map<String, Object> map) {
+        try {
+            List<DoctorPigSalesExportDto> list = Lists.newArrayList();
+            list.addAll(doctorPigEventDao.findSales(map));
+            list.addAll(doctorGroupEventDao.findFattenSales(map));
+            list.addAll(doctorGroupEventDao.findNurseSales(map));
+            list.addAll(doctorGroupEventDao.findReverseSales(map));
+            return Response.ok(list);
+        } catch (Exception e) {
+            log.error("list.find.sales.failed,cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("list find sales failed");
         }
     }
 
