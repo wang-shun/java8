@@ -1601,3 +1601,9 @@ ADD COLUMN `apply_staff_id` BIGINT(20) NULL COMMENT '领用人编号' AFTER `app
 -- 物料月度统计添加处理日期 2017-12-10
 ALTER TABLE `doctor_warehouse_stock_monthly`
 ADD COLUMN `handle_date` DATE NULL COMMENT '处理日期' AFTER `updated_at`;
+
+-- 标识处猪群转场触发的转入，刷新历史数据
+update
+doctor_group_events a left join doctor_group_events b on a.rel_group_event_id = b.id
+set a.in_type = 5, a.extra = replace(replace(a.extra, '"inType":3', '"inType":5'), '群间转移', '转场转入')
+where a.type = 2 and b.type = 9 and a.status = 1;

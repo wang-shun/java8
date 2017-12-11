@@ -60,12 +60,17 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
     private String breedName;
 
     /**
+     * 来源猪场id
+     */
+    private Long fromFarmId;
+
+    private String fromFarmName;
+
+    /**
      * 来源猪舍id
      */
     private Long fromBarnId;
-
     private String fromBarnName;
-
     private Integer fromBarnType;
 
     /**

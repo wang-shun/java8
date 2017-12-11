@@ -141,7 +141,7 @@
         and other_barn_type = 3
     </select>
 
-    <select id="toFatten" parameterType="map" resultType="double">
+    <select id="toFattenWeight" parameterType="map" resultType="double">
         SELECT
         ifnull(sum(weight), 0)
         from doctor_group_events
