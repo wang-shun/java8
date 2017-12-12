@@ -14,7 +14,7 @@
         <if test="endAt != null">AND event_at &lt;= #{endAt}</if>
     </sql>
 
-    <select id="realTimeLivetockGroup" parameterType="map" resultType="int">
+    <select id="realTimeLiveStockGroup" parameterType="map" resultType="int">
         select
         (
         select ifnull(quantity, 0)
@@ -48,7 +48,17 @@
         <include refid="groupCriteria"/>
         and trans_group_type = 1
     </select>
-    
+
+    <select id="chgFarmIn" parameterType="map" resultType="int">
+        SELECT
+        if(sum(quantity),0)
+        from doctor_group_events
+        WHERE
+        <include refid="groupCriteria"/>
+        and trans_group_type = 1
+        and in_type = 5
+    </select>
+
     <select id="turnIntoWeight" parameterType="map" resultType="double">
         SELECT
         if(sum(weight),0)
@@ -57,7 +67,7 @@
         <include refid="groupCriteria"/>
         and trans_group_type = 1
     </select>
-    
+
     <select id="chgFarm" parameterType="map" resultType="int">
         SELECT
         if(sum(quantity),0)
