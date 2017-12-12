@@ -1607,3 +1607,46 @@ update
 doctor_group_events a left join doctor_group_events b on a.rel_group_event_id = b.id
 set a.in_type = 5, a.extra = replace(replace(a.extra, '"inType":3', '"inType":5'), '群间转移', '转场转入')
 where a.type = 2 and b.type = 9 and a.status = 1;
+
+-- 新的猪群报表 2017-12-12
+CREATE TABLE `doctor_group_dailies` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `org_id` bigint(20) NOT NULL COMMENT '公司id',
+  `farm_id` bigint(20) NOT NULL COMMENT '猪场id',
+  `type` tinyint(4) DEFAULT NULL COMMENT '猪群类型',
+  `sum_at` date DEFAULT NULL COMMENT '日期',
+  `start` int(11) DEFAULT NULL COMMENT '期初',
+  `turn_into` int(11) DEFAULT NULL COMMENT '转入数量',
+  `chg_farm_in` int(11) DEFAULT NULL COMMENT '转场转入数量',
+  `turn_into_weight` double DEFAULT NULL COMMENT '转入总重',
+  `chg_farm` int(11) DEFAULT NULL COMMENT '转场数量',
+  `chg_farm_weight` double DEFAULT NULL COMMENT '转场总重',
+  `sale` int(11) DEFAULT NULL COMMENT '销售',
+  `sale_weight` double DEFAULT NULL COMMENT '销售总重',
+  `dead` int(11) DEFAULT NULL COMMENT '死亡',
+  `weed_out` int(11) DEFAULT NULL COMMENT '淘汰',
+  `other_change` int(11) DEFAULT NULL COMMENT '其他变动减少',
+  `to_nursery` int(11) DEFAULT NULL COMMENT '转保育',
+  `to_fatten` int(11) DEFAULT NULL COMMENT '转育肥',
+  `to_fatten_weight` double DEFAULT NULL COMMENT '转育肥总重',
+  `to_houbei` int(11) DEFAULT NULL COMMENT '转后备',
+  `to_houbei_weight` double DEFAULT NULL COMMENT '转后备总重',
+  `turn_seed` int(11) DEFAULT NULL COMMENT '转种猪',
+  `turn_out_weight` double DEFAULT NULL COMMENT '转出总重',
+  `material` double DEFAULT NULL COMMENT '原料消耗数量',
+  `material_amount` bigint(20) DEFAULT NULL COMMENT '原料消耗金额',
+  `feed` double DEFAULT NULL COMMENT '饲料消耗数量',
+  `feed_amount` bigint(20) DEFAULT NULL COMMENT '饲料消耗金额',
+  `medicine_amount` bigint(20) DEFAULT NULL COMMENT '药品消耗金额',
+  `vaccination_amount` bigint(20) DEFAULT NULL COMMENT '疫苗消耗金额',
+  `consumable_amount` bigint(20) DEFAULT NULL COMMENT '易耗品消耗金额',
+  `end` int(11) DEFAULT NULL COMMENT '期末',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '更新事件',
+  `version` int(11) DEFAULT NULL COMMENT '版本号',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_doctor_daily_groups_farm_id_type_sum_at` (`farm_id`,`type`,`sum_at`),
+  KEY `idx_doctor_group_dailies_org_id` (`org_id`),
+  KEY `idx_doctor_group_dailies_farm_id` (`farm_id`),
+  KEY `idx_doctor_group_dailies_sum_at` (`sum_at`)
+) DEFAULT CHARSET=utf8 COMMENT='猪群相关的指标';

@@ -4,11 +4,13 @@ import com.google.common.collect.ImmutableMap;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 /**
  * Created by xjn on 17/12/11.
  * email:xiaojiannan@terminus.io
  */
+@Repository
 public class DoctorGroupStatisticDao {
     private final SqlSessionTemplate sqlSession;
 
