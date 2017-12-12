@@ -1615,7 +1615,6 @@ where a.type = 2 and b.type = 9 and a.status = 1;
 -- 新的猪群报表 2017-12-12
 CREATE TABLE `doctor_group_dailies` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `org_id` bigint(20) NOT NULL COMMENT '公司id',
   `farm_id` bigint(20) NOT NULL COMMENT '猪场id',
   `type` tinyint(4) DEFAULT NULL COMMENT '猪群类型',
   `sum_at` date DEFAULT NULL COMMENT '日期',
@@ -1650,7 +1649,6 @@ CREATE TABLE `doctor_group_dailies` (
   `version` int(11) DEFAULT NULL COMMENT '版本号',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_doctor_daily_groups_farm_id_type_sum_at` (`farm_id`,`type`,`sum_at`),
-  KEY `idx_doctor_group_dailies_org_id` (`org_id`),
   KEY `idx_doctor_group_dailies_farm_id` (`farm_id`),
   KEY `idx_doctor_group_dailies_sum_at` (`sum_at`)
 ) DEFAULT CHARSET=utf8 COMMENT='猪群相关的指标';
