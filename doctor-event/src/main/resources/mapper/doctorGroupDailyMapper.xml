@@ -9,7 +9,7 @@
         <id column="id" property="id"/>
         <result column="org_id" property="orgId"/>
         <result column="farm_id" property="farmId"/>
-        <result column="type" property="type"/>
+        <result column="pig_type" property="pigType"/>
         <result column="sum_at" property="sumAt"/>
         <result column="start" property="start"/>
         <result column="turn_into" property="turnInto"/>
@@ -51,14 +51,14 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        org_id, farm_id, `type`, sum_at, start, turn_into, turn_into_weight, chg_farm, chg_farm_weight, sale, sale_weight,
+        org_id, farm_id, `pig_type`, sum_at, start, turn_into, turn_into_weight, chg_farm, chg_farm_weight, sale, sale_weight,
         dead, weed_out, other_change, to_nursery, to_fatten, to_fatten_weight, to_houbei, to_houbei_weight,
         turn_seed, turn_out_weight, material, material_amount, feed, feed_amount, medicine_amount, material_amount,
         vaccination_amount, consumable_amount, `end`, created_at, updated_at, version
     </sql>
 
     <sql id="vals">
-       #{orgId}, #{farmId}, #{type}, #{sumAt}, #{start}, #{turnInto}, #{turnIntoWeight}, #{chgFarm}, #{chgFarmWeight}, #{sale}, #{saleWeight},
+       #{orgId}, #{farmId}, #{pigType}, #{sumAt}, #{start}, #{turnInto}, #{turnIntoWeight}, #{chgFarm}, #{chgFarmWeight}, #{sale}, #{saleWeight},
        #{dead}, #{weedOut}, #{otherChange}, #{toNursery}, #{toFatten}, #{toFattenWeight}, #{toHoubei}, #{toHoubeiWeight},
        #{turnSeed}, #{turnOutWeight}, #{material}, #{materialAmount}, #{feed}, #{feedAmount}, #{medicineAmount}, #{materialAmount},
        #{vaccinationAmount}, #{consumableAmount}, #{end}, now(), now(), #{version}
@@ -88,7 +88,7 @@
             <if test="name != null">name = #{name},</if>
             <if test="orgId != null">org_id = #{orgId},</if>
             <if test="farmId != null">farm_id = #{farmId},</if>
-            <if test="type != null">type = #{type},</if>
+            <if test="pigType != null">pig_type = #{pigType},</if>
             <if test="sumAt != null">can_open_group = #{sumAt},</if>
             <if test="start != null">status = #{start},</if>
             <if test="turnInto != null">capacity = #{turnInto},</if>
@@ -140,4 +140,11 @@
         </where>
     </select>
 
+    <select id="findBy" parameterType="map" resultMap="DoctorGroupDailyMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        WHERE
+        farm_id = #{farmId}
+        and pig_type = #{pigType}
+        and sum_at = #{sumAt}
+    </select>
 </mapper>
