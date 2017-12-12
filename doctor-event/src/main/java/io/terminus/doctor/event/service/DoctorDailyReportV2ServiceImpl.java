@@ -33,9 +33,11 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
 
     @Override
     public Response<Boolean> flushFarmDaily(Long farmId, String startAt, String endAt) {
+        log.info("flush farm daily starting, farmId:{}, startAt:{}, endAt:{}", farmId, startAt, endAt);
         try {
             flushGroupDaily(farmId, startAt, endAt);
             flushPigDaily(farmId, startAt, endAt);
+            log.info("flush farm daily end");
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("flush farm daily failed, farmId:{}, startAt:{}, endAt:{}, cause:{}",
@@ -46,8 +48,10 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
 
     @Override
     public Response<Boolean> flushGroupDaily(Long farmId, String startAt, String endAt) {
+        log.info("flush group daily starting, farmId:{}, startAt:{}, endAt:{}", farmId, startAt, endAt);
         try {
             PigType.GROUP_TYPES.forEach(pigType -> flushGroupDaily(farmId, pigType, startAt, endAt));
+            log.info("flush group daily end");
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("flush group daily failed, farmId:{}, startAt:{}, endAt:{}, cause:{}",
@@ -58,6 +62,7 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
 
     @Override
     public Response<Boolean> flushGroupDaily(Long farmId, Integer pigType, String startAt, String endAt) {
+        log.info("flush farm daily for pigType starting, farmId:{}, pigType:{}, startAt:{}, endAt:{}", farmId, pigType, startAt, endAt);
         try {
             DoctorStatisticCriteria criteria = new DoctorStatisticCriteria();
             criteria.setFarmId(farmId);
@@ -71,6 +76,7 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
                 criteria.setSumAt(DateUtil.toDateString(date));
                 doctorDailyReportV2Manager.flushGroupDaily(criteria);
             });
+            log.info("flush group daily for pigType end");
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("flush group daily failed, farmId:{}, pigType:{}, startAt:{}, endAt:{}, cause:{}",
