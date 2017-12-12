@@ -64,6 +64,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
 
     @Autowired
     private DoctorModifyGroupEventHandlers doctorModifyGroupEventHandlers;
+    @Autowired
     private DoctorPigTrackDao doctorPigTrackDao;
 
     @Autowired
