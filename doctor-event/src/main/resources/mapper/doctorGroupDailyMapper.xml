@@ -43,7 +43,7 @@
     </resultMap>
 
     <sql id="tb">
-        doctor_group_dailys
+        doctor_group_dailies
     </sql>
 
     <sql id="cols_all">
@@ -139,5 +139,5 @@
             <include refid="criteria"/>
         </where>
     </select>
-    
+
 </mapper>

@@ -45,7 +45,7 @@ public class DoctorGroupDaily implements Serializable {
     private Integer turnInto;
 
     /**
-     * 转转入数量
+     * 转场转入数量
      */
     private Integer chgFarmIn;
 
@@ -130,7 +130,7 @@ public class DoctorGroupDaily implements Serializable {
     private Double material;
 
     /**
-     * 原料消耗数量
+     * 原料消耗金额
      */
     private Long materialAmount;
 
