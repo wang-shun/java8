@@ -41,8 +41,9 @@ public class DoctorDailyReportV2Manager {
         doctorGroupDaily.setStart(groupStatisticDao.realTimeLiveStockGroup(criteria.getFarmId(), criteria.getPigType(),
                 DateUtil.toDateString(new DateTime(DateUtil.toDate(criteria.getSumAt())).minusDays(1).toDate())));
         doctorGroupDaily.setTurnInto(groupStatisticDao.turnInto(criteria));
-        doctorGroupDaily.setChgFarmIn(groupStatisticDao.chgFarmIn(criteria));
         doctorGroupDaily.setTurnIntoWeight(groupStatisticDao.turnIntoWeight(criteria));
+        doctorGroupDaily.setTurnIntoAge(groupStatisticDao.turnIntoAge(criteria));
+        doctorGroupDaily.setChgFarmIn(groupStatisticDao.chgFarmIn(criteria));
         doctorGroupDaily.setChgFarm(groupStatisticDao.chgFarm(criteria));
         doctorGroupDaily.setChgFarmWeight(groupStatisticDao.chgFarmWeight(criteria));
         doctorGroupDaily.setSale(groupStatisticDao.sale(criteria));
