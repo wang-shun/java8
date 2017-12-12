@@ -13,6 +13,7 @@
         <result column="start" property="start"/>
         <result column="turn_into" property="turnInto"/>
         <result column="turn_into_weight" property="turnIntoWeight"/>
+        <result column="turn_into_age" property="turnIntoAge"/>
         <result column="chg_farm_in" property="chgFarmIn"/>
         <result column="chg_farm" property="chgFarm"/>
         <result column="chg_farm_weight" property="chgFarmWeight"/>
@@ -50,14 +51,14 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, `pig_type`, sum_at, start, turn_into, turn_into_weight, chg_farm_in, chg_farm, chg_farm_weight, sale, sale_weight,
+        farm_id, `pig_type`, sum_at, start, turn_into, turn_into_weight, turn_into_age, chg_farm_in, chg_farm, chg_farm_weight, sale, sale_weight,
         dead, weed_out, other_change, to_nursery, to_fatten, to_fatten_weight, to_houbei, to_houbei_weight,
         turn_seed, turn_out_weight, material, material_amount, feed, feed_amount, medicine_amount,
         vaccination_amount, consumable_amount, `end`, created_at, updated_at, version
     </sql>
 
     <sql id="vals">
-       #{farmId}, #{pigType}, #{sumAt}, #{start}, #{turnInto}, #{turnIntoWeight}, #{chgFarmIn}, #{chgFarm}, #{chgFarmWeight}, #{sale}, #{saleWeight},
+       #{farmId}, #{pigType}, #{sumAt}, #{start}, #{turnInto}, #{turnIntoWeight}, #{turnIntoAge}, #{chgFarmIn}, #{chgFarm}, #{chgFarmWeight}, #{sale}, #{saleWeight},
        #{dead}, #{weedOut}, #{otherChange}, #{toNursery}, #{toFatten}, #{toFattenWeight}, #{toHoubei}, #{toHoubeiWeight},
        #{turnSeed}, #{turnOutWeight}, #{material}, #{materialAmount}, #{feed}, #{feedAmount}, #{medicineAmount},
        #{vaccinationAmount}, #{consumableAmount}, #{end}, now(), now(), 1
@@ -90,6 +91,7 @@
             <if test="start != null">start = #{start},</if>
             <if test="turnInto != null">turn_into = #{turnInto},</if>
             <if test="turnIntoWeight != null">turn_into_weight = #{turnIntoWeight},</if>
+            <if test="turnIntoAge != null">turn_into_age = #{turnIntoAge},</if>
             <if test="chgFarmIn != null">chg_farm_in = #{chgFarmIn},</if>
             <if test="chgFarm != null">chg_farm = #{chgFarm},</if>
             <if test="chgFarmWeight != null">chg_farm_weight = #{chgFarmWeight},</if>

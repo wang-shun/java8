@@ -1618,6 +1618,7 @@ CREATE TABLE `doctor_group_dailies` (
   `turn_into` int(11) DEFAULT NULL COMMENT '转入数量',
   `chg_farm_in` int(11) DEFAULT NULL COMMENT '转场转入数量',
   `turn_into_weight` double DEFAULT NULL COMMENT '转入总重',
+  `turn_into_age` int(11) DEFAULT NULL COMMENT '转入总日龄',
   `chg_farm` int(11) DEFAULT NULL COMMENT '转场数量',
   `chg_farm_weight` double DEFAULT NULL COMMENT '转场总重',
   `sale` int(11) DEFAULT NULL COMMENT '销售',

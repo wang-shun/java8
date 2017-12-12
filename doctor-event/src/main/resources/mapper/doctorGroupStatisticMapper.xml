@@ -72,6 +72,15 @@
         and trans_group_type = 1
     </select>
 
+    <select id="turnIntoAge" parameterType="map" resultType="double">
+        SELECT
+        ifnull(sum(avg_day_age * quantity),0)
+        from doctor_group_events
+        WHERE
+        <include refid="groupCriteria"/>
+        and trans_group_type = 1
+    </select>
+
     <select id="chgFarm" parameterType="map" resultType="int">
         SELECT
         ifnull(sum(quantity),0)
