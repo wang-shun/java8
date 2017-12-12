@@ -48,6 +48,11 @@ public class DoctorGroupDaily implements Serializable {
     private Double turnIntoWeight;
 
     /**
+     * 转入总日龄
+     */
+    private Double turnIntoAge;
+
+    /**
      * 转场转入数量
      */
     private Integer chgFarmIn;
