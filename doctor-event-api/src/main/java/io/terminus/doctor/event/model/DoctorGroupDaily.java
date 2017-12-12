@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.model;
 
 import lombok.Data;
-import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -12,16 +11,10 @@ import java.util.Date;
  * 猪群相关报表（组织维度：猪场-猪群类型PigType，时间维度：日）
  */
 @Data
-@Builder
 public class DoctorGroupDaily implements Serializable {
     private static final long serialVersionUID = -395777802984439446L;
 
     private Long id;
-
-    /**
-     * 公司id
-     */
-    private Long orgId;
 
     /**
      * 猪场id
