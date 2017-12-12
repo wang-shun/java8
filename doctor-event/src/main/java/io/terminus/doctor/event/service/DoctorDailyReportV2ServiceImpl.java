@@ -3,6 +3,7 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
 import io.terminus.doctor.event.manager.DoctorDailyReportV2Manager;
@@ -33,13 +34,25 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
     @Override
     public Response<Boolean> flushFarmDaily(Long farmId, String startAt, String endAt) {
         try {
-            flushGroupDaily(farmId, null, startAt, endAt);
+            flushGroupDaily(farmId, startAt, endAt);
             flushPigDaily(farmId, startAt, endAt);
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("flush farm daily failed, farmId:{}, startAt:{}, endAt:{}, cause:{}",
                     farmId, startAt, endAt, Throwables.getStackTraceAsString(e));
         return Response.fail("flush.farm.daily.failed");
+        }
+    }
+
+    @Override
+    public Response<Boolean> flushGroupDaily(Long farmId, String startAt, String endAt) {
+        try {
+            PigType.GROUP_TYPES.forEach(pigType -> flushGroupDaily(farmId, pigType, startAt, endAt));
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("flush group daily failed, farmId:{}, startAt:{}, endAt:{}, cause:{}",
+                    farmId, startAt , endAt, Throwables.getStackTraceAsString(e));
+            return Response.fail("flush.group.daily.failed");
         }
     }
 
