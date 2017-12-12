@@ -9,6 +9,7 @@
     <sql id="groupCriteria">
         status = 1
         AND event_source != 5
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
         <if test="pigType != null">AND pig_type = #{pigType}</if>
         <if test="sumAt != null">AND event_at = #{sumAt}</if>
         <if test="startAt != null">AND event_at &gt;= #{startAt}</if>
@@ -18,7 +19,7 @@
     <select id="realTimeLiveStockGroup" parameterType="map" resultType="int">
         select
         (
-        select ifnull(quantity, 0)
+        select ifnull(sum(quantity), 0)
         from doctor_group_tracks a left join doctor_groups b on a.group_id = b.id
         WHERE b.farm_id = #{farmId} and b.pig_type = #{pigType}
         )
@@ -33,8 +34,8 @@
         )
         ,0)
         from doctor_group_events
-        WHERE b.farm_id = #{farmId} and b.pig_type = #{pigType}
-        and event_at &gt;=  date_add(date(#{date}), INTERVAL 1 day)  -- 当前23:59:59
+        WHERE farm_id = #{farmId} and pig_type = #{pigType}
+        and event_at &gt; #{date}  -- 当前23:59:59
         and status = 1
         and event_source != 5
         and `type` in(2,3,4,5,9)
@@ -43,26 +44,28 @@
 
     <select id="turnInto" parameterType="map" resultType="int">
         SELECT
-        if(sum(quantity),0)
+        ifnull(sum(quantity),0)
         from doctor_group_events
-        WHERE
-        <include refid="groupCriteria"/>
-        and trans_group_type = 1
+        <where>
+            <include refid="groupCriteria"/>
+            and trans_group_type = 1
+        </where>
     </select>
 
     <select id="chgFarmIn" parameterType="map" resultType="int">
         SELECT
-        if(sum(quantity),0)
+        ifnull(sum(quantity),0)
         from doctor_group_events
-        WHERE
-        <include refid="groupCriteria"/>
-        and trans_group_type = 1
-        and in_type = 5
+        <where>
+            <include refid="groupCriteria"/>
+            and trans_group_type = 1
+            and in_type = 5
+        </where>
     </select>
 
     <select id="turnIntoWeight" parameterType="map" resultType="double">
         SELECT
-        if(sum(weight),0)
+        ifnull(sum(weight),0)
         from doctor_group_events
         WHERE
         <include refid="groupCriteria"/>
@@ -71,137 +74,157 @@
 
     <select id="chgFarm" parameterType="map" resultType="int">
         SELECT
-        if(sum(quantity),0)
+        ifnull(sum(quantity),0)
         from doctor_group_events
-        <include refid="groupCriteria"/>
-        and `type` = 9
+        <where>
+            <include refid="groupCriteria"/>
+            and `type` = 9
+        </where>
     </select>
 
     <select id="chgFarmWeight" parameterType="map" resultType="double">
         SELECT
-        if(sum(weight),0)
+        ifnull(sum(weight),0)
         from doctor_group_events
-        <include refid="groupCriteria"/>
-        and `type` = 9
+        <where>
+            <include refid="groupCriteria"/>
+            and `type` = 9
+        </where>
     </select>
 
     <select id="sale" parameterType="map" resultType="int">
         SELECT
-        if(sum(quantity),0)
+        ifnull(sum(quantity),0)
         from doctor_group_events
-        <include refid="groupCriteria"/>
-        and `type` = 3
-        and change_type_id = 109
+        <where>
+            <include refid="groupCriteria"/>
+            and `type` = 3
+            and change_type_id = 109
+        </where>
     </select>
 
     <select id="saleWeight" parameterType="map" resultType="double">
         SELECT
-        if(sum(weight),0)
+        ifnull(sum(weight),0)
         from doctor_group_events
-        <include refid="groupCriteria"/>
-        and `type` = 3
-        and change_type_id = 109
+        <where>
+            <include refid="groupCriteria"/>
+            and `type` = 3
+            and change_type_id = 109
+        </where>
     </select>
 
     <select id="dead" parameterType="map" resultType="int">
         SELECT
-        if(sum(quantity),0)
+        ifnull(sum(quantity),0)
         from doctor_group_events
-        <include refid="groupCriteria"/>
-        and `type` = 3
-        and change_type_id = 110
+        <where>
+            <include refid="groupCriteria"/>
+            and `type` = 3
+            and change_type_id = 110
+        </where>
     </select>
 
     <select id="weedOut" parameterType="map" resultType="int">
         SELECT
-        if(sum(quantity),0)
+        ifnull(sum(quantity),0)
         from doctor_group_events
-        <include refid="groupCriteria"/>
-        and `type` = 3
-        and change_type_id = 111
+        <where>
+            <include refid="groupCriteria"/>
+            and `type` = 3
+            and change_type_id = 111
+        </where>
     </select>
 
     <select id="otherChange" parameterType="map" resultType="int">
         select
         ifnull(sum(quantity), 0)
         from doctor_group_events
-        where
-        <include refid="groupCriteria"/>
-        and `type` = 3
-        and change_type_id not in (109, 110, 111)
+        <where>
+            <include refid="groupCriteria"/>
+            and `type` = 3
+            and change_type_id not in (109, 110, 111)
+        </where>
     </select>
 
     <select id="toNursery" parameterType="map" resultType="int">
         SELECT
         ifnull(sum(quantity), 0)
         from doctor_group_events
-        where
-        <include refid="groupCriteria"/>
-        and `type` = 4
-        and trans_group_type = 1
+        <where>
+            <include refid="groupCriteria"/>
+            and `type` = 4
+            and trans_group_type = 1
+        </where>
     </select>
 
     <select id="toFatten" parameterType="map" resultType="int">
         SELECT
         ifnull(sum(quantity), 0)
         from doctor_group_events
-        where
-        <include refid="groupCriteria"/>
-        and `type` = 4
-        and trans_group_type = 1
-        and other_barn_type = 3
+        <where>
+            <include refid="groupCriteria"/>
+            and `type` = 4
+            and trans_group_type = 1
+            and other_barn_type = 3
+        </where>
     </select>
 
     <select id="toFattenWeight" parameterType="map" resultType="double">
         SELECT
         ifnull(sum(weight), 0)
         from doctor_group_events
-        where
-        <include refid="groupCriteria"/>
-        and `type` = 4
-        and trans_group_type = 1
-        and other_barn_type = 3
+        <where>
+            <include refid="groupCriteria"/>
+            and `type` = 4
+            and trans_group_type = 1
+            and other_barn_type = 3
+        </where>
     </select>
 
     <select id="toHoubei" parameterType="map" resultType="int">
         SELECT
         ifnull(sum(quantity), 0)
         from doctor_group_events
-        where
-        <include refid="groupCriteria"/>
-        and `type` = 4
-        and trans_group_type = 1
-        and other_barn_type = 4
+        <where>
+            <include refid="groupCriteria"/>
+            and `type` = 4
+            and trans_group_type = 1
+            and other_barn_type = 4
+        </where>
     </select>
 
     <select id="toHoubeiWeight" parameterType="map" resultType="double">
         SELECT
         ifnull(sum(weight), 0)
         from doctor_group_events
-        where
-        <include refid="groupCriteria"/>
-        and `type` = 4
-        and trans_group_type = 1
-        and other_barn_type = 4
+        <where>
+            <include refid="groupCriteria"/>
+            and `type` = 4
+            and trans_group_type = 1
+            and other_barn_type = 4
+        </where>
     </select>
 
     <select id="turnSeed" parameterType="map" resultType="int">
         SELECT
         ifnull(sum(quantity), 0)
         from doctor_group_events
-        where
-        <include refid="groupCriteria"/>
-        and `type` = 5
+        <where>
+            <include refid="groupCriteria"/>
+            and `type` = 5
+        </where>
     </select>
 
     <select id="turnOutWeight" parameterType="map" resultType="double">
         SELECT
         ifnull(sum(weight), 0)
         from doctor_group_events
-        where
-        <include refid="groupCriteria"/>
-        and `type` in (3,4,5,9)
-        and trans_group_type = 1
+        <where>
+            <include refid="groupCriteria"/>
+            and `type` in (3,4,5,9)
+            and trans_group_type = 1
+        </where>
     </select>
 
 </mapper>

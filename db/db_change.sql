@@ -1612,7 +1612,7 @@ where a.type = 2 and b.type = 9 and a.status = 1;
 CREATE TABLE `doctor_group_dailies` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
   `farm_id` bigint(20) NOT NULL COMMENT '猪场id',
-  `type` tinyint(4) DEFAULT NULL COMMENT '猪群类型',
+  `pig_type` tinyint(4) DEFAULT NULL COMMENT '猪群类型',
   `sum_at` date DEFAULT NULL COMMENT '日期',
   `start` int(11) DEFAULT NULL COMMENT '期初',
   `turn_into` int(11) DEFAULT NULL COMMENT '转入数量',
@@ -1644,7 +1644,7 @@ CREATE TABLE `doctor_group_dailies` (
   `updated_at` datetime DEFAULT NULL COMMENT '更新事件',
   `version` int(11) DEFAULT NULL COMMENT '版本号',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_doctor_daily_groups_farm_id_type_sum_at` (`farm_id`,`type`,`sum_at`),
+  UNIQUE KEY `idx_doctor_daily_groups_farm_id_type_sum_at` (`farm_id`,`pig_type`,`sum_at`),
   KEY `idx_doctor_group_dailies_farm_id` (`farm_id`),
   KEY `idx_doctor_group_dailies_sum_at` (`sum_at`)
 ) DEFAULT CHARSET=utf8 COMMENT='猪群相关的指标';

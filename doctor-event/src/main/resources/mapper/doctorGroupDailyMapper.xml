@@ -13,6 +13,7 @@
         <result column="start" property="start"/>
         <result column="turn_into" property="turnInto"/>
         <result column="turn_into_weight" property="turnIntoWeight"/>
+        <result column="chg_farm_in" property="chgFarmIn"/>
         <result column="chg_farm" property="chgFarm"/>
         <result column="chg_farm_weight" property="chgFarmWeight"/>
         <result column="sale" property="sale"/>
@@ -32,7 +33,6 @@
         <result column="feed" property="feed"/>
         <result column="feed_amount" property="feedAmount"/>
         <result column="medicine_amount" property="medicineAmount"/>
-        <result column="material_amount" property="materialAmount"/>
         <result column="vaccination_amount" property="vaccinationAmount"/>
         <result column="consumable_amount" property="consumableAmount"/>
         <result column="end" property="end"/>
@@ -50,16 +50,16 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, `pig_type`, sum_at, start, turn_into, turn_into_weight, chg_farm, chg_farm_weight, sale, sale_weight,
+        farm_id, `pig_type`, sum_at, start, turn_into, turn_into_weight, chg_farm_in, chg_farm, chg_farm_weight, sale, sale_weight,
         dead, weed_out, other_change, to_nursery, to_fatten, to_fatten_weight, to_houbei, to_houbei_weight,
-        turn_seed, turn_out_weight, material, material_amount, feed, feed_amount, medicine_amount, material_amount,
+        turn_seed, turn_out_weight, material, material_amount, feed, feed_amount, medicine_amount,
         vaccination_amount, consumable_amount, `end`, created_at, updated_at, version
     </sql>
 
     <sql id="vals">
-       #{farmId}, #{pigType}, #{sumAt}, #{start}, #{turnInto}, #{turnIntoWeight}, #{chgFarm}, #{chgFarmWeight}, #{sale}, #{saleWeight},
+       #{farmId}, #{pigType}, #{sumAt}, #{start}, #{turnInto}, #{turnIntoWeight}, #{chgFarmIn}, #{chgFarm}, #{chgFarmWeight}, #{sale}, #{saleWeight},
        #{dead}, #{weedOut}, #{otherChange}, #{toNursery}, #{toFatten}, #{toFattenWeight}, #{toHoubei}, #{toHoubeiWeight},
-       #{turnSeed}, #{turnOutWeight}, #{material}, #{materialAmount}, #{feed}, #{feedAmount}, #{medicineAmount}, #{materialAmount},
+       #{turnSeed}, #{turnOutWeight}, #{material}, #{materialAmount}, #{feed}, #{feedAmount}, #{medicineAmount},
        #{vaccinationAmount}, #{consumableAmount}, #{end}, now(), now(), 1
     </sql>
 
@@ -84,15 +84,15 @@
         UPDATE
         <include refid="tb"/>
         <set>
-            <if test="name != null">name = #{name},</if>
             <if test="farmId != null">farm_id = #{farmId},</if>
             <if test="pigType != null">pig_type = #{pigType},</if>
-            <if test="sumAt != null">can_open_group = #{sumAt},</if>
-            <if test="start != null">status = #{start},</if>
-            <if test="turnInto != null">capacity = #{turnInto},</if>
-            <if test="turnIntoWeight != null">staff_id = #{turnIntoWeight},</if>
-            <if test="chgFarm != null">staff_name = #{chgFarm},</if>
-            <if test="chgFarmWeight != null">out_id = #{chgFarmWeight},</if>
+            <if test="sumAt != null"> sum_at= #{sumAt},</if>
+            <if test="start != null">start = #{start},</if>
+            <if test="turnInto != null">turn_into = #{turnInto},</if>
+            <if test="turnIntoWeight != null">turn_into_weight = #{turnIntoWeight},</if>
+            <if test="chgFarmIn != null">chg_farm_in = #{chgFarmIn},</if>
+            <if test="chgFarm != null">chg_farm = #{chgFarm},</if>
+            <if test="chgFarmWeight != null">chg_farm_weight = #{chgFarmWeight},</if>
             <if test="sale != null">sale = #{sale},</if>
             <if test="saleWeight != null">sale_weight = #{saleWeight},</if>
             <if test="dead != null">dead = #{dead},</if>
@@ -110,10 +110,10 @@
             <if test="feed != null">feed = #{feed},</if>
             <if test="feedAmount != null">feed_amount = #{feedAmount},</if>
             <if test="medicineAmount != null">medicine_amount = #{medicineAmount},</if>
-            <if test="materialAmount != null">material_amount = #{materialAmount},</if>
             <if test="vaccinationAmount != null">vaccination_amount = #{vaccinationAmount},</if>
             <if test="consumableAmount != null">consumable_amount = #{consumableAmount},</if>
-            updated_at=now()
+            updated_at=now(),
+            version = version + 1
         </set>
         WHERE id = #{id}
         and version = #{version}

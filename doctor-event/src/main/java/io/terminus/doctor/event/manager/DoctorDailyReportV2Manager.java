@@ -6,6 +6,7 @@ import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
 import io.terminus.doctor.event.dao.DoctorGroupStatisticDao;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +38,8 @@ public class DoctorDailyReportV2Manager {
             doctorGroupDaily.setSumAt(DateUtil.toDate(criteria.getSumAt()));
         }
 
-        doctorGroupDaily.setStart(groupStatisticDao.realTimeLiveStockGroup(criteria.getFarmId(), criteria.getPigType(), criteria.getStartAt()));
+        doctorGroupDaily.setStart(groupStatisticDao.realTimeLiveStockGroup(criteria.getFarmId(), criteria.getPigType(),
+                DateUtil.toDateString(new DateTime(DateUtil.toDate(criteria.getSumAt())).minusDays(1).toDate())));
         doctorGroupDaily.setTurnInto(groupStatisticDao.turnInto(criteria));
         doctorGroupDaily.setChgFarmIn(groupStatisticDao.chgFarmIn(criteria));
         doctorGroupDaily.setTurnIntoWeight(groupStatisticDao.turnIntoWeight(criteria));
@@ -49,7 +51,7 @@ public class DoctorDailyReportV2Manager {
         doctorGroupDaily.setWeedOut(groupStatisticDao.weedOut(criteria));
         doctorGroupDaily.setOtherChange(groupStatisticDao.otherChange(criteria));
         doctorGroupDaily.setTurnOutWeight(groupStatisticDao.turnOutWeight(criteria));
-        doctorGroupDaily.setEnd(groupStatisticDao.realTimeLiveStockGroup(criteria.getFarmId(), criteria.getPigType(), criteria.getEndAt()));
+        doctorGroupDaily.setEnd(groupStatisticDao.realTimeLiveStockGroup(criteria.getFarmId(), criteria.getPigType(), criteria.getSumAt()));
 
         PigType pigType = expectNotNull(PigType.from(criteria.getPigType()), "pigType.is.illegal");
         switch (pigType) {
