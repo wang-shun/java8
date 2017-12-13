@@ -9,9 +9,10 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
-import io.terminus.doctor.event.dao.DoctorDailyGroupDao;
+import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
 import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
 import io.terminus.doctor.event.dao.DoctorGroupBatchSummaryDao;
+import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -23,8 +24,9 @@ import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.manager.DoctorDailyReportManager;
+import io.terminus.doctor.event.manager.DoctorDailyReportV2Manager;
 import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorDailyGroup;
+import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -58,11 +60,11 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     @Autowired
     protected DoctorGroupTrackDao doctorGroupTrackDao;
     @Autowired
-    protected DoctorDailyGroupDao doctorDailyGroupDao;
+    protected DoctorGroupDailyDao doctorGroupDailyDao;
     @Autowired
     private DoctorEventModifyLogDao doctorEventModifyLogDao;
     @Autowired
-    protected DoctorDailyReportManager doctorDailyReportManager;
+    protected DoctorDailyReportV2Manager doctorDailyReportManager;
     @Autowired
     protected DoctorBarnDao doctorBarnDao;
 
@@ -331,7 +333,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * @param changeDto 变化量
      * @return 新猪群记录
      */
-    protected DoctorDailyGroup buildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
+    protected DoctorGroupDaily buildDailyGroup(DoctorGroupDaily oldDailyGroup, DoctorEventChangeDto changeDto) {
         return expectNotNull(oldDailyGroup, "daily.group.not.null");
     }
 
@@ -409,12 +411,12 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     /**
      * 更新猪群某天及某天之后的存栏数量
-     * @param groupId 猪群id
+     * @param farmId 猪场id
      * @param sumAt 统计时间
      * @param changeCount 存栏变化量
      */
-    protected void updateDailyGroupLiveStock(Long groupId, Date sumAt, Integer changeCount) {
-        doctorDailyGroupDao.updateDailyGroupLiveStock(groupId, sumAt, changeCount);
+    protected void updateDailyGroupLiveStock(Long farmId, Integer pigType, Date sumAt, Integer changeCount) {
+        doctorGroupDailyDao.updateDailyGroupLiveStock(farmId, pigType, sumAt, changeCount);
     }
 
     /**
@@ -424,13 +426,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * @param changeCount 变化数量
      */
     public boolean validGroupLiveStockForDelete(Long groupId, Date sumAt, Integer changeCount) {
-        List<DoctorDailyGroup> dailyGroupList = doctorDailyGroupDao.findAfterSumAt(groupId, DateUtil.toDateString(sumAt));
-        for(DoctorDailyGroup dailyGroup : dailyGroupList){
-            if (EventUtil.plusInt(dailyGroup.getEnd(), changeCount) < 0) {
-                return false;
-            }
-        }
-        return true;
+        doctorGroupEventDao.
     }
 
     public void validGroupLiveStock(Long groupId, String groupCode, Date sumAt, Integer changeCount) {
@@ -447,10 +443,10 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      */
     protected void validGroupLiveStock(Long groupId, String groupCode, Date oldEventAt, Date newEventAt, Integer oldQuantity, Integer newQuantity,  Integer changeCount){
         Date sumAt = oldEventAt.before(newEventAt) ? oldEventAt : newEventAt;
-        List<DoctorDailyGroup> dailyGroupList = doctorDailyGroupDao.findAfterSumAt(groupId, DateUtil.toDateString(sumAt));
+        List<DoctorGroupDaily> dailyGroupList = doctorDailyGroupDao.findAfterSumAt(groupId, DateUtil.toDateString(sumAt));
 
         //如果新日期的猪群记录不存在则初始化一个进行校验
-        DoctorDailyGroup doctorDailyGroup = doctorDailyGroupDao.findByGroupIdAndSumAt(groupId, newEventAt);
+        DoctorGroupDaily doctorDailyGroup = doctorDailyGroupDao.findByGroupIdAndSumAt(groupId, newEventAt);
         if (isNull(doctorDailyGroup)) {
             dailyGroupList.add(doctorDailyReportManager.findByGroupIdAndSumAt(groupId, newEventAt));
         }
@@ -467,7 +463,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
                     .filter(dailyGroup -> !newEventAt.after(dailyGroup.getSumAt()))
                     .forEach(dailyGroup -> dailyGroup.setEnd(EventUtil.plusInt(dailyGroup.getEnd(), newQuantity)));
         }
-        for (DoctorDailyGroup dailyGroup : dailyGroupList) {
+        for (DoctorGroupDaily dailyGroup : dailyGroupList) {
             expectTrue(notNull(dailyGroup.getEnd()) && dailyGroup.getEnd() >= 0,
                     "group.live.stock.lower.zero", groupCode, DateUtil.toDateString(dailyGroup.getSumAt()));
         }

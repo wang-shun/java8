@@ -6,7 +6,7 @@ import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
-import io.terminus.doctor.event.model.DoctorDailyGroup;
+import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.util.EventUtil;
@@ -102,14 +102,13 @@ public class DoctorModifyGroupTransFarmEventHandler extends DoctorAbstractModify
         DoctorTransFarmGroupInput oldInput = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorTransFarmGroupInput.class);
         DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
                 .quantityChange(EventUtil.minusInt(0, oldInput.getQuantity()))
+                .weightChange(EventUtil.minusDouble(0D, oldInput.getWeight()))
                 .build();
-        DoctorDailyGroup oldDailyGroup1 = doctorDailyGroupDao.findByGroupIdAndSumAt(oldGroupEvent.getGroupId(), oldGroupEvent.getEventAt());
-        doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup1, changeDto1));
-        updateDailyGroupLiveStock(oldGroupEvent.getGroupId(), getAfterDay(oldGroupEvent.getEventAt()), -changeDto1.getQuantityChange());
+        DoctorGroupDaily oldDailyGroup1 = doctorGroupDailyDao.findBy(oldGroupEvent.getFarmId(), oldGroupEvent.getPigType(), oldGroupEvent.getEventAt());
+        doctorGroupDailyDao.update(buildDailyGroup(oldDailyGroup1, changeDto1));
+        updateDailyGroupLiveStock(oldGroupEvent.getFarmId(), oldGroupEvent.getPigType(),
+                getAfterDay(oldGroupEvent.getEventAt()), -changeDto1.getQuantityChange());
 
-        Integer weanChangeCount = oldGroupEvent.getQuantity();
-        doctorDailyGroupDao.updateUnweanAndWeanLiveStock(oldGroupEvent.getGroupId()
-                , oldGroupEvent.getEventAt(), 0, weanChangeCount);
     }
 
     @Override
@@ -118,20 +117,19 @@ public class DoctorModifyGroupTransFarmEventHandler extends DoctorAbstractModify
         DoctorTransFarmGroupInput newInput = (DoctorTransFarmGroupInput) input;
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                 .quantityChange(newInput.getQuantity())
+                .weightChange(newInput.getWeight())
                 .build();
-        DoctorDailyGroup oldDailyGroup2 = doctorDailyReportManager.findByGroupIdAndSumAt(newGroupEvent.getGroupId(), eventAt);
-        doctorDailyReportManager.createOrUpdateDailyGroup(buildDailyGroup(oldDailyGroup2, changeDto2));
-        updateDailyGroupLiveStock(newGroupEvent.getGroupId(), getAfterDay(eventAt), -changeDto2.getQuantityChange());
-
-        Integer weanChangeCount = - newInput.getQuantity();
-        doctorDailyGroupDao.updateUnweanAndWeanLiveStock(newGroupEvent.getGroupId()
-                , eventAt, 0, weanChangeCount);
+        DoctorGroupDaily oldDailyGroup2 = doctorGroupDailyDao.findBy(newGroupEvent.getFarmId(), newGroupEvent.getPigType(), eventAt);
+        doctorDailyReportManager.createOrUpdateGroupDaily(buildDailyGroup(oldDailyGroup2, changeDto2));
+        updateDailyGroupLiveStock(newGroupEvent.getFarmId(), newGroupEvent.getPigType(),
+                getAfterDay(eventAt), -changeDto2.getQuantityChange());
     }
 
     @Override
-    protected DoctorDailyGroup buildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
+    protected DoctorGroupDaily buildDailyGroup(DoctorGroupDaily oldDailyGroup, DoctorEventChangeDto changeDto) {
         oldDailyGroup = super.buildDailyGroup(oldDailyGroup, changeDto);
         oldDailyGroup.setChgFarm(EventUtil.plusInt(oldDailyGroup.getChgFarm(), changeDto.getQuantityChange()));
+        oldDailyGroup.setChgFarmWeight(EventUtil.plusDouble(oldDailyGroup.getChgFarmWeight(), changeDto.getWeightChange()));
         oldDailyGroup.setEnd(EventUtil.minusInt(oldDailyGroup.getEnd(), changeDto.getQuantityChange()));
         return oldDailyGroup;
     }

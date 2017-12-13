@@ -141,6 +141,10 @@ public class EventUtil {
         return (long) (MoreObjects.firstNonNull(price, 0L) * get2(MoreObjects.firstNonNull(weight, 0D)));
     }
 
+    public static int get(Integer factor1, Integer factor2) {
+        return MoreObjects.firstNonNull(factor1, 0) * MoreObjects.firstNonNull(factor2, 0);
+    }
+
     public static double get2(double number) {
         return new BigDecimal(number).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
