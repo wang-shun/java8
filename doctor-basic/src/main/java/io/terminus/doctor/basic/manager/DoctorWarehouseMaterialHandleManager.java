@@ -50,6 +50,8 @@ public class DoctorWarehouseMaterialHandleManager {
     private DoctorWarehouseStockMonthlyManager doctorWarehouseStockMonthlyManager;
     @Autowired
     private DoctorWarehouseHandlerManager doctorWarehouseHandlerManager;
+    @Autowired
+    private DoctorWarehousePurchaseManager doctorWarehousePurchaseManager;
 
     @Autowired
     private DoctorBasicDao doctorBasicDao;
@@ -158,26 +160,29 @@ public class DoctorWarehouseMaterialHandleManager {
 
         //扣减库存
         stocks.get(0).setQuantity(stocks.get(0).getQuantity().subtract(handle.getQuantity()));
+        doctorWarehouseStockDao.update(stocks.get(0));
 
+
+        doctorWarehousePurchaseManager.delete(handle);
         //当时入库记录
-        List<DoctorWarehouseHandleDetail> outDetails = doctorWarehouseHandleDetailDao.list(DoctorWarehouseHandleDetail.builder()
-                .materialHandleId(handle.getId())
-                .build());
-        if (null == outDetails || outDetails.isEmpty())
-            throw new ServiceException("stock.out.detail.not.found");
-
-        List<DoctorWarehousePurchase> purchases = doctorWarehousePurchaseDao.findByIds(outDetails.stream().map(DoctorWarehouseHandleDetail::getMaterialPurchaseId).collect(Collectors.toList()));
-        if (null == purchases || purchases.isEmpty())
-            throw new ServiceException("purchase.not.found");
-
-        purchases.get(0).setHandleQuantity(purchases.get(0).getHandleQuantity().add(handle.getQuantity()));
-        if (purchases.get(0).getHandleQuantity().compareTo(purchases.get(0).getQuantity()) >= 0)
-            purchases.get(0).setHandleFinishFlag(WarehousePurchaseHandleFlag.OUT_FINISH.getValue());
-
-        DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = new DoctorWarehouseHandlerManager.PurchaseHandleContext();
-        purchaseHandleContext.setStock(stocks.get(0));
-        purchaseHandleContext.setPurchaseQuantity(Collections.singletonMap(purchases.get(0), handle.getQuantity()));
-        doctorWarehouseHandlerManager.outStock(stocks.get(0), purchaseHandleContext, null);
+//        List<DoctorWarehouseHandleDetail> outDetails = doctorWarehouseHandleDetailDao.list(DoctorWarehouseHandleDetail.builder()
+//                .materialHandleId(handle.getId())
+//                .build());
+//        if (null == outDetails || outDetails.isEmpty())
+//            throw new ServiceException("stock.out.detail.not.found");
+//
+//        List<DoctorWarehousePurchase> purchases = doctorWarehousePurchaseDao.findByIds(outDetails.stream().map(DoctorWarehouseHandleDetail::getMaterialPurchaseId).collect(Collectors.toList()));
+//        if (null == purchases || purchases.isEmpty())
+//            throw new ServiceException("purchase.not.found");
+//
+//        purchases.get(0).setHandleQuantity(purchases.get(0).getHandleQuantity().add(handle.getQuantity()));
+//        if (purchases.get(0).getHandleQuantity().compareTo(purchases.get(0).getQuantity()) >= 0)
+//            purchases.get(0).setHandleFinishFlag(WarehousePurchaseHandleFlag.OUT_FINISH.getValue());
+//
+//        DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = new DoctorWarehouseHandlerManager.PurchaseHandleContext();
+//        purchaseHandleContext.setStock(stocks.get(0));
+//        purchaseHandleContext.setPurchaseQuantity(Collections.singletonMap(purchases.get(0), handle.getQuantity()));
+//        doctorWarehouseHandlerManager.outStock(stocks.get(0), purchaseHandleContext, null);
         doctorWarehouseStockMonthlyManager.count(handle.getWarehouseId(),
                 handle.getMaterialId(),
                 handle.getHandleYear(),
