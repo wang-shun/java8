@@ -5,10 +5,7 @@ import io.terminus.doctor.event.model.DoctorPigDaily;
 import org.springframework.stereotype.Repository;
 import sun.font.SunFontManager;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Desc:
@@ -20,16 +17,26 @@ import java.util.List;
 public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
 
 
-    public DoctorPigDaily findByFarm(Long farmId) {
-        List<DoctorPigDaily> reports = this.list(Collections.singletonMap("farmId", farmId));
+    public DoctorPigDaily findByFarm(Long farmId, Date start, Date end) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("farmId", farmId);
+        params.put("start", start);
+        params.put("end", end);
+
+        List<DoctorPigDaily> reports = this.list(params);
         if (reports.isEmpty())
             return null;
         return reports.get(0);
     }
 
 
-    public List<DoctorPigDaily> findByOrg(List<Long> farmIds) {
-        return this.list(Collections.singletonMap("farmIds", farmIds));
+    public List<DoctorPigDaily> findByOrg(List<Long> farmIds, Date start, Date end) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("farmIds", farmIds);
+        params.put("start", start);
+        params.put("end", end);
+        
+        return this.list(params);
     }
 
 

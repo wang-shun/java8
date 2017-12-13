@@ -141,6 +141,12 @@
                     farm_id =#{id}
                 </foreach>
             </if>
+            <if test="start !=null">
+                AND <![CDATA[sum_at >= #{start}]]>
+            </if>
+            <if test="end !=null">
+                AND <![CDATA[sum_at <= #{end}]]>
+            </if>
         </where>
     </sql>
 
