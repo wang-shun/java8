@@ -506,7 +506,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             iotPigDto.setStatusDay(DateUtil.getDeltaDays(statusDate, new Date()));
             return Response.ok(iotPigDto);
         } catch (Exception e) {
-            log.error("get iot pig failed, pigId, cause:{}", pigId, Throwables.getStackTraceAsString(e));
+            log.error("get iot pig failed, pigId:{}, cause:{}", pigId, Throwables.getStackTraceAsString(e));
             return Response.fail("get.iot.pig.failed");
         }
     }
