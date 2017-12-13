@@ -1,12 +1,9 @@
 package io.terminus.doctor.event.model;
 
-import com.google.common.base.CaseFormat;
 import lombok.Data;
-import org.springframework.util.ReflectionUtils;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.stream.Stream;
 
 /**
  * Created by xjn on 17/12/11.
@@ -31,69 +28,84 @@ public class DoctorPigDaily implements Serializable {
     private Long farmId;
 
     /**
-     * 母猪期初存栏
+     * 配怀母猪期初头数
      */
-    private Integer sowStart;
-
+    private Integer sowPhStart;
 
     /**
-     * 母猪死亡数量
-     */
-    private Integer sowDead;
-
-
-    /**
-     * 母猪淘汰数量
-     */
-    private Integer sowWeedOut;
-
-    /**
-     * 基础母猪死淘率
-     * （死亡数量+淘汰数量）/基础母猪平均存栏
-     */
-    private Integer basicSowDeadAndWeedOutRate;
-
-    /**
-     * 母猪销售数量
-     */
-    private Integer sowSale;
-
-    /**
-     * 母猪转场数量
-     */
-    private Integer sowChgFarm;
-
-    /**
-     * 母猪其他减少
-     */
-    private Integer sowOtherOut;
-
-
-    /**
-     * 母猪后备转入
+     * 后备转入
      */
     private Integer sowPhReserveIn;
 
+    /**
+     * 配怀母猪断奶转入
+     */
+    private Integer sowPhWeanIn;
 
     /**
-     * 母猪其他转入
-     * 配怀转入+产房转入
+     * 配怀母猪进场
      */
-    private Integer sowOtherIn;
-
+    private Integer sowPhEntryIn;
 
     /**
-     * 母猪日均存栏
-     * 存栏和除以天数
+     * 转场转入
      */
-    private Integer sowDailyQuantity;
-
+    private Integer sowPhChgFarmIn;
 
     /**
-     * 母猪期末存栏
+     * 配怀死亡母猪
      */
-    private Integer sowEnd;
+    private Integer sowPhDead;
 
+    /**
+     * 配怀淘汰母猪
+     */
+    private Integer sowPhWeedOut;
+
+    /**
+     * 配怀母猪销售
+     */
+    private Integer sowPhSale;
+
+    /**
+     * 配怀母猪转场
+     */
+    private Integer sowPhChgFarm;
+
+    /**
+     * 配怀母猪其他减少
+     */
+    private Integer sowPhOtherOut;
+
+    /**
+     * 配种数
+     */
+    private Integer matingCount;
+
+    /**
+     * 妊娠检查阳性头数
+     */
+    private Integer pregPositive;
+
+    /**
+     * 妊娠检查阴性头数
+     */
+    private Integer pregNegative;
+
+    /**
+     * 妊娠检查返情头数
+     */
+    private Integer pregFanqing;
+
+    /**
+     * 妊娠检查流产头数
+     */
+    private Integer pregLiuchan;
+
+    /**
+     * 配怀母猪期末头数
+     */
+    private Integer sowPhEnd;
 
     /**
      * 产房母猪期初存栏
@@ -105,14 +117,13 @@ public class DoctorPigDaily implements Serializable {
      */
     private Integer sowCfEnd;
 
-
     /**
      * 产房母猪，从配怀转入
      */
     private Integer sowCfIn;
 
     /**
-     * 产房母猪其他转入
+     * 产房母猪其他转入 = 转场转入的数量
      */
     private Integer sowCfInFarmIn;
 
@@ -121,24 +132,20 @@ public class DoctorPigDaily implements Serializable {
      */
     private Integer sowCfDead;
 
-
     /**
      * 产房母猪淘汰数量
      */
     private Integer sowCfWeedOut;
-
 
     /**
      * 产房母猪销售数量
      */
     private Integer sowCfSale;
 
-
     /**
      * 产房母猪转场数量
      */
     private Integer sowCfChgFarm;
-
 
     /**
      * 产房母猪其他减少数量
@@ -146,46 +153,14 @@ public class DoctorPigDaily implements Serializable {
     private Integer sowCfOtherOut;
 
     /**
-     * 产房前期配种数量
-     */
-    private Integer earlyMating;
-
-    /**
-     * 产房前期分娩窝数
-     * 向前推114天的配种数之合
-     */
-    private Integer earlyFarrowNest;
-
-    /**
-     * 产房前推分娩率
-     * 当前分娩窝数/前期配种数量
-     */
-    private Integer earlyFarrowRate;
-
-    /**
-     * 产房后期分娩窝数
-     * 向后推114天的分娩窝数之合
-     */
-    private Integer lateFarrowNest;
-
-    /**
-     * 产房后推分娩率
-     * 后期分娩窝数/当前配种数
-     */
-    private Integer lateFarrowRate;
-
-
-    /**
      * 产房分娩窝数
      */
     private Integer farrowNest;
-
 
     /**
      * 产房产仔总数
      */
     private Integer farrowAll;
-
 
     /**
      * 产房产活仔数
@@ -206,37 +181,10 @@ public class DoctorPigDaily implements Serializable {
      */
     private Integer farrowDead;
 
-
     /**
      * 产房黑木畸数
      */
-    private Integer farrowSjmh;
-
-
-    /**
-     * 产房窝均产仔数
-     * 产仔总数/分娩窝数
-     */
-    private Integer avgFarrow;
-
-    /**
-     * 产房窝均活仔数
-     * 产活仔数/分娩窝数
-     */
-    private Integer avgFarrowLive;
-
-    /**
-     * 产房窝均健仔数
-     * 产健仔数/分娩窝数
-     */
-    private Integer avgFarrowHealth;
-
-    /**
-     * 产房窝均弱仔数
-     * 产健仔数/分娩窝数
-     */
-    private Integer avgFarrowWeak;
-
+    private Integer farrowjmh;
 
     /**
      * 产房窝重之和
@@ -244,17 +192,29 @@ public class DoctorPigDaily implements Serializable {
     private Integer weight;
 
     /**
-     * 产房平均窝重
-     * 窝重之和/窝数
+     * 断奶窝数
      */
-    private Integer avgWeight;
+    private Integer weanNest;
 
     /**
-     * 产房初生重
-     * 窝重之和/产活仔数
+     * 断奶合格数
      */
-    private Integer firstWeight;
+    private Integer weanQualifiedCount;
 
+    /**
+     * 断奶仔猪数
+     */
+    private Integer weanCount;
+
+    /**
+     * 每头猪的断奶日龄之和
+     */
+    private Double weanDayAge;
+
+    /**
+     * 每一窝的断奶均重之和
+     */
+    private Double weanWeight;
 
     /**
      * 公猪期初存栏
