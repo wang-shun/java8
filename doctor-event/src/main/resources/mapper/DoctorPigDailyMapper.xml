@@ -135,6 +135,12 @@
             <if test="version != null">AND `version` = #{version}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
+            <if test="farmIds != null and farmIds.size() > 0">
+                AND
+                <foreach collection="farmIds" item="id" open="(" separator="or" close=")">
+                    farm_id =#{id}
+                </foreach>
+            </if>
         </where>
     </sql>
 
