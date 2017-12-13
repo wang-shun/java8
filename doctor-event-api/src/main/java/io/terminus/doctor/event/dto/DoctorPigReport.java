@@ -1,10 +1,13 @@
 package io.terminus.doctor.event.dto;
 
+import lombok.Data;
+
 import java.util.Date;
 
 /**
  * Created by sunbo@terminus.io on 2017/12/13.
  */
+@Data
 public class DoctorPigReport {
 
 
