@@ -50,7 +50,7 @@ public class DoctorGroupDaily implements Serializable {
     /**
      * 转入总日龄
      */
-    private Double turnIntoAge;
+    private Integer turnIntoAge;
 
     /**
      * 转场转入数量
@@ -123,7 +123,7 @@ public class DoctorGroupDaily implements Serializable {
     private Integer turnSeed;
 
     /**
-     * 转出总重
+     * 转出总重(死淘、销售、转入育肥等所有减少的重量)
      */
     private Double turnOutWeight;
 
