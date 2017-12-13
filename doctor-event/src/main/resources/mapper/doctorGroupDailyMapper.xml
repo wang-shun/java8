@@ -29,13 +29,6 @@
         <result column="to_houbei_weight" property="toHoubeiWeight"/>
         <result column="turn_seed" property="turnSeed"/>
         <result column="turn_out_weight" property="turnOutWeight"/>
-        <result column="material" property="material"/>
-        <result column="material_amount" property="materialAmount"/>
-        <result column="feed" property="feed"/>
-        <result column="feed_amount" property="feedAmount"/>
-        <result column="medicine_amount" property="medicineAmount"/>
-        <result column="vaccination_amount" property="vaccinationAmount"/>
-        <result column="consumable_amount" property="consumableAmount"/>
         <result column="end" property="end"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
@@ -53,15 +46,13 @@
     <sql id="cols_exclude_id">
         farm_id, `pig_type`, sum_at, start, turn_into, turn_into_weight, turn_into_age, chg_farm_in, chg_farm, chg_farm_weight, sale, sale_weight,
         dead, weed_out, other_change, to_nursery, to_fatten, to_fatten_weight, to_houbei, to_houbei_weight,
-        turn_seed, turn_out_weight, material, material_amount, feed, feed_amount, medicine_amount,
-        vaccination_amount, consumable_amount, `end`, created_at, updated_at, version
+        turn_seed, turn_out_weight, `end`, created_at, updated_at, version
     </sql>
 
     <sql id="vals">
        #{farmId}, #{pigType}, #{sumAt}, #{start}, #{turnInto}, #{turnIntoWeight}, #{turnIntoAge}, #{chgFarmIn}, #{chgFarm}, #{chgFarmWeight}, #{sale}, #{saleWeight},
        #{dead}, #{weedOut}, #{otherChange}, #{toNursery}, #{toFatten}, #{toFattenWeight}, #{toHoubei}, #{toHoubeiWeight},
-       #{turnSeed}, #{turnOutWeight}, #{material}, #{materialAmount}, #{feed}, #{feedAmount}, #{medicineAmount},
-       #{vaccinationAmount}, #{consumableAmount}, #{end}, now(), now(), 1
+       #{turnSeed}, #{turnOutWeight}, #{end}, now(), now(), 1
     </sql>
 
     <sql id="criteria">
@@ -107,13 +98,6 @@
             <if test="toHoubeiWeight != null">to_houbei_weight = #{toHoubeiWeight},</if>
             <if test="turnSeed != null">turn_seed = #{turnSeed},</if>
             <if test="turnOutWeight != null">turn_out_weight = #{turnOutWeight},</if>
-            <if test="material != null">material = #{material},</if>
-            <if test="materialAmount != null">material_amount = #{materialAmount},</if>
-            <if test="feed != null">feed = #{feed},</if>
-            <if test="feedAmount != null">feed_amount = #{feedAmount},</if>
-            <if test="medicineAmount != null">medicine_amount = #{medicineAmount},</if>
-            <if test="vaccinationAmount != null">vaccination_amount = #{vaccinationAmount},</if>
-            <if test="consumableAmount != null">consumable_amount = #{consumableAmount},</if>
             updated_at=now(),
             version = version + 1
         </set>

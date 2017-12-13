@@ -9,7 +9,6 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
-import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
 import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
 import io.terminus.doctor.event.dao.DoctorGroupBatchSummaryDao;
 import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
@@ -23,16 +22,14 @@ import io.terminus.doctor.event.editHandler.DoctorModifyGroupEventHandler;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
-import io.terminus.doctor.event.manager.DoctorDailyReportManager;
 import io.terminus.doctor.event.manager.DoctorDailyReportV2Manager;
 import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
-import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +38,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.enums.SourceType.UN_MODIFY;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
@@ -426,7 +422,8 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * @param changeCount 变化数量
      */
     public boolean validGroupLiveStockForDelete(Long groupId, Date sumAt, Integer changeCount) {
-        doctorGroupEventDao.
+        // TODO: 17/12/13  
+        return true;
     }
 
     public void validGroupLiveStock(Long groupId, String groupCode, Date sumAt, Integer changeCount) {
@@ -443,30 +440,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      */
     protected void validGroupLiveStock(Long groupId, String groupCode, Date oldEventAt, Date newEventAt, Integer oldQuantity, Integer newQuantity,  Integer changeCount){
         Date sumAt = oldEventAt.before(newEventAt) ? oldEventAt : newEventAt;
-        List<DoctorGroupDaily> dailyGroupList = doctorDailyGroupDao.findAfterSumAt(groupId, DateUtil.toDateString(sumAt));
-
-        //如果新日期的猪群记录不存在则初始化一个进行校验
-        DoctorGroupDaily doctorDailyGroup = doctorDailyGroupDao.findByGroupIdAndSumAt(groupId, newEventAt);
-        if (isNull(doctorDailyGroup)) {
-            dailyGroupList.add(doctorDailyReportManager.findByGroupIdAndSumAt(groupId, newEventAt));
-        }
-
-        if (Objects.equals(oldEventAt, newEventAt)) {
-            dailyGroupList.stream()
-                    .filter(dailyGroup -> !oldEventAt.after(dailyGroup.getSumAt()))
-                    .forEach(dailyGroup -> dailyGroup.setEnd(EventUtil.plusInt(dailyGroup.getEnd(), changeCount)));
-        } else {
-            dailyGroupList.stream()
-                    .filter(dailyGroup -> !oldEventAt.after(dailyGroup.getSumAt()))
-                    .forEach(dailyGroup -> dailyGroup.setEnd(EventUtil.plusInt(dailyGroup.getEnd(), oldQuantity)));
-            dailyGroupList.stream()
-                    .filter(dailyGroup -> !newEventAt.after(dailyGroup.getSumAt()))
-                    .forEach(dailyGroup -> dailyGroup.setEnd(EventUtil.plusInt(dailyGroup.getEnd(), newQuantity)));
-        }
-        for (DoctorGroupDaily dailyGroup : dailyGroupList) {
-            expectTrue(notNull(dailyGroup.getEnd()) && dailyGroup.getEnd() >= 0,
-                    "group.live.stock.lower.zero", groupCode, DateUtil.toDateString(dailyGroup.getSumAt()));
-        }
+        // TODO: 17/12/13  
     }
     /**
      * 获取日期下一天
