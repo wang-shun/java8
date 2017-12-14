@@ -111,7 +111,7 @@ public class DoctorPigStatisticDao {
         return sqlSession.selectOne(sqlId("sowCfOtherOut"), criteria.toMap());
     }
 
-    public Integer farrowNest(DoctorStatisticCriteria criteria) {
+    public Double farrowNest(DoctorStatisticCriteria criteria) {
         return sqlSession.selectOne(sqlId("farrowNest"), criteria.toMap());
     }
 
@@ -131,7 +131,7 @@ public class DoctorPigStatisticDao {
         return sqlSession.selectOne(sqlId("farrowjmh"), criteria.toMap());
     }
 
-    public Integer weight(DoctorStatisticCriteria criteria) {
+    public Double weight(DoctorStatisticCriteria criteria) {
         return sqlSession.selectOne(sqlId("weight"), criteria.toMap());
     }
 
@@ -147,7 +147,7 @@ public class DoctorPigStatisticDao {
         return sqlSession.selectOne(sqlId("weanCount"), criteria.toMap());
     }
 
-    public Integer weanWeight(DoctorStatisticCriteria criteria) {
+    public Double weanWeight(DoctorStatisticCriteria criteria) {
         return sqlSession.selectOne(sqlId("weanWeight"), criteria.toMap());
     }
 

@@ -360,7 +360,7 @@
         </where>
     </select>
 
-    <select id="weanNest" parameterType="map" resultType="double">
+    <select id="weanNest" parameterType="map" resultType="int">
         SELECT ifnull(sum(farrow_weight), 0)
         FROM doctor_pig_events
         <where>
@@ -369,8 +369,8 @@
         </where>
     </select>
 
-    <select id="weanQualifiedCount" parameterType="map" resultType="double">
-        SELECT ifnull(sum(farrow_weight), 0)
+    <select id="weanQualifiedCount" parameterType="map" resultType="int">
+        SELECT ifnull(sum(health_count), 0)
         FROM doctor_pig_events
         <where>
             <include refid="criteria" />
@@ -378,7 +378,7 @@
         </where>
     </select>
 
-    <select id="weanCount" parameterType="map" resultType="double">
+    <select id="weanCount" parameterType="map" resultType="int">
         SELECT ifnull(sum(wean_count), 0)
         FROM doctor_pig_events
         <where>
@@ -396,7 +396,7 @@
         </where>
     </select>
 
-    <select id="boarLiveStock" parameterType="map" resultType="double">
+    <select id="boarLiveStock" parameterType="map" resultType="int">
         (
         select ifnull(sum(count(*)), 0 )
         from doctor_pig_tracks
@@ -422,7 +422,7 @@
         )
     </select>
 
-    <select id="boarIn" parameterType="map" resultType="double">
+    <select id="boarIn" parameterType="map" resultType="int">
         SELECT ifnull(sum(wean_avg_weight), 0)
         FROM doctor_pig_events
         <where>
