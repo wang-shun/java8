@@ -201,6 +201,7 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
         DoctorBarn toBarn = doctorBarnDao.findById(oldInput.getToBarnId());
         DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
                 .quantityChange(EventUtil.minusInt(0, oldInput.getQuantity()))
+                .weightChange(EventUtil.minusDouble(0D, oldInput.getWeight()))
                 .transBarnType(toBarn.getPigType())
                 .transGroupType(oldGroupEvent.getTransGroupType())
                 .build();
@@ -220,6 +221,7 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
         DoctorBarn toBarn = doctorBarnDao.findById(newInput.getToBarnId());
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                 .quantityChange(newInput.getQuantity())
+                .weightChange(newInput.getWeight())
                 .transBarnType(toBarn.getPigType())
                 .transGroupType(newGroupEvent.getTransGroupType())
                 .build();
@@ -233,11 +235,14 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
     protected DoctorGroupDaily buildDailyGroup(DoctorGroupDaily oldDailyGroup, DoctorEventChangeDto changeDto) {
         oldDailyGroup = super.buildDailyGroup(oldDailyGroup, changeDto);
         oldDailyGroup.setEnd(EventUtil.minusInt(oldDailyGroup.getEnd(), changeDto.getQuantityChange()));
+        oldDailyGroup.setTurnOutWeight(EventUtil.plusDouble(oldDailyGroup.getTurnOutWeight(), changeDto.getWeightChange()));
 
         if (Objects.equals(changeDto.getTransBarnType(), PigType.FATTEN_PIG.getValue())) {
             oldDailyGroup.setToFatten(EventUtil.plusInt(oldDailyGroup.getToFatten(), changeDto.getQuantityChange()));
+            oldDailyGroup.setToFattenWeight(EventUtil.plusDouble(oldDailyGroup.getToFattenWeight(), changeDto.getWeightChange()));
         }else if (Objects.equals(changeDto.getTransBarnType(), PigType.RESERVE.getValue())) {
             oldDailyGroup.setToHoubei(EventUtil.plusInt(oldDailyGroup.getToHoubei(), changeDto.getQuantityChange()));
+            oldDailyGroup.setToHoubeiWeight(EventUtil.plusDouble(oldDailyGroup.getToHoubeiWeight(), changeDto.getWeightChange()));
         } else if (Objects.equals(changeDto.getTransBarnType(), PigType.NURSERY_PIGLET.getValue())) {
             oldDailyGroup.setToNursery(EventUtil.plusInt(oldDailyGroup.getToNursery(), changeDto.getQuantityChange()));
         }

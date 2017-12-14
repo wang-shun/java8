@@ -128,41 +128,6 @@ public class DoctorGroupDaily implements Serializable {
     private Double turnOutWeight;
 
     /**
-     * 原料消耗数量
-     */
-    private Double material;
-
-    /**
-     * 原料消耗金额
-     */
-    private Long materialAmount;
-
-    /**
-     * 饲料消耗数量
-     */
-    private Double feed;
-
-    /**
-     * 饲料消耗金额
-     */
-    private Long feedAmount;
-
-    /**
-     * 药品消耗金额
-     */
-    private Long medicineAmount;
-
-    /**
-     * 疫苗消耗金额
-     */
-    private Long vaccinationAmount;
-
-    /**
-     * 易耗品消耗金额
-     */
-    private Long consumableAmount;
-
-    /**
      * 期末
      */
     private Integer end;

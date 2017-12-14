@@ -158,15 +158,6 @@ public class DoctorPigDaily implements Serializable {
     private Integer farrowNest;
 
     /**
-     * 产房产仔总数
-     */
-    private Integer farrowAll;
-
-    /**
-     * 产房产活仔数
-     */
-    private Integer farrowLive;
-    /**
      * 产房产健仔数
      */
     private Integer farrowHealth;
