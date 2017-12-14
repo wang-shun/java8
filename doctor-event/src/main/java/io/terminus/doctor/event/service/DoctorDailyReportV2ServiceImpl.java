@@ -62,13 +62,18 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
 
     @Override
     public Response<Boolean> flushGroupDaily(Long farmId, Integer pigType, String startAt, String endAt) {
-        log.info("flush farm daily for pigType starting, farmId:{}, pigType:{}, startAt:{}, endAt:{}", farmId, pigType, startAt, endAt);
+        log.info("flush group daily for pigType starting, farmId:{}, pigType:{}, startAt:{}, endAt:{}", farmId, pigType, startAt, endAt);
         try {
+            if (!PigType.GROUP_TYPES.contains(pigType)) {
+                log.error("flush group daily pig type is illegal,pigType:{}", pigType);
+                return Response.fail("pig.type.is.illegal");
+            }
             DoctorStatisticCriteria criteria = new DoctorStatisticCriteria();
             criteria.setFarmId(farmId);
             criteria.setPigType(pigType);
             List<Date> list = DateUtil.getDates(DateUtil.toDate(startAt), DateUtil.toDate(endAt));
             if (list.isEmpty()) {
+                log.error("flush group daily startAt or endAt is illegal, startAt:{}, endAt:{}", startAt, endAt);
                 return Response.fail("startAt.or.endAt.is.error");
             }
             
@@ -87,7 +92,27 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
 
     @Override
     public Response<Boolean> flushPigDaily(Long farmId, String startAt, String endAt) {
-        // TODO: 17/12/12  
-        return null;
+        try {
+            log.info("flush pig daily starting, farmId:{}, startAt:{}, endAt:{}", farmId, startAt, endAt);
+            DoctorStatisticCriteria criteria = new DoctorStatisticCriteria();
+            criteria.setFarmId(farmId);
+            List<Date> list = DateUtil.getDates(DateUtil.toDate(startAt), DateUtil.toDate(endAt));
+            if (list.isEmpty()) {
+                log.error("flush pig daily startAt or endAt is illegal, startAt:{}, endAt:{}", startAt, endAt);
+                return Response.fail("startAt.or.endAt.is.error");
+            }
+
+            list.forEach(date -> {
+                criteria.setSumAt(DateUtil.toDateString(date));
+                doctorDailyReportV2Manager.flushPigDaily(criteria);
+            });
+
+            log.info("flush pig daily for pigType end");
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("flush pig daily failed, farmId:{}, startAt:{}, endAt:{}, cause:{}",
+                    farmId, startAt, endAt, Throwables.getStackTraceAsString(e));
+            return Response.fail("flush.pig.daily.failed");
+        }
     }
 }
