@@ -224,7 +224,7 @@ public class DoctorPigReport {
 
     /**
      * 产房窝均弱仔数
-     * 产健仔数/分娩窝数
+     * 产弱仔数/分娩窝数
      */
     private Integer avgFarrowWeak;
 
