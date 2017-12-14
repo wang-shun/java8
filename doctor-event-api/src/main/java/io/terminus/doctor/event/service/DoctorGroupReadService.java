@@ -157,7 +157,7 @@ public interface DoctorGroupReadService {
      */
     Response<List<DoctorGroup>> findGroupByCurrentBarnId(@NotNull(message = "barnId.not.null") Long barnId);
 
-    Response<Integer> findGroupPigQuantityByBarnId(@NotNull(message = "barnId.not.null") Long barnId);
+    Response<Long> findGroupPigQuantityByBarnId(@NotNull(message = "barnId.not.null") Long barnId);
 
     /**
      * 根据日期区间和事件类型查询事件列表
