@@ -3,25 +3,26 @@ package io.terminus.doctor.basic.manager;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
+import io.terminus.doctor.basic.dao.DoctorWarehouseHandleDetailDao;
 import io.terminus.doctor.basic.dao.DoctorWarehousePurchaseDao;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDto;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockInDto;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.enums.WarehousePurchaseHandleFlag;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehousePurchase;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
+import io.terminus.doctor.basic.model.warehouseV2.*;
 import io.terminus.doctor.common.exception.InvalidException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by sunbo@terminus.io on 2017/9/12.
  */
+@Slf4j
 @Component
 public class DoctorWarehousePurchaseManager {
 
@@ -30,6 +31,9 @@ public class DoctorWarehousePurchaseManager {
     private DoctorWarehousePurchaseDao doctorWarehousePurchaseDao;
     @Autowired
     private DoctorWarehouseStockManager doctorWarehouseStockManager;
+
+    @Autowired
+    private DoctorWarehouseHandleDetailDao doctorWarehouseHandleDetailDao;
     @Autowired
     private DoctorVendorManager doctorVendorManager;
 
@@ -147,5 +151,37 @@ public class DoctorWarehousePurchaseManager {
             }
             return new BigDecimal(totalPrice).divide(totalQuantity, 0, BigDecimal.ROUND_HALF_UP).longValue();
         }
+    }
+
+
+    /**
+     * 删除入库触发的删除采购记录
+     *
+     * @param materialHandle
+     */
+    public void delete(DoctorWarehouseMaterialHandle materialHandle) {
+
+        if (!WarehouseMaterialHandleType.isBigIn(materialHandle.getType()))//只有入库类型的才能删除采购记录
+            throw new ServiceException("purchase.not.allow.delete");
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("material_handle_id", materialHandle.getId());
+        List<Long> purchaseIds = doctorWarehouseHandleDetailDao.list(params).stream().map(DoctorWarehouseHandleDetail::getMaterialPurchaseId).collect(Collectors.toList());
+        if (purchaseIds.isEmpty()) {
+            log.warn("material handle [{}] not associate purchase", materialHandle.getId());
+            return;
+        }
+
+        DoctorWarehousePurchase purchase = doctorWarehousePurchaseDao.findById(purchaseIds.get(0));//一笔入库类型的操作只会产生一笔采购
+        if (null == purchase) {
+            log.warn("purchase not found for material handle[{}],with id:{}", materialHandle.getId(), purchaseIds.get(0));
+            return;
+        }
+        if (purchase.getHandleQuantity().compareTo(new BigDecimal(0)) != 0) { //如果该笔采购已经被消耗了
+            throw new InvalidException("purchase.has.been.eat", purchase.getUnitPrice(), materialHandle.getMaterialName());
+        }
+
+        doctorWarehousePurchaseDao.delete(purchase.getId());
+        log.info("delete purchase with warehouse[{}],sku[{}],quantity[{}],unitPrice[{}]", purchase.getWarehouseId(), purchase.getMaterialId(), purchase.getQuantity(), purchase.getUnitPrice());
     }
 }

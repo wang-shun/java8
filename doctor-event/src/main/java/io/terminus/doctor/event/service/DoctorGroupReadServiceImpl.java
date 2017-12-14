@@ -17,16 +17,14 @@ import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithEx;
-import io.terminus.doctor.event.dao.DoctorGroupDao;
-import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupJoinDao;
-import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dao.*;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.dto.search.DoctorGroupCountDto;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupEventHandlers;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -66,6 +64,8 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
 
     @Autowired
     private DoctorModifyGroupEventHandlers doctorModifyGroupEventHandlers;
+    @Autowired
+    private DoctorPigTrackDao doctorPigTrackDao;
 
     @Autowired
     public DoctorGroupReadServiceImpl(DoctorGroupDao doctorGroupDao,
@@ -292,13 +292,15 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
-    public Response<Integer> findGroupPigQuantityByBarnId(Long barnId) {
+    public Response<Long> findGroupPigQuantityByBarnId(Long barnId) {
         try {
-            Integer quantity =
+            Integer groupQuantity =
                     doctorGroupDao.findByCurrentBarnId(barnId).stream().mapToInt(group -> doctorGroupTrackDao.findByGroupId(group.getId()).getQuantity())
                             .sum();
 
-            return Response.ok(quantity);
+            long pigQuantity = doctorPigTrackDao.findByBarnId(barnId).stream().filter(p -> p.getIsRemoval() == IsOrNot.NO.getValue().intValue()).count();
+
+            return Response.ok(groupQuantity + pigQuantity);
         } catch (Exception e) {
             log.error("find group by current barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
             return Response.fail("group.find.fail");
