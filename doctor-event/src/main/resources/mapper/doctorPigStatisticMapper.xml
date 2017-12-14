@@ -315,24 +315,6 @@
         </where>
     </select>
 
-    <select id="farrowAll" parameterType="map" resultType="int">
-        SELECT ifnull(sum(live_count), 0)
-        FROM doctor_pig_events
-        <where>
-            <include refid="criteria" />
-            AND `type` = 15
-        </where>
-    </select>
-
-    <select id="farrowLive" parameterType="map" resultType="int">
-        SELECT ifnull(sum(live_count), 0)
-        FROM doctor_pig_events
-        <where>
-            <include refid="criteria" />
-            AND `type` = 15
-        </where>
-    </select>
-
     <select id="farrowHealth" parameterType="map" resultType="int">
         SELECT ifnull(sum(health_count), 0)
         FROM doctor_pig_events
