@@ -115,14 +115,6 @@ public class DoctorPigStatisticDao {
         return sqlSession.selectOne(sqlId("farrowNest"), criteria.toMap());
     }
 
-    public Integer farrowAll(DoctorStatisticCriteria criteria) {
-        return sqlSession.selectOne(sqlId("farrowAll"), criteria.toMap());
-    }
-
-    public Integer farrowLive(DoctorStatisticCriteria criteria) {
-        return sqlSession.selectOne(sqlId("farrowLive"), criteria.toMap());
-    }
-
     public Integer farrowHealth(DoctorStatisticCriteria criteria) {
         return sqlSession.selectOne(sqlId("farrowHealth"), criteria.toMap());
     }
