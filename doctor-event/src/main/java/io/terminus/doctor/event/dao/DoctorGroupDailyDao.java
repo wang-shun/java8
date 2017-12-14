@@ -21,8 +21,7 @@ public class DoctorGroupDailyDao extends MyBatisDao<DoctorGroupDaily> {
     }
 
     public DoctorGroupDaily findBy(Long farmId, Integer pigType, Date sumAt) {
-        return sqlSession.selectOne(sqlId("findBy"), ImmutableMap.of("farmId", farmId,
-                "pigType", pigType, "sumAt", DateUtil.toDateString(sumAt)));
+        return findBy(farmId, pigType, DateUtil.toDateString(sumAt));
     }
 
     /**

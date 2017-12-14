@@ -4,8 +4,10 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
 import io.terminus.doctor.event.dao.DoctorGroupStatisticDao;
+import io.terminus.doctor.event.dao.DoctorPigDailyDao;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
+import io.terminus.doctor.event.model.DoctorPigDaily;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,11 +24,13 @@ import static io.terminus.doctor.common.utils.Checks.expectTrue;
 public class DoctorDailyReportV2Manager {
     private final DoctorGroupStatisticDao groupStatisticDao;
     private final DoctorGroupDailyDao groupDailyDao;
+    private final DoctorPigDailyDao doctorPigDailyDao;
 
     @Autowired
-    public DoctorDailyReportV2Manager(DoctorGroupStatisticDao groupStatisticDao, DoctorGroupDailyDao groupDailyDao) {
+    public DoctorDailyReportV2Manager(DoctorGroupStatisticDao groupStatisticDao, DoctorGroupDailyDao groupDailyDao, DoctorPigDailyDao doctorPigDailyDao) {
         this.groupStatisticDao = groupStatisticDao;
         this.groupDailyDao = groupDailyDao;
+        this.doctorPigDailyDao = doctorPigDailyDao;
     }
 
     public void flushGroupDaily(DoctorStatisticCriteria criteria){
@@ -98,6 +102,39 @@ public class DoctorDailyReportV2Manager {
     }
 
     public void flushPigDaily(DoctorStatisticCriteria criteria) {
-        // TODO: 17/12/12
+        DoctorPigDaily doctorPigDaily = doctorPigDailyDao.findBy(criteria.getFarmId(), criteria.getSumAt());
+        if (isNull(doctorPigDaily)) {
+            doctorPigDaily = new DoctorPigDaily();
+            doctorPigDaily.setFarmId(criteria.getFarmId());
+            doctorPigDaily.setSumAt(DateUtil.toDate(criteria.getSumAt()));
+        }
+
+    }
+
+    /**
+     * 配怀
+     * @param doctorPigDaily 日报
+     * @param criteria 条件
+     */
+    private void flushPhPigDaily(DoctorPigDaily doctorPigDaily, DoctorStatisticCriteria criteria){
+
+    }
+
+    /**
+     * 产房
+     * @param doctorPigDaily 日报
+     * @param criteria 条件
+     */
+    private void flushCfPigDaily(DoctorPigDaily doctorPigDaily, DoctorStatisticCriteria criteria){
+
+    }
+
+    /**
+     * 公猪
+     * @param doctorPigDaily 日报
+     * @param criteria 条件
+     */
+    private void flushBoarPigDaily(DoctorPigDaily doctorPigDaily, DoctorStatisticCriteria criteria){
+
     }
 }
