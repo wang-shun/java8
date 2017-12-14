@@ -14,6 +14,7 @@ import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
+import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -37,7 +38,8 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
 
         //不允许修改初配事件日期，初配事件还要影响其他复配事件的预产期，track中预产期，比较麻烦
         if (Objects.equals(oldPigEvent.getCurrentMatingCount(), 1)) {
-            expectTrue(Objects.equals(oldPigEvent.getEventAt(), inputDto.eventAt()),
+            expectTrue(Objects.equals(new DateTime(oldPigEvent.getEventAt()).withTimeAtStartOfDay(),
+                    new DateTime(inputDto.eventAt()).withTimeAtStartOfDay()),
                     "first.mate.date.is.not.modify");
         }
 
