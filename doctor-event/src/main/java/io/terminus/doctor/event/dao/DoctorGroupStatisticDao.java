@@ -40,7 +40,7 @@ public class DoctorGroupStatisticDao {
         return sqlSession.selectOne(sqlId("turnIntoWeight"), criteria.toMap());
     }
 
-    public Double turnIntoAge(DoctorStatisticCriteria criteria) {
+    public Integer turnIntoAge(DoctorStatisticCriteria criteria) {
         return sqlSession.selectOne(sqlId("turnIntoAge"), criteria.toMap());
     }
 
