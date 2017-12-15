@@ -13,6 +13,8 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+
 import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
@@ -209,6 +211,9 @@ public class DoctorDailyReportV2Manager {
         doctorPigDaily.setBoarEnd(pigStatisticDao.boarLiveStock(criteria.getFarmId(), criteria.getSumAt()));
     }
 
+    public DoctorPigDaily findDoctorPigDaily(Long farmId, Date sumAt){
+        return pigDailyDao.findBy(farmId, sumAt);
+    }
     /**
      * 有则更新,无则创建
      */

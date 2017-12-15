@@ -311,4 +311,25 @@
         AND sum_at = #{sumAt}
     </select>
 
+    <update id="updateDailySowPigLiveStock" parameterType="map" >
+        UPDATE <include refid="tb"/>
+        SET
+        sow_ph_start = ifnull(sow_ph_start, 0) + ifnull(#{phChangeCount}, 0),
+        sow_ph_end = ifnull(sow_ph_end, 0) + ifnull(#{phChangeCount}, 0),
+        sow_cf_start = ifnull(sow_cf_start, 0) + ifnull(#{cfChangeCount}, 0),
+        sow_cf_end = ifnull(sow_cf_end, 0) + ifnull(#{cfChangeCount}, 0),
+        WHERE
+        farm_id = #{farmId}
+        AND sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
+    </update>
+
+    <update id="updateDailyBoarPigLiveStock" parameterType="map" >
+        UPDATE <include refid="tb"/>
+        SET boar_start = boar_start + #{changeCount},
+        `boar_end` = `boar_end` + #{changeCount}
+        WHERE
+        farm_id = #{farmId}
+        AND sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
+    </update>
+
 </mapper>

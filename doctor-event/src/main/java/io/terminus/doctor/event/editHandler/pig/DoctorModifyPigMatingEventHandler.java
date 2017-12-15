@@ -1,16 +1,13 @@
 package io.terminus.doctor.event.editHandler.pig;
 
 import com.google.common.collect.Maps;
-import io.terminus.doctor.common.exception.InvalidException;
-import io.terminus.doctor.common.utils.Checks;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
-import io.terminus.doctor.event.enums.DoctorMatingType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.model.DoctorDailyReport;
+import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
@@ -140,22 +137,12 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
         if (oldPigEvent.getCurrentMatingCount() > 1) {
             return;
         }
-        DoctorDailyReport oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
+        DoctorPigDaily oldDailyPig1 = doctorDailyReportManager.findDoctorPigDaily(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
         DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
                 .doctorMateType(oldPigEvent.getDoctorMateType())
                 .doctorMateTypeCountChange(-1)
                 .build();
-        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig1, changeDto1));
-
-        //更新配种母猪数与空怀母猪数
-        Integer sowPhKonghuaiChangeCount = 0;
-        if (Objects.equals(oldPigEvent.getPigStatusBefore(), PigStatus.KongHuai.getKey())
-                || Objects.equals(oldPigEvent.getPigStatusBefore(), PigStatus.Entry.getKey())) {
-            sowPhKonghuaiChangeCount = 1;
-        }
-        doctorDailyPigDao.updateDailyPhStatusLiveStock(oldPigEvent.getFarmId(), oldPigEvent.getEventAt()
-                , -1, sowPhKonghuaiChangeCount , 0);
-
+        doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig1, changeDto1));
     }
 
     @Override
@@ -163,48 +150,18 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
         if (newPigEvent.getCurrentMatingCount() > 1) {
             return;
         }
-        DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
+        DoctorPigDaily oldDailyPig2 = doctorDailyReportManager.findDoctorPigDaily(newPigEvent.getFarmId(), inputDto.eventAt());
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                 .doctorMateType(newPigEvent.getDoctorMateType())
                 .doctorMateTypeCountChange(1)
                 .build();
-        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig2, changeDto2));
-
-        //更新配种母猪数与空怀母猪数
-        Integer sowPhKonghuaiChangeCount = 0;
-        if (Objects.equals(newPigEvent.getPigStatusBefore(), PigStatus.KongHuai.getKey())
-                || Objects.equals(newPigEvent.getPigStatusBefore(), PigStatus.Entry.getKey())) {
-            sowPhKonghuaiChangeCount = -1;
-        }
-        doctorDailyPigDao.updateDailyPhStatusLiveStock(newPigEvent.getFarmId(), inputDto.eventAt()
-                , 1, sowPhKonghuaiChangeCount, 0);
-
+        doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig2, changeDto2));
     }
 
     @Override
-    protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
+    protected DoctorPigDaily buildDailyPig(DoctorPigDaily oldDailyPig, DoctorEventChangeDto changeDto) {
         oldDailyPig = super.buildDailyPig(oldDailyPig, changeDto);
-        DoctorMatingType matingType = DoctorMatingType.from(changeDto.getDoctorMateType());
-        Checks.expectNotNull(matingType, "mating.type.is.null");
-        switch (matingType) {
-            case HP:
-                oldDailyPig.setMateHb(EventUtil.plusInt(oldDailyPig.getMateHb(), changeDto.getDoctorMateTypeCountChange()));
-                break;
-            case LPC:
-                oldDailyPig.setMateLc(EventUtil.plusInt(oldDailyPig.getMateLc(), changeDto.getDoctorMateTypeCountChange()));
-                break;
-            case DP:
-                oldDailyPig.setMateDn(EventUtil.plusInt(oldDailyPig.getMateDn(), changeDto.getDoctorMateTypeCountChange()));
-                break;
-            case YP:
-                oldDailyPig.setMateYx(EventUtil.plusInt(oldDailyPig.getMateYx(), changeDto.getDoctorMateTypeCountChange()));
-                break;
-            case FP:
-                oldDailyPig.setMateFq(EventUtil.plusInt(oldDailyPig.getMateFq(), changeDto.getDoctorMateTypeCountChange()));
-                break;
-            default:
-                throw new InvalidException("mating.type.error");
-        }
+        oldDailyPig.setMatingCount(EventUtil.plusInt(oldDailyPig.getMatingCount(), changeDto.getDoctorMateTypeCountChange()));
         return oldDailyPig;
     }
 
@@ -214,7 +171,6 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
         expectNotNull(firstMatingEvent, "first.mate.not.null", pigId);
         expectTrue(DateUtil.getDeltaDays(firstMatingEvent.getEventAt(), eventAt) <= 3,
                 "serial.mating.over.three.day", DateUtil.toDateString(firstMatingEvent.getEventAt()));
-
     }
 
 }

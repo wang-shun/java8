@@ -13,7 +13,7 @@ import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorDailyReport;
+import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -128,8 +128,7 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
                     .build();
             matingChangeCount = 1;
             farrowChangCount = -1;
-            doctorDailyPigDao.updateDailyPhStatusLiveStock(oldPigEvent.getFarmId(), oldPigEvent.getEventAt()
-                    , 0, 0, 1);
+
         } else if (Objects.equals(oldPigEvent.getType(), PigEvent.TO_MATING.getKey())) {
             changeDto = DoctorEventChangeDto.builder()
                     .chgLocationChangeCount(-1)
@@ -137,13 +136,11 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
                     .build();
             matingChangeCount = -1;
             farrowChangCount = 1;
-            doctorDailyPigDao.updateDailyPhStatusLiveStock(oldPigEvent.getFarmId(), oldPigEvent.getEventAt()
-                    , 0, -1, 0);
         } else {
             return;
         }
-        DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
-        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig, changeDto));
+        DoctorPigDaily oldDailyPig = doctorDailyReportManager.findDoctorPigDaily(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
+        doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig, changeDto));
         doctorDailyPigDao.updateDailySowPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(oldPigEvent.getEventAt()),
                 0, matingChangeCount, farrowChangCount);
     }
@@ -160,8 +157,6 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
                     .build();
             matingChangeCount = -1;
             farrowChangCount = 1;
-            doctorDailyPigDao.updateDailyPhStatusLiveStock(newPigEvent.getFarmId(), inputDto.eventAt()
-                    , 0, 0, -1);
         } else if (Objects.equals(newPigEvent.getType(), PigEvent.TO_MATING.getKey())) {
             changeDto = DoctorEventChangeDto.builder()
                     .chgLocationChangeCount(1)
@@ -169,34 +164,26 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
                     .build();
             matingChangeCount = 1;
             farrowChangCount = -1;
-            doctorDailyPigDao.updateDailyPhStatusLiveStock(newPigEvent.getFarmId(), inputDto.eventAt()
-                    , 0, 1, 0);
         } else {
             return;
         }
-        DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
-        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig, changeDto));
+        DoctorPigDaily oldDailyPig = doctorDailyReportManager.findDoctorPigDaily(newPigEvent.getFarmId(), inputDto.eventAt());
+        doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig, changeDto));
         doctorDailyPigDao.updateDailySowPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()),
                 0, matingChangeCount, farrowChangCount);
     }
 
     @Override
-    protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
+    protected DoctorPigDaily buildDailyPig(DoctorPigDaily oldDailyPig, DoctorEventChangeDto changeDto) {
         oldDailyPig = super.buildDailyPig(oldDailyPig, changeDto);
         if (Objects.equals(changeDto.getChgLocationType(), PigEvent.TO_MATING.getKey())) {
-            oldDailyPig.setSowPh(EventUtil.plusInt(oldDailyPig.getSowPh(), changeDto.getChgLocationChangeCount()));
             oldDailyPig.setSowPhEnd(EventUtil.plusInt(oldDailyPig.getSowPhEnd(), changeDto.getChgLocationChangeCount()));
             oldDailyPig.setSowPhWeanIn(EventUtil.plusInt(oldDailyPig.getSowPhWeanIn(), changeDto.getChgLocationChangeCount()));
-            oldDailyPig.setSowCfWeanOut(EventUtil.plusInt(oldDailyPig.getSowCfWeanOut(), changeDto.getChgLocationChangeCount()));
-            oldDailyPig.setSowCf(EventUtil.minusInt(oldDailyPig.getSowCf(), changeDto.getChgLocationChangeCount()));
             oldDailyPig.setSowCfEnd(EventUtil.minusInt(oldDailyPig.getSowCfEnd(), changeDto.getChgLocationChangeCount()));
             return oldDailyPig;
         }
-        oldDailyPig.setSowPh(EventUtil.minusInt(oldDailyPig.getSowPh(), changeDto.getChgLocationChangeCount()));
         oldDailyPig.setSowPhEnd(EventUtil.minusInt(oldDailyPig.getSowPhEnd(), changeDto.getChgLocationChangeCount()));
-        oldDailyPig.setSowCf(EventUtil.plusInt(oldDailyPig.getSowCf(), changeDto.getChgLocationChangeCount()));
         oldDailyPig.setSowCfEnd(EventUtil.plusInt(oldDailyPig.getSowCfEnd(), changeDto.getChgLocationChangeCount()));
-        oldDailyPig.setSowPhToCf(EventUtil.plusInt(oldDailyPig.getSowPhToCf(), changeDto.getChgLocationChangeCount()));
         oldDailyPig.setSowCfIn(EventUtil.plusInt(oldDailyPig.getSowCfIn(), changeDto.getChgLocationChangeCount()));
         return oldDailyPig;
     }

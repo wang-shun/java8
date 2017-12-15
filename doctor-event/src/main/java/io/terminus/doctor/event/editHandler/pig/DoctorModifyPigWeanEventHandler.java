@@ -10,7 +10,7 @@ import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupWeanEventHandler;
 import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.model.DoctorDailyReport;
+import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -77,9 +77,9 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
     @Override
     protected void updateDailyForModify(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto) {
         if (Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
-            DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getOldEventAt());
+            DoctorPigDaily oldDailyPig = doctorDailyReportManager.findDoctorPigDaily(changeDto.getFarmId(), changeDto.getOldEventAt());
             changeDto.setWeanDayAge(getWeanAvgAge(oldPigEvent.getPigId(), oldPigEvent.getParity(), changeDto.getOldEventAt()));
-            doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig, changeDto));
+            doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig, changeDto));
         } else {
             updateDailyOfDelete(oldPigEvent);
             updateDailyOfNew(oldPigEvent, inputDto);
@@ -123,20 +123,20 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
 
     @Override
     public void updateDailyOfDelete(DoctorPigEvent oldPigEvent) {
-        DoctorDailyReport oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
+        DoctorPigDaily oldDailyPig1 = doctorDailyReportManager.findDoctorPigDaily(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
         DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
                 .weanAvgWeight(oldPigEvent.getWeanAvgWeight())
                 .weanCountChange(-oldPigEvent.getWeanCount())
                 .weanNestChange(-1)
                 .weanDayAge(getWeanAvgAge(oldPigEvent.getPigId(), oldPigEvent.getParity(), oldPigEvent.getEventAt()))
                 .build();
-        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig1, changeDto1));
+        doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig1, changeDto1));
 
     }
 
     @Override
     public void updateDailyOfNew(DoctorPigEvent newPigEvent, BasePigEventInputDto inputDto) {
-        DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
+        DoctorPigDaily oldDailyPig2 = doctorDailyReportManager.findDoctorPigDaily(newPigEvent.getFarmId(), inputDto.eventAt());
         DoctorWeanDto weanDto2 = (DoctorWeanDto) inputDto;
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                 .weanAvgWeight(weanDto2.getPartWeanAvgWeight())
@@ -144,15 +144,14 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
                 .weanNestChange(1)
                 .weanDayAge(getWeanAvgAge(newPigEvent.getPigId(), newPigEvent.getParity(), inputDto.eventAt()))
                 .build();
-        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig2, changeDto2));
+        doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig2, changeDto2));
 
     }
 
     @Override
-    protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
+    protected DoctorPigDaily buildDailyPig(DoctorPigDaily oldDailyPig, DoctorEventChangeDto changeDto) {
         oldDailyPig = super.buildDailyPig(oldDailyPig, changeDto);
-        oldDailyPig.setWeanDayAge(EventUtil.getAvgDayAge(oldDailyPig.getWeanDayAge(), oldDailyPig.getWeanCount(), changeDto.getWeanDayAge().doubleValue(), changeDto.getWeanCountChange()));
-        oldDailyPig.setWeanAvgWeight(EventUtil.getAvgWeight(oldDailyPig.getWeanAvgWeight(), oldDailyPig.getWeanCount(), changeDto.getWeanAvgWeight(), changeDto.getWeanCountChange()));
+        oldDailyPig.setWeanWeight(EventUtil.plusDouble(oldDailyPig.getWeanWeight(), oldDailyPig.getWeanWeight()));
         oldDailyPig.setWeanNest(EventUtil.plusInt(oldDailyPig.getWeanNest(), changeDto.getWeanNestChange()));
         oldDailyPig.setWeanCount(EventUtil.plusInt(oldDailyPig.getWeanCount(), changeDto.getWeanCountChange()));
         return oldDailyPig;
