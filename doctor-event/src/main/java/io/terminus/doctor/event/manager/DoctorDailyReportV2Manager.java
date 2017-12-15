@@ -72,10 +72,20 @@ public class DoctorDailyReportV2Manager {
     }
 
 
+    /**
+     * 产房仔猪
+     * @param doctorGroupDaily 猪群日报
+     * @param criteria 条件
+     */
     private void flushDeliverDaily(DoctorGroupDaily doctorGroupDaily, DoctorStatisticCriteria criteria){
         doctorGroupDaily.setToNursery(groupStatisticDao.toNursery(criteria));
     }
 
+    /**
+     * 保育
+     * @param doctorGroupDaily 猪群日报
+     * @param criteria 条件
+     */
     private void flushNurseryDaily(DoctorGroupDaily doctorGroupDaily, DoctorStatisticCriteria criteria){
         doctorGroupDaily.setToFatten(groupStatisticDao.toFatten(criteria));
         doctorGroupDaily.setToFattenWeight(groupStatisticDao.toFattenWeight(criteria));
@@ -83,11 +93,21 @@ public class DoctorDailyReportV2Manager {
         doctorGroupDaily.setToHoubeiWeight(groupStatisticDao.toHoubeiWeight(criteria));
     }
 
+    /**
+     * 育肥
+     * @param doctorGroupDaily 猪群日报
+     * @param criteria 条件
+     */
     private void flushFattenDaily(DoctorGroupDaily doctorGroupDaily, DoctorStatisticCriteria criteria){
         doctorGroupDaily.setToHoubei(groupStatisticDao.toHoubei(criteria));
         doctorGroupDaily.setToHoubeiWeight(groupStatisticDao.toHoubeiWeight(criteria));
     }
 
+    /**
+     * 后备
+     * @param doctorGroupDaily 猪群日报
+     * @param criteria 条件
+     */
     private void flushReserveDaily(DoctorGroupDaily doctorGroupDaily, DoctorStatisticCriteria criteria){
         doctorGroupDaily.setToFatten(groupStatisticDao.toFatten(criteria));
         doctorGroupDaily.setTurnSeed(groupStatisticDao.turnSeed(criteria));

@@ -201,7 +201,7 @@
             <if test="boarSale != null">`boar_sale` = #{boarSale},</if>
             <if test="boarOtherOut != null">`boar_other_out` = #{boarOtherOut},</if>
             <if test="boarEnd != null">`boar_end` = #{boarEnd},</if>
-            updated_at = now()
+            updated_at = now(),
             version = version + 1
         </set>
         WHERE id = #{id} and version = #{version}
