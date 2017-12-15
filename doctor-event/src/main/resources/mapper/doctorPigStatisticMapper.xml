@@ -351,7 +351,7 @@
         </where>
     </select>
 
-    <select id="weight" parameterType="map" resultType="double">
+    <select id="farrowWeight" parameterType="map" resultType="double">
         SELECT ifnull(sum(farrow_weight), 0)
         FROM doctor_pig_events
         <where>

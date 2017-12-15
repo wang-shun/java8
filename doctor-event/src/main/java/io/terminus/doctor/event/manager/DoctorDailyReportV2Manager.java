@@ -5,6 +5,7 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
 import io.terminus.doctor.event.dao.DoctorGroupStatisticDao;
 import io.terminus.doctor.event.dao.DoctorPigDailyDao;
+import io.terminus.doctor.event.dao.DoctorPigStatisticDao;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorPigDaily;
@@ -24,12 +25,14 @@ import static io.terminus.doctor.common.utils.Checks.expectTrue;
 public class DoctorDailyReportV2Manager {
     private final DoctorGroupStatisticDao groupStatisticDao;
     private final DoctorGroupDailyDao groupDailyDao;
+    private final DoctorPigStatisticDao pigStatisticDao;
     private final DoctorPigDailyDao doctorPigDailyDao;
 
     @Autowired
-    public DoctorDailyReportV2Manager(DoctorGroupStatisticDao groupStatisticDao, DoctorGroupDailyDao groupDailyDao, DoctorPigDailyDao doctorPigDailyDao) {
+    public DoctorDailyReportV2Manager(DoctorGroupStatisticDao groupStatisticDao, DoctorGroupDailyDao groupDailyDao, DoctorPigStatisticDao pigStatisticDao, DoctorPigDailyDao doctorPigDailyDao) {
         this.groupStatisticDao = groupStatisticDao;
         this.groupDailyDao = groupDailyDao;
+        this.pigStatisticDao = pigStatisticDao;
         this.doctorPigDailyDao = doctorPigDailyDao;
     }
 
@@ -109,6 +112,9 @@ public class DoctorDailyReportV2Manager {
             doctorPigDaily.setSumAt(DateUtil.toDate(criteria.getSumAt()));
         }
 
+        flushPhPigDaily(doctorPigDaily, criteria);
+        flushCfPigDaily(doctorPigDaily, criteria);
+        flushBoarPigDaily(doctorPigDaily, criteria);
     }
 
     /**
@@ -117,7 +123,23 @@ public class DoctorDailyReportV2Manager {
      * @param criteria 条件
      */
     private void flushPhPigDaily(DoctorPigDaily doctorPigDaily, DoctorStatisticCriteria criteria){
-
+        doctorPigDaily.setSowPhStart(pigStatisticDao.phLiveStock(criteria.getFarmId(),
+                DateUtil.toDateString(new DateTime(DateUtil.toDate(criteria.getSumAt())).minusDays(1).toDate())));
+        doctorPigDaily.setSowPhReserveIn(pigStatisticDao.sowPhReserveIn(criteria));
+        doctorPigDaily.setSowPhWeanIn(pigStatisticDao.sowPhWeanIn(criteria));
+        doctorPigDaily.setSowPhEntryIn(pigStatisticDao.sowPhEntryIn(criteria));
+        doctorPigDaily.setSowPhChgFarmIn((pigStatisticDao.sowPhChgFarmIn(criteria)));
+        doctorPigDaily.setSowPhDead(pigStatisticDao.sowPhDead(criteria));
+        doctorPigDaily.setSowPhWeedOut(pigStatisticDao.sowPhWeedOut(criteria));
+        doctorPigDaily.setSowPhSale(pigStatisticDao.sowPhSale(criteria));
+        doctorPigDaily.setSowPhChgFarm(pigStatisticDao.sowPhChgFarm(criteria));
+        doctorPigDaily.setSowPhOtherOut(pigStatisticDao.sowPhOtherOut(criteria));
+        doctorPigDaily.setMatingCount(pigStatisticDao.matingCount(criteria));
+        doctorPigDaily.setPregPositive(pigStatisticDao.pregPositive(criteria));
+        doctorPigDaily.setPregNegative(pigStatisticDao.pregNegative(criteria));
+        doctorPigDaily.setPregFanqing(pigStatisticDao.pregFanqing(criteria));
+        doctorPigDaily.setPregLiuchan(pigStatisticDao.pregLiuchan(criteria));
+        doctorPigDaily.setSowPhEnd(pigStatisticDao.phLiveStock(criteria.getFarmId(), criteria.getSumAt()));
     }
 
     /**
@@ -126,7 +148,27 @@ public class DoctorDailyReportV2Manager {
      * @param criteria 条件
      */
     private void flushCfPigDaily(DoctorPigDaily doctorPigDaily, DoctorStatisticCriteria criteria){
-
+        doctorPigDaily.setSowCfStart(pigStatisticDao.cfLiveStock(criteria.getFarmId(),
+                DateUtil.toDateString(new DateTime(DateUtil.toDate(criteria.getSumAt())).minusDays(1).toDate())));
+        doctorPigDaily.setSowCfEnd(pigStatisticDao.cfLiveStock(criteria.getFarmId(), criteria.getSumAt()));
+        doctorPigDaily.setSowCfIn(pigStatisticDao.sowCfIn(criteria));
+        doctorPigDaily.setSowCfInFarmIn(pigStatisticDao.sowCfInFarmIn(criteria));
+        doctorPigDaily.setSowCfDead(pigStatisticDao.sowCfDead(criteria));
+        doctorPigDaily.setSowCfWeedOut(pigStatisticDao.sowCfWeedOut(criteria));
+        doctorPigDaily.setSowCfSale(pigStatisticDao.sowCfSale(criteria));
+        doctorPigDaily.setSowCfChgFarm(pigStatisticDao.sowCfChgFarm(criteria));
+        doctorPigDaily.setSowCfOtherOut(pigStatisticDao.sowCfOtherOut(criteria));
+        doctorPigDaily.setFarrowNest(pigStatisticDao.farrowNest(criteria));
+        doctorPigDaily.setFarrowHealth(pigStatisticDao.farrowHealth(criteria));
+        doctorPigDaily.setFarrowWeak(pigStatisticDao.farrowWeak(criteria));
+        doctorPigDaily.setFarrowDead(pigStatisticDao.farrowDead(criteria));
+        doctorPigDaily.setFarrowjmh(pigStatisticDao.farrowjmh(criteria));
+        doctorPigDaily.setFarrowWeight(pigStatisticDao.farrowWeight(criteria));
+        doctorPigDaily.setWeanNest(pigStatisticDao.weanNest(criteria));
+        doctorPigDaily.setWeanQualifiedCount(pigStatisticDao.weanQualifiedCount(criteria));
+        doctorPigDaily.setWeanCount(pigStatisticDao.weanCount(criteria));
+        doctorPigDaily.setWeanCount(pigStatisticDao.weanDayAge(criteria));
+        doctorPigDaily.setWeanWeight(pigStatisticDao.weanWeight(criteria));
     }
 
     /**
@@ -135,6 +177,13 @@ public class DoctorDailyReportV2Manager {
      * @param criteria 条件
      */
     private void flushBoarPigDaily(DoctorPigDaily doctorPigDaily, DoctorStatisticCriteria criteria){
-
+        doctorPigDaily.setBoarStart(pigStatisticDao.boarLiveStock(criteria.getFarmId(),
+                DateUtil.toDateString(new DateTime(DateUtil.toDate(criteria.getSumAt())).minusDays(1).toDate())));
+        doctorPigDaily.setBoarIn(pigStatisticDao.boarIn(criteria));
+        doctorPigDaily.setBoarDead(pigStatisticDao.boarDead(criteria));
+        doctorPigDaily.setBoarWeedOut(pigStatisticDao.boarWeedOut(criteria));
+        doctorPigDaily.setBoarSale(pigStatisticDao.boarSale(criteria));
+        doctorPigDaily.setBoarOtherOut(pigStatisticDao.boarOtherOut(criteria));
+        doctorPigDaily.setBoarEnd(pigStatisticDao.boarLiveStock(criteria.getFarmId(), criteria.getSumAt()));
     }
 }

@@ -75,6 +75,10 @@ public class DoctorPigStatisticDao {
         return sqlSession.selectOne(sqlId("pregPositive"), criteria.toMap());
     }
 
+    public Integer pregNegative(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("pregNegative"), criteria.toMap());
+    }
+
     public Integer pregFanqing(DoctorStatisticCriteria criteria) {
         return sqlSession.selectOne(sqlId("pregFanqing"), criteria.toMap());
     }
@@ -111,7 +115,7 @@ public class DoctorPigStatisticDao {
         return sqlSession.selectOne(sqlId("sowCfOtherOut"), criteria.toMap());
     }
 
-    public Double farrowNest(DoctorStatisticCriteria criteria) {
+    public Integer farrowNest(DoctorStatisticCriteria criteria) {
         return sqlSession.selectOne(sqlId("farrowNest"), criteria.toMap());
     }
 
@@ -131,8 +135,8 @@ public class DoctorPigStatisticDao {
         return sqlSession.selectOne(sqlId("farrowjmh"), criteria.toMap());
     }
 
-    public Double weight(DoctorStatisticCriteria criteria) {
-        return sqlSession.selectOne(sqlId("weight"), criteria.toMap());
+    public Double farrowWeight(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("farrowWeight"), criteria.toMap());
     }
 
     public Integer weanNest(DoctorStatisticCriteria criteria) {
@@ -151,8 +155,8 @@ public class DoctorPigStatisticDao {
         return sqlSession.selectOne(sqlId("weanWeight"), criteria.toMap());
     }
 
-    public Integer boarLiveStock(DoctorStatisticCriteria criteria) {
-        return sqlSession.selectOne(sqlId("boarLiveStock"), criteria.toMap());
+    public Integer boarLiveStock(Long farmId, String sumAt) {
+        return sqlSession.selectOne(sqlId("boarLiveStock"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
     }
 
     public Integer boarIn(DoctorStatisticCriteria criteria) {

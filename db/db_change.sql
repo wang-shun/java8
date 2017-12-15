@@ -1677,7 +1677,7 @@ create table doctor_pig_dailies (
   farrow_weak int(11) DEFAULT NULL COMMENT '产房产弱仔数',
   farrow_dead int(11) DEFAULT NULL COMMENT '产房死胎数',
   farrowjmh int(11) DEFAULT NULL COMMENT '产房黑木畸数',
-  weight int(11) DEFAULT NULL COMMENT '产房窝重之和',
+  farrow_weight double DEFAULT NULL COMMENT '产房窝重之和',
   wean_nest int(11) DEFAULT NULL COMMENT '断奶窝数',
   wean_qualified_count int(11) DEFAULT NULL COMMENT '断奶合格数',
   wean_count int(11) DEFAULT NULL COMMENT '断奶仔猪数',
