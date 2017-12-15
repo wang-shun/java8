@@ -4,10 +4,9 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
@@ -69,7 +68,7 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
 
     @Override
     public void updateDailyOfDelete(DoctorPigEvent oldPigEvent) {
-        DoctorDailyReport oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
+        DoctorPigDaily oldDailyPig1 = doctorDailyReportManager.findDoctorPigDaily(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
         DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
                 .pigSex(oldPigEvent.getKind())
                 .removeCountChange(-1)
@@ -80,12 +79,10 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
         } else {
             changeDto1.setPhCountChange(1);
         }
-        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig1, changeDto1));
+        doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig1, changeDto1));
         if (Objects.equals(oldPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
             doctorDailyPigDao.updateDailySowPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(oldPigEvent.getEventAt()),
                     -changeDto1.getRemoveCountChange(), changeDto1.getPhCountChange(), changeDto1.getCfCountChange());
-
-            updatePhSowStatusCount(oldPigEvent, 1, oldPigEvent.getPigStatusBefore());
         } else {
             doctorDailyPigDao.updateDailyBoarPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(oldPigEvent.getEventAt()), -changeDto1.getRemoveCountChange());
         }
@@ -93,7 +90,7 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
 
     @Override
     public void updateDailyOfNew(DoctorPigEvent newPigEvent, BasePigEventInputDto inputDto) {
-        DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
+        DoctorPigDaily oldDailyPig2 = doctorDailyReportManager.findDoctorPigDaily(newPigEvent.getFarmId(), inputDto.eventAt());
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                 .pigSex(newPigEvent.getKind())
                 .removeCountChange(1)
@@ -104,12 +101,10 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
         } else {
             changeDto2.setPhCountChange(-1);
         }
-        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig2, changeDto2));
+        doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig2, changeDto2));
         if (Objects.equals(newPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
             doctorDailyPigDao.updateDailySowPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()),
                     -changeDto2.getRemoveCountChange(), changeDto2.getPhCountChange(), changeDto2.getCfCountChange());
-
-            updatePhSowStatusCount(newPigEvent, -1, newPigEvent.getPigStatusBefore());
 
         } else {
             doctorDailyPigDao.updateDailyBoarPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()), -changeDto2.getRemoveCountChange());
@@ -117,26 +112,21 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
     }
 
     @Override
-    protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
+    protected DoctorPigDaily buildDailyPig(DoctorPigDaily oldDailyPig, DoctorEventChangeDto changeDto) {
         oldDailyPig = super.buildDailyPig(oldDailyPig, changeDto);
         //公猪
         if (Objects.equals(changeDto.getPigSex(), DoctorPig.PigSex.BOAR.getKey())) {
-            oldDailyPig.setBoarChgFarm(EventUtil.plusInt(oldDailyPig.getBoarChgFarm(), changeDto.getRemoveCountChange()));
             oldDailyPig.setBoarEnd(EventUtil.minusInt(oldDailyPig.getBoarEnd(), changeDto.getRemoveCountChange()));
            return oldDailyPig;
         }
         //母猪
         if (Objects.equals(changeDto.getBarnType(), PigType.DELIVER_SOW.getValue())) {
-            oldDailyPig.setSowCf(EventUtil.minusInt(oldDailyPig.getSowCf(), changeDto.getRemoveCountChange()));
-            oldDailyPig.setSowCfEnd(EventUtil.minusInt(oldDailyPig.getSowCf(), changeDto.getRemoveCountChange()));
+            oldDailyPig.setSowCfEnd(EventUtil.minusInt(oldDailyPig.getSowCfEnd(), changeDto.getRemoveCountChange()));
             oldDailyPig.setSowCfChgFarm(EventUtil.plusInt(oldDailyPig.getSowCfChgFarm(), changeDto.getRemoveCountChange()));
         } else {
-            oldDailyPig.setSowPh(EventUtil.minusInt(oldDailyPig.getSowPh(), changeDto.getRemoveCountChange()));
-            oldDailyPig.setSowPhEnd(EventUtil.minusInt(oldDailyPig.getSowPh(), changeDto.getRemoveCountChange()));
+            oldDailyPig.setSowPhEnd(EventUtil.minusInt(oldDailyPig.getSowPhEnd(), changeDto.getRemoveCountChange()));
             oldDailyPig.setSowPhChgFarm(EventUtil.plusInt(oldDailyPig.getSowPhChgFarm(), changeDto.getRemoveCountChange()));
         }
-        oldDailyPig.setSowChgFarm(EventUtil.plusInt(oldDailyPig.getSowChgFarm(), changeDto.getRemoveCountChange()));
-        oldDailyPig.setSowEnd(EventUtil.minusInt(oldDailyPig.getSowEnd(), changeDto.getRemoveCountChange()));
         return oldDailyPig;
     }
 

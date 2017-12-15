@@ -2,30 +2,25 @@ package io.terminus.doctor.event.editHandler.pig;
 
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.common.utils.Checks;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
-import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
+import io.terminus.doctor.event.dao.DoctorPigDailyDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.manager.DoctorDailyReportManager;
-import io.terminus.doctor.event.model.DoctorDailyReport;
+import io.terminus.doctor.event.manager.DoctorDailyReportV2Manager;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +31,6 @@ import java.util.List;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
-import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
 import static io.terminus.doctor.common.enums.SourceType.UN_MODIFY;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.event.dto.DoctorBasicInputInfoDto.generateEventDescFromExtra;
@@ -58,7 +52,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     @Autowired
     protected DoctorPigDao doctorPigDao;
     @Autowired
-    protected DoctorDailyReportDao doctorDailyPigDao;
+    protected DoctorPigDailyDao doctorDailyPigDao;
     @Autowired
     protected DoctorGroupEventDao doctorGroupEventDao;
     @Autowired
@@ -66,7 +60,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     @Autowired
     protected DoctorBarnDao doctorBarnDao;
     @Autowired
-    protected DoctorDailyReportManager doctorDailyReportManager;
+    protected DoctorDailyReportV2Manager doctorDailyReportManager;
 
     protected final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
@@ -240,7 +234,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      * @param changeDto   变化量
      * @return 新记录
      */
-    protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
+    protected DoctorPigDaily buildDailyPig(DoctorPigDaily oldDailyPig, DoctorEventChangeDto changeDto) {
         return expectNotNull(oldDailyPig, "daily.pig.not.null");
     }
 
@@ -429,40 +423,4 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
         DoctorPigEvent lastEvent = doctorPigEventDao.findLastManualEventExcludeTypes(pigEvent.getPigId(), IGNORE_EVENT);
         return notNull(lastEvent) && Objects.equals(pigEvent.getId(), lastEvent.getId());
     }
-
-    /**
-     * 更新配怀舍各种状态母猪的数量
-     *
-     * @param pigEvent 猪事件事件
-     * @param count    变化数量
-     */
-    protected void updatePhSowStatusCount(DoctorPigEvent pigEvent, int count, Integer pigStatus) {
-        if (!PigType.MATING_TYPES.contains(pigEvent.getBarnType())) {
-            return;
-        }
-        int konghuai = 0;
-        int mating = 0;
-        int pregnant = 0;
-        PigStatus beforeStatus = PigStatus.from(pigStatus);
-        Checks.expectNotNull(beforeStatus, "event.before.status.is.null", pigEvent.getId());
-        switch (beforeStatus) {
-            case KongHuai:
-            case Wean:
-            case Entry:
-                konghuai = count;
-                break;
-            case Mate:
-                mating = count;
-                break;
-            case Pregnancy:
-                pregnant = count;
-                break;
-            default:
-                break;
-        }
-        doctorDailyPigDao.updateDailyPhStatusLiveStock(pigEvent.getFarmId(), pigEvent.getEventAt()
-                , mating, konghuai, pregnant);
-    }
-
-
 }
