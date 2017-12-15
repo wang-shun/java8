@@ -377,7 +377,7 @@ public class DoctorImportDataService {
                     subDao.create(sub);
 
                     userWriteService.update(subUser);
-
+                    userDaoExt.updateAll(subUser);
                     subUserId = subUser.getId();
                 } else {
                     subUser = new User();
