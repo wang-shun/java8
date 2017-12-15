@@ -26,14 +26,14 @@ public class DoctorDailyReportV2Manager {
     private final DoctorGroupStatisticDao groupStatisticDao;
     private final DoctorGroupDailyDao groupDailyDao;
     private final DoctorPigStatisticDao pigStatisticDao;
-    private final DoctorPigDailyDao doctorPigDailyDao;
+    private final DoctorPigDailyDao pigDailyDao;
 
     @Autowired
-    public DoctorDailyReportV2Manager(DoctorGroupStatisticDao groupStatisticDao, DoctorGroupDailyDao groupDailyDao, DoctorPigStatisticDao pigStatisticDao, DoctorPigDailyDao doctorPigDailyDao) {
+    public DoctorDailyReportV2Manager(DoctorGroupStatisticDao groupStatisticDao, DoctorGroupDailyDao groupDailyDao, DoctorPigStatisticDao pigStatisticDao, DoctorPigDailyDao pigDailyDao) {
         this.groupStatisticDao = groupStatisticDao;
         this.groupDailyDao = groupDailyDao;
         this.pigStatisticDao = pigStatisticDao;
-        this.doctorPigDailyDao = doctorPigDailyDao;
+        this.pigDailyDao = pigDailyDao;
     }
 
     public void flushGroupDaily(DoctorStatisticCriteria criteria){
@@ -105,7 +105,7 @@ public class DoctorDailyReportV2Manager {
     }
 
     public void flushPigDaily(DoctorStatisticCriteria criteria) {
-        DoctorPigDaily doctorPigDaily = doctorPigDailyDao.findBy(criteria.getFarmId(), criteria.getSumAt());
+        DoctorPigDaily doctorPigDaily = pigDailyDao.findBy(criteria.getFarmId(), criteria.getSumAt());
         if (isNull(doctorPigDaily)) {
             doctorPigDaily = new DoctorPigDaily();
             doctorPigDaily.setFarmId(criteria.getFarmId());
@@ -115,6 +115,8 @@ public class DoctorDailyReportV2Manager {
         flushPhPigDaily(doctorPigDaily, criteria);
         flushCfPigDaily(doctorPigDaily, criteria);
         flushBoarPigDaily(doctorPigDaily, criteria);
+
+        createOrUpdatePigDaily(doctorPigDaily);
     }
 
     /**
@@ -167,7 +169,7 @@ public class DoctorDailyReportV2Manager {
         doctorPigDaily.setWeanNest(pigStatisticDao.weanNest(criteria));
         doctorPigDaily.setWeanQualifiedCount(pigStatisticDao.weanQualifiedCount(criteria));
         doctorPigDaily.setWeanCount(pigStatisticDao.weanCount(criteria));
-        doctorPigDaily.setWeanCount(pigStatisticDao.weanDayAge(criteria));
+//        doctorPigDaily.setWeanCount(pigStatisticDao.weanDayAge(criteria));
         doctorPigDaily.setWeanWeight(pigStatisticDao.weanWeight(criteria));
     }
 
@@ -185,5 +187,16 @@ public class DoctorDailyReportV2Manager {
         doctorPigDaily.setBoarSale(pigStatisticDao.boarSale(criteria));
         doctorPigDaily.setBoarOtherOut(pigStatisticDao.boarOtherOut(criteria));
         doctorPigDaily.setBoarEnd(pigStatisticDao.boarLiveStock(criteria.getFarmId(), criteria.getSumAt()));
+    }
+
+    /**
+     * 有则更新,无则创建
+     */
+    public void createOrUpdatePigDaily(DoctorPigDaily doctorPigDaily) {
+        if (isNull(doctorPigDaily.getId())) {
+            pigDailyDao.create(doctorPigDaily);
+        } else {
+            expectTrue(pigDailyDao.update(doctorPigDaily), "concurrent.error");
+        }
     }
 }

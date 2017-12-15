@@ -238,13 +238,13 @@ public class DoctorPigReport {
      * 产房平均窝重
      * 窝重之和/窝数
      */
-    private Integer avgWeight;
+    private Double avgWeight;
 
     /**
      * 产房初生重
      * 窝重之和/产活仔数
      */
-    private Integer firstWeight;
+    private Double firstWeight;
 
 
     /**

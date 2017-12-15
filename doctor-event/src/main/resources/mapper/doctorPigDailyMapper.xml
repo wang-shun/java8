@@ -35,7 +35,7 @@
         <result property="farrowWeak" column="farrow_weak"/>
         <result property="farrowDead" column="farrow_dead"/>
         <result property="farrowjmh" column="farrowjmh"/>
-        <result property="weight" column="weight"/>
+        <result property="farrowWeight" column="farrow_weight"/>
         <result property="weanNest" column="wean_nest"/>
         <result property="weanQualifiedCount" column="wean_qualified_count"/>
         <result property="weanCount" column="wean_count"/>
@@ -54,7 +54,7 @@
     </resultMap>
 
     <sql id="tb">
-        doctor_pig_daily
+        doctor_pig_dailies
     </sql>
 
     <sql id="cols_all">
@@ -63,25 +63,13 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `sum_at`, `farm_id`, `sow_ph_start`, `sow_ph_reserve_in`, `sow_ph_wean_in`, `sow_ph_entry_in`,
-        `sow_ph_chg_farm_in`, `sow_ph_dead`, `sow_ph_weed_out`, `sow_ph_sale`, `sow_ph_chg_farm`, `sow_ph_other_out`,
-        `mating_count`, `preg_positive`, `preg_negative`, `preg_fanqing`, `preg_liuchan`, `sow_ph_end`, `sow_cf_start`,
-        `sow_cf_end`, `sow_cf_in`, `sow_cf_in_farm_in`, `sow_cf_dead`, `sow_cf_weed_out`, `sow_cf_sale`,
-        `sow_cf_chg_farm`, `sow_cf_other_out`, `farrow_nest`, `farrow_health`, `farrow_weak`, `farrow_dead`,
-        `farrowjmh`, `weight`, `wean_nest`, `wean_qualified_count`, `wean_count`, `wean_day_age`, `wean_weight`,
-        `boar_start`, `boar_in`, `boar_dead`, `boar_weed_out`, `boar_sale`, `boar_other_out`, `boar_end`, `version`,
-        created_at, updated_at
+        `sum_at`, `farm_id`, `sow_ph_start`, `sow_ph_reserve_in`, `sow_ph_wean_in`, `sow_ph_entry_in`, `sow_ph_chg_farm_in`, `sow_ph_dead`, `sow_ph_weed_out`, `sow_ph_sale`, `sow_ph_chg_farm`, `sow_ph_other_out`, `mating_count`, `preg_positive`, `preg_negative`, `preg_fanqing`, `preg_liuchan`, `sow_ph_end`, `sow_cf_start`, `sow_cf_end`, `sow_cf_in`, `sow_cf_in_farm_in`, `sow_cf_dead`, `sow_cf_weed_out`, `sow_cf_sale`, `sow_cf_chg_farm`, `sow_cf_other_out`, `farrow_nest`, `farrow_health`, `farrow_weak`, `farrow_dead`, `farrowjmh`, `farrow_weight`, `wean_nest`, `wean_qualified_count`, `wean_count`, `wean_day_age`, `wean_weight`, `boar_start`, `boar_in`, `boar_dead`, `boar_weed_out`, `boar_sale`, `boar_other_out`, `boar_end`,
+        created_at, updated_at, version
     </sql>
 
     <sql id="vals">
-        #{sumAt}, #{farmId}, #{sowPhStart}, #{sowPhReserveIn}, #{sowPhWeanIn}, #{sowPhEntryIn}, #{sowPhChgFarmIn},
-        #{sowPhDead}, #{sowPhWeedOut}, #{sowPhSale}, #{sowPhChgFarm}, #{sowPhOtherOut}, #{matingCount}, #{pregPositive},
-        #{pregNegative}, #{pregFanqing}, #{pregLiuchan}, #{sowPhEnd}, #{sowCfStart}, #{sowCfEnd}, #{sowCfIn},
-        #{sowCfInFarmIn}, #{sowCfDead}, #{sowCfWeedOut}, #{sowCfSale}, #{sowCfChgFarm}, #{sowCfOtherOut}, #{farrowNest},
-        #{farrowHealth}, #{farrowWeak}, #{farrowDead}, #{farrowjmh}, #{weight}, #{weanNest}, #{weanQualifiedCount},
-        #{weanCount}, #{weanDayAge}, #{weanWeight}, #{boarStart}, #{boarIn}, #{boarDead}, #{boarWeedOut}, #{boarSale},
-        #{boarOtherOut}, #{boarEnd}, #{version},
-        now(), now()
+        #{sumAt}, #{farmId}, #{sowPhStart}, #{sowPhReserveIn}, #{sowPhWeanIn}, #{sowPhEntryIn}, #{sowPhChgFarmIn}, #{sowPhDead}, #{sowPhWeedOut}, #{sowPhSale}, #{sowPhChgFarm}, #{sowPhOtherOut}, #{matingCount}, #{pregPositive}, #{pregNegative}, #{pregFanqing}, #{pregLiuchan}, #{sowPhEnd}, #{sowCfStart}, #{sowCfEnd}, #{sowCfIn}, #{sowCfInFarmIn}, #{sowCfDead}, #{sowCfWeedOut}, #{sowCfSale}, #{sowCfChgFarm}, #{sowCfOtherOut}, #{farrowNest}, #{farrowHealth}, #{farrowWeak}, #{farrowDead}, #{farrowjmh}, #{farrowWeight}, #{weanNest}, #{weanQualifiedCount}, #{weanCount}, #{weanDayAge}, #{weanWeight}, #{boarStart}, #{boarIn}, #{boarDead}, #{boarWeedOut}, #{boarSale}, #{boarOtherOut}, #{boarEnd},
+        now(), now(), 1
     </sql>
 
     <sql id="criteria">
@@ -118,7 +106,7 @@
             <if test="farrowWeak != null">AND `farrow_weak` = #{farrowWeak}</if>
             <if test="farrowDead != null">AND `farrow_dead` = #{farrowDead}</if>
             <if test="farrowjmh != null">AND `farrowjmh` = #{farrowjmh}</if>
-            <if test="weight != null">AND `weight` = #{weight}</if>
+            <if test="farrowWeight != null">AND `farrow_weight` = #{farrowWeight}</if>
             <if test="weanNest != null">AND `wean_nest` = #{weanNest}</if>
             <if test="weanQualifiedCount != null">AND `wean_qualified_count` = #{weanQualifiedCount}</if>
             <if test="weanCount != null">AND `wean_count` = #{weanCount}</if>
@@ -200,7 +188,7 @@
             <if test="farrowWeak != null">`farrow_weak` = #{farrowWeak},</if>
             <if test="farrowDead != null">`farrow_dead` = #{farrowDead},</if>
             <if test="farrowjmh != null">`farrowjmh` = #{farrowjmh},</if>
-            <if test="weight != null">`weight` = #{weight},</if>
+            <if test="farrowWeight != null">`farrow_weight` = #{farrowWeight},</if>
             <if test="weanNest != null">`wean_nest` = #{weanNest},</if>
             <if test="weanQualifiedCount != null">`wean_qualified_count` = #{weanQualifiedCount},</if>
             <if test="weanCount != null">`wean_count` = #{weanCount},</if>
@@ -317,4 +305,14 @@
     </select>
 
 
+=======
+    <select id="findBy" parameterType="map" resultMap="DoctorPigDailyMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE
+        farm_id = #{farmId}
+        AND sum_at = #{sumAt}
+    </select>
+
+>>>>>>> fix flush pig daily
 </mapper>

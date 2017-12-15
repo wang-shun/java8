@@ -1645,10 +1645,10 @@ CREATE TABLE `doctor_group_dailies` (
   UNIQUE KEY `idx_doctor_daily_groups_farm_id_type_sum_at` (`farm_id`,`pig_type`,`sum_at`),
   KEY `idx_doctor_group_dailies_farm_id` (`farm_id`),
   KEY `idx_doctor_group_dailies_sum_at` (`sum_at`)
-) DEFAULT CHARSET=utf8 COMMENT='猪群相关的指标';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪群相关的指标';
 
 create table doctor_pig_dailies (
-  id bigint(20) NOT NULL COMMENT 'id',
+  id bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
   sum_at date NOT NULL COMMENT '日期（yyyy-MM-dd）',
   farm_id bigint(20) NOT NULL COMMENT '猪场',
   sow_ph_start int(11) DEFAULT NULL COMMENT '配怀母猪期初头数',
@@ -1701,4 +1701,4 @@ create table doctor_pig_dailies (
   UNIQUE KEY `idx_doctor_daily_pigs_farm_id_sum_at` (`farm_id`,`sum_at`),
   KEY `idx_doctor_pig_dailies_farm_id` (`farm_id`),
   KEY `idx_doctor_pig_dailies_sum_at` (`sum_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COMMENT='猪相关报表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪相关报表';

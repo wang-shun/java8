@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created by sunbo@terminus.io on 2017/12/13.
@@ -80,8 +79,8 @@ public class DoctorPigReportReadServiceImpl implements DoctorPigReportReadServic
             doctorPigReport.setAvgFarrowLive(farrowLive / pigDaily.getFarrowNest() * 100);
             doctorPigReport.setAvgFarrowHealth(pigDaily.getFarrowHealth() / pigDaily.getFarrowNest() * 100);
             doctorPigReport.setAvgFarrowWeak(pigDaily.getFarrowWeak() / pigDaily.getFarrowNest() * 100);
-            doctorPigReport.setAvgWeight(pigDaily.getWeight() / pigDaily.getFarrowNest() * 100);
-            doctorPigReport.setFirstWeight(pigDaily.getWeight() / farrowLive * 100);
+            doctorPigReport.setAvgWeight(pigDaily.getFarrowWeight() / pigDaily.getFarrowNest() * 100);
+            doctorPigReport.setFirstWeight(pigDaily.getFarrowWeight() / farrowLive * 100);
 
 
         } else if (reportTime == ReportTime.WEEK) {
