@@ -4,7 +4,7 @@
   -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 
-<mapper namespace="DoctorGroupStatistic">
+<mapper namespace="DoctorPigStatistic">
 
     <sql id="criteria">
         status = 1
@@ -397,20 +397,22 @@
     </select>
 
     <select id="boarLiveStock" parameterType="map" resultType="int">
+        SELECT
         (
-        select ifnull(sum(count(*)), 0 )
+        select ifnull(count(*), 0 )
         from doctor_pig_tracks
         where
-        status = 11
+        farm_id = #{farmId}
+        and status = 11
         )
         -
         (
-        SELECT sum (
+        SELECT ifnull(sum(
         case
         when `type` = 6 then 1
         when `type` in (7,20) then -1 else 0
         END
-        )
+        ),0)
         FROM doctor_pig_events
         <where>
             farm_id = #{farmId}
@@ -420,6 +422,7 @@
             AND boar_type = 1
         </where>
         )
+        FROM dual
     </select>
 
     <select id="boarIn" parameterType="map" resultType="int">
