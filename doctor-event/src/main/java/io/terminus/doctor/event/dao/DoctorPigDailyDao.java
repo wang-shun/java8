@@ -28,26 +28,23 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
         return findBy(farmId, DateUtil.toDateString(sumAt));
     }
 
-    public DoctorPigDaily findByFarm(Long farmId, Date start, Date end) {
+    public DoctorPigDaily countByFarm(Long farmId, Date start, Date end) {
         Map<String, Object> params = new HashMap<>();
         params.put("farmId", farmId);
-        params.put("start", start);
-        params.put("end", end);
+        params.put("startDate", start);
+        params.put("endDate", end);
 
-        List<DoctorPigDaily> reports = this.list(params);
-        if (reports.isEmpty())
-            return null;
-        return reports.get(0);
+        return sqlSession.selectOne("report", params);
     }
 
 
     public List<DoctorPigDaily> findByOrg(List<Long> farmIds, Date start, Date end) {
         Map<String, Object> params = new HashMap<>();
         params.put("farmIds", farmIds);
-        params.put("start", start);
-        params.put("end", end);
-        
-        return this.list(params);
+        params.put("startDate", start);
+        params.put("endDate", end);
+
+        return sqlSession.selectOne("report", params);
     }
 
 }
