@@ -303,9 +303,6 @@
         </where>
 
     </select>
-
-
-=======
     <select id="findBy" parameterType="map" resultMap="DoctorPigDailyMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
@@ -314,5 +311,4 @@
         AND sum_at = #{sumAt}
     </select>
 
->>>>>>> fix flush pig daily
 </mapper>
