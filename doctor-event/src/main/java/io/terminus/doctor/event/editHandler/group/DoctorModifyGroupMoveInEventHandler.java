@@ -113,7 +113,7 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
             return;
         }
         if (Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
-            DoctorGroupDaily oldDailyGroup = doctorGroupDailyDao.findBy(changeDto.getFarmId(), changeDto.getPigType(), changeDto.getOldEventAt());
+            DoctorGroupDaily oldDailyGroup = doctorDailyReportManager.findDoctorGroupDaily(changeDto.getFarmId(), changeDto.getPigType(), changeDto.getOldEventAt());
             buildDailyGroup(oldDailyGroup, changeDto);
             doctorGroupDailyDao.update(oldDailyGroup);
             updateDailyGroupLiveStock(changeDto.getFarmId(), changeDto.getPigType(), getAfterDay(changeDto.getOldEventAt()), changeDto.getQuantityChange());
@@ -158,7 +158,7 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
                 .isFarrowIn(notNull(oldGroupEvent.getRelPigEventId()))
                 .inType(oldGroupEvent.getInType())
                 .build();
-        DoctorGroupDaily oldDailyGroup1 = doctorGroupDailyDao.findBy(oldGroupEvent.getFarmId(), oldGroupEvent.getPigType(), oldGroupEvent.getEventAt());
+        DoctorGroupDaily oldDailyGroup1 = doctorDailyReportManager.findDoctorGroupDaily(oldGroupEvent.getFarmId(), oldGroupEvent.getPigType(), oldGroupEvent.getEventAt());
         doctorGroupDailyDao.update(buildDailyGroup(oldDailyGroup1, changeDto1));
         updateDailyGroupLiveStock(oldGroupEvent.getFarmId(), oldGroupEvent.getPigType(), getAfterDay(oldGroupEvent.getEventAt()), changeDto1.getQuantityChange());
 
@@ -180,7 +180,7 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
                 .isFarrowIn(notNull(newGroupEvent.getRelPigEventId()))
                 .inType(newGroupEvent.getInType())
                 .build();
-        DoctorGroupDaily oldDailyGroup2 = doctorGroupDailyDao.findBy(newGroupEvent.getFarmId(), newGroupEvent.getPigType(), eventAt);
+        DoctorGroupDaily oldDailyGroup2 = doctorDailyReportManager.findDoctorGroupDaily(newGroupEvent.getFarmId(), newGroupEvent.getPigType(), eventAt);
         doctorDailyReportManager.createOrUpdateGroupDaily(buildDailyGroup(oldDailyGroup2, changeDto2));
         updateDailyGroupLiveStock(newGroupEvent.getFarmId(), newGroupEvent.getPigType(), getAfterDay(eventAt), changeDto2.getQuantityChange());
 

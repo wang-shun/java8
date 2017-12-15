@@ -115,6 +115,10 @@ public class DoctorDailyReportV2Manager {
         doctorGroupDaily.setTurnSeed(groupStatisticDao.turnSeed(criteria));
     }
 
+    public DoctorGroupDaily findDoctorGroupDaily(Long farmId, Integer pigType, Date sumAt){
+        return groupDailyDao.findBy(farmId, pigType, sumAt);
+    }
+
     /**
      * 有则更新,无则创建
      */

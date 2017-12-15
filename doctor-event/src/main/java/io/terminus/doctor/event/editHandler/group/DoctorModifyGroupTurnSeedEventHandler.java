@@ -134,7 +134,7 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
     public void updateDailyOfDelete(DoctorGroupEvent oldGroupEvent) {
         DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder().quantityChange(-1)
                 .weightChange(EventUtil.minusDouble(0D, oldGroupEvent.getWeight())).build();
-        DoctorGroupDaily oldDailyGroup1 = doctorGroupDailyDao.findBy(oldGroupEvent.getFarmId(), oldGroupEvent.getPigType(), oldGroupEvent.getEventAt());
+        DoctorGroupDaily oldDailyGroup1 = doctorDailyReportManager.findDoctorGroupDaily(oldGroupEvent.getFarmId(), oldGroupEvent.getPigType(), oldGroupEvent.getEventAt());
         doctorGroupDailyDao.update(buildDailyGroup(oldDailyGroup1, changeDto1));
         updateDailyGroupLiveStock(oldGroupEvent.getFarmId(), oldGroupEvent.getPigType(),
                 getAfterDay(oldGroupEvent.getEventAt()), -changeDto1.getQuantityChange());
@@ -146,7 +146,7 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
         DoctorTurnSeedGroupInput input1 = (DoctorTurnSeedGroupInput) input;
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder().quantityChange(1)
                 .weightChange(input1.getWeight()).build();
-        DoctorGroupDaily oldDailyGroup2 = doctorGroupDailyDao.findBy(newGroupEvent.getFarmId(), newGroupEvent.getPigType(), eventAt);
+        DoctorGroupDaily oldDailyGroup2 = doctorDailyReportManager.findDoctorGroupDaily(newGroupEvent.getFarmId(), newGroupEvent.getPigType(), eventAt);
         doctorDailyReportManager.createOrUpdateGroupDaily(buildDailyGroup(oldDailyGroup2, changeDto2));
         updateDailyGroupLiveStock(newGroupEvent.getFarmId(), newGroupEvent.getPigType(),
                 getAfterDay(eventAt), -changeDto2.getQuantityChange());
