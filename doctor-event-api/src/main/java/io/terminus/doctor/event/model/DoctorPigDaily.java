@@ -180,7 +180,7 @@ public class DoctorPigDaily implements Serializable {
     /**
      * 产房窝重之和
      */
-    private Integer weight;
+    private Double farrowWeight;
 
     /**
      * 断奶窝数
