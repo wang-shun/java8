@@ -35,7 +35,7 @@ public class DoctorPigReportReadServiceImpl implements DoctorPigReportReadServic
             if (!DateUtils.isSameDay(start, end)) {
                 throw new ServiceException("start.day.not.equals.end.day");
             }
-            DoctorPigDaily pigDaily = doctorPigDailyDao.findByFarm(farmId, start, end);
+            DoctorPigDaily pigDaily = doctorPigDailyDao.countByFarm(farmId, start, end);
             BeanUtils.copyProperties(pigDaily, doctorPigReport);
 
 
@@ -59,14 +59,14 @@ public class DoctorPigReportReadServiceImpl implements DoctorPigReportReadServic
 
             //前推114天配种数量
             Date before = DateUtils.addDays(start, -114);
-            DoctorPigDaily beforePigDaily = doctorPigDailyDao.findByFarm(farmId, before, before);
+            DoctorPigDaily beforePigDaily = doctorPigDailyDao.countByFarm(farmId, before, before);
             doctorPigReport.setEarlyMating(null == beforePigDaily ? 0 : beforePigDaily.getMatingCount());
 
             //todo 前期分娩窝数
 //            doctorPigReport.setEarlyFarrowNest();
             doctorPigReport.setEarlyFarrowRate(pigDaily.getFarrowNest() / doctorPigReport.getEarlyMating() * 100);
             Date after = DateUtils.addDays(start, 114);
-            DoctorPigDaily afterPigDaily = doctorPigDailyDao.findByFarm(farmId, after, after);
+            DoctorPigDaily afterPigDaily = doctorPigDailyDao.countByFarm(farmId, after, after);
             doctorPigReport.setLateFarrowNest(null == afterPigDaily ? 0 : afterPigDaily.getFarrowNest());
 
             doctorPigReport.setLateFarrowRate(doctorPigReport.getLateFarrowNest() / pigDaily.getMatingCount() * 100);
