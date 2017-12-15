@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.service;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -63,6 +65,7 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
     @Override
     public Response<Boolean> flushGroupDaily(Long farmId, Integer pigType, String startAt, String endAt) {
         log.info("flush group daily for pigType starting, farmId:{}, pigType:{}, startAt:{}, endAt:{}", farmId, pigType, startAt, endAt);
+        Stopwatch stopwatch = Stopwatch.createStarted();
         try {
             if (!PigType.GROUP_TYPES.contains(pigType)) {
                 log.error("flush group daily pig type is illegal,pigType:{}", pigType);
@@ -79,9 +82,10 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
             
             list.forEach(date -> {
                 criteria.setSumAt(DateUtil.toDateString(date));
+                log.info("flush group daily farmId:{}, sumAt:{}", criteria.getFarmId(), criteria.getSumAt());
                 doctorDailyReportV2Manager.flushGroupDaily(criteria);
             });
-            log.info("flush group daily for pigType end");
+            log.info("flush group daily for pigType end, consume:{}minute", stopwatch.elapsed(TimeUnit.MINUTES));
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("flush group daily failed, farmId:{}, pigType:{}, startAt:{}, endAt:{}, cause:{}",
@@ -93,6 +97,7 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
     @Override
     public Response<Boolean> flushPigDaily(Long farmId, String startAt, String endAt) {
         try {
+            Stopwatch stopwatch = Stopwatch.createStarted();
             log.info("flush pig daily starting, farmId:{}, startAt:{}, endAt:{}", farmId, startAt, endAt);
             DoctorStatisticCriteria criteria = new DoctorStatisticCriteria();
             criteria.setFarmId(farmId);
@@ -104,10 +109,11 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
 
             list.forEach(date -> {
                 criteria.setSumAt(DateUtil.toDateString(date));
+                log.info("flush pig daily farmId:{}, sumAt:{}", criteria.getFarmId(), criteria.getSumAt());
                 doctorDailyReportV2Manager.flushPigDaily(criteria);
             });
 
-            log.info("flush pig daily for pigType end");
+            log.info("flush pig daily for pigType end, consume:{}minute", stopwatch.elapsed(TimeUnit.MINUTES));
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("flush pig daily failed, farmId:{}, startAt:{}, endAt:{}, cause:{}",
