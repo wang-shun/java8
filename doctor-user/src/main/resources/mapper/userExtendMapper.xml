@@ -158,4 +158,21 @@
         FROM <include refid="tb"/>
         WHERE `type` = #{type}
     </select>
+
+    <update id="updateAll" parameterType="User">
+        UPDATE
+        <include refid="tb"/>
+        <set>
+            <if test="password != null">password = #{password},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="mobile != null">mobile = #{mobile},</if>
+            <if test="type != null">`type` = #{type},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="rolesJson != null">roles_json = #{rolesJson},</if>
+            <if test="extraJson != null">extra_json = #{extraJson},</if>
+            updated_at=now()
+        </set>
+        WHERE id=#{id}
+    </update>
 </mapper>
