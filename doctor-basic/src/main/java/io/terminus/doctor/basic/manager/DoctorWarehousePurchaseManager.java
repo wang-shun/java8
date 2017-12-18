@@ -172,16 +172,18 @@ public class DoctorWarehousePurchaseManager {
             return;
         }
 
-        DoctorWarehousePurchase purchase = doctorWarehousePurchaseDao.findById(purchaseIds.get(0));//一笔入库类型的操作只会产生一笔采购
-        if (null == purchase) {
-            log.warn("purchase not found for material handle[{}],with id:{}", materialHandle.getId(), purchaseIds.get(0));
+        List<DoctorWarehousePurchase> purchases = doctorWarehousePurchaseDao.findByIds(purchaseIds);
+        if (purchases.isEmpty()) {
+            log.warn("purchase not found for material handle[{}]", materialHandle.getId());
             return;
         }
-        if (purchase.getHandleQuantity().compareTo(new BigDecimal(0)) != 0) { //如果该笔采购已经被消耗了
-            throw new InvalidException("purchase.has.been.eat", purchase.getUnitPrice(), materialHandle.getMaterialName());
-        }
+        for (DoctorWarehousePurchase purchase : purchases) {
+            if (purchase.getHandleQuantity().compareTo(new BigDecimal(0)) != 0) { //如果该笔采购已经被消耗了
+                throw new InvalidException("purchase.has.been.eat", purchase.getUnitPrice(), materialHandle.getMaterialName());
+            }
 
-        doctorWarehousePurchaseDao.delete(purchase.getId());
-        log.info("delete purchase with warehouse[{}],sku[{}],quantity[{}],unitPrice[{}]", purchase.getWarehouseId(), purchase.getMaterialId(), purchase.getQuantity(), purchase.getUnitPrice());
+            doctorWarehousePurchaseDao.delete(purchase.getId());
+            log.info("delete purchase with warehouse[{}],sku[{}],quantity[{}],unitPrice[{}]", purchase.getWarehouseId(), purchase.getMaterialId(), purchase.getQuantity(), purchase.getUnitPrice());
+        }
     }
 }
