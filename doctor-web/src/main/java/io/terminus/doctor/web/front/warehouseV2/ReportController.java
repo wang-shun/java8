@@ -264,13 +264,19 @@ public class ReportController {
                 .map(DoctorWarehouseStock::getSkuId).collect(Collectors.toList())))
                 .stream().collect(Collectors.groupingBy(DoctorWarehouseSku::getId));
 
+        Map<Long, AmountAndQuantityDto> balanceMap = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countEachMaterialBalance(warehouseId, date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1));
+        Map<Long, AmountAndQuantityDto> lastMonthBalanceMap = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countEachMaterialBalance(warehouseId, lastMonth.get(Calendar.YEAR), lastMonth.get(Calendar.MONTH) + 1));
+
         List<WarehouseMonthlyReportVo> report = new ArrayList<>();
         for (DoctorWarehouseStock stock : stocksResponse.getResult()) {
 
-            AmountAndQuantityDto balance = RespHelper.or500(doctorWarehouseStockMonthlyReadService
-                    .countMaterialBalance(warehouseId, stock.getSkuId(), date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1));
-            AmountAndQuantityDto initialBalance = RespHelper.or500(doctorWarehouseStockMonthlyReadService
-                    .countMaterialBalance(warehouseId, stock.getSkuId(), lastMonth.get(Calendar.YEAR), lastMonth.get(Calendar.MONTH) + 1));
+//            AmountAndQuantityDto balance = RespHelper.or500(doctorWarehouseStockMonthlyReadService
+//                    .countMaterialBalance(warehouseId, stock.getSkuId(), date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1));
+//            AmountAndQuantityDto initialBalance = RespHelper.or500(doctorWarehouseStockMonthlyReadService
+//                    .countMaterialBalance(warehouseId, stock.getSkuId(), lastMonth.get(Calendar.YEAR), lastMonth.get(Calendar.MONTH) + 1));
+
+            AmountAndQuantityDto balance = balanceMap.containsKey(stock.getSkuId()) ? balanceMap.get(stock.getSkuId()) : new AmountAndQuantityDto(0, new BigDecimal(0));
+            AmountAndQuantityDto initialBalance = lastMonthBalanceMap.containsKey(stock.getSkuId()) ? lastMonthBalanceMap.get(stock.getSkuId()) : new AmountAndQuantityDto(0, new BigDecimal(0));
 
             Response<WarehouseStockStatisticsDto> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByMaterialVendor(warehouseId, stock.getSkuId(), null, date,
                     WarehouseMaterialHandleType.IN,
