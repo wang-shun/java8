@@ -32,7 +32,7 @@ public class DoctorWarehousePurchaseManagerTest {
 
     @Test
     @Sql(statements = "insert into doctor_warehouse_handle_detail(id,material_handle_id,material_purchase_id)values(888,888,888)")
-    @Sql(statements = "insert into doctor_warehouse_purchase(id,handle_quantity)values(888,0)")
+    @Sql(statements = "insert into doctor_warehouse_purchase(id,handle_quantity)values(777,1),(888,0),(9999,1)")
     public void testDeletePurchase() {
         DoctorWarehouseMaterialHandle materialHandle = new DoctorWarehouseMaterialHandle();
         materialHandle.setId(888L);

@@ -165,7 +165,7 @@ public class DoctorWarehousePurchaseManager {
             throw new ServiceException("purchase.not.allow.delete");
 
         Map<String, Object> params = new HashMap<>();
-        params.put("material_handle_id", materialHandle.getId());
+        params.put("materialHandleId", materialHandle.getId());
         List<Long> purchaseIds = doctorWarehouseHandleDetailDao.list(params).stream().map(DoctorWarehouseHandleDetail::getMaterialPurchaseId).collect(Collectors.toList());
         if (purchaseIds.isEmpty()) {
             log.warn("material handle [{}] not associate purchase", materialHandle.getId());
