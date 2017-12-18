@@ -147,8 +147,8 @@ public class DoctorDailyReportV2Manager {
         Date today = Dates.startOfDay(new Date());
         Date yesterday = new DateTime(today).minusDays(1).toDate();
         Map<Long, Date> farmToDate = queryFarmEarlyEventAtImpl(DateUtil.toDateString(yesterday));
-        DoctorStatisticCriteria criteria = new DoctorStatisticCriteria();
         farmIds.parallelStream().forEach(farmId -> {
+            DoctorStatisticCriteria criteria = new DoctorStatisticCriteria();
             log.info("generate farm daily, farmId:{}", farmId);
             criteria.setFarmId(farmId);
             Date temp = yesterday;
@@ -165,9 +165,9 @@ public class DoctorDailyReportV2Manager {
 
     public void flushFarmDaily(DoctorStatisticCriteria criteria) {
         PigType.GROUP_TYPES.forEach(pigType -> {
-                    criteria.setPigType(pigType);
-                    flushGroupDaily(criteria);
-                });
+            criteria.setPigType(pigType);
+            flushGroupDaily(criteria);
+        });
         flushPigDaily(criteria);
     }
 
