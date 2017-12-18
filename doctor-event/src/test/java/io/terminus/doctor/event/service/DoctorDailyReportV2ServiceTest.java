@@ -35,7 +35,7 @@ public class DoctorDailyReportV2ServiceTest extends BaseServiceTest {
 
     @Test
     public void flushPigDaily() {
-        Response<Boolean> response = doctorDailyReportV2Service.flushPigDaily(2L,"2017-01-01", "2017-01-05");
+        Response<Boolean> response = doctorDailyReportV2Service.flushPigDaily(8L,"2016-07-12", "2016-07-20");
         Assert.assertTrue(response.isSuccess());
         Assert.assertTrue(response.getResult());
     }

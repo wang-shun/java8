@@ -19,9 +19,9 @@ public class DoctorPigDailyDaoTest extends BaseDaoTest {
     @Test
     public void testReportDailyByFarm() throws Exception {
         Date end;
-        Date start = end = DateUtils.parseDate("2017-11-12", "yyyy-MM-dd");
-        DoctorPigDaily pigDaily = doctorPigDailyDao.countByFarm(1L, start, end);
+        Date start = end = DateUtils.parseDate("2016-06-12", "yyyy-MM-dd");
+        DoctorPigDaily pigDaily = doctorPigDailyDao.countByFarm(2L, start, end);
 
-
+        System.out.println(pigDaily);
     }
 }
