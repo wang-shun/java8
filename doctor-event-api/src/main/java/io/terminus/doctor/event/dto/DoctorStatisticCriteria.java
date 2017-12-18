@@ -24,6 +24,10 @@ public class DoctorStatisticCriteria implements Serializable {
         this.sumAt = sumAt;
     }
 
+    public DoctorStatisticCriteria(Long farmId, String sumAt) {
+        new DoctorStatisticCriteria(farmId, null, sumAt);
+    }
+
     /**
      * 猪场id
      */
