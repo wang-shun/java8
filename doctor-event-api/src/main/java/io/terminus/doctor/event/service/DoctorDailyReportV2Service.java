@@ -3,6 +3,8 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
 
+import java.util.List;
+
 /**
  * Created by xjn on 17/12/12.
  * email:xiaojiannan@terminus.io
@@ -41,4 +43,10 @@ public interface DoctorDailyReportV2Service {
      * @param endAt   结束时间 yyyy-MM-dd
      */
     Response<Boolean> flushPigDaily(Long farmId, String startAt, String endAt);
+
+    /**
+     * 生成昨天和今天的报表
+     * @param farmIds 猪场ids
+     */
+    Response<Boolean> generateYesterdayAndToday(List<Long> farmIds);
 }
