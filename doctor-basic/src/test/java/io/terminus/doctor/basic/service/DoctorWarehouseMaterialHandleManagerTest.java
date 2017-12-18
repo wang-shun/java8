@@ -44,6 +44,6 @@ public class DoctorWarehouseMaterialHandleManagerTest {
         Assert.assertNull(doctorWarehousePurchaseDao.findById(1L));
 
         DoctorWarehouseStock stock = doctorWarehouseStockDao.findById(15L);
-        Assert.assertEquals(5, stock.getQuantity().doubleValue(), 2);
+        Assert.assertEquals(5, stock.getQuantity().doubleValue(), 0);
     }
 }

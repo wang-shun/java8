@@ -170,7 +170,7 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
     public Response<Map<Long, AmountAndQuantityDto>> countEachMaterialBalance(Long farmId, Long warehouseId) {
 
 
-        return Response.ok(doctorWarehouseStockMonthlyDao.statisticsGroupBySku(warehouseId));
+        return Response.ok(doctorWarehouseStockMonthlyDao.statisticsGroupBySku(warehouseId, null));
 //        Map<Long, List<DoctorWarehousePurchase>> materialPurchases = doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
 //                .farmId(farmId)
 //                .warehouseId(warehouId)
