@@ -99,6 +99,14 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
     }
 
     /**
+     * 查询最新影响事件不包含某些事件类型的事件 逆序
+     */
+    public List<DoctorGroupEvent> findEventIncludeTypesForDesc(Long groupId, List<Integer> types, String eventAt) {
+        return getSqlSession().selectList(sqlId("findEventIncludeTypesForDesc"),
+                ImmutableMap.of("groupId", groupId, "types", types, "eventAt", eventAt));
+    }
+
+    /**
      * 查询最新手动猪群事件
      */
     public DoctorGroupEvent findLastManualEventByGroupId(Long groupId) {

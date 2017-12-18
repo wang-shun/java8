@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.editHandler.group;
 
+import com.google.common.collect.Lists;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.enums.PigType;
@@ -30,6 +31,7 @@ import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -422,7 +424,22 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * @param changeCount 变化数量
      */
     public boolean validGroupLiveStockForDelete(Long groupId, Date sumAt, Integer changeCount) {
-        // TODO: 17/12/13  
+        List<Integer> includeTypes = Lists.newArrayList(GroupEventType.CHANGE.getValue(), GroupEventType.MOVE_IN.getValue(),
+                GroupEventType.TRANS_FARM.getValue(), GroupEventType.TRANS_GROUP.getValue());
+        List<DoctorGroupEvent> groupEventList = doctorGroupEventDao.findEventIncludeTypesForDesc(groupId, includeTypes, DateUtil.toDateString(sumAt));
+        DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(groupId);
+        int quantity = EventUtil.minusInt(groupTrack.getQuantity(), changeCount);
+        for (DoctorGroupEvent groupEvent: groupEventList) {
+            if (quantity < 0) {
+                return false;
+            }
+
+            if (Objects.equals(groupEvent.getType(), GroupEventType.MOVE_IN.getValue())) {
+                quantity = EventUtil.minusInt(quantity, groupEvent.getQuantity());
+            } else {
+                quantity = EventUtil.plusInt(quantity, groupEvent.getQuantity());
+            }
+        }
         return true;
     }
 
@@ -438,10 +455,31 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * @param oldQuantity 原数量
      * @param newQuantity 新数量
      */
-    protected void validGroupLiveStock(Long groupId, String groupCode, Date oldEventAt, Date newEventAt, Integer oldQuantity, Integer newQuantity,  Integer changeCount){
+    protected void validGroupLiveStock(Long groupId, String groupCode, Date oldEventAt, Date newEventAt, Integer oldQuantity,
+                                       Integer newQuantity,  Integer changeCount){
         Date sumAt = oldEventAt.before(newEventAt) ? oldEventAt : newEventAt;
-        // TODO: 17/12/13  
+        List<Integer> includeTypes = Lists.newArrayList(GroupEventType.CHANGE.getValue(), GroupEventType.MOVE_IN.getValue(),
+                GroupEventType.TRANS_FARM.getValue(), GroupEventType.TRANS_GROUP.getValue());
+        List<DoctorGroupEvent> groupEventList = doctorGroupEventDao.findEventIncludeTypesForDesc(groupId, includeTypes, DateUtil.toDateString(sumAt));
+        DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(groupId);
+        int quantity = oldEventAt.equals(newEventAt)
+                ? EventUtil.minusInt(groupTrack.getQuantity(), changeCount)
+                : groupTrack.getQuantity() + newQuantity - oldQuantity;
+
+        for (DoctorGroupEvent groupEvent : groupEventList) {
+            if (quantity < 0) {
+                throw new InvalidException("group.live.stock.lower.zero", groupCode, groupEvent.getEventAt());
+            }
+
+            if (Objects.equals(groupEvent.getType(), GroupEventType.MOVE_IN.getValue())) {
+                quantity = EventUtil.minusInt(quantity, groupEvent.getQuantity());
+            } else {
+                quantity = EventUtil.plusInt(quantity, groupEvent.getQuantity());
+            }
+        }
+
     }
+
     /**
      * 获取日期下一天
      * @param date 日期
