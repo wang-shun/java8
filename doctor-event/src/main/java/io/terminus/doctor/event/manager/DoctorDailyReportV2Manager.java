@@ -63,6 +63,9 @@ public class DoctorDailyReportV2Manager {
         this.doctorEventModifyLogDao = doctorEventModifyLogDao;
     }
 
+    /**
+     * 刷新猪群日报
+     */
     public void flushGroupDaily(DoctorStatisticCriteria criteria){
         DoctorGroupDaily doctorGroupDaily = groupDailyDao.findBy(criteria.getFarmId(), criteria.getPigType(), criteria.getSumAt());
         if (isNull(doctorGroupDaily)) {
@@ -102,9 +105,6 @@ public class DoctorDailyReportV2Manager {
         return groupDailyDao.findBy(farmId, pigType, sumAt);
     }
 
-    /**
-     * 有则更新,无则创建
-     */
     public void createOrUpdateGroupDaily(DoctorGroupDaily doctorGroupDaily) {
         if (isNull(doctorGroupDaily.getId())) {
             groupDailyDao.create(doctorGroupDaily);
@@ -113,6 +113,9 @@ public class DoctorDailyReportV2Manager {
         }
     }
 
+    /**
+     * 刷新猪日报
+     */
     public void flushPigDaily(DoctorStatisticCriteria criteria) {
         DoctorPigDaily doctorPigDaily = pigDailyDao.findBy(criteria.getFarmId(), criteria.getSumAt());
         if (isNull(doctorPigDaily)) {
@@ -132,9 +135,6 @@ public class DoctorDailyReportV2Manager {
         return pigDailyDao.findBy(farmId, sumAt);
     }
 
-    /**
-     * 有则更新,无则创建
-     */
     public void createOrUpdatePigDaily(DoctorPigDaily doctorPigDaily) {
         if (isNull(doctorPigDaily.getId())) {
             pigDailyDao.create(doctorPigDaily);
@@ -143,6 +143,10 @@ public class DoctorDailyReportV2Manager {
         }
     }
 
+    /**
+     * 生成昨天和今天的猪场日报
+     * @param farmIds 猪场ids
+     */
     public void generateYesterdayAndToday(List<Long> farmIds) {
         Date today = Dates.startOfDay(new Date());
         Date yesterday = new DateTime(today).minusDays(1).toDate();
@@ -163,6 +167,9 @@ public class DoctorDailyReportV2Manager {
         });
     }
 
+    /**
+     * 刷新猪场日报
+     */
     public void flushFarmDaily(DoctorStatisticCriteria criteria) {
         PigType.GROUP_TYPES.forEach(pigType -> {
             criteria.setPigType(pigType);
