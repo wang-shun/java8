@@ -66,7 +66,7 @@ public class DoctorDailyReportV2Manager {
     /**
      * 刷新猪群日报
      */
-    public void flushGroupDaily(DoctorStatisticCriteria criteria){
+    public DoctorGroupDaily flushGroupDaily(DoctorStatisticCriteria criteria){
         DoctorGroupDaily doctorGroupDaily = groupDailyDao.findBy(criteria.getFarmId(), criteria.getPigType(), criteria.getSumAt());
         if (isNull(doctorGroupDaily)) {
             doctorGroupDaily = new DoctorGroupDaily();
@@ -99,10 +99,15 @@ public class DoctorDailyReportV2Manager {
             case RESERVE: flushReserveDaily(doctorGroupDaily, criteria); break;
         }
         createOrUpdateGroupDaily(doctorGroupDaily);
+        return doctorGroupDaily;
     }
 
     public DoctorGroupDaily findDoctorGroupDaily(Long farmId, Integer pigType, Date sumAt){
-        return groupDailyDao.findBy(farmId, pigType, sumAt);
+        DoctorGroupDaily doctorGroupDaily = groupDailyDao.findBy(farmId, pigType, sumAt);
+        if (isNull(doctorGroupDaily)) {
+            doctorGroupDaily = flushGroupDaily(new DoctorStatisticCriteria(farmId, pigType, DateUtil.toDateString(sumAt)));
+        }
+        return doctorGroupDaily;
     }
 
     public void createOrUpdateGroupDaily(DoctorGroupDaily doctorGroupDaily) {
@@ -116,7 +121,7 @@ public class DoctorDailyReportV2Manager {
     /**
      * 刷新猪日报
      */
-    public void flushPigDaily(DoctorStatisticCriteria criteria) {
+    public DoctorPigDaily flushPigDaily(DoctorStatisticCriteria criteria) {
         DoctorPigDaily doctorPigDaily = pigDailyDao.findBy(criteria.getFarmId(), criteria.getSumAt());
         if (isNull(doctorPigDaily)) {
             doctorPigDaily = new DoctorPigDaily();
@@ -129,10 +134,15 @@ public class DoctorDailyReportV2Manager {
         flushBoarPigDaily(doctorPigDaily, criteria);
 
         createOrUpdatePigDaily(doctorPigDaily);
+        return doctorPigDaily;
     }
 
     public DoctorPigDaily findDoctorPigDaily(Long farmId, Date sumAt){
-        return pigDailyDao.findBy(farmId, sumAt);
+        DoctorPigDaily doctorPigDaily = pigDailyDao.findBy(farmId, sumAt);
+        if (isNull(doctorPigDaily)) {
+            doctorPigDaily = flushPigDaily(new DoctorStatisticCriteria(farmId, DateUtil.toDateString(sumAt)));
+        }
+        return doctorPigDaily;
     }
 
     public void createOrUpdatePigDaily(DoctorPigDaily doctorPigDaily) {
