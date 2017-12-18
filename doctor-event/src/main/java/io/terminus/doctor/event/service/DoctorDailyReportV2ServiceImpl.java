@@ -37,8 +37,19 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
     public Response<Boolean> flushFarmDaily(Long farmId, String startAt, String endAt) {
         log.info("flush farm daily starting, farmId:{}, startAt:{}, endAt:{}", farmId, startAt, endAt);
         try {
-            flushGroupDaily(farmId, startAt, endAt);
-            flushPigDaily(farmId, startAt, endAt);
+            DoctorStatisticCriteria criteria = new DoctorStatisticCriteria();
+            criteria.setFarmId(farmId);
+            List<Date> list = DateUtil.getDates(DateUtil.toDate(startAt), DateUtil.toDate(endAt));
+            if (list.isEmpty()) {
+                log.error("flush farm daily startAt or endAt is illegal, startAt:{}, endAt:{}", startAt, endAt);
+                return Response.fail("startAt.or.endAt.is.error");
+            }
+
+            list.forEach(date -> {
+                criteria.setSumAt(DateUtil.toDateString(date));
+                log.info("flush farm daily farmId:{}, sumAt:{}", criteria.getFarmId(), criteria.getSumAt());
+                doctorDailyReportV2Manager.flushFarmDaily(criteria);
+            });
             log.info("flush farm daily end");
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
@@ -119,6 +130,20 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
             log.error("flush pig daily failed, farmId:{}, startAt:{}, endAt:{}, cause:{}",
                     farmId, startAt, endAt, Throwables.getStackTraceAsString(e));
             return Response.fail("flush.pig.daily.failed");
+        }
+    }
+
+    @Override
+    public Response<Boolean> generateYesterdayAndToday(List<Long> farmIds) {
+        try {
+            log.info("generate yesterday and today starting");
+            Stopwatch stopWatch = Stopwatch.createStarted();
+            doctorDailyReportV2Manager.generateYesterdayAndToday(farmIds);
+            log.info("generate yesterday and today end, consume:{}minute", stopWatch.elapsed(TimeUnit.MINUTES));
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("generate yesterday and today failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("generate.yesterday.and.today.failed");
         }
     }
 }

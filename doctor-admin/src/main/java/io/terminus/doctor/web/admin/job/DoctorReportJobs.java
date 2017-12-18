@@ -11,6 +11,7 @@ import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
 import io.terminus.doctor.event.service.DoctorDailyGroupWriteService;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
+import io.terminus.doctor.event.service.DoctorDailyReportV2Service;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorRangeReportWriteService;
@@ -66,6 +67,8 @@ public class DoctorReportJobs {
     private DoctorOrgReadService doctorOrgReadService;
     @RpcConsumer
     private DoctorDepartmentReadService doctorDepartmentReadService;
+    @RpcConsumer
+    private DoctorDailyReportV2Service doctorDailyReportV2Service;
 
     private final HostLeader hostLeader;
 
@@ -73,6 +76,8 @@ public class DoctorReportJobs {
     public DoctorReportJobs(HostLeader hostLeader) {
         this.hostLeader = hostLeader;
     }
+
+
 
     /**
      * 猪场日报计算job
@@ -89,7 +94,7 @@ public class DoctorReportJobs {
             }
             log.info("daily report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
 
-            doctorDailyReportWriteService.generateYesterdayAndTodayReports(getAllFarmIds());
+            doctorDailyReportV2Service.generateYesterdayAndToday(getAllFarmIds());
 
             log.info("daily report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
@@ -97,7 +102,7 @@ public class DoctorReportJobs {
         }
     }
 
-    @Scheduled(cron = "0 0 1 * * ?")
+//    @Scheduled(cron = "0 0 1 * * ?")
     @RequestMapping(value = "/group/daily", method = RequestMethod.GET)
     public void groupDaily() {
         try {
@@ -118,7 +123,7 @@ public class DoctorReportJobs {
      * 猪场月报计算job
      * 每两点执行一发
      */
-    @Scheduled(cron = "0 0 2 * * ?")
+//    @Scheduled(cron = "0 0 2 * * ?")
     @RequestMapping(value = "/farm/range", method = RequestMethod.GET)
     public void monthlyReport() {
         try {
@@ -140,7 +145,7 @@ public class DoctorReportJobs {
      * 公司月报计算job
      * 每两点执行一发
      */
-    @Scheduled(cron = "0 0 3 * * ?")
+//    @Scheduled(cron = "0 0 3 * * ?")
     @RequestMapping(value = "/org/range", method = RequestMethod.GET)
     public void monthlyOrgReport() {
         try {

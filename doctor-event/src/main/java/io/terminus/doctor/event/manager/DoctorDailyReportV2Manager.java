@@ -1,21 +1,39 @@
 package io.terminus.doctor.event.manager;
 
+import com.google.common.collect.Lists;
+import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
 import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupStatisticDao;
 import io.terminus.doctor.event.dao.DoctorPigDailyDao;
+import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigStatisticDao;
+import io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
+import io.terminus.doctor.event.model.DoctorEventModifyLog;
+import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigDaily;
+import io.terminus.doctor.event.model.DoctorPigEvent;
+import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.isNull;
+import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
@@ -23,19 +41,26 @@ import static io.terminus.doctor.common.utils.Checks.expectTrue;
  * Created by xjn on 17/12/12.
  * email:xiaojiannan@terminus.io
  */
+@Slf4j
 @Component
 public class DoctorDailyReportV2Manager {
     private final DoctorGroupStatisticDao groupStatisticDao;
     private final DoctorGroupDailyDao groupDailyDao;
     private final DoctorPigStatisticDao pigStatisticDao;
     private final DoctorPigDailyDao pigDailyDao;
+    private final DoctorPigEventDao doctorPigEventDao;
+    private final DoctorGroupEventDao doctorGroupEventDao;
+    private final DoctorEventModifyLogDao doctorEventModifyLogDao;
 
     @Autowired
-    public DoctorDailyReportV2Manager(DoctorGroupStatisticDao groupStatisticDao, DoctorGroupDailyDao groupDailyDao, DoctorPigStatisticDao pigStatisticDao, DoctorPigDailyDao pigDailyDao) {
+    public DoctorDailyReportV2Manager(DoctorGroupStatisticDao groupStatisticDao, DoctorGroupDailyDao groupDailyDao, DoctorPigStatisticDao pigStatisticDao, DoctorPigDailyDao pigDailyDao, DoctorPigEventDao doctorPigEventDao, DoctorGroupEventDao doctorGroupEventDao, DoctorEventModifyLogDao doctorEventModifyLogDao) {
         this.groupStatisticDao = groupStatisticDao;
         this.groupDailyDao = groupDailyDao;
         this.pigStatisticDao = pigStatisticDao;
         this.pigDailyDao = pigDailyDao;
+        this.doctorPigEventDao = doctorPigEventDao;
+        this.doctorGroupEventDao = doctorGroupEventDao;
+        this.doctorEventModifyLogDao = doctorEventModifyLogDao;
     }
 
     public void flushGroupDaily(DoctorStatisticCriteria criteria){
@@ -73,6 +98,78 @@ public class DoctorDailyReportV2Manager {
         createOrUpdateGroupDaily(doctorGroupDaily);
     }
 
+    public DoctorGroupDaily findDoctorGroupDaily(Long farmId, Integer pigType, Date sumAt){
+        return groupDailyDao.findBy(farmId, pigType, sumAt);
+    }
+
+    /**
+     * 有则更新,无则创建
+     */
+    public void createOrUpdateGroupDaily(DoctorGroupDaily doctorGroupDaily) {
+        if (isNull(doctorGroupDaily.getId())) {
+            groupDailyDao.create(doctorGroupDaily);
+        } else {
+            expectTrue(groupDailyDao.update(doctorGroupDaily), "concurrent.error");
+        }
+    }
+
+    public void flushPigDaily(DoctorStatisticCriteria criteria) {
+        DoctorPigDaily doctorPigDaily = pigDailyDao.findBy(criteria.getFarmId(), criteria.getSumAt());
+        if (isNull(doctorPigDaily)) {
+            doctorPigDaily = new DoctorPigDaily();
+            doctorPigDaily.setFarmId(criteria.getFarmId());
+            doctorPigDaily.setSumAt(DateUtil.toDate(criteria.getSumAt()));
+        }
+
+        flushPhPigDaily(doctorPigDaily, criteria);
+        flushCfPigDaily(doctorPigDaily, criteria);
+        flushBoarPigDaily(doctorPigDaily, criteria);
+
+        createOrUpdatePigDaily(doctorPigDaily);
+    }
+
+    public DoctorPigDaily findDoctorPigDaily(Long farmId, Date sumAt){
+        return pigDailyDao.findBy(farmId, sumAt);
+    }
+
+    /**
+     * 有则更新,无则创建
+     */
+    public void createOrUpdatePigDaily(DoctorPigDaily doctorPigDaily) {
+        if (isNull(doctorPigDaily.getId())) {
+            pigDailyDao.create(doctorPigDaily);
+        } else {
+            expectTrue(pigDailyDao.update(doctorPigDaily), "concurrent.error");
+        }
+    }
+
+    public void generateYesterdayAndToday(List<Long> farmIds) {
+        Date today = Dates.startOfDay(new Date());
+        Date yesterday = new DateTime(today).minusDays(1).toDate();
+        Map<Long, Date> farmToDate = queryFarmEarlyEventAtImpl(DateUtil.toDateString(yesterday));
+        DoctorStatisticCriteria criteria = new DoctorStatisticCriteria();
+        farmIds.parallelStream().forEach(farmId -> {
+            log.info("generate farm daily, farmId:{}", farmId);
+            criteria.setFarmId(farmId);
+            Date temp = yesterday;
+            if (farmToDate.containsKey(farmId)) {
+                temp = farmToDate.get(farmId);
+            }
+            List<Date> list = DateUtil.getDates(temp, today);
+            list.forEach(date -> {
+                criteria.setSumAt(DateUtil.toDateString(date));
+                flushFarmDaily(criteria);
+            });
+        });
+    }
+
+    public void flushFarmDaily(DoctorStatisticCriteria criteria) {
+        PigType.GROUP_TYPES.forEach(pigType -> {
+                    criteria.setPigType(pigType);
+                    flushGroupDaily(criteria);
+                });
+        flushPigDaily(criteria);
+    }
 
     /**
      * 产房仔猪
@@ -113,36 +210,6 @@ public class DoctorDailyReportV2Manager {
     private void flushReserveDaily(DoctorGroupDaily doctorGroupDaily, DoctorStatisticCriteria criteria){
         doctorGroupDaily.setToFatten(groupStatisticDao.toFatten(criteria));
         doctorGroupDaily.setTurnSeed(groupStatisticDao.turnSeed(criteria));
-    }
-
-    public DoctorGroupDaily findDoctorGroupDaily(Long farmId, Integer pigType, Date sumAt){
-        return groupDailyDao.findBy(farmId, pigType, sumAt);
-    }
-
-    /**
-     * 有则更新,无则创建
-     */
-    public void createOrUpdateGroupDaily(DoctorGroupDaily doctorGroupDaily) {
-        if (isNull(doctorGroupDaily.getId())) {
-            groupDailyDao.create(doctorGroupDaily);
-        } else {
-            expectTrue(groupDailyDao.update(doctorGroupDaily), "concurrent.error");
-        }
-    }
-
-    public void flushPigDaily(DoctorStatisticCriteria criteria) {
-        DoctorPigDaily doctorPigDaily = pigDailyDao.findBy(criteria.getFarmId(), criteria.getSumAt());
-        if (isNull(doctorPigDaily)) {
-            doctorPigDaily = new DoctorPigDaily();
-            doctorPigDaily.setFarmId(criteria.getFarmId());
-            doctorPigDaily.setSumAt(DateUtil.toDate(criteria.getSumAt()));
-        }
-
-        flushPhPigDaily(doctorPigDaily, criteria);
-        flushCfPigDaily(doctorPigDaily, criteria);
-        flushBoarPigDaily(doctorPigDaily, criteria);
-
-        createOrUpdatePigDaily(doctorPigDaily);
     }
 
     /**
@@ -215,17 +282,35 @@ public class DoctorDailyReportV2Manager {
         doctorPigDaily.setBoarEnd(pigStatisticDao.boarLiveStock(criteria.getFarmId(), criteria.getSumAt()));
     }
 
-    public DoctorPigDaily findDoctorPigDaily(Long farmId, Date sumAt){
-        return pigDailyDao.findBy(farmId, sumAt);
+    private Map<Long, Date> queryFarmEarlyEventAtImpl(String startDate) {
+        List<DoctorFarmEarlyEventAtDto> list1 = doctorPigEventDao.getFarmEarlyEventAt(startDate);
+        List<DoctorFarmEarlyEventAtDto> list2 = doctorGroupEventDao.getFarmEarlyEventAt(startDate);
+        list1.addAll(list2);
+
+        List<DoctorEventModifyLog> modifyLogList = doctorEventModifyLogDao.getEventModifyLog(startDate);
+        List<DoctorFarmEarlyEventAtDto> list3 = Lists.newArrayList();
+        modifyLogList.forEach(modifyLog -> {
+            add(list3, modifyLog.getDeleteEvent(), modifyLog.getType());
+            add(list3, modifyLog.getFromEvent(), modifyLog.getType());
+            add(list3, modifyLog.getToEvent(), modifyLog.getType());
+        });
+        list1.addAll(list3);
+        Map<Long, List<DoctorFarmEarlyEventAtDto>> map = list1.stream().collect(Collectors.groupingBy(DoctorFarmEarlyEventAtDto::getFarmId));
+        return map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey
+                , v -> v.getValue().stream().min(Comparator.comparing(DoctorFarmEarlyEventAtDto::getEventAt)).get().getEventAt()));
+
     }
-    /**
-     * 有则更新,无则创建
-     */
-    public void createOrUpdatePigDaily(DoctorPigDaily doctorPigDaily) {
-        if (isNull(doctorPigDaily.getId())) {
-            pigDailyDao.create(doctorPigDaily);
-        } else {
-            expectTrue(pigDailyDao.update(doctorPigDaily), "concurrent.error");
+
+    private void add(List<DoctorFarmEarlyEventAtDto> list3,
+                     String json, Integer type) {
+        if (notNull(json)) {
+            if (Objects.equals(type, DoctorEventModifyRequest.TYPE.PIG.getValue())) {
+                DoctorPigEvent event = JsonMapperUtil.nonEmptyMapper().fromJson(json, DoctorPigEvent.class);
+                list3.add(new DoctorFarmEarlyEventAtDto(event.getFarmId(), event.getEventAt()));
+            } else {
+                DoctorGroupEvent event = JsonMapperUtil.nonEmptyMapper().fromJson(json, DoctorGroupEvent.class);
+                list3.add(new DoctorFarmEarlyEventAtDto(event.getFarmId(), event.getEventAt()));
+            }
         }
     }
 }
