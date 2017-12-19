@@ -4,9 +4,7 @@ import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.UserType;
-import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.open.dto.DoctorServiceReviewDto;
@@ -19,7 +17,13 @@ import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
-import io.terminus.doctor.user.service.*;
+import io.terminus.doctor.user.service.DoctorMobileMenuReadService;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
+import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
+import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
+import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
+import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.user.service.PrimaryUserReadService;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.doctor.web.core.dto.ServiceBetaStatusToken;
 import io.terminus.doctor.web.core.service.ServiceBetaStatusHandler;
@@ -149,6 +153,8 @@ public class OPDoctorUsers {
                     break;
             }
         });
+
+        dto.setPigJxy(getPigJxy(baseUser));
         return dto;
     }
 
@@ -252,5 +258,15 @@ public class OPDoctorUsers {
             }
         }
         return null;
+    }
+
+    private ServiceReviewOpenDto getPigJxy(BaseUser baseUser) {
+        ServiceReviewOpenDto openDto = new ServiceReviewOpenDto();
+        openDto.setServiceStatus(DoctorServiceStatus.Status.OPENED.value());
+        openDto.setUserId(baseUser.getId());
+        openDto.setType(DoctorServiceReview.Type.PIG_JXY.getValue());
+        openDto.setStatus(DoctorServiceReview.Status.OK.getValue());
+        openDto.setUrl("http://39.108.236.233/app");
+        return openDto;
     }
 }
