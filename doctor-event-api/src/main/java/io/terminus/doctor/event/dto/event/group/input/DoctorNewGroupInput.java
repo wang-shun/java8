@@ -25,11 +25,6 @@ public class DoctorNewGroupInput extends BaseGroupInput implements Serializable 
     private static final long serialVersionUID = 5586688187641324955L;
 
     /**
-     * 原值
-     */
-    private String origin;
-
-    /**
      * 猪场id
      */
     @NotNull(message = "farmId.not.null")

@@ -35,11 +35,6 @@ public class DoctorFarmEntryDto extends BasePigEventInputDto implements Serializ
      */
     private String rfid;
 
-    /**
-     * 原值
-     */
-    private String origin;
-
     @NotNull(message = "birthday.not.null")
     private Date birthday; // 猪生日
 
