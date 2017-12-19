@@ -99,4 +99,8 @@ public class DoctorGroupStatisticDao {
     public Double turnOutWeight(DoctorStatisticCriteria criteria) {
         return sqlSession.selectOne(sqlId("turnOutWeight"), criteria.toMap());
     }
+
+    public Integer groupLiveStock(Long groupId, String date) {
+        return sqlSession.selectOne(sqlId("groupLiveStock"), ImmutableMap.of("groupId", groupId, "date", date));
+    }
 }
