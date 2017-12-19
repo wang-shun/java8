@@ -20,4 +20,6 @@ public class DoctorServiceReviewDto implements Serializable {
     private ServiceReviewOpenDto neverest;   //大数据
     private ServiceReviewOpenDto pigTrade;   //生猪交易
 
+    private ServiceReviewOpenDto pigJxy;     //绩效云
+
 }

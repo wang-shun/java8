@@ -137,4 +137,8 @@ public class UserDaoExt extends UserDao {
     public List<String> listAllUserMobiles(String role){
         return sqlSession.selectList(NAMESPACE + "listAllUserMobiles", role);
     }
+
+    public Boolean updateAll(User user) {
+        return sqlSession.update(NAMESPACE + "updateAll", user) == 1;
+    }
 }
