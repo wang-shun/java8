@@ -78,6 +78,31 @@ public class DoctorPigDaily implements Serializable {
     private Integer sowPhOtherOut;
 
     /**
+     * 配后备头数
+     */
+    private Integer mateHb;
+
+    /**
+     * 配断奶头数
+     */
+    private Integer mateDn;
+
+    /**
+     * 配返情头数
+     */
+    private Integer mateFq;
+
+    /**
+     * 配流产头数
+     */
+    private Integer mateLc;
+
+    /**
+     * 配阴性头数
+     */
+    private Integer mateYx;
+
+    /**
      * 配种数
      */
     private Integer matingCount;

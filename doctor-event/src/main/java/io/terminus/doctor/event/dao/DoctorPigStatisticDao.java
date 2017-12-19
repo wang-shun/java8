@@ -67,6 +67,26 @@ public class DoctorPigStatisticDao {
         return sqlSession.selectOne(sqlId("sowPhOtherOut"), criteria.toMap());
     }
 
+    public Integer mateHb(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("mateHb"), criteria.toMap());
+    }
+
+    public Integer mateDn(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("mateDn"), criteria.toMap());
+    }
+
+    public Integer mateFq(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("mateFq"), criteria.toMap());
+    }
+
+    public Integer mateLc(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("mateLc"), criteria.toMap());
+    }
+
+    public Integer mateYx(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("mateYx"), criteria.toMap());
+    }
+
     public Integer matingCount(DoctorStatisticCriteria criteria) {
         return sqlSession.selectOne(sqlId("matingCount"), criteria.toMap());
     }
