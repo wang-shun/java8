@@ -42,6 +42,32 @@
         )
     </select>
 
+    <select id="groupLiveStock" parameterType="map" resultType="int">
+        select
+        (
+        select ifnull(quantity, 0)
+        from doctor_group_tracks
+        WHERE group_id = #{groupId}
+        )
+        -
+        (
+        select
+        ifnull(
+        sum(
+        CASE WHEN TYPE = 2 THEN quantity ELSE 0 END -
+        CASE WHEN TYPE IN (3, 4, 9) THEN quantity ELSE 0 END -
+        CASE WHEN TYPE = 5 THEN 1 ELSE 0 END
+        )
+        ,0)
+        from doctor_group_events
+        WHERE group_id = #{groupId}
+        and event_at &gt; #{date}  -- 当前23:59:59
+        and status = 1
+        and event_source != 5
+        and `type` in(2,3,4,5,9)
+        )
+    </select>
+
     <select id="turnInto" parameterType="map" resultType="int">
         SELECT
         ifnull(sum(quantity),0)

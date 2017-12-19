@@ -18,7 +18,9 @@ import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyGroup;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorDailyReportSum;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupChangeSum;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorRangeReport;
 import io.terminus.doctor.event.service.DoctorCommonReportReadService;
@@ -48,6 +50,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.io.BufferedReader;
 import java.net.HttpURLConnection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -265,8 +268,8 @@ public class PhoenixCrmReports {
      */
     @OpenMethod(key = "get.group.live.stock.detail", paramNames = "date")
     public String getGroupLiveStockDetail(@NotEmpty(message = "date.not.empty") String date) {
-        Response<List<DoctorDailyGroup>> dailyGroups = doctorDailyGroupReadService.findGroupInfoBySumAt(date);
-        if (!dailyGroups.isSuccess() || dailyGroups.getResult() == null) {
+        Response<List<DoctorGroup>> groups = doctorGroupReadService.listOpenGroupsBy(date);
+        if (!groups.isSuccess() || groups.getResult() == null) {
             return "";
         }
         Response<Map<Long, String>> mapResponse = primaryUserReadService.findFarmIdToUserName();
@@ -275,15 +278,17 @@ public class PhoenixCrmReports {
         }
         Map<Long, String> farmToUserNameMap = mapResponse.getResult();
         List<DoctorGroupLiveStockDetailOpen> liveStockDetailOpenList = Lists.newArrayList();
-        dailyGroups.getResult().forEach(doctorDailyGroup -> {
-            DoctorGroupDetail groupDetail = RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(doctorDailyGroup.getGroupId()));
+        Date sumAt = DateUtil.toDate(date);
+        groups.getResult().forEach(doctorGroup -> {
+            DoctorGroupTrack groupTrack = RespHelper.or500(doctorGroupReadService.findTrackByGroupId(doctorGroup.getId()));
+
             DoctorGroupLiveStockDetailOpen doctorGroupLiveStockDetailOpen = new DoctorGroupLiveStockDetailOpen();
-            doctorGroupLiveStockDetailOpen.setUserName(farmToUserNameMap.get(doctorDailyGroup.getFarmId()));
-            doctorGroupLiveStockDetailOpen.setGroupCode(groupDetail.getGroup().getGroupCode());
+            doctorGroupLiveStockDetailOpen.setUserName(farmToUserNameMap.get(doctorGroup.getFarmId()));
+            doctorGroupLiveStockDetailOpen.setGroupCode(doctorGroup.getGroupCode());
             doctorGroupLiveStockDetailOpen.setLiveStocks(MoreObjects.firstNonNull(doctorDailyGroup.getEnd(), 0));
-            doctorGroupLiveStockDetailOpen.setType(PigType.from(doctorDailyGroup.getType()).getName());
-            doctorGroupLiveStockDetailOpen.setSumAt(doctorDailyGroup.getSumAt());
-            doctorGroupLiveStockDetailOpen.setDayAge(DateUtil.getDeltaDaysAbs(groupDetail.getGroupTrack().getBirthDate(), doctorDailyGroup.getSumAt()));
+            doctorGroupLiveStockDetailOpen.setType(PigType.from(doctorGroup.getPigType()).getName());
+            doctorGroupLiveStockDetailOpen.setSumAt(sumAt);
+            doctorGroupLiveStockDetailOpen.setDayAge(DateUtil.getDeltaDaysAbs(groupTrack.getBirthDate(), sumAt));
             liveStockDetailOpenList.add(doctorGroupLiveStockDetailOpen);
         });
         return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(liveStockDetailOpenList);
