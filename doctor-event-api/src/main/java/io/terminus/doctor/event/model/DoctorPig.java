@@ -53,6 +53,11 @@ public class DoctorPig implements Serializable {
     private String rfid;
 
     /**
+     * 原值
+     */
+    private Double origin;
+
+    /**
      * @see PigSex
      */
     private Integer pigType;

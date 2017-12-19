@@ -12,6 +12,7 @@
         <result column="farm_id" property="farmId"/>
         <result column="farm_name" property="farmName"/>
         <result column="group_code" property="groupCode"/>
+        <result column="origin" property="origin"/>
         <result column="batch_no" property="batchNo"/>
         <result column="open_at" property="openAt"/>
         <result column="close_at" property="closeAt"/>
@@ -48,11 +49,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        org_id, org_name, farm_id, farm_name, group_code, batch_no, open_at, close_at, status, init_barn_id, init_barn_name, current_barn_id, current_barn_name, pig_type, breed_id, breed_name, genetic_id, genetic_name, staff_id, staff_name, remark, out_id, extra, creator_id, creator_name, updator_id, updator_name, created_at, updated_at
+        org_id, org_name, farm_id, farm_name, group_code, origin, batch_no, open_at, close_at, status, init_barn_id, init_barn_name, current_barn_id, current_barn_name, pig_type, breed_id, breed_name, genetic_id, genetic_name, staff_id, staff_name, remark, out_id, extra, creator_id, creator_name, updator_id, updator_name, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{groupCode}, #{batchNo}, #{openAt}, #{closeAt}, #{status}, #{initBarnId}, #{initBarnName}, #{currentBarnId}, #{currentBarnName}, #{pigType}, #{breedId}, #{breedName}, #{geneticId}, #{geneticName}, #{staffId}, #{staffName}, #{remark}, #{outId}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
+        #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{groupCode}, #{origin}, #{batchNo}, #{openAt}, #{closeAt}, #{status}, #{initBarnId}, #{initBarnName}, #{currentBarnId}, #{currentBarnName}, #{pigType}, #{breedId}, #{breedName}, #{geneticId}, #{geneticName}, #{staffId}, #{staffName}, #{remark}, #{outId}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
     </sql>
 
     <sql id="criteria">
@@ -115,6 +116,7 @@
             <if test="farmId != null">farm_id = #{farmId},</if>
             <if test="farmName != null">farm_name = #{farmName},</if>
             <if test="groupCode != null">group_code = #{groupCode},</if>
+            <if test="origin != null">origin = #{origin},</if>
             <if test="batchNo != null">batch_no = #{batchNo},</if>
             <if test="openAt != null">open_at = #{openAt},</if>
             <if test="closeAt != null">close_at = #{closeAt},</if>
