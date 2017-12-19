@@ -266,6 +266,7 @@ public class OPDoctorUsers {
         openDto.setUserId(baseUser.getId());
         openDto.setType(DoctorServiceReview.Type.PIG_JXY.getValue());
         openDto.setStatus(DoctorServiceReview.Status.OK.getValue());
+        openDto.setUrl("http://39.108.236.233/app");
         return openDto;
     }
 }
