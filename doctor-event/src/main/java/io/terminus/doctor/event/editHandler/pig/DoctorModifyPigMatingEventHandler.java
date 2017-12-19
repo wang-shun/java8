@@ -1,10 +1,13 @@
 package io.terminus.doctor.event.editHandler.pig;
 
 import com.google.common.collect.Maps;
+import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.common.utils.Checks;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
+import io.terminus.doctor.event.enums.DoctorMatingType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPigDaily;
@@ -160,6 +163,27 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
     protected DoctorPigDaily buildDailyPig(DoctorPigDaily oldDailyPig, DoctorEventChangeDto changeDto) {
         oldDailyPig = super.buildDailyPig(oldDailyPig, changeDto);
         oldDailyPig.setMatingCount(EventUtil.plusInt(oldDailyPig.getMatingCount(), changeDto.getDoctorMateTypeCountChange()));
+        DoctorMatingType matingType = DoctorMatingType.from(changeDto.getDoctorMateType());
+        Checks.expectNotNull(matingType, "mating.type.is.null");
+        switch (matingType) {
+            case HP:
+                oldDailyPig.setMateHb(EventUtil.plusInt(oldDailyPig.getMateHb(), changeDto.getDoctorMateTypeCountChange()));
+                break;
+            case LPC:
+                oldDailyPig.setMateLc(EventUtil.plusInt(oldDailyPig.getMateLc(), changeDto.getDoctorMateTypeCountChange()));
+                break;
+            case DP:
+                oldDailyPig.setMateDn(EventUtil.plusInt(oldDailyPig.getMateDn(), changeDto.getDoctorMateTypeCountChange()));
+                break;
+            case YP:
+                oldDailyPig.setMateYx(EventUtil.plusInt(oldDailyPig.getMateYx(), changeDto.getDoctorMateTypeCountChange()));
+                break;
+            case FP:
+                oldDailyPig.setMateFq(EventUtil.plusInt(oldDailyPig.getMateFq(), changeDto.getDoctorMateTypeCountChange()));
+                break;
+            default:
+                throw new InvalidException("mating.type.error");
+        }
         return oldDailyPig;
     }
 

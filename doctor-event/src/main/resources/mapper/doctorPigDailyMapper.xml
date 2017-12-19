@@ -15,6 +15,11 @@
         <result property="sowPhSale" column="sow_ph_sale"/>
         <result property="sowPhChgFarm" column="sow_ph_chg_farm"/>
         <result property="sowPhOtherOut" column="sow_ph_other_out"/>
+        <result property="mateHb" column="mate_hb"/>
+        <result property="mateDn" column="mate_dn"/>
+        <result property="mateFq" column="mate_fq"/>
+        <result property="mateLc" column="mate_lc"/>
+        <result property="mateYx" column="mate_yx"/>
         <result property="matingCount" column="mating_count"/>
         <result property="pregPositive" column="preg_positive"/>
         <result property="pregNegative" column="preg_negative"/>
@@ -63,12 +68,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `sum_at`, `farm_id`, `sow_ph_start`, `sow_ph_reserve_in`, `sow_ph_wean_in`, `sow_ph_entry_in`, `sow_ph_chg_farm_in`, `sow_ph_dead`, `sow_ph_weed_out`, `sow_ph_sale`, `sow_ph_chg_farm`, `sow_ph_other_out`, `mating_count`, `preg_positive`, `preg_negative`, `preg_fanqing`, `preg_liuchan`, `sow_ph_end`, `sow_cf_start`, `sow_cf_end`, `sow_cf_in`, `sow_cf_in_farm_in`, `sow_cf_dead`, `sow_cf_weed_out`, `sow_cf_sale`, `sow_cf_chg_farm`, `sow_cf_other_out`, `farrow_nest`, `farrow_health`, `farrow_weak`, `farrow_dead`, `farrowjmh`, `farrow_weight`, `wean_nest`, `wean_qualified_count`, `wean_count`, `wean_day_age`, `wean_weight`, `boar_start`, `boar_in`, `boar_dead`, `boar_weed_out`, `boar_sale`, `boar_other_out`, `boar_end`,
+        `sum_at`, `farm_id`, `sow_ph_start`, `sow_ph_reserve_in`, `sow_ph_wean_in`, `sow_ph_entry_in`, `sow_ph_chg_farm_in`, `sow_ph_dead`, `sow_ph_weed_out`, `sow_ph_sale`, `sow_ph_chg_farm`, `sow_ph_other_out`, mate_hb, mate_dn, mate_fq, mate_lc, mate_yx, `mating_count`, `preg_positive`, `preg_negative`, `preg_fanqing`, `preg_liuchan`, `sow_ph_end`, `sow_cf_start`, `sow_cf_end`, `sow_cf_in`, `sow_cf_in_farm_in`, `sow_cf_dead`, `sow_cf_weed_out`, `sow_cf_sale`, `sow_cf_chg_farm`, `sow_cf_other_out`, `farrow_nest`, `farrow_health`, `farrow_weak`, `farrow_dead`, `farrowjmh`, `farrow_weight`, `wean_nest`, `wean_qualified_count`, `wean_count`, `wean_day_age`, `wean_weight`, `boar_start`, `boar_in`, `boar_dead`, `boar_weed_out`, `boar_sale`, `boar_other_out`, `boar_end`,
         created_at, updated_at, version
     </sql>
 
     <sql id="vals">
-        #{sumAt}, #{farmId}, #{sowPhStart}, #{sowPhReserveIn}, #{sowPhWeanIn}, #{sowPhEntryIn}, #{sowPhChgFarmIn}, #{sowPhDead}, #{sowPhWeedOut}, #{sowPhSale}, #{sowPhChgFarm}, #{sowPhOtherOut}, #{matingCount}, #{pregPositive}, #{pregNegative}, #{pregFanqing}, #{pregLiuchan}, #{sowPhEnd}, #{sowCfStart}, #{sowCfEnd}, #{sowCfIn}, #{sowCfInFarmIn}, #{sowCfDead}, #{sowCfWeedOut}, #{sowCfSale}, #{sowCfChgFarm}, #{sowCfOtherOut}, #{farrowNest}, #{farrowHealth}, #{farrowWeak}, #{farrowDead}, #{farrowjmh}, #{farrowWeight}, #{weanNest}, #{weanQualifiedCount}, #{weanCount}, #{weanDayAge}, #{weanWeight}, #{boarStart}, #{boarIn}, #{boarDead}, #{boarWeedOut}, #{boarSale}, #{boarOtherOut}, #{boarEnd},
+        #{sumAt}, #{farmId}, #{sowPhStart}, #{sowPhReserveIn}, #{sowPhWeanIn}, #{sowPhEntryIn}, #{sowPhChgFarmIn}, #{sowPhDead}, #{sowPhWeedOut}, #{sowPhSale}, #{sowPhChgFarm}, #{sowPhOtherOut}, #{mateHb}, #{mateDn}, #{mateFq}, #{mateLc}, #{mateYx}, #{matingCount}, #{pregPositive}, #{pregNegative}, #{pregFanqing}, #{pregLiuchan}, #{sowPhEnd}, #{sowCfStart}, #{sowCfEnd}, #{sowCfIn}, #{sowCfInFarmIn}, #{sowCfDead}, #{sowCfWeedOut}, #{sowCfSale}, #{sowCfChgFarm}, #{sowCfOtherOut}, #{farrowNest}, #{farrowHealth}, #{farrowWeak}, #{farrowDead}, #{farrowjmh}, #{farrowWeight}, #{weanNest}, #{weanQualifiedCount}, #{weanCount}, #{weanDayAge}, #{weanWeight}, #{boarStart}, #{boarIn}, #{boarDead}, #{boarWeedOut}, #{boarSale}, #{boarOtherOut}, #{boarEnd},
         now(), now(), 1
     </sql>
 
@@ -168,6 +173,11 @@
             <if test="sowPhSale != null">`sow_ph_sale` = #{sowPhSale},</if>
             <if test="sowPhChgFarm != null">`sow_ph_chg_farm` = #{sowPhChgFarm},</if>
             <if test="sowPhOtherOut != null">`sow_ph_other_out` = #{sowPhOtherOut},</if>
+            <if test="mateHb != null">`mate_hb` = #{mateHb},</if>
+            <if test="mateDn != null">`mate_dn` = #{mateDn},</if>
+            <if test="mateFq != null">`mate_fq` = #{mateFq},</if>
+            <if test="mateLc != null">`mate_lc` = #{mateLc},</if>
+            <if test="mateYx != null">`mate_yx` = #{mateYx},</if>
             <if test="matingCount != null">`mating_count` = #{matingCount},</if>
             <if test="pregPositive != null">`preg_positive` = #{pregPositive},</if>
             <if test="pregNegative != null">`preg_negative` = #{pregNegative},</if>

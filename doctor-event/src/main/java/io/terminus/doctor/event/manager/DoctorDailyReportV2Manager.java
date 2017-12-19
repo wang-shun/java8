@@ -246,6 +246,11 @@ public class DoctorDailyReportV2Manager {
         doctorPigDaily.setSowPhSale(pigStatisticDao.sowPhSale(criteria));
         doctorPigDaily.setSowPhChgFarm(pigStatisticDao.sowPhChgFarm(criteria));
         doctorPigDaily.setSowPhOtherOut(pigStatisticDao.sowPhOtherOut(criteria));
+        doctorPigDaily.setMateHb(pigStatisticDao.mateHb(criteria));
+        doctorPigDaily.setMateDn(pigStatisticDao.mateDn(criteria));
+        doctorPigDaily.setMateFq(pigStatisticDao.mateFq(criteria));
+        doctorPigDaily.setMateLc(pigStatisticDao.mateLc(criteria));
+        doctorPigDaily.setMateYx(pigStatisticDao.mateYx(criteria));
         doctorPigDaily.setMatingCount(pigStatisticDao.matingCount(criteria));
         doctorPigDaily.setPregPositive(pigStatisticDao.pregPositive(criteria));
         doctorPigDaily.setPregNegative(pigStatisticDao.pregNegative(criteria));
