@@ -176,4 +176,13 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
     public void deleteByFarmId(Long farmId, List<Integer> pigTypes)  {
         getSqlSession().delete(sqlId("deleteByFarmId"), ImmutableMap.of("farmId", farmId, "pigTypes", pigTypes));
     }
+
+    /**
+     * 查询指定时间处于开启状态的猪群
+     * @param date 日期 yyyy-MM-dd
+     * @return 猪群列表
+     */
+    public List<DoctorGroup> listOpenGroupsBy(String date){
+        return getSqlSession().selectList(sqlId("listOpenGroupsBy"), date);
+    }
 }

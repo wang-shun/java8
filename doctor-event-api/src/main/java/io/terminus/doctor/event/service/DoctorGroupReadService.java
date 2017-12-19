@@ -321,4 +321,11 @@ public interface DoctorGroupReadService {
     Response<Integer> sumPigletCount(List<Long> groupIds);
 
     Response<DoctorGroupTrack> findTrackByGroupId(Long groupId);
+
+    /**
+     * 查询指定时间处于开启状态的猪群
+     * @param date 日期 yyyy-MM-dd
+     * @return 猪群列表
+     */
+    Response<List<DoctorGroup>> listOpenGroupsBy(String date);
 }
