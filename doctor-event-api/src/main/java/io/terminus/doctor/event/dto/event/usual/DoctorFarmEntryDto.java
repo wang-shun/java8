@@ -38,7 +38,7 @@ public class DoctorFarmEntryDto extends BasePigEventInputDto implements Serializ
     /**
      * 原值
      */
-    private Double origin;
+    private String origin;
 
     @NotNull(message = "birthday.not.null")
     private Date birthday; // 猪生日

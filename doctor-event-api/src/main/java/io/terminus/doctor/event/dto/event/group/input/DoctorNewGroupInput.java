@@ -27,7 +27,7 @@ public class DoctorNewGroupInput extends BaseGroupInput implements Serializable 
     /**
      * 原值
      */
-    private Double origin;
+    private String origin;
 
     /**
      * 猪场id

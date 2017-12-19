@@ -45,11 +45,6 @@ public class DoctorGroup implements Serializable {
      * 猪群号
      */
     private String groupCode;
-
-    /**
-     * 原值
-     */
-    private Double origin;
     
     /**
      * 猪群批次号(雏鹰模式)

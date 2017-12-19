@@ -200,8 +200,6 @@ public class DoctorGroupManager {
         group.setCurrentBarnId(newGroupInput.getBarnId());
         group.setCurrentBarnName(newGroupInput.getBarnName());
 
-        group.setOrigin(newGroupInput.getOrigin());
-
         DoctorBarn barn = doctorBarnDao.findById(group.getInitBarnId());
         if (barn == null) {
             throw new ServiceException("barn.not.null");
