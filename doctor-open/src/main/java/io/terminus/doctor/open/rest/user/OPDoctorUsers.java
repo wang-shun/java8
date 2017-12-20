@@ -1,10 +1,14 @@
 package io.terminus.doctor.open.rest.user;
 
+import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
+import io.terminus.common.model.Response;
+import io.terminus.common.redis.utils.JedisTemplate;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.open.dto.DoctorServiceReviewDto;
@@ -36,15 +40,19 @@ import io.terminus.parana.auth.core.PermissionHelper;
 import io.terminus.parana.auth.model.Acl;
 import io.terminus.parana.auth.model.ParanaThreadVars;
 import io.terminus.parana.auth.model.PermissionData;
+import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
@@ -70,6 +78,12 @@ public class OPDoctorUsers {
     private final PrimaryUserReadService primaryUserReadService;
     private final ServiceBetaStatusHandler serviceBetaStatusHandler;
 
+    private final JedisTemplate jedisTemplate;
+
+    @Value("${session.redis-prefix}")
+    private String redisPrefix;
+
+
     //猪场软件链接url
     private final String farmManageMultiple = "pigdoctor://company?homepage_type=1";;
 
@@ -84,7 +98,7 @@ public class OPDoctorUsers {
                          AclLoader aclLoader,
                          PermissionHelper permissionHelper,
                          PrimaryUserReadService primaryUserReadService,
-                         ServiceBetaStatusHandler serviceBetaStatusHandler) {
+                         ServiceBetaStatusHandler serviceBetaStatusHandler, JedisTemplate jedisTemplate) {
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
         this.doctorUserReadService = doctorUserReadService;
@@ -96,6 +110,7 @@ public class OPDoctorUsers {
         this.permissionHelper = permissionHelper;
         this.primaryUserReadService = primaryUserReadService;
         this.serviceBetaStatusHandler = serviceBetaStatusHandler;
+        this.jedisTemplate = jedisTemplate;
     }
 
     @Value("${service-domain.pigmall:m.xrnm.com}")
@@ -242,6 +257,25 @@ public class OPDoctorUsers {
     @OpenMethod(key = "get.user.level.one.menu")
     public List<DoctorMenuDto> getUserLevelOneMenu() {
         return OPRespHelper.orOPEx(doctorMobileMenuReadService.findMenuByUserIdAndLevel(UserUtil.getUserId(), 1));
+    }
+
+    @OpenMethod(key = "get.user.by.sessionId", httpMethods = RequestMethod.GET, paramNames = {"sessionId"})
+    public User getUserBySessionId(String sessionId){
+        String userInfo = jedisTemplate.execute(jedis -> {
+            return jedis.get(redisPrefix + ":" + sessionId);
+        });
+        if (Strings.isNullOrEmpty(userInfo)) {
+            throw new JsonResponseException("user.not.login");
+        }
+
+        Map<String, Object> map = JsonMapperUtil.nonEmptyMapper().fromJson(userInfo, Map.class);
+        Integer userId = (Integer)map.get("userId");
+        Response<User> userResponse = doctorUserReadService.findById(userId.longValue());
+        if (!userResponse.isSuccess() || isNull(userResponse.getResult())) {
+            throw new JsonResponseException("user.not.found");
+        }
+
+        return userResponse.getResult();
     }
 
     private String getPigdoctorUrl(Long userId){

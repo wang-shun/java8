@@ -2,6 +2,13 @@ server:
   context-path: /
   port: 8081
 
+redis:
+  host: 101.201.44.35
+  port: 6379
+  max-total: 10
+  max-idle: 2
+  test-on-borrow: true
+
 session:
   cookie-context-path: /
   cookie-domain: doctor.com
