@@ -1602,6 +1602,7 @@ ADD COLUMN `apply_staff_id` BIGINT(20) NULL COMMENT '领用人编号' AFTER `app
 ALTER TABLE `doctor_warehouse_stock_monthly`
 ADD COLUMN `handle_date` DATE NULL COMMENT '处理日期' AFTER `updated_at`;
 
--- 猪 猪群原值
+-- 猪 猪群原值 2017-12-20
 ALTER TABLE `doctor_pig_events` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `remark`;
 ALTER TABLE `doctor_group_events` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `remark`;
+ALTER TABLE `doctor_pigs` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `pig_code`;
