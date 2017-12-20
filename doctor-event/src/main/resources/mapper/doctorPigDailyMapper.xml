@@ -251,7 +251,7 @@
 
     <select id="report" parameterType="map" resultMap="DoctorPigDailyMap">
         SELECT
-        sum(`sow_ph_start`) as sow_ph_start,
+        min(`sow_ph_start`) as sow_ph_start,
         sum(`sow_ph_reserve_in`) as sow_ph_reserve_in,
         sum(`sow_ph_wean_in`) as sow_ph_wean_in,
         sum(`sow_ph_entry_in`) as sow_ph_entry_in,
@@ -266,9 +266,9 @@
         sum(`preg_negative`) as preg_negative,
         sum(`preg_fanqing`) as preg_fanqing,
         sum(`preg_liuchan`) as preg_liuchan,
-        sum(`sow_ph_end`) as sow_ph_end,
-        sum(`sow_cf_start`) as sow_cf_start,
-        sum(`sow_cf_end`) as sow_cf_end,
+        max(`sow_ph_end`) as sow_ph_end,
+        min(`sow_cf_start`) as sow_cf_start,
+        max(`sow_cf_end`) as sow_cf_end,
         sum(`sow_cf_in`) as sow_cf_in,
         sum(`sow_cf_in_farm_in`) as sow_cf_in_farm_in,
         sum(`sow_cf_dead`) as sow_cf_dead,
@@ -287,13 +287,13 @@
         sum(`wean_count`) as wean_count,
         sum(`wean_day_age`) as wean_day_age,
         sum(`wean_weight`) as wean_weight,
-        sum(`boar_start`) as boar_start,
+        min(`boar_start`) as boar_start,
         sum(`boar_in`) as boar_in,
         sum(`boar_dead`) as boar_dead,
         sum(`boar_weed_out`) as boar_weed_out,
         sum(`boar_sale`) as boar_sale,
         sum(`boar_other_out`) as boar_other_out,
-        sum(`boar_end`) as boar_end
+        max(`boar_end`) as boar_end
         FROM
         <include refid="tb"/>
         <where>
