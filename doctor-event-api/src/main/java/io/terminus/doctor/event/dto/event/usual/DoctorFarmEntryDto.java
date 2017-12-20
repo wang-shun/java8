@@ -29,7 +29,6 @@ public class DoctorFarmEntryDto extends BasePigEventInputDto implements Serializ
 
     private static final long serialVersionUID = -3221757737932679045L;
 
-
     @NotNull(message = "birthday.not.null")
     private Date birthday; // 猪生日
 
@@ -76,6 +75,11 @@ public class DoctorFarmEntryDto extends BasePigEventInputDto implements Serializ
     private Integer left;   //左乳头的数量
 
     private Integer right;  //右乳头数量
+
+    /**
+     * 原值
+     */
+    private Double origin;
 
     /**
      * 迁移猪的外部Id(仅迁移用)
