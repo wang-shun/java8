@@ -112,7 +112,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         event.setWeight(EventUtil.getWeight(event.getAvgWeight(), event.getQuantity()));
         event.setAmount(moveIn.getAmount());
         event.setInType(moveIn.getInType());
-
+        event.setOrigin(moveIn.getOrigin());
         event.setTransGroupType(DoctorGroupEvent.TransGroupType.OUT.getValue());
         if (moveIn.getFromBarnId() != null) {
             DoctorBarn fromBarn = getBarnById(moveIn.getFromBarnId());
