@@ -124,6 +124,12 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
      */
     private String sowCode;
 
+    /**
+     * 原值
+     *
+     */
+    private Double origin;
+
     @Override
     public Map<String, String> descMap() {
         Map<String, String> map = new HashMap<>();

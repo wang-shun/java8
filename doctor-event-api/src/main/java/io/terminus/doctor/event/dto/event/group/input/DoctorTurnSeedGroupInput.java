@@ -68,6 +68,11 @@ public class DoctorTurnSeedGroupInput extends BaseGroupInput implements Serializ
     @Min(value = 0, message = "weight.not.less.zero")
     private Double weight;
 
+    /**
+     * 原值
+     */
+    private Double origin;
+
     @Override
     public Map<String, String> descMap() {
         Map<String, String> descMap = new HashMap<>();
