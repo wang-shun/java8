@@ -1709,3 +1709,6 @@ create table doctor_pig_dailies (
   KEY `idx_doctor_pig_dailies_farm_id` (`farm_id`),
   KEY `idx_doctor_pig_dailies_sum_at` (`sum_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪相关报表';
+-- 猪 猪群原值
+ALTER TABLE `doctor_pig_events` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `remark`;
+ALTER TABLE `doctor_group_events` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `remark`;
