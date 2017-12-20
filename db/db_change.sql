@@ -1602,6 +1602,7 @@ ADD COLUMN `apply_staff_id` BIGINT(20) NULL COMMENT '领用人编号' AFTER `app
 ALTER TABLE `doctor_warehouse_stock_monthly`
 ADD COLUMN `handle_date` DATE NULL COMMENT '处理日期' AFTER `updated_at`;
 
+<<<<<<< 21929a4a66cb937e9714104bc85e29ee1ea7f256
 <<<<<<< 9862197c64335b8aee6350f495284aef8af18c62
 -- 标识处猪群转场触发的转入，刷新历史数据
 update
@@ -1706,6 +1707,8 @@ create table doctor_pig_dailies (
   KEY `idx_doctor_pig_dailies_farm_id` (`farm_id`),
   KEY `idx_doctor_pig_dailies_sum_at` (`sum_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪相关报表';
--- 猪 猪群原值
+-- 猪 猪群原值 2017-12-20
+>>>>>>> doctorPig add origin
 ALTER TABLE `doctor_pig_events` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `remark`;
 ALTER TABLE `doctor_group_events` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `remark`;
+ALTER TABLE `doctor_pigs` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `pig_code`;
