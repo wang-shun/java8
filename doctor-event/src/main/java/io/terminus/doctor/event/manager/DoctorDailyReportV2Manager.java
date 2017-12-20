@@ -276,6 +276,7 @@ public class DoctorDailyReportV2Manager {
         doctorPigDaily.setSowCfChgFarm(pigStatisticDao.sowCfChgFarm(criteria));
         doctorPigDaily.setSowCfOtherOut(pigStatisticDao.sowCfOtherOut(criteria));
         doctorPigDaily.setFarrowNest(pigStatisticDao.farrowNest(criteria));
+        doctorPigDaily.setFarrowLive(pigStatisticDao.farrowLive(criteria));
         doctorPigDaily.setFarrowHealth(pigStatisticDao.farrowHealth(criteria));
         doctorPigDaily.setFarrowWeak(pigStatisticDao.farrowWeak(criteria));
         doctorPigDaily.setFarrowDead(pigStatisticDao.farrowDead(criteria));

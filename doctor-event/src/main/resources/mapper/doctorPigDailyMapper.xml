@@ -36,6 +36,7 @@
         <result property="sowCfChgFarm" column="sow_cf_chg_farm"/>
         <result property="sowCfOtherOut" column="sow_cf_other_out"/>
         <result property="farrowNest" column="farrow_nest"/>
+        <result property="farrowLive" column="farrow_live"/>
         <result property="farrowHealth" column="farrow_health"/>
         <result property="farrowWeak" column="farrow_weak"/>
         <result property="farrowDead" column="farrow_dead"/>
@@ -68,12 +69,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `sum_at`, `farm_id`, `sow_ph_start`, `sow_ph_reserve_in`, `sow_ph_wean_in`, `sow_ph_entry_in`, `sow_ph_chg_farm_in`, `sow_ph_dead`, `sow_ph_weed_out`, `sow_ph_sale`, `sow_ph_chg_farm`, `sow_ph_other_out`, mate_hb, mate_dn, mate_fq, mate_lc, mate_yx, `mating_count`, `preg_positive`, `preg_negative`, `preg_fanqing`, `preg_liuchan`, `sow_ph_end`, `sow_cf_start`, `sow_cf_end`, `sow_cf_in`, `sow_cf_in_farm_in`, `sow_cf_dead`, `sow_cf_weed_out`, `sow_cf_sale`, `sow_cf_chg_farm`, `sow_cf_other_out`, `farrow_nest`, `farrow_health`, `farrow_weak`, `farrow_dead`, `farrowjmh`, `farrow_weight`, `wean_nest`, `wean_qualified_count`, `wean_count`, `wean_day_age`, `wean_weight`, `boar_start`, `boar_in`, `boar_dead`, `boar_weed_out`, `boar_sale`, `boar_other_out`, `boar_end`,
+        `sum_at`, `farm_id`, `sow_ph_start`, `sow_ph_reserve_in`, `sow_ph_wean_in`, `sow_ph_entry_in`, `sow_ph_chg_farm_in`, `sow_ph_dead`, `sow_ph_weed_out`, `sow_ph_sale`, `sow_ph_chg_farm`, `sow_ph_other_out`, mate_hb, mate_dn, mate_fq, mate_lc, mate_yx, `mating_count`, `preg_positive`, `preg_negative`, `preg_fanqing`, `preg_liuchan`, `sow_ph_end`, `sow_cf_start`, `sow_cf_end`, `sow_cf_in`, `sow_cf_in_farm_in`, `sow_cf_dead`, `sow_cf_weed_out`, `sow_cf_sale`, `sow_cf_chg_farm`, `sow_cf_other_out`, `farrow_nest`, farrow_live, `farrow_health`, `farrow_weak`, `farrow_dead`, `farrowjmh`, `farrow_weight`, `wean_nest`, `wean_qualified_count`, `wean_count`, `wean_day_age`, `wean_weight`, `boar_start`, `boar_in`, `boar_dead`, `boar_weed_out`, `boar_sale`, `boar_other_out`, `boar_end`,
         created_at, updated_at, version
     </sql>
 
     <sql id="vals">
-        #{sumAt}, #{farmId}, #{sowPhStart}, #{sowPhReserveIn}, #{sowPhWeanIn}, #{sowPhEntryIn}, #{sowPhChgFarmIn}, #{sowPhDead}, #{sowPhWeedOut}, #{sowPhSale}, #{sowPhChgFarm}, #{sowPhOtherOut}, #{mateHb}, #{mateDn}, #{mateFq}, #{mateLc}, #{mateYx}, #{matingCount}, #{pregPositive}, #{pregNegative}, #{pregFanqing}, #{pregLiuchan}, #{sowPhEnd}, #{sowCfStart}, #{sowCfEnd}, #{sowCfIn}, #{sowCfInFarmIn}, #{sowCfDead}, #{sowCfWeedOut}, #{sowCfSale}, #{sowCfChgFarm}, #{sowCfOtherOut}, #{farrowNest}, #{farrowHealth}, #{farrowWeak}, #{farrowDead}, #{farrowjmh}, #{farrowWeight}, #{weanNest}, #{weanQualifiedCount}, #{weanCount}, #{weanDayAge}, #{weanWeight}, #{boarStart}, #{boarIn}, #{boarDead}, #{boarWeedOut}, #{boarSale}, #{boarOtherOut}, #{boarEnd},
+        #{sumAt}, #{farmId}, #{sowPhStart}, #{sowPhReserveIn}, #{sowPhWeanIn}, #{sowPhEntryIn}, #{sowPhChgFarmIn}, #{sowPhDead}, #{sowPhWeedOut}, #{sowPhSale}, #{sowPhChgFarm}, #{sowPhOtherOut}, #{mateHb}, #{mateDn}, #{mateFq}, #{mateLc}, #{mateYx}, #{matingCount}, #{pregPositive}, #{pregNegative}, #{pregFanqing}, #{pregLiuchan}, #{sowPhEnd}, #{sowCfStart}, #{sowCfEnd}, #{sowCfIn}, #{sowCfInFarmIn}, #{sowCfDead}, #{sowCfWeedOut}, #{sowCfSale}, #{sowCfChgFarm}, #{sowCfOtherOut}, #{farrowNest}, #{farrowLive}, #{farrowHealth}, #{farrowWeak}, #{farrowDead}, #{farrowjmh}, #{farrowWeight}, #{weanNest}, #{weanQualifiedCount}, #{weanCount}, #{weanDayAge}, #{weanWeight}, #{boarStart}, #{boarIn}, #{boarDead}, #{boarWeedOut}, #{boarSale}, #{boarOtherOut}, #{boarEnd},
         now(), now(), 1
     </sql>
 
@@ -107,6 +108,7 @@
             <if test="sowCfChgFarm != null">AND `sow_cf_chg_farm` = #{sowCfChgFarm}</if>
             <if test="sowCfOtherOut != null">AND `sow_cf_other_out` = #{sowCfOtherOut}</if>
             <if test="farrowNest != null">AND `farrow_nest` = #{farrowNest}</if>
+            <if test="farrowLive != null">AND `farrow_live` = #{farrowLive}</if>
             <if test="farrowHealth != null">AND `farrow_health` = #{farrowHealth}</if>
             <if test="farrowWeak != null">AND `farrow_weak` = #{farrowWeak}</if>
             <if test="farrowDead != null">AND `farrow_dead` = #{farrowDead}</if>
@@ -194,6 +196,7 @@
             <if test="sowCfChgFarm != null">`sow_cf_chg_farm` = #{sowCfChgFarm},</if>
             <if test="sowCfOtherOut != null">`sow_cf_other_out` = #{sowCfOtherOut},</if>
             <if test="farrowNest != null">`farrow_nest` = #{farrowNest},</if>
+            <if test="farrowLive != null">`farrow_live` = #{farrowLive},</if>
             <if test="farrowHealth != null">`farrow_health` = #{farrowHealth},</if>
             <if test="farrowWeak != null">`farrow_weak` = #{farrowWeak},</if>
             <if test="farrowDead != null">`farrow_dead` = #{farrowDead},</if>

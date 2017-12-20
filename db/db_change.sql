@@ -1678,6 +1678,7 @@ create table doctor_pig_dailies (
   sow_cf_chg_farm int(11) DEFAULT NULL COMMENT '产房母猪转场数量',
   sow_cf_other_out int(11) DEFAULT NULL COMMENT '产房母猪其他减少数量',
   farrow_nest int(11) DEFAULT NULL COMMENT '产房分娩窝数',
+  farrow_live int(11) DEFAULT NULL COMMENT '产房产活仔数',
   farrow_health int(11) DEFAULT NULL COMMENT '产房产健仔数',
   farrow_weak int(11) DEFAULT NULL COMMENT '产房产弱仔数',
   farrow_dead int(11) DEFAULT NULL COMMENT '产房死胎数',
