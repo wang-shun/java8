@@ -43,32 +43,72 @@ public class DoctorPigReportReadServiceImpl implements DoctorPigReportReadServic
 
         DoctorPigDaily pigDaily = getPigDaily(Collections.singletonList(farmId), start, reportTime);
 
-        DoctorPigReport doctorPigReport = generate(pigDaily);
+        DoctorPigReport doctorPigReport = generate(pigDaily, new SpecialKeyHandle() {
+            @Override
+            public int generateTransferIn(DoctorPigDaily pigDaily) {
 
-        //前推114天配种数量
-        Date before = DateUtils.addDays(start, -114);
-        DoctorPigDaily beforePigDaily = doctorPigDailyDao.countByFarm(pigDaily.getFarmId(), before, before);
-        doctorPigReport.setEarlyMating(null == beforePigDaily ? 0 : beforePigDaily.getMatingCount());
+                //转入=后备进场+后备转入+配怀转场转入+产房转场转入
+                return pigDaily.getSowPhReserveIn() +
+                        pigDaily.getSowPhEntryIn() +
+                        pigDaily.getSowPhChgFarmIn() +
+                        pigDaily.getSowCfInFarmIn();
+            }
+
+            @Override
+            public int generateEarlyMating(DoctorPigDaily pigDaily) {
+                //前推114天配种数量
+                Date before = DateUtils.addDays(start, -114);
+                DoctorPigDaily beforePigDaily = doctorPigDailyDao.countByFarm(pigDaily.getFarmId(), before, before);
+                return null == beforePigDaily ? 0 : beforePigDaily.getMatingCount();
+            }
+
+            @Override
+            public int generateLateFarrowNest(DoctorPigDaily pigDaily) {
+
+                Date after = DateUtils.addDays(start, 114);
+                DoctorPigDaily afterPigDaily = doctorPigDailyDao.countByFarm(farmId, after, after);
+                return null == afterPigDaily ? 0 : afterPigDaily.getFarrowNest();
+            }
+        });
+
 
         //todo 前期分娩窝数
 //            doctorPigReport.setEarlyFarrowNest();
-        doctorPigReport.setEarlyFarrowRate(pigDaily.getFarrowNest() / doctorPigReport.getEarlyMating() * 100);
-        Date after = DateUtils.addDays(start, 114);
-        DoctorPigDaily afterPigDaily = doctorPigDailyDao.countByFarm(farmId, after, after);
-        doctorPigReport.setLateFarrowNest(null == afterPigDaily ? 0 : afterPigDaily.getFarrowNest());
+
 
         return doctorPigReport;
     }
 
     @Override
-    public DoctorPigReport companyReport(Long orgId, Date start, ReportTime reportTime) {
+    public DoctorPigReport companyReport(List<Long> farmIds, Date start, ReportTime reportTime) {
 
         //TODO 转场转入无意义
-        return null;
+
+        DoctorPigDaily pigDaily = getPigDaily(farmIds, start, reportTime);
+
+        return generate(pigDaily, new SpecialKeyHandle() {
+            @Override
+            public int generateTransferIn(DoctorPigDaily pigDaily) {
+                return pigDaily.getSowPhReserveIn() +
+                        pigDaily.getSowPhEntryIn() +
+                        pigDaily.getSowPhChgFarmIn() +
+                        pigDaily.getSowCfInFarmIn();
+            }
+
+            @Override
+            public int generateEarlyMating(DoctorPigDaily pigDaily) {
+                return 0;
+            }
+
+            @Override
+            public int generateLateFarrowNest(DoctorPigDaily pigDaily) {
+                return 0;
+            }
+        });
     }
 
     @Override
-    public DoctorPigReport orgReport(Long orgId, Date start, ReportTime reportTime) {
+    public DoctorPigReport orgReport(List<Long> farmIds, Date start, ReportTime reportTime) {
         return null;
     }
 
@@ -122,7 +162,7 @@ public class DoctorPigReportReadServiceImpl implements DoctorPigReportReadServic
     }
 
 
-    private DoctorPigReport generate(DoctorPigDaily pigDaily) {
+    private DoctorPigReport generate(DoctorPigDaily pigDaily, SpecialKeyHandle specialKeyHandle) {
 
         DoctorPigReport doctorPigReport = new DoctorPigReport();
 
@@ -131,8 +171,10 @@ public class DoctorPigReportReadServiceImpl implements DoctorPigReportReadServic
         //母猪区=配怀+产房
         //期初
         Integer sowStart = (pigDaily.getSowCfStart() + pigDaily.getSowPhStart());
-        //转入=后备进场+后备转入+配怀转场转入+产房转场转入
-        Integer sowTransferIn = pigDaily.getSowPhReserveIn() + pigDaily.getSowPhEntryIn() + pigDaily.getSowPhChgFarmIn() + pigDaily.getSowCfInFarmIn();
+
+        //转入
+        Integer sowTransferIn = specialKeyHandle.generateTransferIn(pigDaily);
+
         //母猪死亡
         Integer sowDead = pigDaily.getSowCfDead() + pigDaily.getSowPhDead();
         //母猪淘汰
@@ -146,7 +188,10 @@ public class DoctorPigReportReadServiceImpl implements DoctorPigReportReadServic
         doctorPigReport.setSowEnd(pigDaily.getSowCfEnd() + pigDaily.getSowPhEnd());
         doctorPigReport.setSowDailyQuantity(doctorPigReport.getSowEnd() / 1);
 
+        doctorPigReport.setEarlyMating(specialKeyHandle.generateEarlyMating(pigDaily));
+        doctorPigReport.setLateFarrowNest(specialKeyHandle.generateLateFarrowNest(pigDaily));
 
+        doctorPigReport.setEarlyFarrowRate(pigDaily.getFarrowNest() / doctorPigReport.getEarlyMating() * 100);
         doctorPigReport.setLateFarrowRate(doctorPigReport.getLateFarrowNest() / pigDaily.getMatingCount() * 100);
         //产仔总数=尖子数+弱子数+
         Integer farrowAll = pigDaily.getFarrowHealth() + pigDaily.getFarrowWeak() + pigDaily.getFarrowjmh() + pigDaily.getFarrowDead();
@@ -162,6 +207,34 @@ public class DoctorPigReportReadServiceImpl implements DoctorPigReportReadServic
 
 
         return doctorPigReport;
+    }
+
+    private interface SpecialKeyHandle {
+        /**
+         * 获取转入数量
+         *
+         * @param pigDaily
+         * @return
+         */
+        int generateTransferIn(DoctorPigDaily pigDaily);
+
+        /**
+         * 产房前期配种数量
+         *
+         * @param pigDaily
+         * @return
+         */
+        int generateEarlyMating(DoctorPigDaily pigDaily);
+
+        /**
+         * 产房后期分娩窝数
+         *
+         * @param pigDaily
+         * @return
+         */
+        int generateLateFarrowNest(DoctorPigDaily pigDaily);
+
+
     }
 
 }
