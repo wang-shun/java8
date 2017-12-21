@@ -124,7 +124,7 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
                 doctorDailyReportV2Manager.flushPigDaily(criteria);
             });
 
-            log.info("flush pig daily for pigType end, consume:{}minute", stopwatch.elapsed(TimeUnit.MINUTES));
+            log.info("flush pig daily end, consume:{}minute", stopwatch.elapsed(TimeUnit.MINUTES));
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("flush pig daily failed, farmId:{}, startAt:{}, endAt:{}, cause:{}",
