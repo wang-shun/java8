@@ -371,6 +371,18 @@
         </where>
     </select>
 
+    <select id="earlyFarrowNest" parameterType="map" resultType="int">
+        select count(1)
+        from doctor_pig_events  a left join doctor_pig_events b on a.pig_id = b.pig_id
+        where a.farm_id =#{farmId}
+        and a.type = 9
+        and a.`current_mating_count` = 1
+        and a.event_at = #{sumAt}
+        and b.type = 15
+        and a.`parity` = b.`parity`
+        group by a.pig_id;
+    </select>
+
     <select id="farrowNest" parameterType="map" resultType="int">
         SELECT ifnull(count(1), 0)
         FROM doctor_pig_events

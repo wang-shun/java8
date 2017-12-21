@@ -178,6 +178,11 @@ public class DoctorPigDaily implements Serializable {
     private Integer sowCfOtherOut;
 
     /**
+     * 产房前期分娩窝数（t+1）
+     */
+    private Integer earlyFarrowNest;
+
+    /**
      * 产房分娩窝数
      */
     private Integer farrowNest;

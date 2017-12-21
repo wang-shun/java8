@@ -186,6 +186,8 @@ public class DoctorDailyReportV2Manager {
             flushGroupDaily(criteria);
         });
         flushPigDaily(criteria);
+
+        // TODO: 17/12/21 效率指标 
     }
 
     /**
@@ -275,6 +277,7 @@ public class DoctorDailyReportV2Manager {
         doctorPigDaily.setSowCfSale(pigStatisticDao.sowCfSale(criteria));
         doctorPigDaily.setSowCfChgFarm(pigStatisticDao.sowCfChgFarm(criteria));
         doctorPigDaily.setSowCfOtherOut(pigStatisticDao.sowCfOtherOut(criteria));
+        doctorPigDaily.setEarlyFarrowNest(pigStatisticDao.earlyFarrowNest(criteria));
         doctorPigDaily.setFarrowNest(pigStatisticDao.farrowNest(criteria));
         doctorPigDaily.setFarrowLive(pigStatisticDao.farrowLive(criteria));
         doctorPigDaily.setFarrowHealth(pigStatisticDao.farrowHealth(criteria));
