@@ -35,7 +35,7 @@
         FROM doctor_pig_events a
         WHERE
         a.farm_id = #{farmId} AND
-        a.event_at &gt;= #{sumAt} AND
+        a.event_at &gt; #{sumAt} AND
         a.kind = 1 AND
         (a.barn_type = 7 or type = 14) and
         a.status = 1 and
@@ -63,7 +63,7 @@
         FROM doctor_pig_events
         WHERE
         farm_id = #{farmId} AND
-        event_at &gt;= #{sumAt} AND
+        event_at &gt; #{sumAt} AND
         kind = 1 AND
         status = 1 AND
         event_source != 5 AND
@@ -176,52 +176,67 @@
 
     <!-- 配后备-->
     <select id="mateHb" parameterType="map" resultType="int">
-        select ifnull(count(1),0) from doctor_pig_events
-        where `type` = 9
-        and kind = 1
-        and `doctor_mate_type` = 1
-        and `current_mating_count` = 1
-        <include refid="criteria" />
+        select ifnull(count(1),0)
+        from doctor_pig_events
+        <where>
+            <include refid="criteria" />
+            and `type` = 9
+            and kind = 1
+            and `doctor_mate_type` = 1
+            and `current_mating_count` = 1
+        </where>
     </select>
 
     <!-- 配流产-->
     <select id="mateLc" parameterType="map" resultType="int">
-        select ifnull(count(1),0) from doctor_pig_events
-        where `type` = 9
-        and kind = 1
-        and `doctor_mate_type` in (2, 3)
-        and `current_mating_count` = 1
-        <include refid="criteria" />
+        select ifnull(count(1),0)
+        from doctor_pig_events
+        <where>
+            <include refid="criteria" />
+            and `type` = 9
+            and kind = 1
+            and `doctor_mate_type` in (2, 3)
+            and `current_mating_count` = 1
+        </where>
     </select>
 
     <!-- 配断奶-->
     <select id="mateDn" parameterType="map" resultType="int">
-        select ifnull(count(1),0) from doctor_pig_events
-        where `type` = 9
-        and kind = 1
-        and `doctor_mate_type` = 4
-        and `current_mating_count` = 1
-        <include refid="criteria" />
+        select ifnull(count(1),0)
+        from doctor_pig_events
+        <where>
+            <include refid="criteria" />
+            and `type` = 9
+            and kind = 1
+            and `doctor_mate_type` = 4
+            and `current_mating_count` = 1
+        </where>
     </select>
 
     <!-- 配阴性-->
     <select id="mateYx" parameterType="map" resultType="int">
-        select ifnull(count(1),0) from doctor_pig_events
-        where `type` = 9
-        and kind = 1
-        and `doctor_mate_type` = 5
-        and `current_mating_count` = 1
-        <include refid="criteria" />
+        select ifnull(count(1),0)
+        from doctor_pig_events
+        <where>
+            <include refid="criteria" />
+            and `type` = 9
+            and kind = 1
+            and `doctor_mate_type` = 5
+            and `current_mating_count` = 1
+        </where>
     </select>
 
     <!-- 配返情-->
     <select id="mateFq" parameterType="map" resultType="int">
         select ifnull(count(1),0) from doctor_pig_events
-        where `type` = 9
-        and kind = 1
-        and `doctor_mate_type` = 6
-        and `current_mating_count` = 1
-        <include refid="criteria" />
+        <where>
+            <include refid="criteria" />
+            and `type` = 9
+            and kind = 1
+            and `doctor_mate_type` = 6
+            and `current_mating_count` = 1
+        </where>
+
     </select>
 
     <select id="matingCount" parameterType="map" resultType="int">
