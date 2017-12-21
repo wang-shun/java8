@@ -265,14 +265,14 @@ public class OPDoctorUsers {
             return jedis.get(redisPrefix + ":" + sessionId);
         });
         if (Strings.isNullOrEmpty(userInfo)) {
-            throw new JsonResponseException("user.not.login");
+            throw new OPClientException("user.not.login");
         }
 
         Map<String, Object> map = JsonMapperUtil.nonEmptyMapper().fromJson(userInfo, Map.class);
         Integer userId = (Integer)map.get("userId");
         Response<User> userResponse = doctorUserReadService.findById(userId.longValue());
         if (!userResponse.isSuccess() || isNull(userResponse.getResult())) {
-            throw new JsonResponseException("user.not.found");
+            throw new OPClientException("user.not.found");
         }
 
         return userResponse.getResult();
