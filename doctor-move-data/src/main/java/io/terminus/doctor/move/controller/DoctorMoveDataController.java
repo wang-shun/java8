@@ -1254,6 +1254,15 @@ public class DoctorMoveDataController {
         return true;
     }
 
+
+    @RequestMapping(value = "/deleteOrg", method = RequestMethod.GET)
+    public Boolean deleteOrg(@RequestParam Long orgId) {
+        log.info("delete org starting, orgId:{}");
+        doctorMoveDataService.deleteOrg(orgId);
+        log.info("delete org ending");
+        return true;
+    }
+
     @RequestMapping(value = "/deleteFarm", method = RequestMethod.GET)
     public Boolean deleteFarm(@RequestParam Long farmId) {
         log.info("delete farm starting, farmId:{}");

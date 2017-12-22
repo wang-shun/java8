@@ -7,6 +7,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
@@ -103,10 +104,12 @@ import io.terminus.doctor.move.model.View_EventListSow;
 import io.terminus.doctor.move.model.View_GainCardList;
 import io.terminus.doctor.move.model.View_SowCardList;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
+import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
@@ -169,6 +172,8 @@ public class DoctorMoveDataService {
     private DoctorGroupEventManager doctorGroupEventManager;
     @Autowired
     private DoctorFarmDao doctorFarmDao;
+    @Autowired
+    private DoctorOrgDao doctorOrgDao;
     @Autowired
     private SubDao subDao;
     @Autowired
@@ -2832,6 +2837,18 @@ public class DoctorMoveDataService {
         User user = userDao.findById(userId);
         user.setName(newName);
         userWriteService.update(user);
+    }
+
+    @Transactional
+    public void deleteOrg(Long orgId) {
+        List<DoctorOrg> subOrgs = doctorOrgDao.findOrgByParentId(orgId);
+        if (!Arguments.isNullOrEmpty(subOrgs)) {
+            throw new JsonResponseException("clique.not.allow.delete");
+        }
+
+        List<DoctorFarm> farmList = doctorFarmDao.findByOrgId(orgId);
+        farmList.forEach(doctorFarm -> deleteFarm(doctorFarm.getId()));
+        doctorOrgDao.delete(orgId);
     }
 
     /**

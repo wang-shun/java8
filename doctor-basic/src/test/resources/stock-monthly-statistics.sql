@@ -1,4 +1,5 @@
-insert into doctor_warehouse_stock_monthly(id,warehouse_id,material_id,handle_year,handle_month,balance_quantity,balacne_amount,handle_date)values (1,1,1,2017,1,100,200,'2017-01-01'),
+insert into doctor_warehouse_stock_monthly(id,warehouse_id,material_id,handle_year,handle_month,balance_quantity,balacne_amount,handle_date)values
+(1,1,1,2017,1,100,200,'2017-01-01'),
 (2,1,1,2017,2,200,300,'2017-02-01'),
 (3,1,1,2017,3,300,400,'2017-03-01'),
 (4,1,1,2017,4,400,500,'2017-04-01'),

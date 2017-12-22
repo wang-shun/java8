@@ -11,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.InvalidPropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -21,6 +22,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(DoctorWarehouseStockWriteServiceTest.ServiceConfig.class)
 @ActiveProfiles("test")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class DoctorWarehousePurchaseManagerTest {
 
     @Autowired
@@ -30,7 +32,7 @@ public class DoctorWarehousePurchaseManagerTest {
 
     @Test
     @Sql(statements = "insert into doctor_warehouse_handle_detail(id,material_handle_id,material_purchase_id)values(888,888,888)")
-    @Sql(statements = "insert into doctor_warehouse_purchase(id,handle_quantity)values(888,0)")
+    @Sql(statements = "insert into doctor_warehouse_purchase(id,handle_quantity)values(777,1),(888,0),(9999,1)")
     public void testDeletePurchase() {
         DoctorWarehouseMaterialHandle materialHandle = new DoctorWarehouseMaterialHandle();
         materialHandle.setId(888L);
