@@ -2551,7 +2551,6 @@
         from doctor_pig_events
         where event_at &gt; #{startAt}
         and farm_id = #{farmId}
-        and pig_status_before != pig_status_after
         and type in(2,6,11,14,20)
         and barn_type in(5,6)
         and status =1
