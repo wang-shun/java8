@@ -71,6 +71,7 @@ public class DoctorTurnSeedGroupInput extends BaseGroupInput implements Serializ
     /**
      * 原值
      */
+    @NotNull(message = "origin.not.null")
     private Double origin;
 
     @Override

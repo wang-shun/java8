@@ -128,6 +128,7 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
      * 原值
      *
      */
+    @NotNull(message = "origin.not.null")
     private Double origin;
 
     @Override
