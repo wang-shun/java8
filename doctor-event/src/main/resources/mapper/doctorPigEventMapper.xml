@@ -378,6 +378,12 @@
                 #{i}
             </foreach>
         </if>
+        <if test="farmIds != null &amp;&amp; farmIds.size() > 0">
+            AND `farmId` IN
+            <foreach collection="farmIds" item="i" open="(" close=")" separator=",">
+                #{i}
+            </foreach>
+        </if>
         <if test="barnTypes != null &amp;&amp; barnTypes.size() > 0">
             AND `barn_type` IN
             <foreach collection="barnTypes" item="barnType" open="(" close=")" separator=",">
