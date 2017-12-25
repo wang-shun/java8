@@ -1710,12 +1710,20 @@ create table doctor_pig_dailies (
   KEY `idx_doctor_pig_dailies_sum_at` (`sum_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪相关报表';
 -- 猪 猪群原值 2017-12-20
->>>>>>> doctorPig add origin
 ALTER TABLE `doctor_pig_events` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `remark`;
 ALTER TABLE `doctor_group_events` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `remark`;
 ALTER TABLE `doctor_pigs` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `pig_code`;
 -- 标识处猪群转场触发的转入，刷新历史数据
-update
-doctor_group_events a left join doctor_group_events b on a.rel_group_event_id = b.id
-set a.in_type = 5, a.extra = replace(replace(a.extra, '"inType":3', '"inType":5'), '群间转移', '转场转入')
-where a.type = 2 and b.type = 9 and a.status = 1;
+
+
+-- 添加猪场月度母猪非生产天数表 2017-12-25
+CREATE TABLE `doctor_report_npds` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `farm_id` bigint(20) DEFAULT NULL,
+  `sum_at` date DEFAULT NULL COMMENT '报表日期',
+  `npd` int(11) DEFAULT NULL COMMENT '非生产总天数',
+  `sow_quantity` int(11) DEFAULT NULL COMMENT '统计的母猪的数量',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场月度母猪非生产天数表';
