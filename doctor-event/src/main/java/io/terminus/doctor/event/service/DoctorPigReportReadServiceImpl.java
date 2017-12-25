@@ -2,13 +2,16 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorPigDailyDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorPigReport;
+import io.terminus.doctor.event.enums.ReportTime;
 import io.terminus.doctor.event.model.DoctorPigDaily;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -55,24 +58,7 @@ public class DoctorPigReportReadServiceImpl implements DoctorPigReportReadServic
                         pigDaily.getSowCfInFarmIn();
             }
 
-//            @Override
-//            public int generateEarlyMating(DoctorPigDaily pigDaily) {
-//                //前推114天配种数量
-//                Date before = DateUtils.addDays(start, -114);
-//                DoctorPigDaily beforePigDaily = doctorPigDailyDao.countByFarm(pigDaily.getFarmId(), before, before);
-//                return null == beforePigDaily ? 0 : beforePigDaily.getMatingCount();
-//            }
-//
-//            @Override
-//            public int generateLateFarrowNest(DoctorPigDaily pigDaily) {
-//
-//                Date after = DateUtils.addDays(start, 114);
-//                DoctorPigDaily afterPigDaily = doctorPigDailyDao.countByFarm(farmId, after, after);
-//                return null == afterPigDaily ? 0 : afterPigDaily.getFarrowNest();
-//            }
         });
-
-
         //todo 前期分娩窝数
 //            doctorPigReport.setEarlyFarrowNest();
 
@@ -105,12 +91,13 @@ public class DoctorPigReportReadServiceImpl implements DoctorPigReportReadServic
     }
 
 
-    private PigDailyContext getDuration(Date countDate, ReportTime reportTime) {
+    public DateDuration getDuration(Date countDate, ReportTime reportTime) {
 
         Date start, end;
 
         if (reportTime == ReportTime.DAY) {
-            start = end = countDate;
+            start = countDate;
+            end = Dates.endOfDay(countDate);
         } else if (reportTime == ReportTime.WEEK) {
             start = DateUtil.weekStart(countDate);
             end = DateUtil.weekEnd(countDate);
@@ -143,16 +130,18 @@ public class DoctorPigReportReadServiceImpl implements DoctorPigReportReadServic
             start = DateUtil.toYYYYMM(year + "-01");
             end = DateUtil.getMonthEnd(new DateTime(year, 12, 1, 0, 0)).toDate();
         }
-        return new PigDailyContext(start, end);
+        return new DateDuration(start, end);
     }
 
     private PigDailyContext getPigDaily(List<Long> farmIds, Date countDate, ReportTime reportTime) {
         if (farmIds.isEmpty())
             throw new ServiceException("");
 
-        PigDailyContext pigDailyContext = getDuration(countDate, reportTime);
-        Date start = pigDailyContext.getStart();
-        Date end = pigDailyContext.getEnd();
+        PigDailyContext pigDailyContext = new PigDailyContext();
+
+        DateDuration dateDuration = getDuration(countDate, reportTime);
+        Date start = dateDuration.getStart();
+        Date end = dateDuration.getEnd();
 
         if (farmIds.size() == 1) {
             pigDailyContext.setPigDaily(doctorPigDailyDao.countByFarm(farmIds.get(0), start, end));
@@ -160,6 +149,7 @@ public class DoctorPigReportReadServiceImpl implements DoctorPigReportReadServic
             pigDailyContext.setPigDaily(doctorPigDailyDao.countByOrg(farmIds, start, end));
         }
         pigDailyContext.setFarmIds(farmIds);
+        pigDailyContext.setDateDuration(dateDuration);
         return pigDailyContext;
     }
 
@@ -192,14 +182,14 @@ public class DoctorPigReportReadServiceImpl implements DoctorPigReportReadServic
         doctorPigReport.setSowEnd(pigDaily.getSowCfEnd() + pigDaily.getSowPhEnd());
         doctorPigReport.setSowDailyQuantity(doctorPigReport.getSowEnd() / 1);
 
-        Date beforeStart = DateUtils.addDays(pigDailyContext.getStart(), -114);
-        Date beforeEnd = DateUtils.addDays(pigDailyContext.getEnd(), -114);
+        Date beforeStart = DateUtils.addDays(pigDailyContext.getDateDuration().getStart(), -114);
+        Date beforeEnd = DateUtils.addDays(pigDailyContext.getDateDuration().getEnd(), -114);
         DoctorPigDaily earlyPigDaily = doctorPigDailyDao.countByOrg(pigDailyContext.getFarmIds(), beforeStart, beforeEnd);
         doctorPigReport.setEarlyMating(earlyPigDaily == null ? 0 : earlyPigDaily.getMatingCount());
 
 
-        Date afterStart = DateUtils.addDays(pigDailyContext.getStart(), 114);
-        Date afterEnd = DateUtils.addDays(pigDailyContext.getEnd(), 114);
+        Date afterStart = DateUtils.addDays(pigDailyContext.getDateDuration().getStart(), 114);
+        Date afterEnd = DateUtils.addDays(pigDailyContext.getDateDuration().getEnd(), 114);
         DoctorPigDaily afterPigDaily = doctorPigDailyDao.countByOrg(pigDailyContext.getFarmIds(), afterStart, afterEnd);
         doctorPigReport.setLateFarrowNest(afterPigDaily == null ? 0 : afterPigDaily.getFarrowNest());
 
@@ -209,7 +199,7 @@ public class DoctorPigReportReadServiceImpl implements DoctorPigReportReadServic
         Integer farrowAll = pigDaily.getFarrowHealth() + pigDaily.getFarrowWeak() + pigDaily.getFarrowjmh() + pigDaily.getFarrowDead();
         doctorPigReport.setAvgFarrow(farrowAll / pigDaily.getFarrowNest() * 100);
         //产仔活子数=
-        //TODO 活子数
+        //TODO 活子数 直接从表中取
         Integer farrowLive = 0;
         doctorPigReport.setAvgFarrowLive(farrowLive / pigDaily.getFarrowNest() * 100);
         doctorPigReport.setAvgFarrowHealth(pigDaily.getFarrowHealth() / pigDaily.getFarrowNest() * 100);
@@ -232,19 +222,14 @@ public class DoctorPigReportReadServiceImpl implements DoctorPigReportReadServic
     }
 
     @Data
-    @AllArgsConstructor
     public class PigDailyContext {
 
-        public PigDailyContext(Date start, Date end) {
-            this.start = start;
-            this.end = end;
-        }
-
-        private Date start;
-        private Date end;
+        private DateDuration dateDuration;
         private DoctorPigDaily pigDaily;
         private List<Long> farmIds;
     }
+
+
 
 
 }
