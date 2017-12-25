@@ -1719,7 +1719,7 @@ ALTER TABLE `doctor_pigs` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原�
 -- 添加猪场月度母猪非生产天数表 2017-12-25
 CREATE TABLE `doctor_report_npds` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `farm_id` bigint(20) DEFAULT NULL,
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场',
   `sum_at` date DEFAULT NULL COMMENT '报表日期',
   `npd` int(11) DEFAULT NULL COMMENT '非生产总天数',
   `sow_quantity` int(11) DEFAULT NULL COMMENT '统计的母猪的数量',
@@ -1727,3 +1727,4 @@ CREATE TABLE `doctor_report_npds` (
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场月度母猪非生产天数表';
+
