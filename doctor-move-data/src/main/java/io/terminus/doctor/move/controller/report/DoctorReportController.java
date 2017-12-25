@@ -38,10 +38,9 @@ public class DoctorReportController {
     }
 
     /**
-     *
      * @param farmId 猪场id 可选，默认全部猪场
-     * @param from 开始时间 yyyy-MM-dd
-     * @param to 结束时间，可选，默认当前 yyyy-MM-dd
+     * @param from   开始时间 yyyy-MM-dd
+     * @param to     结束时间，可选，默认当前 yyyy-MM-dd
      * @return 是否成功
      */
     @RequestMapping(value = "/flush/farm/daily", method = RequestMethod.GET)
@@ -58,15 +57,14 @@ public class DoctorReportController {
         String temp = to;
         List<DoctorFarm> farmList = RespHelper.or500(doctorFarmReadService.findAllFarms());
         farmList.stream().parallel().forEach(doctorFarm ->
-        RespHelper.or500(doctorDailyReportV2Service.flushFarmDaily(doctorFarm.getId(), from, temp)));
+                RespHelper.or500(doctorDailyReportV2Service.flushFarmDaily(doctorFarm.getId(), from, temp)));
         return Boolean.TRUE;
     }
 
     /**
-     *
      * @param farmId 猪场id 可选，默认全部猪场
-     * @param from 开始时间 yyyy-MM-dd
-     * @param to 结束时间，可选，默认当前 yyyy-MM-dd
+     * @param from   开始时间 yyyy-MM-dd
+     * @param to     结束时间，可选，默认当前 yyyy-MM-dd
      * @return 是否成功
      */
     @RequestMapping(value = "/flush/group/daily", method = RequestMethod.GET)
@@ -89,10 +87,9 @@ public class DoctorReportController {
     }
 
     /**
-     *
      * @param farmId 猪场id 可选，默认全部猪场
-     * @param from 开始时间 yyyy-MM-dd
-     * @param to 结束时间，可选，默认当前 yyyy-MM-dd
+     * @param from   开始时间 yyyy-MM-dd
+     * @param to     结束时间，可选，默认当前 yyyy-MM-dd
      * @return 是否成功
      */
     @RequestMapping(value = "/flush/pig/daily", method = RequestMethod.GET)
@@ -112,5 +109,13 @@ public class DoctorReportController {
         farmList.stream().parallel().forEach(doctorFarm ->
                 RespHelper.or500(doctorDailyReportV2Service.flushPigDaily(doctorFarm.getId(), from, temp)));
         return Boolean.TRUE;
+    }
+
+
+    @RequestMapping(method = RequestMethod.PUT, value = "/flush/npd")
+    public void flushNPD() {
+        //
+        Date start, end;
+
     }
 }

@@ -1,6 +1,8 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.doctor.event.dto.DoctorPigReport;
+import io.terminus.doctor.event.enums.ReportTime;
+import lombok.Getter;
 
 import java.util.Date;
 import java.util.List;
@@ -38,8 +40,25 @@ public interface DoctorPigReportReadService {
     DoctorPigReport orgReport(List<Long> farmIds, Date start, ReportTime reportTime);
 
 
-    public enum ReportTime {
-        DAY, WEEK, MONTH, SEASON, YEAR
+    /**
+     * 根据类型获取时间间隔
+     *
+     * @param countDate
+     * @param reportTime
+     * @return
+     */
+    DateDuration getDuration(Date countDate, ReportTime reportTime);
+
+
+    @Getter
+    public class DateDuration {
+        public DateDuration(Date start, Date end) {
+            this.start = start;
+            this.end = end;
+        }
+
+        private Date start;
+        private Date end;
     }
 
 }
