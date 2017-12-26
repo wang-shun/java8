@@ -1619,7 +1619,7 @@ ALTER TABLE doctor_warehouse_stock_handle ADD warehouse_type TINYINT(4) NULL COM
 ALTER TABLE doctor_warehouse_material_handle ADD before_inventory_quantity DECIMAL(23,2) NULL COMMENT '盘点前库存数量';
 
 -- doctorfarm 添加是否是智能猪舍标志
-ALTER TABLE doctor_farms ADD column is_intelligent  smallint(6) DEFAULT 0 NULL
+ALTER TABLE doctor_farms ADD column is_intelligent  smallint(6) DEFAULT 0
 COMMENT '是否是智能猪舍（物联网使用默认是0）1->智能猪场 0不是猪场' after extra;
 
 -- 物料领用添加领用类型 2017-11-28
@@ -1633,3 +1633,8 @@ ADD COLUMN `apply_staff_id` BIGINT(20) NULL COMMENT '领用人编号' AFTER `app
 -- 物料月度统计添加处理日期 2017-12-10
 ALTER TABLE `doctor_warehouse_stock_monthly`
 ADD COLUMN `handle_date` DATE NULL COMMENT '处理日期' AFTER `updated_at`;
+
+-- 弱仔数是否作为活仔数 2017-12-26
+ALTER TABLE `doctor_farms`
+ADD COLUMN `is_weak` SMALLINT(6) DEFAULT 1 COMMENT '弱仔数是否作为活仔数' AFTER `is_intelligent`;
+

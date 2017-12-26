@@ -75,4 +75,22 @@ public class DoctorFarmWriteServiceImpl implements DoctorFarmWriteService{
             return Response.fail("switch.is.intelligent.failed");
         }
     }
+
+    @Override
+    public Response<Boolean> switchIsWeak(Long farmId) {
+        try {
+            DoctorFarm doctorFarm = doctorFarmDao.findById(farmId);
+            DoctorFarm updateFarm = new DoctorFarm();
+            updateFarm.setId(farmId);
+            if (Objects.equals(doctorFarm.getIsWeak(), IsOrNot.YES.getKey())) {
+                updateFarm.setIsWeak(IsOrNot.NO.getKey());
+            } else {
+                updateFarm.setIsWeak(IsOrNot.YES.getKey());
+            }
+            return Response.ok(doctorFarmDao.update(updateFarm));
+        } catch (Exception e) {
+            log.error("switch.is.weak.failed,farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("switch.is.weak.failed");
+        }
+    }
 }

@@ -186,6 +186,12 @@ public class FarmController {
         return RespHelper.or500(doctorFarmWriteService.switchIsIntelligent(farmId));
     }
 
+    @ApiOperation("是否计算弱仔, isWeak: 1-》计算弱仔，0-》不计算弱仔")
+    @RequestMapping(value = "/switch/isWeak", method = RequestMethod.PUT)
+    public Boolean switchIsWeak(@RequestParam @ApiParam("猪场id") Long farmId) {
+        return RespHelper.or500(doctorFarmWriteService.switchIsWeak(farmId));
+    }
+
     /**
      * 获取猪场员工
      * @param farmId 猪场id

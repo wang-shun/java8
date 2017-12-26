@@ -31,4 +31,6 @@ public interface DoctorFarmWriteService {
     Response<List<DoctorFarm>> addFarms4PrimaryUser(Long userId, Long orgId, List<DoctorFarm> farms);
 
     Response<Boolean> switchIsIntelligent(Long farmId);
+
+    Response<Boolean> switchIsWeak(Long farmId);
 }

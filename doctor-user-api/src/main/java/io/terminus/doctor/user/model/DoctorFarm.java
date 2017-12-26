@@ -74,6 +74,12 @@ public class DoctorFarm implements Serializable {
      * @see io.terminus.doctor.common.enums.IsOrNot
      */
     private Integer isIntelligent;
+
+    /**
+     * 弱仔数是否作为活仔数
+     * @see io.terminus.doctor.common.enums.IsOrNot
+     */
+    private Integer isWeak;
     
     /**
      * 创建时间

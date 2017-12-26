@@ -22,6 +22,7 @@
         <result column="source" property="source"/>
         <result column="extra" property="extra"/>
         <result column="is_intelligent" property="isIntelligent"/>
+        <result column="is_weak" property="isWeak"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
     </resultMap>
@@ -35,11 +36,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        name, farm_code, org_id, org_name, province_id, province_name, city_id, city_name, district_id, district_name, detail_address, out_id, source, extra, is_intelligent, created_at, updated_at
+        name, farm_code, org_id, org_name, province_id, province_name, city_id, city_name, district_id, district_name, detail_address, out_id, source, extra, is_intelligent, is_weak, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{name}, #{farmCode}, #{orgId}, #{orgName}, #{provinceId}, #{provinceName}, #{cityId}, #{cityName}, #{districtId}, #{districtName}, #{detailAddress}, #{outId}, #{source}, #{extra}, #{isIntelligent}, now(), now()
+        #{name}, #{farmCode}, #{orgId}, #{orgName}, #{provinceId}, #{provinceName}, #{cityId}, #{cityName}, #{districtId}, #{districtName}, #{detailAddress}, #{outId}, #{source}, #{extra}, #{isIntelligent}, #{isWeak}, now(), now()
     </sql>
 
     <sql id="criteria">
@@ -50,6 +51,7 @@
         <if test="source != null">AND source = #{source}</if>
         <if test="fuzzyName != null">AND name LIKE concat('%',#{fuzzyName}, '%')</if>
         <if test="isIntelligent != null">AND is_intelligent = #{isIntelligent}</if>
+        <if test="isWeak != null">AND is_weak = #{isWeak}</if>
     </sql>
 
     <insert id="create" parameterType="DoctorFarm" keyProperty="id" useGeneratedKeys="true">
@@ -125,6 +127,7 @@
             <if test="source != null">source = #{source},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="isIntelligent != null">is_intelligent = #{isIntelligent},</if>
+            <if test="isWeak != null">is_weak = #{isWeak},</if>
             updated_at=now()
         </set>
         WHERE id = #{id}
