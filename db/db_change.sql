@@ -1636,5 +1636,5 @@ ADD COLUMN `handle_date` DATE NULL COMMENT '处理日期' AFTER `updated_at`;
 
 -- 弱仔数是否作为活仔数 2017-12-26
 ALTER TABLE `doctor_farms`
-ADD COLUMN `is_weak` SMALLINT(6) DEFAULT 1 COMMENT '弱仔数是否作为活仔数' AFTER `is_intelligent`;
+ADD COLUMN `is_weak` SMALLINT(6) DEFAULT 1 COMMENT '弱仔数是否作为活仔数, 1->作为活仔数 0不作为活仔数，默认为1' AFTER `is_intelligent`;
 
