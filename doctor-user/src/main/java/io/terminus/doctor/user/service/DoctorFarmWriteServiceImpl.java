@@ -3,6 +3,7 @@ package io.terminus.doctor.user.service;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.manager.DoctorFarmManager;
 import io.terminus.doctor.user.model.DoctorFarm;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Desc:
@@ -53,6 +55,24 @@ public class DoctorFarmWriteServiceImpl implements DoctorFarmWriteService{
         } catch (Exception e) {
             log.error("create farm failed, userId:{}, orgId:{}, farms:{}, cause:{}", userId, orgId, farms, Throwables.getStackTraceAsString(e));
             return Response.fail("create.farm.failed");
+        }
+    }
+
+    @Override
+    public Response<Boolean> switchIsWeak(Long farmId) {
+        try {
+            DoctorFarm doctorFarm = doctorFarmDao.findById(farmId);
+            DoctorFarm updateFarm = new DoctorFarm();
+            updateFarm.setId(farmId);
+            if (Objects.equals(doctorFarm.getIsWeak(), IsOrNot.YES.getKey())) {
+                updateFarm.setIsWeak(IsOrNot.NO.getKey());
+            } else {
+                updateFarm.setIsWeak(IsOrNot.YES.getKey());
+            }
+            return Response.ok(doctorFarmDao.update(updateFarm));
+        } catch (Exception e) {
+            log.error("switch.is.weak.failed,farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("switch.is.weak.failed");
         }
     }
 }
