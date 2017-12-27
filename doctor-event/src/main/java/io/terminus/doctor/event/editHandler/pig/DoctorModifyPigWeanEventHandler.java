@@ -168,6 +168,7 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
         input.setNotQualifiedCount(partWeanDto.getNotQualifiedCount());
         input.setGroupId(pigEvent.getGroupId());
         input.setEventAt(DateUtil.toDateString(pigEvent.getEventAt()));
+        input.setEventSource(pigEvent.getEventSource());
         input.setIsAuto(1);
         input.setCreatorId(pigEvent.getCreatorId());
         input.setCreatorName(pigEvent.getCreatorName());

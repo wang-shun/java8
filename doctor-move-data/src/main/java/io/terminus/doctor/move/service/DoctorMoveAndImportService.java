@@ -83,30 +83,35 @@ public class DoctorMoveAndImportService {
     @Transactional
     public Long importData(DoctorImportSheet sheet) {
         log.info("import data starting");
+        DoctorFarm farm = null;
+        try {
+            //导入猪场和用户
+            farm = importFarmAndUser(sheet.getFarm(), sheet.getStaff());
 
-        //导入猪场和用户
-        DoctorFarm farm = importFarmAndUser(sheet.getFarm(), sheet.getStaff());
+            //导入基础数据
+            importBasic(farm, sheet.getBarn(), sheet.getBreed());
 
-        //导入基础数据
-        importBasic(farm, sheet.getBarn(), sheet.getBreed());
+            //打包数据
+            DoctorImportBasicData importBasicData = packageImportBasicData(farm);
 
-        //打包数据
-        DoctorImportBasicData importBasicData = packageImportBasicData(farm);
+            //导入猪事件
+            importPig(sheet.getBoar(), sheet.getSow(), importBasicData);
 
-        //导入猪事件
-        importPig(sheet.getBoar(), sheet.getSow(), importBasicData);
+            //导入猪群事件
+            importGroup(sheet.getGroup(), importBasicData);
 
-        //导入猪群事件
-        importGroup(sheet.getGroup(), importBasicData);
+            //导入仓库
+            importWareHouse();
 
-        //导入仓库
-        importWareHouse();
+            //基础数据与猪场关联
+            importFarmBasics(farm.getId());
 
-        //基础数据与猪场关联
-        importFarmBasics(farm.getId());
-
-        log.info("import data end");
-        return farm.getId();
+            log.info("import data end");
+            return farm.getId();
+        } catch (Exception e) {
+            importDataService.deleteUser(farm);
+            throw e;
+        }
     }
 
     private DoctorFarm importFarmAndUser(Sheet farmShit, Sheet staffShit) {
@@ -125,6 +130,7 @@ public class DoctorMoveAndImportService {
         log.info("import basic end");
     }
 
+    @Transactional
     public DoctorImportBasicData packageImportBasicData(DoctorFarm farm) {
         log.info("package import basic staring");
         Map<String, Long> userMap = moveBasicService.getSubMap(farm.getOrgId());
@@ -135,12 +141,14 @@ public class DoctorMoveAndImportService {
                 .build();
     }
 
+    @Transactional
     public void importPig(Sheet boarSheet, Sheet sowSheet, DoctorImportBasicData importBasicData) {
         log.info("import pig staring");
         moveAndImportManager.importPig(boarSheet, sowSheet, importBasicData);
         log.info("import pig end");
     }
 
+    @Transactional
     public void importGroup(Sheet groupSheet, DoctorImportBasicData importBasicData) {
         log.info("import group staring");
         moveAndImportManager.importGroup(groupSheet, importBasicData);
