@@ -284,7 +284,7 @@ public class DoctorImportDataService {
         doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PigSex.SOW.getKey());
     }
 
-    private void deleteUser(DoctorFarm farm){
+    public void deleteUser(DoctorFarm farm){
         if(farm != null && farm.getOrgId() != null){
             List<DoctorUserDataPermission> permissions = doctorUserDataPermissionDao.findByOrgId(farm.getOrgId());
             permissions.forEach(permission -> {
