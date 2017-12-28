@@ -1606,3 +1606,25 @@ ADD COLUMN `handle_date` DATE NULL COMMENT '处理日期' AFTER `updated_at`;
 ALTER TABLE `doctor_pig_events` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `remark`;
 ALTER TABLE `doctor_group_events` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `remark`;
 ALTER TABLE `doctor_pigs` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `pig_code`;
+
+
+-- 报表自定义显示字段表 2017-12-28
+CREATE TABLE `doctor_report_field_customizes` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `type_id` bigint(20) NOT NULL COMMENT '类型ID',
+  `field_id` bigint(20) DEFAULT NULL COMMENT '字段ID',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_type` (`type_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 COMMENT='报表自定义可显示字段';
+
+CREATE TABLE `doctor_report_fields` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `f_id` bigint(20) DEFAULT NULL COMMENT '父ID',
+  `name` varchar(32) NOT NULL COMMENT '字段名称',
+  `type` smallint(6) DEFAULT NULL COMMENT '类型',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COMMENT='报表自定义字段表';
