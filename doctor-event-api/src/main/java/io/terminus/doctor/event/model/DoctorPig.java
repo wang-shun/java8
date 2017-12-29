@@ -48,11 +48,6 @@ public class DoctorPig implements Serializable {
     private String pigCode;
 
     /**
-     * 原值
-     */
-    private Double origin;
-
-    /**
      * @see PigSex
      */
     private Integer pigType;
