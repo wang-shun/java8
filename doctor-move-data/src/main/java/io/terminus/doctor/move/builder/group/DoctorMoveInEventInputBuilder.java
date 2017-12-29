@@ -115,6 +115,7 @@ public class DoctorMoveInEventInputBuilder implements DoctorGroupEventInputBuild
         moveIn.setAvgWeight(importGroupEvent.getAvgWeight());
         moveIn.setAvgDayAge(importGroupEvent.getAvgDayAge());
 
+        moveIn.setOrigin(importGroupEvent.getOrigin());
         return moveIn;
     }
 }

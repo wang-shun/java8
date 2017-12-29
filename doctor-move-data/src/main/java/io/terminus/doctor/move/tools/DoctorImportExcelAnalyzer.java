@@ -62,6 +62,7 @@ public class DoctorImportExcelAnalyzer {
                 .breedName(getString(row, 6))
                 .source(getString(row, 7))
                 .boarType(getString(row, 8))
+                .origin(getDouble(row, 9))
                 .lineNumber(row.getRowNum() + 1)
                 .build();
     }
@@ -98,6 +99,7 @@ public class DoctorImportExcelAnalyzer {
                 .fatherCode(getString(row, 27))
                 .motherCode(getString(row, 28))
                 .inFarmDate(getDate(row, 29))
+                .origin(getDouble(row, 30))
                 .lineNumber(row.getRowNum() + 1)
                 .build();
     }
@@ -111,6 +113,7 @@ public class DoctorImportExcelAnalyzer {
                 .avgDayAge(getInt(row, 4))
                 .avgWeight(getDouble(row, 5))
                 .newGroupDate(getDate(row, 6))
+                .origin(getDouble(row, 7))
                 .lineNumber(row.getRowNum() + 1)
                 .build();
     }
