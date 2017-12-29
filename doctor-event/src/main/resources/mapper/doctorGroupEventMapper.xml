@@ -40,7 +40,6 @@
         <result column="status" property="status"/>
         <result column="event_source" property="eventSource"/>
         <result column="remark" property="remark"/>
-        <result column="origin" property="origin"/>
         <result column="extra" property="extra"/>
         <result column="sow_id" property="sowId"/>
         <result column="sow_code" property="sowCode"/>
@@ -103,7 +102,6 @@
         status,
         event_source,
         remark,
-        origin,
         extra,
         sow_id,
         sow_code,
@@ -158,7 +156,6 @@
         #{status},
         #{eventSource},
         #{remark},
-        #{origin},
         #{extra},
         #{sowId},
         #{sowCode},
@@ -218,7 +215,6 @@
             #{item.status},
             #{item.eventSource},
             #{item.remark},
-            #{item.origin},
             #{item.extra},
             #{item.sowId},
             #{item.sowCode},
@@ -278,7 +274,6 @@
         <if test="relPigEventId != null">AND rel_pig_event_id = #{relPigEventId}</if>
         <if test="outId != null">AND out_id = #{outId}</if>
         <if test="remark != null">AND remark = #{remark}</if>
-        <if test="origin != null">AND origin = #{origin}</if>
         <if test="eventSource != null">AND event_source = #{eventSource}</if>
         <if test="extra != null">AND extra = #{extra}</if>
         <if test="sowId != null">AND sow_id = #{sowId}</if>
@@ -389,7 +384,6 @@
             status = #{status},
             event_source = #{eventSource},
             remark = #{remark},
-            origin = #{origin},
             extra = #{extra},
             sow_id = #{sowId},
             sow_code = #{sowCode},
@@ -447,7 +441,6 @@
             <if test="status != null">status = #{status},</if>
             <if test="eventSource != null">event_source = #{eventSource},</if>
             <if test="remark != null">remark = #{remark},</if>
-            <if test="origin != null">origin = #{origin},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="sowId != null">sow_id = #{sowId},</if>
             <if test="sowCode != null">sow_code = #{sowCode},</if>

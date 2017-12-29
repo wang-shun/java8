@@ -190,7 +190,6 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         doctorPigEvent.setBreedName(farmEntryDto.getBreedName());
         doctorPigEvent.setBreedTypeId(farmEntryDto.getBreedType());
         doctorPigEvent.setBreedTypeName(farmEntryDto.getBreedTypeName());
-        doctorPigEvent.setOrigin(farmEntryDto.getOrigin());
         return doctorPigEvent;
     }
 
