@@ -265,6 +265,7 @@ public class ReportController {
                 .stream().collect(Collectors.groupingBy(DoctorWarehouseSku::getId));
 
         Map<Long, AmountAndQuantityDto> balanceMap = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countEachMaterialBalance(warehouseId, date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1));
+        //刨除本月的历史余额，也称为月初余额
         Map<Long, AmountAndQuantityDto> lastMonthBalanceMap = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countEachMaterialBalance(warehouseId, lastMonth.get(Calendar.YEAR), lastMonth.get(Calendar.MONTH) + 1));
 
         List<WarehouseMonthlyReportVo> report = new ArrayList<>();
@@ -326,8 +327,10 @@ public class ReportController {
             vo.setInitialAmount(initialBalance.getAmount());
             vo.setInitialQuantity(initialBalance.getQuantity());
 
-            vo.setBalanceAmount(initialBalance.getAmount() + balance.getAmount());
-            vo.setBalanceQuantity(initialBalance.getQuantity().add(balance.getQuantity()));
+//            vo.setBalanceAmount(initialBalance.getAmount() + balance.getAmount());
+//            vo.setBalanceQuantity(initialBalance.getQuantity().add(balance.getQuantity()));
+            vo.setBalanceAmount(balance.getAmount());
+            vo.setBalanceQuantity(balance.getQuantity());
 
             report.add(vo);
         }
