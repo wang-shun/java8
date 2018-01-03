@@ -100,7 +100,7 @@
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
-        ORDER BY `id` DESC
+        ORDER BY `id` asc
         LIMIT #{offset}, #{limit}
     </select>
 
@@ -108,7 +108,7 @@
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
-        ORDER BY `id` DESC
+        ORDER BY `id` asc
     </select>
 
 </mapper>
