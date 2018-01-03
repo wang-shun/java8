@@ -1,17 +1,13 @@
 package io.terminus.doctor.basic.service;
 
-import com.alibaba.dubbo.rpc.cluster.merger.FloatArrayMerger;
+import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorReportFieldCustomizesDao;
 import io.terminus.doctor.basic.dao.DoctorReportFieldsDao;
-import io.terminus.doctor.basic.dto.DoctorReportFieldDto;
-
-import io.terminus.common.model.Response;
-import io.terminus.boot.rpc.common.annotation.RpcProvider;
-
-import com.google.common.base.Throwables;
+import io.terminus.doctor.basic.dto.DoctorReportFieldTypeDto;
 import io.terminus.doctor.basic.model.DoctorReportFieldCustomizes;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,7 +65,7 @@ public class DoctorReportFieldCustomizesWriteServiceImpl implements DoctorReport
 
     @Override
     @Transactional
-    public Response<Boolean> customize(Long farmId, DoctorReportFieldDto fieldDto) {
+    public Response<Boolean> customize(Long farmId, DoctorReportFieldTypeDto fieldDto) {
         try {
 
             //删除原有的绑定关系
@@ -94,11 +90,11 @@ public class DoctorReportFieldCustomizesWriteServiceImpl implements DoctorReport
 
     @Override
     @Transactional
-    public Response<Boolean> customize(Long farmId, List<DoctorReportFieldDto> fieldDto) {
+    public Response<Boolean> customize(Long farmId, List<DoctorReportFieldTypeDto> fieldDto) {
 
         try {
             //删除原有的绑定关系
-            doctorReportFieldCustomizesDao.deleteByFarmAndType(farmId, fieldDto.stream().map(DoctorReportFieldDto::getId).collect(Collectors.toList()));
+            doctorReportFieldCustomizesDao.deleteByFarmAndType(farmId, fieldDto.stream().map(DoctorReportFieldTypeDto::getId).collect(Collectors.toList()));
 
 
             fieldDto.stream().forEach(f -> {

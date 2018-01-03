@@ -1,12 +1,12 @@
 package io.terminus.doctor.basic.service;
 
-import io.terminus.doctor.basic.dto.DoctorReportFieldDto;
-import io.terminus.doctor.basic.model.DoctorReportFields;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.dto.DoctorReportFieldTypeDto;
+import io.terminus.doctor.basic.model.DoctorReportFields;
 
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc:
@@ -43,5 +43,5 @@ public interface DoctorReportFieldsReadService {
     Response<List<DoctorReportFields>> list(Map<String, Object> criteria);
 
 
-    Response<List<DoctorReportFieldDto>> listAll();
+    Response<List<DoctorReportFieldTypeDto>> listAll();
 }

@@ -1,15 +1,13 @@
 package io.terminus.doctor.web.front.report;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.basic.dto.DoctorReportFieldDto;
-import io.terminus.doctor.basic.model.DoctorReportFields;
+import io.terminus.doctor.basic.dto.DoctorReportFieldTypeDto;
 import io.terminus.doctor.basic.service.DoctorReportFieldCustomizesReadService;
 import io.terminus.doctor.basic.service.DoctorReportFieldCustomizesWriteService;
 import io.terminus.doctor.basic.service.DoctorReportFieldsReadService;
-import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.pampas.engine.utils.FileLoader;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +34,7 @@ public class ReportCustomizeFieldController {
      * 获取字段
      */
     @RequestMapping(method = RequestMethod.GET, value = "field")
-    public Response<List<DoctorReportFieldDto>> getField() {
+    public Response<List<DoctorReportFieldTypeDto>> getField() {
         return doctorReportFieldsReadService.listAll();
     }
 
@@ -54,10 +52,17 @@ public class ReportCustomizeFieldController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "field/{farmId}/customize")
-    public Response<List<DoctorReportFieldDto>> getSelectedField(@PathVariable Long farmId) {
+    public Response<List<DoctorReportFieldTypeDto>> getSelectedField(@PathVariable Long farmId) {
         return doctorReportFieldCustomizesReadService.getSelected(farmId);
     }
 
+    /**
+     * 获取所有类型下所有字段，并标记可显示的字段
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "field/{farmId}/customize/all")
+    public Response<List<DoctorReportFieldTypeDto>> getAllFieldWithSelected(@PathVariable Long farmId) {
+        return doctorReportFieldCustomizesReadService.getAllWithSelected(farmId);
+    }
 
 
     /**
@@ -66,10 +71,10 @@ public class ReportCustomizeFieldController {
     @RequestMapping(method = RequestMethod.PUT, value = "field/{farmId}/{id}/customize")
     public void selectField(@PathVariable Long farmId, @PathVariable("id") Long typeId, @RequestBody List<Long> fieldIds) {
 
-        DoctorReportFieldDto fieldDto = new DoctorReportFieldDto();
+        DoctorReportFieldTypeDto fieldDto = new DoctorReportFieldTypeDto();
         fieldDto.setId(typeId);
         fieldDto.setFields(fieldIds.stream().map(id -> {
-            DoctorReportFieldDto child = new DoctorReportFieldDto();
+            DoctorReportFieldTypeDto.DoctorReportFieldDto child = new DoctorReportFieldTypeDto.DoctorReportFieldDto();
             child.setId(id);
             return child;
         }).collect(Collectors.toList()));
@@ -80,7 +85,7 @@ public class ReportCustomizeFieldController {
      * 设置所有类型的需要显示的字段
      */
     @RequestMapping(method = RequestMethod.PUT, value = "field/{farmId}/customize")
-    public void selectField(@PathVariable Long farmId, @RequestBody @Valid List<DoctorReportFieldDto> fieldDto, Errors errors) {
+    public void selectField(@PathVariable Long farmId, @RequestBody @Valid List<DoctorReportFieldTypeDto> fieldDto, Errors errors) {
         if (errors.hasErrors())
             throw new ServiceException(errors.getFieldError().getDefaultMessage());
 

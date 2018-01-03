@@ -1,8 +1,7 @@
 package io.terminus.doctor.basic.service;
 
-import io.terminus.doctor.basic.dto.DoctorReportFieldDto;
-
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.dto.DoctorReportFieldTypeDto;
 import io.terminus.doctor.basic.model.DoctorReportFieldCustomizes;
 
 import java.util.List;
@@ -40,8 +39,8 @@ public interface DoctorReportFieldCustomizesWriteService {
     Response<Boolean> delete(Long id);
 
 
-    Response<Boolean> customize(Long farmId, DoctorReportFieldDto fieldDto);
+    Response<Boolean> customize(Long farmId, DoctorReportFieldTypeDto fieldDto);
 
-    Response<Boolean> customize(Long farmId, List<DoctorReportFieldDto> fieldDto);
+    Response<Boolean> customize(Long farmId, List<DoctorReportFieldTypeDto> fieldDto);
 
 }

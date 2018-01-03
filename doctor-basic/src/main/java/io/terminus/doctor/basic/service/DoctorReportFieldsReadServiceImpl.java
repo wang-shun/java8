@@ -1,25 +1,23 @@
 package io.terminus.doctor.basic.service;
 
-import io.terminus.doctor.basic.dao.DoctorReportFieldsDao;
-import io.terminus.doctor.basic.dto.DoctorReportFieldDto;
-import io.terminus.doctor.basic.enums.DoctorReportFieldType;
-import io.terminus.doctor.basic.model.DoctorReportFields;
-
+import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.boot.rpc.common.annotation.RpcProvider;
-
-import com.google.common.base.Throwables;
-import io.terminus.doctor.basic.service.DoctorReportFieldsReadService;
+import io.terminus.doctor.basic.dao.DoctorReportFieldsDao;
+import io.terminus.doctor.basic.dto.DoctorReportFieldTypeDto;
+import io.terminus.doctor.basic.enums.DoctorReportFieldType;
+import io.terminus.doctor.basic.model.DoctorReportFields;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import javax.swing.plaf.metal.MetalIconFactory;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -69,7 +67,7 @@ public class DoctorReportFieldsReadServiceImpl implements DoctorReportFieldsRead
 
     @Override
     @Cacheable(value = "", key = "'doctor_report_field_all'")
-    public Response<List<DoctorReportFieldDto>> listAll() {
+    public Response<List<DoctorReportFieldTypeDto>> listAll() {
 
         try {
             List<DoctorReportFields> allTypes = doctorReportFieldsDao.list(DoctorReportFields.builder()
@@ -81,17 +79,17 @@ public class DoctorReportFieldsReadServiceImpl implements DoctorReportFieldsRead
                     .build()).stream().collect(Collectors.groupingBy(DoctorReportFields::getFId));
 
 
-            List<DoctorReportFieldDto> result = new ArrayList<>(allTypes.size());
+            List<DoctorReportFieldTypeDto> result = new ArrayList<>(allTypes.size());
 
             allTypes.stream().forEach(type -> {
-                DoctorReportFieldDto fieldDto = new DoctorReportFieldDto();
+                DoctorReportFieldTypeDto fieldDto = new DoctorReportFieldTypeDto();
                 fieldDto.setId(type.getId());
                 fieldDto.setName(type.getName());
 
 
                 if (allFields.containsKey(type.getId())) {
                     fieldDto.setFields(allFields.get(type.getId()).stream().map(field -> {
-                        DoctorReportFieldDto child = new DoctorReportFieldDto();
+                        DoctorReportFieldTypeDto.DoctorReportFieldDto child = new DoctorReportFieldTypeDto.DoctorReportFieldDto();
                         child.setId(field.getId());
                         child.setName(field.getName());
                         return child;

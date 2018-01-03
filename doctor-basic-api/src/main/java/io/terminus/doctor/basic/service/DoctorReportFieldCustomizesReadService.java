@@ -1,12 +1,12 @@
 package io.terminus.doctor.basic.service;
 
-import io.terminus.doctor.basic.dto.DoctorReportFieldDto;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.dto.DoctorReportFieldTypeDto;
 import io.terminus.doctor.basic.model.DoctorReportFieldCustomizes;
 
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc:
@@ -45,5 +45,7 @@ public interface DoctorReportFieldCustomizesReadService {
 
     Response<List<Long>> getSelected(Long typeId,Long farmId);
 
-    Response<List<DoctorReportFieldDto>> getSelected(Long farmId);
+    Response<List<DoctorReportFieldTypeDto>> getSelected(Long farmId);
+
+    Response<List<DoctorReportFieldTypeDto>> getAllWithSelected(Long farmId);
 }
