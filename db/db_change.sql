@@ -1790,3 +1790,6 @@ insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(
 insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(158,'PSY',152,2,now(),now());
 insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(159,'妊娠期',152,2,now(),now());
 insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(160,'哺乳期',152,2,now(),now());
+
+-- 自定义字段显示表添加猪场ID 2017-01-03
+ALTER TABLE `doctor_report_field_customizes` ADD COLUMN `farm_id` BIGINT(20) NOT NULL COMMENT '猪场ID' after `id`;
