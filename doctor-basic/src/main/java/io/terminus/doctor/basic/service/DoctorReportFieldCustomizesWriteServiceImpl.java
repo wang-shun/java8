@@ -1,16 +1,15 @@
 package io.terminus.doctor.basic.service;
 
+import com.alibaba.dubbo.rpc.cluster.merger.FloatArrayMerger;
 import io.terminus.doctor.basic.dao.DoctorReportFieldCustomizesDao;
 import io.terminus.doctor.basic.dao.DoctorReportFieldsDao;
 import io.terminus.doctor.basic.dto.DoctorReportFieldDto;
-import io.terminus.doctor.basic.model.DoctorReportFieldCustomizes;
-import io.terminus.doctor.basic.model.DoctorReportFields;
 
 import io.terminus.common.model.Response;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 
 import com.google.common.base.Throwables;
-import io.terminus.doctor.basic.service.DoctorReportFieldCustomizesWriteService;
+import io.terminus.doctor.basic.model.DoctorReportFieldCustomizes;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,16 +69,17 @@ public class DoctorReportFieldCustomizesWriteServiceImpl implements DoctorReport
 
     @Override
     @Transactional
-    public Response<Boolean> customize(DoctorReportFieldDto fieldDto) {
+    public Response<Boolean> customize(Long farmId, DoctorReportFieldDto fieldDto) {
         try {
 
             //删除原有的绑定关系
-            doctorReportFieldCustomizesDao.deleteByType(Collections.singletonList(fieldDto.getId()));
+            doctorReportFieldCustomizesDao.deleteByFarmAndType(farmId, Collections.singletonList(fieldDto.getId()));
 
 
             fieldDto.getFields().stream().forEach(f -> {
                 DoctorReportFieldCustomizes customizes = new DoctorReportFieldCustomizes();
                 customizes.setTypeId(fieldDto.getId());
+                customizes.setFarmId(farmId);
                 customizes.setFieldId(f.getId());
                 doctorReportFieldCustomizesDao.create(customizes);
             });
@@ -94,17 +94,18 @@ public class DoctorReportFieldCustomizesWriteServiceImpl implements DoctorReport
 
     @Override
     @Transactional
-    public Response<Boolean> customize(List<DoctorReportFieldDto> fieldDto) {
+    public Response<Boolean> customize(Long farmId, List<DoctorReportFieldDto> fieldDto) {
 
         try {
             //删除原有的绑定关系
-            doctorReportFieldCustomizesDao.deleteByType(fieldDto.stream().map(DoctorReportFieldDto::getId).collect(Collectors.toList()));
+            doctorReportFieldCustomizesDao.deleteByFarmAndType(farmId, fieldDto.stream().map(DoctorReportFieldDto::getId).collect(Collectors.toList()));
 
 
             fieldDto.stream().forEach(f -> {
                 f.getFields().stream().forEach(fi -> {
                     DoctorReportFieldCustomizes customizes = new DoctorReportFieldCustomizes();
                     customizes.setTypeId(f.getId());
+                    customizes.setFarmId(farmId);
                     customizes.setFieldId(fi.getId());
                     doctorReportFieldCustomizesDao.create(customizes);
                 });

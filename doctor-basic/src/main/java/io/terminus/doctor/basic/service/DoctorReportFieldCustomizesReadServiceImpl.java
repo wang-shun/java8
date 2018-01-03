@@ -2,7 +2,6 @@ package io.terminus.doctor.basic.service;
 
 import io.terminus.doctor.basic.dao.DoctorReportFieldCustomizesDao;
 import io.terminus.doctor.basic.dto.DoctorReportFieldDto;
-import io.terminus.doctor.basic.model.DoctorReportFieldCustomizes;
 
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
@@ -10,13 +9,12 @@ import io.terminus.common.model.Response;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 
 import com.google.common.base.Throwables;
-import io.terminus.doctor.basic.service.DoctorReportFieldCustomizesReadService;
+import io.terminus.doctor.basic.model.DoctorReportFieldCustomizes;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.Cipher;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
@@ -68,10 +66,11 @@ public class DoctorReportFieldCustomizesReadServiceImpl implements DoctorReportF
     }
 
     @Override
-    public Response<List<Long>> getSelected(Long typeId) {
+    public Response<List<Long>> getSelected(Long typeId, Long farmId) {
         try {
             return Response.ok(doctorReportFieldCustomizesDao.
                     list(DoctorReportFieldCustomizes.builder()
+                            .farmId(farmId)
                             .typeId(typeId)
                             .build())
                     .stream()
@@ -84,9 +83,10 @@ public class DoctorReportFieldCustomizesReadServiceImpl implements DoctorReportF
     }
 
     @Override
-    public Response<List<DoctorReportFieldDto>> getSelected() {
+    public Response<List<DoctorReportFieldDto>> getSelected(Long farmId) {
         Map<Long, List<DoctorReportFieldCustomizes>> typeCustomizes = doctorReportFieldCustomizesDao.
                 list(DoctorReportFieldCustomizes.builder()
+                        .farmId(farmId)
                         .build()).stream().collect(Collectors.groupingBy(DoctorReportFieldCustomizes::getTypeId));
         List<DoctorReportFieldDto> result = new ArrayList<>(typeCustomizes.size());
 

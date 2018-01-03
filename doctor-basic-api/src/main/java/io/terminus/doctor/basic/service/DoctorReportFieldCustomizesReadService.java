@@ -1,9 +1,9 @@
 package io.terminus.doctor.basic.service;
 
 import io.terminus.doctor.basic.dto.DoctorReportFieldDto;
-import io.terminus.doctor.basic.model.DoctorReportFieldCustomizes;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.model.DoctorReportFieldCustomizes;
 
 import java.util.Map;
 import java.util.List;
@@ -43,7 +43,7 @@ public interface DoctorReportFieldCustomizesReadService {
     Response<List<DoctorReportFieldCustomizes>> list(Map<String, Object> criteria);
 
 
-    Response<List<Long>> getSelected(Long typeId);
+    Response<List<Long>> getSelected(Long typeId,Long farmId);
 
-    Response<List<DoctorReportFieldDto>> getSelected();
+    Response<List<DoctorReportFieldDto>> getSelected(Long farmId);
 }

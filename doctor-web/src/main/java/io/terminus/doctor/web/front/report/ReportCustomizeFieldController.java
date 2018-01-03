@@ -43,9 +43,9 @@ public class ReportCustomizeFieldController {
     /**
      * 获取指定类型下启用的字段
      */
-    @RequestMapping(method = RequestMethod.GET, value = "field/{id}/customize")
-    public Response<List<Long>> getSelectedField(@PathVariable("id") Long typeId) {
-        return doctorReportFieldCustomizesReadService.getSelected(typeId);
+    @RequestMapping(method = RequestMethod.GET, value = "field/{farmId}/{id}/customize")
+    public Response<List<Long>> getSelectedField(@PathVariable("id") Long typeId, @PathVariable Long farmId) {
+        return doctorReportFieldCustomizesReadService.getSelected(typeId, farmId);
     }
 
     /**
@@ -53,17 +53,18 @@ public class ReportCustomizeFieldController {
      *
      * @return
      */
-    @RequestMapping(method = RequestMethod.GET, value = "field/customize")
-    public Response<List<DoctorReportFieldDto>> getSelectedField() {
-        return doctorReportFieldCustomizesReadService.getSelected();
+    @RequestMapping(method = RequestMethod.GET, value = "field/{farmId}/customize")
+    public Response<List<DoctorReportFieldDto>> getSelectedField(@PathVariable Long farmId) {
+        return doctorReportFieldCustomizesReadService.getSelected(farmId);
     }
+
 
 
     /**
      * 设置指定类型的需要显示的字段
      */
-    @RequestMapping(method = RequestMethod.PUT, value = "field/{id}/customize")
-    public void selectField(@PathVariable("id") Long typeId, @RequestBody List<Long> fieldIds) {
+    @RequestMapping(method = RequestMethod.PUT, value = "field/{farmId}/{id}/customize")
+    public void selectField(@PathVariable Long farmId, @PathVariable("id") Long typeId, @RequestBody List<Long> fieldIds) {
 
         DoctorReportFieldDto fieldDto = new DoctorReportFieldDto();
         fieldDto.setId(typeId);
@@ -72,18 +73,18 @@ public class ReportCustomizeFieldController {
             child.setId(id);
             return child;
         }).collect(Collectors.toList()));
-        doctorReportFieldCustomizesWriteService.customize(fieldDto);
+        doctorReportFieldCustomizesWriteService.customize(farmId, fieldDto);
     }
 
     /**
      * 设置所有类型的需要显示的字段
      */
-    @RequestMapping(method = RequestMethod.PUT, value = "field/customize")
-    public void selectField(@RequestBody @Valid List<DoctorReportFieldDto> fieldDto, Errors errors) {
+    @RequestMapping(method = RequestMethod.PUT, value = "field/{farmId}/customize")
+    public void selectField(@PathVariable Long farmId, @RequestBody @Valid List<DoctorReportFieldDto> fieldDto, Errors errors) {
         if (errors.hasErrors())
             throw new ServiceException(errors.getFieldError().getDefaultMessage());
 
-        doctorReportFieldCustomizesWriteService.customize(fieldDto);
+        doctorReportFieldCustomizesWriteService.customize(farmId, fieldDto);
     }
 
 }
