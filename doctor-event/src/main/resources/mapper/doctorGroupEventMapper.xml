@@ -752,7 +752,7 @@
     <select id="getFarmEarlyEventAt" parameterType="string" resultType="io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto" >
         SELECT farm_id as farmId, min(event_at) as eventAt
         FROM <include refid="tb"/>
-        WHERE created_at &gt;= #{startDate}
+        WHERE updated_at &gt;= #{startDate}
         group by farm_id
     </select>
 
