@@ -1807,3 +1807,6 @@ CREATE TABLE `doctor_bi_pages` (
   KEY `index_name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='BI系统集成页面表';
 
+-- BI表添加备注说明字段 2017-01-05
+ALTER TABLE `doctor_bi_pages` ADD COLUMN `desc` varchar(32) NULL COMMENT '描述说明' after `url`;
+

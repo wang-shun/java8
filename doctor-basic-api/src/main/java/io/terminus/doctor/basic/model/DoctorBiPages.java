@@ -8,13 +8,13 @@ import java.util.Date;
 /**
  * Desc:
  * Mail: [ your email ]
- * Date: 2018-01-05 13:13:41
+ * Date: 2018-01-05 16:04:23
  * Created by [ your name ]
  */
 @Data
 public class DoctorBiPages implements Serializable {
 
-    private static final long serialVersionUID = 7169484030772870400L;
+    private static final long serialVersionUID = -403144309860082823L;
 
     /**
      * 自增主键
@@ -35,6 +35,11 @@ public class DoctorBiPages implements Serializable {
      * BI页面地址
      */
     private String url;
+    
+    /**
+     * 描述说明
+     */
+    private String desc;
     
     /**
      * 创建时间

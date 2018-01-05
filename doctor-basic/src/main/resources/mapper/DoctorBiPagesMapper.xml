@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2018-01-05 13:13:41
+ ~ Date: 2018-01-05 16:05:43
  ~ Created by [ your name ]
 -->
 
@@ -13,6 +13,7 @@
         <result property="name" column="name"/>
         <result property="token" column="token"/>
         <result property="url" column="url"/>
+        <result property="desc" column="desc"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
@@ -27,12 +28,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `name`, `token`, `url`, 
+        `name`, `token`, `url`, `desc`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{name}, #{token}, #{url}, 
+        #{name}, #{token}, #{url}, #{desc}, 
         now(), now()
     </sql>
 
@@ -41,6 +42,7 @@
             <if test="name != null">AND `name` = #{name}</if>
             <if test="token != null">AND `token` = #{token}</if>
             <if test="url != null">AND `url` = #{url}</if>
+            <if test="desc != null">AND `desc` = #{desc}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
         </where>
@@ -80,6 +82,7 @@
             <if test="name != null">`name` = #{name},</if>
             <if test="token != null">`token` = #{token},</if>
             <if test="url != null">`url` = #{url},</if>
+            <if test="desc != null">`desc` = #{desc},</if>
             updated_at = now()
         </set>
         WHERE id = #{id}

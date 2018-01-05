@@ -1,8 +1,7 @@
 package io.terminus.doctor.basic.dao;
 
-import io.terminus.doctor.basic.model.DoctorBiPages;
 import io.terminus.common.mysql.dao.MyBatisDao;
-
+import io.terminus.doctor.basic.model.DoctorBiPages;
 import org.springframework.stereotype.Repository;
 
 /**
