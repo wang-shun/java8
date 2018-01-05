@@ -11,6 +11,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
@@ -51,15 +52,19 @@ public class BIAuthController {
             paramsWithOrder.put("_where", params.get("_where"));
         }
 
+        Map<String, Object> paramsInUrl = new HashMap<>();//URL中的参数
         int pIndex = page.getUrl().lastIndexOf("?");
         if (pIndex != -1) {
             Stream.of(page.getUrl().substring(pIndex + 1).split("&")).forEach(p -> {
                 String[] d = p.split("=");
                 if (d.length == 2) {
-                    paramsWithOrder.put(d[0], d[1]);
+                    paramsInUrl.put(d[0], d[1]);
                 }
             });
         }
+        paramsInUrl.entrySet().stream()
+                .filter(p -> p.getKey().equals("_project_key") || p.getKey().equals("_board_key") || p.getKey().equals("_role_key"))
+                .forEach(p -> paramsWithOrder.put(p.getKey(), p.getValue()));
 
         String sign = Hashing.md5().newHasher().
                 putString(Joiner.on('&').withKeyValueSeparator("=").join(paramsWithOrder), Charsets.UTF_8)
@@ -71,6 +76,7 @@ public class BIAuthController {
         if (params.containsKey("_where"))
             sb.append("&_where=").append(params.get("_where"));
         params.remove("_where");
+        params.remove("_");
         params.forEach((k, v) -> sb.append("&").append(k).append("=").append(v));
         sb.append("&_sign=").append(sign);
         return page.getUrl() + sb.toString();
