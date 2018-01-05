@@ -24,21 +24,28 @@ public class BIAuthController {
     @RpcConsumer
     private DoctorBiPagesReadService doctorBiPagesReadService;
 
+    /**
+     * 生成签名
+     *
+     * @param pageName
+     * @param params
+     * @return
+     */
     @RequestMapping(method = RequestMethod.GET, value = "{pageName}/sign")
     public String getUrlWithSign(@PathVariable String pageName, @RequestParam(required = false) String params) {
 
         DoctorBiPages page = RespHelper.or500(doctorBiPagesReadService.findByName(pageName));
         if (null == page)
             throw new ServiceException("bi.page.not.found");
-
-        long timestamp = System.currentTimeMillis();
-        TreeMap<String, Object> paramsWithOrder = new TreeMap<>();
-        paramsWithOrder.put("_t", timestamp);
-        if (StringUtils.isNotBlank(params)) {
-            paramsWithOrder.put("_where", params);
-        }
         if (StringUtils.isBlank(page.getUrl())) {
             throw new ServiceException("bi.page.url.blank");
+        }
+
+        long timestamp = System.currentTimeMillis();
+        TreeMap<String, Object> paramsWithOrder = new TreeMap<>(); //参数排序
+        paramsWithOrder.put("_t", timestamp);
+        if (StringUtils.isNotBlank(params)) { //自定义参数
+            paramsWithOrder.put("_where", params);
         }
 
         int pIndex = page.getUrl().lastIndexOf("?");
