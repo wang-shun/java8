@@ -2443,7 +2443,7 @@
 
     <select id="getFeedConsume2" parameterType="map" resultType="double">
 
-        select * from doctor_warehouse_material_apply
+        select sum(quantity) from doctor_warehouse_material_apply
         where farm_id IN
         <foreach collection="farmIds" item="fId" open="(" separator="," close=")" >
             #{fId}
