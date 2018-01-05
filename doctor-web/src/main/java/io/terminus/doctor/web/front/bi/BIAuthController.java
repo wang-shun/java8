@@ -40,6 +40,8 @@ public class BIAuthController {
         if (StringUtils.isBlank(page.getUrl())) {
             throw new ServiceException("bi.page.url.blank");
         }
+        if (StringUtils.isBlank(page.getToken()))
+            throw new ServiceException("bi.page.token.blank");
 
         long timestamp = System.currentTimeMillis();
         TreeMap<String, Object> paramsWithOrder = new TreeMap<>(); //参数排序
@@ -60,7 +62,7 @@ public class BIAuthController {
 
         String sign = Hashing.md5().newHasher().
                 putString(Joiner.on('&').withKeyValueSeparator("=").join(paramsWithOrder), Charsets.UTF_8)
-                .putString("", Charsets.UTF_8)
+                .putString(page.getToken(), Charsets.UTF_8)
                 .hash().toString();
         return page.getUrl() + "&_t=" + timestamp + (StringUtils.isNotBlank(params) ? "&_where=" + params : "") + "&sign=" + sign;
 
