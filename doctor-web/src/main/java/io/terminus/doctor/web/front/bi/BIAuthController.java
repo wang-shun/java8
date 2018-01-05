@@ -72,7 +72,7 @@ public class BIAuthController {
             sb.append("&_where=").append(params.get("_where"));
         params.remove("_where");
         params.forEach((k, v) -> sb.append("&").append(k).append("=").append(v));
-        sb.append("&sign=").append(sign);
+        sb.append("&_sign=").append(sign);
         return page.getUrl() + sb.toString();
 
     }
