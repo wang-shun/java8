@@ -11,6 +11,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
 
@@ -32,7 +33,7 @@ public class BIAuthController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "{pageName}/sign")
-    public String getUrlWithSign(@PathVariable String pageName, @RequestParam(required = false) String params) {
+    public String getUrlWithSign(@PathVariable String pageName, @RequestParam(required = false) Map<String, Object> params) {
 
         DoctorBiPages page = RespHelper.or500(doctorBiPagesReadService.findByName(pageName));
         if (null == page)
@@ -46,8 +47,8 @@ public class BIAuthController {
         long timestamp = System.currentTimeMillis();
         TreeMap<String, Object> paramsWithOrder = new TreeMap<>(); //参数排序
         paramsWithOrder.put("_t", timestamp);
-        if (StringUtils.isNotBlank(params)) { //自定义参数
-            paramsWithOrder.put("_where", params);
+        if (params.containsKey("_where")) { //自定义参数
+            paramsWithOrder.put("_where", params.get("_where"));
         }
 
         int pIndex = page.getUrl().lastIndexOf("?");
@@ -64,7 +65,15 @@ public class BIAuthController {
                 putString(Joiner.on('&').withKeyValueSeparator("=").join(paramsWithOrder), Charsets.UTF_8)
                 .putString(page.getToken(), Charsets.UTF_8)
                 .hash().toString();
-        return page.getUrl() + "&_t=" + timestamp + (StringUtils.isNotBlank(params) ? "&_where=" + params : "") + "&sign=" + sign;
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("&_t=").append(timestamp);
+        if (params.containsKey("_where"))
+            sb.append("&_where=").append(params.get("_where"));
+        params.remove("_where");
+        params.forEach((k, v) -> sb.append("&").append(k).append("=").append(v));
+        sb.append("&sign=").append(sign);
+        return page.getUrl() + sb.toString();
 
     }
 
