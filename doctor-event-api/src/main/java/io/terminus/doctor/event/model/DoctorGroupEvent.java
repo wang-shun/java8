@@ -199,11 +199,6 @@ public class DoctorGroupEvent<T extends BaseGroupInput> implements Serializable 
     private String remark;
 
     /**
-     * 原值
-     */
-    private Double origin;
-
-    /**
      * 具体事件的内容通过json存储
      */
     private String extra;

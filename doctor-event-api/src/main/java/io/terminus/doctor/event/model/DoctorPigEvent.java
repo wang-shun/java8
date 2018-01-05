@@ -383,11 +383,6 @@ public class DoctorPigEvent implements Serializable {
     private String remark;
 
     /**
-     * 原值
-     */
-    private Double origin;
-
-    /**
      * 事件操作人, 不一定是录入者
      */
     private Long operatorId;

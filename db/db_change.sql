@@ -1793,3 +1793,17 @@ insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(
 
 -- 自定义字段显示表添加猪场ID 2017-01-03
 ALTER TABLE `doctor_report_field_customizes` ADD COLUMN `farm_id` BIGINT(20) NOT NULL COMMENT '猪场ID' after `id`;
+
+
+-- 添加BI系统页面表 2017-01-05
+CREATE TABLE `doctor_bi_pages` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(32) NOT NULL COMMENT '页面名称',
+  `token` varchar(32) NOT NULL,
+  `url` varchar(512) NOT NULL COMMENT 'BI页面地址',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_name` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='BI系统集成页面表';
+
