@@ -106,6 +106,9 @@ public class DoctorRangeReportWriteServiceImpl implements DoctorRangeReportWrite
         try{
             log.info("generateDoctorRangeReports start=========");
             Stopwatch stopwatch = Stopwatch.createStarted();
+            DateTime dateAt = DateTime.now();
+            DateTime weekEnd = dateAt.withDayOfWeek(7);
+            DateTime monthEnd = DateUtil.getMonthEnd(dateAt);
             Map<Long, Date> map = queryFarmEarlyEventAtImpl(DateUtil.toDateString(date));
             farmIds.stream().parallel().forEach(farmId -> {
                 Date startDate = date;
@@ -113,13 +116,12 @@ public class DoctorRangeReportWriteServiceImpl implements DoctorRangeReportWrite
                     startDate = map.get(farmId);
                 }
                 DateTime startAt = new DateTime(startDate);
-                DateTime dateAt = DateTime.now().minusDays(1);
-                while (!startAt.isAfter(dateAt)) {
+                while (!startAt.isAfter(weekEnd)) {
                     generateDoctorWeeklyReports(farmId, startAt.toDate());
                     startAt = startAt.plusWeeks(1);
                 }
                 startAt = new DateTime(startDate);
-                while (!startAt.isAfter(dateAt)) {
+                while (!startAt.isAfter(monthEnd)) {
                     generateDoctorMonthlyReports(farmId, startAt.toDate());
                     startAt = startAt.plusMonths(1);
                 }
@@ -414,5 +416,4 @@ public class DoctorRangeReportWriteServiceImpl implements DoctorRangeReportWrite
             }
         }
     }
-
 }
