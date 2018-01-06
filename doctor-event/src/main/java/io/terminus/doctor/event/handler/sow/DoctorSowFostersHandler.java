@@ -111,6 +111,7 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventHandler {
         fosterByDto.setPigType(fosterByTrack.getPigType());
         fosterByDto.setBarnId(fosterByTrack.getCurrentBarnId());
         fosterByDto.setBarnName(fosterByTrack.getCurrentBarnName());
+        fosterByDto.setBarnType(fosterByTrack.getCurrentBarnType());
         fosterByDto.setRelPigEventId(doctorPigEvent.getId());
         fosterByDto.setEventName(PigEvent.FOSTERS_BY.getName());
         fosterByDto.setEventType(PigEvent.FOSTERS_BY.getKey());
