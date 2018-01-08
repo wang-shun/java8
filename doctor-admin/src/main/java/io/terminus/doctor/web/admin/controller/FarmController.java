@@ -184,7 +184,9 @@ public class FarmController {
                                          @RequestParam(required = false) @ApiParam("页码") Integer pageNo,
                                          @RequestParam(required = false) @ApiParam("分页大小") Integer pageSize) {
         FarmCriteria farmCriteria = new FarmCriteria();
-        farmCriteria.setFuzzyName(fuzzyName);
+        if (!Strings.isNullOrEmpty(fuzzyName)) {
+            farmCriteria.setFuzzyName(fuzzyName);
+        }
         return RespHelper.or500(doctorFarmReadService.pagingFarm(farmCriteria, pageNo, pageSize));
     }
 
