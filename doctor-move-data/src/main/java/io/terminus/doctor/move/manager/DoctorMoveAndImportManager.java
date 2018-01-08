@@ -224,6 +224,8 @@ public class DoctorMoveAndImportManager {
         importBasicData.setDefaultFarrowBarn(getDefaultFarrowBarn(importBasicData.getDoctorFarm()));
         importBasicData.getBarnMap().put(importBasicData.getDefaultFarrowBarn().getName(),
                 importBasicData.getDefaultFarrowBarn());
+        importBasicData.getBarnMap().put(importBasicData.getDefaultPregBarn().getName(),
+                importBasicData.getDefaultPregBarn());
         initFarrowGroup(importBasicData, importSowList);
     }
 
@@ -244,11 +246,28 @@ public class DoctorMoveAndImportManager {
             updateBarn.setId(defaultFarrowBarn.getId());
             updateBarn.setStatus(DoctorBarn.Status.CLOSE.getValue());
             doctorBarnDao.update(updateBarn);
+
+            //将初始化的妊娠舍置为已删除
+            DoctorBarn updateBarn1 = new DoctorBarn();
+            updateBarn1.setId(importBasicData.getDefaultPregBarn().getId());
+            updateBarn1.setStatus(DoctorBarn.Status.CLOSE.getValue());
+            doctorBarnDao.update(updateBarn1);
         }
     }
 
     private DoctorBarn getDefaultPregBarn(DoctorFarm farm) {
-        return doctorBarnDao.getDefaultPregBarn(farm.getId());
+        DoctorBarn defaultPregBarn = new DoctorBarn();
+        defaultPregBarn.setName("初始化妊娠舍");
+        defaultPregBarn.setOrgId(farm.getOrgId());
+        defaultPregBarn.setOrgName(farm.getOrgName());
+        defaultPregBarn.setFarmId(farm.getId());
+        defaultPregBarn.setFarmName(farm.getName());
+        defaultPregBarn.setPigType(PigType.PREG_SOW.getValue());
+        defaultPregBarn.setCanOpenGroup(DoctorBarn.CanOpenGroup.NO.getValue());
+        defaultPregBarn.setStatus(DoctorBarn.Status.USING.getValue());
+        defaultPregBarn.setCapacity(1000);
+        doctorBarnDao.create(defaultPregBarn);
+        return defaultPregBarn;
     }
 
     private DoctorBarn getDefaultFarrowBarn(DoctorFarm farm) {
