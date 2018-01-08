@@ -2,15 +2,19 @@ package io.terminus.doctor.web.admin.controller;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.doctor.user.dto.FarmCriteria;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.PrimaryUser;
@@ -35,6 +39,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -171,6 +176,22 @@ public class FarmController {
     @RequestMapping(value = "/allBarn/{farmId}", method = RequestMethod.GET)
     public List<DoctorBarn> findAllUnUse(@PathVariable Long farmId) {
         return RespHelper.or500(doctorBarnReadService.findBarnsByFarmId(farmId));
+    }
+
+    @ApiOperation("分页查询猪场")
+    @RequestMapping(value = "/paging/farm", method = RequestMethod.GET)
+    public Paging<DoctorFarm> pagingFarm(@RequestParam(required = false) @ApiParam("猪舍模糊名称, 选填") String fuzzyName,
+                                         @RequestParam(required = false) @ApiParam("页码") Integer pageNo,
+                                         @RequestParam(required = false) @ApiParam("分页大小") Integer pageSize) {
+        FarmCriteria farmCriteria = new FarmCriteria();
+        farmCriteria.setFuzzyName(fuzzyName);
+        return RespHelper.or500(doctorFarmReadService.pagingFarm(farmCriteria, pageNo, pageSize));
+    }
+
+    @ApiOperation("是否计算弱仔, isWeak: 1-》计算弱仔，0-》不计算弱仔")
+    @RequestMapping(value = "/switch/isWeak", method = RequestMethod.PUT)
+    public Boolean switchIsWeak(@RequestParam @ApiParam("猪场id") Long farmId) {
+        return RespHelper.or500(doctorFarmWriteService.switchIsWeak(farmId));
     }
 
     /**

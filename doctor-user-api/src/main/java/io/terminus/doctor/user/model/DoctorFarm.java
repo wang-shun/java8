@@ -66,6 +66,13 @@ public class DoctorFarm implements Serializable {
      * 附加字段
      */
     private String extra;
+
+    /**
+     * 弱仔数是否作为活仔数
+     * @see io.terminus.doctor.common.enums.IsOrNot
+     */
+    private Integer isWeak;
+
     
     /**
      * 创建时间
