@@ -77,7 +77,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         checkCanTransGroup(transGroup.getToGroupId(), transGroup.getToBarnId(), transGroup.getIsCreateGroup());
         checkFarrowGroupUnique(transGroup.getIsCreateGroup(), transGroup.getToBarnId());
         checkQuantity(groupTrack.getQuantity(), transGroup.getQuantity());
-        Double realWeight = transGroup.getAvgWeight() * transGroup.getQuantity();   //后台计算的总重
+        Double avgWeight = EventUtil.getAvgWeight(transGroup.getWeight(), transGroup.getQuantity());   //后台计算的总重
 
         //转入猪舍
         DoctorBarn toBarn = getBarn(transGroup.getToBarnId());
@@ -95,8 +95,8 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         event.setQuantity(transGroup.getQuantity());
 
         event.setAvgDayAge(groupTrack.getAvgDayAge());  //重算日龄
-        event.setAvgWeight(transGroup.getAvgWeight());  //均重
-        event.setWeight(realWeight);                    //总重
+        event.setAvgWeight(avgWeight);  //均重
+        event.setWeight(transGroup.getWeight());                    //总重
         event.setTransGroupType(getTransType(null, group.getPigType(), toBarn).getValue());   //区别内转还是外转(null是因为不用判断转入类型)
         event.setOtherBarnId(toBarn.getId());          //目标猪舍id
         event.setOtherBarnType(toBarn.getPigType());   //目标猪舍类型
@@ -160,7 +160,8 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         } else {
             checkQuantity(groupTrack.getQuantity() - MoreObjects.firstNonNull(groupTrack.getUnweanQty(), 0), transGroup.getQuantity());
         }
-        Double realWeight = transGroup.getAvgWeight() * transGroup.getQuantity();   //后台计算的总重
+
+        Double avgWeight = EventUtil.getAvgWeight(transGroup.getWeight(), transGroup.getQuantity());   //后台计算的总重
         //checkDayAge(groupTrack.getAvgDayAge(), transGroup);
 
         //转入猪舍
@@ -180,8 +181,8 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         event.setAvgDayAge(groupTrack.getAvgDayAge());  //重算日龄
         event.setSowId(transGroup.getSowId());
         event.setSowCode(transGroup.getSowCode());
-        event.setAvgWeight(transGroup.getAvgWeight());  //均重
-        event.setWeight(realWeight);                    //总重
+        event.setAvgWeight(avgWeight);  //均重
+        event.setWeight(transGroup.getWeight());                    //总重
         event.setTransGroupType(getTransType(null, group.getPigType(), toBarn).getValue());   //区别内转还是外转(null是因为不用判断转入类型)
         event.setOtherBarnId(toBarn.getId());          //目标猪舍id
         event.setOtherBarnType(toBarn.getPigType());   //目标猪舍类型
@@ -206,7 +207,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
             groupTrack.setLiveQty(EventUtil.plusInt(groupTrack.getLiveQty(), -transGroup.getQuantity()));
             groupTrack.setHealthyQty(groupTrack.getLiveQty() - MoreObjects.firstNonNull(groupTrack.getWeakQty(), 0));
             groupTrack.setUnweanQty(EventUtil.plusInt(groupTrack.getUnweanQty(), -transGroup.getQuantity()));
-            groupTrack.setBirthWeight(EventUtil.plusDouble(groupTrack.getBirthWeight(), -realWeight));
+            groupTrack.setBirthWeight(EventUtil.plusDouble(groupTrack.getBirthWeight(), -transGroup.getAvgWeight()));
         }
 
         updateGroupTrack(groupTrack, event);
