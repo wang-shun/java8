@@ -239,8 +239,11 @@ public class DoctorMoveAndImportManager {
                 doctorGroupDao.delete(defaultGroup.getId());
             }
 
-            //删除虚拟猪舍
-            doctorBarnDao.delete(defaultFarrowBarn.getId());
+            //将初始化的产房置为已删除
+            DoctorBarn updateBarn = new DoctorBarn();
+            updateBarn.setId(defaultFarrowBarn.getId());
+            updateBarn.setStatus(DoctorBarn.Status.CLOSE.getValue());
+            doctorBarnDao.update(updateBarn);
         }
     }
 
@@ -250,7 +253,7 @@ public class DoctorMoveAndImportManager {
 
     private DoctorBarn getDefaultFarrowBarn(DoctorFarm farm) {
         DoctorBarn defaultFarrowBarn = new DoctorBarn();
-        defaultFarrowBarn.setName("虚拟产房");
+        defaultFarrowBarn.setName("初始化产房");
         defaultFarrowBarn.setOrgId(farm.getOrgId());
         defaultFarrowBarn.setOrgName(farm.getOrgName());
         defaultFarrowBarn.setFarmId(farm.getId());
