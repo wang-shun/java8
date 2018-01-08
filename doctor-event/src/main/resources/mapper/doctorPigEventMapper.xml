@@ -16,6 +16,7 @@
         <result column="farm_name" property="farmName"/>
         <result column="pig_id" property="pigId"/>
         <result column="pig_code" property="pigCode"/>
+        <result column="origin" property="origin"/>
         <result column="is_auto" property="isAuto"/>
         <result column="event_at" property="eventAt"/>
         <result column="type" property="type"/>
@@ -111,6 +112,7 @@
         farm_name,
         pig_id,
         pig_code,
+        origin,
         is_auto,
         event_at,
         `type`,
@@ -200,6 +202,7 @@
         #{farmName},
         #{pigId},
         #{pigCode},
+        #{origin},
         #{isAuto},
         #{eventAt},
         #{type},
@@ -290,6 +293,7 @@
         <if test="farmName != null">AND farm_name = #{farmName}</if>
         <if test="pigId != null">AND pig_id = #{pigId}</if>
         <if test="pigCode != null">AND pig_code = #{pigCode}</if>
+        <if test="origin != null">AND origin = #{origin}</if>
         <if test="pigCodeFuzzy != null">AND pig_code LIKE concat('%',#{pigCodeFuzzy},'%')</if>
         <if test="isAuto != null">AND is_auto = #{isAuto}</if>
         <if test="beginDate != null">AND <![CDATA[ event_at >= #{beginDate} ]]> </if>
@@ -422,6 +426,7 @@
             #{item.farmName},
             #{item.pigId},
             #{item.pigCode},
+            #{item.origin},
             #{item.isAuto},
             #{item.eventAt},
             #{item.type},
@@ -697,6 +702,7 @@
             <if test="farmName != null">farm_name = #{farmName},</if>
             <if test="pigId != null">pig_id = #{pigId},</if>
             <if test="pigCode != null">pig_code = #{pigCode},</if>
+            <if test="origin != null">origin = #{origin},</if>
             <if test="isAuto != null">is_auto = #{isAuto},</if>
             <if test="eventAt != null">event_at = #{eventAt},</if>
             <if test="type != null">`type` = #{type},</if>
@@ -857,6 +863,7 @@
                 farm_name = #{item.farmName},
                 pig_id = #{item.pigId},
                 pig_code = #{item.pigCode},
+                origin = #{item.origin},
                 is_auto = #{item.isAuto},
                 event_at = #{item.eventAt},
                 `type` = #{item.type},
