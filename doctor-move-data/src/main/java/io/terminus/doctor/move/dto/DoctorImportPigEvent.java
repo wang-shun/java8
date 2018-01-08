@@ -46,5 +46,6 @@ public class DoctorImportPigEvent {
     private Integer partWeanPigletsCount; //部分断奶数量
     private Double partWeanAvgWeight;     //断奶平均重量
     private String weanToBarn;            //断奶转入猪舍
+    private Double origin;                //原值
 
 }

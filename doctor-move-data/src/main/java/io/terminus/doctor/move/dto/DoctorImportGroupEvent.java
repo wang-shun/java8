@@ -31,5 +31,6 @@ public class DoctorImportGroupEvent {
     private Integer quantity;             //数量
     private Integer avgDayAge;            //平均日龄
     private Double avgWeight;             //平均体重
+    private Double origin;                //原值
 
 }
