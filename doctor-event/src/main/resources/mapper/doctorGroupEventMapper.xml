@@ -13,6 +13,7 @@
         <result column="farm_name" property="farmName"/>
         <result column="group_id" property="groupId"/>
         <result column="group_code" property="groupCode"/>
+        <result column="origin" property="origin"/>
         <result column="event_at" property="eventAt"/>
         <result column="type" property="type"/>
         <result column="name" property="name"/>
@@ -75,6 +76,7 @@
         farm_name,
         group_id,
         group_code,
+        origin,
         event_at,
         `type`,
         `name`,
@@ -129,6 +131,7 @@
         #{farmName},
         #{groupId},
         #{groupCode},
+        #{origin},
         #{eventAt},
         #{type},
         #{name},
@@ -188,6 +191,7 @@
             #{item.farmName},
             #{item.groupId},
             #{item.groupCode},
+            #{item.origin},
             #{item.eventAt},
             #{item.type},
             #{item.name},
@@ -245,6 +249,7 @@
         <if test="farmName != null">AND farm_name = #{farmName}</if>
         <if test="groupId != null">AND group_id = #{groupId}</if>
         <if test="groupCode != null">AND group_code = #{groupCode}</if>
+        <if test="origin != null">AND origin = #{origin}</if>
         <if test="groupCodeFuzzy != null">AND group_code LIKE concat('%', #{groupCodeFuzzy},'%')</if>
         <if test="eventAt != null">AND event_at = #{eventAt}</if>
         <if test="beginDate != null">AND <![CDATA[ event_at >= #{beginDate} ]]> </if>
@@ -414,6 +419,7 @@
             <if test="farmName != null">farm_name = #{farmName},</if>
             <if test="groupId != null">group_id = #{groupId},</if>
             <if test="groupCode != null">group_code = #{groupCode},</if>
+            <if test="origin != null">origin = #{origin},</if>
             <if test="eventAt != null">event_at = #{eventAt},</if>
             <if test="type != null">`type` = #{type},</if>
             <if test="name != null">`name` = #{name},</if>

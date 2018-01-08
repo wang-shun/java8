@@ -118,6 +118,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
                 .orgId(basic.getOrgId())
                 .orgName(basic.getOrgName())
                 .pigCode(dto.getPigCode())
+                .origin(dto.getOrigin())
                 .pigType(dto.getPigType())
                 .isRemoval(IsOrNot.NO.getValue())
                 .pigFatherCode(dto.getFatherCode())
@@ -182,6 +183,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
         }
         farmEntryDto.setPigId(doctorPig.getId());
         DoctorPigEvent doctorPigEvent =  super.buildPigEvent(basic, farmEntryDto);
+        doctorPigEvent.setOrigin(farmEntryDto.getOrigin());
         doctorPigEvent.setParity(farmEntryDto.getParity());
         doctorPigEvent.setSource(farmEntryDto.getSource());
         doctorPigEvent.setBoarType(farmEntryDto.getBoarType());

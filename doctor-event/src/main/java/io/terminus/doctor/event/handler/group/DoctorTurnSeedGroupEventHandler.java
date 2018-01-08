@@ -118,7 +118,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         DoctorGroupEvent event = dozerGroupEvent(group, GroupEventType.TURN_SEED, turnSeed);
         event.setExtraMap(turnSeed);
         event.setQuantity(1);
-
+        event.setOrigin(turnSeed.getOrigin());
         event.setWeight(turnSeed.getWeight());
         event.setAvgWeight(turnSeed.getWeight());
         event.setOtherBarnId(toBarn.getId());          //目标猪舍id

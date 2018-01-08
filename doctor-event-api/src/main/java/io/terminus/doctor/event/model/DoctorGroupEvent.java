@@ -58,7 +58,12 @@ public class DoctorGroupEvent<T extends BaseGroupInput> implements Serializable 
      * 猪群号
      */
     private String groupCode;
-    
+
+    /**
+     * 原值
+     */
+    private Double origin;
+
     /**
      * 事件发生日期
      */

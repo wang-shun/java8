@@ -242,6 +242,7 @@ public class DoctorCommonGroupEventHandler {
         //基本信息
         farmEntryDto.setRelGroupEventId(input.getRelGroupEventId());
         farmEntryDto.setPigCode(input.getPigCode());
+        farmEntryDto.setOrigin(input.getOrigin());
         farmEntryDto.setBarnId(barn.getId());
         farmEntryDto.setBarnName(barn.getName());
         farmEntryDto.setBarnType(barn.getPigType());

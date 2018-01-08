@@ -1605,3 +1605,7 @@ ADD COLUMN `handle_date` DATE NULL COMMENT '处理日期' AFTER `updated_at`;
 ALTER TABLE `doctor_farms`
 ADD COLUMN `is_weak` SMALLINT(6) DEFAULT 1 COMMENT '弱仔数是否作为活仔数' AFTER `is_intelligent`;
 
+-- 猪 猪群原值 2017-12-20
+ALTER TABLE `doctor_pig_events` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `remark`;
+ALTER TABLE `doctor_group_events` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `remark`;
+ALTER TABLE `doctor_pigs` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `pig_code`;
