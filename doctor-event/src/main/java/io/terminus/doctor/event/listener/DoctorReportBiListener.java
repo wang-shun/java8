@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.listener;
 
 import com.google.common.eventbus.Subscribe;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.EventListener;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportBoarDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportDeliverDao;
@@ -13,6 +14,8 @@ import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorPigDaily;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 /**
  * Created by xjn on 18/1/9.
@@ -46,7 +49,7 @@ public class DoctorReportBiListener implements EventListener{
      */
     @Subscribe
     public void synchronizePigData(DoctorPigDaily pigDaily) {
-
+        
     }
 
     /**
@@ -55,7 +58,13 @@ public class DoctorReportBiListener implements EventListener{
      */
     @Subscribe
     public void synchronizeGroupData(DoctorGroupDaily groupDaily){
-
+        if (Objects.equals(groupDaily.getPigType(), PigType.NURSERY_PIGLET.getValue())) {
+            // TODO: 18/1/9  
+        } else if (Objects.equals(groupDaily.getPigType(), PigType.FATTEN_PIG.getValue())) {
+            // TODO: 18/1/9  
+        } else {
+            // TODO: 18/1/9  
+        }
     }
 
     /**

@@ -24,7 +24,7 @@ public class DoctorReportBiManager {
      * @param pigDaily 猪日报表
      */
     public void synchronizePigData(DoctorPigDaily pigDaily) {
-
+        dispatcher.publish(pigDaily);
     }
 
     /**
@@ -32,7 +32,7 @@ public class DoctorReportBiManager {
      * @param groupDaily 猪群日报表
      */
     public void synchronizeGroupData(DoctorGroupDaily groupDaily){
-
+        dispatcher.publish(groupDaily);
     }
 
     /**
