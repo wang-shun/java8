@@ -60,9 +60,9 @@ public class DoctorGroupEvent<T extends BaseGroupInput> implements Serializable 
     private String groupCode;
 
     /**
-     * 原值
+     * 原值(单位分)
      */
-    private Double origin;
+    private Long origin;
 
     /**
      * 事件发生日期

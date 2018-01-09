@@ -29,7 +29,7 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
      * 原值
      */
     @NotNull(message = "origin.not.null")
-    private Double origin;
+    private Long origin;
 
     /**
      * 猪群转移类型
