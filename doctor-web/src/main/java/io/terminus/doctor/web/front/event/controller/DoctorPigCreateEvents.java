@@ -62,6 +62,7 @@ import io.terminus.doctor.event.service.DoctorModifyEventService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.event.util.EventUtil;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
@@ -758,6 +759,12 @@ public class DoctorPigCreateEvents {
                 return doctorValidService.valid(dto, doctorPig.getPigCode());
             case FARROWING:
                 DoctorFarrowingDto farrowingDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorFarrowingDto.class);
+                DoctorFarm doctorFarm3 = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+                if (Objects.equals(doctorFarm3.getIsWeak(), io.terminus.doctor.common.enums.IsOrNot.NO.getKey())) {
+                    farrowingDto.setFarrowingLiveCount(farrowingDto.getHealthCount());
+                } else {
+                    farrowingDto.setFarrowingLiveCount(EventUtil.plusInt(farrowingDto.getHealthCount(), farrowingDto.getWeakCount()));
+                }
                 return doctorValidService.valid(farrowingDto, doctorPig.getPigCode());
             case WEAN:
                 DoctorWeanDto weanDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorWeanDto.class);

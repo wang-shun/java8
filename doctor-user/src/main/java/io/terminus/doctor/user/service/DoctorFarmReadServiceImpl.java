@@ -4,10 +4,13 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.model.PageInfo;
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
+import io.terminus.doctor.user.dto.FarmCriteria;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.parana.common.utils.RespHelper;
@@ -126,4 +129,17 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
             return Response.fail("find.farms.by.ids.failed");
         }
     }
+
+    @Override
+    public Response<Paging<DoctorFarm>> pagingFarm(FarmCriteria farmCriteria, Integer pageNo, Integer pageSize) {
+        try {
+            PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
+            return Response.ok(doctorFarmDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), farmCriteria));
+        } catch (Exception e) {
+            log.error("paging farm failed, doctorFarm:{},cause:{}",
+                    farmCriteria, Throwables.getStackTraceAsString(e));
+            return Response.fail("paging.farm.failed");
+        }
+    }
+
 }

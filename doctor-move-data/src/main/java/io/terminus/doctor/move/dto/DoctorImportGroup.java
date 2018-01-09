@@ -24,4 +24,5 @@ public class DoctorImportGroup {
     private Integer avgDayAge;            //平均日龄
     private Double avgWeight;             //平均体重
     private Date newGroupDate;            //建群日期
+    private Double origin;                //原值
 }

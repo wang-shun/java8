@@ -39,7 +39,7 @@ public class DoctorImportSow implements Serializable {
     private String farrowBarnName;   //分娩猪舍(历史胎次默认产房中第一个产房)
     private String bed;              //床号
     private Date weanDate;           //断奶日期
-    private Integer healthyCount;     //健仔数
+    private Integer healthyCount;    //健仔数
     private Integer jixingCount;     //畸形
     private Integer weakCount;       //弱仔数
     private Integer deadCount;       //死仔
@@ -62,7 +62,8 @@ public class DoctorImportSow implements Serializable {
     private String pregBarn;         //进场、配种、妊娠检查、去分娩几个事件的发生猪舍(默认导入猪舍的第一个妊娠舍)
     private String weanToBarn;       //断奶转入猪舍
     private Integer parityStage;     //胎次阶段
-    private String pregCheckResult;   //妊娠检查结果
+    private String pregCheckResult;  //妊娠检查结果
+    private Double origin;           //原值
 
     public enum ParityStage {
         FIRST(1, "第一条"),

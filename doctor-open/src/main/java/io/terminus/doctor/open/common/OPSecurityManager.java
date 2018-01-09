@@ -34,9 +34,11 @@ public class OPSecurityManager implements SecurityManager {
         clientMap.put("pigDoctorIOS", new OPClientInfo(2L, "pigDoctorIOS", "pigDoctorIOSSecret"));
         clientMap.put("pigDoctorPC", new OPClientInfo(3L, "pigDoctorPC", "pigDoctorPCSecret"));
         clientMap.put("pigDoctorCRM", new OPClientInfo(4L, "xrnm-crm", "7dI6Pp18SPQySQUz"));    //CRM系统
+        clientMap.put("pigDoctorJXY", new OPClientInfo(5L, "pigDoctorJXY", "gzYEVmIHZ24JQHcX"));    //JXY系统
 
         idClientMap = clientMap.values().stream().collect(Collectors.toMap(OpClient::getClientId, o->o));
         clientPermissionMap.put(4L, ImmutableSet.of("get.daily.report", "get.monthly.report", "get.group.live.stock.detail", "get.shop.item.sale"));
+        clientPermissionMap.put(5L, ImmutableSet.of("get.user.by.sessionId"));
     }
 
     @Override
@@ -53,7 +55,7 @@ public class OPSecurityManager implements SecurityManager {
     @Override
     public boolean hasPermission(Long clientId, String method) {
         // TODO: 16/5/18 数据库里要配上有权限的method
-        if (clientId != 4L) {
+        if (clientId != 4L && clientId != 5L) {
             return true;
         }
         return clientPermissionMap.get(clientId).contains(method);

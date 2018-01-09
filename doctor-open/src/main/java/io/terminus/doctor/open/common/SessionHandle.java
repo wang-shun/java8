@@ -37,7 +37,8 @@ import static io.terminus.common.utils.Arguments.isEmpty;
         "get.daily.report",
         "get.monthly.report",
         "get.group.live.stock.detail",
-        "get.shop.item.sale"
+        "get.shop.item.sale",
+        "get.user.by.sessionId"
 })
 public class SessionHandle implements ParamPreHandle {
 

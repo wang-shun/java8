@@ -1,10 +1,12 @@
 package io.terminus.doctor.open.rest.user;
 
+import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
+import io.terminus.common.model.Response;
+import io.terminus.common.redis.utils.JedisTemplate;
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -19,7 +21,13 @@ import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
-import io.terminus.doctor.user.service.*;
+import io.terminus.doctor.user.service.DoctorMobileMenuReadService;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
+import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
+import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
+import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
+import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.user.service.PrimaryUserReadService;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.doctor.web.core.dto.ServiceBetaStatusToken;
 import io.terminus.doctor.web.core.service.ServiceBetaStatusHandler;
@@ -32,15 +40,19 @@ import io.terminus.parana.auth.core.PermissionHelper;
 import io.terminus.parana.auth.model.Acl;
 import io.terminus.parana.auth.model.ParanaThreadVars;
 import io.terminus.parana.auth.model.PermissionData;
+import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
@@ -66,6 +78,12 @@ public class OPDoctorUsers {
     private final PrimaryUserReadService primaryUserReadService;
     private final ServiceBetaStatusHandler serviceBetaStatusHandler;
 
+    private final JedisTemplate jedisTemplate;
+
+    @Value("${session.redis-prefix}")
+    private String redisPrefix;
+
+
     //猪场软件链接url
     private final String farmManageMultiple = "pigdoctor://company?homepage_type=1";;
 
@@ -80,7 +98,7 @@ public class OPDoctorUsers {
                          AclLoader aclLoader,
                          PermissionHelper permissionHelper,
                          PrimaryUserReadService primaryUserReadService,
-                         ServiceBetaStatusHandler serviceBetaStatusHandler) {
+                         ServiceBetaStatusHandler serviceBetaStatusHandler, JedisTemplate jedisTemplate) {
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
         this.doctorUserReadService = doctorUserReadService;
@@ -92,6 +110,7 @@ public class OPDoctorUsers {
         this.permissionHelper = permissionHelper;
         this.primaryUserReadService = primaryUserReadService;
         this.serviceBetaStatusHandler = serviceBetaStatusHandler;
+        this.jedisTemplate = jedisTemplate;
     }
 
     @Value("${service-domain.pigmall:m.xrnm.com}")
@@ -149,6 +168,8 @@ public class OPDoctorUsers {
                     break;
             }
         });
+
+        dto.setPigJxy(getPigJxy(baseUser));
         return dto;
     }
 
@@ -238,6 +259,25 @@ public class OPDoctorUsers {
         return OPRespHelper.orOPEx(doctorMobileMenuReadService.findMenuByUserIdAndLevel(UserUtil.getUserId(), 1));
     }
 
+    @OpenMethod(key = "get.user.by.sessionId", httpMethods = RequestMethod.GET, paramNames = {"sessionId"})
+    public User getUserBySessionId(String sessionId){
+        String userInfo = jedisTemplate.execute(jedis -> {
+            return jedis.get(redisPrefix + ":" + sessionId);
+        });
+        if (Strings.isNullOrEmpty(userInfo)) {
+            throw new OPClientException("user.not.login");
+        }
+
+        Map<String, Object> map = JsonMapperUtil.nonEmptyMapper().fromJson(userInfo, Map.class);
+        Integer userId = (Integer)map.get("userId");
+        Response<User> userResponse = doctorUserReadService.findById(userId.longValue());
+        if (!userResponse.isSuccess() || isNull(userResponse.getResult())) {
+            throw new OPClientException("user.not.found");
+        }
+
+        return userResponse.getResult();
+    }
+
     private String getPigdoctorUrl(Long userId){
         //查询关联猪场
         DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
@@ -252,5 +292,15 @@ public class OPDoctorUsers {
             }
         }
         return null;
+    }
+
+    private ServiceReviewOpenDto getPigJxy(BaseUser baseUser) {
+        ServiceReviewOpenDto openDto = new ServiceReviewOpenDto();
+        openDto.setServiceStatus(DoctorServiceStatus.Status.OPENED.value());
+        openDto.setUserId(baseUser.getId());
+        openDto.setType(DoctorServiceReview.Type.PIG_JXY.getValue());
+        openDto.setStatus(DoctorServiceReview.Status.OK.getValue());
+        openDto.setUrl("http://39.108.236.233/app");
+        return openDto;
     }
 }
