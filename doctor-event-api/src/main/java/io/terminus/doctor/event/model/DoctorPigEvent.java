@@ -47,9 +47,9 @@ public class DoctorPigEvent implements Serializable {
     private String pigCode; // 猪Code
 
     /**
-     * 原值
+     * 原值(单位分)
      */
-    private Double origin;
+    private Long origin;
 
     /**
      * @see io.terminus.doctor.event.enums.IsOrNot

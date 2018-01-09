@@ -25,7 +25,7 @@ public class DoctorTurnSeedGroupInput extends BaseGroupInput implements Serializ
      * 原值
      */
     @NotNull(message = "origin.not.null")
-    private Double origin;
+    private Long origin;
 
     /**
      * 转种猪后的猪号

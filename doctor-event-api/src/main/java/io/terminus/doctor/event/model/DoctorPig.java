@@ -48,9 +48,9 @@ public class DoctorPig implements Serializable {
     private String pigCode;
 
     /**
-     * 原值
+     * 原值(单位分)
      */
-    private Double origin;
+    private Long origin;
 
     /**
      * @see PigSex
