@@ -7,7 +7,10 @@
 <mapper namespace="DoctorGroupDaily">
     <resultMap id="DoctorGroupDailyMap" type="DoctorGroupDaily">
         <id column="id" property="id"/>
+        <result column="org_id" property="orgId"/>
+        <result column="org_name" property="orgName"/>
         <result column="farm_id" property="farmId"/>
+        <result column="farm_name" property="farmName"/>
         <result column="pig_type" property="pigType"/>
         <result column="sum_at" property="sumAt"/>
         <result column="start" property="start"/>
@@ -44,13 +47,13 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, `pig_type`, sum_at, start, turn_into, turn_into_weight, turn_into_age, chg_farm_in, chg_farm, chg_farm_weight, sale, sale_weight,
+        org_id, org_name, farm_id, farm_name, `pig_type`, sum_at, start, turn_into, turn_into_weight, turn_into_age, chg_farm_in, chg_farm, chg_farm_weight, sale, sale_weight,
         dead, weed_out, other_change, to_nursery, to_fatten, to_fatten_weight, to_houbei, to_houbei_weight,
         turn_seed, turn_out_weight, `end`, created_at, updated_at, version
     </sql>
 
     <sql id="vals">
-       #{farmId}, #{pigType}, #{sumAt}, #{start}, #{turnInto}, #{turnIntoWeight}, #{turnIntoAge}, #{chgFarmIn}, #{chgFarm}, #{chgFarmWeight}, #{sale}, #{saleWeight},
+       #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{pigType}, #{sumAt}, #{start}, #{turnInto}, #{turnIntoWeight}, #{turnIntoAge}, #{chgFarmIn}, #{chgFarm}, #{chgFarmWeight}, #{sale}, #{saleWeight},
        #{dead}, #{weedOut}, #{otherChange}, #{toNursery}, #{toFatten}, #{toFattenWeight}, #{toHoubei}, #{toHoubeiWeight},
        #{turnSeed}, #{turnOutWeight}, #{end}, now(), now(), 1
     </sql>
@@ -76,7 +79,10 @@
         UPDATE
         <include refid="tb"/>
         <set>
+            <if test="orgId != null">org_id = #{orgId},</if>
+            <if test="orgName != null">org_name = #{orgName},</if>
             <if test="farmId != null">farm_id = #{farmId},</if>
+            <if test="farmName != null">farm_name = #{farmName},</if>
             <if test="pigType != null">pig_type = #{pigType},</if>
             <if test="sumAt != null"> sum_at= #{sumAt},</if>
             <if test="start != null">start = #{start},</if>

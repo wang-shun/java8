@@ -17,9 +17,18 @@ public class DoctorGroupDaily implements Serializable {
     private Long id;
 
     /**
+     * 所属公司id
+     */
+    private Long orgId;
+
+    private String orgName;
+
+    /**
      * 猪场id
      */
     private Long farmId;
+
+    private String farmName;
 
     /**
      * 猪群类型

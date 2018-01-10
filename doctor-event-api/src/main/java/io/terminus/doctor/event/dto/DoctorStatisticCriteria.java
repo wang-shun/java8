@@ -29,6 +29,12 @@ public class DoctorStatisticCriteria implements Serializable {
     }
 
     /**
+     * 公司id
+     */
+
+    private Long orgId;
+
+    /**
      * 猪场id
      */
     private Long farmId;

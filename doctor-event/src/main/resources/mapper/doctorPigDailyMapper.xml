@@ -4,7 +4,10 @@
     <resultMap id="DoctorPigDailyMap" type="DoctorPigDaily">
         <id property="id" column="id"/>
         <result property="sumAt" column="sum_at"/>
+        <result property="orgId" column="org_id"/>
+        <result property="orgName" column="org_name"/>
         <result property="farmId" column="farm_id"/>
+        <result property="farmName" column="farm_name"/>
         <result property="sowPhStart" column="sow_ph_start"/>
         <result property="sowPhReserveIn" column="sow_ph_reserve_in"/>
         <result property="sowPhWeanIn" column="sow_ph_wean_in"/>
@@ -70,19 +73,22 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `sum_at`, `farm_id`, `sow_ph_start`, `sow_ph_reserve_in`, `sow_ph_wean_in`, `sow_ph_entry_in`, `sow_ph_chg_farm_in`, `sow_ph_dead`, `sow_ph_weed_out`, `sow_ph_sale`, `sow_ph_chg_farm`, `sow_ph_other_out`, mate_hb, mate_dn, mate_fq, mate_lc, mate_yx, `mating_count`, `preg_positive`, `preg_negative`, `preg_fanqing`, `preg_liuchan`, `sow_ph_end`, `sow_cf_start`, `sow_cf_end`, `sow_cf_in`, `sow_cf_in_farm_in`, `sow_cf_dead`, `sow_cf_weed_out`, `sow_cf_sale`, `sow_cf_chg_farm`, `sow_cf_other_out`, early_farrow_nest, `farrow_nest`, farrow_live, `farrow_health`, `farrow_weak`, `farrow_dead`, `farrowjmh`, `farrow_weight`, `wean_nest`, `wean_qualified_count`, `wean_count`, `wean_day_age`, `wean_weight`, `boar_start`, `boar_in`, `boar_dead`, `boar_weed_out`, `boar_sale`, `boar_other_out`, `boar_end`,
+        `sum_at`, `org_id`, org_name, `farm_id`, farm_name, `sow_ph_start`, `sow_ph_reserve_in`, `sow_ph_wean_in`, `sow_ph_entry_in`, `sow_ph_chg_farm_in`, `sow_ph_dead`, `sow_ph_weed_out`, `sow_ph_sale`, `sow_ph_chg_farm`, `sow_ph_other_out`, mate_hb, mate_dn, mate_fq, mate_lc, mate_yx, `mating_count`, `preg_positive`, `preg_negative`, `preg_fanqing`, `preg_liuchan`, `sow_ph_end`, `sow_cf_start`, `sow_cf_end`, `sow_cf_in`, `sow_cf_in_farm_in`, `sow_cf_dead`, `sow_cf_weed_out`, `sow_cf_sale`, `sow_cf_chg_farm`, `sow_cf_other_out`, early_farrow_nest, `farrow_nest`, farrow_live, `farrow_health`, `farrow_weak`, `farrow_dead`, `farrowjmh`, `farrow_weight`, `wean_nest`, `wean_qualified_count`, `wean_count`, `wean_day_age`, `wean_weight`, `boar_start`, `boar_in`, `boar_dead`, `boar_weed_out`, `boar_sale`, `boar_other_out`, `boar_end`,
         created_at, updated_at, version
     </sql>
 
     <sql id="vals">
-        #{sumAt}, #{farmId}, #{sowPhStart}, #{sowPhReserveIn}, #{sowPhWeanIn}, #{sowPhEntryIn}, #{sowPhChgFarmIn}, #{sowPhDead}, #{sowPhWeedOut}, #{sowPhSale}, #{sowPhChgFarm}, #{sowPhOtherOut}, #{mateHb}, #{mateDn}, #{mateFq}, #{mateLc}, #{mateYx}, #{matingCount}, #{pregPositive}, #{pregNegative}, #{pregFanqing}, #{pregLiuchan}, #{sowPhEnd}, #{sowCfStart}, #{sowCfEnd}, #{sowCfIn}, #{sowCfInFarmIn}, #{sowCfDead}, #{sowCfWeedOut}, #{sowCfSale}, #{sowCfChgFarm}, #{sowCfOtherOut}, #{earlyFarrowNest}, #{farrowNest}, #{farrowLive}, #{farrowHealth}, #{farrowWeak}, #{farrowDead}, #{farrowjmh}, #{farrowWeight}, #{weanNest}, #{weanQualifiedCount}, #{weanCount}, #{weanDayAge}, #{weanWeight}, #{boarStart}, #{boarIn}, #{boarDead}, #{boarWeedOut}, #{boarSale}, #{boarOtherOut}, #{boarEnd},
+        #{sumAt}, #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{sowPhStart}, #{sowPhReserveIn}, #{sowPhWeanIn}, #{sowPhEntryIn}, #{sowPhChgFarmIn}, #{sowPhDead}, #{sowPhWeedOut}, #{sowPhSale}, #{sowPhChgFarm}, #{sowPhOtherOut}, #{mateHb}, #{mateDn}, #{mateFq}, #{mateLc}, #{mateYx}, #{matingCount}, #{pregPositive}, #{pregNegative}, #{pregFanqing}, #{pregLiuchan}, #{sowPhEnd}, #{sowCfStart}, #{sowCfEnd}, #{sowCfIn}, #{sowCfInFarmIn}, #{sowCfDead}, #{sowCfWeedOut}, #{sowCfSale}, #{sowCfChgFarm}, #{sowCfOtherOut}, #{earlyFarrowNest}, #{farrowNest}, #{farrowLive}, #{farrowHealth}, #{farrowWeak}, #{farrowDead}, #{farrowjmh}, #{farrowWeight}, #{weanNest}, #{weanQualifiedCount}, #{weanCount}, #{weanDayAge}, #{weanWeight}, #{boarStart}, #{boarIn}, #{boarDead}, #{boarWeedOut}, #{boarSale}, #{boarOtherOut}, #{boarEnd},
         now(), now(), 1
     </sql>
 
     <sql id="criteria">
         <where>
             <if test="sumAt != null">AND `sum_at` = #{sumAt}</if>
+            <if test="orgId != null">AND `org_id` = #{orgId}</if>
+            <if test="orgName != null">AND `org_name` = #{orgName}</if>
             <if test="farmId != null">AND `farm_id` = #{farmId}</if>
+            <if test="farmName != null">AND `farm_name` = #{farmName}</if>
             <if test="sowPhStart != null">AND `sow_ph_start` = #{sowPhStart}</if>
             <if test="sowPhReserveIn != null">AND `sow_ph_reserve_in` = #{sowPhReserveIn}</if>
             <if test="sowPhWeanIn != null">AND `sow_ph_wean_in` = #{sowPhWeanIn}</if>
@@ -166,6 +172,7 @@
         <include refid="tb"/>
         <set>
             <if test="sumAt != null">`sum_at` = #{sumAt},</if>
+            <if test="orgId != null">`org_id` = #{orgId},</if>
             <if test="farmId != null">`farm_id` = #{farmId},</if>
             <if test="sowPhStart != null">`sow_ph_start` = #{sowPhStart},</if>
             <if test="sowPhReserveIn != null">`sow_ph_reserve_in` = #{sowPhReserveIn},</if>

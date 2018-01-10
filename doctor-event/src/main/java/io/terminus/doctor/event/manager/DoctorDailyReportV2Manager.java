@@ -5,6 +5,7 @@ import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.event.cache.DoctorDepartmentCache;
 import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
 import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -20,6 +21,7 @@ import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.user.dto.DoctorDepartmentLinerDto;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,9 +53,10 @@ public class DoctorDailyReportV2Manager {
     private final DoctorPigEventDao doctorPigEventDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorEventModifyLogDao doctorEventModifyLogDao;
+    private final DoctorDepartmentCache departmentCache;
 
     @Autowired
-    public DoctorDailyReportV2Manager(DoctorGroupStatisticDao groupStatisticDao, DoctorGroupDailyDao groupDailyDao, DoctorPigStatisticDao pigStatisticDao, DoctorPigDailyDao pigDailyDao, DoctorPigEventDao doctorPigEventDao, DoctorGroupEventDao doctorGroupEventDao, DoctorEventModifyLogDao doctorEventModifyLogDao) {
+    public DoctorDailyReportV2Manager(DoctorGroupStatisticDao groupStatisticDao, DoctorGroupDailyDao groupDailyDao, DoctorPigStatisticDao pigStatisticDao, DoctorPigDailyDao pigDailyDao, DoctorPigEventDao doctorPigEventDao, DoctorGroupEventDao doctorGroupEventDao, DoctorEventModifyLogDao doctorEventModifyLogDao, DoctorDepartmentCache departmentCache) {
         this.groupStatisticDao = groupStatisticDao;
         this.groupDailyDao = groupDailyDao;
         this.pigStatisticDao = pigStatisticDao;
@@ -61,6 +64,7 @@ public class DoctorDailyReportV2Manager {
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorEventModifyLogDao = doctorEventModifyLogDao;
+        this.departmentCache = departmentCache;
     }
 
     /**
@@ -69,8 +73,12 @@ public class DoctorDailyReportV2Manager {
     public DoctorGroupDaily flushGroupDaily(DoctorStatisticCriteria criteria){
         DoctorGroupDaily doctorGroupDaily = groupDailyDao.findBy(criteria.getFarmId(), criteria.getPigType(), criteria.getSumAt());
         if (isNull(doctorGroupDaily)) {
+            DoctorDepartmentLinerDto departmentLinerDto = departmentCache.getUnchecked(criteria.getFarmId());
             doctorGroupDaily = new DoctorGroupDaily();
+            doctorGroupDaily.setOrgId(departmentLinerDto.getOrgId());
+            doctorGroupDaily.setOrgName(departmentLinerDto.getOrgName());
             doctorGroupDaily.setFarmId(criteria.getFarmId());
+            doctorGroupDaily.setFarmName(departmentLinerDto.getFarmName());
             doctorGroupDaily.setPigType(criteria.getPigType());
             doctorGroupDaily.setSumAt(DateUtil.toDate(criteria.getSumAt()));
         }
@@ -124,8 +132,12 @@ public class DoctorDailyReportV2Manager {
     public DoctorPigDaily flushPigDaily(DoctorStatisticCriteria criteria) {
         DoctorPigDaily doctorPigDaily = pigDailyDao.findBy(criteria.getFarmId(), criteria.getSumAt());
         if (isNull(doctorPigDaily)) {
+            DoctorDepartmentLinerDto departmentLinerDto = departmentCache.getUnchecked(criteria.getFarmId());
             doctorPigDaily = new DoctorPigDaily();
+            doctorPigDaily.setOrgId(departmentLinerDto.getOrgId());
+            doctorPigDaily.setOrgName(departmentLinerDto.getOrgName());
             doctorPigDaily.setFarmId(criteria.getFarmId());
+            doctorPigDaily.setFarmName(departmentLinerDto.getFarmName());
             doctorPigDaily.setSumAt(DateUtil.toDate(criteria.getSumAt()));
         }
 

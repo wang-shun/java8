@@ -23,9 +23,18 @@ public class DoctorPigDaily implements Serializable {
     private Date sumAt;
 
     /**
+     * 所属公司id
+     */
+    private Long orgId;
+
+    private String orgName;
+
+    /**
      * 猪场
      */
     private Long farmId;
+
+    private String farmName;
 
     /**
      * 配怀母猪期初头数

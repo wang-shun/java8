@@ -1615,7 +1615,10 @@ where a.type = 2 and b.type = 9 and a.status = 1;
 -- 新的猪群报表 2017-12-12
 CREATE TABLE `doctor_group_dailies` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
+   org_id bigint(20) NOT NULL COMMENT '所属公司id',
+   org_name varchar(64) NOT NULL COMMENT '所属公司名',
   `farm_id` bigint(20) NOT NULL COMMENT '猪场id',
+   farm_name varchar(64) NOT NULL COMMENT '所属猪场名',
   `pig_type` tinyint(4) NOT NULL COMMENT '猪群类型',
   `sum_at` date NOT NULL COMMENT '日期',
   `start` int(11) DEFAULT NULL COMMENT '期初',
@@ -1650,7 +1653,10 @@ CREATE TABLE `doctor_group_dailies` (
 create table doctor_pig_dailies (
   id bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
   sum_at date NOT NULL COMMENT '日期（yyyy-MM-dd）',
+  org_id bigint(20) NOT NULL COMMENT '所属公司id',
+  org_name varchar(64) NOT NULL COMMENT '所属公司名',
   farm_id bigint(20) NOT NULL COMMENT '猪场',
+  farm_name varchar(64) NOT NULL COMMENT '猪场名',
   sow_ph_start int(11) DEFAULT NULL COMMENT '配怀母猪期初头数',
   sow_ph_reserve_in int(11) DEFAULT NULL COMMENT '后备转入',
   sow_ph_wean_in int(11) DEFAULT NULL COMMENT '配怀母猪断奶转入',
