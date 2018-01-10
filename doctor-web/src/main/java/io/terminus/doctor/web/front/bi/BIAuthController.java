@@ -2,6 +2,8 @@ package io.terminus.doctor.web.front.bi;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.hash.Hashing;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.ServiceException;
@@ -12,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Stream;
@@ -30,11 +33,17 @@ public class BIAuthController {
      * 生成签名
      *
      * @param pageName
+     * @param type  project: 项目分享  page: 页面分享（页面分享md5不需要_role_key)
      * @param params
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "{pageName}/sign")
-    public String getUrlWithSign(@PathVariable String pageName, @RequestParam(required = false) Map<String, Object> params) {
+    public String getUrlWithSign(@PathVariable String pageName, @RequestParam(required = false) String type, @RequestParam(required = false) Map<String, Object> params) {
+
+        List<String> list = Lists.newArrayList("_project_key", "_board_key");
+        if(!Strings.isNullOrEmpty(type) && "project".equals(type)) {
+            list.add("_role_key");
+        }
 
         DoctorBiPages page = RespHelper.or500(doctorBiPagesReadService.findByName(pageName));
         if (null == page)
@@ -63,7 +72,7 @@ public class BIAuthController {
             });
         }
         paramsInUrl.entrySet().stream()
-                .filter(p -> p.getKey().equals("_project_key") || p.getKey().equals("_board_key") || p.getKey().equals("_role_key"))
+                .filter(p -> list.contains(p.getKey()))
                 .forEach(p -> paramsWithOrder.put(p.getKey(), p.getValue()));
 
         String sign = Hashing.md5().newHasher().
