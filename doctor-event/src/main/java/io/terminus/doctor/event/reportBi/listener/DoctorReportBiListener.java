@@ -3,14 +3,6 @@ package io.terminus.doctor.event.reportBi.listener;
 import com.google.common.eventbus.Subscribe;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.EventListener;
-import io.terminus.doctor.event.dao.reportBi.DoctorReportBoarDao;
-import io.terminus.doctor.event.dao.reportBi.DoctorReportDeliverDao;
-import io.terminus.doctor.event.dao.reportBi.DoctorReportFattenDao;
-import io.terminus.doctor.event.dao.reportBi.DoctorReportMatePregDao;
-import io.terminus.doctor.event.dao.reportBi.DoctorReportNurseryDao;
-import io.terminus.doctor.event.dao.reportBi.DoctorReportReverseDao;
-import io.terminus.doctor.event.dao.reportBi.DoctorReportSowDao;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -21,25 +13,6 @@ import java.util.Objects;
  */
 @Component
 public class DoctorReportBiListener implements EventListener{
-
-    private final DoctorReportBoarDao doctorReportBoarDao;
-    private final DoctorReportDeliverDao doctorReportDeliverDao;
-    private final DoctorReportFattenDao doctorReportFattenDao;
-    private final DoctorReportMatePregDao doctorReportMatePregDao;
-    private final DoctorReportNurseryDao doctorReportNurseryDao;
-    private final DoctorReportReverseDao doctorReportReverseDao;
-    private final DoctorReportSowDao doctorReportSowDao;
-
-    @Autowired
-    public DoctorReportBiListener(DoctorReportBoarDao doctorReportBoarDao, DoctorReportDeliverDao doctorReportDeliverDao, DoctorReportFattenDao doctorReportFattenDao, DoctorReportMatePregDao doctorReportMatePregDao, DoctorReportNurseryDao doctorReportNurseryDao, DoctorReportReverseDao doctorReportReverseDao, DoctorReportSowDao doctorReportSowDao) {
-        this.doctorReportBoarDao = doctorReportBoarDao;
-        this.doctorReportDeliverDao = doctorReportDeliverDao;
-        this.doctorReportFattenDao = doctorReportFattenDao;
-        this.doctorReportMatePregDao = doctorReportMatePregDao;
-        this.doctorReportNurseryDao = doctorReportNurseryDao;
-        this.doctorReportReverseDao = doctorReportReverseDao;
-        this.doctorReportSowDao = doctorReportSowDao;
-    }
 
     /**
      * 同步猪报表数据到bi

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+ ~ Desc:
+ ~ Mail: [ your email ]
+ ~ Date: 2018-01-11 16:18:03
+ ~ Created by [ your name ]
+-->
+
+<mapper namespace="DoctorReportMating">
+    <resultMap id="DoctorReportMatingMap" type="DoctorReportMating">
+        <id property="id" column="id"/>
+        <result property="sumAt" column="sum_at"/>
+        <result property="sumAtName" column="sum_at_name"/>
+        <result property="dateType" column="date_type"/>
+        <result property="orzId" column="orz_id"/>
+        <result property="orzName" column="orz_name"/>
+        <result property="orzType" column="orz_type"/>
+        <result property="start" column="start"/>
+        <result property="houbeiIn" column="houbei_in"/>
+        <result property="sowPhWeanIn" column="sow_ph_wean_in"/>
+        <result property="otherIn" column="other_in"/>
+        <result property="dead" column="dead"/>
+        <result property="weedOut" column="weed_out"/>
+        <result property="sale" column="sale"/>
+        <result property="chgFarmOut" column="chg_farm_out"/>
+        <result property="otherChange" column="other_change"/>
+        <result property="matingCount" column="mating_count"/>
+        <result property="matingSowCount" column="mating_sow_count"/>
+        <result property="pregnancySowCount" column="pregnancy_sow_count"/>
+        <result property="noPregnancySowCount" column="no_pregnancy_sow_count"/>
+        <result property="pregPositive" column="preg_positive"/>
+        <result property="pregNegative" column="preg_negative"/>
+        <result property="pregFanqing" column="preg_fanqing"/>
+        <result property="pregLiuchan" column="preg_liuchan"/>
+        <result property="matingRate" column="mating_rate"/>
+        <result property="end" column="end"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <sql id="tb">
+        doctor_report_matings
+    </sql>
+
+    <sql id="cols_all">
+        id,
+        <include refid="cols_exclude_id"/>
+    </sql>
+
+    <sql id="cols_exclude_id">
+        `sum_at`, `sum_at_name`, `date_type`, `orz_id`, `orz_name`, `orz_type`, `start`, `houbei_in`, `sow_ph_wean_in`, `other_in`, `dead`, `weed_out`, `sale`, `chg_farm_out`, `other_change`, `mating_count`, `mating_sow_count`, `pregnancy_sow_count`, `no_pregnancy_sow_count`, `preg_positive`, `preg_negative`, `preg_fanqing`, `preg_liuchan`, `mating_rate`, `end`, 
+        created_at, updated_at
+    </sql>
+
+    <sql id="vals">
+        #{sumAt}, #{sumAtName}, #{dateType}, #{orzId}, #{orzName}, #{orzType}, #{start}, #{houbeiIn}, #{sowPhWeanIn}, #{otherIn}, #{dead}, #{weedOut}, #{sale}, #{chgFarmOut}, #{otherChange}, #{matingCount}, #{matingSowCount}, #{pregnancySowCount}, #{noPregnancySowCount}, #{pregPositive}, #{pregNegative}, #{pregFanqing}, #{pregLiuchan}, #{matingRate}, #{end}, 
+        now(), now()
+    </sql>
+
+    <sql id="criteria">
+        <where>
+            <if test="sumAt != null">AND `sum_at` = #{sumAt}</if>
+            <if test="sumAtName != null">AND `sum_at_name` = #{sumAtName}</if>
+            <if test="dateType != null">AND `date_type` = #{dateType}</if>
+            <if test="orzId != null">AND `orz_id` = #{orzId}</if>
+            <if test="orzName != null">AND `orz_name` = #{orzName}</if>
+            <if test="orzType != null">AND `orz_type` = #{orzType}</if>
+            <if test="start != null">AND `start` = #{start}</if>
+            <if test="houbeiIn != null">AND `houbei_in` = #{houbeiIn}</if>
+            <if test="sowPhWeanIn != null">AND `sow_ph_wean_in` = #{sowPhWeanIn}</if>
+            <if test="otherIn != null">AND `other_in` = #{otherIn}</if>
+            <if test="dead != null">AND `dead` = #{dead}</if>
+            <if test="weedOut != null">AND `weed_out` = #{weedOut}</if>
+            <if test="sale != null">AND `sale` = #{sale}</if>
+            <if test="chgFarmOut != null">AND `chg_farm_out` = #{chgFarmOut}</if>
+            <if test="otherChange != null">AND `other_change` = #{otherChange}</if>
+            <if test="matingCount != null">AND `mating_count` = #{matingCount}</if>
+            <if test="matingSowCount != null">AND `mating_sow_count` = #{matingSowCount}</if>
+            <if test="pregnancySowCount != null">AND `pregnancy_sow_count` = #{pregnancySowCount}</if>
+            <if test="noPregnancySowCount != null">AND `no_pregnancy_sow_count` = #{noPregnancySowCount}</if>
+            <if test="pregPositive != null">AND `preg_positive` = #{pregPositive}</if>
+            <if test="pregNegative != null">AND `preg_negative` = #{pregNegative}</if>
+            <if test="pregFanqing != null">AND `preg_fanqing` = #{pregFanqing}</if>
+            <if test="pregLiuchan != null">AND `preg_liuchan` = #{pregLiuchan}</if>
+            <if test="matingRate != null">AND `mating_rate` = #{matingRate}</if>
+            <if test="end != null">AND `end` = #{end}</if>
+            <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
+            <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
+        </where>
+    </sql>
+
+    <insert id="create" parameterType="DoctorReportMating" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        <include refid="tb"/>
+        (<include refid="cols_exclude_id"/>)
+        VALUES
+        (<include refid="vals"/>)
+    </insert>
+
+    <select id="findById" parameterType="long" resultMap="DoctorReportMatingMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE id = #{id} LIMIT 1
+    </select>
+
+    <select id="findByIds" parameterType="list" resultMap="DoctorReportMatingMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <update id="update" parameterType="DoctorReportMating">
+        UPDATE
+        <include refid="tb"/>
+        <set>
+            <if test="sumAt != null">`sum_at` = #{sumAt},</if>
+            <if test="sumAtName != null">`sum_at_name` = #{sumAtName},</if>
+            <if test="dateType != null">`date_type` = #{dateType},</if>
+            <if test="orzId != null">`orz_id` = #{orzId},</if>
+            <if test="orzName != null">`orz_name` = #{orzName},</if>
+            <if test="orzType != null">`orz_type` = #{orzType},</if>
+            <if test="start != null">`start` = #{start},</if>
+            <if test="houbeiIn != null">`houbei_in` = #{houbeiIn},</if>
+            <if test="sowPhWeanIn != null">`sow_ph_wean_in` = #{sowPhWeanIn},</if>
+            <if test="otherIn != null">`other_in` = #{otherIn},</if>
+            <if test="dead != null">`dead` = #{dead},</if>
+            <if test="weedOut != null">`weed_out` = #{weedOut},</if>
+            <if test="sale != null">`sale` = #{sale},</if>
+            <if test="chgFarmOut != null">`chg_farm_out` = #{chgFarmOut},</if>
+            <if test="otherChange != null">`other_change` = #{otherChange},</if>
+            <if test="matingCount != null">`mating_count` = #{matingCount},</if>
+            <if test="matingSowCount != null">`mating_sow_count` = #{matingSowCount},</if>
+            <if test="pregnancySowCount != null">`pregnancy_sow_count` = #{pregnancySowCount},</if>
+            <if test="noPregnancySowCount != null">`no_pregnancy_sow_count` = #{noPregnancySowCount},</if>
+            <if test="pregPositive != null">`preg_positive` = #{pregPositive},</if>
+            <if test="pregNegative != null">`preg_negative` = #{pregNegative},</if>
+            <if test="pregFanqing != null">`preg_fanqing` = #{pregFanqing},</if>
+            <if test="pregLiuchan != null">`preg_liuchan` = #{pregLiuchan},</if>
+            <if test="matingRate != null">`mating_rate` = #{matingRate},</if>
+            <if test="end != null">`end` = #{end},</if>
+            updated_at = now()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="long">
+        DELETE FROM <include refid="tb"/>
+        WHERE id = #{id}
+    </delete>
+    
+    <select id="count" parameterType="map" resultType="long">
+        SELECT COUNT(1)
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+    </select>
+
+    <select id="paging" parameterType="map" resultMap="DoctorReportMatingMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+        ORDER BY `id` DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="list" parameterType="map" resultMap="DoctorReportMatingMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+        ORDER BY `id` DESC
+    </select>
+
+</mapper>

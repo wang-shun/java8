@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+ ~ Desc:
+ ~ Mail: [ your email ]
+ ~ Date: 2018-01-11 16:16:32
+ ~ Created by [ your name ]
+-->
+
+<mapper namespace="DoctorReportMaterial">
+    <resultMap id="DoctorReportMaterialMap" type="DoctorReportMaterial">
+        <id property="id" column="id"/>
+        <result property="sumAt" column="sum_at"/>
+        <result property="sumAtName" column="sum_at_name"/>
+        <result property="dateType" column="date_type"/>
+        <result property="orzId" column="orz_id"/>
+        <result property="orzName" column="orz_name"/>
+        <result property="orzType" column="orz_type"/>
+        <result property="houbeiFeedAmount" column="houbei_feed_amount"/>
+        <result property="houbeiFeedQuantity" column="houbei_feed_quantity"/>
+        <result property="houbeiMaterialAmount" column="houbei_material_amount"/>
+        <result property="houbeiMaterialQuantity" column="houbei_material_quantity"/>
+        <result property="houbeiVaccinationAmount" column="houbei_vaccination_amount"/>
+        <result property="houbeiMedicineAmount" column="houbei_medicine_amount"/>
+        <result property="houbeiConsumeAmount" column="houbei_consume_amount"/>
+        <result property="peihuaiFeedAmount" column="peihuai_feed_amount"/>
+        <result property="peihuaiFeedQuantity" column="peihuai_feed_quantity"/>
+        <result property="peihuaiMaterialAmount" column="peihuai_material_amount"/>
+        <result property="peihuaiMaterialQuantity" column="peihuai_material_quantity"/>
+        <result property="peihuaiVaccinationAmount" column="peihuai_vaccination_amount"/>
+        <result property="peihuaiMedicineAmount" column="peihuai_medicine_amount"/>
+        <result property="peihuaiConsumeAmount" column="peihuai_consume_amount"/>
+        <result property="sowFeedAmount" column="sow_feed_amount"/>
+        <result property="sowFeedQuantity" column="sow_feed_quantity"/>
+        <result property="sowMaterialAmount" column="sow_material_amount"/>
+        <result property="sowMaterialQuantity" column="sow_material_quantity"/>
+        <result property="sowVaccinationAmount" column="sow_vaccination_amount"/>
+        <result property="sowMedicineAmount" column="sow_medicine_amount"/>
+        <result property="sowConsumeAmount" column="sow_consume_amount"/>
+        <result property="pigletFeedAmount" column="piglet_feed_amount"/>
+        <result property="pigletFeedQuantity" column="piglet_feed_quantity"/>
+        <result property="pigletMaterialAmount" column="piglet_material_amount"/>
+        <result property="pigletMaterialQuantity" column="piglet_material_quantity"/>
+        <result property="pigletVaccinationAmount" column="piglet_vaccination_amount"/>
+        <result property="pigletMedicineAmount" column="piglet_medicine_amount"/>
+        <result property="pigletConsumeAmount" column="piglet_consume_amount"/>
+        <result property="baoyuFeedAmount" column="baoyu_feed_amount"/>
+        <result property="baoyuFeedQuantity" column="baoyu_feed_quantity"/>
+        <result property="baoyuMaterialAmount" column="baoyu_material_amount"/>
+        <result property="baoyuMaterialQuantity" column="baoyu_material_quantity"/>
+        <result property="baoyuVaccinationAmount" column="baoyu_vaccination_amount"/>
+        <result property="baoyuMedicineAmount" column="baoyu_medicine_amount"/>
+        <result property="baoyuConsumeAmount" column="baoyu_consume_amount"/>
+        <result property="yufeiFeedAmount" column="yufei_feed_amount"/>
+        <result property="yufeiFeedQuantity" column="yufei_feed_quantity"/>
+        <result property="yufeiMaterialAmount" column="yufei_material_amount"/>
+        <result property="yufeiMaterialQuantity" column="yufei_material_quantity"/>
+        <result property="yufeiVaccinationAmount" column="yufei_vaccination_amount"/>
+        <result property="yufeiMedicineAmount" column="yufei_medicine_amount"/>
+        <result property="yufeiConsumeAmount" column="yufei_consume_amount"/>
+        <result property="boarFeedAmount" column="boar_feed_amount"/>
+        <result property="boarFeedQuantity" column="boar_feed_quantity"/>
+        <result property="boarMaterialAmount" column="boar_material_amount"/>
+        <result property="boarMaterialQuantity" column="boar_material_quantity"/>
+        <result property="boarVaccinationAmount" column="boar_vaccination_amount"/>
+        <result property="boarMedicineAmount" column="boar_medicine_amount"/>
+        <result property="boarConsumeAmount" column="boar_consume_amount"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <sql id="tb">
+        doctor_report_materials
+    </sql>
+
+    <sql id="cols_all">
+        id,
+        <include refid="cols_exclude_id"/>
+    </sql>
+
+    <sql id="cols_exclude_id">
+        `sum_at`, `sum_at_name`, `date_type`, `orz_id`, `orz_name`, `orz_type`, `houbei_feed_amount`, `houbei_feed_quantity`, `houbei_material_amount`, `houbei_material_quantity`, `houbei_vaccination_amount`, `houbei_medicine_amount`, `houbei_consume_amount`, `peihuai_feed_amount`, `peihuai_feed_quantity`, `peihuai_material_amount`, `peihuai_material_quantity`, `peihuai_vaccination_amount`, `peihuai_medicine_amount`, `peihuai_consume_amount`, `sow_feed_amount`, `sow_feed_quantity`, `sow_material_amount`, `sow_material_quantity`, `sow_vaccination_amount`, `sow_medicine_amount`, `sow_consume_amount`, `piglet_feed_amount`, `piglet_feed_quantity`, `piglet_material_amount`, `piglet_material_quantity`, `piglet_vaccination_amount`, `piglet_medicine_amount`, `piglet_consume_amount`, `baoyu_feed_amount`, `baoyu_feed_quantity`, `baoyu_material_amount`, `baoyu_material_quantity`, `baoyu_vaccination_amount`, `baoyu_medicine_amount`, `baoyu_consume_amount`, `yufei_feed_amount`, `yufei_feed_quantity`, `yufei_material_amount`, `yufei_material_quantity`, `yufei_vaccination_amount`, `yufei_medicine_amount`, `yufei_consume_amount`, `boar_feed_amount`, `boar_feed_quantity`, `boar_material_amount`, `boar_material_quantity`, `boar_vaccination_amount`, `boar_medicine_amount`, `boar_consume_amount`, 
+        created_at, updated_at
+    </sql>
+
+    <sql id="vals">
+        #{sumAt}, #{sumAtName}, #{dateType}, #{orzId}, #{orzName}, #{orzType}, #{houbeiFeedAmount}, #{houbeiFeedQuantity}, #{houbeiMaterialAmount}, #{houbeiMaterialQuantity}, #{houbeiVaccinationAmount}, #{houbeiMedicineAmount}, #{houbeiConsumeAmount}, #{peihuaiFeedAmount}, #{peihuaiFeedQuantity}, #{peihuaiMaterialAmount}, #{peihuaiMaterialQuantity}, #{peihuaiVaccinationAmount}, #{peihuaiMedicineAmount}, #{peihuaiConsumeAmount}, #{sowFeedAmount}, #{sowFeedQuantity}, #{sowMaterialAmount}, #{sowMaterialQuantity}, #{sowVaccinationAmount}, #{sowMedicineAmount}, #{sowConsumeAmount}, #{pigletFeedAmount}, #{pigletFeedQuantity}, #{pigletMaterialAmount}, #{pigletMaterialQuantity}, #{pigletVaccinationAmount}, #{pigletMedicineAmount}, #{pigletConsumeAmount}, #{baoyuFeedAmount}, #{baoyuFeedQuantity}, #{baoyuMaterialAmount}, #{baoyuMaterialQuantity}, #{baoyuVaccinationAmount}, #{baoyuMedicineAmount}, #{baoyuConsumeAmount}, #{yufeiFeedAmount}, #{yufeiFeedQuantity}, #{yufeiMaterialAmount}, #{yufeiMaterialQuantity}, #{yufeiVaccinationAmount}, #{yufeiMedicineAmount}, #{yufeiConsumeAmount}, #{boarFeedAmount}, #{boarFeedQuantity}, #{boarMaterialAmount}, #{boarMaterialQuantity}, #{boarVaccinationAmount}, #{boarMedicineAmount}, #{boarConsumeAmount}, 
+        now(), now()
+    </sql>
+
+    <sql id="criteria">
+        <where>
+            <if test="sumAt != null">AND `sum_at` = #{sumAt}</if>
+            <if test="sumAtName != null">AND `sum_at_name` = #{sumAtName}</if>
+            <if test="dateType != null">AND `date_type` = #{dateType}</if>
+            <if test="orzId != null">AND `orz_id` = #{orzId}</if>
+            <if test="orzName != null">AND `orz_name` = #{orzName}</if>
+            <if test="orzType != null">AND `orz_type` = #{orzType}</if>
+            <if test="houbeiFeedAmount != null">AND `houbei_feed_amount` = #{houbeiFeedAmount}</if>
+            <if test="houbeiFeedQuantity != null">AND `houbei_feed_quantity` = #{houbeiFeedQuantity}</if>
+            <if test="houbeiMaterialAmount != null">AND `houbei_material_amount` = #{houbeiMaterialAmount}</if>
+            <if test="houbeiMaterialQuantity != null">AND `houbei_material_quantity` = #{houbeiMaterialQuantity}</if>
+            <if test="houbeiVaccinationAmount != null">AND `houbei_vaccination_amount` = #{houbeiVaccinationAmount}</if>
+            <if test="houbeiMedicineAmount != null">AND `houbei_medicine_amount` = #{houbeiMedicineAmount}</if>
+            <if test="houbeiConsumeAmount != null">AND `houbei_consume_amount` = #{houbeiConsumeAmount}</if>
+            <if test="peihuaiFeedAmount != null">AND `peihuai_feed_amount` = #{peihuaiFeedAmount}</if>
+            <if test="peihuaiFeedQuantity != null">AND `peihuai_feed_quantity` = #{peihuaiFeedQuantity}</if>
+            <if test="peihuaiMaterialAmount != null">AND `peihuai_material_amount` = #{peihuaiMaterialAmount}</if>
+            <if test="peihuaiMaterialQuantity != null">AND `peihuai_material_quantity` = #{peihuaiMaterialQuantity}</if>
+            <if test="peihuaiVaccinationAmount != null">AND `peihuai_vaccination_amount` = #{peihuaiVaccinationAmount}</if>
+            <if test="peihuaiMedicineAmount != null">AND `peihuai_medicine_amount` = #{peihuaiMedicineAmount}</if>
+            <if test="peihuaiConsumeAmount != null">AND `peihuai_consume_amount` = #{peihuaiConsumeAmount}</if>
+            <if test="sowFeedAmount != null">AND `sow_feed_amount` = #{sowFeedAmount}</if>
+            <if test="sowFeedQuantity != null">AND `sow_feed_quantity` = #{sowFeedQuantity}</if>
+            <if test="sowMaterialAmount != null">AND `sow_material_amount` = #{sowMaterialAmount}</if>
+            <if test="sowMaterialQuantity != null">AND `sow_material_quantity` = #{sowMaterialQuantity}</if>
+            <if test="sowVaccinationAmount != null">AND `sow_vaccination_amount` = #{sowVaccinationAmount}</if>
+            <if test="sowMedicineAmount != null">AND `sow_medicine_amount` = #{sowMedicineAmount}</if>
+            <if test="sowConsumeAmount != null">AND `sow_consume_amount` = #{sowConsumeAmount}</if>
+            <if test="pigletFeedAmount != null">AND `piglet_feed_amount` = #{pigletFeedAmount}</if>
+            <if test="pigletFeedQuantity != null">AND `piglet_feed_quantity` = #{pigletFeedQuantity}</if>
+            <if test="pigletMaterialAmount != null">AND `piglet_material_amount` = #{pigletMaterialAmount}</if>
+            <if test="pigletMaterialQuantity != null">AND `piglet_material_quantity` = #{pigletMaterialQuantity}</if>
+            <if test="pigletVaccinationAmount != null">AND `piglet_vaccination_amount` = #{pigletVaccinationAmount}</if>
+            <if test="pigletMedicineAmount != null">AND `piglet_medicine_amount` = #{pigletMedicineAmount}</if>
+            <if test="pigletConsumeAmount != null">AND `piglet_consume_amount` = #{pigletConsumeAmount}</if>
+            <if test="baoyuFeedAmount != null">AND `baoyu_feed_amount` = #{baoyuFeedAmount}</if>
+            <if test="baoyuFeedQuantity != null">AND `baoyu_feed_quantity` = #{baoyuFeedQuantity}</if>
+            <if test="baoyuMaterialAmount != null">AND `baoyu_material_amount` = #{baoyuMaterialAmount}</if>
+            <if test="baoyuMaterialQuantity != null">AND `baoyu_material_quantity` = #{baoyuMaterialQuantity}</if>
+            <if test="baoyuVaccinationAmount != null">AND `baoyu_vaccination_amount` = #{baoyuVaccinationAmount}</if>
+            <if test="baoyuMedicineAmount != null">AND `baoyu_medicine_amount` = #{baoyuMedicineAmount}</if>
+            <if test="baoyuConsumeAmount != null">AND `baoyu_consume_amount` = #{baoyuConsumeAmount}</if>
+            <if test="yufeiFeedAmount != null">AND `yufei_feed_amount` = #{yufeiFeedAmount}</if>
+            <if test="yufeiFeedQuantity != null">AND `yufei_feed_quantity` = #{yufeiFeedQuantity}</if>
+            <if test="yufeiMaterialAmount != null">AND `yufei_material_amount` = #{yufeiMaterialAmount}</if>
+            <if test="yufeiMaterialQuantity != null">AND `yufei_material_quantity` = #{yufeiMaterialQuantity}</if>
+            <if test="yufeiVaccinationAmount != null">AND `yufei_vaccination_amount` = #{yufeiVaccinationAmount}</if>
+            <if test="yufeiMedicineAmount != null">AND `yufei_medicine_amount` = #{yufeiMedicineAmount}</if>
+            <if test="yufeiConsumeAmount != null">AND `yufei_consume_amount` = #{yufeiConsumeAmount}</if>
+            <if test="boarFeedAmount != null">AND `boar_feed_amount` = #{boarFeedAmount}</if>
+            <if test="boarFeedQuantity != null">AND `boar_feed_quantity` = #{boarFeedQuantity}</if>
+            <if test="boarMaterialAmount != null">AND `boar_material_amount` = #{boarMaterialAmount}</if>
+            <if test="boarMaterialQuantity != null">AND `boar_material_quantity` = #{boarMaterialQuantity}</if>
+            <if test="boarVaccinationAmount != null">AND `boar_vaccination_amount` = #{boarVaccinationAmount}</if>
+            <if test="boarMedicineAmount != null">AND `boar_medicine_amount` = #{boarMedicineAmount}</if>
+            <if test="boarConsumeAmount != null">AND `boar_consume_amount` = #{boarConsumeAmount}</if>
+            <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
+            <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
+        </where>
+    </sql>
+
+    <insert id="create" parameterType="DoctorReportMaterial" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        <include refid="tb"/>
+        (<include refid="cols_exclude_id"/>)
+        VALUES
+        (<include refid="vals"/>)
+    </insert>
+
+    <select id="findById" parameterType="long" resultMap="DoctorReportMaterialMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE id = #{id} LIMIT 1
+    </select>
+
+    <select id="findByIds" parameterType="list" resultMap="DoctorReportMaterialMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <update id="update" parameterType="DoctorReportMaterial">
+        UPDATE
+        <include refid="tb"/>
+        <set>
+            <if test="sumAt != null">`sum_at` = #{sumAt},</if>
+            <if test="sumAtName != null">`sum_at_name` = #{sumAtName},</if>
+            <if test="dateType != null">`date_type` = #{dateType},</if>
+            <if test="orzId != null">`orz_id` = #{orzId},</if>
+            <if test="orzName != null">`orz_name` = #{orzName},</if>
+            <if test="orzType != null">`orz_type` = #{orzType},</if>
+            <if test="houbeiFeedAmount != null">`houbei_feed_amount` = #{houbeiFeedAmount},</if>
+            <if test="houbeiFeedQuantity != null">`houbei_feed_quantity` = #{houbeiFeedQuantity},</if>
+            <if test="houbeiMaterialAmount != null">`houbei_material_amount` = #{houbeiMaterialAmount},</if>
+            <if test="houbeiMaterialQuantity != null">`houbei_material_quantity` = #{houbeiMaterialQuantity},</if>
+            <if test="houbeiVaccinationAmount != null">`houbei_vaccination_amount` = #{houbeiVaccinationAmount},</if>
+            <if test="houbeiMedicineAmount != null">`houbei_medicine_amount` = #{houbeiMedicineAmount},</if>
+            <if test="houbeiConsumeAmount != null">`houbei_consume_amount` = #{houbeiConsumeAmount},</if>
+            <if test="peihuaiFeedAmount != null">`peihuai_feed_amount` = #{peihuaiFeedAmount},</if>
+            <if test="peihuaiFeedQuantity != null">`peihuai_feed_quantity` = #{peihuaiFeedQuantity},</if>
+            <if test="peihuaiMaterialAmount != null">`peihuai_material_amount` = #{peihuaiMaterialAmount},</if>
+            <if test="peihuaiMaterialQuantity != null">`peihuai_material_quantity` = #{peihuaiMaterialQuantity},</if>
+            <if test="peihuaiVaccinationAmount != null">`peihuai_vaccination_amount` = #{peihuaiVaccinationAmount},</if>
+            <if test="peihuaiMedicineAmount != null">`peihuai_medicine_amount` = #{peihuaiMedicineAmount},</if>
+            <if test="peihuaiConsumeAmount != null">`peihuai_consume_amount` = #{peihuaiConsumeAmount},</if>
+            <if test="sowFeedAmount != null">`sow_feed_amount` = #{sowFeedAmount},</if>
+            <if test="sowFeedQuantity != null">`sow_feed_quantity` = #{sowFeedQuantity},</if>
+            <if test="sowMaterialAmount != null">`sow_material_amount` = #{sowMaterialAmount},</if>
+            <if test="sowMaterialQuantity != null">`sow_material_quantity` = #{sowMaterialQuantity},</if>
+            <if test="sowVaccinationAmount != null">`sow_vaccination_amount` = #{sowVaccinationAmount},</if>
+            <if test="sowMedicineAmount != null">`sow_medicine_amount` = #{sowMedicineAmount},</if>
+            <if test="sowConsumeAmount != null">`sow_consume_amount` = #{sowConsumeAmount},</if>
+            <if test="pigletFeedAmount != null">`piglet_feed_amount` = #{pigletFeedAmount},</if>
+            <if test="pigletFeedQuantity != null">`piglet_feed_quantity` = #{pigletFeedQuantity},</if>
+            <if test="pigletMaterialAmount != null">`piglet_material_amount` = #{pigletMaterialAmount},</if>
+            <if test="pigletMaterialQuantity != null">`piglet_material_quantity` = #{pigletMaterialQuantity},</if>
+            <if test="pigletVaccinationAmount != null">`piglet_vaccination_amount` = #{pigletVaccinationAmount},</if>
+            <if test="pigletMedicineAmount != null">`piglet_medicine_amount` = #{pigletMedicineAmount},</if>
+            <if test="pigletConsumeAmount != null">`piglet_consume_amount` = #{pigletConsumeAmount},</if>
+            <if test="baoyuFeedAmount != null">`baoyu_feed_amount` = #{baoyuFeedAmount},</if>
+            <if test="baoyuFeedQuantity != null">`baoyu_feed_quantity` = #{baoyuFeedQuantity},</if>
+            <if test="baoyuMaterialAmount != null">`baoyu_material_amount` = #{baoyuMaterialAmount},</if>
+            <if test="baoyuMaterialQuantity != null">`baoyu_material_quantity` = #{baoyuMaterialQuantity},</if>
+            <if test="baoyuVaccinationAmount != null">`baoyu_vaccination_amount` = #{baoyuVaccinationAmount},</if>
+            <if test="baoyuMedicineAmount != null">`baoyu_medicine_amount` = #{baoyuMedicineAmount},</if>
+            <if test="baoyuConsumeAmount != null">`baoyu_consume_amount` = #{baoyuConsumeAmount},</if>
+            <if test="yufeiFeedAmount != null">`yufei_feed_amount` = #{yufeiFeedAmount},</if>
+            <if test="yufeiFeedQuantity != null">`yufei_feed_quantity` = #{yufeiFeedQuantity},</if>
+            <if test="yufeiMaterialAmount != null">`yufei_material_amount` = #{yufeiMaterialAmount},</if>
+            <if test="yufeiMaterialQuantity != null">`yufei_material_quantity` = #{yufeiMaterialQuantity},</if>
+            <if test="yufeiVaccinationAmount != null">`yufei_vaccination_amount` = #{yufeiVaccinationAmount},</if>
+            <if test="yufeiMedicineAmount != null">`yufei_medicine_amount` = #{yufeiMedicineAmount},</if>
+            <if test="yufeiConsumeAmount != null">`yufei_consume_amount` = #{yufeiConsumeAmount},</if>
+            <if test="boarFeedAmount != null">`boar_feed_amount` = #{boarFeedAmount},</if>
+            <if test="boarFeedQuantity != null">`boar_feed_quantity` = #{boarFeedQuantity},</if>
+            <if test="boarMaterialAmount != null">`boar_material_amount` = #{boarMaterialAmount},</if>
+            <if test="boarMaterialQuantity != null">`boar_material_quantity` = #{boarMaterialQuantity},</if>
+            <if test="boarVaccinationAmount != null">`boar_vaccination_amount` = #{boarVaccinationAmount},</if>
+            <if test="boarMedicineAmount != null">`boar_medicine_amount` = #{boarMedicineAmount},</if>
+            <if test="boarConsumeAmount != null">`boar_consume_amount` = #{boarConsumeAmount},</if>
+            updated_at = now()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="long">
+        DELETE FROM <include refid="tb"/>
+        WHERE id = #{id}
+    </delete>
+    
+    <select id="count" parameterType="map" resultType="long">
+        SELECT COUNT(1)
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+    </select>
+
+    <select id="paging" parameterType="map" resultMap="DoctorReportMaterialMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+        ORDER BY `id` DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="list" parameterType="map" resultMap="DoctorReportMaterialMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+        ORDER BY `id` DESC
+    </select>
+
+</mapper>

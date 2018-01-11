@@ -1,11 +1,16 @@
 package io.terminus.doctor.event.dao.reportBi;
 
+import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.doctor.event.model.DoctorReportDeliver;
 import org.springframework.stereotype.Repository;
 
 /**
- * Created by xjn on 18/1/9.
- * email:xiaojiannan@terminus.io
+ * Desc:
+ * Mail: [ your email ]
+ * Date: 2018-01-11 14:33:07
+ * Created by [ your name ]
  */
 @Repository
-public class DoctorReportDeliverDao {
+public class DoctorReportDeliverDao extends MyBatisDao<DoctorReportDeliver> {
+
 }

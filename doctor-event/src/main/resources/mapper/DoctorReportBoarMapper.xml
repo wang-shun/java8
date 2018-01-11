@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+ ~ Desc:
+ ~ Mail: [ your email ]
+ ~ Date: 2018-01-11 14:28:37
+ ~ Created by [ your name ]
+-->
+
+<mapper namespace="DoctorReportBoar">
+    <resultMap id="DoctorReportBoarMap" type="DoctorReportBoar">
+        <id property="id" column="id"/>
+        <result property="sumAt" column="sum_at"/>
+        <result property="sumAtName" column="sum_at_name"/>
+        <result property="dateType" column="date_type"/>
+        <result property="orzId" column="orz_id"/>
+        <result property="orzName" column="orz_name"/>
+        <result property="orzType" column="orz_type"/>
+        <result property="start" column="start"/>
+        <result property="turnInto" column="turn_into"/>
+        <result property="dead" column="dead"/>
+        <result property="weedOut" column="weed_out"/>
+        <result property="sale" column="sale"/>
+        <result property="otherChange" column="other_change"/>
+        <result property="dailyPigCount" column="daily_pig_count"/>
+        <result property="end" column="end"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <sql id="tb">
+        doctor_report_boars
+    </sql>
+
+    <sql id="cols_all">
+        id,
+        <include refid="cols_exclude_id"/>
+    </sql>
+
+    <sql id="cols_exclude_id">
+        `sum_at`, `sum_at_name`, `date_type`, `orz_id`, `orz_name`, `orz_type`, `start`, `turn_into`, `dead`, `weed_out`, `sale`, `other_change`, `daily_pig_count`, `end`, 
+        created_at, updated_at
+    </sql>
+
+    <sql id="vals">
+        #{sumAt}, #{sumAtName}, #{dateType}, #{orzId}, #{orzName}, #{orzType}, #{start}, #{turnInto}, #{dead}, #{weedOut}, #{sale}, #{otherChange}, #{dailyPigCount}, #{end}, 
+        now(), now()
+    </sql>
+
+    <sql id="criteria">
+        <where>
+            <if test="sumAt != null">AND `sum_at` = #{sumAt}</if>
+            <if test="sumAtName != null">AND `sum_at_name` = #{sumAtName}</if>
+            <if test="dateType != null">AND `date_type` = #{dateType}</if>
+            <if test="orzId != null">AND `orz_id` = #{orzId}</if>
+            <if test="orzName != null">AND `orz_name` = #{orzName}</if>
+            <if test="orzType != null">AND `orz_type` = #{orzType}</if>
+            <if test="start != null">AND `start` = #{start}</if>
+            <if test="turnInto != null">AND `turn_into` = #{turnInto}</if>
+            <if test="dead != null">AND `dead` = #{dead}</if>
+            <if test="weedOut != null">AND `weed_out` = #{weedOut}</if>
+            <if test="sale != null">AND `sale` = #{sale}</if>
+            <if test="otherChange != null">AND `other_change` = #{otherChange}</if>
+            <if test="dailyPigCount != null">AND `daily_pig_count` = #{dailyPigCount}</if>
+            <if test="end != null">AND `end` = #{end}</if>
+            <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
+            <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
+        </where>
+    </sql>
+
+    <insert id="create" parameterType="DoctorReportBoar" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        <include refid="tb"/>
+        (<include refid="cols_exclude_id"/>)
+        VALUES
+        (<include refid="vals"/>)
+    </insert>
+
+    <select id="findById" parameterType="long" resultMap="DoctorReportBoarMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE id = #{id} LIMIT 1
+    </select>
+
+    <select id="findByIds" parameterType="list" resultMap="DoctorReportBoarMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <update id="update" parameterType="DoctorReportBoar">
+        UPDATE
+        <include refid="tb"/>
+        <set>
+            <if test="sumAt != null">`sum_at` = #{sumAt},</if>
+            <if test="sumAtName != null">`sum_at_name` = #{sumAtName},</if>
+            <if test="dateType != null">`date_type` = #{dateType},</if>
+            <if test="orzId != null">`orz_id` = #{orzId},</if>
+            <if test="orzName != null">`orz_name` = #{orzName},</if>
+            <if test="orzType != null">`orz_type` = #{orzType},</if>
+            <if test="start != null">`start` = #{start},</if>
+            <if test="turnInto != null">`turn_into` = #{turnInto},</if>
+            <if test="dead != null">`dead` = #{dead},</if>
+            <if test="weedOut != null">`weed_out` = #{weedOut},</if>
+            <if test="sale != null">`sale` = #{sale},</if>
+            <if test="otherChange != null">`other_change` = #{otherChange},</if>
+            <if test="dailyPigCount != null">`daily_pig_count` = #{dailyPigCount},</if>
+            <if test="end != null">`end` = #{end},</if>
+            updated_at = now()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="long">
+        DELETE FROM <include refid="tb"/>
+        WHERE id = #{id}
+    </delete>
+    
+    <select id="count" parameterType="map" resultType="long">
+        SELECT COUNT(1)
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+    </select>
+
+    <select id="paging" parameterType="map" resultMap="DoctorReportBoarMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+        ORDER BY `id` DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="list" parameterType="map" resultMap="DoctorReportBoarMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+        ORDER BY `id` DESC
+    </select>
+
+</mapper>

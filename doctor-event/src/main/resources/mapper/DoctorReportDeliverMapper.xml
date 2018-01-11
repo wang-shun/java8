@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+ ~ Desc:
+ ~ Mail: [ your email ]
+ ~ Date: 2018-01-11 14:33:07
+ ~ Created by [ your name ]
+-->
+
+<mapper namespace="DoctorReportDeliver">
+    <resultMap id="DoctorReportDeliverMap" type="DoctorReportDeliver">
+        <id property="id" column="id"/>
+        <result property="sumAt" column="sum_at"/>
+        <result property="sumAtName" column="sum_at_name"/>
+        <result property="dateType" column="date_type"/>
+        <result property="orzId" column="orz_id"/>
+        <result property="orzName" column="orz_name"/>
+        <result property="orzType" column="orz_type"/>
+        <result property="start" column="start"/>
+        <result property="end" column="end"/>
+        <result property="sowCfIn" column="sow_cf_in"/>
+        <result property="otherIn" column="other_in"/>
+        <result property="dead" column="dead"/>
+        <result property="weedOut" column="weed_out"/>
+        <result property="sale" column="sale"/>
+        <result property="chgFarmOut" column="chg_farm_out"/>
+        <result property="sowPhWeanOut" column="sow_ph_wean_out"/>
+        <result property="otherChange" column="other_change"/>
+        <result property="earlyMating" column="early_mating"/>
+        <result property="earlyNest" column="early_nest"/>
+        <result property="earlyNestRate" column="early_nest_rate"/>
+        <result property="laterNest" column="later_nest"/>
+        <result property="laterNestRate" column="later_nest_rate"/>
+        <result property="farrowNest" column="farrow_nest"/>
+        <result property="farrowLiving" column="farrow_living"/>
+        <result property="farrowHealth" column="farrow_health"/>
+        <result property="farrowWeak" column="farrow_weak"/>
+        <result property="farrowDead" column="farrow_dead"/>
+        <result property="farrowJmh" column="farrow_jmh"/>
+        <result property="pigletCountPerFarrow" column="piglet_count_per_farrow"/>
+        <result property="pigletLivingCountPerFarrow" column="piglet_living_count_per_farrow"/>
+        <result property="pigletHealthCountPerFarrow" column="piglet_health_count_per_farrow"/>
+        <result property="pigletWeakCountPerFarrow" column="piglet_weak_count_per_farrow"/>
+        <result property="avgWeightPerFarrow" column="avg_weight_per_farrow"/>
+        <result property="firstBornWeight" column="first_born_weight"/>
+        <result property="pigletStart" column="piglet_start"/>
+        <result property="pigletOtherIn" column="piglet_other_in"/>
+        <result property="pigletChgFarmOut" column="piglet_chg_farm_out"/>
+        <result property="pigletChgFarmOutAvgWeight" column="piglet_chg_farm_out_avg_weight"/>
+        <result property="toNursery" column="to_nursery"/>
+        <result property="toNurseryAvgWeight" column="to_nursery_avg_weight"/>
+        <result property="pigletDead" column="piglet_dead"/>
+        <result property="pigletWeedOut" column="piglet_weed_out"/>
+        <result property="pigletOtherChange" column="piglet_other_change"/>
+        <result property="pigletDeadWeedOutRate" column="piglet_dead_weed_out_rate"/>
+        <result property="pigletLivingRate" column="piglet_living_rate"/>
+        <result property="weanNest" column="wean_nest"/>
+        <result property="weanCount" column="wean_count"/>
+        <result property="weanQualifiedCount" column="wean_qualified_count"/>
+        <result property="weanCountPerFarrow" column="wean_count_per_farrow"/>
+        <result property="weanDayAge" column="wean_day_age"/>
+        <result property="weanWeightPerFarrow" column="wean_weight_per_farrow"/>
+        <result property="turnOutAvgWeight" column="turn_out_avg_weight"/>
+        <result property="turnOutDay" column="turn_out_day"/>
+        <result property="turnOutAvgWeight28" column="turn_out_avg_weight_28"/>
+        <result property="pigletSale" column="piglet_sale"/>
+        <result property="pigletSaleAveWeight" column="piglet_sale_ave_weight"/>
+        <result property="pigletEnd" column="piglet_end"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <sql id="tb">
+        doctor_report_delivers
+    </sql>
+
+    <sql id="cols_all">
+        id,
+        <include refid="cols_exclude_id"/>
+    </sql>
+
+    <sql id="cols_exclude_id">
+        `sum_at`, `sum_at_name`, `date_type`, `orz_id`, `orz_name`, `orz_type`, `start`, `end`, `sow_cf_in`, `other_in`, `dead`, `weed_out`, `sale`, `chg_farm_out`, `sow_ph_wean_out`, `other_change`, `early_mating`, `early_nest`, `early_nest_rate`, `later_nest`, `later_nest_rate`, `farrow_nest`, `farrow_living`, `farrow_health`, `farrow_weak`, `farrow_dead`, `farrow_jmh`, `piglet_count_per_farrow`, `piglet_living_count_per_farrow`, `piglet_health_count_per_farrow`, `piglet_weak_count_per_farrow`, `avg_weight_per_farrow`, `first_born_weight`, `piglet_start`, `piglet_other_in`, `piglet_chg_farm_out`, `piglet_chg_farm_out_avg_weight`, `to_nursery`, `to_nursery_avg_weight`, `piglet_dead`, `piglet_weed_out`, `piglet_other_change`, `piglet_dead_weed_out_rate`, `piglet_living_rate`, `wean_nest`, `wean_count`, `wean_qualified_count`, `wean_count_per_farrow`, `wean_day_age`, `wean_weight_per_farrow`, `turn_out_avg_weight`, `turn_out_day`, `turn_out_avg_weight_28`, `piglet_sale`, `piglet_sale_ave_weight`, `piglet_end`, 
+        created_at, updated_at
+    </sql>
+
+    <sql id="vals">
+        #{sumAt}, #{sumAtName}, #{dateType}, #{orzId}, #{orzName}, #{orzType}, #{start}, #{end}, #{sowCfIn}, #{otherIn}, #{dead}, #{weedOut}, #{sale}, #{chgFarmOut}, #{sowPhWeanOut}, #{otherChange}, #{earlyMating}, #{earlyNest}, #{earlyNestRate}, #{laterNest}, #{laterNestRate}, #{farrowNest}, #{farrowLiving}, #{farrowHealth}, #{farrowWeak}, #{farrowDead}, #{farrowJmh}, #{pigletCountPerFarrow}, #{pigletLivingCountPerFarrow}, #{pigletHealthCountPerFarrow}, #{pigletWeakCountPerFarrow}, #{avgWeightPerFarrow}, #{firstBornWeight}, #{pigletStart}, #{pigletOtherIn}, #{pigletChgFarmOut}, #{pigletChgFarmOutAvgWeight}, #{toNursery}, #{toNurseryAvgWeight}, #{pigletDead}, #{pigletWeedOut}, #{pigletOtherChange}, #{pigletDeadWeedOutRate}, #{pigletLivingRate}, #{weanNest}, #{weanCount}, #{weanQualifiedCount}, #{weanCountPerFarrow}, #{weanDayAge}, #{weanWeightPerFarrow}, #{turnOutAvgWeight}, #{turnOutDay}, #{turnOutAvgWeight28}, #{pigletSale}, #{pigletSaleAveWeight}, #{pigletEnd}, 
+        now(), now()
+    </sql>
+
+    <sql id="criteria">
+        <where>
+            <if test="sumAt != null">AND `sum_at` = #{sumAt}</if>
+            <if test="sumAtName != null">AND `sum_at_name` = #{sumAtName}</if>
+            <if test="dateType != null">AND `date_type` = #{dateType}</if>
+            <if test="orzId != null">AND `orz_id` = #{orzId}</if>
+            <if test="orzName != null">AND `orz_name` = #{orzName}</if>
+            <if test="orzType != null">AND `orz_type` = #{orzType}</if>
+            <if test="start != null">AND `start` = #{start}</if>
+            <if test="end != null">AND `end` = #{end}</if>
+            <if test="sowCfIn != null">AND `sow_cf_in` = #{sowCfIn}</if>
+            <if test="otherIn != null">AND `other_in` = #{otherIn}</if>
+            <if test="dead != null">AND `dead` = #{dead}</if>
+            <if test="weedOut != null">AND `weed_out` = #{weedOut}</if>
+            <if test="sale != null">AND `sale` = #{sale}</if>
+            <if test="chgFarmOut != null">AND `chg_farm_out` = #{chgFarmOut}</if>
+            <if test="sowPhWeanOut != null">AND `sow_ph_wean_out` = #{sowPhWeanOut}</if>
+            <if test="otherChange != null">AND `other_change` = #{otherChange}</if>
+            <if test="earlyMating != null">AND `early_mating` = #{earlyMating}</if>
+            <if test="earlyNest != null">AND `early_nest` = #{earlyNest}</if>
+            <if test="earlyNestRate != null">AND `early_nest_rate` = #{earlyNestRate}</if>
+            <if test="laterNest != null">AND `later_nest` = #{laterNest}</if>
+            <if test="laterNestRate != null">AND `later_nest_rate` = #{laterNestRate}</if>
+            <if test="farrowNest != null">AND `farrow_nest` = #{farrowNest}</if>
+            <if test="farrowLiving != null">AND `farrow_living` = #{farrowLiving}</if>
+            <if test="farrowHealth != null">AND `farrow_health` = #{farrowHealth}</if>
+            <if test="farrowWeak != null">AND `farrow_weak` = #{farrowWeak}</if>
+            <if test="farrowDead != null">AND `farrow_dead` = #{farrowDead}</if>
+            <if test="farrowJmh != null">AND `farrow_jmh` = #{farrowJmh}</if>
+            <if test="pigletCountPerFarrow != null">AND `piglet_count_per_farrow` = #{pigletCountPerFarrow}</if>
+            <if test="pigletLivingCountPerFarrow != null">AND `piglet_living_count_per_farrow` = #{pigletLivingCountPerFarrow}</if>
+            <if test="pigletHealthCountPerFarrow != null">AND `piglet_health_count_per_farrow` = #{pigletHealthCountPerFarrow}</if>
+            <if test="pigletWeakCountPerFarrow != null">AND `piglet_weak_count_per_farrow` = #{pigletWeakCountPerFarrow}</if>
+            <if test="avgWeightPerFarrow != null">AND `avg_weight_per_farrow` = #{avgWeightPerFarrow}</if>
+            <if test="firstBornWeight != null">AND `first_born_weight` = #{firstBornWeight}</if>
+            <if test="pigletStart != null">AND `piglet_start` = #{pigletStart}</if>
+            <if test="pigletOtherIn != null">AND `piglet_other_in` = #{pigletOtherIn}</if>
+            <if test="pigletChgFarmOut != null">AND `piglet_chg_farm_out` = #{pigletChgFarmOut}</if>
+            <if test="pigletChgFarmOutAvgWeight != null">AND `piglet_chg_farm_out_avg_weight` = #{pigletChgFarmOutAvgWeight}</if>
+            <if test="toNursery != null">AND `to_nursery` = #{toNursery}</if>
+            <if test="toNurseryAvgWeight != null">AND `to_nursery_avg_weight` = #{toNurseryAvgWeight}</if>
+            <if test="pigletDead != null">AND `piglet_dead` = #{pigletDead}</if>
+            <if test="pigletWeedOut != null">AND `piglet_weed_out` = #{pigletWeedOut}</if>
+            <if test="pigletOtherChange != null">AND `piglet_other_change` = #{pigletOtherChange}</if>
+            <if test="pigletDeadWeedOutRate != null">AND `piglet_dead_weed_out_rate` = #{pigletDeadWeedOutRate}</if>
+            <if test="pigletLivingRate != null">AND `piglet_living_rate` = #{pigletLivingRate}</if>
+            <if test="weanNest != null">AND `wean_nest` = #{weanNest}</if>
+            <if test="weanCount != null">AND `wean_count` = #{weanCount}</if>
+            <if test="weanQualifiedCount != null">AND `wean_qualified_count` = #{weanQualifiedCount}</if>
+            <if test="weanCountPerFarrow != null">AND `wean_count_per_farrow` = #{weanCountPerFarrow}</if>
+            <if test="weanDayAge != null">AND `wean_day_age` = #{weanDayAge}</if>
+            <if test="weanWeightPerFarrow != null">AND `wean_weight_per_farrow` = #{weanWeightPerFarrow}</if>
+            <if test="turnOutAvgWeight != null">AND `turn_out_avg_weight` = #{turnOutAvgWeight}</if>
+            <if test="turnOutDay != null">AND `turn_out_day` = #{turnOutDay}</if>
+            <if test="turnOutAvgWeight28 != null">AND `turn_out_avg_weight_28` = #{turnOutAvgWeight28}</if>
+            <if test="pigletSale != null">AND `piglet_sale` = #{pigletSale}</if>
+            <if test="pigletSaleAveWeight != null">AND `piglet_sale_ave_weight` = #{pigletSaleAveWeight}</if>
+            <if test="pigletEnd != null">AND `piglet_end` = #{pigletEnd}</if>
+            <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
+            <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
+        </where>
+    </sql>
+
+    <insert id="create" parameterType="DoctorReportDeliver" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        <include refid="tb"/>
+        (<include refid="cols_exclude_id"/>)
+        VALUES
+        (<include refid="vals"/>)
+    </insert>
+
+    <select id="findById" parameterType="long" resultMap="DoctorReportDeliverMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE id = #{id} LIMIT 1
+    </select>
+
+    <select id="findByIds" parameterType="list" resultMap="DoctorReportDeliverMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <update id="update" parameterType="DoctorReportDeliver">
+        UPDATE
+        <include refid="tb"/>
+        <set>
+            <if test="sumAt != null">`sum_at` = #{sumAt},</if>
+            <if test="sumAtName != null">`sum_at_name` = #{sumAtName},</if>
+            <if test="dateType != null">`date_type` = #{dateType},</if>
+            <if test="orzId != null">`orz_id` = #{orzId},</if>
+            <if test="orzName != null">`orz_name` = #{orzName},</if>
+            <if test="orzType != null">`orz_type` = #{orzType},</if>
+            <if test="start != null">`start` = #{start},</if>
+            <if test="end != null">`end` = #{end},</if>
+            <if test="sowCfIn != null">`sow_cf_in` = #{sowCfIn},</if>
+            <if test="otherIn != null">`other_in` = #{otherIn},</if>
+            <if test="dead != null">`dead` = #{dead},</if>
+            <if test="weedOut != null">`weed_out` = #{weedOut},</if>
+            <if test="sale != null">`sale` = #{sale},</if>
+            <if test="chgFarmOut != null">`chg_farm_out` = #{chgFarmOut},</if>
+            <if test="sowPhWeanOut != null">`sow_ph_wean_out` = #{sowPhWeanOut},</if>
+            <if test="otherChange != null">`other_change` = #{otherChange},</if>
+            <if test="earlyMating != null">`early_mating` = #{earlyMating},</if>
+            <if test="earlyNest != null">`early_nest` = #{earlyNest},</if>
+            <if test="earlyNestRate != null">`early_nest_rate` = #{earlyNestRate},</if>
+            <if test="laterNest != null">`later_nest` = #{laterNest},</if>
+            <if test="laterNestRate != null">`later_nest_rate` = #{laterNestRate},</if>
+            <if test="farrowNest != null">`farrow_nest` = #{farrowNest},</if>
+            <if test="farrowLiving != null">`farrow_living` = #{farrowLiving},</if>
+            <if test="farrowHealth != null">`farrow_health` = #{farrowHealth},</if>
+            <if test="farrowWeak != null">`farrow_weak` = #{farrowWeak},</if>
+            <if test="farrowDead != null">`farrow_dead` = #{farrowDead},</if>
+            <if test="farrowJmh != null">`farrow_jmh` = #{farrowJmh},</if>
+            <if test="pigletCountPerFarrow != null">`piglet_count_per_farrow` = #{pigletCountPerFarrow},</if>
+            <if test="pigletLivingCountPerFarrow != null">`piglet_living_count_per_farrow` = #{pigletLivingCountPerFarrow},</if>
+            <if test="pigletHealthCountPerFarrow != null">`piglet_health_count_per_farrow` = #{pigletHealthCountPerFarrow},</if>
+            <if test="pigletWeakCountPerFarrow != null">`piglet_weak_count_per_farrow` = #{pigletWeakCountPerFarrow},</if>
+            <if test="avgWeightPerFarrow != null">`avg_weight_per_farrow` = #{avgWeightPerFarrow},</if>
+            <if test="firstBornWeight != null">`first_born_weight` = #{firstBornWeight},</if>
+            <if test="pigletStart != null">`piglet_start` = #{pigletStart},</if>
+            <if test="pigletOtherIn != null">`piglet_other_in` = #{pigletOtherIn},</if>
+            <if test="pigletChgFarmOut != null">`piglet_chg_farm_out` = #{pigletChgFarmOut},</if>
+            <if test="pigletChgFarmOutAvgWeight != null">`piglet_chg_farm_out_avg_weight` = #{pigletChgFarmOutAvgWeight},</if>
+            <if test="toNursery != null">`to_nursery` = #{toNursery},</if>
+            <if test="toNurseryAvgWeight != null">`to_nursery_avg_weight` = #{toNurseryAvgWeight},</if>
+            <if test="pigletDead != null">`piglet_dead` = #{pigletDead},</if>
+            <if test="pigletWeedOut != null">`piglet_weed_out` = #{pigletWeedOut},</if>
+            <if test="pigletOtherChange != null">`piglet_other_change` = #{pigletOtherChange},</if>
+            <if test="pigletDeadWeedOutRate != null">`piglet_dead_weed_out_rate` = #{pigletDeadWeedOutRate},</if>
+            <if test="pigletLivingRate != null">`piglet_living_rate` = #{pigletLivingRate},</if>
+            <if test="weanNest != null">`wean_nest` = #{weanNest},</if>
+            <if test="weanCount != null">`wean_count` = #{weanCount},</if>
+            <if test="weanQualifiedCount != null">`wean_qualified_count` = #{weanQualifiedCount},</if>
+            <if test="weanCountPerFarrow != null">`wean_count_per_farrow` = #{weanCountPerFarrow},</if>
+            <if test="weanDayAge != null">`wean_day_age` = #{weanDayAge},</if>
+            <if test="weanWeightPerFarrow != null">`wean_weight_per_farrow` = #{weanWeightPerFarrow},</if>
+            <if test="turnOutAvgWeight != null">`turn_out_avg_weight` = #{turnOutAvgWeight},</if>
+            <if test="turnOutDay != null">`turn_out_day` = #{turnOutDay},</if>
+            <if test="turnOutAvgWeight28 != null">`turn_out_avg_weight_28` = #{turnOutAvgWeight28},</if>
+            <if test="pigletSale != null">`piglet_sale` = #{pigletSale},</if>
+            <if test="pigletSaleAveWeight != null">`piglet_sale_ave_weight` = #{pigletSaleAveWeight},</if>
+            <if test="pigletEnd != null">`piglet_end` = #{pigletEnd},</if>
+            updated_at = now()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="long">
+        DELETE FROM <include refid="tb"/>
+        WHERE id = #{id}
+    </delete>
+    
+    <select id="count" parameterType="map" resultType="long">
+        SELECT COUNT(1)
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+    </select>
+
+    <select id="paging" parameterType="map" resultMap="DoctorReportDeliverMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+        ORDER BY `id` DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="list" parameterType="map" resultMap="DoctorReportDeliverMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+        ORDER BY `id` DESC
+    </select>
+
+</mapper>
