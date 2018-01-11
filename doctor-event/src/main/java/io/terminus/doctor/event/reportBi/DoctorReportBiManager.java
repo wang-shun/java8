@@ -1,7 +1,7 @@
-package io.terminus.doctor.event.manager;
+package io.terminus.doctor.event.reportBi;
 
 import io.terminus.doctor.common.event.CoreEventDispatcher;
-import io.terminus.doctor.event.listener.DoctorReportBiEvent;
+import io.terminus.doctor.event.reportBi.listener.DoctorReportBiEvent;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorPigDaily;
 import org.springframework.beans.factory.annotation.Autowired;

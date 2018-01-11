@@ -1,4 +1,4 @@
-package io.terminus.doctor.event.listener;
+package io.terminus.doctor.event.reportBi.listener;
 
 import com.google.common.eventbus.Subscribe;
 import io.terminus.doctor.common.enums.PigType;

@@ -1,4 +1,4 @@
-package io.terminus.doctor.event.listener;
+package io.terminus.doctor.event.reportBi.listener;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

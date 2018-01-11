@@ -1,4 +1,4 @@
-package io.terminus.doctor.event.listener;
+package io.terminus.doctor.event.reportBi.listener;
 
 import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
 import io.terminus.doctor.event.dao.DoctorPigDailyDao;
@@ -25,4 +25,6 @@ public class DoctorReportBiDataHandler {
     public void handleFullBiData(){
 
     }
+
+
 }
