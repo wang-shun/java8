@@ -1606,6 +1606,7 @@ ADD COLUMN `handle_date` DATE NULL COMMENT '处理日期' AFTER `updated_at`;
 ALTER TABLE `doctor_pig_events` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `remark`;
 ALTER TABLE `doctor_group_events` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `remark`;
 ALTER TABLE `doctor_pigs` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `pig_code`;
+
 -- 标识处猪群转场触发的转入，刷新历史数据
 update
 doctor_group_events a left join doctor_group_events b on a.rel_group_event_id = b.id
@@ -1733,4 +1734,206 @@ CREATE TABLE `doctor_report_npds` (
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场月度母猪非生产天数表';
+
+-- 报表自定义显示字段表 2017-12-28
+CREATE TABLE `doctor_report_field_customizes` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `type_id` bigint(20) NOT NULL COMMENT '类型ID',
+  `field_id` bigint(20) DEFAULT NULL COMMENT '字段ID',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_type` (`type_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8 COMMENT='报表自定义可显示字段';
+
+CREATE TABLE `doctor_report_fields` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `f_id` bigint(20) DEFAULT NULL COMMENT '父ID',
+  `name` varchar(32) NOT NULL COMMENT '字段名称',
+  `type` smallint(6) DEFAULT NULL COMMENT '类型',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COMMENT='报表自定义字段表';
+
+
+-- 自定义指标初始化数据 2018-1-2
+insert into doctor_report_fields(id,name,type,created_at,updated_at)values(1,'后备区',1,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(2,'期初存栏',1,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(3,'转入数量',1,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(4,'转种猪数',1,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(5,'死亡数量',1,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(6,'淘汰数量',1,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(7,'死淘率',1,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(8,'转育肥数量',1,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(9,'销售数量',1,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(10,'转场数量',1,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(11,'其他减少',1,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(12,'日均存栏',1,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(13,'期末存栏',1,2,now(),now());
+insert into doctor_report_fields(id,name,type,created_at,updated_at)values(14,'母猪区',1,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(15,'母猪期初存栏',14,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(16,'死亡数量',14,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(17,'淘汰数量',14,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(18,'基础母猪死淘率',14,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(19,'销售数量',14,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(20,'转场数量',14,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(21,'其他减少',14,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(22,'后备转入',14,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(23,'其他转入',14,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(24,'日均存栏',14,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(25,'母猪期末存栏',14,2,now(),now());
+insert into doctor_report_fields(id,name,type,created_at,updated_at)values(26,'配怀区',1,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(27,'期初存栏',26,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(28,'后备转入',26,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(29,'断奶转入',26,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(30,'其他转入',26,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(31,'死亡数量',26,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(32,'淘汰数量',26,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(33,'销售数量',26,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(34,'转场数量',26,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(35,'其他减少',26,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(36,'已配种数量',26,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(37,'怀孕母猪数量',26,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(38,'空怀母猪数量',26,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(39,'配种数量',26,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(40,'妊检阳性数量',26,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(41,'妊检返情数量',26,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(42,'妊检阴性数量',26,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(43,'流产数量',26,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(44,'断奶7日配种率',26,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(45,'期末存栏',26,2,now(),now());
+insert into doctor_report_fields(id,name,type,created_at,updated_at)values(46,'产房区',1,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(47,'期初存栏',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(48,'期末存栏',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(49,'配怀转入',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(50,'其他转入',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(51,'死亡数量',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(52,'淘汰数量',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(53,'销售数量',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(54,'转场数量',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(55,'其他减少',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(56,'前期配种数量',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(57,'前期分娩窝数',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(58,'前推分娩率%',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(59,'后期分娩窝数',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(60,'后推分娩率%',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(61,'分娩窝数',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(62,'产仔总数',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(63,'产活仔数',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(64,'产健仔数',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(65,'产弱仔数',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(66,'死胎数',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(67,'黑木畸数',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(68,'窝均产仔数',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(69,'窝均活仔数',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(70,'窝均健仔数',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(71,'窝均弱仔数',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(72,'平均窝重',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(73,'初生重',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(74,'仔猪期初存栏',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(75,'其他转入（仔猪）',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(76,'转场数量（仔猪）',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(77,'转场均重（仔猪）',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(78,'转保育数',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(79,'仔猪死亡数',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(80,'仔猪淘汰数',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(81,'其他减少（仔猪）',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(82,'仔猪死淘率',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(83,'产房成活率（仔猪）',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(84,'断奶窝数',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(85,'断奶合格数',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(86,'窝均断奶数',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(87,'断奶日龄',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(88,'断奶均重',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(89,'产房转出均重（28日龄（4周龄重））',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(90,'销售数量（仔猪）',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(91,'销售均重（仔猪）',46,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(92,'仔猪期末存栏',46,2,now(),now());
+insert into doctor_report_fields(id,name,type,created_at,updated_at)values(93,'保育区',1,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(94,'期初存栏',93,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(95,'转入数量',93,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(96,'转入日龄',93,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(97,'转入均重',93,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(98,'销售数量',93,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(99,'销售均重',93,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(100,'转育肥数量',93,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(101,'转育肥均重',93,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(102,'转后备数量',93,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(103,'转后备均重',93,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(104,'转场数量',93,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(105,'转场均重',93,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(106,'死亡数量',93,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(107,'淘汰数量',93,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(108,'其他减少',93,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(109,'期末存栏',93,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(110,'日均存栏',93,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(111,'保育转出均重（70日龄（10周龄重））',93,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(112,'死淘率',93,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(113,'保育成活率',93,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(114,'料肉比（保育）',93,2,now(),now());
+insert into doctor_report_fields(id,name,type,created_at,updated_at)values(115,'育肥区',1,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(116,'期初存栏',115,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(117,'转入数量',115,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(118,'转入日龄',115,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(119,'转入均重',115,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(120,'销售数量',115,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(121,'销售均重',115,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(122,'转后备数量',115,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(123,'转后备均重',115,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(124,'转场数量',115,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(125,'转场均重',115,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(126,'死亡数量',115,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(127,'淘汰数量',115,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(128,'其他减少',115,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(129,'期末存栏',115,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(130,'日均存栏',115,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(131,'育肥出栏均重（180日龄（26周龄重））',115,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(132,'死淘率',115,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(133,'育肥成活率',115,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(134,'料肉比（育肥）',115,2,now(),now());
+insert into doctor_report_fields(id,name,type,created_at,updated_at)values(135,'公猪区',1,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(136,'期初存栏',135,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(138,'转入数量',135,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(139,'死亡数量',135,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(140,'淘汰数量',135,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(141,'销售数量',135,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(142,'其他减少',135,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(143,'期末存栏',135,2,now(),now());
+insert into doctor_report_fields(id,name,type,created_at,updated_at)values(144,'物料消耗',1,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(145,'原料（数量）',144,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(146,'饲料（数量）',144,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(147,'原料（金额）',144,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(148,'饲料（金额）',144,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(149,'兽药（金额）',144,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(150,'疫苗（金额）',144,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(151,'易耗品（金额）',144,2,now(),now());
+insert into doctor_report_fields(id,name,type,created_at,updated_at)values(152,'效率指标',1,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(153,'非生产天数',152,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(154,'年产胎次',152,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(155,'MSY（仔猪）',152,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(156,'MSY（保育）',152,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(157,'MSY（保育+育肥）',152,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(158,'PSY',152,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(159,'妊娠期',152,2,now(),now());
+insert into doctor_report_fields(id,name,f_id,type,created_at,updated_at)values(160,'哺乳期',152,2,now(),now());
+
+-- 自定义字段显示表添加猪场ID 2017-01-03
+ALTER TABLE `doctor_report_field_customizes` ADD COLUMN `farm_id` BIGINT(20) NOT NULL COMMENT '猪场ID' after `id`;
+
+
+-- 添加BI系统页面表 2017-01-05
+CREATE TABLE `doctor_bi_pages` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(32) NOT NULL COMMENT '页面名称',
+  `token` varchar(32) NOT NULL,
+  `url` varchar(512) NOT NULL COMMENT 'BI页面地址',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_name` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='BI系统集成页面表';
+
+-- BI表添加备注说明字段 2017-01-05
+ALTER TABLE `doctor_bi_pages` ADD COLUMN `desc` varchar(32) NULL COMMENT '描述说明' after `url`;
 

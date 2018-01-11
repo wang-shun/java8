@@ -87,7 +87,6 @@
         <result column="vaccination_id" property="vaccinationId"/>
         <result column="vaccination_name" property="vaccinationName"/>
         <result column="remark" property="remark"/>
-        <result column="origin" property="origin"/>
         <result column="operator_id" property="operatorId"/>
         <result column="operator_name" property="operatorName"/>
         <result column="creator_id" property="creatorId"/>
@@ -183,7 +182,6 @@
         vaccination_id,
         vaccination_name,
         remark,
-        origin,
         operator_id,
         operator_name,
         creator_id,
@@ -273,7 +271,6 @@
         #{vaccinationId},
         #{vaccinationName},
         #{remark},
-        #{origin},
         #{operatorId},
         #{operatorName},
         #{creatorId},
@@ -365,7 +362,6 @@
         <if test="vaccinationName != null">AND vaccination_name = #{vaccinationName}</if>
         <if test="eventSource != null">AND event_source = #{eventSource}</if>
         <if test="remark != null">AND remark = #{remark}</if>
-        <if test="origin != null">AND origin = #{origin}</if>
         <if test="operatorId != null">AND operator_id = #{operatorId}</if>
         <if test="operatorName != null">AND operator_name = #{operatorName}</if>
         <if test="creatorId != null">AND creator_id = #{creatorId}</if>
@@ -503,7 +499,6 @@
             #{item.vaccinationId},
             #{item.vaccinationName},
             #{item.remark},
-            #{item.origin},
             #{item.operatorId},
             #{item.operatorName},
             #{item.creatorId},
@@ -779,7 +774,6 @@
             <if test="vaccinationName != null">vaccination_name = #{vaccinationName},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="remark != null">remark = #{remark},</if>
-            <if test="origin != null">origin = #{origin},</if>
             <if test="operatorId != null">operator_id = #{operatorId},</if>
             <if test="operatorName != null">operator_name = #{operatorName},</if>
             <if test="creatorId != null">creator_id = #{creatorId},</if>
@@ -940,7 +934,6 @@
                 vaccination_id = #{item.vaccinationId},
                 vaccination_name = #{item.vaccinationName},
                 remark = #{item.remark},
-                origin = #{item.origin},
                 operator_id = #{item.operatorId},
                 operator_name = #{item.operatorName},
                 creator_id = #{item.creatorId},
@@ -1494,7 +1487,6 @@
             vaccination_id = #{vaccinationId},
             vaccination_name = #{vaccinationName},
             remark = #{remark},
-            origin = #{origin},
             operator_id = #{operatorId},
             operator_name = #{operatorName},
             creator_id = #{creatorId},
