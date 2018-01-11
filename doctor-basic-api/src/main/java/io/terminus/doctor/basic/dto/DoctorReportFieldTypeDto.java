@@ -15,6 +15,7 @@ import java.util.List;
 public class DoctorReportFieldTypeDto implements Serializable {
 
 
+    private static final long serialVersionUID = 7006221694137190527L;
     @NotNull(message = "report.customize.type.id.null")
     private Long id;
 
@@ -28,6 +29,7 @@ public class DoctorReportFieldTypeDto implements Serializable {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class DoctorReportFieldDto implements Serializable {
 
+        private static final long serialVersionUID = 4876768912712007938L;
         @NotNull(message = "report.customize.type.id.null")
         private Long id;
 
