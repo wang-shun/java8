@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.manager;
 
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.event.listener.DoctorReportBiEvent;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorPigDaily;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,8 @@ public class DoctorReportBiManager {
      * @param pigDaily 猪日报表
      */
     public void synchronizePigData(DoctorPigDaily pigDaily) {
-        dispatcher.publish(pigDaily);
+        dispatcher.publish(new DoctorReportBiEvent(pigDaily.getOrgId(), pigDaily.getOrgName(),
+                pigDaily.getFarmId(), pigDaily.getFarmName(), null, pigDaily.getSumAt()));
     }
 
     /**
@@ -32,7 +34,9 @@ public class DoctorReportBiManager {
      * @param groupDaily 猪群日报表
      */
     public void synchronizeGroupData(DoctorGroupDaily groupDaily){
-        dispatcher.publish(groupDaily);
+        dispatcher.publish(new DoctorReportBiEvent(groupDaily.getOrgId(), groupDaily.getOrgName(),
+                groupDaily.getFarmId(), groupDaily.getFarmName(), groupDaily.getPigType(), groupDaily.getSumAt()));
+
     }
 
     /**

@@ -10,8 +10,6 @@ import io.terminus.doctor.event.dao.reportBi.DoctorReportMatePregDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportNurseryDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportReverseDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportSowDao;
-import io.terminus.doctor.event.model.DoctorGroupDaily;
-import io.terminus.doctor.event.model.DoctorPigDaily;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -45,22 +43,22 @@ public class DoctorReportBiListener implements EventListener{
 
     /**
      * 同步猪报表数据到bi
-     * @param pigDaily 猪日报表
+     * @param reportBiEvent 猪日报表
      */
     @Subscribe
-    public void synchronizePigData(DoctorPigDaily pigDaily) {
+    public void synchronizePigData(DoctorReportBiEvent reportBiEvent) {
         
     }
 
     /**
      * 同步猪群报表数据到bi
-     * @param groupDaily 猪群日报表
+     * @param reportBiEvent 猪群日报表
      */
     @Subscribe
-    public void synchronizeGroupData(DoctorGroupDaily groupDaily){
-        if (Objects.equals(groupDaily.getPigType(), PigType.NURSERY_PIGLET.getValue())) {
+    public void synchronizeGroupData(DoctorReportBiEvent reportBiEvent){
+        if (Objects.equals(reportBiEvent.getPigType(), PigType.NURSERY_PIGLET.getValue())) {
             // TODO: 18/1/9  
-        } else if (Objects.equals(groupDaily.getPigType(), PigType.FATTEN_PIG.getValue())) {
+        } else if (Objects.equals(reportBiEvent.getPigType(), PigType.FATTEN_PIG.getValue())) {
             // TODO: 18/1/9  
         } else {
             // TODO: 18/1/9  
@@ -72,4 +70,9 @@ public class DoctorReportBiListener implements EventListener{
      */
     @Subscribe
     public void synchronizeSpecificData(){}
+
+    @Subscribe
+    public void synchronizeFullData(DoctorReportBiFullEvent doctorReportBiFullEvent){
+
+    }
 }
