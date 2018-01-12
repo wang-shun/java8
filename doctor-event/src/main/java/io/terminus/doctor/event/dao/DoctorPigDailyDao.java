@@ -4,10 +4,10 @@ import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.model.DoctorPigDaily;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -74,5 +74,14 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
     public void updateDailyBoarPigLiveStock(Long farmId, Date sumAt, Integer changeCount) {
         getSqlSession().update(sqlId("updateDailyBoarPigLiveStock"), ImmutableMap.of("farmId"
                 , farmId, "sumAt", DateUtil.toDateString(sumAt), "changeCount", changeCount));
+    }
+
+    /**
+     * 查询指定组织维度和时间维度下的聚合数据（不包含猪场日维度）
+     * @param dimensionCriteria 维度
+     * @return 聚合数据
+     */
+    public List<DoctorPigDaily> sumForDimension(DoctorDimensionCriteria dimensionCriteria) {
+        return getSqlSession().selectList(sqlId("sumForDimension"), dimensionCriteria);
     }
 }

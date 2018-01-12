@@ -10,12 +10,16 @@ import io.terminus.doctor.event.dao.reportBi.DoctorReportNurseryDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportReserveDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportSowDao;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
+import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorReportReserve;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by xjn on 18/1/11.
  * email:xiaojiannan@terminus.io
  */
+@Component
 public class DoctorReportBiDataFactory {
     private final DoctorReportBoarDao doctorReportBoarDao;
     private final DoctorReportDeliverDao doctorReportDeliverDao;
@@ -27,6 +31,7 @@ public class DoctorReportBiDataFactory {
     private final DoctorReportReserveDao doctorReportReserveDao;
     private final DoctorReportSowDao doctorReportSowDao;
 
+    @Autowired
     public DoctorReportBiDataFactory(DoctorReportBoarDao doctorReportBoarDao,
                                      DoctorReportDeliverDao doctorReportDeliverDao,
                                      DoctorReportEfficiencyDao doctorReportEfficiencyDao,
@@ -47,7 +52,7 @@ public class DoctorReportBiDataFactory {
         this.doctorReportSowDao = doctorReportSowDao;
     }
 
-    public DoctorReportReserve buildRealTimeBoar(DoctorDimensionCriteria criteria) {
+    public DoctorReportReserve buildRealTimeBoar() {
         return null;
     }
 
@@ -85,9 +90,24 @@ public class DoctorReportBiDataFactory {
 
     }
 
-    public DoctorReportReserve buildRealTimeReserve() {
-        return null;
+    public DoctorReportReserve buildReserve(DoctorGroupDaily groupDaily,
+                                            DoctorReportReserve reportReserve) {
 
+        buildRealTimeReserve(groupDaily, reportReserve);
+        buildDelayReserve(groupDaily, reportReserve);
+        return reportReserve;
+    }
+
+    public DoctorReportReserve buildRealTimeReserve(DoctorGroupDaily groupDaily,
+                                                    DoctorReportReserve reportReserve) {
+        reportReserve.setStart(100);
+        return reportReserve;
+    }
+
+    public DoctorReportReserve buildDelayReserve(DoctorGroupDaily groupDaily,
+                                                 DoctorReportReserve reportReserve) {
+        reportReserve.setDeadWeedOutRate(10D);
+        return reportReserve;
     }
 
     public DoctorReportReserve buildRealTimeSow() {

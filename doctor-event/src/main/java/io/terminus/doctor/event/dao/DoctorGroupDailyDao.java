@@ -3,10 +3,12 @@ package io.terminus.doctor.event.dao;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by xjn on 17/12/11.
@@ -35,5 +37,15 @@ public class DoctorGroupDailyDao extends MyBatisDao<DoctorGroupDaily> {
     public void updateDailyGroupLiveStock(Long farmId, Integer pigType, Date sumAt, Integer changeCount) {
         getSqlSession().update(sqlId("updateDailyGroupLiveStock"), ImmutableMap.of("farmId", farmId, "pigType", pigType,
                 "sumAt", DateUtil.toDateString(sumAt), "changeCount", changeCount));
+    }
+
+    /**
+     * 查询指定组织维度和时间维度下的聚合数据（不包含猪场日维度）
+     * @param dimensionCriteria 维度
+     * @return 聚合数据
+     */
+    public List<DoctorGroupDaily> sumForDimension(DoctorDimensionCriteria dimensionCriteria) {
+        return getSqlSession().selectList(sqlId("sumForDimension"),
+                ImmutableMap.of("orzType", dimensionCriteria.getOrzType(), "dateType", dimensionCriteria.getDateType()));
     }
 }

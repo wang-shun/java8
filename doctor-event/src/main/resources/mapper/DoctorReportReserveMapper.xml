@@ -28,8 +28,6 @@
         <result property="otherChange" column="other_change"/>
         <result property="dailyLivestockOnHand" column="daily_livestock_on_hand"/>
         <result property="end" column="end"/>
-        <result property="createdAt" column="created_at"/>
-        <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
     <sql id="tb">
@@ -42,13 +40,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `sum_at`, `sum_at_name`, `date_type`, `orz_id`, `orz_name`, `orz_type`, `start`, `turn_into`, `turn_seed`, `dead`, `weed_out`, `dead_weed_out_rate`, `to_fatten`, `sale`, `chg_farm_out`, `other_change`, `daily_livestock_on_hand`, `end`, 
-        created_at, updated_at
+        `sum_at`, `sum_at_name`, `date_type`, `orz_id`, `orz_name`, `orz_type`, `start`, `turn_into`, `turn_seed`, `dead`, `weed_out`, `dead_weed_out_rate`, `to_fatten`, `sale`, `chg_farm_out`, `other_change`, `daily_livestock_on_hand`, `end`
     </sql>
 
     <sql id="vals">
-        #{sumAt}, #{sumAtName}, #{dateType}, #{orzId}, #{orzName}, #{orzType}, #{start}, #{turnInto}, #{turnSeed}, #{dead}, #{weedOut}, #{deadWeedOutRate}, #{toFatten}, #{sale}, #{chgFarmOut}, #{otherChange}, #{dailyLivestockOnHand}, #{end}, 
-        now(), now()
+        #{sumAt}, #{sumAtName}, #{dateType}, #{orzId}, #{orzName}, #{orzType}, #{start}, #{turnInto}, #{turnSeed}, #{dead}, #{weedOut}, #{deadWeedOutRate}, #{toFatten}, #{sale}, #{chgFarmOut}, #{otherChange}, #{dailyLivestockOnHand}, #{end}
     </sql>
 
     <sql id="criteria">
@@ -71,8 +67,6 @@
             <if test="otherChange != null">AND `other_change` = #{otherChange}</if>
             <if test="dailyLivestockOnHand != null">AND `daily_livestock_on_hand` = #{dailyLivestockOnHand}</if>
             <if test="end != null">AND `end` = #{end}</if>
-            <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
-            <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
         </where>
     </sql>
 
@@ -125,7 +119,6 @@
             <if test="otherChange != null">`other_change` = #{otherChange},</if>
             <if test="dailyLivestockOnHand != null">`daily_livestock_on_hand` = #{dailyLivestockOnHand},</if>
             <if test="end != null">`end` = #{end},</if>
-            updated_at = now()
         </set>
         WHERE id = #{id}
     </update>
@@ -155,5 +148,10 @@
         <include refid="criteria"/>
         ORDER BY `id` DESC
     </select>
+
+    <delete id="deleteAll">
+        DELETE
+        FROM <include refid="tb"/>
+    </delete>
 
 </mapper>

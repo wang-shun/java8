@@ -13,5 +13,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class DoctorReportReserveDao extends MyBatisDao<DoctorReportReserve> {
-
+    public void deleteAll(){
+        getSqlSession().delete(sqlId("deleteAll"));
+    }
 }

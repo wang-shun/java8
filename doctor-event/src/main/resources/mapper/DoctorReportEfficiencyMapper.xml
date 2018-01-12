@@ -7,8 +7,8 @@
  ~ Created by [ your name ]
 -->
 
-<mapper namespace="DoctorReportEfficiencie">
-    <resultMap id="DoctorReportEfficiencieMap" type="DoctorReportEfficiencie">
+<mapper namespace="DoctorReportEfficiency">
+    <resultMap id="DoctorReportEfficiencyMap" type="DoctorReportEfficiency">
         <id property="id" column="id"/>
         <result property="sumAt" column="sum_at"/>
         <result property="sumAtName" column="sum_at_name"/>
@@ -62,7 +62,7 @@
         </where>
     </sql>
 
-    <insert id="create" parameterType="DoctorReportEfficiencie" useGeneratedKeys="true" keyProperty="id">
+    <insert id="create" parameterType="DoctorReportEfficiency" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO
         <include refid="tb"/>
         (<include refid="cols_exclude_id"/>)
@@ -70,7 +70,7 @@
         (<include refid="vals"/>)
     </insert>
 
-    <select id="findById" parameterType="long" resultMap="DoctorReportEfficiencieMap">
+    <select id="findById" parameterType="long" resultMap="DoctorReportEfficiencyMap">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -78,7 +78,7 @@
         WHERE id = #{id} LIMIT 1
     </select>
 
-    <select id="findByIds" parameterType="list" resultMap="DoctorReportEfficiencieMap">
+    <select id="findByIds" parameterType="list" resultMap="DoctorReportEfficiencyMap">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -89,7 +89,7 @@
         </foreach>
     </select>
 
-    <update id="update" parameterType="DoctorReportEfficiencie">
+    <update id="update" parameterType="DoctorReportEfficiency">
         UPDATE
         <include refid="tb"/>
         <set>
@@ -120,7 +120,7 @@
         <include refid="criteria"/>
     </select>
 
-    <select id="paging" parameterType="map" resultMap="DoctorReportEfficiencieMap">
+    <select id="paging" parameterType="map" resultMap="DoctorReportEfficiencyMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
@@ -128,7 +128,7 @@
         LIMIT #{offset}, #{limit}
     </select>
 
-    <select id="list" parameterType="map" resultMap="DoctorReportEfficiencieMap">
+    <select id="list" parameterType="map" resultMap="DoctorReportEfficiencyMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>

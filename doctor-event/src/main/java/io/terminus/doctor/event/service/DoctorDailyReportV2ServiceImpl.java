@@ -93,7 +93,7 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
             
             list.forEach(date -> {
                 criteria.setSumAt(DateUtil.toDateString(date));
-                log.info("flush group daily farmId:{}, sumAt:{}", criteria.getFarmId(), criteria.getSumAt());
+                log.info("flush group daily farmId:{}, pigType:{}, sumAt:{}", criteria.getFarmId(), criteria.getPigType(), criteria.getSumAt());
                 doctorDailyReportV2Manager.flushGroupDaily(criteria);
             });
             log.info("flush group daily for pigType end, consume:{}minute", stopwatch.elapsed(TimeUnit.MINUTES));

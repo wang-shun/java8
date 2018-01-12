@@ -41,7 +41,7 @@ public class DoctorReportBiListener implements EventListener{
     /**
      * 同步特殊指标数据到bi
      */
-    @Subscribe
+//    @Subscribe
     public void synchronizeSpecificData(){}
 
     @Subscribe

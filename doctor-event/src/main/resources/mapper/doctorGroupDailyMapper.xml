@@ -147,4 +147,45 @@
         AND pig_type = #{pigType}
         AND sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
     </update>
+
+    <sql id="forSum">
+        org_id,
+        org_name,
+        farm_id,
+        farm_name,
+        pig_type,
+        sum_at,
+        ifnull(sum(turn_into), 0) as turnInfo,
+        ifnull(sum(chg_farm_in), 0) as chgFarmIn,
+        ifnull(sum(turn_into_weight), 0) as turnIntoWeight,
+        ifnull(sum(turn_into_age), 0) as turnIntoAge,
+        ifnull(sum(chg_farm), 0) as chgFarm,
+        ifnull(sum(chg_farm_weight), 0) as chgFarmWeight,
+        ifnull(sum(sale), 0) as sale,
+        ifnull(sum(sale_weight), 0) as saleWeight,
+        ifnull(sum(dead), 0) as dead,
+        ifnull(sum(weed_out), 0) as weedOut,
+        ifnull(sum(other_change), 0) as otherChange,
+        ifnull(sum(to_nursery), 0) as toNursery,
+        ifnull(sum(to_fatten), 0) as toFatten,
+        ifnull(sum(to_fatten_weight), 0) as toFattenWeight,
+        ifnull(sum(to_houbei), 0) as toHoubei,
+        ifnull(sum(to_houbei_weight), 0) as toHoubeiWeight,
+        ifnull(sum(turn_seed), 0) as turnSeed,
+        ifnull(sum(turn_out_weight), 0) as turnOutWeight
+    </sql>
+
+    <select id="sumForDimension" parameterType="map" resultMap="DoctorGroupDailyMap">
+        SELECT
+        <include refid="forSum"/>
+        FROM <include refid="tb"/>
+        GROUP BY
+        <if test="_parameter.get(orzType) == 2">org_id,</if>
+        <if test="_parameter.get(orzType) == 3">farm_id,</if>
+        <if test="_parameter.get(dateType) == 2"> date_format(sum_at, '%y-%u'),</if>
+        <if test="_parameter.get(dateType) == 3"> date_format(sum_at, '%y-%m'),</if>
+        <if test="_parameter.get(dateType) == 4"> concat(date_format(sum_at, '%y-'), QUARTER(sum_at))</if>
+        <if test="_parameter.get(dateType) == 5"> date_format(sum_at, '%y'),</if>
+        pig_type
+    </select>
 </mapper>
