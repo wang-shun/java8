@@ -8,13 +8,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.temporal.TemporalAdjuster;
-import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
-
-import static java.time.temporal.TemporalAdjuster.*;
 
 /**
  * Created by sunbo@terminus.io on 2017/12/15.

@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+ ~ Desc:
+ ~ Mail: [ your email ]
+ ~ Date: 2018-01-12 17:01:12
+ ~ Created by [ your name ]
+-->
+
 <mapper namespace="DoctorPigDaily">
     <resultMap id="DoctorPigDailyMap" type="DoctorPigDaily">
         <id property="id" column="id"/>
@@ -58,6 +65,7 @@
         <result property="boarSale" column="boar_sale"/>
         <result property="boarOtherOut" column="boar_other_out"/>
         <result property="boarEnd" column="boar_end"/>
+        <result property="sowNotMatingCount" column="sow_not_mating_count"/>
         <result property="version" column="version"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
@@ -73,13 +81,13 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `sum_at`, `org_id`, org_name, `farm_id`, farm_name, `sow_ph_start`, `sow_ph_reserve_in`, `sow_ph_wean_in`, `sow_ph_entry_in`, `sow_ph_chg_farm_in`, `sow_ph_dead`, `sow_ph_weed_out`, `sow_ph_sale`, `sow_ph_chg_farm`, `sow_ph_other_out`, mate_hb, mate_dn, mate_fq, mate_lc, mate_yx, `mating_count`, `preg_positive`, `preg_negative`, `preg_fanqing`, `preg_liuchan`, `sow_ph_end`, `sow_cf_start`, `sow_cf_end`, `sow_cf_in`, `sow_cf_in_farm_in`, `sow_cf_dead`, `sow_cf_weed_out`, `sow_cf_sale`, `sow_cf_chg_farm`, `sow_cf_other_out`, early_farrow_nest, `farrow_nest`, farrow_live, `farrow_health`, `farrow_weak`, `farrow_dead`, `farrowjmh`, `farrow_weight`, `wean_nest`, `wean_qualified_count`, `wean_count`, `wean_day_age`, `wean_weight`, `boar_start`, `boar_in`, `boar_dead`, `boar_weed_out`, `boar_sale`, `boar_other_out`, `boar_end`,
-        created_at, updated_at, version
+        `sum_at`, `org_id`, `org_name`, `farm_id`, `farm_name`, `sow_ph_start`, `sow_ph_reserve_in`, `sow_ph_wean_in`, `sow_ph_entry_in`, `sow_ph_chg_farm_in`, `sow_ph_dead`, `sow_ph_weed_out`, `sow_ph_sale`, `sow_ph_chg_farm`, `sow_ph_other_out`, `mate_hb`, `mate_dn`, `mate_fq`, `mate_lc`, `mate_yx`, `mating_count`, `preg_positive`, `preg_negative`, `preg_fanqing`, `preg_liuchan`, `sow_ph_end`, `sow_cf_start`, `sow_cf_end`, `sow_cf_in`, `sow_cf_in_farm_in`, `sow_cf_dead`, `sow_cf_weed_out`, `sow_cf_sale`, `sow_cf_chg_farm`, `sow_cf_other_out`, `early_farrow_nest`, `farrow_nest`, `farrow_live`, `farrow_health`, `farrow_weak`, `farrow_dead`, `farrowjmh`, `farrow_weight`, `wean_nest`, `wean_qualified_count`, `wean_count`, `wean_day_age`, `wean_weight`, `boar_start`, `boar_in`, `boar_dead`, `boar_weed_out`, `boar_sale`, `boar_other_out`, `boar_end`, `sow_not_mating_count`, `version`, 
+        created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{sumAt}, #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{sowPhStart}, #{sowPhReserveIn}, #{sowPhWeanIn}, #{sowPhEntryIn}, #{sowPhChgFarmIn}, #{sowPhDead}, #{sowPhWeedOut}, #{sowPhSale}, #{sowPhChgFarm}, #{sowPhOtherOut}, #{mateHb}, #{mateDn}, #{mateFq}, #{mateLc}, #{mateYx}, #{matingCount}, #{pregPositive}, #{pregNegative}, #{pregFanqing}, #{pregLiuchan}, #{sowPhEnd}, #{sowCfStart}, #{sowCfEnd}, #{sowCfIn}, #{sowCfInFarmIn}, #{sowCfDead}, #{sowCfWeedOut}, #{sowCfSale}, #{sowCfChgFarm}, #{sowCfOtherOut}, #{earlyFarrowNest}, #{farrowNest}, #{farrowLive}, #{farrowHealth}, #{farrowWeak}, #{farrowDead}, #{farrowjmh}, #{farrowWeight}, #{weanNest}, #{weanQualifiedCount}, #{weanCount}, #{weanDayAge}, #{weanWeight}, #{boarStart}, #{boarIn}, #{boarDead}, #{boarWeedOut}, #{boarSale}, #{boarOtherOut}, #{boarEnd},
-        now(), now(), 1
+        #{sumAt}, #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{sowPhStart}, #{sowPhReserveIn}, #{sowPhWeanIn}, #{sowPhEntryIn}, #{sowPhChgFarmIn}, #{sowPhDead}, #{sowPhWeedOut}, #{sowPhSale}, #{sowPhChgFarm}, #{sowPhOtherOut}, #{mateHb}, #{mateDn}, #{mateFq}, #{mateLc}, #{mateYx}, #{matingCount}, #{pregPositive}, #{pregNegative}, #{pregFanqing}, #{pregLiuchan}, #{sowPhEnd}, #{sowCfStart}, #{sowCfEnd}, #{sowCfIn}, #{sowCfInFarmIn}, #{sowCfDead}, #{sowCfWeedOut}, #{sowCfSale}, #{sowCfChgFarm}, #{sowCfOtherOut}, #{earlyFarrowNest}, #{farrowNest}, #{farrowLive}, #{farrowHealth}, #{farrowWeak}, #{farrowDead}, #{farrowjmh}, #{farrowWeight}, #{weanNest}, #{weanQualifiedCount}, #{weanCount}, #{weanDayAge}, #{weanWeight}, #{boarStart}, #{boarIn}, #{boarDead}, #{boarWeedOut}, #{boarSale}, #{boarOtherOut}, #{boarEnd}, #{sowNotMatingCount}, #{version}, 
+        now(), now(),1
     </sql>
 
     <sql id="criteria">
@@ -99,6 +107,11 @@
             <if test="sowPhSale != null">AND `sow_ph_sale` = #{sowPhSale}</if>
             <if test="sowPhChgFarm != null">AND `sow_ph_chg_farm` = #{sowPhChgFarm}</if>
             <if test="sowPhOtherOut != null">AND `sow_ph_other_out` = #{sowPhOtherOut}</if>
+            <if test="mateHb != null">AND `mate_hb` = #{mateHb}</if>
+            <if test="mateDn != null">AND `mate_dn` = #{mateDn}</if>
+            <if test="mateFq != null">AND `mate_fq` = #{mateFq}</if>
+            <if test="mateLc != null">AND `mate_lc` = #{mateLc}</if>
+            <if test="mateYx != null">AND `mate_yx` = #{mateYx}</if>
             <if test="matingCount != null">AND `mating_count` = #{matingCount}</if>
             <if test="pregPositive != null">AND `preg_positive` = #{pregPositive}</if>
             <if test="pregNegative != null">AND `preg_negative` = #{pregNegative}</if>
@@ -114,8 +127,8 @@
             <if test="sowCfSale != null">AND `sow_cf_sale` = #{sowCfSale}</if>
             <if test="sowCfChgFarm != null">AND `sow_cf_chg_farm` = #{sowCfChgFarm}</if>
             <if test="sowCfOtherOut != null">AND `sow_cf_other_out` = #{sowCfOtherOut}</if>
-            <if test="farrowNest != null">AND `farrow_nest` = #{farrowNest}</if>
             <if test="earlyFarrowNest != null">AND `early_farrow_nest` = #{earlyFarrowNest}</if>
+            <if test="farrowNest != null">AND `farrow_nest` = #{farrowNest}</if>
             <if test="farrowLive != null">AND `farrow_live` = #{farrowLive}</if>
             <if test="farrowHealth != null">AND `farrow_health` = #{farrowHealth}</if>
             <if test="farrowWeak != null">AND `farrow_weak` = #{farrowWeak}</if>
@@ -134,6 +147,7 @@
             <if test="boarSale != null">AND `boar_sale` = #{boarSale}</if>
             <if test="boarOtherOut != null">AND `boar_other_out` = #{boarOtherOut}</if>
             <if test="boarEnd != null">AND `boar_end` = #{boarEnd}</if>
+            <if test="sowNotMatingCount != null">AND `sow_not_mating_count` = #{sowNotMatingCount}</if>
             <if test="version != null">AND `version` = #{version}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
@@ -173,7 +187,9 @@
         <set>
             <if test="sumAt != null">`sum_at` = #{sumAt},</if>
             <if test="orgId != null">`org_id` = #{orgId},</if>
+            <if test="orgName != null">`org_name` = #{orgName},</if>
             <if test="farmId != null">`farm_id` = #{farmId},</if>
+            <if test="farmName != null">`farm_name` = #{farmName},</if>
             <if test="sowPhStart != null">`sow_ph_start` = #{sowPhStart},</if>
             <if test="sowPhReserveIn != null">`sow_ph_reserve_in` = #{sowPhReserveIn},</if>
             <if test="sowPhWeanIn != null">`sow_ph_wean_in` = #{sowPhWeanIn},</if>
@@ -224,40 +240,36 @@
             <if test="boarSale != null">`boar_sale` = #{boarSale},</if>
             <if test="boarOtherOut != null">`boar_other_out` = #{boarOtherOut},</if>
             <if test="boarEnd != null">`boar_end` = #{boarEnd},</if>
-            updated_at = now(),
+            <if test="sowNotMatingCount != null">`sow_not_mating_count` = #{sowNotMatingCount},</if>
+            <if test="version != null">`version` = #{version},</if>
+            updated_at = now()
             version = version + 1
         </set>
         WHERE id = #{id} and version = #{version}
     </update>
 
     <delete id="delete" parameterType="long">
-        DELETE FROM
-        <include refid="tb"/>
+        DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
-
+    
     <select id="count" parameterType="map" resultType="long">
         SELECT COUNT(1)
-        FROM
-        <include refid="tb"/>
+        FROM <include refid="tb"/>
         <include refid="criteria"/>
     </select>
 
     <select id="paging" parameterType="map" resultMap="DoctorPigDailyMap">
-        SELECT
-        <include refid="cols_all"/>
-        FROM
-        <include refid="tb"/>
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
         LIMIT #{offset}, #{limit}
     </select>
 
     <select id="list" parameterType="map" resultMap="DoctorPigDailyMap">
-        SELECT
-        <include refid="cols_all"/>
-        FROM
-        <include refid="tb"/>
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
     </select>
@@ -307,6 +319,7 @@
         sum(`boar_sale`) as boar_sale,
         sum(`boar_other_out`) as boar_other_out,
         max(`boar_end`) as boar_end
+        sum(`sow_not_mating_count`) as sow_not_mating_count
         FROM
         <include refid="tb"/>
         <where>

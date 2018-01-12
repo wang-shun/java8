@@ -1938,4 +1938,7 @@ CREATE TABLE `doctor_bi_pages` (
 ALTER TABLE `doctor_bi_pages` ADD COLUMN `desc` varchar(32) NULL COMMENT '描述说明' after `url`;
 
 
-
+-- 猪日报添加进场未配种母猪数字段 2017-01-12
+ALTER TABLE doctor_pig_dailies ADD sow_not_mating_count INT NULL COMMENT '进场未配种的母猪数';
+ALTER TABLE doctor_pig_dailies
+  MODIFY COLUMN sow_not_mating_count INT COMMENT '进场未配种的母猪数' AFTER updated_at;
