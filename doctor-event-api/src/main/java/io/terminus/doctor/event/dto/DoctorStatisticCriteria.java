@@ -25,7 +25,7 @@ public class DoctorStatisticCriteria implements Serializable {
     }
 
     public DoctorStatisticCriteria(Long farmId, String sumAt) {
-        new DoctorStatisticCriteria(farmId, null, sumAt);
+        this(farmId, null, sumAt);
     }
 
     /**

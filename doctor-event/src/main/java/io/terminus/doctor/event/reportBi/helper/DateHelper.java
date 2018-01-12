@@ -1,0 +1,62 @@
+package io.terminus.doctor.event.reportBi.helper;
+
+import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.event.enums.DateDimension;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
+import java.util.Date;
+
+/**
+ * Created by xjn on 18/1/12.
+ * email:xiaojiannan@terminus.io
+ */
+public class DateHelper {
+    private static final DateTimeFormatter DAY = DateTimeFormat.forPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter MMDD = DateTimeFormat.forPattern("MMdd");
+    private static final DateTimeFormatter WEEK = DateTimeFormat.forPattern("yyyy年第w周");
+    private static final DateTimeFormatter MONTH = DateTimeFormat.forPattern("yyyy年M月");
+    private static final DateTimeFormatter YEAR = DateTimeFormat.forPattern("yyyy年");
+
+
+    public static Date withDateStartDay(Date date, DateDimension dateDimension){
+        DateTime dateTime = new DateTime(date);
+        switch (dateDimension) {
+            case DAY: return date;
+            case WEEK: return dateTime.withDayOfWeek(1).toDate();
+            case MONTH: return dateTime.withDayOfMonth(1).toDate();
+            case QUARTER:
+                int month = dateTime.getMonthOfYear();
+                if (month >= 10) {
+                    return dateTime.withMonthOfYear(10).withDayOfMonth(1).toDate();
+                } else if(month >= 7) {
+                    return dateTime.withMonthOfYear(7).withDayOfMonth(1).toDate();
+                } else if (month >= 4) {
+                    return dateTime.withMonthOfYear(4).withDayOfMonth(1).toDate();
+                } else {
+                    return dateTime.withMonthOfYear(1).withDayOfMonth(1).toDate();
+                }
+            case YEAR: return dateTime.withDayOfYear(1).toDate();
+            default:
+                throw new InvalidException("with.date.start.day.failed", date);
+        }
+    }
+
+    public static String dateCN(Date date, DateDimension dateDimension) {
+        DateTime dateTime = new DateTime(date);
+        switch (dateDimension) {
+            case DAY: return dateTime.toString(DAY);
+            case WEEK:
+                DateTime weekStart = dateTime.withDayOfWeek(1);
+                DateTime weekEnd = dateTime.withDayOfWeek(7);
+                String week = dateTime.toString(WEEK);
+                return week + "（" + weekStart.toString(MMDD) + "-" + weekEnd.toString(MMDD) + "）";
+            case MONTH: return dateTime.toString(MONTH);
+            case QUARTER: return dateTime.toString(YEAR)+ "第" + dateTime.getMonthOfYear() + "季度";
+            case YEAR: return dateTime.toString(YEAR);
+            default:
+                throw new InvalidException("date.CN.failed", date);
+        }
+    }
+}

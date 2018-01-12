@@ -97,9 +97,9 @@ public class DoctorDailyReportV2Manager {
 
     public DoctorGroupDaily findDoctorGroupDaily(Long farmId, Integer pigType, Date sumAt){
         DoctorGroupDaily doctorGroupDaily = groupDailyDao.findBy(farmId, pigType, sumAt);
-        if (isNull(doctorGroupDaily)) {
-            doctorGroupDaily = flushGroupDaily(new DoctorStatisticCriteria(farmId, pigType, DateUtil.toDateString(sumAt)));
-        }
+//        if (isNull(doctorGroupDaily)) {
+//            doctorGroupDaily = flushGroupDaily(new DoctorStatisticCriteria(farmId, pigType, DateUtil.toDateString(sumAt)));
+//        }
         return doctorGroupDaily;
     }
 
@@ -136,9 +136,9 @@ public class DoctorDailyReportV2Manager {
 
     public DoctorPigDaily findDoctorPigDaily(Long farmId, Date sumAt){
         DoctorPigDaily doctorPigDaily = pigDailyDao.findBy(farmId, sumAt);
-        if (isNull(doctorPigDaily)) {
-            doctorPigDaily = flushPigDaily(new DoctorStatisticCriteria(farmId, DateUtil.toDateString(sumAt)));
-        }
+//        if (isNull(doctorPigDaily)) {
+//            doctorPigDaily = flushPigDaily(new DoctorStatisticCriteria(farmId, DateUtil.toDateString(sumAt)));
+//        }
         return doctorPigDaily;
     }
 

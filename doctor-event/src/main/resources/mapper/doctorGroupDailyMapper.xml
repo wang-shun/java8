@@ -188,4 +188,18 @@
         <if test="_parameter.get(dateType) == 5"> date_format(sum_at, '%y'),</if>
         pig_type
     </select>
+
+    <select id="extendField" parameterType="map" resultMap="DoctorGroupDailyMap">
+        SELECT
+        <include refid="forSum"/>
+        FROM <include refid="tb"/>
+        GROUP BY
+        <if test="_parameter.get(orzType) == 2">org_id,</if>
+        <if test="_parameter.get(orzType) == 3">farm_id,</if>
+        <if test="_parameter.get(dateType) == 2"> date_format(sum_at, '%y-%u'),</if>
+        <if test="_parameter.get(dateType) == 3"> date_format(sum_at, '%y-%m'),</if>
+        <if test="_parameter.get(dateType) == 4"> concat(date_format(sum_at, '%y-'), QUARTER(sum_at))</if>
+        <if test="_parameter.get(dateType) == 5"> date_format(sum_at, '%y'),</if>
+        pig_type
+    </select>
 </mapper>

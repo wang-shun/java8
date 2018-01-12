@@ -6,9 +6,9 @@ import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
 import io.terminus.doctor.event.dao.DoctorPigDailyDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportReserveDao;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
+import io.terminus.doctor.event.dto.reportBi.DoctorGroupDailyExtend;
 import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
-import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorReportReserve;
 import io.terminus.doctor.event.reportBi.factory.DoctorReportBiDataFactory;
@@ -117,19 +117,27 @@ public class DoctorReportBiDataSynchronizer {
      * @param dimensionCriteria
      */
     private void synchronizeFullBiDataForDimension(DoctorDimensionCriteria dimensionCriteria) {
-        List<DoctorGroupDaily> groupDailyList = doctorGroupDailyDao.sumForDimension(dimensionCriteria);
-        groupDailyList.parallelStream().forEach(this::synchronizeGroupBiData);
+        List<DoctorGroupDailyExtend> groupDailyList = doctorGroupDailyDao.sumForDimension(dimensionCriteria);
+        groupDailyList.parallelStream().forEach(groupDaily -> synchronizeGroupBiData(groupDaily, dimensionCriteria));
         List<DoctorPigDaily> pigDailyList = doctorPigDailyDao.sumForDimension(dimensionCriteria);
         pigDailyList.parallelStream().forEach(this::synchronizePigBiData);
     }
 
-    private void synchronizeGroupBiData(DoctorGroupDaily groupDaily){
+    private void synchronizeGroupBiData(DoctorGroupDailyExtend groupDaily, DoctorDimensionCriteria dimensionCriteria){
+        OrzDimension orzDimension = expectNotNull(OrzDimension.from(dimensionCriteria.getOrzType()), "orzType.is.illegal");
+        DateDimension dateDimension = expectNotNull(DateDimension.from(dimensionCriteria.getDateType()), "dateType.is.illegal");
         PigType pigType = expectNotNull(PigType.from(groupDaily.getPigType()), "pigType.is.illegal");
+        
+        
         switch (pigType) {
             case DELIVER_SOW: ; break;
             case NURSERY_PIGLET: ; break;
             case FATTEN_PIG: ; break;
-            case RESERVE: insertOrUpdateReserve(factory.buildReserve(groupDaily, new DoctorReportReserve())); break;
+            case RESERVE:
+                DoctorReportReserve reserve = new DoctorReportReserve();
+                reserve.setOrzType(orzDimension.getName());
+                reserve.setDateType(dateDimension.getName());
+                insertOrUpdateReserve(factory.buildReserve(groupDaily, reserve)); break;
         }
     }
 

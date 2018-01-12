@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
+import io.terminus.doctor.event.dto.reportBi.DoctorGroupDailyExtend;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
 import org.springframework.stereotype.Repository;
 
@@ -44,8 +45,11 @@ public class DoctorGroupDailyDao extends MyBatisDao<DoctorGroupDaily> {
      * @param dimensionCriteria 维度
      * @return 聚合数据
      */
-    public List<DoctorGroupDaily> sumForDimension(DoctorDimensionCriteria dimensionCriteria) {
-        return getSqlSession().selectList(sqlId("sumForDimension"),
-                ImmutableMap.of("orzType", dimensionCriteria.getOrzType(), "dateType", dimensionCriteria.getDateType()));
+    public List<DoctorGroupDailyExtend> sumForDimension(DoctorDimensionCriteria dimensionCriteria) {
+        return getSqlSession().selectList(sqlId("sumForDimension"), dimensionCriteria);
+    }
+
+    public DoctorGroupDailyExtend extendField(DoctorDimensionCriteria dimensionCriteria){
+        return getSqlSession().selectOne(sqlId("extendField"), dimensionCriteria);
     }
 }
