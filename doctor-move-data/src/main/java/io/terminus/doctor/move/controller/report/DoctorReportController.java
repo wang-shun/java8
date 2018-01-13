@@ -111,6 +111,14 @@ public class DoctorReportController {
         return Boolean.TRUE;
     }
 
+    /**
+     * 全量同步报表数据
+     * @return
+     */
+    @RequestMapping()
+    public Boolean synchronizeFullBiData() {
+        return RespHelper.or500(doctorDailyReportV2Service.synchronizeFullBiData());
+    }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/flush/npd")
     public void flushNPD() {

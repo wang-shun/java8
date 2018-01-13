@@ -49,7 +49,7 @@ public class DoctorGroupDailyDao extends MyBatisDao<DoctorGroupDaily> {
         return getSqlSession().selectList(sqlId("sumForDimension"), dimensionCriteria);
     }
 
-    public DoctorGroupDailyExtend extendField(DoctorDimensionCriteria dimensionCriteria){
-        return getSqlSession().selectOne(sqlId("extendField"), dimensionCriteria);
+    public Integer start(DoctorDimensionCriteria dimensionCriteria){
+        return getSqlSession().selectOne(sqlId("start"), dimensionCriteria);
     }
 }

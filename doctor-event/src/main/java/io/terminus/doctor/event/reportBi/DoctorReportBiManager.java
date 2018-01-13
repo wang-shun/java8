@@ -14,10 +14,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class DoctorReportBiManager {
     private final CoreEventDispatcher dispatcher;
+    private final DoctorReportBiDataSynchronize synchronize;
 
     @Autowired
-    public DoctorReportBiManager(CoreEventDispatcher dispatcher) {
+    public DoctorReportBiManager(CoreEventDispatcher dispatcher, DoctorReportBiDataSynchronize synchronize) {
         this.dispatcher = dispatcher;
+        this.synchronize = synchronize;
     }
 
     /**
@@ -48,7 +50,7 @@ public class DoctorReportBiManager {
      * 全量同步数据到bi(手动)
      */
     public void synchronizeFullData() {
-
+        synchronize.synchronizeFullBiData();
     }
 
 

@@ -49,4 +49,10 @@ public interface DoctorDailyReportV2Service {
      * @param farmIds 猪场ids
      */
     Response<Boolean> generateYesterdayAndToday(List<Long> farmIds);
+
+    /**
+     * 全量同步报表数据
+     * @return
+     */
+    Response<Boolean> synchronizeFullBiData();
 }

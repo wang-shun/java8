@@ -1,6 +1,6 @@
 package io.terminus.doctor.event.bi;
 
-import io.terminus.doctor.event.reportBi.listener.DoctorReportBiDataSynchronizer;
+import io.terminus.doctor.event.reportBi.DoctorReportBiDataSynchronize;
 import io.terminus.doctor.event.test.BaseServiceTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class DoctorBiDataTest extends BaseServiceTest {
     @Autowired
-    private DoctorReportBiDataSynchronizer synchronizer;
+    private DoctorReportBiDataSynchronize synchronizer;
 
     @Test
     public void fullSynchronizerTest() {

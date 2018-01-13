@@ -149,12 +149,13 @@
     </update>
 
     <sql id="forSum">
-        org_id,
-        org_name,
-        farm_id,
-        farm_name,
-        pig_type,
-        sum_at,
+        org_id as orgId,
+        org_name as orgName,
+        farm_id as farmId,
+        farm_name as farmName,
+        pig_type as pigType,
+        sum_at as sumAt,
+        AVG(`end`) as dailyLivestockOnHand,
         ifnull(sum(turn_into), 0) as turnInfo,
         ifnull(sum(chg_farm_in), 0) as chgFarmIn,
         ifnull(sum(turn_into_weight), 0) as turnIntoWeight,
@@ -175,9 +176,26 @@
         ifnull(sum(turn_out_weight), 0) as turnOutWeight
     </sql>
 
-    <select id="sumForDimension" parameterType="map" resultMap="DoctorGroupDailyMap">
+    <select id="sumForDimension" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="io.terminus.doctor.event.dto.reportBi.DoctorGroupDailyExtend">
         SELECT
         <include refid="forSum"/>
+        FROM <include refid="tb"/>
+        <if test="sumAt != null">
+            WHERE update_at >= #{sum_at}
+        </if>
+        GROUP BY
+        <if test="orzType == 2">org_id,</if>
+        <if test="orzType == 3">farm_id,</if>
+        <if test="dateType == 2"> date_format(sum_at, '%y-%u'),</if>
+        <if test="dateType == 3"> date_format(sum_at, '%y-%m'),</if>
+        <if test="dateType == 4"> concat(date_format(sum_at, '%y-'), QUARTER(sum_at))</if>
+        <if test="dateType == 5"> date_format(sum_at, '%y'),</if>
+        pig_type
+    </select>
+
+    <select id="extendField" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultMap="DoctorGroupDailyMap">
+        SELECT
+        AVG(`end`)
         FROM <include refid="tb"/>
         GROUP BY
         <if test="_parameter.get(orzType) == 2">org_id,</if>
@@ -189,17 +207,4 @@
         pig_type
     </select>
 
-    <select id="extendField" parameterType="map" resultMap="DoctorGroupDailyMap">
-        SELECT
-        <include refid="forSum"/>
-        FROM <include refid="tb"/>
-        GROUP BY
-        <if test="_parameter.get(orzType) == 2">org_id,</if>
-        <if test="_parameter.get(orzType) == 3">farm_id,</if>
-        <if test="_parameter.get(dateType) == 2"> date_format(sum_at, '%y-%u'),</if>
-        <if test="_parameter.get(dateType) == 3"> date_format(sum_at, '%y-%m'),</if>
-        <if test="_parameter.get(dateType) == 4"> concat(date_format(sum_at, '%y-'), QUARTER(sum_at))</if>
-        <if test="_parameter.get(dateType) == 5"> date_format(sum_at, '%y'),</if>
-        pig_type
-    </select>
 </mapper>

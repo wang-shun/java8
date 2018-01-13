@@ -1,8 +1,9 @@
-package io.terminus.doctor.event.reportBi.factory;
+package io.terminus.doctor.event.reportBi.synchronizer;
 
 
 import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
 import io.terminus.doctor.event.dao.DoctorPigDailyDao;
+import io.terminus.doctor.event.dao.reportBi.DoctorReportReserveDao;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.reportBi.DoctorGroupDailyExtend;
 import io.terminus.doctor.event.enums.DateDimension;
@@ -16,21 +17,24 @@ import java.util.Objects;
 
 import static io.terminus.doctor.event.reportBi.helper.DateHelper.dateCN;
 import static io.terminus.doctor.event.reportBi.helper.DateHelper.withDateStartDay;
+import static java.util.Objects.isNull;
 
 /**
  * Created by xjn on 18/1/11.
  * email:xiaojiannan@terminus.io
  */
 @Component
-public class DoctorReportBiDataFactory {
+public class DoctorReserveSynchronizer {
 
     private final DoctorPigDailyDao doctorPigDailyDao;
     private final DoctorGroupDailyDao doctorGroupDailyDao;
+    private final DoctorReportReserveDao doctorReportReserveDao;
 
     @Autowired
-    public DoctorReportBiDataFactory(DoctorPigDailyDao doctorPigDailyDao, DoctorGroupDailyDao doctorGroupDailyDao) {
+    public DoctorReserveSynchronizer(DoctorPigDailyDao doctorPigDailyDao, DoctorGroupDailyDao doctorGroupDailyDao, DoctorReportReserveDao doctorReportReserveDao) {
         this.doctorPigDailyDao = doctorPigDailyDao;
         this.doctorGroupDailyDao = doctorGroupDailyDao;
+        this.doctorReportReserveDao = doctorReportReserveDao;
     }
 
     public DoctorReportReserve buildRealTimeBoar() {
@@ -71,13 +75,26 @@ public class DoctorReportBiDataFactory {
 
     }
 
-    public DoctorReportReserve buildReserve(DoctorGroupDailyExtend groupDaily,
+    public void synchronize(DoctorGroupDailyExtend groupDaily,
+                            DoctorReportReserve reportReserve){
+        insertOrUpdateReserve(buildReserve(groupDaily, reportReserve));
+    }
+
+    public void synchronizeRealTime(DoctorGroupDailyExtend groupDaily,
+                            DoctorReportReserve reportReserve){
+        insertOrUpdateReserve(buildRealTimeReserve(groupDaily, reportReserve));
+    }
+
+    private DoctorReportReserve buildReserve(DoctorGroupDailyExtend groupDaily,
                                             DoctorReportReserve reportReserve) {
 
 
         if (Objects.equals(reportReserve.getOrzType(), OrzDimension.FARM.getName())) {
             reportReserve.setOrzId(groupDaily.getFarmId());
             reportReserve.setOrzName(groupDaily.getFarmName());
+        } else {
+            reportReserve.setOrzId(groupDaily.getOrgId());
+            reportReserve.setOrzName(groupDaily.getOrgName());
         }
         DateDimension dateDimension = DateDimension.from(reportReserve.getDateType());
         reportReserve.setSumAt(withDateStartDay(groupDaily.getSumAt(), dateDimension));
@@ -87,7 +104,7 @@ public class DoctorReportBiDataFactory {
         return reportReserve;
     }
 
-    public DoctorReportReserve buildRealTimeReserve(DoctorGroupDailyExtend groupDaily,
+    private DoctorReportReserve buildRealTimeReserve(DoctorGroupDailyExtend groupDaily,
                                                     DoctorReportReserve reportReserve) {
         reportReserve.setStart(groupDaily.getStart());
         reportReserve.setTurnInto(filedUrl(groupDaily.getTurnInto()));
@@ -103,11 +120,19 @@ public class DoctorReportBiDataFactory {
         return reportReserve;
     }
 
-    public DoctorReportReserve buildDelayReserve(DoctorGroupDailyExtend groupDaily,
+    private DoctorReportReserve buildDelayReserve(DoctorGroupDailyExtend groupDaily,
                                                  DoctorReportReserve reportReserve) {
         reportReserve.setDeadWeedOutRate(deadWeedOutRate(groupDaily, reportReserve));
         reportReserve.setDailyLivestockOnHand(groupDaily.getDailyLivestockOnHand());
         return reportReserve;
+    }
+
+    private void insertOrUpdateReserve(DoctorReportReserve reserve){
+        if (isNull(reserve.getId())) {
+            doctorReportReserveDao.create(reserve);
+            return;
+        }
+        doctorReportReserveDao.update(reserve);
     }
 
     public DoctorReportReserve buildRealTimeSow() {
@@ -119,9 +144,9 @@ public class DoctorReportBiDataFactory {
     }
     private Double deadWeedOutRate(DoctorGroupDaily groupDaily,
                                    DoctorReportReserve reportReserve){
-        return null;
+        return 0.0;
     }
     private String filedUrl(Object obj) {
-        return null;
+        return "{}";
     }
 }

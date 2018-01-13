@@ -8,6 +8,7 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
 import io.terminus.doctor.event.manager.DoctorDailyReportV2Manager;
+import io.terminus.doctor.event.reportBi.DoctorReportBiManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,10 +28,12 @@ import java.util.concurrent.TimeUnit;
 public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Service {
 
     private final DoctorDailyReportV2Manager doctorDailyReportV2Manager;
+    private final DoctorReportBiManager doctorReportBiManager;
 
     @Autowired
-    public DoctorDailyReportV2ServiceImpl(DoctorDailyReportV2Manager doctorDailyReportV2Manager) {
+    public DoctorDailyReportV2ServiceImpl(DoctorDailyReportV2Manager doctorDailyReportV2Manager, DoctorReportBiManager doctorReportBiManager) {
         this.doctorDailyReportV2Manager = doctorDailyReportV2Manager;
+        this.doctorReportBiManager = doctorReportBiManager;
     }
 
     @Override
@@ -144,6 +147,17 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
         } catch (Exception e) {
             log.error("generate yesterday and today failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("generate.yesterday.and.today.failed");
+        }
+    }
+
+    @Override
+    public Response<Boolean> synchronizeFullBiData() {
+        try {
+            doctorReportBiManager.synchronizeFullData();
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("synchronize full bi data failed,cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("synchronize.full.bi.data.failed");
         }
     }
 }
