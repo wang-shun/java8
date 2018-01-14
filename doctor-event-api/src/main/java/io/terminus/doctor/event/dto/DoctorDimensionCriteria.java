@@ -1,6 +1,8 @@
 package io.terminus.doctor.event.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -9,11 +11,13 @@ import java.util.Date;
  * email:xiaojiannan@terminus.io
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class DoctorDimensionCriteria {
     /**
      * 组织id
      */
-    private Integer orzId;
+    private Long orzId;
     /**
      * 组织维度
      * @see io.terminus.doctor.event.enums.OrzDimension
@@ -30,5 +34,7 @@ public class DoctorDimensionCriteria {
      * @see io.terminus.doctor.event.enums.DateDimension
      */
     private Integer dateType;
+
+    private Integer pigType;
 
 }

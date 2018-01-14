@@ -130,6 +130,14 @@
         </where>
     </select>
 
+    <select id="paging" parameterType="map" resultMap="DoctorGroupDailyMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        limit #{offset}, #{limit}
+    </select>
+
     <select id="findBy" parameterType="map" resultMap="DoctorGroupDailyMap">
         SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
         WHERE
@@ -137,6 +145,7 @@
         and pig_type = #{pigType}
         and sum_at = #{sumAt}
     </select>
+
 
     <update id="updateDailyGroupLiveStock" parameterType="map" >
         UPDATE <include refid="tb"/>
@@ -180,31 +189,61 @@
         SELECT
         <include refid="forSum"/>
         FROM <include refid="tb"/>
-        <if test="sumAt != null">
-            WHERE update_at >= #{sum_at}
-        </if>
         GROUP BY
         <if test="orzType == 2">org_id,</if>
         <if test="orzType == 3">farm_id,</if>
+        <if test="dateType == 1"> date_format(sum_at, '%y-%m-%d'),</if>
         <if test="dateType == 2"> date_format(sum_at, '%y-%u'),</if>
         <if test="dateType == 3"> date_format(sum_at, '%y-%m'),</if>
-        <if test="dateType == 4"> concat(date_format(sum_at, '%y-'), QUARTER(sum_at))</if>
+        <if test="dateType == 4"> concat(date_format(sum_at, '%y-'), QUARTER(sum_at)),</if>
         <if test="dateType == 5"> date_format(sum_at, '%y'),</if>
         pig_type
     </select>
 
-    <select id="extendField" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultMap="DoctorGroupDailyMap">
+    <select id="selectOneSumForDimension" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="io.terminus.doctor.event.dto.reportBi.DoctorGroupDailyExtend">
         SELECT
-        AVG(`end`)
-        FROM <include refid="tb"/>
-        GROUP BY
-        <if test="_parameter.get(orzType) == 2">org_id,</if>
-        <if test="_parameter.get(orzType) == 3">farm_id,</if>
-        <if test="_parameter.get(dateType) == 2"> date_format(sum_at, '%y-%u'),</if>
-        <if test="_parameter.get(dateType) == 3"> date_format(sum_at, '%y-%m'),</if>
-        <if test="_parameter.get(dateType) == 4"> concat(date_format(sum_at, '%y-'), QUARTER(sum_at))</if>
-        <if test="_parameter.get(dateType) == 5"> date_format(sum_at, '%y'),</if>
-        pig_type
+        <include refid="forSum"/>
+        FROM
+        <include refid="tb"/>
+        <where>
+            1=1
+            <if test="orzType == 2">AND farm_id = #{orzId}</if>
+            <if test="orzType == 3">AND org_id = #{orzId}</if>
+            <if test="dateType == 1">AND date_format(sum_at, '%y-%m-%d') = date_format(#{sumAt}, '%y-%m-%d')</if>
+            <if test="dateType == 2">AND date_format(sum_at, '%y-%u') = date_format(#{sumAt}, '%y-%u')</if>
+            <if test="dateType == 3">AND date_format(sum_at, '%y-%m') = date_format(#{sumAt}, '%y-%m')</if>
+            <if test="dateType == 4">AND concat(date_format(sum_at, '%y-'), QUARTER(sum_at)) =
+                concat(date_format(sum_at, '%y-'), QUARTER(#{sumAt}))
+            </if>
+            <if test="dateType == 5">AND date_format(sum_at, '%y') = date_format(#{sumAt}, '%y')</if>
+            AND pig_type = #{pigType}
+        </where>
     </select>
 
+    <select id="findByAfter" parameterType="map" resultMap="DoctorGroupDailyMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        WHERE
+        updated_at >= date_format(#{sumAt}, '%Y-%m-%d %H:%i:%s')
+    </select>
+
+    <select id="findByDateType" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorDimensionCriteria">
+        SELECT
+        case WHEN #{orzType} = 2 then org_id else farm_id end as orzId,
+        #{orzType} as orzType,
+        sum_at as sumAt,
+        #{dateType} as dateType,
+        pig_type as pigType
+        FROM <include refid="tb"/>
+        WHERE
+        updated_at >= date_format(#{sumAt}, '%Y-%m-%d %H:%i:%s')
+        GROUP BY
+        <if test="orzType == 2">org_id,</if>
+        <if test="orzType == 3">farm_id,</if>
+        <if test="dateType == 1"> date_format(sum_at, '%y-%m-%d'),</if>
+        <if test="dateType == 2"> date_format(sum_at, '%y-%u'),</if>
+        <if test="dateType == 3"> date_format(sum_at, '%y-%m'),</if>
+        <if test="dateType == 4"> concat(date_format(sum_at, '%y-'), QUARTER(sum_at)),</if>
+        <if test="dateType == 5"> date_format(sum_at, '%y'),</if>
+        pig_type
+    </select>
 </mapper>

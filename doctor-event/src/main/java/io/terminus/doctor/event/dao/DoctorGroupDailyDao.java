@@ -49,6 +49,24 @@ public class DoctorGroupDailyDao extends MyBatisDao<DoctorGroupDaily> {
         return getSqlSession().selectList(sqlId("sumForDimension"), dimensionCriteria);
     }
 
+    /**
+     * 获取某一维度的数据
+     * @param dimensionCriteria
+     * @return
+     */
+    public DoctorGroupDailyExtend selectOneSumForDimension(DoctorDimensionCriteria dimensionCriteria) {
+        return getSqlSession().selectOne(sqlId("selectOneSumForDimension"), dimensionCriteria);
+    }
+
+    public List<DoctorGroupDaily> findByAfter(Date updatedAt){
+        return getSqlSession().selectList(sqlId("findByAfter"), updatedAt);
+    }
+
+    public List<DoctorDimensionCriteria> findByDateType(Date sumAt, Integer dateType, Integer orzType) {
+        return getSqlSession().selectList(sqlId("findByDateType"),
+                ImmutableMap.of("sumAt", sumAt, "dateType", dateType, "orzType", orzType));
+    }
+
     public Integer start(DoctorDimensionCriteria dimensionCriteria){
         return getSqlSession().selectOne(sqlId("start"), dimensionCriteria);
     }

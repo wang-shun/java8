@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.event.reportBi.helper.DateHelper.dateCN;
 import static io.terminus.doctor.event.reportBi.helper.DateHelper.withDateStartDay;
 import static java.util.Objects.isNull;
@@ -76,8 +77,16 @@ public class DoctorReserveSynchronizer {
     }
 
     public void synchronize(DoctorGroupDailyExtend groupDaily,
-                            DoctorReportReserve reportReserve){
-        insertOrUpdateReserve(buildReserve(groupDaily, reportReserve));
+                            DoctorDimensionCriteria dimensionCriteria){
+        DoctorReportReserve reportBI;
+        if (isNull(dimensionCriteria.getSumAt()) || isNull(reportBI = doctorReportReserveDao.findByDimension(dimensionCriteria))) {
+                OrzDimension orzDimension = expectNotNull(OrzDimension.from(dimensionCriteria.getOrzType()), "orzType.is.illegal");
+                DateDimension dateDimension = expectNotNull(DateDimension.from(dimensionCriteria.getDateType()), "dateType.is.illegal");
+                reportBI= new DoctorReportReserve();
+                reportBI.setOrzType(orzDimension.getName());
+                reportBI.setDateType(dateDimension.getName());
+        }
+        insertOrUpdateReserve(buildReserve(groupDaily, reportBI));
     }
 
     public void synchronizeRealTime(DoctorGroupDailyExtend groupDaily,

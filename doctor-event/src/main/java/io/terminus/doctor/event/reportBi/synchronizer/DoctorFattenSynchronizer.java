@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.reportBi.synchronizer;
 
 import io.terminus.doctor.event.dao.reportBi.DoctorReportFattenDao;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -11,7 +12,10 @@ import org.springframework.stereotype.Component;
 public class DoctorFattenSynchronizer {
     private final DoctorReportFattenDao doctorReportFattenDao;
 
+    @Autowired
     public DoctorFattenSynchronizer(DoctorReportFattenDao doctorReportFattenDao) {
         this.doctorReportFattenDao = doctorReportFattenDao;
     }
+
+
 }

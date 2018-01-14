@@ -154,4 +154,14 @@
         FROM <include refid="tb"/>
     </delete>
 
+    <select id="findByDimension" parameterType="map" resultMap="DoctorReportReserveMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            orz_id = #{orzId}
+            AND orz_type = #{orzType}
+            AND sum_at = #{sumAt}
+            AND date_type = #{dateType}
+        </where>
+    </select>
 </mapper>
