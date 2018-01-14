@@ -10,7 +10,6 @@ import io.terminus.doctor.event.dto.reportBi.DoctorGroupDailyExtend;
 import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.model.DoctorReportReserve;
-import io.terminus.doctor.event.reportBi.helper.DateHelper;
 import io.terminus.doctor.event.reportBi.helper.FieldHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -60,10 +59,7 @@ public class DoctorReserveSynchronizer {
 
     }
 
-    public DoctorReportReserve buildRealTimeFatten() {
-        return null;
 
-    }
 
     public DoctorReportReserve buildRealTimeMaterial() {
         return null;
@@ -90,63 +86,58 @@ public class DoctorReserveSynchronizer {
                 reportBI.setOrzType(orzDimension.getName());
                 reportBI.setDateType(dateDimension.getName());
         }
-        insertOrUpdateReserve(buildReserve(groupDaily, reportBI));
+        insertOrUpdate(build(groupDaily, reportBI));
     }
 
     public void synchronizeRealTime(DoctorGroupDailyExtend groupDaily,
-                            DoctorReportReserve reportReserve){
-        insertOrUpdateReserve(buildRealTimeReserve(groupDaily, reportReserve));
+                            DoctorReportReserve reportBi){
+        insertOrUpdate(buildRealTime(groupDaily, reportBi));
     }
 
-    private DoctorReportReserve buildReserve(DoctorGroupDailyExtend groupDaily,
-                                            DoctorReportReserve reportReserve) {
+    private DoctorReportReserve build(DoctorGroupDailyExtend groupDaily,
+                                      DoctorReportReserve reportBi) {
 
 
-        if (Objects.equals(reportReserve.getOrzType(), OrzDimension.FARM.getName())) {
-            reportReserve.setOrzId(groupDaily.getFarmId());
-            reportReserve.setOrzName(groupDaily.getFarmName());
+        if (Objects.equals(reportBi.getOrzType(), OrzDimension.FARM.getName())) {
+            reportBi.setOrzId(groupDaily.getFarmId());
+            reportBi.setOrzName(groupDaily.getFarmName());
         } else {
-            reportReserve.setOrzId(groupDaily.getOrgId());
-            reportReserve.setOrzName(groupDaily.getOrgName());
+            reportBi.setOrzId(groupDaily.getOrgId());
+            reportBi.setOrzName(groupDaily.getOrgName());
         }
-        DateDimension dateDimension = DateDimension.from(reportReserve.getDateType());
-        reportReserve.setSumAt(withDateStartDay(groupDaily.getSumAt(), dateDimension));
-        reportReserve.setSumAtName(dateCN(groupDaily.getSumAt(), dateDimension));
-        buildRealTimeReserve(groupDaily, reportReserve);
-        buildDelayReserve(groupDaily, reportReserve);
-        return reportReserve;
+        DateDimension dateDimension = DateDimension.from(reportBi.getDateType());
+        reportBi.setSumAt(withDateStartDay(groupDaily.getSumAt(), dateDimension));
+        reportBi.setSumAtName(dateCN(groupDaily.getSumAt(), dateDimension));
+        buildRealTime(groupDaily, reportBi);
+        buildDelay(groupDaily, reportBi);
+        return reportBi;
     }
 
-    private DoctorReportReserve buildRealTimeReserve(DoctorGroupDailyExtend groupDaily,
-                                                    DoctorReportReserve reportReserve) {
+    private DoctorReportReserve buildRealTime(DoctorGroupDailyExtend groupDaily,
+                                              DoctorReportReserve reportBi) {
         DoctorFiledUrlCriteria filedUrlCriteria = new DoctorFiledUrlCriteria();
-        filedUrlCriteria.setFarmId(groupDaily.getFarmId());
-        filedUrlCriteria.setPigType(groupDaily.getPigType());
-        DateDimension dateDimension = DateDimension.from(reportReserve.getDateType());
-        filedUrlCriteria.setStart(DateHelper.withDateStartDay(groupDaily.getSumAt(), dateDimension));
-        filedUrlCriteria.setEnd(DateHelper.withDateEndDay(groupDaily.getSumAt(), dateDimension));
-
-        reportReserve.setStart(groupDaily.getStart());
-        reportReserve.setTurnInto(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getTurnInto(), "turnInto"));
-        reportReserve.setTurnSeed(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getTurnSeed(), "turnSeed"));
-        reportReserve.setDead(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getDead(), "dead"));
-        reportReserve.setWeedOut(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getWeedOut(), "weedOut"));
-        reportReserve.setToFatten(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getToFatten(), "toFatten"));
-        reportReserve.setSale(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getSale(), "sale"));
-        reportReserve.setChgFarmOut(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getChgFarm(), "chgFarm"));
-        reportReserve.setOtherChange(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getOtherChange(), "otherChange"));
-        reportReserve.setEnd(groupDaily.getEnd());
-        return reportReserve;
+        fieldHelper.fillGroupFiledUrl(filedUrlCriteria, groupDaily, reportBi.getOrzType(), reportBi.getDateType());
+        reportBi.setStart(groupDaily.getStart());
+        reportBi.setTurnInto(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getTurnInto(), "turnInto"));
+        reportBi.setTurnSeed(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getTurnSeed(), "turnSeed"));
+        reportBi.setDead(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getDead(), "dead"));
+        reportBi.setWeedOut(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getWeedOut(), "weedOut"));
+        reportBi.setToFatten(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getToFatten(), "toFatten"));
+        reportBi.setSale(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getSale(), "sale"));
+        reportBi.setChgFarmOut(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getChgFarm(), "chgFarm"));
+        reportBi.setOtherChange(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getOtherChange(), "otherChange"));
+        reportBi.setEnd(groupDaily.getEnd());
+        return reportBi;
     }
 
-    private DoctorReportReserve buildDelayReserve(DoctorGroupDailyExtend groupDaily,
-                                                 DoctorReportReserve reportReserve) {
-        reportReserve.setDeadWeedOutRate(fieldHelper.deadWeedOutRate(groupDaily, reportReserve.getOrzType()));
-        reportReserve.setDailyLivestockOnHand(groupDaily.getDailyLivestockOnHand());
-        return reportReserve;
+    private DoctorReportReserve buildDelay(DoctorGroupDailyExtend groupDaily,
+                                           DoctorReportReserve reportBi) {
+        reportBi.setDeadWeedOutRate(fieldHelper.deadWeedOutRate(groupDaily, reportBi.getOrzType()));
+        reportBi.setDailyLivestockOnHand(groupDaily.getDailyLivestockOnHand());
+        return reportBi;
     }
 
-    private void insertOrUpdateReserve(DoctorReportReserve reserve){
+    private void insertOrUpdate(DoctorReportReserve reserve){
         if (isNull(reserve.getId())) {
             doctorReportReserveDao.create(reserve);
             return;

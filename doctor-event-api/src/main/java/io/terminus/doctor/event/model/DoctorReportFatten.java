@@ -84,7 +84,7 @@ public class DoctorReportFatten implements Serializable {
     /**
      * 转后备均重
      */
-    private Double toHoubeiAvgWeightCopy;
+    private Double toHoubeiAvgWeight;
     
     /**
      * 转场数量

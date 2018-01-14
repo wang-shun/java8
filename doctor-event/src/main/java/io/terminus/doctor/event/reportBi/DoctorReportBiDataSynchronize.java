@@ -6,13 +6,14 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
 import io.terminus.doctor.event.dao.DoctorPigDailyDao;
-import io.terminus.doctor.event.dao.reportBi.DoctorReportReserveDao;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.reportBi.DoctorGroupDailyExtend;
 import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorPigDaily;
+import io.terminus.doctor.event.reportBi.synchronizer.DoctorFattenSynchronizer;
+import io.terminus.doctor.event.reportBi.synchronizer.DoctorNurserySynchronizer;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorReserveSynchronizer;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,8 @@ public class DoctorReportBiDataSynchronize {
     private final DoctorPigDailyDao doctorPigDailyDao;
     private final DoctorGroupDailyDao doctorGroupDailyDao;
     private final DoctorReserveSynchronizer reserveSynchronizer;
-    private final DoctorReportReserveDao doctorReportReserveDao;
+    private final DoctorFattenSynchronizer fattenSynchronizer;
+    private final DoctorNurserySynchronizer nurserySynchronizer;
 
     private final Integer DELTA_INTERVAL = 1440;
     private final Integer REAL_TIME_INTERVAL = 1000000;
@@ -43,12 +45,12 @@ public class DoctorReportBiDataSynchronize {
     @Autowired
     public DoctorReportBiDataSynchronize(DoctorPigDailyDao doctorPigDailyDao,
                                          DoctorGroupDailyDao doctorGroupDailyDao,
-                                         DoctorReserveSynchronizer reserveSynchronizer,
-                                         DoctorReportReserveDao doctorReportReserveDao) {
+                                         DoctorReserveSynchronizer reserveSynchronizer, DoctorFattenSynchronizer fattenSynchronizer, DoctorNurserySynchronizer nurserySynchronizer) {
         this.doctorPigDailyDao = doctorPigDailyDao;
         this.doctorGroupDailyDao = doctorGroupDailyDao;
         this.reserveSynchronizer = reserveSynchronizer;
-        this.doctorReportReserveDao = doctorReportReserveDao;
+        this.fattenSynchronizer = fattenSynchronizer;
+        this.nurserySynchronizer = nurserySynchronizer;
     }
 
     /**
@@ -205,10 +207,10 @@ public class DoctorReportBiDataSynchronize {
                 ;
                 break;
             case NURSERY_PIGLET:
-                ;
+                nurserySynchronizer.synchronize(groupDaily, dimensionCriteria);
                 break;
             case FATTEN_PIG:
-                ;
+                fattenSynchronizer.synchronize(groupDaily, dimensionCriteria);
                 break;
             case RESERVE:
                 reserveSynchronizer.synchronize(groupDaily, dimensionCriteria);

@@ -22,7 +22,7 @@
         <result property="sale" column="sale"/>
         <result property="saleAvgWeight" column="sale_avg_weight"/>
         <result property="toHoubei" column="to_houbei"/>
-        <result property="toHoubeiAvgWeightCopy" column="to_houbei_avg_weightCopy"/>
+        <result property="toHoubeiAvgWeight" column="to_houbei_avg_weight"/>
         <result property="chgFarmOut" column="chg_farm_out"/>
         <result property="chgFarmAvgWeight" column="chg_farm_avg_weight"/>
         <result property="dead" column="dead"/>
@@ -48,12 +48,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `sum_at`, `sum_at_name`, `date_type`, `orz_id`, `orz_name`, `orz_type`, `start`, `turn_into`, `turn_into_age`, `sale`, `sale_avg_weight`, `to_houbei`, `to_houbei_avg_weightCopy`, `chg_farm_out`, `chg_farm_avg_weight`, `dead`, `weed_out`, `other_change`, `end`, `daily_pig_count`, `out_avg_weight_180`, `dead_weed_out_rate`, `living_rate`, `feed_meat_rate`, 
+        `sum_at`, `sum_at_name`, `date_type`, `orz_id`, `orz_name`, `orz_type`, `start`, `turn_into`, `turn_into_age`, `sale`, `sale_avg_weight`, `to_houbei`, `to_houbei_avg_weight`, `chg_farm_out`, `chg_farm_avg_weight`, `dead`, `weed_out`, `other_change`, `end`, `daily_pig_count`, `out_avg_weight_180`, `dead_weed_out_rate`, `living_rate`, `feed_meat_rate`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{sumAt}, #{sumAtName}, #{dateType}, #{orzId}, #{orzName}, #{orzType}, #{start}, #{turnInto}, #{turnIntoAge}, #{sale}, #{saleAvgWeight}, #{toHoubei}, #{toHoubeiAvgWeightCopy}, #{chgFarmOut}, #{chgFarmAvgWeight}, #{dead}, #{weedOut}, #{otherChange}, #{end}, #{dailyPigCount}, #{outAvgWeight180}, #{deadWeedOutRate}, #{livingRate}, #{feedMeatRate}, 
+        #{sumAt}, #{sumAtName}, #{dateType}, #{orzId}, #{orzName}, #{orzType}, #{start}, #{turnInto}, #{turnIntoAge}, #{sale}, #{saleAvgWeight}, #{toHoubei}, #{toHoubeiAvgWeight}, #{chgFarmOut}, #{chgFarmAvgWeight}, #{dead}, #{weedOut}, #{otherChange}, #{end}, #{dailyPigCount}, #{outAvgWeight180}, #{deadWeedOutRate}, #{livingRate}, #{feedMeatRate}, 
         now(), now()
     </sql>
 
@@ -71,7 +71,7 @@
             <if test="sale != null">AND `sale` = #{sale}</if>
             <if test="saleAvgWeight != null">AND `sale_avg_weight` = #{saleAvgWeight}</if>
             <if test="toHoubei != null">AND `to_houbei` = #{toHoubei}</if>
-            <if test="toHoubeiAvgWeightCopy != null">AND `to_houbei_avg_weightCopy` = #{toHoubeiAvgWeightCopy}</if>
+            <if test="toHoubeiAvgWeight != null">AND `to_houbei_avg_weight` = #{toHoubeiAvgWeight}</if>
             <if test="chgFarmOut != null">AND `chg_farm_out` = #{chgFarmOut}</if>
             <if test="chgFarmAvgWeight != null">AND `chg_farm_avg_weight` = #{chgFarmAvgWeight}</if>
             <if test="dead != null">AND `dead` = #{dead}</if>
@@ -131,7 +131,7 @@
             <if test="sale != null">`sale` = #{sale},</if>
             <if test="saleAvgWeight != null">`sale_avg_weight` = #{saleAvgWeight},</if>
             <if test="toHoubei != null">`to_houbei` = #{toHoubei},</if>
-            <if test="toHoubeiAvgWeightCopy != null">`to_houbei_avg_weightCopy` = #{toHoubeiAvgWeightCopy},</if>
+            <if test="toHoubeiAvgWeight != null">`to_houbei_avg_weight` = #{toHoubeiAvgWeight},</if>
             <if test="chgFarmOut != null">`chg_farm_out` = #{chgFarmOut},</if>
             <if test="chgFarmAvgWeight != null">`chg_farm_avg_weight` = #{chgFarmAvgWeight},</if>
             <if test="dead != null">`dead` = #{dead},</if>

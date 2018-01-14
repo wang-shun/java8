@@ -4,6 +4,7 @@ import io.terminus.doctor.common.utils.Checks;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.reportBi.DoctorFiledUrlDao;
 import io.terminus.doctor.event.dto.reportBi.DoctorFiledUrlCriteria;
+import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.model.DoctorFiledUrl;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
@@ -35,6 +36,16 @@ public class FieldHelper {
         this.doctorFiledUrlDao = doctorFiledUrlDao;
         List<DoctorFiledUrl> filedUrls = doctorFiledUrlDao.listAll();
         filedUrlMap = filedUrls.stream().collect(Collectors.toMap(DoctorFiledUrl::getName, DoctorFiledUrl::getUrl));
+    }
+
+    public void fillGroupFiledUrl(DoctorFiledUrlCriteria filedUrlCriteria, DoctorGroupDaily groupDaily, String orzType, String dateType) {
+        if (Objects.equals(orzType, OrzDimension.FARM.getName())) {
+            filedUrlCriteria.setFarmId(groupDaily.getFarmId());
+            filedUrlCriteria.setPigType(groupDaily.getPigType());
+            DateDimension dateDimension = DateDimension.from(dateType);
+            filedUrlCriteria.setStart(DateHelper.withDateStartDay(groupDaily.getSumAt(), dateDimension));
+            filedUrlCriteria.setEnd(DateHelper.withDateEndDay(groupDaily.getSumAt(), dateDimension));
+        }
     }
 
     public String filedUrl(DoctorFiledUrlCriteria criteria, Integer value , String filedName) {
