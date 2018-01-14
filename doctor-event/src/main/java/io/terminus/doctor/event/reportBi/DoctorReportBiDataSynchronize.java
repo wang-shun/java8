@@ -20,9 +20,11 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
+import static java.util.Objects.isNull;
 
 /**
  * Created by xjn on 18/1/9.
@@ -185,15 +187,32 @@ public class DoctorReportBiDataSynchronize {
         }
     }
 
-    private void synchronizeGroupBiData(DoctorGroupDailyExtend groupDaily, DoctorDimensionCriteria dimensionCriteria){
-                PigType pigType = expectNotNull(PigType.from(groupDaily.getPigType()), "pigType.is.illegal");
-        groupDaily.setStart(11);
-        groupDaily.setEnd(100);
+    private void synchronizeGroupBiData(DoctorGroupDailyExtend groupDaily, DoctorDimensionCriteria dimensionCriteria) {
+        PigType pigType = expectNotNull(PigType.from(groupDaily.getPigType()), "pigType.is.illegal");
+        if (isNull(dimensionCriteria.getOrzId())) {
+            if (Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.ORG.getValue())) {
+                dimensionCriteria.setOrzId(groupDaily.getOrgId());
+            } else {
+                dimensionCriteria.setOrzId(groupDaily.getFarmId());
+            }
+        }
+        dimensionCriteria.setSumAt(groupDaily.getSumAt());
+        dimensionCriteria.setPigType(groupDaily.getPigType());
+        groupDaily.setStart(doctorGroupDailyDao.start(dimensionCriteria));
+        groupDaily.setEnd(doctorGroupDailyDao.end(dimensionCriteria));
         switch (pigType) {
-            case DELIVER_SOW: ; break;
-            case NURSERY_PIGLET: ; break;
-            case FATTEN_PIG: ; break;
-            case RESERVE: reserveSynchronizer.synchronize(groupDaily, dimensionCriteria); break;
+            case DELIVER_SOW:
+                ;
+                break;
+            case NURSERY_PIGLET:
+                ;
+                break;
+            case FATTEN_PIG:
+                ;
+                break;
+            case RESERVE:
+                reserveSynchronizer.synchronize(groupDaily, dimensionCriteria);
+                break;
         }
     }
 

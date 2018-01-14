@@ -5,11 +5,14 @@ import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
 import io.terminus.doctor.event.dao.DoctorPigDailyDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportReserveDao;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
+import io.terminus.doctor.event.dto.reportBi.DoctorFiledUrlCriteria;
 import io.terminus.doctor.event.dto.reportBi.DoctorGroupDailyExtend;
 import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorReportReserve;
+import io.terminus.doctor.event.reportBi.helper.DateHelper;
+import io.terminus.doctor.event.reportBi.helper.FieldHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,12 +33,14 @@ public class DoctorReserveSynchronizer {
     private final DoctorPigDailyDao doctorPigDailyDao;
     private final DoctorGroupDailyDao doctorGroupDailyDao;
     private final DoctorReportReserveDao doctorReportReserveDao;
+    private final FieldHelper fieldHelper;
 
     @Autowired
-    public DoctorReserveSynchronizer(DoctorPigDailyDao doctorPigDailyDao, DoctorGroupDailyDao doctorGroupDailyDao, DoctorReportReserveDao doctorReportReserveDao) {
+    public DoctorReserveSynchronizer(DoctorPigDailyDao doctorPigDailyDao, DoctorGroupDailyDao doctorGroupDailyDao, DoctorReportReserveDao doctorReportReserveDao, FieldHelper fieldHelper) {
         this.doctorPigDailyDao = doctorPigDailyDao;
         this.doctorGroupDailyDao = doctorGroupDailyDao;
         this.doctorReportReserveDao = doctorReportReserveDao;
+        this.fieldHelper = fieldHelper;
     }
 
     public DoctorReportReserve buildRealTimeBoar() {
@@ -115,8 +120,14 @@ public class DoctorReserveSynchronizer {
 
     private DoctorReportReserve buildRealTimeReserve(DoctorGroupDailyExtend groupDaily,
                                                     DoctorReportReserve reportReserve) {
+        DoctorFiledUrlCriteria filedUrlCriteria = new DoctorFiledUrlCriteria();
+        filedUrlCriteria.setFarmId(groupDaily.getFarmId());
+        filedUrlCriteria.setPigType(groupDaily.getPigType());
+        DateDimension dateDimension = DateDimension.from(reportReserve.getDateType());
+        filedUrlCriteria.setStart(DateHelper.withDateStartDay(groupDaily.getSumAt(), dateDimension));
+        filedUrlCriteria.setEnd(DateHelper.withDateEndDay(groupDaily.getSumAt(), dateDimension));
         reportReserve.setStart(groupDaily.getStart());
-        reportReserve.setTurnInto(filedUrl(groupDaily.getTurnInto()));
+        reportReserve.setTurnInto(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getTurnInto(), "turnInto"));
         reportReserve.setTurnSeed(filedUrl(groupDaily.getTurnSeed()));
         reportReserve.setTurnSeed(filedUrl(groupDaily.getTurnSeed()));
         reportReserve.setDead(filedUrl(groupDaily.getDead()));
@@ -144,13 +155,6 @@ public class DoctorReserveSynchronizer {
         doctorReportReserveDao.update(reserve);
     }
 
-    public DoctorReportReserve buildRealTimeSow() {
-        return null;
-    }
-
-    private DoctorGroupDailyExtend dailyExpand(){
-        return null;
-    }
     private Double deadWeedOutRate(DoctorGroupDaily groupDaily,
                                    DoctorReportReserve reportReserve){
         return 0.0;

@@ -70,4 +70,8 @@ public class DoctorGroupDailyDao extends MyBatisDao<DoctorGroupDaily> {
     public Integer start(DoctorDimensionCriteria dimensionCriteria){
         return getSqlSession().selectOne(sqlId("start"), dimensionCriteria);
     }
+
+    public Integer end(DoctorDimensionCriteria dimensionCriteria){
+        return getSqlSession().selectOne(sqlId("end"), dimensionCriteria);
+    }
 }

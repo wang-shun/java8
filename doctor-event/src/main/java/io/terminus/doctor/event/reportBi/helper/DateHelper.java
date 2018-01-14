@@ -43,6 +43,29 @@ public class DateHelper {
         }
     }
 
+    public static Date withDateEndDay(Date date, DateDimension dateDimension){
+        DateTime dateTime = new DateTime(date);
+        switch (dateDimension) {
+            case DAY: return date;
+            case WEEK: return dateTime.withDayOfWeek(7).toDate();
+            case MONTH: return dateTime.withDayOfMonth(1).plusMonths(1).minusMillis(1).toDate();
+            case QUARTER:
+                int month = dateTime.getMonthOfYear();
+                if (month >= 10) {
+                    return dateTime.withMonthOfYear(12).withDayOfMonth(31).toDate();
+                } else if(month >= 7) {
+                    return dateTime.withMonthOfYear(9).withDayOfMonth(30).toDate();
+                } else if (month >= 4) {
+                    return dateTime.withMonthOfYear(6).withDayOfMonth(30).toDate();
+                } else {
+                    return dateTime.withMonthOfYear(3).withDayOfMonth(31).toDate();
+                }
+            case YEAR: return dateTime.withDayOfYear(1).plusYears(1).minusMillis(1).toDate();
+            default:
+                throw new InvalidException("with.date.start.day.failed", date);
+        }
+    }
+
     public static String dateCN(Date date, DateDimension dateDimension) {
         DateTime dateTime = new DateTime(date);
         switch (dateDimension) {

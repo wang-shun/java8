@@ -1942,3 +1942,14 @@ ALTER TABLE `doctor_bi_pages` ADD COLUMN `desc` varchar(32) NULL COMMENT '描述
 ALTER TABLE doctor_pig_dailies ADD sow_not_mating_count INT NULL COMMENT '进场未配种的母猪数';
 ALTER TABLE doctor_pig_dailies
   MODIFY COLUMN sow_not_mating_count INT COMMENT '进场未配种的母猪数' AFTER updated_at;
+
+-- 字段跳转url 2017-01-14
+CREATE TABLE `doctor_filed_urls` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(32) NOT NULL COMMENT '字段名称',
+  `url` varchar(512) NOT NULL COMMENT '字段跳转url',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_name` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='字段跳转url';

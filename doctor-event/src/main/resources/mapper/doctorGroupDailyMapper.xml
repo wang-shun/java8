@@ -200,11 +200,7 @@
         pig_type
     </select>
 
-    <select id="selectOneSumForDimension" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="io.terminus.doctor.event.dto.reportBi.DoctorGroupDailyExtend">
-        SELECT
-        <include refid="forSum"/>
-        FROM
-        <include refid="tb"/>
+    <sql id="dimensionCri">
         <where>
             1=1
             <if test="orzType == 2">AND farm_id = #{orzId}</if>
@@ -218,6 +214,13 @@
             <if test="dateType == 5">AND date_format(sum_at, '%y') = date_format(#{sumAt}, '%y')</if>
             AND pig_type = #{pigType}
         </where>
+    </sql>
+    <select id="selectOneSumForDimension" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="io.terminus.doctor.event.dto.reportBi.DoctorGroupDailyExtend">
+        SELECT
+        <include refid="forSum"/>
+        FROM
+        <include refid="tb"/>
+        <include refid="dimensionCri"/>
     </select>
 
     <select id="findByAfter" parameterType="map" resultMap="DoctorGroupDailyMap">
@@ -245,5 +248,23 @@
         <if test="dateType == 4"> concat(date_format(sum_at, '%y-'), QUARTER(sum_at)),</if>
         <if test="dateType == 5"> date_format(sum_at, '%y'),</if>
         pig_type
+    </select>
+
+    <select id="start" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="int">
+        SELECT
+        start
+        FROM <include refid="tb"/>
+        <include refid="dimensionCri"/>
+        order by sum_at asc
+        limit 1
+    </select>
+
+    <select id="end" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="int">
+        SELECT
+        start
+        FROM <include refid="tb"/>
+        <include refid="dimensionCri"/>
+        order by sum_at desc
+        limit 1
     </select>
 </mapper>
