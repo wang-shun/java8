@@ -9,7 +9,6 @@ import io.terminus.doctor.event.dto.reportBi.DoctorFiledUrlCriteria;
 import io.terminus.doctor.event.dto.reportBi.DoctorGroupDailyExtend;
 import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
-import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorReportReserve;
 import io.terminus.doctor.event.reportBi.helper.DateHelper;
 import io.terminus.doctor.event.reportBi.helper.FieldHelper;
@@ -126,23 +125,23 @@ public class DoctorReserveSynchronizer {
         DateDimension dateDimension = DateDimension.from(reportReserve.getDateType());
         filedUrlCriteria.setStart(DateHelper.withDateStartDay(groupDaily.getSumAt(), dateDimension));
         filedUrlCriteria.setEnd(DateHelper.withDateEndDay(groupDaily.getSumAt(), dateDimension));
+
         reportReserve.setStart(groupDaily.getStart());
         reportReserve.setTurnInto(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getTurnInto(), "turnInto"));
-        reportReserve.setTurnSeed(filedUrl(groupDaily.getTurnSeed()));
-        reportReserve.setTurnSeed(filedUrl(groupDaily.getTurnSeed()));
-        reportReserve.setDead(filedUrl(groupDaily.getDead()));
-        reportReserve.setWeedOut(filedUrl(groupDaily.getWeedOut()));
-        reportReserve.setToFatten(filedUrl(groupDaily.getToFatten()));
-        reportReserve.setSale(filedUrl(groupDaily.getSale()));
-        reportReserve.setChgFarmOut(filedUrl(groupDaily.getChgFarm()));
-        reportReserve.setOtherChange(filedUrl(groupDaily.getOtherChange()));
+        reportReserve.setTurnSeed(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getTurnSeed(), "turnSeed"));
+        reportReserve.setDead(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getDead(), "dead"));
+        reportReserve.setWeedOut(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getWeedOut(), "weedOut"));
+        reportReserve.setToFatten(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getToFatten(), "toFatten"));
+        reportReserve.setSale(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getSale(), "sale"));
+        reportReserve.setChgFarmOut(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getChgFarm(), "chgFarm"));
+        reportReserve.setOtherChange(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getOtherChange(), "otherChange"));
         reportReserve.setEnd(groupDaily.getEnd());
         return reportReserve;
     }
 
     private DoctorReportReserve buildDelayReserve(DoctorGroupDailyExtend groupDaily,
                                                  DoctorReportReserve reportReserve) {
-        reportReserve.setDeadWeedOutRate(deadWeedOutRate(groupDaily, reportReserve));
+        reportReserve.setDeadWeedOutRate(fieldHelper.deadWeedOutRate(groupDaily, reportReserve.getOrzType()));
         reportReserve.setDailyLivestockOnHand(groupDaily.getDailyLivestockOnHand());
         return reportReserve;
     }
@@ -153,13 +152,5 @@ public class DoctorReserveSynchronizer {
             return;
         }
         doctorReportReserveDao.update(reserve);
-    }
-
-    private Double deadWeedOutRate(DoctorGroupDaily groupDaily,
-                                   DoctorReportReserve reportReserve){
-        return 0.0;
-    }
-    private String filedUrl(Object obj) {
-        return "{}";
     }
 }
