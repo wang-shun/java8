@@ -425,7 +425,7 @@
         <if test="orzType == 2">org_id,</if>
         <if test="orzType == 3">farm_id,</if>
         <if test="dateType == 1"> date_format(sum_at, '%y-%m-%d')</if>
-        <if test="dateType == 2"> date_format(sum_at, '%y-%u')</if>
+        <if test="dateType == 2"> date_format(sum_at, '%x-%v')</if>
         <if test="dateType == 3"> date_format(sum_at, '%y-%m')</if>
         <if test="dateType == 4"> concat(date_format(sum_at, '%y-'), QUARTER(sum_at))</if>
         <if test="dateType == 5"> date_format(sum_at, '%y')</if>
@@ -437,7 +437,7 @@
             <if test="orzType == 2">AND farm_id = #{orzId}</if>
             <if test="orzType == 3">AND org_id = #{orzId}</if>
             <if test="dateType == 1">AND date_format(sum_at, '%y-%m-%d') = date_format(#{sumAt}, '%y-%m-%d')</if>
-            <if test="dateType == 2">AND date_format(sum_at, '%y-%u') = date_format(#{sumAt}, '%y-%u')</if>
+            <if test="dateType == 2">AND date_format(sum_at, '%x-%v') = date_format(#{sumAt}, '%x-%v')</if>
             <if test="dateType == 3">AND date_format(sum_at, '%y-%m') = date_format(#{sumAt}, '%y-%m')</if>
             <if test="dateType == 4">AND concat(date_format(sum_at, '%y-'), QUARTER(sum_at)) =
                 concat(date_format(#{sumAt}, '%y-'), QUARTER(#{sumAt}))
@@ -472,7 +472,7 @@
         <if test="orzType == 2">org_id,</if>
         <if test="orzType == 3">farm_id,</if>
         <if test="dateType == 1"> date_format(sum_at, '%y-%m-%d')</if>
-        <if test="dateType == 2"> date_format(sum_at, '%y-%u')</if>
+        <if test="dateType == 2"> date_format(sum_at, '%x-%v')</if>
         <if test="dateType == 3"> date_format(sum_at, '%y-%m')</if>
         <if test="dateType == 4"> concat(date_format(sum_at, '%y-'), QUARTER(sum_at))</if>
         <if test="dateType == 5"> date_format(sum_at, '%y')</if>

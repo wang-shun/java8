@@ -15,7 +15,7 @@ import java.util.Date;
 public class DateHelper {
     private static final DateTimeFormatter DAY = DateTimeFormat.forPattern("yyyy-MM-dd");
     private static final DateTimeFormatter MMDD = DateTimeFormat.forPattern("MMdd");
-    private static final DateTimeFormatter WEEK = DateTimeFormat.forPattern("yyyy年第w周");
+    private static final DateTimeFormatter WEEK = DateTimeFormat.forPattern("x年第w周");
     private static final DateTimeFormatter MONTH = DateTimeFormat.forPattern("yyyy年M月");
     private static final DateTimeFormatter YEAR = DateTimeFormat.forPattern("yyyy年");
 
