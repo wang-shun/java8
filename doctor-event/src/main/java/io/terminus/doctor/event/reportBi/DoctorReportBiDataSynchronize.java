@@ -77,23 +77,23 @@ public class DoctorReportBiDataSynchronize {
      * 全量同步数据
      */
     public void synchronizeFullBiData() {
-        log.info("synchronize real time bi data starting");
+        log.info("synchronize full bi data starting");
         Stopwatch stopwatch = Stopwatch.createStarted();
         cleanFullBiData();
         DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria();
         synchronizeBiDataImpl(dimensionCriteria);
-        log.info("synchronize real time bi data end, minute:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
+        log.info("synchronize full bi data end, minute:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
     }
 
     /**
      * 增量同步数据
      */
-    public void synchronizeDeltaDayBiData() {
-        log.info("synchronize real time bi data starting");
+    public void synchronizeDeltaDayBiData(){
+        log.info("synchronize delta day bi data starting");
         Stopwatch stopwatch = Stopwatch.createStarted();
         Date date = DateTime.now().minusMinutes(DELTA_DAY).toDate();
         synchronizeDeltaBiData(date);
-        log.info("synchronize real time bi data end, minute:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
+        log.info("synchronize delta day bi data end, minute:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
     }
 
     /**

@@ -115,7 +115,7 @@ public class DoctorReportController {
      * 全量同步报表数据
      * @return
      */
-    @RequestMapping()
+    @RequestMapping(value = "/synchronize/full/bi/data", method = RequestMethod.GET)
     public Boolean synchronizeFullBiData() {
         return RespHelper.or500(doctorDailyReportV2Service.synchronizeFullBiData());
     }
