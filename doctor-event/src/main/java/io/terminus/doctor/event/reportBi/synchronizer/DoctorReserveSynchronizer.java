@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
-import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.event.reportBi.helper.DateHelper.dateCN;
 import static io.terminus.doctor.event.reportBi.helper.DateHelper.withDateStartDay;
 import static java.util.Objects.isNull;
@@ -80,11 +79,9 @@ public class DoctorReserveSynchronizer {
                             DoctorDimensionCriteria dimensionCriteria){
         DoctorReportReserve reportBI;
         if (isNull(dimensionCriteria.getSumAt()) || isNull(reportBI = doctorReportReserveDao.findByDimension(dimensionCriteria))) {
-                OrzDimension orzDimension = expectNotNull(OrzDimension.from(dimensionCriteria.getOrzType()), "orzType.is.illegal");
-                DateDimension dateDimension = expectNotNull(DateDimension.from(dimensionCriteria.getDateType()), "dateType.is.illegal");
-                reportBI= new DoctorReportReserve();
-                reportBI.setOrzType(orzDimension.getName());
-                reportBI.setDateType(dateDimension.getName());
+            reportBI= new DoctorReportReserve();
+            reportBI.setOrzType(dimensionCriteria.getOrzType());
+            reportBI.setDateType(dimensionCriteria.getDateType());
         }
         insertOrUpdate(build(groupDaily, reportBI));
     }
@@ -98,7 +95,7 @@ public class DoctorReserveSynchronizer {
                                       DoctorReportReserve reportBi) {
 
 
-        if (Objects.equals(reportBi.getOrzType(), OrzDimension.FARM.getName())) {
+        if (Objects.equals(reportBi.getOrzType(), OrzDimension.FARM.getValue())) {
             reportBi.setOrzId(groupDaily.getFarmId());
             reportBi.setOrzName(groupDaily.getFarmName());
         } else {

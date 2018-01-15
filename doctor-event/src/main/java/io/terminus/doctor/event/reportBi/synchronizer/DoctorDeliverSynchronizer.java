@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
-import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.event.reportBi.helper.DateHelper.dateCN;
 import static io.terminus.doctor.event.reportBi.helper.DateHelper.withDateStartDay;
 import static java.util.Objects.isNull;
@@ -39,11 +38,9 @@ public class DoctorDeliverSynchronizer {
                             DoctorDimensionCriteria dimensionCriteria){
         DoctorReportDeliver reportBI;
         if (isNull(dimensionCriteria.getSumAt()) || isNull(reportBI = doctorReportDeliverDao.findByDimension(dimensionCriteria))) {
-            OrzDimension orzDimension = expectNotNull(OrzDimension.from(dimensionCriteria.getOrzType()), "orzType.is.illegal");
-            DateDimension dateDimension = expectNotNull(DateDimension.from(dimensionCriteria.getDateType()), "dateType.is.illegal");
             reportBI= new DoctorReportDeliver();
-            reportBI.setOrzType(orzDimension.getName());
-            reportBI.setDateType(dateDimension.getName());
+            reportBI.setOrzType(dimensionCriteria.getOrzType());
+            reportBI.setDateType(dimensionCriteria.getDateType());
         }
         insertOrUpdate(build(pigDaily, reportBI));
     }
@@ -52,11 +49,9 @@ public class DoctorDeliverSynchronizer {
                             DoctorDimensionCriteria dimensionCriteria){
         DoctorReportDeliver reportBI;
         if (isNull(dimensionCriteria.getSumAt()) || isNull(reportBI = doctorReportDeliverDao.findByDimension(dimensionCriteria))) {
-            OrzDimension orzDimension = expectNotNull(OrzDimension.from(dimensionCriteria.getOrzType()), "orzType.is.illegal");
-            DateDimension dateDimension = expectNotNull(DateDimension.from(dimensionCriteria.getDateType()), "dateType.is.illegal");
             reportBI= new DoctorReportDeliver();
-            reportBI.setOrzType(orzDimension.getName());
-            reportBI.setDateType(dateDimension.getName());
+            reportBI.setOrzType(dimensionCriteria.getOrzType());
+            reportBI.setDateType(dimensionCriteria.getDateType());
         }
         insertOrUpdate(build(groupDaily, reportBI));
     }
@@ -70,7 +65,7 @@ public class DoctorDeliverSynchronizer {
     }
 
     public DoctorReportDeliver build(DoctorPigDailyExtend pigDaily, DoctorReportDeliver reportBi) {
-        if (Objects.equals(reportBi.getOrzType(), OrzDimension.FARM.getName())) {
+        if (Objects.equals(reportBi.getOrzType(), OrzDimension.FARM.getValue())) {
             reportBi.setOrzId(pigDaily.getFarmId());
             reportBi.setOrzName(pigDaily.getFarmName());
         } else {
@@ -86,7 +81,7 @@ public class DoctorDeliverSynchronizer {
     }
 
     public DoctorReportDeliver build(DoctorGroupDailyExtend dailyExtend, DoctorReportDeliver reportBi) {
-        if (Objects.equals(reportBi.getOrzType(), OrzDimension.FARM.getName())) {
+        if (Objects.equals(reportBi.getOrzType(), OrzDimension.FARM.getValue())) {
             reportBi.setOrzId(dailyExtend.getFarmId());
             reportBi.setOrzName(dailyExtend.getFarmName());
         } else {

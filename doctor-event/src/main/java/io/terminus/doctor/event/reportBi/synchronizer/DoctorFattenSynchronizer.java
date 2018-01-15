@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
-import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.event.reportBi.helper.DateHelper.dateCN;
 import static io.terminus.doctor.event.reportBi.helper.DateHelper.withDateStartDay;
 import static java.util.Objects.isNull;
@@ -38,17 +37,15 @@ public class DoctorFattenSynchronizer {
                             DoctorDimensionCriteria dimensionCriteria){
         DoctorReportFatten reportBI;
         if (isNull(dimensionCriteria.getSumAt()) || isNull(reportBI = doctorReportFattenDao.findByDimension(dimensionCriteria))) {
-            OrzDimension orzDimension = expectNotNull(OrzDimension.from(dimensionCriteria.getOrzType()), "orzType.is.illegal");
-            DateDimension dateDimension = expectNotNull(DateDimension.from(dimensionCriteria.getDateType()), "dateType.is.illegal");
             reportBI= new DoctorReportFatten();
-            reportBI.setOrzType(orzDimension.getName());
-            reportBI.setDateType(dateDimension.getName());
+            reportBI.setOrzType(dimensionCriteria.getOrzType());
+            reportBI.setDateType(dimensionCriteria.getDateType());
         }
         insertOrUpdate(build(groupDaily, reportBI));
     }
 
     public DoctorReportFatten build(DoctorGroupDailyExtend groupDaily, DoctorReportFatten reportBi) {
-        if (Objects.equals(reportBi.getOrzType(), OrzDimension.FARM.getName())) {
+        if (Objects.equals(reportBi.getOrzType(), OrzDimension.FARM.getValue())) {
             reportBi.setOrzId(groupDaily.getFarmId());
             reportBi.setOrzName(groupDaily.getFarmName());
         } else {
@@ -86,7 +83,7 @@ public class DoctorFattenSynchronizer {
         reportBi.setChgFarmAvgWeight(EventUtil.getAvgWeight(groupDaily.getChgFarmWeight(), groupDaily.getChgFarm()));
         reportBi.setDailyPigCount(groupDaily.getDailyLivestockOnHand());
         reportBi.setOutAvgWeight180(0.0);
-        reportBi.setDeadWeedOutRate(fieldHelper.deadWeedOutRate(groupDaily, reportBi.getOrzName()));
+        reportBi.setDeadWeedOutRate(fieldHelper.deadWeedOutRate(groupDaily, reportBi.getOrzType()));
         reportBi.setLivingRate(1 - reportBi.getDeadWeedOutRate());
         reportBi.setFeedMeatRate(0.0);
     }

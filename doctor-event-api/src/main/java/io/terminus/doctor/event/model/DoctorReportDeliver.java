@@ -30,11 +30,12 @@ public class DoctorReportDeliver implements Serializable {
      * 
      */
     private String sumAtName;
-    
+
     /**
      * 日期类型，日周月季年
+     * @see io.terminus.doctor.event.enums.DateDimension
      */
-    private String dateType;
+    private Integer dateType;
     
     /**
      * 组织ID
@@ -48,8 +49,9 @@ public class DoctorReportDeliver implements Serializable {
     
     /**
      * 组织类型，猪场，公司，集团
+     * @see io.terminus.doctor.event.enums.OrzDimension
      */
-    private String orzType;
+    private Integer orzType;
     
     /**
      * 期初存栏

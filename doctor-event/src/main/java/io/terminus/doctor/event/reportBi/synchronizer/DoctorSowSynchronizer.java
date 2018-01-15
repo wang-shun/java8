@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
-import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.event.reportBi.helper.DateHelper.dateCN;
 import static io.terminus.doctor.event.reportBi.helper.DateHelper.withDateStartDay;
 import static java.util.Objects.isNull;
@@ -38,11 +37,9 @@ public class DoctorSowSynchronizer {
                             DoctorDimensionCriteria dimensionCriteria){
         DoctorReportSow reportBI;
         if (isNull(dimensionCriteria.getSumAt()) || isNull(reportBI = doctorReportSowDao.findByDimension(dimensionCriteria))) {
-            OrzDimension orzDimension = expectNotNull(OrzDimension.from(dimensionCriteria.getOrzType()), "orzType.is.illegal");
-            DateDimension dateDimension = expectNotNull(DateDimension.from(dimensionCriteria.getDateType()), "dateType.is.illegal");
             reportBI= new DoctorReportSow();
-            reportBI.setOrzType(orzDimension.getName());
-            reportBI.setDateType(dateDimension.getName());
+            reportBI.setOrzType(dimensionCriteria.getOrzType());
+            reportBI.setDateType(dimensionCriteria.getDateType());
         }
         insertOrUpdate(build(pigDaily, reportBI));
     }
@@ -56,7 +53,7 @@ public class DoctorSowSynchronizer {
     }
 
     public DoctorReportSow build(DoctorPigDailyExtend pigDaily, DoctorReportSow reportBi) {
-        if (Objects.equals(reportBi.getOrzType(), OrzDimension.FARM.getName())) {
+        if (Objects.equals(reportBi.getOrzType(), OrzDimension.FARM.getValue())) {
             reportBi.setOrzId(pigDaily.getFarmId());
             reportBi.setOrzName(pigDaily.getFarmName());
         } else {
@@ -97,19 +94,19 @@ public class DoctorSowSynchronizer {
      * @param orzType
      * @return
      */
-    private Integer otherIn(DoctorPigDailyExtend pigDaily, String orzType) {
+    private Integer otherIn(DoctorPigDailyExtend pigDaily, Integer orzType) {
         Integer otherIn = pigDaily.getSowPhEntryIn() - pigDaily.getSowPhReserveIn();
-        if (Objects.equals(orzType, OrzDimension.FARM.getName())) {
+        if (Objects.equals(orzType, OrzDimension.FARM.getValue())) {
             otherIn = otherIn + pigDaily.getSowPhChgFarmIn() + pigDaily.getSowCfInFarmIn();
         }
         return otherIn;
     }
-    private Double sowDeadWeedOutRate(DoctorPigDailyExtend pigDaily, String orzType) {
+    private Double sowDeadWeedOutRate(DoctorPigDailyExtend pigDaily, Integer orzType) {
         Integer sowDeadWeedOut = pigDaily.getSowPhDead() + pigDaily.getSowCfDead()
                 + pigDaily.getSowPhWeedOut() + pigDaily.getSowCfWeedOut();
         Integer sowIn = pigDaily.getSowPhEntryIn();
 
-        if (Objects.equals(orzType, OrzDimension.FARM.getName())) {
+        if (Objects.equals(orzType, OrzDimension.FARM.getValue())) {
             sowIn = sowIn + pigDaily.getSowPhChgFarmIn()
                     + pigDaily.getSowCfInFarmIn();
         }

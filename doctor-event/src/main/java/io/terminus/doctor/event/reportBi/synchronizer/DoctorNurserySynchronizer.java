@@ -9,12 +9,12 @@ import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.model.DoctorReportNursery;
 import io.terminus.doctor.event.reportBi.helper.FieldHelper;
 import io.terminus.doctor.event.util.EventUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
-import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.event.reportBi.helper.DateHelper.dateCN;
 import static io.terminus.doctor.event.reportBi.helper.DateHelper.withDateStartDay;
 import static java.util.Objects.isNull;
@@ -23,6 +23,7 @@ import static java.util.Objects.isNull;
  * Created by xjn on 18/1/13.
  * email:xiaojiannan@terminus.io
  */
+@Slf4j
 @Component
 public class DoctorNurserySynchronizer {
     private final DoctorReportNurseryDao doctorReportNurseryDao;
@@ -38,17 +39,15 @@ public class DoctorNurserySynchronizer {
                             DoctorDimensionCriteria dimensionCriteria){
         DoctorReportNursery reportBI;
         if (isNull(dimensionCriteria.getSumAt()) || isNull(reportBI = doctorReportNurseryDao.findByDimension(dimensionCriteria))) {
-            OrzDimension orzDimension = expectNotNull(OrzDimension.from(dimensionCriteria.getOrzType()), "orzType.is.illegal");
-            DateDimension dateDimension = expectNotNull(DateDimension.from(dimensionCriteria.getDateType()), "dateType.is.illegal");
             reportBI= new DoctorReportNursery();
-            reportBI.setOrzType(orzDimension.getName());
-            reportBI.setDateType(dateDimension.getName());
+            reportBI.setOrzType(dimensionCriteria.getOrzType());
+            reportBI.setDateType(dimensionCriteria.getDateType());
         }
         insertOrUpdate(build(groupDaily, reportBI));
     }
 
     public DoctorReportNursery build(DoctorGroupDailyExtend groupDaily, DoctorReportNursery reportBi) {
-        if (Objects.equals(reportBi.getOrzType(), OrzDimension.FARM.getName())) {
+        if (Objects.equals(reportBi.getOrzType(), OrzDimension.FARM.getValue())) {
             reportBi.setOrzId(groupDaily.getFarmId());
             reportBi.setOrzName(groupDaily.getFarmName());
         } else {
@@ -88,7 +87,7 @@ public class DoctorNurserySynchronizer {
         reportBi.setChgFarmAvgWeight(EventUtil.getAvgWeight(groupDaily.getChgFarmWeight(), groupDaily.getChgFarm()));
         reportBi.setDailyPigCount(groupDaily.getDailyLivestockOnHand());
         reportBi.setOutAvgWeight70(0.0);
-        reportBi.setDeadWeedOutRate(fieldHelper.deadWeedOutRate(groupDaily, reportBi.getOrzName()));
+        reportBi.setDeadWeedOutRate(fieldHelper.deadWeedOutRate(groupDaily, reportBi.getOrzType()));
         reportBi.setLivingRate(1 - reportBi.getDeadWeedOutRate());
         reportBi.setFeedMeatRate(0.0);
     }

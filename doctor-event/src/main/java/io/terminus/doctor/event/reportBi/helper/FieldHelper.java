@@ -40,8 +40,8 @@ public class FieldHelper {
         filedUrlMap = filedUrls.stream().collect(Collectors.toMap(DoctorFiledUrl::getName, DoctorFiledUrl::getUrl));
     }
 
-    public void fillGroupFiledUrl(DoctorFiledUrlCriteria filedUrlCriteria, DoctorGroupDaily groupDaily, String orzType, String dateType) {
-        if (Objects.equals(orzType, OrzDimension.FARM.getName())) {
+    public void fillGroupFiledUrl(DoctorFiledUrlCriteria filedUrlCriteria, DoctorGroupDaily groupDaily, Integer orzType, Integer dateType) {
+        if (Objects.equals(orzType, OrzDimension.FARM.getValue())) {
             filedUrlCriteria.setFarmId(groupDaily.getFarmId());
             filedUrlCriteria.setPigType(groupDaily.getPigType());
             DateDimension dateDimension = DateDimension.from(dateType);
@@ -50,8 +50,8 @@ public class FieldHelper {
         }
     }
 
-    public void fillPigFiledUrl(DoctorFiledUrlCriteria filedUrlCriteria, DoctorPigDaily pigDaily, String orzType, String dateType) {
-        if (Objects.equals(orzType, OrzDimension.FARM.getName())) {
+    public void fillPigFiledUrl(DoctorFiledUrlCriteria filedUrlCriteria, DoctorPigDaily pigDaily, Integer orzType, Integer dateType) {
+        if (Objects.equals(orzType, OrzDimension.FARM.getValue())) {
             filedUrlCriteria.setFarmId(pigDaily.getFarmId());
             DateDimension dateDimension = DateDimension.from(dateType);
             filedUrlCriteria.setStart(DateHelper.withDateStartDay(pigDaily.getSumAt(), dateDimension));
@@ -68,10 +68,10 @@ public class FieldHelper {
         return filedUrl(criteria);
     }
 
-    public Double deadWeedOutRate(DoctorGroupDaily groupDaily, String orzName){
+    public Double deadWeedOutRate(DoctorGroupDaily groupDaily, Integer orzType){
         Integer deadWeedOut = groupDaily.getDead() + groupDaily.getWeedOut();
         try {
-            if (Objects.equals(orzName, OrzDimension.FARM.getName())) {
+            if (Objects.equals(orzType, OrzDimension.FARM.getValue())) {
                 return get(deadWeedOut, groupDaily.getStart() + groupDaily.getTurnInto());
             }
             if (isNull(groupDaily.getChgFarmIn())) {
