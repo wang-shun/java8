@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2018-01-15 10:43:33
+ ~ Date: 2018-01-15 20:15:53
  ~ Created by [ your name ]
 -->
 
@@ -29,12 +29,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`, `sum_at`, `npd`, `sow_count`, `days`,
+        `farm_id`, `sum_at`, `npd`, `sow_count`, `days`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{sumAt}, #{npd}, #{sowCount}, #{days},
+        #{farmId}, #{sumAt}, #{npd}, #{sowCount}, #{days}, 
         now(), now()
     </sql>
 
@@ -92,33 +92,27 @@
     </update>
 
     <delete id="delete" parameterType="long">
-        DELETE FROM
-        <include refid="tb"/>
+        DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
-
+    
     <select id="count" parameterType="map" resultType="long">
         SELECT COUNT(1)
-        FROM
-        <include refid="tb"/>
+        FROM <include refid="tb"/>
         <include refid="criteria"/>
     </select>
 
     <select id="paging" parameterType="map" resultMap="DoctorReportNpdMap">
-        SELECT
-        <include refid="cols_all"/>
-        FROM
-        <include refid="tb"/>
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
         LIMIT #{offset}, #{limit}
     </select>
 
     <select id="list" parameterType="map" resultMap="DoctorReportNpdMap">
-        SELECT
-        <include refid="cols_all"/>
-        FROM
-        <include refid="tb"/>
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
     </select>

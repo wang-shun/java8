@@ -14,9 +14,7 @@ import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorReportNpd;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -232,10 +230,6 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
 
     }
 
-    @Override
-    public void flushBirthCount() {
-
-    }
 
     /**
      * 过滤多余的妊娠检查事件

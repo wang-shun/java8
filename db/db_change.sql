@@ -1963,3 +1963,7 @@ ALTER TABLE doctor_report_npds
 ALTER TABLE doctor_report_npds ADD days INT NULL COMMENT '天数';
 ALTER TABLE doctor_report_npds
   MODIFY COLUMN days INT COMMENT '天数' AFTER sow_count;
+
+ALTER TABLE doctor_report_npds ADD pd INT NULL COMMENT '生产天数';
+ALTER TABLE doctor_report_npds
+  MODIFY COLUMN pd INT COMMENT '生产天数' AFTER npd;

@@ -21,8 +21,4 @@ public interface DoctorReportWriteService {
     void flushNPD(List<Long> farmIds, Date countDate, ReportTime reportTime);
 
 
-    /**
-     * 年产胎次
-     */
-    void flushBirthCount();
 }

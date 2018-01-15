@@ -8,13 +8,13 @@ import java.util.Date;
 /**
  * Desc:
  * Mail: [ your email ]
- * Date: 2018-01-15 10:43:33
+ * Date: 2018-01-15 20:15:53
  * Created by [ your name ]
  */
 @Data
 public class DoctorReportNpd implements Serializable {
 
-    private static final long serialVersionUID = 5080466436402678346L;
+    private static final long serialVersionUID = 5884879648763331806L;
 
     /**
      * 自增主键
