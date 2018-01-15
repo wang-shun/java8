@@ -46,6 +46,10 @@ public class DoctorReportBiManager {
      */
     public void synchronizeSpecificData(){}
 
+    public void synchronizeDeltaDayBiData() {
+        synchronize.synchronizeDeltaDayBiData();
+    }
+
     /**
      * 全量同步数据到bi(手动)
      */

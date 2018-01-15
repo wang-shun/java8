@@ -53,7 +53,7 @@ public class DoctorReportBiDataSynchronize {
     private final DoctorDeliverSynchronizer deliverSynchronizer;
 
     private final Integer DELTA_DAY = 1440;
-    private final Integer REAL_TIME_INTERVAL = 20;
+    private final Integer REAL_TIME_INTERVAL = 1;
 
     @Autowired
     public DoctorReportBiDataSynchronize(DoctorPigDailyDao doctorPigDailyDao,
