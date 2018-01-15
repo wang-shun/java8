@@ -19,6 +19,7 @@
         <result property="start" column="start"/>
         <result property="turnInto" column="turn_into"/>
         <result property="turnIntoAge" column="turn_into_age"/>
+        <result property="turnIntoAvgWeight" column="turn_into_avg_weight"/>
         <result property="sale" column="sale"/>
         <result property="saleAvgWeight" column="sale_avg_weight"/>
         <result property="toHoubei" column="to_houbei"/>
@@ -46,11 +47,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `sum_at`, `sum_at_name`, `date_type`, `orz_id`, `orz_name`, `orz_type`, `start`, `turn_into`, `turn_into_age`, `sale`, `sale_avg_weight`, `to_houbei`, `to_houbei_avg_weight`, `chg_farm_out`, `chg_farm_avg_weight`, `dead`, `weed_out`, `other_change`, `end`, `daily_pig_count`, `out_avg_weight_180`, `dead_weed_out_rate`, `living_rate`, `feed_meat_rate`
+        `sum_at`, `sum_at_name`, `date_type`, `orz_id`, `orz_name`, `orz_type`, `start`, `turn_into`, `turn_into_age`,`turn_into_avg_weight`, `sale`, `sale_avg_weight`, `to_houbei`, `to_houbei_avg_weight`, `chg_farm_out`, `chg_farm_avg_weight`, `dead`, `weed_out`, `other_change`, `end`, `daily_pig_count`, `out_avg_weight_180`, `dead_weed_out_rate`, `living_rate`, `feed_meat_rate`
     </sql>
 
     <sql id="vals">
-        #{sumAt}, #{sumAtName}, #{dateType}, #{orzId}, #{orzName}, #{orzType}, #{start}, #{turnInto}, #{turnIntoAge}, #{sale}, #{saleAvgWeight}, #{toHoubei}, #{toHoubeiAvgWeight}, #{chgFarmOut}, #{chgFarmAvgWeight}, #{dead}, #{weedOut}, #{otherChange}, #{end}, #{dailyPigCount}, #{outAvgWeight180}, #{deadWeedOutRate}, #{livingRate}, #{feedMeatRate}
+        #{sumAt}, #{sumAtName}, #{dateType}, #{orzId}, #{orzName}, #{orzType}, #{start}, #{turnInto}, #{turnIntoAge}, #{turnIntoAvgWeight}, #{sale}, #{saleAvgWeight}, #{toHoubei}, #{toHoubeiAvgWeight}, #{chgFarmOut}, #{chgFarmAvgWeight}, #{dead}, #{weedOut}, #{otherChange}, #{end}, #{dailyPigCount}, #{outAvgWeight180}, #{deadWeedOutRate}, #{livingRate}, #{feedMeatRate}
     </sql>
 
     <sql id="criteria">
@@ -64,6 +65,7 @@
             <if test="start != null">AND `start` = #{start}</if>
             <if test="turnInto != null">AND `turn_into` = #{turnInto}</if>
             <if test="turnIntoAge != null">AND `turn_into_age` = #{turnIntoAge}</if>
+            <if test="turnIntoAvgWeight != null">AND `turn_into_avg_weight` = #{turnIntoAvgWeight}</if>
             <if test="sale != null">AND `sale` = #{sale}</if>
             <if test="saleAvgWeight != null">AND `sale_avg_weight` = #{saleAvgWeight}</if>
             <if test="toHoubei != null">AND `to_houbei` = #{toHoubei}</if>
@@ -122,6 +124,7 @@
             <if test="start != null">`start` = #{start},</if>
             <if test="turnInto != null">`turn_into` = #{turnInto},</if>
             <if test="turnIntoAge != null">`turn_into_age` = #{turnIntoAge},</if>
+            <if test="turnIntoAvgWeight != null">`turn_into_avg_weight` = #{turnIntoAvgWeight},</if>
             <if test="sale != null">`sale` = #{sale},</if>
             <if test="saleAvgWeight != null">`sale_avg_weight` = #{saleAvgWeight},</if>
             <if test="toHoubei != null">`to_houbei` = #{toHoubei},</if>
