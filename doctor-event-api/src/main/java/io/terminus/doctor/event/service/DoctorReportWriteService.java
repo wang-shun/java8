@@ -15,27 +15,11 @@ public interface DoctorReportWriteService {
      * 生成非生产天数
      *
      * @param farmIds
-     * @param countDate
-     * @param reportTime
+     * @param countDate  范围之内某一个天
+     * @param reportTime 月、季、年
      */
     void flushNPD(List<Long> farmIds, Date countDate, ReportTime reportTime);
 
-    /**
-     * 生成非生产天数
-     *
-     * @param farmIds
-     * @param startDate
-     * @param endDate
-     */
-    void flushNPD(List<Long> farmIds, Date startDate, Date endDate);
-
-    /**
-     * 生成非生产天数
-     *
-     * @param pigIds
-     */
-    @Deprecated
-    void flushNPD(List<Long> pigIds);
 
     /**
      * 年产胎次

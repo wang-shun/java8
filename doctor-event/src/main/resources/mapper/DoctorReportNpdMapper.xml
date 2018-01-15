@@ -3,17 +3,18 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2017-12-25 09:58:17
+ ~ Date: 2018-01-15 10:43:33
  ~ Created by [ your name ]
 -->
 
-<mapper namespace="DoctorReportNpds">
-    <resultMap id="DoctorReportNpdsMap" type="DoctorReportNpds">
+<mapper namespace="DoctorReportNpd">
+    <resultMap id="DoctorReportNpdMap" type="DoctorReportNpd">
         <id property="id" column="id"/>
         <result property="farmId" column="farm_id"/>
         <result property="sumAt" column="sum_at"/>
         <result property="npd" column="npd"/>
-        <result property="sowQuantity" column="sow_quantity"/>
+        <result property="sowCount" column="sow_count"/>
+        <result property="days" column="days"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
@@ -28,12 +29,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`, `sum_at`, `npd`, `sow_quantity`, 
+        `farm_id`, `sum_at`, `npd`, `sow_count`, `days`,
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{sumAt}, #{npd}, #{sowQuantity}, 
+        #{farmId}, #{sumAt}, #{npd}, #{sowCount}, #{days},
         now(), now()
     </sql>
 
@@ -42,13 +43,14 @@
             <if test="farmId != null">AND `farm_id` = #{farmId}</if>
             <if test="sumAt != null">AND `sum_at` = #{sumAt}</if>
             <if test="npd != null">AND `npd` = #{npd}</if>
-            <if test="sowQuantity != null">AND `sow_quantity` = #{sowQuantity}</if>
+            <if test="sowCount != null">AND `sow_count` = #{sowCount}</if>
+            <if test="days != null">AND `days` = #{days}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
         </where>
     </sql>
 
-    <insert id="create" parameterType="DoctorReportNpds" useGeneratedKeys="true" keyProperty="id">
+    <insert id="create" parameterType="DoctorReportNpd" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO
         <include refid="tb"/>
         (<include refid="cols_exclude_id"/>)
@@ -56,7 +58,7 @@
         (<include refid="vals"/>)
     </insert>
 
-    <select id="findById" parameterType="long" resultMap="DoctorReportNpdsMap">
+    <select id="findById" parameterType="long" resultMap="DoctorReportNpdMap">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -64,7 +66,7 @@
         WHERE id = #{id} LIMIT 1
     </select>
 
-    <select id="findByIds" parameterType="list" resultMap="DoctorReportNpdsMap">
+    <select id="findByIds" parameterType="list" resultMap="DoctorReportNpdMap">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -75,43 +77,58 @@
         </foreach>
     </select>
 
-    <update id="update" parameterType="DoctorReportNpds">
+    <update id="update" parameterType="DoctorReportNpd">
         UPDATE
         <include refid="tb"/>
         <set>
             <if test="farmId != null">`farm_id` = #{farmId},</if>
             <if test="sumAt != null">`sum_at` = #{sumAt},</if>
             <if test="npd != null">`npd` = #{npd},</if>
-            <if test="sowQuantity != null">`sow_quantity` = #{sowQuantity},</if>
+            <if test="sowCount != null">`sow_count` = #{sowCount},</if>
+            <if test="days != null">`days` = #{days},</if>
             updated_at = now()
         </set>
         WHERE id = #{id}
     </update>
 
     <delete id="delete" parameterType="long">
-        DELETE FROM <include refid="tb"/>
+        DELETE FROM
+        <include refid="tb"/>
         WHERE id = #{id}
     </delete>
-    
+
     <select id="count" parameterType="map" resultType="long">
         SELECT COUNT(1)
-        FROM <include refid="tb"/>
+        FROM
+        <include refid="tb"/>
         <include refid="criteria"/>
     </select>
 
-    <select id="paging" parameterType="map" resultMap="DoctorReportNpdsMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+    <select id="paging" parameterType="map" resultMap="DoctorReportNpdMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
         LIMIT #{offset}, #{limit}
     </select>
 
-    <select id="list" parameterType="map" resultMap="DoctorReportNpdsMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+    <select id="list" parameterType="map" resultMap="DoctorReportNpdMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
+    </select>
+
+    <select id="findByFarmAndSumAt" parameterType="map" resultMap="DoctorReportNpdMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE farm_id=#{farmId} and sum_at=#{sumAt}
     </select>
 
 </mapper>

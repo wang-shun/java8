@@ -1953,3 +1953,13 @@ CREATE TABLE `doctor_filed_urls` (
   PRIMARY KEY (`id`),
   KEY `index_name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='字段跳转url';
+-- 修改非生产天数报表
+ALTER TABLE doctor_report_npds DROP sow_quantity;
+ALTER TABLE doctor_report_npds ADD sow_count INT NULL COMMENT '存栏。（母猪日存栏-进场未配种母猪数）';
+ALTER TABLE doctor_report_npds MODIFY sum_at DATE COMMENT '报表日期,月度单位';
+ALTER TABLE doctor_report_npds
+  MODIFY COLUMN sow_count INT COMMENT '存栏。（母猪日存栏-进场未配种母猪数）' AFTER npd;
+
+ALTER TABLE doctor_report_npds ADD days INT NULL COMMENT '天数';
+ALTER TABLE doctor_report_npds
+  MODIFY COLUMN days INT COMMENT '天数' AFTER sow_count;

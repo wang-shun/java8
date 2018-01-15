@@ -318,7 +318,7 @@
         sum(`boar_weed_out`) as boar_weed_out,
         sum(`boar_sale`) as boar_sale,
         sum(`boar_other_out`) as boar_other_out,
-        max(`boar_end`) as boar_end
+        max(`boar_end`) as boar_end,
         sum(`sow_not_mating_count`) as sow_not_mating_count
         FROM
         <include refid="tb"/>

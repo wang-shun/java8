@@ -375,7 +375,7 @@
             </foreach>
         </if>
         <if test="farmIds != null &amp;&amp; farmIds.size() > 0">
-            AND `farmId` IN
+            AND `farm_id` IN
             <foreach collection="farmIds" item="i" open="(" close=")" separator=",">
                 #{i}
             </foreach>
