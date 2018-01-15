@@ -36,8 +36,6 @@
         <result property="deadWeedOutRate" column="dead_weed_out_rate"/>
         <result property="livingRate" column="living_rate"/>
         <result property="feedMeatRate" column="feed_meat_rate"/>
-        <result property="createdAt" column="created_at"/>
-        <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
     <sql id="tb">
@@ -50,13 +48,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `sum_at`, `sum_at_name`, `date_type`, `orz_id`, `orz_name`, `orz_type`, `start`, `turn_into`, `turn_into_age`, `sale`, `sale_avg_weight`, `to_fatten`, `to_fatten_avg_weight`, `to_houbei`, `to_houbei_avg_weight`, `chg_farm_out`, `chg_farm_avg_weight`, `dead`, `weed_out`, `other_change`, `end`, `daily_pig_count`, `out_avg_weight_70`, `dead_weed_out_rate`, `living_rate`, `feed_meat_rate`, 
-        created_at, updated_at
+        `sum_at`, `sum_at_name`, `date_type`, `orz_id`, `orz_name`, `orz_type`, `start`, `turn_into`, `turn_into_age`, `sale`, `sale_avg_weight`, `to_fatten`, `to_fatten_avg_weight`, `to_houbei`, `to_houbei_avg_weight`, `chg_farm_out`, `chg_farm_avg_weight`, `dead`, `weed_out`, `other_change`, `end`, `daily_pig_count`, `out_avg_weight_70`, `dead_weed_out_rate`, `living_rate`, `feed_meat_rate`
     </sql>
 
     <sql id="vals">
-        #{sumAt}, #{sumAtName}, #{dateType}, #{orzId}, #{orzName}, #{orzType}, #{start}, #{turnInto}, #{turnIntoAge}, #{sale}, #{saleAvgWeight}, #{toFatten}, #{toFattenAvgWeight}, #{toHoubei}, #{toHoubeiAvgWeight}, #{chgFarmOut}, #{chgFarmAvgWeight}, #{dead}, #{weedOut}, #{otherChange}, #{end}, #{dailyPigCount}, #{outAvgWeight70}, #{deadWeedOutRate}, #{livingRate}, #{feedMeatRate}, 
-        now(), now()
+        #{sumAt}, #{sumAtName}, #{dateType}, #{orzId}, #{orzName}, #{orzType}, #{start}, #{turnInto}, #{turnIntoAge}, #{sale}, #{saleAvgWeight}, #{toFatten}, #{toFattenAvgWeight}, #{toHoubei}, #{toHoubeiAvgWeight}, #{chgFarmOut}, #{chgFarmAvgWeight}, #{dead}, #{weedOut}, #{otherChange}, #{end}, #{dailyPigCount}, #{outAvgWeight70}, #{deadWeedOutRate}, #{livingRate}, #{feedMeatRate}
     </sql>
 
     <sql id="criteria">
@@ -87,8 +83,6 @@
             <if test="deadWeedOutRate != null">AND `dead_weed_out_rate` = #{deadWeedOutRate}</if>
             <if test="livingRate != null">AND `living_rate` = #{livingRate}</if>
             <if test="feedMeatRate != null">AND `feed_meat_rate` = #{feedMeatRate}</if>
-            <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
-            <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
         </where>
     </sql>
 
@@ -148,8 +142,7 @@
             <if test="outAvgWeight70 != null">`out_avg_weight_70` = #{outAvgWeight70},</if>
             <if test="deadWeedOutRate != null">`dead_weed_out_rate` = #{deadWeedOutRate},</if>
             <if test="livingRate != null">`living_rate` = #{livingRate},</if>
-            <if test="feedMeatRate != null">`feed_meat_rate` = #{feedMeatRate},</if>
-            updated_at = now()
+            <if test="feedMeatRate != null">`feed_meat_rate` = #{feedMeatRate}</if>
         </set>
         WHERE id = #{id}
     </update>
@@ -178,6 +171,22 @@
         FROM <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
+    </select>
+
+    <delete id="deleteAll">
+        DELETE
+        FROM <include refid="tb"/>
+    </delete>
+
+    <select id="findByDimension" parameterType="map" resultMap="DoctorReportNurseryMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            orz_id = #{orzId}
+            AND orz_type = #{orzType}
+            AND sum_at = #{sumAt}
+            AND date_type = #{dateType}
+        </where>
     </select>
 
 </mapper>

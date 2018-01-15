@@ -130,7 +130,12 @@ public class DoctorReportDeliver implements Serializable {
      * 分娩窝数
      */
     private String farrowNest;
-    
+
+    /**
+     * 产仔总数
+     */
+    private Integer farrowAll;
+
     /**
      * 产活仔数
      */
@@ -204,7 +209,7 @@ public class DoctorReportDeliver implements Serializable {
     /**
      * 转场均重（仔猪）
      */
-    private Integer pigletChgFarmOutAvgWeight;
+    private Double pigletChgFarmOutAvgWeight;
     
     /**
      * 转保育数
@@ -259,7 +264,7 @@ public class DoctorReportDeliver implements Serializable {
     /**
      * 窝均断奶数
      */
-    private Integer weanCountPerFarrow;
+    private Double weanCountPerFarrow;
     
     /**
      * 断奶日龄

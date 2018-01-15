@@ -24,8 +24,6 @@
         <result property="otherChange" column="other_change"/>
         <result property="dailyPigCount" column="daily_pig_count"/>
         <result property="end" column="end"/>
-        <result property="createdAt" column="created_at"/>
-        <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
     <sql id="tb">
@@ -38,13 +36,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `sum_at`, `sum_at_name`, `date_type`, `orz_id`, `orz_name`, `orz_type`, `start`, `turn_into`, `dead`, `weed_out`, `sale`, `other_change`, `daily_pig_count`, `end`, 
-        created_at, updated_at
+        `sum_at`, `sum_at_name`, `date_type`, `orz_id`, `orz_name`, `orz_type`, `start`, `turn_into`, `dead`, `weed_out`, `sale`, `other_change`, `daily_pig_count`, `end`
     </sql>
 
     <sql id="vals">
-        #{sumAt}, #{sumAtName}, #{dateType}, #{orzId}, #{orzName}, #{orzType}, #{start}, #{turnInto}, #{dead}, #{weedOut}, #{sale}, #{otherChange}, #{dailyPigCount}, #{end}, 
-        now(), now()
+        #{sumAt}, #{sumAtName}, #{dateType}, #{orzId}, #{orzName}, #{orzType}, #{start}, #{turnInto}, #{dead}, #{weedOut}, #{sale}, #{otherChange}, #{dailyPigCount}, #{end}
     </sql>
 
     <sql id="criteria">
@@ -63,8 +59,6 @@
             <if test="otherChange != null">AND `other_change` = #{otherChange}</if>
             <if test="dailyPigCount != null">AND `daily_pig_count` = #{dailyPigCount}</if>
             <if test="end != null">AND `end` = #{end}</if>
-            <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
-            <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
         </where>
     </sql>
 
@@ -112,8 +106,7 @@
             <if test="sale != null">`sale` = #{sale},</if>
             <if test="otherChange != null">`other_change` = #{otherChange},</if>
             <if test="dailyPigCount != null">`daily_pig_count` = #{dailyPigCount},</if>
-            <if test="end != null">`end` = #{end},</if>
-            updated_at = now()
+            <if test="end != null">`end` = #{end}</if>
         </set>
         WHERE id = #{id}
     </update>
@@ -142,6 +135,22 @@
         FROM <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
+    </select>
+
+    <delete id="deleteAll">
+        DELETE
+        FROM <include refid="tb"/>
+    </delete>
+
+    <select id="findByDimension" parameterType="map" resultMap="DoctorReportBoarMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            orz_id = #{orzId}
+            AND orz_type = #{orzType}
+            AND sum_at = #{sumAt}
+            AND date_type = #{dateType}
+        </where>
     </select>
 
 </mapper>

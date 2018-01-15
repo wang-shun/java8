@@ -35,8 +35,6 @@
         <result property="pregLiuchan" column="preg_liuchan"/>
         <result property="matingRate" column="mating_rate"/>
         <result property="end" column="end"/>
-        <result property="createdAt" column="created_at"/>
-        <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
     <sql id="tb">
@@ -49,13 +47,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `sum_at`, `sum_at_name`, `date_type`, `orz_id`, `orz_name`, `orz_type`, `start`, `houbei_in`, `sow_ph_wean_in`, `other_in`, `dead`, `weed_out`, `sale`, `chg_farm_out`, `other_change`, `mating_count`, `mating_sow_count`, `pregnancy_sow_count`, `no_pregnancy_sow_count`, `preg_positive`, `preg_negative`, `preg_fanqing`, `preg_liuchan`, `mating_rate`, `end`, 
-        created_at, updated_at
+        `sum_at`, `sum_at_name`, `date_type`, `orz_id`, `orz_name`, `orz_type`, `start`, `houbei_in`, `sow_ph_wean_in`, `other_in`, `dead`, `weed_out`, `sale`, `chg_farm_out`, `other_change`, `mating_count`, `mating_sow_count`, `pregnancy_sow_count`, `no_pregnancy_sow_count`, `preg_positive`, `preg_negative`, `preg_fanqing`, `preg_liuchan`, `mating_rate`, `end`
     </sql>
 
     <sql id="vals">
-        #{sumAt}, #{sumAtName}, #{dateType}, #{orzId}, #{orzName}, #{orzType}, #{start}, #{houbeiIn}, #{sowPhWeanIn}, #{otherIn}, #{dead}, #{weedOut}, #{sale}, #{chgFarmOut}, #{otherChange}, #{matingCount}, #{matingSowCount}, #{pregnancySowCount}, #{noPregnancySowCount}, #{pregPositive}, #{pregNegative}, #{pregFanqing}, #{pregLiuchan}, #{matingRate}, #{end}, 
-        now(), now()
+        #{sumAt}, #{sumAtName}, #{dateType}, #{orzId}, #{orzName}, #{orzType}, #{start}, #{houbeiIn}, #{sowPhWeanIn}, #{otherIn}, #{dead}, #{weedOut}, #{sale}, #{chgFarmOut}, #{otherChange}, #{matingCount}, #{matingSowCount}, #{pregnancySowCount}, #{noPregnancySowCount}, #{pregPositive}, #{pregNegative}, #{pregFanqing}, #{pregLiuchan}, #{matingRate}, #{end}
     </sql>
 
     <sql id="criteria">
@@ -85,8 +81,6 @@
             <if test="pregLiuchan != null">AND `preg_liuchan` = #{pregLiuchan}</if>
             <if test="matingRate != null">AND `mating_rate` = #{matingRate}</if>
             <if test="end != null">AND `end` = #{end}</if>
-            <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
-            <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
         </where>
     </sql>
 
@@ -145,8 +139,7 @@
             <if test="pregFanqing != null">`preg_fanqing` = #{pregFanqing},</if>
             <if test="pregLiuchan != null">`preg_liuchan` = #{pregLiuchan},</if>
             <if test="matingRate != null">`mating_rate` = #{matingRate},</if>
-            <if test="end != null">`end` = #{end},</if>
-            updated_at = now()
+            <if test="end != null">`end` = #{end}</if>
         </set>
         WHERE id = #{id}
     </update>
@@ -175,6 +168,22 @@
         FROM <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
+    </select>
+
+    <delete id="deleteAll">
+        DELETE
+        FROM <include refid="tb"/>
+    </delete>
+
+    <select id="findByDimension" parameterType="map" resultMap="DoctorReportMatingMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            orz_id = #{orzId}
+            AND orz_type = #{orzType}
+            AND sum_at = #{sumAt}
+            AND date_type = #{dateType}
+        </where>
     </select>
 
 </mapper>

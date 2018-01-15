@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.reportBi.helper;
 
+import com.google.common.base.MoreObjects;
 import io.terminus.doctor.common.utils.Checks;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.reportBi.DoctorFiledUrlDao;
@@ -8,6 +9,7 @@ import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.model.DoctorFiledUrl;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
+import io.terminus.doctor.event.model.DoctorPigDaily;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -48,6 +50,15 @@ public class FieldHelper {
         }
     }
 
+    public void fillPigFiledUrl(DoctorFiledUrlCriteria filedUrlCriteria, DoctorPigDaily pigDaily, String orzType, String dateType) {
+        if (Objects.equals(orzType, OrzDimension.FARM.getName())) {
+            filedUrlCriteria.setFarmId(pigDaily.getFarmId());
+            DateDimension dateDimension = DateDimension.from(dateType);
+            filedUrlCriteria.setStart(DateHelper.withDateStartDay(pigDaily.getSumAt(), dateDimension));
+            filedUrlCriteria.setEnd(DateHelper.withDateEndDay(pigDaily.getSumAt(), dateDimension));
+        }
+    }
+
     public String filedUrl(DoctorFiledUrlCriteria criteria, Integer value , String filedName) {
         if (isNull(criteria.getFarmId())) {
             return value.toString();
@@ -59,10 +70,19 @@ public class FieldHelper {
 
     public Double deadWeedOutRate(DoctorGroupDaily groupDaily, String orzName){
         Integer deadWeedOut = groupDaily.getDead() + groupDaily.getWeedOut();
-        if (Objects.equals(orzName, OrzDimension.FARM.getName())) {
-            return get(deadWeedOut, groupDaily.getTurnInto());
+        try {
+            if (Objects.equals(orzName, OrzDimension.FARM.getName())) {
+                return get(deadWeedOut, groupDaily.getStart() + groupDaily.getTurnInto());
+            }
+            if (isNull(groupDaily.getChgFarmIn())) {
+                System.out.println("");;
+            }
+            return get(deadWeedOut, groupDaily.getStart() + groupDaily.getTurnInto()
+                    - MoreObjects.firstNonNull(groupDaily.getChgFarmIn(), 0));
+        } catch (Exception e) {
+            System.out.println("");
         }
-        return get(deadWeedOut, groupDaily.getTurnInto() - groupDaily.getChgFarmIn());
+        return 0.0;
     }
 
     public String filedUrl(DoctorFiledUrlCriteria criteria) {
@@ -76,7 +96,7 @@ public class FieldHelper {
         return JSON.toJson(map);
     }
 
-    private Double get(Integer denominator, Integer molecular) {
+    public Double get(Integer denominator, Integer molecular) {
         if (isNull(denominator) || isNull(molecular) || molecular == 0) {
             return 0D;
         }

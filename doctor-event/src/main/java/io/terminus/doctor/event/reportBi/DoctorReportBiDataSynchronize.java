@@ -8,13 +8,18 @@ import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
 import io.terminus.doctor.event.dao.DoctorPigDailyDao;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.reportBi.DoctorGroupDailyExtend;
+import io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend;
 import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorPigDaily;
+import io.terminus.doctor.event.reportBi.synchronizer.DoctorBoarSynchronizer;
+import io.terminus.doctor.event.reportBi.synchronizer.DoctorDeliverSynchronizer;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorFattenSynchronizer;
+import io.terminus.doctor.event.reportBi.synchronizer.DoctorMatingSynchronizer;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorNurserySynchronizer;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorReserveSynchronizer;
+import io.terminus.doctor.event.reportBi.synchronizer.DoctorSowSynchronizer;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -38,6 +43,10 @@ public class DoctorReportBiDataSynchronize {
     private final DoctorReserveSynchronizer reserveSynchronizer;
     private final DoctorFattenSynchronizer fattenSynchronizer;
     private final DoctorNurserySynchronizer nurserySynchronizer;
+    private final DoctorBoarSynchronizer boarSynchronizer;
+    private final DoctorSowSynchronizer sowSynchronizer;
+    private final DoctorMatingSynchronizer matingSynchronizer;
+    private final DoctorDeliverSynchronizer deliverSynchronizer;
 
     private final Integer DELTA_INTERVAL = 1440;
     private final Integer REAL_TIME_INTERVAL = 1000000;
@@ -45,12 +54,22 @@ public class DoctorReportBiDataSynchronize {
     @Autowired
     public DoctorReportBiDataSynchronize(DoctorPigDailyDao doctorPigDailyDao,
                                          DoctorGroupDailyDao doctorGroupDailyDao,
-                                         DoctorReserveSynchronizer reserveSynchronizer, DoctorFattenSynchronizer fattenSynchronizer, DoctorNurserySynchronizer nurserySynchronizer) {
+                                         DoctorReserveSynchronizer reserveSynchronizer,
+                                         DoctorFattenSynchronizer fattenSynchronizer,
+                                         DoctorNurserySynchronizer nurserySynchronizer,
+                                         DoctorBoarSynchronizer boarSynchronizer,
+                                         DoctorSowSynchronizer sowSynchronizer,
+                                         DoctorMatingSynchronizer matingSynchronizer,
+                                         DoctorDeliverSynchronizer deliverSynchronizer) {
         this.doctorPigDailyDao = doctorPigDailyDao;
         this.doctorGroupDailyDao = doctorGroupDailyDao;
         this.reserveSynchronizer = reserveSynchronizer;
         this.fattenSynchronizer = fattenSynchronizer;
         this.nurserySynchronizer = nurserySynchronizer;
+        this.boarSynchronizer = boarSynchronizer;
+        this.sowSynchronizer = sowSynchronizer;
+        this.matingSynchronizer = matingSynchronizer;
+        this.deliverSynchronizer = deliverSynchronizer;
     }
 
     /**
@@ -80,7 +99,7 @@ public class DoctorReportBiDataSynchronize {
         if (Arguments.isNullOrEmpty(groupDailyList)) {
             return;
         }
-        synchronizeForDay(groupDailyList);
+        synchronizeGroupForDay(groupDailyList);
         List<DoctorDimensionCriteria> dimensionCriteriaList = Lists.newArrayList();
         dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(date, DateDimension.WEEK.getValue(), OrzDimension.FARM.getValue()));
         dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(date, DateDimension.MONTH.getValue(), OrzDimension.FARM.getValue()));
@@ -99,7 +118,7 @@ public class DoctorReportBiDataSynchronize {
         // TODO: 18/1/13 pigdaily
     }
 
-    private void synchronizeForDay(List<DoctorGroupDaily> groupDailyList) {
+    private void synchronizeGroupForDay(List<DoctorGroupDaily> groupDailyList) {
         if (Arguments.isNullOrEmpty(groupDailyList)) {
             return;
         }
@@ -113,9 +132,23 @@ public class DoctorReportBiDataSynchronize {
             synchronizeGroupBiData(extend, doctorDimensionCriteria);
         });
     }
-    private List<DoctorDimensionCriteria> necessarySynchronizeDimension(Date date) {
 
-        return null;
+    private void synchronizePigForDay(List<DoctorPigDaily> pigDailyList) {
+        if (Arguments.isNullOrEmpty(pigDailyList)) {
+            return;
+        }
+        DoctorPigDailyExtend extend = new DoctorPigDailyExtend();
+        DoctorDimensionCriteria doctorDimensionCriteria = new DoctorDimensionCriteria();
+        doctorDimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
+        doctorDimensionCriteria.setDateType(DateDimension.DAY.getValue());
+        pigDailyList.forEach(pigDaily -> {
+            BeanMapper.copy(pigDaily, extend);
+            extend.setSowStart(pigDaily.getSowPhStart() + pigDaily.getSowCfStart());
+            extend.setSowEnd(pigDaily.getSowPhEnd() + pigDaily.getSowCfEnd());
+            extend.setSowDailyPigCount(extend.getSowEnd().doubleValue());
+            extend.setBoarDailyPigCount(pigDaily.getBoarEnd().doubleValue());
+            synchronizePigBiData(extend, doctorDimensionCriteria);
+        });
     }
 
     /**
@@ -173,8 +206,8 @@ public class DoctorReportBiDataSynchronize {
     private void synchronizeFullBiDataForDimension(DoctorDimensionCriteria dimensionCriteria) {
         List<DoctorGroupDailyExtend> groupDailyList = doctorGroupDailyDao.sumForDimension(dimensionCriteria);
         groupDailyList.parallelStream().forEach(groupDaily -> synchronizeGroupBiData(groupDaily, dimensionCriteria));
-//        List<DoctorPigDaily> pigDailyList = doctorPigDailyDao.sumForDimension(dimensionCriteria);
-//        pigDailyList.parallelStream().forEach(this::synchronizePigBiData);
+        List<DoctorPigDailyExtend> pigDailyList = doctorPigDailyDao.sumForDimension(dimensionCriteria);
+        pigDailyList.parallelStream().forEach(pigDaily -> synchronizePigBiData(pigDaily, dimensionCriteria));
     }
 
     private void synchronizeFullBiDataForDay() {
@@ -183,8 +216,17 @@ public class DoctorReportBiDataSynchronize {
         Integer pageNo = 0;
         while (true) {
             groupDailyList = doctorGroupDailyDao.paging(pageNo, pageSize).getData();
-            synchronizeForDay(groupDailyList);
+            synchronizeGroupForDay(groupDailyList);
             if (groupDailyList.size() < 5000) break;
+            pageNo += 5000;
+        }
+
+        List<DoctorPigDaily> pigDailyList;
+        pageNo = 0;
+        while (true) {
+            pigDailyList = doctorPigDailyDao.paging(pageNo, pageSize).getData();
+            synchronizePigForDay(pigDailyList);
+            if (pigDailyList.size() < 5000) break;
             pageNo += 5000;
         }
     }
@@ -204,7 +246,7 @@ public class DoctorReportBiDataSynchronize {
         groupDaily.setEnd(doctorGroupDailyDao.end(dimensionCriteria));
         switch (pigType) {
             case DELIVER_SOW:
-                ;
+                deliverSynchronizer.synchronize(groupDaily, dimensionCriteria);
                 break;
             case NURSERY_PIGLET:
                 nurserySynchronizer.synchronize(groupDaily, dimensionCriteria);
@@ -218,7 +260,18 @@ public class DoctorReportBiDataSynchronize {
         }
     }
 
-    private void synchronizePigBiData(DoctorPigDaily pigDaily){
-
+    private void synchronizePigBiData(DoctorPigDailyExtend dailyExtend, DoctorDimensionCriteria dimensionCriteria){
+        if (isNull(dimensionCriteria.getOrzId())) {
+            if (Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.ORG.getValue())) {
+                dimensionCriteria.setOrzId(dailyExtend.getOrgId());
+            } else {
+                dimensionCriteria.setOrzId(dailyExtend.getFarmId());
+            }
+        }
+        dimensionCriteria.setSumAt(dailyExtend.getSumAt());
+        boarSynchronizer.synchronize(dailyExtend, dimensionCriteria);
+        sowSynchronizer.synchronize(dailyExtend, dimensionCriteria);
+        matingSynchronizer.synchronize(dailyExtend, dimensionCriteria);
+        deliverSynchronizer.synchronize(dailyExtend, dimensionCriteria);
     }
 }

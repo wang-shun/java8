@@ -12,7 +12,11 @@ import io.terminus.doctor.event.util.EventUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
+import static io.terminus.doctor.event.reportBi.helper.DateHelper.dateCN;
+import static io.terminus.doctor.event.reportBi.helper.DateHelper.withDateStartDay;
 import static java.util.Objects.isNull;
 
 /**
@@ -44,6 +48,16 @@ public class DoctorFattenSynchronizer {
     }
 
     public DoctorReportFatten build(DoctorGroupDailyExtend groupDaily, DoctorReportFatten reportBi) {
+        if (Objects.equals(reportBi.getOrzType(), OrzDimension.FARM.getName())) {
+            reportBi.setOrzId(groupDaily.getFarmId());
+            reportBi.setOrzName(groupDaily.getFarmName());
+        } else {
+            reportBi.setOrzId(groupDaily.getOrgId());
+            reportBi.setOrzName(groupDaily.getOrgName());
+        }
+        DateDimension dateDimension = DateDimension.from(reportBi.getDateType());
+        reportBi.setSumAt(withDateStartDay(groupDaily.getSumAt(), dateDimension));
+        reportBi.setSumAtName(dateCN(groupDaily.getSumAt(), dateDimension));
         buildRealTime(groupDaily, reportBi);
         buildDelay(groupDaily, reportBi);
         return reportBi;

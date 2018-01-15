@@ -5,6 +5,7 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
+import io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend;
 import io.terminus.doctor.event.model.DoctorPigDaily;
 import org.springframework.stereotype.Repository;
 
@@ -81,7 +82,33 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
      * @param dimensionCriteria 维度
      * @return 聚合数据
      */
-    public List<DoctorPigDaily> sumForDimension(DoctorDimensionCriteria dimensionCriteria) {
+    public List<DoctorPigDailyExtend> sumForDimension(DoctorDimensionCriteria dimensionCriteria) {
         return getSqlSession().selectList(sqlId("sumForDimension"), dimensionCriteria);
+    }
+
+    /**
+     * 获取某一维度的数据
+     * @param dimensionCriteria
+     * @return
+     */
+    public DoctorPigDailyExtend selectOneSumForDimension(DoctorDimensionCriteria dimensionCriteria) {
+        return getSqlSession().selectOne(sqlId("selectOneSumForDimension"), dimensionCriteria);
+    }
+
+    public List<DoctorPigDaily> findByAfter(Date updatedAt){
+        return getSqlSession().selectList(sqlId("findByAfter"), updatedAt);
+    }
+
+    public List<DoctorDimensionCriteria> findByDateType(Date sumAt, Integer dateType, Integer orzType) {
+        return getSqlSession().selectList(sqlId("findByDateType"),
+                ImmutableMap.of("sumAt", sumAt, "dateType", dateType, "orzType", orzType));
+    }
+
+    public DoctorPigDailyExtend start(DoctorDimensionCriteria dimensionCriteria){
+        return getSqlSession().selectOne(sqlId("start"), dimensionCriteria);
+    }
+
+    public DoctorPigDailyExtend end(DoctorDimensionCriteria dimensionCriteria){
+        return getSqlSession().selectOne(sqlId("end"), dimensionCriteria);
     }
 }

@@ -196,12 +196,14 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
     @Override
     protected DoctorGroupDaily buildDailyGroup(DoctorGroupDaily oldDailyGroup, DoctorEventChangeDto changeDto) {
         oldDailyGroup = super.buildDailyGroup(oldDailyGroup, changeDto);
-        oldDailyGroup.setTurnInto(EventUtil.plusInt(oldDailyGroup.getTurnInto(), changeDto.getQuantityChange()));
-        oldDailyGroup.setTurnIntoWeight(EventUtil.plusDouble(oldDailyGroup.getTurnIntoWeight(), changeDto.getWeightChange()));
-        oldDailyGroup.setTurnIntoAge(EventUtil.plusInt(oldDailyGroup.getTurnIntoAge(), changeDto.getAgeChange()));
-        oldDailyGroup.setEnd(EventUtil.plusInt(oldDailyGroup.getEnd(), changeDto.getQuantityChange()));
-        if (Objects.equals(changeDto.getInType(), InType.FARM.getValue())) {
-            oldDailyGroup.setChgFarmIn(EventUtil.plusInt(oldDailyGroup.getChgFarmIn(), changeDto.getQuantityChange()));
+        if (Objects.equals(changeDto.getTransGroupType(), DoctorGroupEvent.TransGroupType.OUT.getValue())) {
+            oldDailyGroup.setTurnInto(EventUtil.plusInt(oldDailyGroup.getTurnInto(), changeDto.getQuantityChange()));
+            oldDailyGroup.setTurnIntoWeight(EventUtil.plusDouble(oldDailyGroup.getTurnIntoWeight(), changeDto.getWeightChange()));
+            oldDailyGroup.setTurnIntoAge(EventUtil.plusInt(oldDailyGroup.getTurnIntoAge(), changeDto.getAgeChange()));
+            oldDailyGroup.setEnd(EventUtil.plusInt(oldDailyGroup.getEnd(), changeDto.getQuantityChange()));
+            if (Objects.equals(changeDto.getInType(), InType.FARM.getValue())) {
+                oldDailyGroup.setChgFarmIn(EventUtil.plusInt(oldDailyGroup.getChgFarmIn(), changeDto.getQuantityChange()));
+            }
         }
         return oldDailyGroup;
     }

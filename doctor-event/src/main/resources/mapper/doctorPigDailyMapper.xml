@@ -366,4 +366,140 @@
         AND sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
     </update>
 
+    <sql id="forSum">
+        org_id as orgId,
+        org_name as orgName,
+        farm_id as farmId,
+        farm_name as farmName,
+        sum_at as sumAt,
+        AVG(`boar_end`) as boarDailyPigCount,
+        AVG(`sow_ph_end`+`sow_cf_end`) as sowDailyPigCount,
+        ifnull(sum(sow_ph_start), 0) as sowPhStart,
+        ifnull(sum(sow_ph_reserve_in), 0) as sowPhReserveIn,
+        ifnull(sum(sow_ph_wean_in), 0) as sowPhWeanIn,
+        ifnull(sum(sow_ph_entry_in), 0) as sowPhEntryIn,
+        ifnull(sum(sow_ph_chg_farm_in), 0) as sowPhChgFarmIn,
+        ifnull(sum(sow_ph_dead), 0) as sowPhDead,
+        ifnull(sum(sow_ph_weed_out), 0) as sowPhWeedOut,
+        ifnull(sum(sow_ph_sale), 0) as sowPhSale,
+        ifnull(sum(sow_ph_chg_farm), 0) as sowPhChgFarm,
+        ifnull(sum(sow_ph_other_out), 0) as sowPhOtherOut,
+        ifnull(sum(mating_count), 0) as matingCount,
+        ifnull(sum(preg_positive), 0) as pregPositive,
+        ifnull(sum(preg_negative), 0) as pregNegative,
+        ifnull(sum(preg_fanqing), 0) as pregFanqing,
+        ifnull(sum(preg_liuchan), 0) as pregLiuchan,
+        ifnull(sum(sow_cf_in), 0) as sowCfIn,
+        ifnull(sum(sow_cf_in_farm_in), 0) as sowCfInFarmIn,
+        ifnull(sum(sow_cf_dead), 0) as sowCfDead,
+        ifnull(sum(sow_cf_weed_out), 0) as sowCfWeedOut,
+        ifnull(sum(sow_cf_dead), 0) as sowCfDead,
+        ifnull(sum(sow_cf_sale), 0) as sowCfSale,
+        ifnull(sum(sow_cf_chg_farm), 0) as sowCfChgFarm,
+        ifnull(sum(sow_cf_other_out), 0) as sowCfOtherOut,
+        ifnull(sum(early_farrow_nest), 0) as earlyFarrowNest,
+        ifnull(sum(farrow_nest), 0) as farrowNest,
+        ifnull(sum(farrow_live), 0) as farrowLive,
+        ifnull(sum(farrow_health), 0) as farrowHealth,
+        ifnull(sum(farrow_weak), 0) as farrowWeak,
+        ifnull(sum(farrow_dead), 0) as farrowDead,
+        ifnull(sum(farrowjmh), 0) as farrowjmh,
+        ifnull(sum(farrow_weight), 0) as farrowWeight,
+        ifnull(sum(wean_nest), 0) as weanNest,
+        ifnull(sum(wean_qualified_count), 0) as weanQualifiedCount,
+        ifnull(sum(wean_count), 0) as weanCount,
+        ifnull(sum(wean_day_age), 0) as weanDayAge,
+        ifnull(sum(wean_weight), 0) as weanWeight,
+        ifnull(sum(boar_in), 0) as boarIn,
+        ifnull(sum(boar_dead), 0) as boarDead,
+        ifnull(sum(boar_weed_out), 0) as boarWeedOut,
+        ifnull(sum(boar_sale), 0) as boarSale,
+        ifnull(sum(boar_other_out), 0) as boarOtherOut
+    </sql>
+
+    <select id="sumForDimension" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="io.terminus.doctor.event.dto.reportBi.DoctorGroupDailyExtend">
+        SELECT
+        <include refid="forSum"/>
+        FROM <include refid="tb"/>
+        GROUP BY
+        <if test="orzType == 2">org_id,</if>
+        <if test="orzType == 3">farm_id,</if>
+        <if test="dateType == 1"> date_format(sum_at, '%y-%m-%d')</if>
+        <if test="dateType == 2"> date_format(sum_at, '%y-%u')</if>
+        <if test="dateType == 3"> date_format(sum_at, '%y-%m')</if>
+        <if test="dateType == 4"> concat(date_format(sum_at, '%y-'), QUARTER(sum_at))</if>
+        <if test="dateType == 5"> date_format(sum_at, '%y')</if>
+    </select>
+
+    <sql id="dimensionCri">
+        <where>
+            1=1
+            <if test="orzType == 2">AND farm_id = #{orzId}</if>
+            <if test="orzType == 3">AND org_id = #{orzId}</if>
+            <if test="dateType == 1">AND date_format(sum_at, '%y-%m-%d') = date_format(#{sumAt}, '%y-%m-%d')</if>
+            <if test="dateType == 2">AND date_format(sum_at, '%y-%u') = date_format(#{sumAt}, '%y-%u')</if>
+            <if test="dateType == 3">AND date_format(sum_at, '%y-%m') = date_format(#{sumAt}, '%y-%m')</if>
+            <if test="dateType == 4">AND concat(date_format(sum_at, '%y-'), QUARTER(sum_at)) =
+                concat(date_format(sum_at, '%y-'), QUARTER(#{sumAt}))
+            </if>
+            <if test="dateType == 5">AND date_format(sum_at, '%y') = date_format(#{sumAt}, '%y')</if>
+        </where>
+    </sql>
+    <select id="selectOneSumForDimension" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
+        SELECT
+        <include refid="forSum"/>
+        FROM
+        <include refid="tb"/>
+        <include refid="dimensionCri"/>
+    </select>
+
+    <select id="findByAfter" parameterType="map" resultMap="DoctorPigDailyMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        WHERE
+        updated_at >= date_format(#{sumAt}, '%Y-%m-%d %H:%i:%s')
+    </select>
+
+    <select id="findByDateType" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorDimensionCriteria">
+        SELECT
+        case WHEN #{orzType} = 2 then org_id else farm_id end as orzId,
+        #{orzType} as orzType,
+        sum_at as sumAt,
+        #{dateType} as dateType,
+        FROM <include refid="tb"/>
+        WHERE
+        updated_at >= date_format(#{sumAt}, '%Y-%m-%d %H:%i:%s')
+        GROUP BY
+        <if test="orzType == 2">org_id,</if>
+        <if test="orzType == 3">farm_id,</if>
+        <if test="dateType == 1"> date_format(sum_at, '%y-%m-%d')</if>
+        <if test="dateType == 2"> date_format(sum_at, '%y-%u')</if>
+        <if test="dateType == 3"> date_format(sum_at, '%y-%m')</if>
+        <if test="dateType == 4"> concat(date_format(sum_at, '%y-'), QUARTER(sum_at))</if>
+        <if test="dateType == 5"> date_format(sum_at, '%y')</if>
+    </select>
+
+    <select id="start" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
+        SELECT
+        sow_ph_start as sowPhStart,
+        sow_cf_start as sowCfStart,
+        boar_start as boarStart,
+        sow_ph_start + sow_cf_start as sowStart
+        FROM <include refid="tb"/>
+        <include refid="dimensionCri"/>
+        order by sum_at asc
+        limit 1
+    </select>
+
+    <select id="end" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
+        SELECT
+        sow_ph_end as sowPhEnd,
+        sow_cf_end as sowCfEnd,
+        sow_ph_end + sow_cf_end as sowEnd,
+        boar_end as boarEnd
+        FROM <include refid="tb"/>
+        <include refid="dimensionCri"/>
+        order by sum_at desc
+        limit 1
+    </select>
+
 </mapper>

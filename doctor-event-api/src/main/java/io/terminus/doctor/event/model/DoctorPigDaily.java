@@ -260,7 +260,7 @@ public class DoctorPigDaily implements Serializable {
     /**
      * 每头猪的断奶日龄之和
      */
-    private Double weanDayAge;
+    private Integer weanDayAge;
     
     /**
      * 每一窝的断奶均重之和

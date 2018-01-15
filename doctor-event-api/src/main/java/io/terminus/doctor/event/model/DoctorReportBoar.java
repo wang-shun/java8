@@ -84,7 +84,7 @@ public class DoctorReportBoar implements Serializable {
     /**
      * 日均存栏
      */
-    private Integer dailyPigCount;
+    private Double dailyPigCount;
     
     /**
      * 期末存栏
