@@ -159,6 +159,15 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                     else
                         npd.setNpd(monthNPD.get(i));
                 }
+                if (farmPD.containsKey(f))
+                    npd.setPd(0);
+                else {
+                    Map<Integer, Integer> monthPD = farmPD.get(f);
+                    if (!monthPD.containsKey(i))
+                        npd.setPd(0);
+                    else
+                        npd.setPd(monthPD.get(i));
+                }
 
                 if (null == npd.getId())
                     doctorReportNpdDao.create(npd);
