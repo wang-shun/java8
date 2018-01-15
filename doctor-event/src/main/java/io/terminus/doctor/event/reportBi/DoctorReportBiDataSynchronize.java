@@ -14,13 +14,7 @@ import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorPigDaily;
-import io.terminus.doctor.event.reportBi.synchronizer.DoctorBoarSynchronizer;
-import io.terminus.doctor.event.reportBi.synchronizer.DoctorDeliverSynchronizer;
-import io.terminus.doctor.event.reportBi.synchronizer.DoctorFattenSynchronizer;
-import io.terminus.doctor.event.reportBi.synchronizer.DoctorMatingSynchronizer;
-import io.terminus.doctor.event.reportBi.synchronizer.DoctorNurserySynchronizer;
-import io.terminus.doctor.event.reportBi.synchronizer.DoctorReserveSynchronizer;
-import io.terminus.doctor.event.reportBi.synchronizer.DoctorSowSynchronizer;
+import io.terminus.doctor.event.reportBi.synchronizer.*;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +45,7 @@ public class DoctorReportBiDataSynchronize {
     private final DoctorSowSynchronizer sowSynchronizer;
     private final DoctorMatingSynchronizer matingSynchronizer;
     private final DoctorDeliverSynchronizer deliverSynchronizer;
+    private final DoctorWarehouseSynchronizer warehouseSynchronizer;
 
     private final Integer DELTA_DAY = 1440;
     private final Integer REAL_TIME_INTERVAL = 1;
@@ -64,7 +59,8 @@ public class DoctorReportBiDataSynchronize {
                                          DoctorBoarSynchronizer boarSynchronizer,
                                          DoctorSowSynchronizer sowSynchronizer,
                                          DoctorMatingSynchronizer matingSynchronizer,
-                                         DoctorDeliverSynchronizer deliverSynchronizer) {
+                                         DoctorDeliverSynchronizer deliverSynchronizer,
+                                         DoctorWarehouseSynchronizer warehouseSynchronizer) {
         this.doctorPigDailyDao = doctorPigDailyDao;
         this.doctorGroupDailyDao = doctorGroupDailyDao;
         this.reserveSynchronizer = reserveSynchronizer;
@@ -74,6 +70,7 @@ public class DoctorReportBiDataSynchronize {
         this.sowSynchronizer = sowSynchronizer;
         this.matingSynchronizer = matingSynchronizer;
         this.deliverSynchronizer = deliverSynchronizer;
+        this.warehouseSynchronizer = warehouseSynchronizer;
     }
 
     /**
@@ -91,7 +88,7 @@ public class DoctorReportBiDataSynchronize {
     /**
      * 增量同步数据
      */
-    public void synchronizeDeltaDayBiData(){
+    public void synchronizeDeltaDayBiData() {
         log.info("synchronize real time bi data starting");
         Stopwatch stopwatch = Stopwatch.createStarted();
         Date date = DateTime.now().minusMinutes(DELTA_DAY).toDate();
@@ -130,7 +127,7 @@ public class DoctorReportBiDataSynchronize {
             dimensionCriteriaList.parallelStream().forEach(dimensionCriteria ->
                     synchronizeGroupBiData(doctorGroupDailyDao.selectOneSumForDimension(dimensionCriteria), dimensionCriteria));
         }
-        List<DoctorPigDaily>  pigDailyList = doctorPigDailyDao.findByAfter(date);
+        List<DoctorPigDaily> pigDailyList = doctorPigDailyDao.findByAfter(date);
         if (!Arguments.isNullOrEmpty(pigDailyList)) {
             synchronizePigForDay(pigDailyList);
             List<DoctorDimensionCriteria> criteriaList = Lists.newArrayList();
@@ -149,6 +146,9 @@ public class DoctorReportBiDataSynchronize {
             criteriaList.parallelStream().forEach(dimensionCriteria ->
                     synchronizePigBiData(doctorPigDailyDao.selectOneSumForDimension(dimensionCriteria), dimensionCriteria));
         }
+
+
+        warehouseSynchronizer.sync(date);
     }
 
     private void synchronizeGroupForDay(List<DoctorGroupDaily> groupDailyList) {
@@ -187,7 +187,7 @@ public class DoctorReportBiDataSynchronize {
     /**
      * 清空bi相关表的所有数据
      */
-    public void cleanFullBiData(){
+    public void cleanFullBiData() {
         deliverSynchronizer.deleteAll();
         fattenSynchronizer.deleteAll();
         nurserySynchronizer.deleteAll();
@@ -240,6 +240,7 @@ public class DoctorReportBiDataSynchronize {
 
     /**
      * 全量同步不同维度的数据
+     *
      * @param dimensionCriteria
      */
     private void synchronizeFullBiDataForDimension(DoctorDimensionCriteria dimensionCriteria) {
@@ -303,7 +304,7 @@ public class DoctorReportBiDataSynchronize {
         }
     }
 
-    private void synchronizePigBiData(DoctorPigDailyExtend dailyExtend, DoctorDimensionCriteria dimensionCriteria){
+    private void synchronizePigBiData(DoctorPigDailyExtend dailyExtend, DoctorDimensionCriteria dimensionCriteria) {
         if (isNull(dimensionCriteria.getOrzId())) {
             if (Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.ORG.getValue())) {
                 dimensionCriteria.setOrzId(dailyExtend.getOrgId());
