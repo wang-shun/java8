@@ -65,7 +65,12 @@ public class DoctorReportNursery implements Serializable {
      * 转入日龄
      */
     private Integer turnIntoAge;
-    
+
+    /**
+     * 转入均重
+     */
+    private Double turnIntoAvgWeight;
+
     /**
      * 销售数量
      */
