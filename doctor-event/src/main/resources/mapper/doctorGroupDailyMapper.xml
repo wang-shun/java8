@@ -165,7 +165,7 @@
         pig_type as pigType,
         sum_at as sumAt,
         AVG(`end`) as dailyLivestockOnHand,
-        ifnull(sum(turn_into), 0) as turnInfo,
+        ifnull(sum(turn_into), 0) as turnInto,
         ifnull(sum(chg_farm_in), 0) as chgFarmIn,
         ifnull(sum(turn_into_weight), 0) as turnIntoWeight,
         ifnull(sum(turn_into_age), 0) as turnIntoAge,

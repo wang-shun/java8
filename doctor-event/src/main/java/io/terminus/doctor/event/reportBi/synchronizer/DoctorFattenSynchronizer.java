@@ -98,4 +98,7 @@ public class DoctorFattenSynchronizer {
         doctorReportFattenDao.update(reportBi);
     }
 
+    public void deleteAll() {
+        doctorReportFattenDao.deleteAll();
+    }
 }

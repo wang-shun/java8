@@ -115,4 +115,8 @@ public class DoctorSowSynchronizer {
         }
         return fieldHelper.get(sowDeadWeedOut, sowIn);
     }
+
+    public void deleteAll() {
+        doctorReportSowDao.deleteAll();
+    }
 }

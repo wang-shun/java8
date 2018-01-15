@@ -173,4 +173,8 @@ public class DoctorDeliverSynchronizer {
 //    private Integer pigletOtherIn(DoctorGroupDailyExtend groupDaily, String orzType){
 //        Integer otherIn =
 //    }
+
+    public void deleteAll() {
+        doctorReportDeliverDao.deleteAll();
+    }
 }

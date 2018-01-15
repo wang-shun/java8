@@ -99,4 +99,8 @@ public class DoctorNurserySynchronizer {
         }
         doctorReportNurseryDao.update(reportBi);
     }
+
+    public void deleteAll() {
+        doctorReportNurseryDao.deleteAll();
+    }
 }

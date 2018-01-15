@@ -144,4 +144,8 @@ public class DoctorReserveSynchronizer {
         }
         doctorReportReserveDao.update(reserve);
     }
+
+    public void deleteAll() {
+        doctorReportReserveDao.deleteAll();
+    }
 }

@@ -107,4 +107,8 @@ public class DoctorMatingSynchronizer {
     private void buildDelay(DoctorPigDailyExtend pigDaily, DoctorReportMating reportBi) {
         reportBi.setMatingRate(0.0);
     }
+
+    public void deleteAll() {
+        doctorReportMatingDao.deleteAll();
+    }
 }

@@ -417,7 +417,7 @@
         ifnull(sum(boar_other_out), 0) as boarOtherOut
     </sql>
 
-    <select id="sumForDimension" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="io.terminus.doctor.event.dto.reportBi.DoctorGroupDailyExtend">
+    <select id="sumForDimension" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
         SELECT
         <include refid="forSum"/>
         FROM <include refid="tb"/>

@@ -73,7 +73,6 @@ public class DoctorBoarSynchronizer {
     private void buildRealTime(DoctorPigDailyExtend pigDaily, DoctorReportBoar reportBi) {
         DoctorFiledUrlCriteria filedUrlCriteria = new DoctorFiledUrlCriteria();
         fieldHelper.fillPigFiledUrl(filedUrlCriteria, pigDaily, reportBi.getOrzType(), reportBi.getDateType());
-
         reportBi.setStart(pigDaily.getBoarStart());
         reportBi.setTurnInto(pigDaily.getBoarIn());
         reportBi.setDead(fieldHelper.filedUrl(filedUrlCriteria, pigDaily.getBoarDead(), "boarDead"));
@@ -85,5 +84,9 @@ public class DoctorBoarSynchronizer {
 
     private void buildDelay(DoctorPigDailyExtend pigDaily, DoctorReportBoar reportBi) {
         reportBi.setDailyPigCount(pigDaily.getBoarDailyPigCount());
+    }
+
+    public void deleteAll() {
+        doctorReportBoarDao.deleteAll();
     }
 }

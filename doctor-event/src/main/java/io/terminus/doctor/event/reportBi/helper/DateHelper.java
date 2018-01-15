@@ -76,7 +76,19 @@ public class DateHelper {
                 String week = dateTime.toString(WEEK);
                 return week + "（" + weekStart.toString(MMDD) + "-" + weekEnd.toString(MMDD) + "）";
             case MONTH: return dateTime.toString(MONTH);
-            case QUARTER: return dateTime.toString(YEAR)+ "第" + dateTime.getMonthOfYear() + "季度";
+            case QUARTER:
+                int quarter;
+                int month = dateTime.getMonthOfYear();
+                if (month >= 10) {
+                    quarter = 4;
+                } else if (month >= 7) {
+                    quarter = 3;
+                } else if (month >= 4 ) {
+                    quarter = 2;
+                } else{
+                    quarter = 1;
+                }
+                return dateTime.toString(YEAR)+ "第" + quarter + "季度";
             case YEAR: return dateTime.toString(YEAR);
             default:
                 throw new InvalidException("date.CN.failed", date);

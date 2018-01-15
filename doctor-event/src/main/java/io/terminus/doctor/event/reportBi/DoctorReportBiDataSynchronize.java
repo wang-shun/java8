@@ -115,7 +115,27 @@ public class DoctorReportBiDataSynchronize {
         dimensionCriteriaList.addAll(orgList);
         dimensionCriteriaList.parallelStream().forEach(dimensionCriteria ->
                 synchronizeGroupBiData(doctorGroupDailyDao.selectOneSumForDimension(dimensionCriteria), dimensionCriteria));
-        // TODO: 18/1/13 pigdaily
+
+        List<DoctorPigDaily>  pigDailyList = doctorPigDailyDao.findByAfter(date);
+        if (Arguments.isNullOrEmpty(pigDailyList)) {
+            return;
+        }
+        synchronizePigForDay(pigDailyList);
+        List<DoctorDimensionCriteria> criteriaList = Lists.newArrayList();
+        criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.WEEK.getValue(), OrzDimension.FARM.getValue()));
+        criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.MONTH.getValue(), OrzDimension.FARM.getValue()));
+        criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.QUARTER.getValue(), OrzDimension.FARM.getValue()));
+        criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.YEAR.getValue(), OrzDimension.FARM.getValue()));
+        criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.WEEK.getValue(), OrzDimension.ORG.getValue()));
+        criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.MONTH.getValue(), OrzDimension.ORG.getValue()));
+        criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.QUARTER.getValue(), OrzDimension.ORG.getValue()));
+        criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.YEAR.getValue(), OrzDimension.ORG.getValue()));
+        List<DoctorDimensionCriteria> orgs = groupDailyList.stream().map(groupDaily ->
+                new DoctorDimensionCriteria(groupDaily.getOrgId(), OrzDimension.ORG.getValue(), groupDaily.getSumAt(), DateDimension.DAY.getValue(), null)
+        ).collect(Collectors.toList());
+        criteriaList.addAll(orgs);
+        criteriaList.parallelStream().forEach(dimensionCriteria ->
+                synchronizePigBiData(doctorPigDailyDao.selectOneSumForDimension(dimensionCriteria), dimensionCriteria));
     }
 
     private void synchronizeGroupForDay(List<DoctorGroupDaily> groupDailyList) {
@@ -133,7 +153,7 @@ public class DoctorReportBiDataSynchronize {
         });
     }
 
-    private void synchronizePigForDay(List<DoctorPigDaily> pigDailyList) {
+    public void synchronizePigForDay(List<DoctorPigDaily> pigDailyList) {
         if (Arguments.isNullOrEmpty(pigDailyList)) {
             return;
         }
@@ -155,7 +175,13 @@ public class DoctorReportBiDataSynchronize {
      * 清空bi相关表的所有数据
      */
     private void cleanFullBiData(){
-
+        deliverSynchronizer.deleteAll();
+        fattenSynchronizer.deleteAll();
+        nurserySynchronizer.deleteAll();
+        reserveSynchronizer.deleteAll();
+        boarSynchronizer.deleteAll();
+        sowSynchronizer.deleteAll();
+        matingSynchronizer.deleteAll();
     }
 
     private void synchronizeBiDataImpl(DoctorDimensionCriteria dimensionCriteria) {
@@ -165,19 +191,19 @@ public class DoctorReportBiDataSynchronize {
         dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
         dimensionCriteria.setDateType(DateDimension.WEEK.getValue());
         synchronizeFullBiDataForDimension(dimensionCriteria);
-//        //同步猪场月
-//        dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
-//        dimensionCriteria.setDateType(DateDimension.MONTH.getValue());
-//        synchronizeFullBiDataForDimension(dimensionCriteria);
-//        //同步猪场季
-//        dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
-//        dimensionCriteria.setDateType(DateDimension.QUARTER.getValue());
-//        synchronizeFullBiDataForDimension(dimensionCriteria);
-//        //同步猪场年
-//        dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
-//        dimensionCriteria.setDateType(DateDimension.YEAR.getValue());
-//        synchronizeFullBiDataForDimension(dimensionCriteria);
-//        //同步公司日
+        //同步猪场月
+        dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
+        dimensionCriteria.setDateType(DateDimension.MONTH.getValue());
+        synchronizeFullBiDataForDimension(dimensionCriteria);
+        //同步猪场季
+        dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
+        dimensionCriteria.setDateType(DateDimension.QUARTER.getValue());
+        synchronizeFullBiDataForDimension(dimensionCriteria);
+        //同步猪场年
+        dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
+        dimensionCriteria.setDateType(DateDimension.YEAR.getValue());
+        synchronizeFullBiDataForDimension(dimensionCriteria);
+        //同步公司日
         dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
         dimensionCriteria.setDateType(DateDimension.DAY.getValue());
         synchronizeFullBiDataForDimension(dimensionCriteria);
@@ -185,18 +211,18 @@ public class DoctorReportBiDataSynchronize {
         dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
         dimensionCriteria.setDateType(DateDimension.WEEK.getValue());
         synchronizeFullBiDataForDimension(dimensionCriteria);
-//        //同步公司月
-//        dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
-//        dimensionCriteria.setDateType(DateDimension.MONTH.getValue());
-//        synchronizeFullBiDataForDimension(dimensionCriteria);
-//        //同步公司季
-//        dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
-//        dimensionCriteria.setDateType(DateDimension.QUARTER.getValue());
-//        synchronizeFullBiDataForDimension(dimensionCriteria);
-//        //同步公司年
-//        dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
-//        dimensionCriteria.setDateType(DateDimension.YEAR.getValue());
-//        synchronizeFullBiDataForDimension(dimensionCriteria);
+        //同步公司月
+        dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
+        dimensionCriteria.setDateType(DateDimension.MONTH.getValue());
+        synchronizeFullBiDataForDimension(dimensionCriteria);
+        //同步公司季
+        dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
+        dimensionCriteria.setDateType(DateDimension.QUARTER.getValue());
+        synchronizeFullBiDataForDimension(dimensionCriteria);
+        //同步公司年
+        dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
+        dimensionCriteria.setDateType(DateDimension.YEAR.getValue());
+        synchronizeFullBiDataForDimension(dimensionCriteria);
     }
 
     /**
@@ -269,6 +295,19 @@ public class DoctorReportBiDataSynchronize {
             }
         }
         dimensionCriteria.setSumAt(dailyExtend.getSumAt());
+        if (!Objects.equals(dimensionCriteria.getDateType(), DateDimension.DAY.getValue())
+                || !Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.FARM.getValue())) {
+            DoctorPigDailyExtend start = doctorPigDailyDao.start(dimensionCriteria);
+            dailyExtend.setSowCfStart(start.getSowCfStart());
+            dailyExtend.setSowPhStart(start.getSowPhStart());
+            dailyExtend.setSowStart(start.getSowStart());
+            dailyExtend.setBoarStart(start.getBoarStart());
+            DoctorPigDailyExtend end = doctorPigDailyDao.end(dimensionCriteria);
+            dailyExtend.setSowCfEnd(end.getSowCfEnd());
+            dailyExtend.setSowPhEnd(end.getSowPhEnd());
+            dailyExtend.setSowEnd(end.getSowEnd());
+            dailyExtend.setBoarEnd(end.getBoarEnd());
+        }
         boarSynchronizer.synchronize(dailyExtend, dimensionCriteria);
         sowSynchronizer.synchronize(dailyExtend, dimensionCriteria);
         matingSynchronizer.synchronize(dailyExtend, dimensionCriteria);
