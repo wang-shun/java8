@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.reportBi;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
@@ -20,6 +21,7 @@ import io.terminus.doctor.event.reportBi.synchronizer.DoctorMatingSynchronizer;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorNurserySynchronizer;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorReserveSynchronizer;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorSowSynchronizer;
+import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
@@ -36,6 +39,7 @@ import static java.util.Objects.isNull;
  * Created by xjn on 18/1/9.
  * email:xiaojiannan@terminus.io
  */
+@Slf4j
 @Component
 public class DoctorReportBiDataSynchronize {
     private final DoctorPigDailyDao doctorPigDailyDao;
@@ -49,7 +53,7 @@ public class DoctorReportBiDataSynchronize {
     private final DoctorDeliverSynchronizer deliverSynchronizer;
 
     private final Integer DELTA_DAY = 1440;
-    private final Integer REAL_TIME_INTERVAL = 1;
+    private final Integer REAL_TIME_INTERVAL = 20;
 
     @Autowired
     public DoctorReportBiDataSynchronize(DoctorPigDailyDao doctorPigDailyDao,
@@ -76,70 +80,75 @@ public class DoctorReportBiDataSynchronize {
      * 全量同步数据
      */
     public void synchronizeFullBiData() {
+        log.info("synchronize real time bi data starting");
+        Stopwatch stopwatch = Stopwatch.createStarted();
         cleanFullBiData();
         DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria();
         synchronizeBiDataImpl(dimensionCriteria);
+        log.info("synchronize real time bi data end, minute:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
     }
 
     /**
      * 增量同步数据
      */
     public void synchronizeDeltaDayBiData(){
+        log.info("synchronize real time bi data starting");
+        Stopwatch stopwatch = Stopwatch.createStarted();
         Date date = DateTime.now().minusMinutes(DELTA_DAY).toDate();
         synchronizeDeltaBiData(date);
+        log.info("synchronize real time bi data end, minute:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
     }
 
     /**
      * 同步实时数据
      */
     public void synchronizeRealTimeBiData() {
+        log.info("synchronize real time bi data starting");
         Date date = DateTime.now().minusMinutes(REAL_TIME_INTERVAL).toDate();
         synchronizeDeltaBiData(date);
+        log.info("synchronize real time bi data end");
     }
 
     private void synchronizeDeltaBiData(Date date) {
 
         List<DoctorGroupDaily> groupDailyList = doctorGroupDailyDao.findByAfter(date);
-        if (Arguments.isNullOrEmpty(groupDailyList)) {
-            return;
+        if (!Arguments.isNullOrEmpty(groupDailyList)) {
+            synchronizeGroupForDay(groupDailyList);
+            List<DoctorDimensionCriteria> dimensionCriteriaList = Lists.newArrayList();
+            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(date, DateDimension.WEEK.getValue(), OrzDimension.FARM.getValue()));
+            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(date, DateDimension.MONTH.getValue(), OrzDimension.FARM.getValue()));
+            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(date, DateDimension.QUARTER.getValue(), OrzDimension.FARM.getValue()));
+            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(date, DateDimension.YEAR.getValue(), OrzDimension.FARM.getValue()));
+            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(date, DateDimension.WEEK.getValue(), OrzDimension.ORG.getValue()));
+            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(date, DateDimension.MONTH.getValue(), OrzDimension.ORG.getValue()));
+            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(date, DateDimension.QUARTER.getValue(), OrzDimension.ORG.getValue()));
+            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(date, DateDimension.YEAR.getValue(), OrzDimension.ORG.getValue()));
+            List<DoctorDimensionCriteria> orgList = groupDailyList.stream().map(groupDaily ->
+                    new DoctorDimensionCriteria(groupDaily.getOrgId(), OrzDimension.ORG.getValue(), groupDaily.getSumAt(), DateDimension.DAY.getValue(), groupDaily.getPigType())
+            ).collect(Collectors.toList());
+            dimensionCriteriaList.addAll(orgList);
+            dimensionCriteriaList.parallelStream().forEach(dimensionCriteria ->
+                    synchronizeGroupBiData(doctorGroupDailyDao.selectOneSumForDimension(dimensionCriteria), dimensionCriteria));
         }
-        synchronizeGroupForDay(groupDailyList);
-        List<DoctorDimensionCriteria> dimensionCriteriaList = Lists.newArrayList();
-        dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(date, DateDimension.WEEK.getValue(), OrzDimension.FARM.getValue()));
-        dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(date, DateDimension.MONTH.getValue(), OrzDimension.FARM.getValue()));
-        dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(date, DateDimension.QUARTER.getValue(), OrzDimension.FARM.getValue()));
-        dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(date, DateDimension.YEAR.getValue(), OrzDimension.FARM.getValue()));
-        dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(date, DateDimension.WEEK.getValue(), OrzDimension.ORG.getValue()));
-        dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(date, DateDimension.MONTH.getValue(), OrzDimension.ORG.getValue()));
-        dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(date, DateDimension.QUARTER.getValue(), OrzDimension.ORG.getValue()));
-        dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(date, DateDimension.YEAR.getValue(), OrzDimension.ORG.getValue()));
-        List<DoctorDimensionCriteria> orgList = groupDailyList.stream().map(groupDaily ->
-            new DoctorDimensionCriteria(groupDaily.getOrgId(), OrzDimension.ORG.getValue(), groupDaily.getSumAt(), DateDimension.DAY.getValue(), groupDaily.getPigType())
-        ).collect(Collectors.toList());
-        dimensionCriteriaList.addAll(orgList);
-        dimensionCriteriaList.parallelStream().forEach(dimensionCriteria ->
-                synchronizeGroupBiData(doctorGroupDailyDao.selectOneSumForDimension(dimensionCriteria), dimensionCriteria));
-
         List<DoctorPigDaily>  pigDailyList = doctorPigDailyDao.findByAfter(date);
-        if (Arguments.isNullOrEmpty(pigDailyList)) {
-            return;
+        if (!Arguments.isNullOrEmpty(pigDailyList)) {
+            synchronizePigForDay(pigDailyList);
+            List<DoctorDimensionCriteria> criteriaList = Lists.newArrayList();
+            criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.WEEK.getValue(), OrzDimension.FARM.getValue()));
+            criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.MONTH.getValue(), OrzDimension.FARM.getValue()));
+            criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.QUARTER.getValue(), OrzDimension.FARM.getValue()));
+            criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.YEAR.getValue(), OrzDimension.FARM.getValue()));
+            criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.WEEK.getValue(), OrzDimension.ORG.getValue()));
+            criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.MONTH.getValue(), OrzDimension.ORG.getValue()));
+            criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.QUARTER.getValue(), OrzDimension.ORG.getValue()));
+            criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.YEAR.getValue(), OrzDimension.ORG.getValue()));
+            List<DoctorDimensionCriteria> orgs = pigDailyList.stream().map(pigDaily ->
+                    new DoctorDimensionCriteria(pigDaily.getOrgId(), OrzDimension.ORG.getValue(), pigDaily.getSumAt(), DateDimension.DAY.getValue(), null)
+            ).collect(Collectors.toList());
+            criteriaList.addAll(orgs);
+            criteriaList.parallelStream().forEach(dimensionCriteria ->
+                    synchronizePigBiData(doctorPigDailyDao.selectOneSumForDimension(dimensionCriteria), dimensionCriteria));
         }
-        synchronizePigForDay(pigDailyList);
-        List<DoctorDimensionCriteria> criteriaList = Lists.newArrayList();
-        criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.WEEK.getValue(), OrzDimension.FARM.getValue()));
-        criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.MONTH.getValue(), OrzDimension.FARM.getValue()));
-        criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.QUARTER.getValue(), OrzDimension.FARM.getValue()));
-        criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.YEAR.getValue(), OrzDimension.FARM.getValue()));
-        criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.WEEK.getValue(), OrzDimension.ORG.getValue()));
-        criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.MONTH.getValue(), OrzDimension.ORG.getValue()));
-        criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.QUARTER.getValue(), OrzDimension.ORG.getValue()));
-        criteriaList.addAll(doctorPigDailyDao.findByDateType(date, DateDimension.YEAR.getValue(), OrzDimension.ORG.getValue()));
-        List<DoctorDimensionCriteria> orgs = groupDailyList.stream().map(groupDaily ->
-                new DoctorDimensionCriteria(groupDaily.getOrgId(), OrzDimension.ORG.getValue(), groupDaily.getSumAt(), DateDimension.DAY.getValue(), null)
-        ).collect(Collectors.toList());
-        criteriaList.addAll(orgs);
-        criteriaList.parallelStream().forEach(dimensionCriteria ->
-                synchronizePigBiData(doctorPigDailyDao.selectOneSumForDimension(dimensionCriteria), dimensionCriteria));
     }
 
     private void synchronizeGroupForDay(List<DoctorGroupDaily> groupDailyList) {
@@ -178,7 +187,7 @@ public class DoctorReportBiDataSynchronize {
     /**
      * 清空bi相关表的所有数据
      */
-    private void cleanFullBiData(){
+    public void cleanFullBiData(){
         deliverSynchronizer.deleteAll();
         fattenSynchronizer.deleteAll();
         nurserySynchronizer.deleteAll();
@@ -270,6 +279,10 @@ public class DoctorReportBiDataSynchronize {
                 dimensionCriteria.setOrzId(groupDaily.getFarmId());
             }
         }
+        OrzDimension orzDimension = expectNotNull(OrzDimension.from(dimensionCriteria.getOrzType()), "orzType.is.illegal");
+        DateDimension dateDimension = expectNotNull(DateDimension.from(dimensionCriteria.getDateType()), "dateType.is.illegal");
+        dimensionCriteria.setOrzDimensionName(orzDimension.getName());
+        dimensionCriteria.setDateDimensionName(dateDimension.getName());
         dimensionCriteria.setSumAt(groupDaily.getSumAt());
         dimensionCriteria.setPigType(groupDaily.getPigType());
         groupDaily.setStart(doctorGroupDailyDao.start(dimensionCriteria));
@@ -298,6 +311,10 @@ public class DoctorReportBiDataSynchronize {
                 dimensionCriteria.setOrzId(dailyExtend.getFarmId());
             }
         }
+        OrzDimension orzDimension = expectNotNull(OrzDimension.from(dimensionCriteria.getOrzType()), "orzType.is.illegal");
+        DateDimension dateDimension = expectNotNull(DateDimension.from(dimensionCriteria.getDateType()), "dateType.is.illegal");
+        dimensionCriteria.setOrzDimensionName(orzDimension.getName());
+        dimensionCriteria.setDateDimensionName(dateDimension.getName());
         dimensionCriteria.setSumAt(dailyExtend.getSumAt());
         if (!Objects.equals(dimensionCriteria.getDateType(), DateDimension.DAY.getValue())
                 || !Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.FARM.getValue())) {

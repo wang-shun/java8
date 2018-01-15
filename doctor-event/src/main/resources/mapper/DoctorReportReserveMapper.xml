@@ -159,9 +159,9 @@
         FROM <include refid="tb"/>
         <where>
             orz_id = #{orzId}
-            AND orz_type = #{orzType}
-            AND sum_at = #{sumAt}
-            AND date_type = #{dateType}
+            AND orz_type = #{orzDimensionName}
+            AND sum_at = date_format(#{sumAt}, '%Y-%m-%d')
+            AND date_type = #{dateDimensionName}
         </where>
     </select>
 </mapper>

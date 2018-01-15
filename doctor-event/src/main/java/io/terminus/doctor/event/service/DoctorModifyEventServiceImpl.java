@@ -3,6 +3,7 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.common.utils.ToJsonMapper;
@@ -14,6 +15,7 @@ import io.terminus.doctor.event.manager.DoctorGroupEventManager;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.reportBi.listener.DoctorReportBiReaTimeEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,6 +48,13 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
     @Autowired
     private DoctorPigEventManager doctorPigEventManager;
 
+    private final CoreEventDispatcher coreEventDispatcher;
+
+    @Autowired
+    public DoctorModifyEventServiceImpl(CoreEventDispatcher coreEventDispatcher) {
+        this.coreEventDispatcher = coreEventDispatcher;
+    }
+
     @Override
     public RespWithEx<Boolean> modifyPigEvent(BasePigEventInputDto inputDto, Long eventId, Integer eventType) {
         try {
@@ -64,6 +73,7 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
     public RespWithEx<Boolean> modifyGroupEvent(BaseGroupInput inputDto, Long eventId, Integer eventType) {
         try {
             groupEventManager.modifyGroupEventHandle(inputDto, eventId, eventType);
+            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent());
             return RespWithEx.ok(true);
         } catch (InvalidException e) {
             log.error("modify pig event failed , inputDto:{}, cuase:{}", inputDto, Throwables.getStackTraceAsString(e));
@@ -79,6 +89,7 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
     public RespWithEx<Boolean> modifyPigEvent(String oldPigEvent, DoctorPigEvent pigEvent) {
         try {
             doctorPigEventManager.modifyPigEvent(pigEvent, oldPigEvent);
+            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent());
             return RespWithEx.ok(true);
         } catch (Exception e) {
             log.error("modify pig event failed , inputDto:{}, cause:{}", oldPigEvent, Throwables.getStackTraceAsString(e));

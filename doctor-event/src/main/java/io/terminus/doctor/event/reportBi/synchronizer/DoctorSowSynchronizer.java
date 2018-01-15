@@ -75,7 +75,7 @@ public class DoctorSowSynchronizer {
         DoctorFiledUrlCriteria filedUrlCriteria = new DoctorFiledUrlCriteria();
         fieldHelper.fillPigFiledUrl(filedUrlCriteria, pigDaily, reportBi.getOrzType(), reportBi.getDateType());
 
-        reportBi.setStart(pigDaily.getBoarStart());
+        reportBi.setStart(pigDaily.getSowStart());
         reportBi.setDead(fieldHelper.filedUrl(filedUrlCriteria, EventUtil.plusInt(pigDaily.getSowPhDead(), pigDaily.getSowCfDead()), "sowDead"));
         reportBi.setWeedOut(fieldHelper.filedUrl(filedUrlCriteria, EventUtil.plusInt(pigDaily.getSowPhWeedOut(), pigDaily.getSowCfWeedOut()), "sowWeedOut"));
         reportBi.setSale(fieldHelper.filedUrl(filedUrlCriteria, EventUtil.plusInt(pigDaily.getSowPhSale(), pigDaily.getSowCfSale()), "sowSale"));
@@ -83,7 +83,7 @@ public class DoctorSowSynchronizer {
         reportBi.setOtherChange(pigDaily.getBoarOtherOut());
         reportBi.setHoubeiIn(pigDaily.getSowPhReserveIn());
         reportBi.setOtherIn(otherIn(pigDaily, reportBi.getOrzType()));
-        reportBi.setEnd(pigDaily.getBoarEnd());
+        reportBi.setEnd(pigDaily.getSowEnd());
     }
 
     private void buildDelay(DoctorPigDailyExtend pigDaily, DoctorReportSow reportBi) {

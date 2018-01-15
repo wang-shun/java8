@@ -209,7 +209,7 @@
             <if test="dateType == 2">AND date_format(sum_at, '%y-%u') = date_format(#{sumAt}, '%y-%u')</if>
             <if test="dateType == 3">AND date_format(sum_at, '%y-%m') = date_format(#{sumAt}, '%y-%m')</if>
             <if test="dateType == 4">AND concat(date_format(sum_at, '%y-'), QUARTER(sum_at)) =
-                concat(date_format(sum_at, '%y-'), QUARTER(#{sumAt}))
+                concat(date_format(#{sumAt}, '%y-'), QUARTER(#{sumAt}))
             </if>
             <if test="dateType == 5">AND date_format(sum_at, '%y') = date_format(#{sumAt}, '%y')</if>
             AND pig_type = #{pigType}

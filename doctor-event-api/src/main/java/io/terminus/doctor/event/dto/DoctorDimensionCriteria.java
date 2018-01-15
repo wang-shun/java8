@@ -24,6 +24,8 @@ public class DoctorDimensionCriteria {
      */
     private Integer orzType;
 
+    private String orzDimensionName;
+
     /**
      * 统计时间
      */
@@ -35,6 +37,15 @@ public class DoctorDimensionCriteria {
      */
     private Integer dateType;
 
+    private String dateDimensionName;
+
     private Integer pigType;
 
+    public DoctorDimensionCriteria(Long orzId, Integer orzType, Date sumAt, Integer dateType, Integer pigType) {
+        this.orzId = orzId;
+        this.orzType = orzType;
+        this.sumAt = sumAt;
+        this.dateType = dateType;
+        this.pigType = pigType;
+    }
 }
