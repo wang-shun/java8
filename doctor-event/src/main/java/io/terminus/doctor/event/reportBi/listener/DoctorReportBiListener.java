@@ -1,11 +1,10 @@
 package io.terminus.doctor.event.reportBi.listener;
 
 import com.google.common.eventbus.Subscribe;
-import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.EventListener;
+import io.terminus.doctor.event.reportBi.DoctorReportBiDataSynchronize;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.Objects;
 
 /**
  * Created by xjn on 18/1/9.
@@ -14,28 +13,16 @@ import java.util.Objects;
 @Component
 public class DoctorReportBiListener implements EventListener{
 
-    /**
-     * 同步猪报表数据到bi
-     * @param reportBiEvent 猪日报表
-     */
-    @Subscribe
-    public void synchronizePigData(DoctorReportBiEvent reportBiEvent) {
-        
+    private final DoctorReportBiDataSynchronize synchronize;
+
+    @Autowired
+    public DoctorReportBiListener(DoctorReportBiDataSynchronize synchronize) {
+        this.synchronize = synchronize;
     }
 
-    /**
-     * 同步猪群报表数据到bi
-     * @param reportBiEvent 猪群日报表
-     */
     @Subscribe
-    public void synchronizeGroupData(DoctorReportBiEvent reportBiEvent){
-        if (Objects.equals(reportBiEvent.getPigType(), PigType.NURSERY_PIGLET.getValue())) {
-            // TODO: 18/1/9  
-        } else if (Objects.equals(reportBiEvent.getPigType(), PigType.FATTEN_PIG.getValue())) {
-            // TODO: 18/1/9  
-        } else {
-            // TODO: 18/1/9  
-        }
+    public void synchronizeRealTimeData(DoctorReportBiReaTimeEvent reportBiReaTimeEvent) {
+        synchronize.synchronizeRealTimeBiData();
     }
 
 }

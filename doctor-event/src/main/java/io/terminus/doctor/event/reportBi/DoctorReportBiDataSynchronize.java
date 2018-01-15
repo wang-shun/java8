@@ -48,8 +48,8 @@ public class DoctorReportBiDataSynchronize {
     private final DoctorMatingSynchronizer matingSynchronizer;
     private final DoctorDeliverSynchronizer deliverSynchronizer;
 
-    private final Integer DELTA_INTERVAL = 1440;
-    private final Integer REAL_TIME_INTERVAL = 1000000;
+    private final Integer DELTA_DAY = 1440;
+    private final Integer REAL_TIME_INTERVAL = 1;
 
     @Autowired
     public DoctorReportBiDataSynchronize(DoctorPigDailyDao doctorPigDailyDao,
@@ -84,17 +84,21 @@ public class DoctorReportBiDataSynchronize {
     /**
      * 增量同步数据
      */
-    public void synchronizeDeltaBiData(){
-        DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria();
-        dimensionCriteria.setSumAt(DateTime.now().minusMinutes(DELTA_INTERVAL).toDate());
-        synchronizeBiDataImpl(dimensionCriteria);
+    public void synchronizeDeltaDayBiData(){
+        Date date = DateTime.now().minusMinutes(DELTA_DAY).toDate();
+        synchronizeDeltaBiData(date);
     }
 
     /**
      * 同步实时数据
      */
-    public void synchronizeRealTimeBiData(){
+    public void synchronizeRealTimeBiData() {
         Date date = DateTime.now().minusMinutes(REAL_TIME_INTERVAL).toDate();
+        synchronizeDeltaBiData(date);
+    }
+
+    private void synchronizeDeltaBiData(Date date) {
+
         List<DoctorGroupDaily> groupDailyList = doctorGroupDailyDao.findByAfter(date);
         if (Arguments.isNullOrEmpty(groupDailyList)) {
             return;
