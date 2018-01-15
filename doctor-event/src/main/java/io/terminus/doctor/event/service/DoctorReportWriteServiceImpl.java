@@ -69,56 +69,56 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
         params.put("farmIds", farmIds);
         params.put("beginDate", startDate);
         params.put("endDate", endDate);
-        doctorPigEventDao.list(params)
+        Map<Long, List<DoctorPigEvent>> pigEvents = doctorPigEventDao.list(params)
                 .stream()
-                .collect(Collectors.groupingBy(DoctorPigEvent::getPigId))
-                .forEach((pigId, events) -> {
+                .collect(Collectors.groupingBy(DoctorPigEvent::getPigId));
+        pigEvents.forEach((pigId, events) -> {
 
-                    List<DoctorPigEvent> pigAllEvent = doctorPigEventDao.findByPigId(pigId);
+            List<DoctorPigEvent> pigAllEvent = doctorPigEventDao.findByPigId(pigId);
 
-                    List<DoctorPigEvent> filterMultiPreCheckEvents = filterMultiPregnancyCheckEvent(pigAllEvent);
+            List<DoctorPigEvent> filterMultiPreCheckEvents = filterMultiPregnancyCheckEvent(pigAllEvent);
 
-                    for (int i = 0; i < filterMultiPreCheckEvents.size(); i++) {
-                        if (i == filterMultiPreCheckEvents.size() - 1)
-                            break;
+            for (int i = 0; i < filterMultiPreCheckEvents.size(); i++) {
+                if (i == filterMultiPreCheckEvents.size() - 1)
+                    break;
 
-                        DoctorPigEvent currentEvent = filterMultiPreCheckEvents.get(i);
-                        DoctorPigEvent nextEvent = filterMultiPreCheckEvents.get(i + 1);
+                DoctorPigEvent currentEvent = filterMultiPreCheckEvents.get(i);
+                DoctorPigEvent nextEvent = filterMultiPreCheckEvents.get(i + 1);
 
-                        if (nextEvent.getType().equals(PigEvent.CHG_FARM.getKey()) || nextEvent.getType().equals(PigEvent.REMOVAL.getKey()))
-                            break;
+                if (nextEvent.getType().equals(PigEvent.CHG_FARM.getKey()) || nextEvent.getType().equals(PigEvent.REMOVAL.getKey()))
+                    break;
 
 
-                        int days = DateUtil.getDeltaDays(currentEvent.getEventAt(), nextEvent.getEventAt());//天数
-                        int month = new DateTime(nextEvent.getEventAt()).getMonthOfYear();
-                        if (nextEvent.getType().equals(PigEvent.FARROWING.getKey()) || nextEvent.getType().equals(PigEvent.WEAN)) {
-                            if (farmPD.containsKey(nextEvent.getFarmId())) {
-                                Map<Integer, Integer> monthPD = farmPD.get(nextEvent.getFarmId());
-                                if (monthPD.containsKey(month))
-                                    monthPD.put(month, monthPD.get(month) + days);
-                                else
-                                    monthPD.put(month, days);
-                            } else {
-                                Map<Integer, Integer> monthPD = new HashMap<>();
-                                monthPD.put(month, days);
-                                farmPD.put(nextEvent.getFarmId(), monthPD);
-                            }
-                        } else {
-                            if (farmNPD.containsKey(nextEvent.getFarmId())) {
-                                Map<Integer, Integer> monthNPD = farmNPD.get(nextEvent.getFarmId());
-                                if (monthNPD.containsKey(month))
-                                    monthNPD.put(month, monthNPD.get(month) + days);
-                                else
-                                    monthNPD.put(month, days);
-                            } else {
-                                Map<Integer, Integer> monthNPD = new HashMap<>();
-                                monthNPD.put(month, days);
-                                farmNPD.put(nextEvent.getFarmId(), monthNPD);
-                            }
-                        }
+                int days = DateUtil.getDeltaDays(currentEvent.getEventAt(), nextEvent.getEventAt());//天数
+                int month = new DateTime(nextEvent.getEventAt()).getMonthOfYear();
+                if (nextEvent.getType().equals(PigEvent.FARROWING.getKey()) || nextEvent.getType().equals(PigEvent.WEAN)) {
+                    if (farmPD.containsKey(nextEvent.getFarmId())) {
+                        Map<Integer, Integer> monthPD = farmPD.get(nextEvent.getFarmId());
+                        if (monthPD.containsKey(month))
+                            monthPD.put(month, monthPD.get(month) + days);
+                        else
+                            monthPD.put(month, days);
+                    } else {
+                        Map<Integer, Integer> monthPD = new HashMap<>();
+                        monthPD.put(month, days);
+                        farmPD.put(nextEvent.getFarmId(), monthPD);
                     }
+                } else {
+                    if (farmNPD.containsKey(nextEvent.getFarmId())) {
+                        Map<Integer, Integer> monthNPD = farmNPD.get(nextEvent.getFarmId());
+                        if (monthNPD.containsKey(month))
+                            monthNPD.put(month, monthNPD.get(month) + days);
+                        else
+                            monthNPD.put(month, days);
+                    } else {
+                        Map<Integer, Integer> monthNPD = new HashMap<>();
+                        monthNPD.put(month, days);
+                        farmNPD.put(nextEvent.getFarmId(), monthNPD);
+                    }
+                }
+            }
 
-                });
+        });
 
 
         int year = new DateTime(startDate).getYear();
@@ -262,12 +262,30 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                 }
                 break;
             }
-            DoctorPigEvent nextEvent = pigEvents.get(i + 1);
-            if (nextEvent.getType().equals(PigEvent.PREG_CHECK.getKey())) {//下一笔还是妊娠检查事件
-                //如果下一笔还是同一个月的
-                if (new DateTime(nextEvent.getEventAt()).getMonthOfYear() ==
-                        new DateTime(pigEvents.get(i).getEventAt()).getMonthOfYear())
-                    continue;//放弃这一笔的妊娠检查事件
+
+            DoctorPigEvent currentEvent = pigEvents.get(i);
+
+            if (currentEvent.getType().equals(PigEvent.PREG_CHECK.getKey())) {
+
+                //如果是阳性，过滤
+                if (currentEvent.getPregCheckResult().equals(PregCheckResult.YANG.getKey()))
+                    continue;
+
+
+                boolean remove = false;
+                for (int j = i + 1; j < sortedByEventDate.size(); j++) {
+
+                    if (pigEvents.get(j).getType().equals(PigEvent.PREG_CHECK.getKey()))//下一笔还是妊娠检查事件
+                        //如果下一笔还是同一个月的
+                        if (new DateTime(pigEvents.get(j).getEventAt()).getMonthOfYear() ==
+                                new DateTime(pigEvents.get(i).getEventAt()).getMonthOfYear()) {
+                            remove = true;
+                            continue;//放弃这一笔的妊娠检查事件
+                        }
+                }
+                if (remove)
+                    continue;
+
             }
 
             filterMultiPreCheckEvents.add(pigEvents.get(i));
