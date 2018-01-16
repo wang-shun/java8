@@ -108,7 +108,7 @@ public class DoctorDeliverSynchronizer {
         reportBi.setWeedOut(pigDaily.getSowCfWeedOut());
         reportBi.setSale(pigDaily.getSowCfSale());
         reportBi.setChgFarmOut(pigDaily.getSowCfChgFarm());
-        reportBi.setSowPhWeanOut(fieldHelper.filedUrl(filedUrlCriteria, pigDaily.getSowCfIn(), "sowPhWeanOut"));
+        reportBi.setSowPhWeanOut(fieldHelper.filedUrl(filedUrlCriteria, pigDaily.getSowPhWeanIn(), "sowPhWeanOut"));
         reportBi.setOtherChange(pigDaily.getSowCfOtherOut());
 
         reportBi.setEarlyMating(pigDaily.getEarlyMating());

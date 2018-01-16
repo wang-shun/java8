@@ -287,7 +287,6 @@ public class DoctorDailyReportV2Manager {
         doctorPigDaily.setSowCfWeedOut(pigStatisticDao.sowCfWeedOut(criteria));
         doctorPigDaily.setSowCfSale(pigStatisticDao.sowCfSale(criteria));
         doctorPigDaily.setSowCfChgFarm(pigStatisticDao.sowCfChgFarm(criteria));
-        doctorPigDaily.setSowCfWeanOut(pigStatisticDao.sowCfWeanOut(criteria));
         doctorPigDaily.setSowCfOtherOut(pigStatisticDao.sowCfOtherOut(criteria));
         doctorPigDaily.setEarlyMating(pigStatisticDao.earlyMating(criteria));
         doctorPigDaily.setEarlyFarrowNest(pigStatisticDao.earlyFarrowNest(criteria));

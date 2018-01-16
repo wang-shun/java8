@@ -151,10 +151,6 @@ public class DoctorPigStatisticDao {
         return sqlSession.selectOne(sqlId("sowCfChgFarm"), criteria.toMap());
     }
 
-    public Integer sowCfWeanOut(DoctorStatisticCriteria criteria) {
-        return sqlSession.selectOne(sqlId("sowPhWeanIn"), criteria.toMap());
-    }
-
     public Integer sowCfOtherOut(DoctorStatisticCriteria criteria) {
         return sqlSession.selectOne(sqlId("sowCfOtherOut"), criteria.toMap());
     }

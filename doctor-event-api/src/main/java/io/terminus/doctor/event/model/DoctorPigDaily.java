@@ -223,11 +223,6 @@ public class DoctorPigDaily implements Serializable {
     private Integer sowCfChgFarm;
 
     /**
-     * 产房母猪断奶转出
-     */
-    private Integer sowCfWeanOut;
-    
-    /**
      * 产房母猪其他减少数量
      */
     private Integer sowCfOtherOut;
