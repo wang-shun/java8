@@ -2,13 +2,11 @@ package io.terminus.doctor.event.dao;
 
 import io.terminus.common.mysql.dao.MyBatisDao;
 
+import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.model.DoctorReportNpd;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Desc:
@@ -28,5 +26,17 @@ public class DoctorReportNpdDao extends MyBatisDao<DoctorReportNpd> {
 
         return Optional.ofNullable(this.sqlSession.selectOne(this.sqlId("findByFarmAndSumAt"), params));
     }
+
+
+    public List<DoctorReportNpd> sumForDimension(DoctorDimensionCriteria dimensionCriteria) {
+
+
+        return this.sqlSession.selectList(this.sqlId(""));
+    }
+
+    public void delete() {
+        this.sqlSession.delete(this.sqlId("deleteAll"));
+    }
+
 
 }

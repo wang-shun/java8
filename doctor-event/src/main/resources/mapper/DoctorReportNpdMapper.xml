@@ -134,4 +134,8 @@
         WHERE farm_id=#{farmId} and sum_at=#{sumAt}
     </select>
 
+    <delete id="deleteAll">
+        DELETE FROM <include refid="tb"/>
+    </delete>
+
 </mapper>
