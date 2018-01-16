@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.reportBi.synchronizer;
 
+import io.terminus.doctor.event.dao.DoctorWarehouseReportDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportFattenDao;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.reportBi.DoctorFiledUrlCriteria;
@@ -25,11 +26,15 @@ import static java.util.Objects.isNull;
 @Component
 public class DoctorFattenSynchronizer {
     private final DoctorReportFattenDao doctorReportFattenDao;
+    private final DoctorWarehouseReportDao doctorWarehouseReportDao;
     private final FieldHelper fieldHelper;
 
     @Autowired
-    public DoctorFattenSynchronizer(DoctorReportFattenDao doctorReportFattenDao, FieldHelper fieldHelper) {
+    public DoctorFattenSynchronizer(DoctorReportFattenDao doctorReportFattenDao,
+                                    DoctorWarehouseReportDao doctorWarehouseReportDao,
+                                    FieldHelper fieldHelper) {
         this.doctorReportFattenDao = doctorReportFattenDao;
+        this.doctorWarehouseReportDao = doctorWarehouseReportDao;
         this.fieldHelper = fieldHelper;
     }
 
@@ -85,7 +90,9 @@ public class DoctorFattenSynchronizer {
         reportBi.setOutAvgWeight180(outAvgWeight180(groupDaily));
         reportBi.setDeadWeedOutRate(fieldHelper.deadWeedOutRate(groupDaily, reportBi.getOrzType()));
         reportBi.setLivingRate(1 - reportBi.getDeadWeedOutRate());
-        reportBi.setFeedMeatRate(feedMeatRate(groupDaily));
+        reportBi.setFeedMeatRate(feedMeatRate(groupDaily,
+                new DoctorDimensionCriteria(reportBi.getOrzId(), reportBi.getOrzType(), reportBi.getSumAt(),
+                        reportBi.getDateType(), groupDaily.getPigType())));
     }
 
     private Double outAvgWeight180(DoctorGroupDailyExtend dailyExtend) {
@@ -95,8 +102,8 @@ public class DoctorFattenSynchronizer {
                 + EventUtil.getAvgWeight(dailyExtend.getTurnActualWeight(), dailyExtend.getTurnActualCount()) * FACTOR) / FACTOR;
     }
 
-    private Double feedMeatRate(DoctorGroupDailyExtend dailyExtend){
-        return 0.0;
+    private Double feedMeatRate(DoctorGroupDailyExtend dailyExtend,DoctorDimensionCriteria dimensionCriteria){
+        return EventUtil.divide(doctorWarehouseReportDao.materialApply(dimensionCriteria), dailyExtend.getNetWeightGain());
     }
 
     private void insertOrUpdate(DoctorReportFatten reportBi){

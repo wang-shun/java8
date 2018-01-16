@@ -1,6 +1,6 @@
 package io.terminus.doctor.event.dao;
 
-import org.apache.commons.collections.map.HashedMap;
+import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -57,6 +57,15 @@ public class DoctorWarehouseReportDao {
         params.put("startAt", start);
         params.put("endAt", end);
         return sqlSession.selectList(namespace + ".findFarmId", params);
+    }
+
+    /**
+     * 获取不同纬度的饲料消耗
+     * @param dimensionCriteria
+     * @return
+     */
+    public Double materialApply(DoctorDimensionCriteria dimensionCriteria) {
+        return sqlSession.selectOne(namespace + "materialApply", dimensionCriteria);
     }
 
 }
