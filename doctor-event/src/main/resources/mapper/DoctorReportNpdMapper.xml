@@ -134,6 +134,22 @@
         WHERE farm_id=#{farmId} and sum_at=#{sumAt}
     </select>
 
+    <select id="findByOrgAndSumAt" parameterType="map" resultMap="DoctorReportNpdMap">
+        SELECT
+        ifnull(sum(npd),0) as npd,
+        ifnull(sum(pd),0) as pd,
+        ifnull(sum(sow_count),0) as sow_count,
+        ifnull(sum(days),0) as days,
+        sum_at
+        FROM
+        <include refid="tb"/>
+        WHERE
+        <foreach collection="farmIds" item="t" open="(" separator="or" close=")">
+            farm_id=#{t}
+        </foreach>
+        and sum_at=#{sumAt}
+    </select>
+
     <delete id="deleteAll">
         DELETE FROM <include refid="tb"/>
     </delete>

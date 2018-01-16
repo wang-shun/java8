@@ -7,6 +7,7 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
 import io.terminus.doctor.event.dao.DoctorPigDailyDao;
+import io.terminus.doctor.event.dao.DoctorReportNpdDao;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.reportBi.DoctorGroupDailyExtend;
 import io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend;
@@ -14,6 +15,7 @@ import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorPigDaily;
+import io.terminus.doctor.event.model.DoctorReportNpd;
 import io.terminus.doctor.event.reportBi.synchronizer.*;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -38,6 +40,7 @@ import static java.util.Objects.isNull;
 public class DoctorReportBiDataSynchronize {
     private final DoctorPigDailyDao doctorPigDailyDao;
     private final DoctorGroupDailyDao doctorGroupDailyDao;
+    private final DoctorReportNpdDao doctorReportNpdDao;
     private final DoctorReserveSynchronizer reserveSynchronizer;
     private final DoctorFattenSynchronizer fattenSynchronizer;
     private final DoctorNurserySynchronizer nurserySynchronizer;
@@ -54,6 +57,7 @@ public class DoctorReportBiDataSynchronize {
     @Autowired
     public DoctorReportBiDataSynchronize(DoctorPigDailyDao doctorPigDailyDao,
                                          DoctorGroupDailyDao doctorGroupDailyDao,
+                                         DoctorReportNpdDao doctorReportNpdDao,
                                          DoctorReserveSynchronizer reserveSynchronizer,
                                          DoctorFattenSynchronizer fattenSynchronizer,
                                          DoctorNurserySynchronizer nurserySynchronizer,
@@ -65,6 +69,7 @@ public class DoctorReportBiDataSynchronize {
                                          DoctorEfficiencySynchronizer efficiencySynchronizer) {
         this.doctorPigDailyDao = doctorPigDailyDao;
         this.doctorGroupDailyDao = doctorGroupDailyDao;
+        this.doctorReportNpdDao = doctorReportNpdDao;
         this.reserveSynchronizer = reserveSynchronizer;
         this.fattenSynchronizer = fattenSynchronizer;
         this.nurserySynchronizer = nurserySynchronizer;
@@ -263,6 +268,9 @@ public class DoctorReportBiDataSynchronize {
         groupDailyList.forEach(groupDaily -> synchronizeGroupBiData(groupDaily, dimensionCriteria));
         List<DoctorPigDailyExtend> pigDailyList = doctorPigDailyDao.sumForDimension(dimensionCriteria);
         pigDailyList.parallelStream().forEach(pigDaily -> synchronizePigBiData(pigDaily, dimensionCriteria));
+
+        List<DoctorReportNpd> npds = doctorReportNpdDao.sumForDimension(dimensionCriteria);
+        efficiencySynchronizer.sync(npds, dimensionCriteria);
     }
 
     private void synchronizeFullBiDataForDay() {

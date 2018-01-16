@@ -27,6 +27,14 @@ public class DoctorReportNpdDao extends MyBatisDao<DoctorReportNpd> {
         return Optional.ofNullable(this.sqlSession.selectOne(this.sqlId("findByFarmAndSumAt"), params));
     }
 
+    public DoctorReportNpd findByOrgAndSumAt(List<Long> farmIds, Date month) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("farmIds", farmIds);
+        params.put("sumAt", month);
+
+        return this.sqlSession.selectOne(this.sqlId("findByOrgAndSumAt"), params);
+    }
+
 
     public List<DoctorReportNpd> sumForDimension(DoctorDimensionCriteria dimensionCriteria) {
 
