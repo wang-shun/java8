@@ -40,41 +40,6 @@ public class DoctorReserveSynchronizer {
         this.fieldHelper = fieldHelper;
     }
 
-    public DoctorReportReserve buildRealTimeBoar() {
-        return null;
-    }
-
-    public DoctorReportReserve buildDelayBoar(DoctorDimensionCriteria criteria) {
-        return null;
-    }
-
-    public DoctorReportReserve buildRealTimeDeliver() {
-        return null;
-
-    }
-
-    public DoctorReportReserve buildRealTimeEfficiency() {
-        return null;
-
-    }
-
-
-
-    public DoctorReportReserve buildRealTimeMaterial() {
-        return null;
-
-    }
-
-    public DoctorReportReserve buildRealTimeMating() {
-        return null;
-
-    }
-
-    public DoctorReportReserve buildRealTimeNursery() {
-        return null;
-
-    }
-
     public void synchronize(DoctorGroupDailyExtend groupDaily,
                             DoctorDimensionCriteria dimensionCriteria){
         DoctorReportReserve reportBI;

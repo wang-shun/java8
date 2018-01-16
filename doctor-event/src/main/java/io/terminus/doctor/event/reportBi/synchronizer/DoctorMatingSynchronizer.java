@@ -82,10 +82,9 @@ public class DoctorMatingSynchronizer {
         reportBi.setChgFarmOut(pigDaily.getSowPhChgFarm());
         reportBi.setOtherChange(pigDaily.getSowPhOtherOut());
         reportBi.setMatingCount(pigDaily.getMatingCount());
-        // TODO: 18/1/14  已配种 怀孕 空怀 七日
-        reportBi.setMatingSowCount(0);
-        reportBi.setPregnancySowCount(0);
-        reportBi.setNoPregnancySowCount(0);
+        reportBi.setMatingSowCount(pigDaily.getSowPhMating());
+        reportBi.setPregnancySowCount(pigDaily.getSowPhPregnant());
+        reportBi.setNoPregnancySowCount(pigDaily.getSowPhKonghuai());
         reportBi.setPregPositive(fieldHelper.filedUrl(filedUrlCriteria, pigDaily.getPregPositive(), "pregPositive"));
         reportBi.setPregNegative(fieldHelper.filedUrl(filedUrlCriteria, pigDaily.getPregNegative(), "pregNegative"));
         reportBi.setPregFanqing(fieldHelper.filedUrl(filedUrlCriteria, pigDaily.getPregFanqing(), "pregFanqing"));
@@ -102,7 +101,11 @@ public class DoctorMatingSynchronizer {
     }
 
     private void buildDelay(DoctorPigDailyExtend pigDaily, DoctorReportMating reportBi) {
-        reportBi.setMatingRate(0.0);
+        reportBi.setMatingRate(matingRate(pigDaily));
+    }
+
+    private Double matingRate(DoctorPigDailyExtend dailyExtend) {
+        return fieldHelper.get(dailyExtend.getWeanMate(), (dailyExtend.getWeanNest() - dailyExtend.getWeanDeadWeedOut()));
     }
 
     public void deleteAll() {

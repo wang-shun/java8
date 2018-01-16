@@ -86,10 +86,21 @@ public class DoctorNurserySynchronizer {
         reportBi.setToFattenAvgWeight(EventUtil.getAvgWeight(groupDaily.getToFattenWeight(), groupDaily.getToFatten()));
         reportBi.setChgFarmAvgWeight(EventUtil.getAvgWeight(groupDaily.getChgFarmWeight(), groupDaily.getChgFarm()));
         reportBi.setDailyPigCount(groupDaily.getDailyLivestockOnHand());
-        reportBi.setOutAvgWeight70(0.0);
+        reportBi.setOutAvgWeight70(outAvgWeight70(groupDaily));
         reportBi.setDeadWeedOutRate(fieldHelper.deadWeedOutRate(groupDaily, reportBi.getOrzType()));
         reportBi.setLivingRate(1 - reportBi.getDeadWeedOutRate());
-        reportBi.setFeedMeatRate(0.0);
+        reportBi.setFeedMeatRate(feedMeatRate(groupDaily));
+    }
+
+    private Double outAvgWeight70(DoctorGroupDailyExtend dailyExtend) {
+        Integer STANDARD_AGE = 70;
+        Double FACTOR = 1.55;
+        return (STANDARD_AGE - dailyExtend.getTurnActualAge()
+                + EventUtil.getAvgWeight(dailyExtend.getTurnActualWeight(), dailyExtend.getTurnActualCount()) * FACTOR) / FACTOR;
+    }
+
+    private Double feedMeatRate(DoctorGroupDailyExtend dailyExtend){
+        return 0.0;
     }
 
     private void insertOrUpdate(DoctorReportNursery reportBi){

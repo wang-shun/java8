@@ -107,6 +107,11 @@ public class DoctorGroupDaily implements Serializable {
     private Integer toNursery;
 
     /**
+     * 转保育总重
+     */
+    private Double toNurseryWeight;
+
+    /**
      * 转育肥
      */
     private Integer toFatten;
@@ -135,6 +140,36 @@ public class DoctorGroupDaily implements Serializable {
      * 转出总重(死淘、销售、转入育肥等所有减少的重量)
      */
     private Double turnOutWeight;
+
+    /**
+     * 结束猪群转出实际数量（用于计算保育和育肥转出均重）
+     */
+    private Integer turnActualCount;
+
+    /**
+     * 结束猪群转出实际总重量（用于计算保育70日龄和育肥180日龄转出均重）
+     */
+    private Double turnActualWeight;
+
+    /**
+     * 结束猪群转出实际总日龄
+     */
+    private Integer turnActualAge;
+
+    /**
+     * 结束猪群净增重（用于计算保育和育肥料肉比）
+     */
+    private Double netWeightGain;
+
+    /**
+     * 产房转出总重
+     */
+    private Double deliverTurnOutWeight;
+
+    /**
+     * 产房转出总日龄
+     */
+    private Double deliverTurnOutAge;
 
     /**
      * 期末

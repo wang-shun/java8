@@ -473,6 +473,8 @@
         ifnull(sum(preg_negative), 0) as pregNegative,
         ifnull(sum(preg_fanqing), 0) as pregFanqing,
         ifnull(sum(preg_liuchan), 0) as pregLiuchan,
+        ifnull(sum(wean_mate), 0) as weanMate,
+        ifnull(sum(wean_dead_weed_out), 0) as weanDeadWeedOut,
         ifnull(sum(sow_cf_in), 0) as sowCfIn,
         ifnull(sum(sow_cf_in_farm_in), 0) as sowCfInFarmIn,
         ifnull(sum(sow_cf_dead), 0) as sowCfDead,
@@ -480,8 +482,11 @@
         ifnull(sum(sow_cf_dead), 0) as sowCfDead,
         ifnull(sum(sow_cf_sale), 0) as sowCfSale,
         ifnull(sum(sow_cf_chg_farm), 0) as sowCfChgFarm,
+        ifnull(sum(sow_cf_Wean_Out), 0) as sowCfWeanOut,
         ifnull(sum(sow_cf_other_out), 0) as sowCfOtherOut,
+        ifnull(sum(early_mating), 0) as earlyMating,
         ifnull(sum(early_farrow_nest), 0) as earlyFarrowNest,
+        ifnull(sum(later_nest), 0) as laterNest,
         ifnull(sum(farrow_nest), 0) as farrowNest,
         ifnull(sum(farrow_live), 0) as farrowLive,
         ifnull(sum(farrow_health), 0) as farrowHealth,
@@ -589,9 +594,11 @@
         sow_ph_end as sowPhEnd,
         sow_cf_end as sowCfEnd,
         sow_ph_end + sow_cf_end as sowEnd,
-        boar_end as boarEnd
-        FROM
-        <include refid="tb"/>
+        boar_end as boarEnd,
+        sow_ph_mating as sowPhMating,
+        sow_ph_konghuai as sowPhKonghuai,
+        sow_ph_pregnant as sowPhPregnant
+        FROM <include refid="tb"/>
         <include refid="dimensionCri"/>
         order by sum_at desc
         limit 1

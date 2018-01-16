@@ -111,10 +111,11 @@ public class DoctorDeliverSynchronizer {
         reportBi.setSowPhWeanOut(fieldHelper.filedUrl(filedUrlCriteria, pigDaily.getSowCfIn(), "sowPhWeanOut"));
         reportBi.setOtherChange(pigDaily.getSowCfOtherOut());
 
-        reportBi.setEarlyMating(0);
+        reportBi.setEarlyMating(pigDaily.getEarlyMating());
         reportBi.setEarlyNest(pigDaily.getEarlyFarrowNest());
-        reportBi.setEarlyNestRate(fieldHelper.get(pigDaily.getFarrowNest(), reportBi.getEarlyMating()));
-        reportBi.setLaterNest(0);
+        reportBi.setEarlyNestRate(fieldHelper.get(pigDaily.getFarrowNest(), pigDaily.getEarlyMating()));
+        reportBi.setLaterNest(pigDaily.getLaterNest());
+        reportBi.setLaterNestRate(fieldHelper.get(pigDaily.getLaterNest(), pigDaily.getMatingCount()));
         reportBi.setFarrowNest(fieldHelper.filedUrl(filedUrlCriteria, pigDaily.getFarrowNest(), "farrowNest"));
         reportBi.setFarrowAll(pigDaily.getFarrowLive() + pigDaily.getFarrowjmh() + pigDaily.getFarrowDead());
         reportBi.setFarrowLiving(pigDaily.getFarrowLive());
@@ -143,26 +144,33 @@ public class DoctorDeliverSynchronizer {
         reportBi.setPigletStart(groupDaily.getStart());
         reportBi.setPigletOtherIn(0);
         reportBi.setPigletChgFarmOut(groupDaily.getChgFarm());
-        reportBi.setPigletChgFarmOutAvgWeight(EventUtil.getAvgWeight(groupDaily.getChgFarmWeight(), groupDaily.getChgFarm()));
         reportBi.setToNursery(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getToNursery(), "toNursery"));
-        reportBi.setToNurseryAvgWeight(0.0);
         reportBi.setPigletDead(groupDaily.getDead());
         reportBi.setPigletWeedOut(groupDaily.getWeedOut());
         reportBi.setPigletOtherChange(groupDaily.getOtherChange());
-        reportBi.setPigletDeadWeedOutRate(fieldHelper.deadWeedOutRate(groupDaily,reportBi.getOrzType() ));
-        reportBi.setPigletLivingRate(1 - reportBi.getPigletDeadWeedOutRate());
-        reportBi.setTurnOutAvgWeight(0.0);
-        reportBi.setTurnOutDay(0);
-        reportBi.setTurnOutAvgWeight28(0.0);
         reportBi.setPigletSale(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getSale(), "pigletSale"));
-        reportBi.setPigletSaleAveWeight(EventUtil.getAvgWeight(groupDaily.getSaleWeight(), groupDaily.getSale()));
         reportBi.setPigletEnd(groupDaily.getEnd());
     }
 
     private void buildDelay(DoctorPigDailyExtend pigDaily, DoctorReportDeliver reportBi) {
+        reportBi.setTurnOutAvgWeight28(outAvgWeight28(reportBi));
     }
 
     private void buildDelay(DoctorGroupDailyExtend groupDaily, DoctorReportDeliver reportBi) {
+        reportBi.setPigletChgFarmOutAvgWeight(EventUtil.getAvgWeight(groupDaily.getChgFarmWeight(), groupDaily.getChgFarm()));
+        reportBi.setToNurseryAvgWeight(EventUtil.getAvgWeight(groupDaily.getToNurseryWeight(), groupDaily.getToNursery()));
+        reportBi.setPigletDeadWeedOutRate(fieldHelper.deadWeedOutRate(groupDaily,reportBi.getOrzType() ));
+        reportBi.setPigletLivingRate(1 - reportBi.getPigletDeadWeedOutRate());
+        reportBi.setTurnOutAvgWeight(0.0);
+        reportBi.setTurnOutDay(0);
+        reportBi.setPigletSaleAveWeight(EventUtil.getAvgWeight(groupDaily.getSaleWeight(), groupDaily.getSale()));
+    }
+
+    private Double outAvgWeight28(DoctorReportDeliver deliver) {
+        Integer STANDARD_AGE = 28;
+        return (deliver.getWeanWeightPerFarrow() / deliver.getWeanDayAge())
+                * (STANDARD_AGE - deliver.getWeanDayAge())
+                + deliver.getWeanWeightPerFarrow();
     }
 
 //    private Integer pigletOtherIn(DoctorGroupDailyExtend groupDaily, String orzType){

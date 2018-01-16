@@ -131,7 +131,22 @@ public class DoctorPigDaily implements Serializable {
      * 配种数
      */
     private Integer matingCount;
-    
+
+    /**
+     * 配怀舍配种母猪数
+     */
+    private Integer sowPhMating;
+
+    /**
+     * 配怀空怀母猪数
+     */
+    private Integer sowPhKonghuai;
+
+    /**
+     * 配怀怀孕母猪数
+     */
+    private Integer sowPhPregnant;
+
     /**
      * 妊娠检查阳性头数
      */
@@ -151,6 +166,16 @@ public class DoctorPigDaily implements Serializable {
      * 妊娠检查流产头数
      */
     private Integer pregLiuchan;
+
+    /**
+     * 断奶母猪7日配种数
+     */
+    private Integer weanMate;
+
+    /**
+     * 断奶母猪7日死淘数
+     */
+    private Integer weanDeadWeedOut;
     
     /**
      * 配怀母猪期末头数
@@ -196,16 +221,31 @@ public class DoctorPigDaily implements Serializable {
      * 产房母猪转场数量
      */
     private Integer sowCfChgFarm;
+
+    /**
+     * 产房母猪断奶转出
+     */
+    private Integer sowCfWeanOut;
     
     /**
      * 产房母猪其他减少数量
      */
     private Integer sowCfOtherOut;
-    
+
+    /**
+     * 前期配种数量
+     */
+    private Integer earlyMating;
+
     /**
      * 产房前期分娩窝数
      */
     private Integer earlyFarrowNest;
+
+    /**
+     * 后期分娩窝数
+     */
+    private Integer laterNest;
     
     /**
      * 产房分娩窝数
