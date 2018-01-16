@@ -3,6 +3,7 @@ package io.terminus.doctor.event.cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.dto.DoctorDepartmentLinerDto;
 import io.terminus.doctor.user.service.DoctorDepartmentReadService;
@@ -19,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class DoctorDepartmentCache {
     private LoadingCache<Long, DoctorDepartmentLinerDto> organizationCache;
-//    @RpcConsumer
+    @RpcConsumer
     private DoctorDepartmentReadService doctorDepartmentReadService;
 
     @PostConstruct
