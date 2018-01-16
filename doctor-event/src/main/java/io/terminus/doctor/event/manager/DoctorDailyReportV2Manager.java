@@ -194,6 +194,7 @@ public class DoctorDailyReportV2Manager {
      */
     private void flushDeliverDaily(DoctorGroupDaily doctorGroupDaily, DoctorStatisticCriteria criteria){
         doctorGroupDaily.setToNursery(groupStatisticDao.toNursery(criteria));
+        doctorGroupDaily.setToNurseryWeight(groupStatisticDao.toNurseryWeight(criteria));
     }
 
     /**
@@ -206,6 +207,10 @@ public class DoctorDailyReportV2Manager {
         doctorGroupDaily.setToFattenWeight(groupStatisticDao.toFattenWeight(criteria));
         doctorGroupDaily.setToHoubei(groupStatisticDao.toHoubei(criteria));
         doctorGroupDaily.setToHoubeiWeight(groupStatisticDao.toHoubeiWeight(criteria));
+        doctorGroupDaily.setTurnActualCount(groupStatisticDao.turnActualCount(criteria));
+        doctorGroupDaily.setTurnActualWeight(groupStatisticDao.turnActualWeight(criteria));
+        doctorGroupDaily.setTurnActualAge(groupStatisticDao.turnActualAge(criteria));
+        doctorGroupDaily.setNetWeightGain(groupStatisticDao.netWeightGain(criteria));
     }
 
     /**
@@ -216,6 +221,10 @@ public class DoctorDailyReportV2Manager {
     private void flushFattenDaily(DoctorGroupDaily doctorGroupDaily, DoctorStatisticCriteria criteria){
         doctorGroupDaily.setToHoubei(groupStatisticDao.toHoubei(criteria));
         doctorGroupDaily.setToHoubeiWeight(groupStatisticDao.toHoubeiWeight(criteria));
+        doctorGroupDaily.setTurnActualCount(groupStatisticDao.turnActualCount(criteria));
+        doctorGroupDaily.setTurnActualWeight(groupStatisticDao.turnActualWeight(criteria));
+        doctorGroupDaily.setTurnActualAge(groupStatisticDao.turnActualAge(criteria));
+        doctorGroupDaily.setNetWeightGain(groupStatisticDao.netWeightGain(criteria));
     }
 
     /**
@@ -251,10 +260,15 @@ public class DoctorDailyReportV2Manager {
         doctorPigDaily.setMateLc(pigStatisticDao.mateLc(criteria));
         doctorPigDaily.setMateYx(pigStatisticDao.mateYx(criteria));
         doctorPigDaily.setMatingCount(pigStatisticDao.matingCount(criteria));
+        doctorPigDaily.setSowPhMating(pigStatisticDao.sowPhMating(criteria));
+        doctorPigDaily.setSowPhKonghuai(pigStatisticDao.sowPhKonghuai(criteria));
+        doctorPigDaily.setSowPhPregnant(pigStatisticDao.sowPhPregnant(criteria));
         doctorPigDaily.setPregPositive(pigStatisticDao.pregPositive(criteria));
         doctorPigDaily.setPregNegative(pigStatisticDao.pregNegative(criteria));
         doctorPigDaily.setPregFanqing(pigStatisticDao.pregFanqing(criteria));
         doctorPigDaily.setPregLiuchan(pigStatisticDao.pregLiuchan(criteria));
+        doctorPigDaily.setWeanMate(pigStatisticDao.weanMate(criteria));
+        doctorPigDaily.setWeanDeadWeedOut(pigStatisticDao.weanDeadWeedOut(criteria));
         doctorPigDaily.setSowPhEnd(pigStatisticDao.phLiveStock(criteria.getFarmId(), criteria.getSumAt()));
     }
 
@@ -273,8 +287,11 @@ public class DoctorDailyReportV2Manager {
         doctorPigDaily.setSowCfWeedOut(pigStatisticDao.sowCfWeedOut(criteria));
         doctorPigDaily.setSowCfSale(pigStatisticDao.sowCfSale(criteria));
         doctorPigDaily.setSowCfChgFarm(pigStatisticDao.sowCfChgFarm(criteria));
+        doctorPigDaily.setSowCfWeanOut(pigStatisticDao.sowCfWeanOut(criteria));
         doctorPigDaily.setSowCfOtherOut(pigStatisticDao.sowCfOtherOut(criteria));
+        doctorPigDaily.setEarlyMating(pigStatisticDao.earlyMating(criteria));
         doctorPigDaily.setEarlyFarrowNest(pigStatisticDao.earlyFarrowNest(criteria));
+        doctorPigDaily.setLaterNest(pigStatisticDao.laterNest(criteria));
         doctorPigDaily.setFarrowNest(pigStatisticDao.farrowNest(criteria));
         doctorPigDaily.setFarrowLive(pigStatisticDao.farrowLive(criteria));
         doctorPigDaily.setFarrowHealth(pigStatisticDao.farrowHealth(criteria));
@@ -285,7 +302,7 @@ public class DoctorDailyReportV2Manager {
         doctorPigDaily.setWeanNest(pigStatisticDao.weanNest(criteria));
         doctorPigDaily.setWeanQualifiedCount(pigStatisticDao.weanQualifiedCount(criteria));
         doctorPigDaily.setWeanCount(pigStatisticDao.weanCount(criteria));
-//        doctorPigDaily.setWeanCount(pigStatisticDao.weanDayAge(criteria));
+        doctorPigDaily.setWeanDayAge(pigStatisticDao.weanDayAge(criteria));
         doctorPigDaily.setWeanWeight(pigStatisticDao.weanWeight(criteria));
     }
 

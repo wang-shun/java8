@@ -91,6 +91,18 @@ public class DoctorPigStatisticDao {
         return sqlSession.selectOne(sqlId("matingCount"), criteria.toMap());
     }
 
+    public Integer sowPhMating(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("sowPhMating"), criteria.toMap());
+    }
+
+    public Integer sowPhKonghuai(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("sowPhKonghuai"), criteria.toMap());
+    }
+
+    public Integer sowPhPregnant(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("sowPhPregnant"), criteria.toMap());
+    }
+
     public Integer pregPositive(DoctorStatisticCriteria criteria) {
         return sqlSession.selectOne(sqlId("pregPositive"), criteria.toMap());
     }
@@ -105,6 +117,14 @@ public class DoctorPigStatisticDao {
 
     public Integer pregLiuchan(DoctorStatisticCriteria criteria) {
         return sqlSession.selectOne(sqlId("pregLiuchan"), criteria.toMap());
+    }
+
+    public Integer weanMate(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("weanMate"), criteria.toMap());
+    }
+
+    public Integer weanDeadWeedOut(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("weanDeadWeedOut"), criteria.toMap());
     }
 
     public Integer sowCfIn(DoctorStatisticCriteria criteria) {
@@ -131,11 +151,23 @@ public class DoctorPigStatisticDao {
         return sqlSession.selectOne(sqlId("sowCfChgFarm"), criteria.toMap());
     }
 
+    public Integer sowCfWeanOut(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("sowPhWeanIn"), criteria.toMap());
+    }
+
     public Integer sowCfOtherOut(DoctorStatisticCriteria criteria) {
         return sqlSession.selectOne(sqlId("sowCfOtherOut"), criteria.toMap());
     }
 
+    public Integer earlyMating(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("earlyMating"), criteria.toMap());
+    }
+
     public Integer earlyFarrowNest(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("earlyFarrowNest"), criteria.toMap());
+    }
+
+    public Integer laterNest(DoctorStatisticCriteria criteria) {
         return sqlSession.selectOne(sqlId("earlyFarrowNest"), criteria.toMap());
     }
 
@@ -177,6 +209,10 @@ public class DoctorPigStatisticDao {
 
     public Integer weanCount(DoctorStatisticCriteria criteria) {
         return sqlSession.selectOne(sqlId("weanCount"), criteria.toMap());
+    }
+
+    public Integer weanDayAge(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("weanDayAge"), criteria.toMap());
     }
 
     public Double weanWeight(DoctorStatisticCriteria criteria) {

@@ -76,6 +76,10 @@ public class DoctorGroupStatisticDao {
         return sqlSession.selectOne(sqlId("toNursery"), criteria.toMap());
     }
 
+    public Double toNurseryWeight(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("toNurseryWeight"), criteria.toMap());
+    }
+
     public Integer toFatten(DoctorStatisticCriteria criteria) {
         return sqlSession.selectOne(sqlId("toFatten"), criteria.toMap());
     }
@@ -98,6 +102,30 @@ public class DoctorGroupStatisticDao {
 
     public Double turnOutWeight(DoctorStatisticCriteria criteria) {
         return sqlSession.selectOne(sqlId("turnOutWeight"), criteria.toMap());
+    }
+
+    public Integer turnActualCount(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("turnActualCount"), criteria.toMap());
+    }
+
+    public Double turnActualWeight(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("turnActualWeight"), criteria.toMap());
+    }
+
+    public Integer turnActualAge(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("turnActualAge"), criteria.toMap());
+    }
+
+    public Double netWeightGain(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("netWeightGain"), criteria.toMap());
+    }
+
+    public Double deliverTurnOutWeight(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("deliverTurnOutWeight"), criteria.toMap());
+    }
+
+    public Double deliverTurnOutAge(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("deliverTurnOutAge"), criteria.toMap());
     }
 
     public Integer groupLiveStock(Long groupId, String date) {

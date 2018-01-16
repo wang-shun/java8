@@ -250,6 +250,90 @@
         </where>
     </select>
 
+    <select id="sowPhMating" parameterType="map" resultType="int" >
+        select
+        (
+        select count(1)
+        from doctor_pig_tracks
+        where status = 3
+        and farm_id = #{farmId}
+        and current_barn_type in(5,6)
+        )
+        -
+        (
+        select ifnull(sum(
+        case when type = 20 and pig_status_before = 3 then 1 else 0 end +
+        case when type = 9 and current_mating_count =1 then 1 else 0 end -
+        case when type in (2,6,11) and pig_status_before = 3 then 1 else 0 end)
+        ,0)
+        from doctor_pig_events
+        where event_at &gt; #{startAt}
+        and farm_id = #{farmId}
+        and type in(2, 6, 9, 11)
+        and barn_type in(5,6)
+        and status =1
+        and kind = 1
+        and event_source != 5
+        )
+    </select>
+
+    <select id="sowPhKonghuai" parameterType="map" resultType="int" >
+        select
+        (
+        select count(1)
+        from doctor_pig_tracks
+        where status in (1,5,9)
+        and farm_id = #{farmId}
+        and current_barn_type in(5,6)
+        )
+        -
+        (
+        select ifnull(sum(
+        case when type = 7 then 1 else 0 end +
+        case when type = 12 then 1 else 0 end +
+        case when type = 20 and barn_type in(5,6) and pig_status_before in (1,5,9) then 1 else 0 end +
+        case when type = 11 and pig_status_before != 5 and pig_status_after = 5 then 1 else 0 end -
+        case when barn_type in(5,6) and pig_status_before in (1,5,9) and pig_status_after not in(1,5,9) then 1 else 0 end
+        )
+        ,0)
+        from doctor_pig_events
+        where event_at &gt; #{startAt}
+        and farm_id = #{farmId}
+        and type in(2,6,7,9,11,12,20)
+        and status =1
+        and kind = 1
+        and event_source != 5
+        )
+    </select>
+
+    <select id="sowPhPregnant" parameterType="map" resultType="int" >
+        select
+        (
+        select count(1)
+        from doctor_pig_tracks
+        where status = 4
+        and farm_id = #{farmId}
+        and current_barn_type in(5,6)
+        )
+        -
+        (
+        select ifnull(sum(
+        case when type in (11,20) and pig_status_after = 4 then 1 else 0 end -
+        case when type in (2,6,11,14) and pig_status_before = 4  then 1 else 0 end
+        )
+        ,0)
+        from doctor_pig_events
+        where event_at &gt; #{startAt}
+        and farm_id = #{farmId}
+        and type in(2,6,11,14,20)
+        and barn_type in(5,6)
+        and status =1
+        and kind = 1
+        and event_source != 5
+        )
+    </select>
+
+
     <select id="pregPositive" parameterType="map" resultType="int">
         SELECT ifnull(count(1), 0)
         FROM doctor_pig_events
@@ -291,6 +375,30 @@
             AND `type` = 11
             AND preg_check_result = 3
             AND barn_type in (5,6)
+        </where>
+    </select>
+
+    <select id="weanMate" parameterType="map" resultType="int">
+        SELECT count(1)
+        FROM doctor_pig_events a left join doctor_pig_events b on a.pig_id = b.pig_id
+        <where>
+            a.farm_id = #{farmId}
+            and a.type = 16
+            and b.type = 9
+            and b.current_mating_count = 1
+            and datediff(a.event_at, b.event_at) &lt;= 7;
+        </where>
+    </select>
+
+    <select id="weanDeadWeedOut" parameterType="map" resultType="int">
+        SELECT count(1)
+        FROM doctor_pig_events a left join doctor_pig_events b on a.pig_id = b.pig_id
+        <where>
+            a.farm_id = #{farmId}
+            and a.type = 16
+            and b.type = 6
+            AND b.change_type_id in (110,111)
+            and datediff(a.event_at, b.event_at) &lt;= 7;
         </where>
     </select>
 
@@ -369,6 +477,28 @@
             AND `type` = 6
             AND barn_type = 7
             AND change_type_id not in( 109, 110, 111)
+        </where>
+    </select>
+
+    <select id="earlyMating" parameterType="map" resultType="int">
+        select count(1)
+        FROM doctor_pig_events
+        <where>
+            farm_id = #{farmId}
+            and `type` = 9
+            and current_mating_count = 1
+            and event_at = date_sub(#{sumAt}, INTERVAL 114 DAY )
+        </where>
+    </select>
+
+    <select id="laterNest" parameterType="map" resultType="int">
+        select count(1)
+        FROM doctor_pig_events
+        <where>
+            farm_id = #{farmId}
+            and `type` = 9
+            and current_mating_count = 1
+            and event_at = date_add(#{sumAt}, INTERVAL 114 DAY )
         </where>
     </select>
 
@@ -472,6 +602,16 @@
             AND `type` = 16
         </where>
     </select>
+
+    <select id="weanDayAge" parameterType="map" resultType="int">
+        SELECT ifnull(sum(wean_count * feed_days) , 0)
+        FROM doctor_pig_events
+        <where>
+            <include refid="criteria" />
+            AND `type` = 16
+        </where>
+    </select>
+
 
     <select id="weanWeight" parameterType="map" resultType="double">
         SELECT ifnull(sum(wean_avg_weight), 0)

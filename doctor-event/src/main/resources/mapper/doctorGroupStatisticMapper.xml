@@ -193,6 +193,17 @@
         </where>
     </select>
 
+    <select id="toNurseryWeight" parameterType="map" resultType="double">
+        SELECT
+        ifnull(sum(weight), 0)
+        from doctor_group_events
+        <where>
+            <include refid="groupCriteria"/>
+            and `type` = 4
+            and trans_group_type = 1
+        </where>
+    </select>
+
     <select id="toFatten" parameterType="map" resultType="int">
         SELECT
         ifnull(sum(quantity), 0)
@@ -260,6 +271,100 @@
             and `type` in (3,4,5,9)
             and trans_group_type = 1
         </where>
+    </select>
+
+    <select id="turnActualCount" parameterType="map" resultType="int">
+        SELECT
+        ifnull(sum(quantity), 0)
+        from doctor_groups a left join doctor_group_events b on a.id = b.group_id
+        <where>
+            <include refid="groupCriteria"/>
+            <if test="pigType = 2">and
+                (
+                  (`type` = 4 and trans_group_type = 1 and other_barn_type = 3 )
+                  OR (`type` = 3 and change_type_id = 109)
+                )
+            </if>
+            <if test="pigType = 3">and
+                (
+                  (`type` = 4 and trans_group_type = 1 and other_barn_type = 4 )
+                  OR (`type` = 3 and change_type_id = 109)
+                )
+            </if>
+        </where>
+    </select>
+
+    <select id="turnActualWeight" parameterType="map" resultType="double">
+        SELECT
+        ifnull(sum(weight), 0)
+        from doctor_groups a left join doctor_group_events b on a.id = b.group_id
+        <where>
+            <include refid="groupCriteria"/>
+            <if test="pigType = 2">and
+                (
+                (`type` = 4 and trans_group_type = 1 and other_barn_type = 3 )
+                OR (`type` = 3 and change_type_id = 109)
+                )
+            </if>
+            <if test="pigType = 3">and
+                (
+                (`type` = 4 and trans_group_type = 1 and other_barn_type = 4 )
+                OR (`type` = 3 and change_type_id = 109)
+                )
+            </if>
+        </where>
+    </select>
+
+    <select id="turnActualAge" parameterType="map" resultType="int">
+        SELECT
+        ifnull(sum(quantity * avg_day_age), 0)
+        from doctor_groups a left join doctor_group_events b on a.id = b.group_id
+        <where>
+            <include refid="groupCriteria"/>
+            <if test="pigType = 2">and
+                (
+                (`type` = 4 and trans_group_type = 1 and other_barn_type = 3 )
+                OR (`type` = 3 and change_type_id = 109)
+                )
+            </if>
+            <if test="pigType = 3">and
+                (
+                (`type` = 4 and trans_group_type = 1 and other_barn_type = 4 )
+                OR (`type` = 3 and change_type_id = 109)
+                )
+            </if>
+        </where>
+    </select>
+
+    <select id="netWeightGain" parameterType="map" resultType="double">
+        SELECT
+        (
+        SELECT
+        ifnull(b.weight)
+        FROM doctor_groups a left join doctor_group_events b on a.id = b.group_id
+        <where>
+            a.farm_id = #{farmId}
+            AND a.pig_type = b.pig_type
+            AND a.status = -1
+            AND date_format(a.close_at, '%Y-%m-%d') = #{sumAt}
+            AND `type` in (3,4,9)
+        </where>
+        )
+        -
+        (
+        SELECT
+        ifnull(b.weight)
+        FROM doctor_groups a left join doctor_group_events b on a.id = b.group_id
+        <where>
+            a.farm_id = #{farmId}
+            AND a.pig_type = b.pig_type
+            AND a.status = -1
+            AND date_format(a.close_at, '%Y-%m-%d') = #{sumAt}
+            AND `type` = 2
+            AND trans_group_type = 1
+        </where>
+        )
+        FROM dual
     </select>
 
 </mapper>
