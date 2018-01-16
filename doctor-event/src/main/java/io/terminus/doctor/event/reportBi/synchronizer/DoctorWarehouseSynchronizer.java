@@ -5,6 +5,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorWarehouseReportDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportMaterialDao;
 import io.terminus.doctor.event.enums.DateDimension;
+import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.enums.ReportTime;
 import io.terminus.doctor.event.model.DoctorReportMaterial;
 import io.terminus.doctor.event.reportBi.helper.DateHelper;
@@ -54,10 +55,10 @@ public class DoctorWarehouseSynchronizer {
             DoctorReportMaterial material = new DoctorReportMaterial();
             material.setSumAt(date);
             material.setSumAtName(DateHelper.dateCN(date, DateDimension.DAY));
-            material.setDateType("日");
+            material.setDateType(DateDimension.DAY.getValue());
             material.setOrzId(f);
             material.setOrzName(farm == null ? "" : farm.getName());
-            material.setOrzType("猪场");
+            material.setOrzType(OrzDimension.FARM.getValue());
 
             fill(material, result);
 
@@ -74,10 +75,10 @@ public class DoctorWarehouseSynchronizer {
             DoctorReportMaterial material = new DoctorReportMaterial();
             material.setSumAt(date);
             material.setSumAtName(DateHelper.dateCN(date, DateDimension.DAY));
-            material.setDateType("日");
+            material.setDateType(DateDimension.DAY.getValue());
             material.setOrzId(o);
             material.setOrzName(org == null ? "" : org.getName());
-            material.setOrzType("公司");
+            material.setOrzType(OrzDimension.ORG.getValue());
 
             fill(material, result);
 
@@ -99,10 +100,10 @@ public class DoctorWarehouseSynchronizer {
             DoctorReportMaterial material = new DoctorReportMaterial();
             material.setSumAt(date);
             material.setSumAtName(DateHelper.dateCN(date, DateDimension.DAY));
-            material.setDateType("周");
+            material.setDateType(DateDimension.WEEK.getValue());
             material.setOrzId(f);
             material.setOrzName(farm == null ? "" : farm.getName());
-            material.setOrzType("猪场");
+            material.setOrzType(OrzDimension.FARM.getValue());
 
             fill(material, result);
 
@@ -118,10 +119,10 @@ public class DoctorWarehouseSynchronizer {
             DoctorReportMaterial material = new DoctorReportMaterial();
             material.setSumAt(date);
             material.setSumAtName(DateHelper.dateCN(date, DateDimension.DAY));
-            material.setDateType("周");
+            material.setDateType(DateDimension.WEEK.getValue());
             material.setOrzId(o);
             material.setOrzName(org == null ? "" : org.getName());
-            material.setOrzType("公司");
+            material.setOrzType(OrzDimension.ORG.getValue());
 
             fill(material, result);
 
@@ -143,10 +144,10 @@ public class DoctorWarehouseSynchronizer {
             DoctorReportMaterial material = new DoctorReportMaterial();
             material.setSumAt(date);
             material.setSumAtName(DateHelper.dateCN(date, DateDimension.DAY));
-            material.setDateType("月");
+            material.setDateType(DateDimension.MONTH.getValue());
             material.setOrzId(f);
             material.setOrzName(farm == null ? "" : farm.getName());
-            material.setOrzType("猪场");
+            material.setOrzType(OrzDimension.FARM.getValue());
 
             fill(material, result);
 
@@ -162,10 +163,10 @@ public class DoctorWarehouseSynchronizer {
             DoctorReportMaterial material = new DoctorReportMaterial();
             material.setSumAt(date);
             material.setSumAtName(DateHelper.dateCN(date, DateDimension.DAY));
-            material.setDateType("月");
+            material.setDateType(DateDimension.MONTH.getValue());
             material.setOrzId(o);
             material.setOrzName(org == null ? "" : org.getName());
-            material.setOrzType("公司");
+            material.setOrzType(OrzDimension.ORG.getValue());
 
             fill(material, result);
 
@@ -187,10 +188,10 @@ public class DoctorWarehouseSynchronizer {
             DoctorReportMaterial material = new DoctorReportMaterial();
             material.setSumAt(date);
             material.setSumAtName(DateHelper.dateCN(date, DateDimension.DAY));
-            material.setDateType("季");
+            material.setDateType(DateDimension.QUARTER.getValue());
             material.setOrzId(f);
             material.setOrzName(farm == null ? "" : farm.getName());
-            material.setOrzType("猪场");
+            material.setOrzType(OrzDimension.FARM.getValue());
 
             fill(material, result);
 
@@ -206,10 +207,10 @@ public class DoctorWarehouseSynchronizer {
             DoctorReportMaterial material = new DoctorReportMaterial();
             material.setSumAt(date);
             material.setSumAtName(DateHelper.dateCN(date, DateDimension.DAY));
-            material.setDateType("季");
+            material.setDateType(DateDimension.QUARTER.getValue());
             material.setOrzId(o);
             material.setOrzName(org == null ? "" : org.getName());
-            material.setOrzType("公司");
+            material.setOrzType(OrzDimension.ORG.getValue());
 
             fill(material, result);
 
@@ -231,10 +232,10 @@ public class DoctorWarehouseSynchronizer {
             DoctorReportMaterial material = new DoctorReportMaterial();
             material.setSumAt(date);
             material.setSumAtName(DateHelper.dateCN(date, DateDimension.DAY));
-            material.setDateType("年");
+            material.setDateType(DateDimension.YEAR.getValue());
             material.setOrzId(f);
             material.setOrzName(farm == null ? "" : farm.getName());
-            material.setOrzType("猪场");
+            material.setOrzType(OrzDimension.FARM.getValue());
 
             fill(material, result);
 
@@ -250,10 +251,10 @@ public class DoctorWarehouseSynchronizer {
             DoctorReportMaterial material = new DoctorReportMaterial();
             material.setSumAt(date);
             material.setSumAtName(DateHelper.dateCN(date, DateDimension.DAY));
-            material.setDateType("年");
+            material.setDateType(DateDimension.YEAR.getValue());
             material.setOrzId(o);
             material.setOrzName(org == null ? "" : org.getName());
-            material.setOrzType("公司");
+            material.setOrzType(OrzDimension.ORG.getValue());
 
             fill(material, result);
 
