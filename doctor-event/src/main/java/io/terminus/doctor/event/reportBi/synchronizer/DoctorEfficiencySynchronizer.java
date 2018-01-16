@@ -78,10 +78,9 @@ public class DoctorEfficiencySynchronizer {
             //非生产天数=非生产天数/母猪存栏/天数
             efficiency.setNpd(npd.getNpd() / (npd.getSowCount() / npd.getDays()));
             //年产胎次（月）=365-非生产天数*12/生产天数/总窝数
-            efficiency.setBirthPerYear((365 - efficiency.getNpd()) * 12 / (npd.getPd() / pigDaily.getFarrowNest()));
+            efficiency.setBirthPerYear((365 - efficiency.getNpd()) * 12 / ((npd.getPregnancy() + npd.getLactation()) / pigDaily.getFarrowNest()));
             //psy=年产胎次*断奶仔猪数/断奶窝数
             efficiency.setPsy(efficiency.getBirthPerYear() * (pigDaily.getWeanCount() / pigDaily.getWeanNest()));
-
 
 
             doctorReportEfficiencyDao.create(efficiency);
@@ -104,7 +103,7 @@ public class DoctorEfficiencySynchronizer {
                     //非生产天数=非生产天数/母猪存栏/天数
                     orgEfficiency.setNpd(npd.getNpd() / (npd.getSowCount() / npd.getDays()));
                     //年产胎次（月）=365-非生产天数*12/生产天数/总窝数
-                    orgEfficiency.setBirthPerYear((365 - efficiency.getNpd()) * 12 / (npd.getPd() / pigDaily.getFarrowNest()));
+                    orgEfficiency.setBirthPerYear((365 - efficiency.getNpd()) * 12 / ((npd.getPregnancy() + npd.getLactation()) / pigDaily.getFarrowNest()));
 
                     doctorReportEfficiencyDao.create(orgEfficiency);
                 }

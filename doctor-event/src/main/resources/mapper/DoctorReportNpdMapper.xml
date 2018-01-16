@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2018-01-15 20:20:39
+ ~ Date: 2018-01-16 14:50:06
  ~ Created by [ your name ]
 -->
 
@@ -13,9 +13,10 @@
         <result property="farmId" column="farm_id"/>
         <result property="sumAt" column="sum_at"/>
         <result property="npd" column="npd"/>
-        <result property="pd" column="pd"/>
+        <result property="pregnancy" column="pregnancy"/>
         <result property="sowCount" column="sow_count"/>
         <result property="days" column="days"/>
+        <result property="lactation" column="lactation"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
@@ -30,12 +31,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`, `sum_at`, `npd`, `pd`, `sow_count`, `days`,
+        `farm_id`, `sum_at`, `npd`, `pregnancy`, `sow_count`, `days`, `lactation`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{sumAt}, #{npd}, #{pd}, #{sowCount}, #{days},
+        #{farmId}, #{sumAt}, #{npd}, #{pregnancy}, #{sowCount}, #{days}, #{lactation}, 
         now(), now()
     </sql>
 
@@ -44,9 +45,10 @@
             <if test="farmId != null">AND `farm_id` = #{farmId}</if>
             <if test="sumAt != null">AND `sum_at` = #{sumAt}</if>
             <if test="npd != null">AND `npd` = #{npd}</if>
-            <if test="pd != null">AND `pd` = #{pd}</if>
+            <if test="pregnancy != null">AND `pregnancy` = #{pregnancy}</if>
             <if test="sowCount != null">AND `sow_count` = #{sowCount}</if>
             <if test="days != null">AND `days` = #{days}</if>
+            <if test="lactation != null">AND `lactation` = #{lactation}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
         </where>
@@ -86,42 +88,37 @@
             <if test="farmId != null">`farm_id` = #{farmId},</if>
             <if test="sumAt != null">`sum_at` = #{sumAt},</if>
             <if test="npd != null">`npd` = #{npd},</if>
-            <if test="pd != null">`pd` = #{pd},</if>
+            <if test="pregnancy != null">`pregnancy` = #{pregnancy},</if>
             <if test="sowCount != null">`sow_count` = #{sowCount},</if>
             <if test="days != null">`days` = #{days},</if>
+            <if test="lactation != null">`lactation` = #{lactation},</if>
             updated_at = now()
         </set>
         WHERE id = #{id}
     </update>
 
     <delete id="delete" parameterType="long">
-        DELETE FROM
-        <include refid="tb"/>
+        DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
-
+    
     <select id="count" parameterType="map" resultType="long">
         SELECT COUNT(1)
-        FROM
-        <include refid="tb"/>
+        FROM <include refid="tb"/>
         <include refid="criteria"/>
     </select>
 
     <select id="paging" parameterType="map" resultMap="DoctorReportNpdMap">
-        SELECT
-        <include refid="cols_all"/>
-        FROM
-        <include refid="tb"/>
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
         LIMIT #{offset}, #{limit}
     </select>
 
     <select id="list" parameterType="map" resultMap="DoctorReportNpdMap">
-        SELECT
-        <include refid="cols_all"/>
-        FROM
-        <include refid="tb"/>
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
     </select>
@@ -137,7 +134,8 @@
     <select id="findByOrgAndSumAt" parameterType="map" resultMap="DoctorReportNpdMap">
         SELECT
         ifnull(sum(npd),0) as npd,
-        ifnull(sum(pd),0) as pd,
+        ifnull(sum(pregnancy),0) as pregnancy,
+        ifnull(sum(lactation),0) as lactation,
         ifnull(sum(sow_count),0) as sow_count,
         ifnull(sum(days),0) as days,
         sum_at

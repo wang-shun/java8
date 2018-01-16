@@ -1967,3 +1967,8 @@ ALTER TABLE doctor_report_npds
 ALTER TABLE doctor_report_npds ADD pd INT NULL COMMENT '生产天数';
 ALTER TABLE doctor_report_npds
   MODIFY COLUMN pd INT COMMENT '生产天数' AFTER npd;
+
+ALTER TABLE doctor_report_npds ADD lactation INT NULL COMMENT '哺乳期';
+ALTER TABLE doctor_report_npds CHANGE pd pregnancy INT(11) COMMENT '怀孕期';
+ALTER TABLE doctor_report_npds
+  MODIFY COLUMN lactation INT(11) COMMENT '哺乳期' AFTER days;

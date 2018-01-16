@@ -55,8 +55,9 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
     public void flushNPD(List<Long> farmIds, Date startDate, Date endDate) {
 
 
-        Map<Long/*farmID*/, Map<Integer/*month*/, Integer>> farmPD = new HashMap<>();
-        Map<Long/*farmID*/, Map<Integer/*month*/, Integer>> farmNPD = new HashMap<>();
+        Map<Long/*farmID*/, Map<Integer/*month*/, Integer/*怀孕天数*/>> farmPregnancy = new HashMap<>();
+        Map<Long/*farmID*/, Map<Integer/*month*/, Integer/*哺乳天数*/>> farmLactation = new HashMap<>();
+        Map<Long/*farmID*/, Map<Integer/*month*/, Integer/*非生产天数*/>> farmNPD = new HashMap<>();
 
 
 //            DateTime d = new DateTime(year, i, 1, 0, 0);
@@ -89,17 +90,29 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
 
                 int days = DateUtil.getDeltaDays(currentEvent.getEventAt(), nextEvent.getEventAt());//天数
                 int month = new DateTime(nextEvent.getEventAt()).getMonthOfYear();
-                if (nextEvent.getType().equals(PigEvent.FARROWING.getKey()) || nextEvent.getType().equals(PigEvent.WEAN)) {
-                    if (farmPD.containsKey(nextEvent.getFarmId())) {
-                        Map<Integer, Integer> monthPD = farmPD.get(nextEvent.getFarmId());
-                        if (monthPD.containsKey(month))
-                            monthPD.put(month, monthPD.get(month) + days);
+                if (nextEvent.getType().equals(PigEvent.FARROWING.getKey())) {
+                    if (farmPregnancy.containsKey(nextEvent.getFarmId())) {
+                        Map<Integer, Integer> monthPregnancy = farmPregnancy.get(nextEvent.getFarmId());
+                        if (monthPregnancy.containsKey(month))
+                            monthPregnancy.put(month, monthPregnancy.get(month) + days);
                         else
-                            monthPD.put(month, days);
+                            monthPregnancy.put(month, days);
                     } else {
-                        Map<Integer, Integer> monthPD = new HashMap<>();
-                        monthPD.put(month, days);
-                        farmPD.put(nextEvent.getFarmId(), monthPD);
+                        Map<Integer, Integer> monthPregnancy = new HashMap<>();
+                        monthPregnancy.put(month, days);
+                        farmPregnancy.put(nextEvent.getFarmId(), monthPregnancy);
+                    }
+                } else if (nextEvent.getType().equals(PigEvent.WEAN)) {
+                    if (farmLactation.containsKey(nextEvent.getFarmId())) {
+                        Map<Integer, Integer> monthLactation = farmLactation.get(nextEvent.getFarmId());
+                        if (monthLactation.containsKey(month))
+                            monthLactation.put(month, monthLactation.get(month) + days);
+                        else
+                            monthLactation.put(month, days);
+                    } else {
+                        Map<Integer, Integer> monthLactation = new HashMap<>();
+                        monthLactation.put(month, days);
+                        farmLactation.put(nextEvent.getFarmId(), monthLactation);
                     }
                 } else {
                     if (farmNPD.containsKey(nextEvent.getFarmId())) {
@@ -159,14 +172,23 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                     else
                         npd.setNpd(monthNPD.get(i));
                 }
-                if (farmPD.containsKey(f))
-                    npd.setPd(0);
+                if (!farmPregnancy.containsKey(f))
+                    npd.setPregnancy(0);
                 else {
-                    Map<Integer, Integer> monthPD = farmPD.get(f);
-                    if (!monthPD.containsKey(i))
-                        npd.setPd(0);
+                    Map<Integer, Integer> monthPregnancy = farmPregnancy.get(f);
+                    if (!monthPregnancy.containsKey(i))
+                        npd.setPregnancy(0);
                     else
-                        npd.setPd(monthPD.get(i));
+                        npd.setPregnancy(monthPregnancy.get(i));
+                }
+                if (!farmLactation.containsKey(f))
+                    npd.setLactation(0);
+                else {
+                    Map<Integer, Integer> monthLactation = farmLactation.get(f);
+                    if (!monthLactation.containsKey(i))
+                        npd.setLactation(0);
+                    else
+                        npd.setLactation(monthLactation.get(i));
                 }
 
                 if (null == npd.getId())
