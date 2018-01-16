@@ -17,6 +17,15 @@ import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorReportNpd;
 import io.terminus.doctor.event.reportBi.synchronizer.*;
+import io.terminus.doctor.event.reportBi.synchronizer.DoctorBoarSynchronizer;
+import io.terminus.doctor.event.reportBi.synchronizer.DoctorDeliverSynchronizer;
+import io.terminus.doctor.event.reportBi.synchronizer.DoctorEfficiencySynchronizer;
+import io.terminus.doctor.event.reportBi.synchronizer.DoctorFattenSynchronizer;
+import io.terminus.doctor.event.reportBi.synchronizer.DoctorMatingSynchronizer;
+import io.terminus.doctor.event.reportBi.synchronizer.DoctorNurserySynchronizer;
+import io.terminus.doctor.event.reportBi.synchronizer.DoctorReserveSynchronizer;
+import io.terminus.doctor.event.reportBi.synchronizer.DoctorSowSynchronizer;
+import io.terminus.doctor.event.reportBi.synchronizer.DoctorWarehouseSynchronizer;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +38,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
-import static java.util.Objects.isNull;
 
 /**
  * Created by xjn on 18/1/9.
@@ -297,12 +305,10 @@ public class DoctorReportBiDataSynchronize {
 
     private void synchronizeGroupBiData(DoctorGroupDailyExtend groupDaily, DoctorDimensionCriteria dimensionCriteria) {
         PigType pigType = expectNotNull(PigType.from(groupDaily.getPigType()), "pigType.is.illegal");
-        if (isNull(dimensionCriteria.getOrzId())) {
-            if (Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.ORG.getValue())) {
-                dimensionCriteria.setOrzId(groupDaily.getOrgId());
-            } else {
-                dimensionCriteria.setOrzId(groupDaily.getFarmId());
-            }
+        if (Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.ORG.getValue())) {
+            dimensionCriteria.setOrzId(groupDaily.getOrgId());
+        } else {
+            dimensionCriteria.setOrzId(groupDaily.getFarmId());
         }
         dimensionCriteria.setSumAt(groupDaily.getSumAt());
         dimensionCriteria.setPigType(groupDaily.getPigType());
@@ -329,12 +335,10 @@ public class DoctorReportBiDataSynchronize {
     }
 
     private void synchronizePigBiData(DoctorPigDailyExtend dailyExtend, DoctorDimensionCriteria dimensionCriteria) {
-        if (isNull(dimensionCriteria.getOrzId())) {
-            if (Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.ORG.getValue())) {
-                dimensionCriteria.setOrzId(dailyExtend.getOrgId());
-            } else {
-                dimensionCriteria.setOrzId(dailyExtend.getFarmId());
-            }
+        if (Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.ORG.getValue())) {
+            dimensionCriteria.setOrzId(dailyExtend.getOrgId());
+        } else {
+            dimensionCriteria.setOrzId(dailyExtend.getFarmId());
         }
         dimensionCriteria.setSumAt(dailyExtend.getSumAt());
         if (!Objects.equals(dimensionCriteria.getDateType(), DateDimension.DAY.getValue())
