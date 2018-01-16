@@ -8,13 +8,13 @@ import java.util.Date;
 /**
  * Desc:
  * Mail: [ your email ]
- * Date: 2018-01-16 14:50:06
+ * Date: 2018-01-16 15:30:16
  * Created by [ your name ]
  */
 @Data
 public class DoctorReportNpd implements Serializable {
 
-    private static final long serialVersionUID = -6775536500776792514L;
+    private static final long serialVersionUID = -8619471067562138000L;
 
     /**
      * 自增主键
@@ -25,6 +25,11 @@ public class DoctorReportNpd implements Serializable {
      * 猪场
      */
     private Long farmId;
+    
+    /**
+     * 公司ID
+     */
+    private Long orgId;
     
     /**
      * 报表日期,月度单位

@@ -1972,3 +1972,7 @@ ALTER TABLE doctor_report_npds ADD lactation INT NULL COMMENT '哺乳期';
 ALTER TABLE doctor_report_npds CHANGE pd pregnancy INT(11) COMMENT '怀孕期';
 ALTER TABLE doctor_report_npds
   MODIFY COLUMN lactation INT(11) COMMENT '哺乳期' AFTER days;
+
+ALTER TABLE doctor_report_npds ADD org_id BIGINT NULL COMMENT '公司ID';
+ALTER TABLE doctor_report_npds
+  MODIFY COLUMN org_id BIGINT COMMENT '公司ID' AFTER farm_id;

@@ -156,6 +156,7 @@ public class DoctorReportBiDataSynchronize {
 
 
         warehouseSynchronizer.sync(date);
+
     }
 
     private void synchronizeGroupForDay(List<DoctorGroupDaily> groupDailyList) {
@@ -269,8 +270,8 @@ public class DoctorReportBiDataSynchronize {
         List<DoctorPigDailyExtend> pigDailyList = doctorPigDailyDao.sumForDimension(dimensionCriteria);
         pigDailyList.parallelStream().forEach(pigDaily -> synchronizePigBiData(pigDaily, dimensionCriteria));
 
-        List<DoctorReportNpd> npds = doctorReportNpdDao.sumForDimension(dimensionCriteria);
-        efficiencySynchronizer.sync(npds, dimensionCriteria);
+//        List<DoctorReportNpd> npds = doctorReportNpdDao.sumForDimension(dimensionCriteria);
+        efficiencySynchronizer.sync(dimensionCriteria);
     }
 
     private void synchronizeFullBiDataForDay() {

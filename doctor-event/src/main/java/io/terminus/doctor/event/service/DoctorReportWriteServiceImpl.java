@@ -1,8 +1,10 @@
 package io.terminus.doctor.event.service;
 
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorPigDailyDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
@@ -13,6 +15,10 @@ import io.terminus.doctor.event.enums.ReportTime;
 import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorReportNpd;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorOrg;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +46,9 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
     @Autowired
     private DoctorReportNpdDao doctorReportNpdDao;
 
+    @RpcConsumer
+    private DoctorFarmReadService doctorFarmReadService;
+
 
     @Override
     public void flushNPD(List<Long> farmIds, Date countDate, ReportTime reportTime) {
@@ -60,10 +69,6 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
         Map<Long/*farmID*/, Map<Integer/*month*/, Integer/*非生产天数*/>> farmNPD = new HashMap<>();
 
 
-//            DateTime d = new DateTime(year, i, 1, 0, 0);
-//            Date startDate = d.toDate();
-//            Date endDate = DateUtil.monthEnd(startDate);
-//
         Map<String, Object> params = new HashMap<>();
         params.put("farmIds", farmIds);
         params.put("beginDate", startDate);
@@ -136,7 +141,10 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
         int monthStart = new DateTime(startDate).getMonthOfYear();
         int monthEnd = new DateTime(endDate).getMonthOfYear() + 1;
 
+
         farmIds.forEach(f -> {
+
+            DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(f));
 
             for (int i = monthStart; i < monthEnd; i++) {
 
@@ -191,6 +199,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                         npd.setLactation(monthLactation.get(i));
                 }
 
+                npd.setOrgId(null == farm ? null : farm.getOrgId());
                 if (null == npd.getId())
                     doctorReportNpdDao.create(npd);
                 else doctorReportNpdDao.update(npd);

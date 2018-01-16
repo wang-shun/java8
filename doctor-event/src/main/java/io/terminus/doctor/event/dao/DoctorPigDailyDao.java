@@ -50,6 +50,15 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
         return sqlSession.selectOne("report", params);
     }
 
+    public DoctorPigDaily countByOrg(Long orgId, Date start, Date end) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("orgId", orgId);
+        params.put("startDate", start);
+        params.put("endDate", end);
+
+        return sqlSession.selectOne("reportByOrg", params);
+    }
+
     /**
      * 更新日期(包括更新日期)之后每日母猪存栏
      *
@@ -79,6 +88,7 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
 
     /**
      * 查询指定组织维度和时间维度下的聚合数据（不包含猪场日维度）
+     *
      * @param dimensionCriteria 维度
      * @return 聚合数据
      */
@@ -88,6 +98,7 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
 
     /**
      * 获取某一维度的数据
+     *
      * @param dimensionCriteria
      * @return
      */
@@ -95,7 +106,7 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
         return getSqlSession().selectOne(sqlId("selectOneSumForDimension"), dimensionCriteria);
     }
 
-    public List<DoctorPigDaily> findByAfter(Date updatedAt){
+    public List<DoctorPigDaily> findByAfter(Date updatedAt) {
         return getSqlSession().selectList(sqlId("findByAfter"), updatedAt);
     }
 
@@ -104,11 +115,11 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
                 ImmutableMap.of("sumAt", sumAt, "dateType", dateType, "orzType", orzType));
     }
 
-    public DoctorPigDailyExtend start(DoctorDimensionCriteria dimensionCriteria){
+    public DoctorPigDailyExtend start(DoctorDimensionCriteria dimensionCriteria) {
         return getSqlSession().selectOne(sqlId("start"), dimensionCriteria);
     }
 
-    public DoctorPigDailyExtend end(DoctorDimensionCriteria dimensionCriteria){
+    public DoctorPigDailyExtend end(DoctorDimensionCriteria dimensionCriteria) {
         return getSqlSession().selectOne(sqlId("end"), dimensionCriteria);
     }
 }

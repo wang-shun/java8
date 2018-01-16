@@ -81,12 +81,26 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `sum_at`, `org_id`, `org_name`, `farm_id`, `farm_name`, `sow_ph_start`, `sow_ph_reserve_in`, `sow_ph_wean_in`, `sow_ph_entry_in`, `sow_ph_chg_farm_in`, `sow_ph_dead`, `sow_ph_weed_out`, `sow_ph_sale`, `sow_ph_chg_farm`, `sow_ph_other_out`, `mate_hb`, `mate_dn`, `mate_fq`, `mate_lc`, `mate_yx`, `mating_count`, `preg_positive`, `preg_negative`, `preg_fanqing`, `preg_liuchan`, `sow_ph_end`, `sow_cf_start`, `sow_cf_end`, `sow_cf_in`, `sow_cf_in_farm_in`, `sow_cf_dead`, `sow_cf_weed_out`, `sow_cf_sale`, `sow_cf_chg_farm`, `sow_cf_other_out`, `early_farrow_nest`, `farrow_nest`, `farrow_live`, `farrow_health`, `farrow_weak`, `farrow_dead`, `farrowjmh`, `farrow_weight`, `wean_nest`, `wean_qualified_count`, `wean_count`, `wean_day_age`, `wean_weight`, `boar_start`, `boar_in`, `boar_dead`, `boar_weed_out`, `boar_sale`, `boar_other_out`, `boar_end`, `sow_not_mating_count`,
+        `sum_at`, `org_id`, `org_name`, `farm_id`, `farm_name`, `sow_ph_start`, `sow_ph_reserve_in`, `sow_ph_wean_in`,
+        `sow_ph_entry_in`, `sow_ph_chg_farm_in`, `sow_ph_dead`, `sow_ph_weed_out`, `sow_ph_sale`, `sow_ph_chg_farm`,
+        `sow_ph_other_out`, `mate_hb`, `mate_dn`, `mate_fq`, `mate_lc`, `mate_yx`, `mating_count`, `preg_positive`,
+        `preg_negative`, `preg_fanqing`, `preg_liuchan`, `sow_ph_end`, `sow_cf_start`, `sow_cf_end`, `sow_cf_in`,
+        `sow_cf_in_farm_in`, `sow_cf_dead`, `sow_cf_weed_out`, `sow_cf_sale`, `sow_cf_chg_farm`, `sow_cf_other_out`,
+        `early_farrow_nest`, `farrow_nest`, `farrow_live`, `farrow_health`, `farrow_weak`, `farrow_dead`, `farrowjmh`,
+        `farrow_weight`, `wean_nest`, `wean_qualified_count`, `wean_count`, `wean_day_age`, `wean_weight`, `boar_start`,
+        `boar_in`, `boar_dead`, `boar_weed_out`, `boar_sale`, `boar_other_out`, `boar_end`, `sow_not_mating_count`,
         created_at, updated_at,`version`
     </sql>
 
     <sql id="vals">
-        #{sumAt}, #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{sowPhStart}, #{sowPhReserveIn}, #{sowPhWeanIn}, #{sowPhEntryIn}, #{sowPhChgFarmIn}, #{sowPhDead}, #{sowPhWeedOut}, #{sowPhSale}, #{sowPhChgFarm}, #{sowPhOtherOut}, #{mateHb}, #{mateDn}, #{mateFq}, #{mateLc}, #{mateYx}, #{matingCount}, #{pregPositive}, #{pregNegative}, #{pregFanqing}, #{pregLiuchan}, #{sowPhEnd}, #{sowCfStart}, #{sowCfEnd}, #{sowCfIn}, #{sowCfInFarmIn}, #{sowCfDead}, #{sowCfWeedOut}, #{sowCfSale}, #{sowCfChgFarm}, #{sowCfOtherOut}, #{earlyFarrowNest}, #{farrowNest}, #{farrowLive}, #{farrowHealth}, #{farrowWeak}, #{farrowDead}, #{farrowjmh}, #{farrowWeight}, #{weanNest}, #{weanQualifiedCount}, #{weanCount}, #{weanDayAge}, #{weanWeight}, #{boarStart}, #{boarIn}, #{boarDead}, #{boarWeedOut}, #{boarSale}, #{boarOtherOut}, #{boarEnd}, #{sowNotMatingCount},
+        #{sumAt}, #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{sowPhStart}, #{sowPhReserveIn}, #{sowPhWeanIn},
+        #{sowPhEntryIn}, #{sowPhChgFarmIn}, #{sowPhDead}, #{sowPhWeedOut}, #{sowPhSale}, #{sowPhChgFarm},
+        #{sowPhOtherOut}, #{mateHb}, #{mateDn}, #{mateFq}, #{mateLc}, #{mateYx}, #{matingCount}, #{pregPositive},
+        #{pregNegative}, #{pregFanqing}, #{pregLiuchan}, #{sowPhEnd}, #{sowCfStart}, #{sowCfEnd}, #{sowCfIn},
+        #{sowCfInFarmIn}, #{sowCfDead}, #{sowCfWeedOut}, #{sowCfSale}, #{sowCfChgFarm}, #{sowCfOtherOut},
+        #{earlyFarrowNest}, #{farrowNest}, #{farrowLive}, #{farrowHealth}, #{farrowWeak}, #{farrowDead}, #{farrowjmh},
+        #{farrowWeight}, #{weanNest}, #{weanQualifiedCount}, #{weanCount}, #{weanDayAge}, #{weanWeight}, #{boarStart},
+        #{boarIn}, #{boarDead}, #{boarWeedOut}, #{boarSale}, #{boarOtherOut}, #{boarEnd}, #{sowNotMatingCount},
         now(), now(),1
     </sql>
 
@@ -249,27 +263,33 @@
     </update>
 
     <delete id="delete" parameterType="long">
-        DELETE FROM <include refid="tb"/>
+        DELETE FROM
+        <include refid="tb"/>
         WHERE id = #{id}
     </delete>
-    
+
     <select id="count" parameterType="map" resultType="long">
         SELECT COUNT(1)
-        FROM <include refid="tb"/>
+        FROM
+        <include refid="tb"/>
         <include refid="criteria"/>
     </select>
 
     <select id="paging" parameterType="map" resultMap="DoctorPigDailyMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
         LIMIT #{offset}, #{limit}
     </select>
 
     <select id="list" parameterType="map" resultMap="DoctorPigDailyMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
     </select>
@@ -337,16 +357,79 @@
         </where>
 
     </select>
+
+    <select id="reportByOrg" parameterType="map" resultMap="DoctorPigDailyMap">
+        SELECT
+        min(`sow_ph_start`) as sow_ph_start,
+        sum(`sow_ph_reserve_in`) as sow_ph_reserve_in,
+        sum(`sow_ph_wean_in`) as sow_ph_wean_in,
+        sum(`sow_ph_entry_in`) as sow_ph_entry_in,
+        sum(`sow_ph_chg_farm_in`) as sow_ph_chg_farm_in,
+        sum(`sow_ph_dead`) as sow_ph_dead,
+        sum(`sow_ph_weed_out`) as sow_ph_weed_out,
+        sum(`sow_ph_sale`) as sow_ph_sale,
+        sum(`sow_ph_chg_farm`) as sow_ph_chg_farm,
+        sum(`sow_ph_other_out`) as sow_ph_other_out,
+        sum(`mating_count`) as mating_count,
+        sum(`preg_positive`) as preg_positive,
+        sum(`preg_negative`) as preg_negative,
+        sum(`preg_fanqing`) as preg_fanqing,
+        sum(`preg_liuchan`) as preg_liuchan,
+        max(`sow_ph_end`) as sow_ph_end,
+        min(`sow_cf_start`) as sow_cf_start,
+        max(`sow_cf_end`) as sow_cf_end,
+        sum(`sow_cf_in`) as sow_cf_in,
+        sum(`sow_cf_in_farm_in`) as sow_cf_in_farm_in,
+        sum(`sow_cf_dead`) as sow_cf_dead,
+        sum(`sow_cf_weed_out`) as sow_cf_weed_out,
+        sum(`sow_cf_sale`) as sow_cf_sale,
+        sum(`sow_cf_chg_farm`) as sow_cf_chg_farm,
+        sum(`sow_cf_other_out`) as sow_cf_other_out,
+        sum(`farrow_nest`) as farrow_nest,
+        sum(`farrow_health`) as farrow_health,
+        sum(`farrow_weak`) as farrow_weak,
+        sum(`farrow_dead`) as farrow_dead,
+        sum(`farrowjmh`) as farrowjmh,
+        sum(`farrow_weight`) as farrow_weight,
+        sum(`wean_nest`) as wean_nest,
+        sum(`wean_qualified_count`) as wean_qualified_count,
+        sum(`wean_count`) as wean_count,
+        sum(`wean_day_age`) as wean_day_age,
+        sum(`wean_weight`) as wean_weight,
+        min(`boar_start`) as boar_start,
+        sum(`boar_in`) as boar_in,
+        sum(`boar_dead`) as boar_dead,
+        sum(`boar_weed_out`) as boar_weed_out,
+        sum(`boar_sale`) as boar_sale,
+        sum(`boar_other_out`) as boar_other_out,
+        max(`boar_end`) as boar_end,
+        sum(`sow_not_mating_count`) as sow_not_mating_count
+        FROM
+        <include refid="tb"/>
+        <where>
+            <if test="orgId !=null">
+                AND org_id=#{orgId}
+            </if>
+            <if test="startDate !=null">AND <![CDATA[sum_at >= #{startDate}]]></if>
+            <if test="endDate !=null">AND <![CDATA[sum_at <= #{endDate}]]></if>
+        </where>
+
+    </select>
+
+
     <select id="findBy" parameterType="map" resultMap="DoctorPigDailyMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         WHERE
         farm_id = #{farmId}
         AND sum_at = #{sumAt}
     </select>
 
-    <update id="updateDailySowPigLiveStock" parameterType="map" >
-        UPDATE <include refid="tb"/>
+    <update id="updateDailySowPigLiveStock" parameterType="map">
+        UPDATE
+        <include refid="tb"/>
         SET
         sow_ph_start = ifnull(sow_ph_start, 0) + ifnull(#{phChangeCount}, 0),
         sow_ph_end = ifnull(sow_ph_end, 0) + ifnull(#{phChangeCount}, 0),
@@ -357,8 +440,9 @@
         AND sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
     </update>
 
-    <update id="updateDailyBoarPigLiveStock" parameterType="map" >
-        UPDATE <include refid="tb"/>
+    <update id="updateDailyBoarPigLiveStock" parameterType="map">
+        UPDATE
+        <include refid="tb"/>
         SET boar_start = boar_start + #{changeCount},
         `boar_end` = `boar_end` + #{changeCount}
         WHERE
@@ -417,18 +501,20 @@
         ifnull(sum(boar_other_out), 0) as boarOtherOut
     </sql>
 
-    <select id="sumForDimension" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
+    <select id="sumForDimension" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
+            resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
         SELECT
         <include refid="forSum"/>
-        FROM <include refid="tb"/>
+        FROM
+        <include refid="tb"/>
         GROUP BY
         <if test="orzType == 2">org_id,</if>
         <if test="orzType == 3">farm_id,</if>
-        <if test="dateType == 1"> date_format(sum_at, '%y-%m-%d')</if>
-        <if test="dateType == 2"> date_format(sum_at, '%x-%v')</if>
-        <if test="dateType == 3"> date_format(sum_at, '%y-%m')</if>
-        <if test="dateType == 4"> concat(date_format(sum_at, '%y-'), QUARTER(sum_at))</if>
-        <if test="dateType == 5"> date_format(sum_at, '%y')</if>
+        <if test="dateType == 1">date_format(sum_at, '%y-%m-%d')</if>
+        <if test="dateType == 2">date_format(sum_at, '%x-%v')</if>
+        <if test="dateType == 3">date_format(sum_at, '%y-%m')</if>
+        <if test="dateType == 4">concat(date_format(sum_at, '%y-'), QUARTER(sum_at))</if>
+        <if test="dateType == 5">date_format(sum_at, '%y')</if>
     </select>
 
     <sql id="dimensionCri">
@@ -445,7 +531,8 @@
             <if test="dateType == 5">AND date_format(sum_at, '%y') = date_format(#{sumAt}, '%y')</if>
         </where>
     </sql>
-    <select id="selectOneSumForDimension" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
+    <select id="selectOneSumForDimension" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
+            resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
         SELECT
         <include refid="forSum"/>
         FROM
@@ -454,7 +541,10 @@
     </select>
 
     <select id="findByAfter" parameterType="map" resultMap="DoctorPigDailyMap">
-        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         WHERE
         updated_at >= date_format(#{sumAt}, '%Y-%m-%d %H:%i:%s')
     </select>
@@ -465,38 +555,43 @@
         #{orzType} as orzType,
         sum_at as sumAt,
         #{dateType} as dateType
-        FROM <include refid="tb"/>
+        FROM
+        <include refid="tb"/>
         WHERE
         updated_at >= date_format(#{sumAt}, '%Y-%m-%d %H:%i:%s')
         GROUP BY
         <if test="orzType == 2">org_id,</if>
         <if test="orzType == 3">farm_id,</if>
-        <if test="dateType == 1"> date_format(sum_at, '%y-%m-%d')</if>
-        <if test="dateType == 2"> date_format(sum_at, '%x-%v')</if>
-        <if test="dateType == 3"> date_format(sum_at, '%y-%m')</if>
-        <if test="dateType == 4"> concat(date_format(sum_at, '%y-'), QUARTER(sum_at))</if>
-        <if test="dateType == 5"> date_format(sum_at, '%y')</if>
+        <if test="dateType == 1">date_format(sum_at, '%y-%m-%d')</if>
+        <if test="dateType == 2">date_format(sum_at, '%x-%v')</if>
+        <if test="dateType == 3">date_format(sum_at, '%y-%m')</if>
+        <if test="dateType == 4">concat(date_format(sum_at, '%y-'), QUARTER(sum_at))</if>
+        <if test="dateType == 5">date_format(sum_at, '%y')</if>
     </select>
 
-    <select id="start" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
+    <select id="start" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
+            resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
         SELECT
         sow_ph_start as sowPhStart,
         sow_cf_start as sowCfStart,
         boar_start as boarStart,
         sow_ph_start + sow_cf_start as sowStart
-        FROM <include refid="tb"/>
+        FROM
+        <include refid="tb"/>
         <include refid="dimensionCri"/>
         order by sum_at asc
         limit 1
     </select>
 
-    <select id="end" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
+    <select id="end" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
+            resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
         SELECT
         sow_ph_end as sowPhEnd,
         sow_cf_end as sowCfEnd,
         sow_ph_end + sow_cf_end as sowEnd,
         boar_end as boarEnd
-        FROM <include refid="tb"/>
+        FROM
+        <include refid="tb"/>
         <include refid="dimensionCri"/>
         order by sum_at desc
         limit 1

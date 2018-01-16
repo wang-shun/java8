@@ -3,10 +3,12 @@ package io.terminus.doctor.event.dao;
 import io.terminus.common.mysql.dao.MyBatisDao;
 
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
+import io.terminus.doctor.event.enums.ReportTime;
 import io.terminus.doctor.event.model.DoctorReportNpd;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Desc:
@@ -35,11 +37,23 @@ public class DoctorReportNpdDao extends MyBatisDao<DoctorReportNpd> {
         return this.sqlSession.selectOne(this.sqlId("findByOrgAndSumAt"), params);
     }
 
+    @Deprecated
+    public List<DoctorReportNpd> findByFarm(Long farmId, ReportTime reportTime) {
+        return this.sqlSession.selectList(this.sqlId("findByFarm"), Collections.singletonMap("farmId", farmId));
+    }
 
-    public List<DoctorReportNpd> sumForDimension(DoctorDimensionCriteria dimensionCriteria) {
+    @Deprecated
+    public List<DoctorReportNpd> findByOrg(Long orgId, ReportTime reportTime) {
+        return this.sqlSession.selectList(this.sqlId("findByOrg"), Collections.singletonMap("orgId", orgId));
+    }
 
+    public List<DoctorReportNpd> count(DoctorDimensionCriteria dimensionCriteria) {
 
-        return this.sqlSession.selectList(this.sqlId(""));
+        Map<String, Object> params = new HashMap<>();
+        params.put("orgType", dimensionCriteria.getOrzType());
+        params.put("dateType", dimensionCriteria.getDateType());
+
+        return this.sqlSession.selectList(this.sqlId("report"), params);
     }
 
     public void delete() {
