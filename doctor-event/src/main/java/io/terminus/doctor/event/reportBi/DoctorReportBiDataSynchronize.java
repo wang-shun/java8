@@ -46,6 +46,7 @@ public class DoctorReportBiDataSynchronize {
     private final DoctorMatingSynchronizer matingSynchronizer;
     private final DoctorDeliverSynchronizer deliverSynchronizer;
     private final DoctorWarehouseSynchronizer warehouseSynchronizer;
+    private final DoctorEfficiencySynchronizer efficiencySynchronizer;
 
     private final Integer DELTA_DAY = 1440;
     private final Integer REAL_TIME_INTERVAL = 1;
@@ -60,7 +61,8 @@ public class DoctorReportBiDataSynchronize {
                                          DoctorSowSynchronizer sowSynchronizer,
                                          DoctorMatingSynchronizer matingSynchronizer,
                                          DoctorDeliverSynchronizer deliverSynchronizer,
-                                         DoctorWarehouseSynchronizer warehouseSynchronizer) {
+                                         DoctorWarehouseSynchronizer warehouseSynchronizer,
+                                         DoctorEfficiencySynchronizer efficiencySynchronizer) {
         this.doctorPigDailyDao = doctorPigDailyDao;
         this.doctorGroupDailyDao = doctorGroupDailyDao;
         this.reserveSynchronizer = reserveSynchronizer;
@@ -71,6 +73,7 @@ public class DoctorReportBiDataSynchronize {
         this.matingSynchronizer = matingSynchronizer;
         this.deliverSynchronizer = deliverSynchronizer;
         this.warehouseSynchronizer = warehouseSynchronizer;
+        this.efficiencySynchronizer = efficiencySynchronizer;
     }
 
     /**
@@ -87,7 +90,7 @@ public class DoctorReportBiDataSynchronize {
     /**
      * 增量同步数据
      */
-    public void synchronizeDeltaDayBiData(){
+    public void synchronizeDeltaDayBiData() {
         log.info("synchronize delta day bi data starting");
         Stopwatch stopwatch = Stopwatch.createStarted();
         Date date = DateTime.now().minusMinutes(DELTA_DAY).toDate();
@@ -196,6 +199,7 @@ public class DoctorReportBiDataSynchronize {
         boarSynchronizer.deleteAll();
         sowSynchronizer.deleteAll();
         matingSynchronizer.deleteAll();
+        efficiencySynchronizer.deleteAll();
     }
 
     private void synchronizeBiDataImpl() {
