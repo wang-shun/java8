@@ -41,7 +41,7 @@ public class DoctorWarehouseReportDao {
         result.putAll(farrowSow);
         result.putAll(farrow);
         result.putAll(other);
-        return other;
+        return result;
     }
 
 

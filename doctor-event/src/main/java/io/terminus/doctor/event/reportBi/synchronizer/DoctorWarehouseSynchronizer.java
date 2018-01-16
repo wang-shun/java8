@@ -4,6 +4,7 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorWarehouseReportDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportMaterialDao;
+import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.enums.ReportTime;
@@ -17,6 +18,7 @@ import io.terminus.doctor.user.service.DoctorOrgReadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -95,11 +97,11 @@ public class DoctorWarehouseSynchronizer {
                 orgIds.add(farm.getOrgId());
             }
 
-            Map<String, Object> result = doctorWarehouseReportDao.count(Collections.singletonList(f), date, date);
+            Map<String, Object> result = doctorWarehouseReportDao.count(Collections.singletonList(f), dateDuration.getStart(), dateDuration.getEnd());
 
             DoctorReportMaterial material = new DoctorReportMaterial();
-            material.setSumAt(date);
-            material.setSumAtName(DateHelper.dateCN(date, DateDimension.DAY));
+            material.setSumAt(dateDuration.getStart());
+            material.setSumAtName(DateHelper.dateCN(dateDuration.getStart(), DateDimension.WEEK));
             material.setDateType(DateDimension.WEEK.getValue());
             material.setOrzId(f);
             material.setOrzName(farm == null ? "" : farm.getName());
@@ -109,16 +111,15 @@ public class DoctorWarehouseSynchronizer {
 
             doctorReportMaterialDao.create(material);
         }
-        orgIds.forEach(o ->
-        {
+        for (Long o : orgIds) {
             DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(o));
             List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(o));
 
-            Map<String, Object> result = doctorWarehouseReportDao.count(farms.stream().map(DoctorFarm::getId).collect(Collectors.toList()), date, date);
+            Map<String, Object> result = doctorWarehouseReportDao.count(farms.stream().map(DoctorFarm::getId).collect(Collectors.toList()), dateDuration.getStart(), dateDuration.getEnd());
 
             DoctorReportMaterial material = new DoctorReportMaterial();
-            material.setSumAt(date);
-            material.setSumAtName(DateHelper.dateCN(date, DateDimension.DAY));
+            material.setSumAt(dateDuration.getStart());
+            material.setSumAtName(DateHelper.dateCN(dateDuration.getStart(), DateDimension.WEEK));
             material.setDateType(DateDimension.WEEK.getValue());
             material.setOrzId(o);
             material.setOrzName(org == null ? "" : org.getName());
@@ -127,7 +128,7 @@ public class DoctorWarehouseSynchronizer {
             fill(material, result);
 
             doctorReportMaterialDao.create(material);
-        });
+        }
         //月
         dateDuration = doctorPigReportReadService.getDuration(date, ReportTime.MONTH);
         farmIds = doctorWarehouseReportDao.findApplyFarm(dateDuration.getStart(), dateDuration.getEnd());
@@ -139,11 +140,11 @@ public class DoctorWarehouseSynchronizer {
                 orgIds.add(farm.getOrgId());
             }
 
-            Map<String, Object> result = doctorWarehouseReportDao.count(Collections.singletonList(f), date, date);
+            Map<String, Object> result = doctorWarehouseReportDao.count(Collections.singletonList(f), dateDuration.getStart(), dateDuration.getEnd());
 
             DoctorReportMaterial material = new DoctorReportMaterial();
-            material.setSumAt(date);
-            material.setSumAtName(DateHelper.dateCN(date, DateDimension.DAY));
+            material.setSumAt(dateDuration.getStart());
+            material.setSumAtName(DateHelper.dateCN(dateDuration.getStart(), DateDimension.MONTH));
             material.setDateType(DateDimension.MONTH.getValue());
             material.setOrzId(f);
             material.setOrzName(farm == null ? "" : farm.getName());
@@ -153,16 +154,15 @@ public class DoctorWarehouseSynchronizer {
 
             doctorReportMaterialDao.create(material);
         }
-        orgIds.forEach(o ->
-        {
+        for (Long o : orgIds) {
             DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(o));
             List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(o));
 
-            Map<String, Object> result = doctorWarehouseReportDao.count(farms.stream().map(DoctorFarm::getId).collect(Collectors.toList()), date, date);
+            Map<String, Object> result = doctorWarehouseReportDao.count(farms.stream().map(DoctorFarm::getId).collect(Collectors.toList()), dateDuration.getStart(), dateDuration.getEnd());
 
             DoctorReportMaterial material = new DoctorReportMaterial();
-            material.setSumAt(date);
-            material.setSumAtName(DateHelper.dateCN(date, DateDimension.DAY));
+            material.setSumAt(dateDuration.getStart());
+            material.setSumAtName(DateHelper.dateCN(dateDuration.getStart(), DateDimension.MONTH));
             material.setDateType(DateDimension.MONTH.getValue());
             material.setOrzId(o);
             material.setOrzName(org == null ? "" : org.getName());
@@ -171,7 +171,7 @@ public class DoctorWarehouseSynchronizer {
             fill(material, result);
 
             doctorReportMaterialDao.create(material);
-        });
+        }
         //季
         dateDuration = doctorPigReportReadService.getDuration(date, ReportTime.SEASON);
         farmIds = doctorWarehouseReportDao.findApplyFarm(dateDuration.getStart(), dateDuration.getEnd());
@@ -183,11 +183,11 @@ public class DoctorWarehouseSynchronizer {
                 orgIds.add(farm.getOrgId());
             }
 
-            Map<String, Object> result = doctorWarehouseReportDao.count(Collections.singletonList(f), date, date);
+            Map<String, Object> result = doctorWarehouseReportDao.count(Collections.singletonList(f), dateDuration.getStart(), dateDuration.getEnd());
 
             DoctorReportMaterial material = new DoctorReportMaterial();
-            material.setSumAt(date);
-            material.setSumAtName(DateHelper.dateCN(date, DateDimension.DAY));
+            material.setSumAt(dateDuration.getStart());
+            material.setSumAtName(DateHelper.dateCN(dateDuration.getStart(), DateDimension.QUARTER));
             material.setDateType(DateDimension.QUARTER.getValue());
             material.setOrzId(f);
             material.setOrzName(farm == null ? "" : farm.getName());
@@ -197,16 +197,15 @@ public class DoctorWarehouseSynchronizer {
 
             doctorReportMaterialDao.create(material);
         }
-        orgIds.forEach(o ->
-        {
+        for (Long o : orgIds) {
             DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(o));
             List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(o));
 
-            Map<String, Object> result = doctorWarehouseReportDao.count(farms.stream().map(DoctorFarm::getId).collect(Collectors.toList()), date, date);
+            Map<String, Object> result = doctorWarehouseReportDao.count(farms.stream().map(DoctorFarm::getId).collect(Collectors.toList()), dateDuration.getStart(), dateDuration.getEnd());
 
             DoctorReportMaterial material = new DoctorReportMaterial();
-            material.setSumAt(date);
-            material.setSumAtName(DateHelper.dateCN(date, DateDimension.DAY));
+            material.setSumAt(dateDuration.getStart());
+            material.setSumAtName(DateHelper.dateCN(dateDuration.getStart(), DateDimension.QUARTER));
             material.setDateType(DateDimension.QUARTER.getValue());
             material.setOrzId(o);
             material.setOrzName(org == null ? "" : org.getName());
@@ -215,7 +214,7 @@ public class DoctorWarehouseSynchronizer {
             fill(material, result);
 
             doctorReportMaterialDao.create(material);
-        });
+        }
         //年
         dateDuration = doctorPigReportReadService.getDuration(date, ReportTime.YEAR);
         farmIds = doctorWarehouseReportDao.findApplyFarm(dateDuration.getStart(), dateDuration.getEnd());
@@ -227,11 +226,11 @@ public class DoctorWarehouseSynchronizer {
                 orgIds.add(farm.getOrgId());
             }
 
-            Map<String, Object> result = doctorWarehouseReportDao.count(Collections.singletonList(f), date, date);
+            Map<String, Object> result = doctorWarehouseReportDao.count(Collections.singletonList(f), dateDuration.getStart(), dateDuration.getEnd());
 
             DoctorReportMaterial material = new DoctorReportMaterial();
             material.setSumAt(date);
-            material.setSumAtName(DateHelper.dateCN(date, DateDimension.DAY));
+            material.setSumAtName(DateHelper.dateCN(date, DateDimension.YEAR));
             material.setDateType(DateDimension.YEAR.getValue());
             material.setOrzId(f);
             material.setOrzName(farm == null ? "" : farm.getName());
@@ -241,16 +240,15 @@ public class DoctorWarehouseSynchronizer {
 
             doctorReportMaterialDao.create(material);
         }
-        orgIds.forEach(o ->
-        {
+        for (Long o : orgIds) {
             DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(o));
             List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(o));
 
-            Map<String, Object> result = doctorWarehouseReportDao.count(farms.stream().map(DoctorFarm::getId).collect(Collectors.toList()), date, date);
+            Map<String, Object> result = doctorWarehouseReportDao.count(farms.stream().map(DoctorFarm::getId).collect(Collectors.toList()), dateDuration.getStart(), dateDuration.getEnd());
 
             DoctorReportMaterial material = new DoctorReportMaterial();
-            material.setSumAt(date);
-            material.setSumAtName(DateHelper.dateCN(date, DateDimension.DAY));
+            material.setSumAt(dateDuration.getStart());
+            material.setSumAtName(DateHelper.dateCN(dateDuration.getStart(), DateDimension.YEAR));
             material.setDateType(DateDimension.YEAR.getValue());
             material.setOrzId(o);
             material.setOrzName(org == null ? "" : org.getName());
@@ -259,67 +257,73 @@ public class DoctorWarehouseSynchronizer {
             fill(material, result);
 
             doctorReportMaterialDao.create(material);
-        });
+        }
+
+    }
+
+
+    public void sync(DoctorDimensionCriteria dimensionCriteria) {
+
 
     }
 
 
     private void fill(DoctorReportMaterial material, Map<String, Object> result) {
-        material.setHoubeiFeedQuantity(Integer.parseInt(result.get("houbeiFeedCount".toUpperCase()).toString()));
-        material.setHoubeiFeedAmount(Double.parseDouble(result.get("houbeiFeedAmount".toUpperCase()).toString()));
-        material.setHoubeiMaterialAmount(Double.parseDouble(result.get("houbeiMaterialAmount".toUpperCase()).toString()));
-        material.setHoubeiMaterialQuantity(Integer.parseInt(result.get("houbeiMaterialCount".toUpperCase()).toString()));
-        material.setHoubeiConsumeAmount(Double.parseDouble(result.get("houbeiConsumerAmount".toUpperCase()).toString()));
-        material.setHoubeiMedicineAmount(Double.parseDouble(result.get("houbeiDrugAmount".toUpperCase()).toString()));
-        material.setHoubeiVaccinationAmount(Double.parseDouble(result.get("houbeiVaccineAmount".toUpperCase()).toString()));
+        material.setHoubeiFeedQuantity(((BigDecimal) (result.get("houbeiFeedCount"))).intValue());
+        material.setHoubeiFeedAmount(((BigDecimal) result.get("houbeiFeedAmount")).doubleValue());
+        material.setHoubeiMaterialAmount(((BigDecimal) result.get("houbeiMaterialAmount")).doubleValue());
+        material.setHoubeiMaterialQuantity(((BigDecimal) result.get("houbeiMaterialCount")).intValue());
+        material.setHoubeiConsumeAmount(((BigDecimal) result.get("houbeiConsumerAmount")).doubleValue());
+        material.setHoubeiMedicineAmount(((BigDecimal) result.get("houbeiDrugAmount")).doubleValue());
+        material.setHoubeiVaccinationAmount(((BigDecimal) result.get("houbeiVaccineAmount")).doubleValue());
 
-        material.setPeihuaiFeedQuantity(Integer.parseInt(result.get("peiHuaiFeedCount".toUpperCase()).toString()));
-        material.setPeihuaiFeedAmount(Double.parseDouble(result.get("peiHuaiFeedAmount".toUpperCase()).toString()));
-        material.setPeihuaiMaterialAmount(Double.parseDouble(result.get("peiHuaiMaterialAmount".toUpperCase()).toString()));
-        material.setPeihuaiMaterialQuantity(Integer.parseInt(result.get("peiHuaiMaterialCount".toUpperCase()).toString()));
-        material.setPeihuaiConsumeAmount(Double.parseDouble(result.get("peiHuaiConsumerAmount".toUpperCase()).toString()));
-        material.setPeihuaiMedicineAmount(Double.parseDouble(result.get("peiHuaiDrugAmount".toUpperCase()).toString()));
-        material.setPeihuaiVaccinationAmount(Double.parseDouble(result.get("peiHuaiVaccineAmount".toUpperCase()).toString()));
+        material.setPeihuaiFeedQuantity(((BigDecimal) result.get("peiHuaiFeedCount")).intValue());
+        material.setPeihuaiFeedAmount(((BigDecimal) result.get("peiHuaiFeedAmount")).doubleValue());
+        material.setPeihuaiMaterialAmount(((BigDecimal) result.get("peiHuaiMaterialAmount")).doubleValue());
+        material.setPeihuaiMaterialQuantity(((BigDecimal) result.get("peiHuaiMaterialCount")).intValue());
+        material.setPeihuaiConsumeAmount(((BigDecimal) result.get("peiHuaiConsumerAmount")).doubleValue());
+        material.setPeihuaiMedicineAmount(((BigDecimal) result.get("peiHuaiDrugAmount")).doubleValue());
+        material.setPeihuaiVaccinationAmount(((BigDecimal) result.get("peiHuaiVaccineAmount")).doubleValue());
 
-        material.setSowFeedQuantity(Integer.parseInt(result.get("farrowSowFeedCount".toUpperCase()).toString()));
-        material.setSowFeedAmount(Double.parseDouble(result.get("farrowSowFeedAmount".toUpperCase()).toString()));
-        material.setSowMaterialAmount(Double.parseDouble(result.get("farrowSowMaterialAmount".toUpperCase()).toString()));
-        material.setSowMaterialQuantity(Integer.parseInt(result.get("farrowSowMaterialCount".toUpperCase()).toString()));
-        material.setSowConsumeAmount(Double.parseDouble(result.get("farrowSowConsumerAmount".toUpperCase()).toString()));
-        material.setSowMedicineAmount(Double.parseDouble(result.get("farrowSowDrugAmount".toUpperCase()).toString()));
-        material.setSowVaccinationAmount(Double.parseDouble(result.get("farrowSowVaccineAmount".toUpperCase()).toString()));
+        material.setSowFeedQuantity(((BigDecimal) result.get("farrowSowFeedCount")).intValue());
+        material.setSowFeedAmount(((BigDecimal) result.get("farrowSowFeedAmount")).doubleValue());
+        material.setSowMaterialAmount(((BigDecimal) result.get("farrowSowMaterialAmount")).doubleValue());
+        material.setSowMaterialQuantity(((BigDecimal) result.get("farrowSowMaterialCount")).intValue());
+        material.setSowConsumeAmount(((BigDecimal) result.get("farrowSowConsumerAmount")).doubleValue());
+        material.setSowMedicineAmount(((BigDecimal) result.get("farrowSowDrugAmount")).doubleValue());
+        material.setSowVaccinationAmount(((BigDecimal) result.get("farrowSowVaccineAmount")).doubleValue());
 
-        material.setPigletFeedQuantity(Integer.parseInt(result.get("farrowFeedCount".toUpperCase()).toString()));
-        material.setPigletFeedAmount(Double.parseDouble(result.get("farrowFeedAmount".toUpperCase()).toString()));
-        material.setPigletMaterialAmount(Double.parseDouble(result.get("farrowMaterialAmount".toUpperCase()).toString()));
-        material.setPigletMaterialQuantity(Integer.parseInt(result.get("farrowMaterialCount".toUpperCase()).toString()));
-        material.setPigletConsumeAmount(Double.parseDouble(result.get("farrowConsumerAmount".toUpperCase()).toString()));
-        material.setPigletMedicineAmount(Double.parseDouble(result.get("farrowDrugAmount".toUpperCase()).toString()));
-        material.setPigletVaccinationAmount(Double.parseDouble(result.get("farrowVaccineAmount".toUpperCase()).toString()));
+        material.setPigletFeedQuantity(((BigDecimal) result.get("farrowFeedCount")).intValue());
+        material.setPigletFeedAmount(((BigDecimal) result.get("farrowFeedAmount")).doubleValue());
+        material.setPigletMaterialAmount(((BigDecimal) result.get("farrowMaterialAmount")).doubleValue());
+        material.setPigletMaterialQuantity(((BigDecimal) result.get("farrowMaterialCount")).intValue());
+        material.setPigletConsumeAmount(((BigDecimal) result.get("farrowConsumerAmount")).doubleValue());
+        material.setPigletMedicineAmount(((BigDecimal) result.get("farrowDrugAmount")).doubleValue());
+        material.setPigletVaccinationAmount(((BigDecimal) result.get("farrowVaccineAmount")).doubleValue());
 
-        material.setBaoyuFeedQuantity(Integer.parseInt(result.get("nurseryFeedCount".toUpperCase()).toString()));
-        material.setBaoyuFeedAmount(Double.parseDouble(result.get("nurseryFeedAmount".toUpperCase()).toString()));
-        material.setBaoyuMaterialAmount(Double.parseDouble(result.get("nurseryMaterialAmount".toUpperCase()).toString()));
-        material.setBaoyuMaterialQuantity(Integer.parseInt(result.get("nurseryMaterialCount".toUpperCase()).toString()));
-        material.setBaoyuConsumeAmount(Double.parseDouble(result.get("nurseryConsumerAmount".toUpperCase()).toString()));
-        material.setBaoyuMedicineAmount(Double.parseDouble(result.get("nurseryDrugAmount".toUpperCase()).toString()));
-        material.setBaoyuVaccinationAmount(Double.parseDouble(result.get("nurseryVaccineAmount".toUpperCase()).toString()));
+        material.setBaoyuFeedQuantity(((BigDecimal) result.get("nurseryFeedCount")).intValue());
+        material.setBaoyuFeedAmount(((BigDecimal) result.get("nurseryFeedAmount")).doubleValue());
+        material.setBaoyuMaterialAmount(((BigDecimal) result.get("nurseryMaterialAmount")).doubleValue());
+        material.setBaoyuMaterialQuantity(((BigDecimal) result.get("nurseryMaterialCount")).intValue());
+        material.setBaoyuConsumeAmount(((BigDecimal) result.get("nurseryConsumerAmount")).doubleValue());
+        material.setBaoyuMedicineAmount(((BigDecimal) result.get("nurseryDrugAmount")).doubleValue());
+        material.setBaoyuVaccinationAmount(((BigDecimal) result.get("nurseryVaccineAmount")).doubleValue());
 
-        material.setYufeiFeedQuantity(Integer.parseInt(result.get("fattenFeedCount".toUpperCase()).toString()));
-        material.setYufeiFeedAmount(Double.parseDouble(result.get("fattenFeedAmount".toUpperCase()).toString()));
-        material.setYufeiMaterialAmount(Double.parseDouble(result.get("fattenMaterialAmount".toUpperCase()).toString()));
-        material.setYufeiMaterialQuantity(Integer.parseInt(result.get("fattenMaterialCount".toUpperCase()).toString()));
-        material.setYufeiConsumeAmount(Double.parseDouble(result.get("fattenConsumerAmount".toUpperCase()).toString()));
-        material.setYufeiMedicineAmount(Double.parseDouble(result.get("fattenDrugAmount".toUpperCase()).toString()));
-        material.setYufeiVaccinationAmount(Double.parseDouble(result.get("fattenVaccineAmount".toUpperCase()).toString()));
+        material.setYufeiFeedQuantity(((BigDecimal) result.get("fattenFeedCount")).intValue());
+        material.setYufeiFeedAmount(((BigDecimal) result.get("fattenFeedAmount")).doubleValue());
+        material.setYufeiMaterialAmount(((BigDecimal) result.get("fattenMaterialAmount")).doubleValue());
+        material.setYufeiMaterialQuantity(((BigDecimal) result.get("fattenMaterialCount")).intValue());
+        material.setYufeiConsumeAmount(((BigDecimal) result.get("fattenConsumerAmount")).doubleValue());
+        material.setYufeiMedicineAmount(((BigDecimal) result.get("fattenDrugAmount")).doubleValue());
+        material.setYufeiVaccinationAmount(((BigDecimal) result.get("fattenVaccineAmount")).doubleValue());
 
-        material.setBoarFeedQuantity(Integer.parseInt(result.get("boarFeedCount".toUpperCase()).toString()));
-        material.setBoarFeedAmount(Double.parseDouble(result.get("boarFeedAmount".toUpperCase()).toString()));
-        material.setBoarMaterialAmount(Double.parseDouble(result.get("boarMaterialAmount".toUpperCase()).toString()));
-        material.setBoarMaterialQuantity(Integer.parseInt(result.get("boarMaterialCount".toUpperCase()).toString()));
-        material.setBoarConsumeAmount(Double.parseDouble(result.get("boarConsumerAmount".toUpperCase()).toString()));
-        material.setBoarMedicineAmount(Double.parseDouble(result.get("boarDrugAmount".toUpperCase()).toString()));
-        material.setBoarVaccinationAmount(Double.parseDouble(result.get("boarVaccineAmount".toUpperCase()).toString()));
+        material.setBoarFeedQuantity(((BigDecimal) result.get("boarFeedCount")).intValue());
+        material.setBoarFeedAmount(((BigDecimal) result.get("boarFeedAmount")).doubleValue());
+        material.setBoarMaterialAmount(((BigDecimal) result.get("boarMaterialAmount")).doubleValue());
+        material.setBoarMaterialQuantity(((BigDecimal) result.get("boarMaterialCount")).intValue());
+        material.setBoarConsumeAmount(((BigDecimal) result.get("boarConsumerAmount")).doubleValue());
+        material.setBoarMedicineAmount(((BigDecimal) result.get("boarDrugAmount")).doubleValue());
+        material.setBoarVaccinationAmount(((BigDecimal) result.get("boarVaccineAmount")).doubleValue());
     }
 
 }

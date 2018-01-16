@@ -280,6 +280,7 @@ public class DoctorReportBiDataSynchronize {
         pigDailyList.parallelStream().forEach(pigDaily -> synchronizePigBiData(pigDaily, dimensionCriteria));
 
         efficiencySynchronizer.sync(dimensionCriteria);
+        warehouseSynchronizer.sync(dimensionCriteria);
     }
 
     private void synchronizeFullBiDataForDay() {
