@@ -1981,3 +1981,81 @@ ALTER TABLE doctor_report_npds
 ALTER TABLE doctor_report_npds ADD org_id BIGINT NULL COMMENT '公司ID';
 ALTER TABLE doctor_report_npds
   MODIFY COLUMN org_id BIGINT COMMENT '公司ID' AFTER farm_id;
+
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `houbei_feed_amount` `houbei_feed_amount` DECIMAL(14,4) NOT NULL COMMENT '后备饲料金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `houbei_material_amount` `houbei_material_amount` DECIMAL(14,4) NOT NULL COMMENT '后备原料金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `houbei_vaccination_amount` `houbei_vaccination_amount` DECIMAL(14,4) NOT NULL COMMENT '后备疫苗金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `houbei_medicine_amount` `houbei_medicine_amount` DECIMAL(14,4) NOT NULL COMMENT '后备兽药金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `houbei_consume_amount` `houbei_consume_amount` DECIMAL(14,4) NOT NULL COMMENT '后备消耗品金额' ;
+
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `peihuai_feed_amount` `peihuai_feed_amount` DECIMAL(14,4) NOT NULL COMMENT '配怀饲料金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `peihuai_material_amount` `peihuai_material_amount` DECIMAL(14,4) NOT NULL COMMENT '配怀原料金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `peihuai_vaccination_amount` `peihuai_vaccination_amount` DECIMAL(14,4) NOT NULL COMMENT '配怀疫苗金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `peihuai_medicine_amount` `peihuai_medicine_amount` DECIMAL(14,4) NOT NULL COMMENT '配怀兽药金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `peihuai_consume_amount` `peihuai_consume_amount` DECIMAL(14,4) NOT NULL COMMENT '配怀消耗品金额' ;
+
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `sow_feed_amount` `sow_feed_amount` DECIMAL(14,4) NOT NULL COMMENT '产房母猪饲料金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `sow_material_amount` `sow_material_amount` DECIMAL(14,4) NOT NULL COMMENT '产房母猪原料金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `sow_vaccination_amount` `sow_vaccination_amount` DECIMAL(14,4) NOT NULL COMMENT '产房母猪疫苗金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `sow_medicine_amount` `sow_medicine_amount` DECIMAL(14,4) NOT NULL COMMENT '产房母猪兽药金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `sow_consume_amount` `sow_consume_amount` DECIMAL(14,4) NOT NULL COMMENT '产房母猪消耗品金额' ;
+
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `piglet_feed_amount` `piglet_feed_amount` DECIMAL(14,4) NOT NULL COMMENT '产房仔猪饲料金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `piglet_material_amount` `piglet_material_amount` DECIMAL(14,4) NOT NULL COMMENT '产房仔猪原料金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `piglet_vaccination_amount` `piglet_vaccination_amount` DECIMAL(14,4) NOT NULL COMMENT '产房仔猪疫苗金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `piglet_medicine_amount` `piglet_medicine_amount` DECIMAL(14,4) NOT NULL COMMENT '产房仔猪兽药金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `piglet_consume_amount` `piglet_consume_amount` DECIMAL(14,4) NOT NULL COMMENT '产房仔猪消耗品金额' ;
+
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `baoyu_feed_amount` `baoyu_feed_amount` DECIMAL(14,4) NOT NULL COMMENT '保育饲料金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `baoyu_material_amount` `baoyu_material_amount` DECIMAL(14,4) NOT NULL COMMENT '保育原料金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `baoyu_vaccination_amount` `baoyu_vaccination_amount` DECIMAL(14,4) NOT NULL COMMENT '保育疫苗金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `baoyu_medicine_amount` `baoyu_medicine_amount` DECIMAL(14,4) NOT NULL COMMENT '保育兽药金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `baoyu_consume_amount` `baoyu_consume_amount` DECIMAL(14,4) NOT NULL COMMENT '保育消耗品金额' ;
+
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `yufei_feed_amount` `yufei_feed_amount` DECIMAL(14,4) NOT NULL COMMENT '育肥饲料金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `yufei_material_amount` `yufei_material_amount` DECIMAL(14,4) NOT NULL COMMENT '育肥原料金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `yufei_vaccination_amount` `yufei_vaccination_amount` DECIMAL(14,4) NOT NULL COMMENT '育肥疫苗金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `yufei_medicine_amount` `yufei_medicine_amount` DECIMAL(14,4) NOT NULL COMMENT '育肥兽药金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `yufei_consume_amount` `yufei_consume_amount` DECIMAL(14,4) NOT NULL COMMENT '育肥消耗品金额' ;
+
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `boar_feed_amount` `boar_feed_amount` DECIMAL(14,4) NOT NULL COMMENT '公猪饲料金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `boar_material_amount` `boar_material_amount` DECIMAL(14,4) NOT NULL COMMENT '公猪原料金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `boar_vaccination_amount` `boar_vaccination_amount` DECIMAL(14,4) NOT NULL COMMENT '公猪疫苗金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `boar_medicine_amount` `boar_medicine_amount` DECIMAL(14,4) NOT NULL COMMENT '公猪兽药金额' ;
+ALTER TABLE `doctor_bi`.`doctor_report_materials`
+CHANGE COLUMN `boar_consume_amount` `boar_consume_amount` DECIMAL(14,4) NOT NULL COMMENT '公猪消耗品金额' ;
+
