@@ -4,6 +4,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
@@ -40,6 +41,7 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
     public Response<Boolean> flushFarmDaily(Long farmId, String startAt, String endAt) {
         log.info("flush farm daily starting, farmId:{}, startAt:{}, endAt:{}", farmId, startAt, endAt);
         try {
+            Stopwatch stopwatch = Stopwatch.createStarted();
             DoctorStatisticCriteria criteria = new DoctorStatisticCriteria();
             criteria.setFarmId(farmId);
             List<Date> list = DateUtil.getDates(DateUtil.toDate(startAt), DateUtil.toDate(endAt));
@@ -48,12 +50,14 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
                 return Response.fail("startAt.or.endAt.is.error");
             }
 
-            list.forEach(date -> {
-                criteria.setSumAt(DateUtil.toDateString(date));
-                log.info("flush farm daily farmId:{}, sumAt:{}", criteria.getFarmId(), criteria.getSumAt());
-                doctorDailyReportV2Manager.flushFarmDaily(criteria);
+            list.parallelStream().forEach(date -> {
+                DoctorStatisticCriteria criteria1 = new DoctorStatisticCriteria();
+                BeanMapper.copy(criteria, criteria1);
+                criteria1.setSumAt(DateUtil.toDateString(date));
+                log.info("flush farm daily farmId:{}, sumAt:{}", criteria1.getFarmId(), criteria1.getSumAt());
+                doctorDailyReportV2Manager.flushFarmDaily(criteria1);
             });
-            log.info("flush farm daily end");
+            log.info("flush farm daily end, consume:{}m", stopwatch.elapsed(TimeUnit.SECONDS));
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("flush farm daily failed, farmId:{}, startAt:{}, endAt:{}, cause:{}",

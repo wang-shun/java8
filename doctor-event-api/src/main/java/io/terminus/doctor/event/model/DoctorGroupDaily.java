@@ -162,12 +162,12 @@ public class DoctorGroupDaily implements Serializable {
     private Double netWeightGain;
 
     /**
-     * 产房转出总重
+     * 产房转出总重todo
      */
     private Double deliverTurnOutWeight;
 
     /**
-     * 产房转出总日龄
+     * 产房转出总日龄todo
      */
     private Double deliverTurnOutAge;
 

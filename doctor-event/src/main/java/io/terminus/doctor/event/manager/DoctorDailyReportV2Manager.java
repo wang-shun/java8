@@ -1,22 +1,38 @@
 package io.terminus.doctor.event.manager;
 
 import com.google.common.collect.Lists;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.cache.DoctorDepartmentCache;
-import io.terminus.doctor.event.dao.*;
+import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
+import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
+import io.terminus.doctor.event.dao.DoctorGroupStatisticDao;
+import io.terminus.doctor.event.dao.DoctorPigDailyDao;
+import io.terminus.doctor.event.dao.DoctorPigEventDao;
+import io.terminus.doctor.event.dao.DoctorPigStatisticDao;
 import io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
-import io.terminus.doctor.event.model.*;
+import io.terminus.doctor.event.model.DoctorEventModifyLog;
+import io.terminus.doctor.event.model.DoctorEventModifyRequest;
+import io.terminus.doctor.event.model.DoctorGroupDaily;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorPigDaily;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.user.dto.DoctorDepartmentLinerDto;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.isNull;
@@ -156,7 +172,7 @@ public class DoctorDailyReportV2Manager {
      */
     public void generateYesterdayAndToday(List<Long> farmIds) {
         Date today = Dates.startOfDay(new Date());
-        Date yesterday = new DateTime(today).minusDays(1).toDate();
+        Date yesterday = new DateTime(today).minusDays(10).toDate();
         Map<Long, Date> farmToDate = queryFarmEarlyEventAtImpl(DateUtil.toDateString(yesterday));
         farmIds.parallelStream().forEach(farmId -> {
             DoctorStatisticCriteria criteria = new DoctorStatisticCriteria();
@@ -167,9 +183,11 @@ public class DoctorDailyReportV2Manager {
                 temp = farmToDate.get(farmId);
             }
             List<Date> list = DateUtil.getDates(temp, today);
-            list.forEach(date -> {
-                criteria.setSumAt(DateUtil.toDateString(date));
-                flushFarmDaily(criteria);
+            list.parallelStream().forEach(date -> {
+                DoctorStatisticCriteria criteria1 = new DoctorStatisticCriteria();
+                BeanMapper.copy(criteria, criteria1);
+                criteria1.setSumAt(DateUtil.toDateString(date));
+                flushFarmDaily(criteria1);
             });
         });
     }

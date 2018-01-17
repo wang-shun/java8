@@ -278,7 +278,9 @@
         ifnull(sum(quantity), 0)
         from doctor_groups a left join doctor_group_events b on a.id = b.group_id
         <where>
-            <include refid="groupCriteria"/>
+            b.status = 1
+            AND b.farm_id = #{farmId}
+            AND b.event_at = #{sumAt}
             <if test="pigType = 2">and
                 (
                   (`type` = 4 and trans_group_type = 1 and other_barn_type = 3 )
@@ -299,7 +301,9 @@
         ifnull(sum(weight), 0)
         from doctor_groups a left join doctor_group_events b on a.id = b.group_id
         <where>
-            <include refid="groupCriteria"/>
+            b.status = 1
+            AND b.farm_id = #{farmId}
+            AND b.event_at = #{sumAt}
             <if test="pigType = 2">and
                 (
                 (`type` = 4 and trans_group_type = 1 and other_barn_type = 3 )
@@ -320,7 +324,9 @@
         ifnull(sum(quantity * avg_day_age), 0)
         from doctor_groups a left join doctor_group_events b on a.id = b.group_id
         <where>
-            <include refid="groupCriteria"/>
+            b.status = 1
+            AND b.farm_id = #{farmId}
+            AND b.event_at = #{sumAt}
             <if test="pigType = 2">and
                 (
                 (`type` = 4 and trans_group_type = 1 and other_barn_type = 3 )
@@ -340,7 +346,7 @@
         SELECT
         (
         SELECT
-        ifnull(b.weight)
+        ifnull(sum(b.weight), 0)
         FROM doctor_groups a left join doctor_group_events b on a.id = b.group_id
         <where>
             a.farm_id = #{farmId}
@@ -353,7 +359,7 @@
         -
         (
         SELECT
-        ifnull(b.weight)
+        ifnull(sum(b.weight),0)
         FROM doctor_groups a left join doctor_group_events b on a.id = b.group_id
         <where>
             a.farm_id = #{farmId}
