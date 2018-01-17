@@ -78,7 +78,7 @@ public class DoctorNurserySynchronizer {
         reportBi.setDead(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getDead(), "dead"));
         reportBi.setWeedOut(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getWeedOut(), "weedOut"));
         reportBi.setOtherChange(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getOtherChange(), "otherChange"));
-        reportBi.setEnd(groupDaily.getStart());
+        reportBi.setEnd(groupDaily.getEnd());
     }
 
     private void buildDelay(DoctorGroupDailyExtend groupDaily, DoctorReportNursery reportBi) {
