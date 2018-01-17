@@ -15,6 +15,9 @@ import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorReportEfficiency;
 import io.terminus.doctor.event.model.DoctorReportNpd;
 import io.terminus.doctor.event.reportBi.helper.DateHelper;
+import io.terminus.doctor.event.service.DoctorPigReportReadService;
+import io.terminus.doctor.event.service.DoctorReportReadService;
+import io.terminus.doctor.event.service.DoctorReportWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -44,6 +47,8 @@ public class DoctorEfficiencySynchronizer {
     private DoctorFarmReadService doctorFarmReadService;
     @RpcConsumer
     private DoctorOrgReadService doctorOrgReadService;
+    @RpcConsumer
+    private DoctorPigReportReadService doctorPigReportReadService;
 
 
     public void deleteAll() {
@@ -112,8 +117,10 @@ public class DoctorEfficiencySynchronizer {
         criteria.setOrzType(OrzDimension.FARM.getValue());
         criteria.setDateType(DateDimension.QUARTER.getValue());
 
-        start = DateHelper.withDateStartDay(date, DateDimension.QUARTER);
-        end = DateHelper.withDateEndDay(date, DateDimension.QUARTER);
+
+        DoctorPigReportReadService.DateDuration dateDuration = doctorPigReportReadService.getDuration(date, ReportTime.SEASON);
+        start = dateDuration.getStart();
+        end = dateDuration.getEnd();
 
         npds = doctorReportNpdDao.count(criteria);
         create(npds, DateDimension.QUARTER, start, end);
@@ -122,8 +129,9 @@ public class DoctorEfficiencySynchronizer {
         criteria.setOrzType(OrzDimension.FARM.getValue());
         criteria.setDateType(DateDimension.YEAR.getValue());
 
-        start = DateHelper.withDateStartDay(date, DateDimension.YEAR);
-        end = DateHelper.withDateEndDay(date, DateDimension.YEAR);
+        dateDuration = doctorPigReportReadService.getDuration(date, ReportTime.YEAR);
+        start = dateDuration.getStart();
+        end = dateDuration.getEnd();
 
         npds = doctorReportNpdDao.count(criteria);
         create(npds, DateDimension.YEAR, start, end);
@@ -151,11 +159,13 @@ public class DoctorEfficiencySynchronizer {
             //非生产天数=非生产天数/母猪存栏/天数
             if (npd.getSowCount() != 0)
                 efficiency.setNpd(npd.getNpd() / (npd.getSowCount() / npd.getDays()));
+
             //年产胎次（月）=365-非生产天数*12/生产天数/总窝数
-            if (pigDaily.getFarrowNest() != null && pigDaily.getFarrowNest() != 0)
+            if (null != pigDaily && pigDaily.getFarrowNest() != null && pigDaily.getFarrowNest() != 0 && efficiency.getNpd() != null)
                 efficiency.setBirthPerYear((365 - efficiency.getNpd()) * 12 / ((npd.getPregnancy() + npd.getLactation()) / pigDaily.getFarrowNest()));
+
             //psy=年产胎次*断奶仔猪数/断奶窝数
-            if (pigDaily.getWeanNest() != null && pigDaily.getWeanNest() != 0)
+            if (null != pigDaily && pigDaily.getWeanNest() != null && pigDaily.getWeanNest() != 0 && efficiency.getBirthPerYear() != null)
                 efficiency.setPsy(efficiency.getBirthPerYear() * (pigDaily.getWeanCount() / pigDaily.getWeanNest()));
             efficiency.setPregnancy(npd.getPregnancy());
             efficiency.setLactation(npd.getLactation());
@@ -181,11 +191,16 @@ public class DoctorEfficiencySynchronizer {
 
             efficiency.setSumAt(start);
             //非生产天数=非生产天数/母猪存栏/天数
-            efficiency.setNpd(npd.getNpd() / (npd.getSowCount() / npd.getDays()));
+            if (npd.getSowCount() != 0)
+                efficiency.setNpd(npd.getNpd() / (npd.getSowCount() / npd.getDays()));
+
             //年产胎次（月）=365-非生产天数*12/生产天数/总窝数
-            efficiency.setBirthPerYear((365 - efficiency.getNpd()) * 12 / ((npd.getPregnancy() + npd.getLactation()) / pigDaily.getFarrowNest()));
+            if (null != pigDaily && pigDaily.getFarrowNest() != null && pigDaily.getFarrowNest() != 0 && efficiency.getNpd() != null)
+                efficiency.setBirthPerYear((365 - efficiency.getNpd()) * 12 / ((npd.getPregnancy() + npd.getLactation()) / pigDaily.getFarrowNest()));
+
             //psy=年产胎次*断奶仔猪数/断奶窝数
-            efficiency.setPsy(efficiency.getBirthPerYear() * (pigDaily.getWeanCount() / pigDaily.getWeanNest()));
+            if (null != pigDaily && pigDaily.getWeanNest() != null && pigDaily.getWeanNest() != 0 && efficiency.getBirthPerYear() != null)
+                efficiency.setPsy(efficiency.getBirthPerYear() * (pigDaily.getWeanCount() / pigDaily.getWeanNest()));
             efficiency.setPregnancy(npd.getPregnancy());
             efficiency.setLactation(npd.getLactation());
 

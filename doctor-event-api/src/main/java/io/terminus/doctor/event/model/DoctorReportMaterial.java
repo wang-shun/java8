@@ -3,6 +3,7 @@ package io.terminus.doctor.event.model;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -56,7 +57,7 @@ public class DoctorReportMaterial implements Serializable {
     /**
      * 后备饲料金额
      */
-    private Double houbeiFeedAmount;
+    private BigDecimal houbeiFeedAmount;
     
     /**
      * 后备饲料数量
@@ -66,7 +67,7 @@ public class DoctorReportMaterial implements Serializable {
     /**
      * 后备原料金额
      */
-    private Double houbeiMaterialAmount;
+    private BigDecimal houbeiMaterialAmount;
     
     /**
      * 后备原料数量
@@ -76,22 +77,22 @@ public class DoctorReportMaterial implements Serializable {
     /**
      * 后备疫苗金额
      */
-    private Double houbeiVaccinationAmount;
+    private BigDecimal houbeiVaccinationAmount;
     
     /**
      * 后备兽药金额
      */
-    private Double houbeiMedicineAmount;
+    private BigDecimal houbeiMedicineAmount;
     
     /**
      * 后备消耗品金额
      */
-    private Double houbeiConsumeAmount;
+    private BigDecimal houbeiConsumeAmount;
     
     /**
      * 配怀饲料金额
      */
-    private Double peihuaiFeedAmount;
+    private BigDecimal peihuaiFeedAmount;
     
     /**
      * 配怀饲料数量
@@ -101,7 +102,7 @@ public class DoctorReportMaterial implements Serializable {
     /**
      * 配怀原料金额
      */
-    private Double peihuaiMaterialAmount;
+    private BigDecimal peihuaiMaterialAmount;
     
     /**
      * 配怀原料数量
@@ -111,22 +112,22 @@ public class DoctorReportMaterial implements Serializable {
     /**
      * 配怀疫苗金额
      */
-    private Double peihuaiVaccinationAmount;
+    private BigDecimal peihuaiVaccinationAmount;
     
     /**
      * 配怀兽药金额
      */
-    private Double peihuaiMedicineAmount;
+    private BigDecimal peihuaiMedicineAmount;
     
     /**
      * 配怀消耗品金额
      */
-    private Double peihuaiConsumeAmount;
+    private BigDecimal peihuaiConsumeAmount;
     
     /**
      * 产房母猪饲料金额
      */
-    private Double sowFeedAmount;
+    private BigDecimal sowFeedAmount;
     
     /**
      * 产房母猪饲料数量
@@ -136,7 +137,7 @@ public class DoctorReportMaterial implements Serializable {
     /**
      * 产房母猪原料金额
      */
-    private Double sowMaterialAmount;
+    private BigDecimal sowMaterialAmount;
     
     /**
      * 产房母猪原料数量
@@ -146,22 +147,22 @@ public class DoctorReportMaterial implements Serializable {
     /**
      * 产房母猪疫苗金额
      */
-    private Double sowVaccinationAmount;
+    private BigDecimal sowVaccinationAmount;
     
     /**
      * 产房母猪兽药金额
      */
-    private Double sowMedicineAmount;
+    private BigDecimal sowMedicineAmount;
     
     /**
      * 产房母猪消耗品金额
      */
-    private Double sowConsumeAmount;
+    private BigDecimal sowConsumeAmount;
     
     /**
      * 产房仔猪饲料金额
      */
-    private Double pigletFeedAmount;
+    private BigDecimal pigletFeedAmount;
     
     /**
      * 产房仔猪饲料数量
@@ -171,7 +172,7 @@ public class DoctorReportMaterial implements Serializable {
     /**
      * 产房仔猪原料金额
      */
-    private Double pigletMaterialAmount;
+    private BigDecimal pigletMaterialAmount;
     
     /**
      * 产房仔猪原料数量
@@ -181,22 +182,22 @@ public class DoctorReportMaterial implements Serializable {
     /**
      * 产房仔猪疫苗金额
      */
-    private Double pigletVaccinationAmount;
+    private BigDecimal pigletVaccinationAmount;
     
     /**
      * 产房仔猪兽药金额
      */
-    private Double pigletMedicineAmount;
+    private BigDecimal pigletMedicineAmount;
     
     /**
      * 产房仔猪消耗品金额
      */
-    private Double pigletConsumeAmount;
+    private BigDecimal pigletConsumeAmount;
     
     /**
      * 保育饲料金额
      */
-    private Double baoyuFeedAmount;
+    private BigDecimal baoyuFeedAmount;
     
     /**
      * 保育饲料数量
@@ -206,7 +207,7 @@ public class DoctorReportMaterial implements Serializable {
     /**
      * 保育原料金额
      */
-    private Double baoyuMaterialAmount;
+    private BigDecimal baoyuMaterialAmount;
     
     /**
      * 保育原料数量
@@ -216,22 +217,22 @@ public class DoctorReportMaterial implements Serializable {
     /**
      * 保育疫苗金额
      */
-    private Double baoyuVaccinationAmount;
+    private BigDecimal baoyuVaccinationAmount;
     
     /**
      * 保育兽药金额
      */
-    private Double baoyuMedicineAmount;
+    private BigDecimal baoyuMedicineAmount;
     
     /**
      * 保育消耗品金额
      */
-    private Double baoyuConsumeAmount;
+    private BigDecimal baoyuConsumeAmount;
     
     /**
      * 育肥饲料金额
      */
-    private Double yufeiFeedAmount;
+    private BigDecimal yufeiFeedAmount;
     
     /**
      * 育肥饲料数量
@@ -241,7 +242,7 @@ public class DoctorReportMaterial implements Serializable {
     /**
      * 育肥原料金额
      */
-    private Double yufeiMaterialAmount;
+    private BigDecimal yufeiMaterialAmount;
     
     /**
      * 育肥原料数量
@@ -251,22 +252,22 @@ public class DoctorReportMaterial implements Serializable {
     /**
      * 育肥疫苗金额
      */
-    private Double yufeiVaccinationAmount;
+    private BigDecimal yufeiVaccinationAmount;
     
     /**
      * 育肥兽药金额
      */
-    private Double yufeiMedicineAmount;
+    private BigDecimal yufeiMedicineAmount;
     
     /**
      * 育肥消耗品金额
      */
-    private Double yufeiConsumeAmount;
+    private BigDecimal yufeiConsumeAmount;
     
     /**
      * 公猪饲料金额
      */
-    private Double boarFeedAmount;
+    private BigDecimal boarFeedAmount;
     
     /**
      * 公猪饲料数量
@@ -276,7 +277,7 @@ public class DoctorReportMaterial implements Serializable {
     /**
      * 公猪原料金额
      */
-    private Double boarMaterialAmount;
+    private BigDecimal boarMaterialAmount;
     
     /**
      * 公猪原料数量
@@ -286,17 +287,17 @@ public class DoctorReportMaterial implements Serializable {
     /**
      * 公猪疫苗金额
      */
-    private Double boarVaccinationAmount;
+    private BigDecimal boarVaccinationAmount;
     
     /**
      * 公猪兽药金额
      */
-    private Double boarMedicineAmount;
+    private BigDecimal boarMedicineAmount;
     
     /**
      * 公猪消耗品金额
      */
-    private Double boarConsumeAmount;
+    private BigDecimal boarConsumeAmount;
     
     /**
      * 创建时间

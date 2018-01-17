@@ -263,67 +263,77 @@ public class DoctorWarehouseSynchronizer {
 
 
     public void sync(DoctorDimensionCriteria dimensionCriteria) {
+        List<Long> farmIds = new ArrayList<>();
+        if (dimensionCriteria.getOrzType().equals(OrzDimension.FARM.getValue())) {
+            farmIds.add(dimensionCriteria.getOrzId());
+        } else {
+            farmIds.addAll(RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(dimensionCriteria.getOrzId()))
+                    .stream().map(DoctorFarm::getId)
+                    .collect(Collectors.toList()));
+        }
 
+
+        
 
     }
 
 
     private void fill(DoctorReportMaterial material, Map<String, Object> result) {
         material.setHoubeiFeedQuantity(((BigDecimal) (result.get("houbeiFeedCount"))).intValue());
-        material.setHoubeiFeedAmount(((BigDecimal) result.get("houbeiFeedAmount")).doubleValue());
-        material.setHoubeiMaterialAmount(((BigDecimal) result.get("houbeiMaterialAmount")).doubleValue());
+        material.setHoubeiFeedAmount(((BigDecimal) result.get("houbeiFeedAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
+        material.setHoubeiMaterialAmount(((BigDecimal) result.get("houbeiMaterialAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
         material.setHoubeiMaterialQuantity(((BigDecimal) result.get("houbeiMaterialCount")).intValue());
-        material.setHoubeiConsumeAmount(((BigDecimal) result.get("houbeiConsumerAmount")).doubleValue());
-        material.setHoubeiMedicineAmount(((BigDecimal) result.get("houbeiDrugAmount")).doubleValue());
-        material.setHoubeiVaccinationAmount(((BigDecimal) result.get("houbeiVaccineAmount")).doubleValue());
+        material.setHoubeiConsumeAmount(((BigDecimal) result.get("houbeiConsumerAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
+        material.setHoubeiMedicineAmount(((BigDecimal) result.get("houbeiDrugAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
+        material.setHoubeiVaccinationAmount(((BigDecimal) result.get("houbeiVaccineAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
 
         material.setPeihuaiFeedQuantity(((BigDecimal) result.get("peiHuaiFeedCount")).intValue());
-        material.setPeihuaiFeedAmount(((BigDecimal) result.get("peiHuaiFeedAmount")).doubleValue());
-        material.setPeihuaiMaterialAmount(((BigDecimal) result.get("peiHuaiMaterialAmount")).doubleValue());
+        material.setPeihuaiFeedAmount(((BigDecimal) result.get("peiHuaiFeedAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
+        material.setPeihuaiMaterialAmount(((BigDecimal) result.get("peiHuaiMaterialAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
         material.setPeihuaiMaterialQuantity(((BigDecimal) result.get("peiHuaiMaterialCount")).intValue());
-        material.setPeihuaiConsumeAmount(((BigDecimal) result.get("peiHuaiConsumerAmount")).doubleValue());
-        material.setPeihuaiMedicineAmount(((BigDecimal) result.get("peiHuaiDrugAmount")).doubleValue());
-        material.setPeihuaiVaccinationAmount(((BigDecimal) result.get("peiHuaiVaccineAmount")).doubleValue());
+        material.setPeihuaiConsumeAmount(((BigDecimal) result.get("peiHuaiConsumerAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
+        material.setPeihuaiMedicineAmount(((BigDecimal) result.get("peiHuaiDrugAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
+        material.setPeihuaiVaccinationAmount(((BigDecimal) result.get("peiHuaiVaccineAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
 
         material.setSowFeedQuantity(((BigDecimal) result.get("farrowSowFeedCount")).intValue());
-        material.setSowFeedAmount(((BigDecimal) result.get("farrowSowFeedAmount")).doubleValue());
-        material.setSowMaterialAmount(((BigDecimal) result.get("farrowSowMaterialAmount")).doubleValue());
+        material.setSowFeedAmount(((BigDecimal) result.get("farrowSowFeedAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
+        material.setSowMaterialAmount(((BigDecimal) result.get("farrowSowMaterialAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
         material.setSowMaterialQuantity(((BigDecimal) result.get("farrowSowMaterialCount")).intValue());
-        material.setSowConsumeAmount(((BigDecimal) result.get("farrowSowConsumerAmount")).doubleValue());
-        material.setSowMedicineAmount(((BigDecimal) result.get("farrowSowDrugAmount")).doubleValue());
-        material.setSowVaccinationAmount(((BigDecimal) result.get("farrowSowVaccineAmount")).doubleValue());
+        material.setSowConsumeAmount(((BigDecimal) result.get("farrowSowConsumerAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
+        material.setSowMedicineAmount(((BigDecimal) result.get("farrowSowDrugAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
+        material.setSowVaccinationAmount(((BigDecimal) result.get("farrowSowVaccineAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
 
         material.setPigletFeedQuantity(((BigDecimal) result.get("farrowFeedCount")).intValue());
-        material.setPigletFeedAmount(((BigDecimal) result.get("farrowFeedAmount")).doubleValue());
-        material.setPigletMaterialAmount(((BigDecimal) result.get("farrowMaterialAmount")).doubleValue());
+        material.setPigletFeedAmount(((BigDecimal) result.get("farrowFeedAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
+        material.setPigletMaterialAmount(((BigDecimal) result.get("farrowMaterialAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
         material.setPigletMaterialQuantity(((BigDecimal) result.get("farrowMaterialCount")).intValue());
-        material.setPigletConsumeAmount(((BigDecimal) result.get("farrowConsumerAmount")).doubleValue());
-        material.setPigletMedicineAmount(((BigDecimal) result.get("farrowDrugAmount")).doubleValue());
-        material.setPigletVaccinationAmount(((BigDecimal) result.get("farrowVaccineAmount")).doubleValue());
+        material.setPigletConsumeAmount(((BigDecimal) result.get("farrowConsumerAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
+        material.setPigletMedicineAmount(((BigDecimal) result.get("farrowDrugAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
+        material.setPigletVaccinationAmount(((BigDecimal) result.get("farrowVaccineAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
 
         material.setBaoyuFeedQuantity(((BigDecimal) result.get("nurseryFeedCount")).intValue());
-        material.setBaoyuFeedAmount(((BigDecimal) result.get("nurseryFeedAmount")).doubleValue());
-        material.setBaoyuMaterialAmount(((BigDecimal) result.get("nurseryMaterialAmount")).doubleValue());
+        material.setBaoyuFeedAmount(((BigDecimal) result.get("nurseryFeedAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
+        material.setBaoyuMaterialAmount(((BigDecimal) result.get("nurseryMaterialAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
         material.setBaoyuMaterialQuantity(((BigDecimal) result.get("nurseryMaterialCount")).intValue());
-        material.setBaoyuConsumeAmount(((BigDecimal) result.get("nurseryConsumerAmount")).doubleValue());
-        material.setBaoyuMedicineAmount(((BigDecimal) result.get("nurseryDrugAmount")).doubleValue());
-        material.setBaoyuVaccinationAmount(((BigDecimal) result.get("nurseryVaccineAmount")).doubleValue());
+        material.setBaoyuConsumeAmount(((BigDecimal) result.get("nurseryConsumerAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
+        material.setBaoyuMedicineAmount(((BigDecimal) result.get("nurseryDrugAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
+        material.setBaoyuVaccinationAmount(((BigDecimal) result.get("nurseryVaccineAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
 
         material.setYufeiFeedQuantity(((BigDecimal) result.get("fattenFeedCount")).intValue());
-        material.setYufeiFeedAmount(((BigDecimal) result.get("fattenFeedAmount")).doubleValue());
-        material.setYufeiMaterialAmount(((BigDecimal) result.get("fattenMaterialAmount")).doubleValue());
+        material.setYufeiFeedAmount(((BigDecimal) result.get("fattenFeedAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
+        material.setYufeiMaterialAmount(((BigDecimal) result.get("fattenMaterialAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
         material.setYufeiMaterialQuantity(((BigDecimal) result.get("fattenMaterialCount")).intValue());
-        material.setYufeiConsumeAmount(((BigDecimal) result.get("fattenConsumerAmount")).doubleValue());
-        material.setYufeiMedicineAmount(((BigDecimal) result.get("fattenDrugAmount")).doubleValue());
-        material.setYufeiVaccinationAmount(((BigDecimal) result.get("fattenVaccineAmount")).doubleValue());
+        material.setYufeiConsumeAmount(((BigDecimal) result.get("fattenConsumerAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
+        material.setYufeiMedicineAmount(((BigDecimal) result.get("fattenDrugAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
+        material.setYufeiVaccinationAmount(((BigDecimal) result.get("fattenVaccineAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
 
         material.setBoarFeedQuantity(((BigDecimal) result.get("boarFeedCount")).intValue());
-        material.setBoarFeedAmount(((BigDecimal) result.get("boarFeedAmount")).doubleValue());
-        material.setBoarMaterialAmount(((BigDecimal) result.get("boarMaterialAmount")).doubleValue());
+        material.setBoarFeedAmount(((BigDecimal) result.get("boarFeedAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
+        material.setBoarMaterialAmount(((BigDecimal) result.get("boarMaterialAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
         material.setBoarMaterialQuantity(((BigDecimal) result.get("boarMaterialCount")).intValue());
-        material.setBoarConsumeAmount(((BigDecimal) result.get("boarConsumerAmount")).doubleValue());
-        material.setBoarMedicineAmount(((BigDecimal) result.get("boarDrugAmount")).doubleValue());
-        material.setBoarVaccinationAmount(((BigDecimal) result.get("boarVaccineAmount")).doubleValue());
+        material.setBoarConsumeAmount(((BigDecimal) result.get("boarConsumerAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
+        material.setBoarMedicineAmount(((BigDecimal) result.get("boarDrugAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
+        material.setBoarVaccinationAmount(((BigDecimal) result.get("boarVaccineAmount")).divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_DOWN));
     }
 
 }

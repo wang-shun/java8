@@ -148,6 +148,16 @@
         group by farm_id
     </select>
 
+    <select id="countByOrg" parameterType="map" resultType="map">
+        SELECT t1.org_id,type,pig_type,sum(quantity),sum(quantity * unit_price) AS amount
+        from doctor_warehouse_material_apply t0
+        LEFT JOIN doctor_farms t1 on t0.farm_id=t1.id
+        LEFT JOIN doctor_barns t2 on t0.pig_barn_id=t2.id
+        where apply_type=0
+        GROUP BY t1.org_id,t2.pig_type,type;
+    </select>
+
+
     <select id="materialApply" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="double">
         select ifnull(sum(quantity), 0)
         from doctor_groups a left join `doctor_warehouse_material_apply` b

@@ -159,7 +159,7 @@
         sum_at
         FROM
         <include refid="tb"/>
-        WHERE
+        <where>
         <if test="farmIds !=null and farmIds.size()>0">
             <foreach collection="farmIds" item="t" open="(" separator="or" close=")">
                 farm_id=#{t}
@@ -168,7 +168,8 @@
         <if test="orgId !=null">
             org_id=#{orgId}
         </if>
-        and sum_at=#{sumAt}
+        and sum_at=DATE_FORMAT(#{sumAt},'%Y-%m-%d')
+        </where>
     </select>
 
     <select id="report" parameterType="map" resultMap="DoctorReportNpdMap">
@@ -179,13 +180,15 @@
         ifnull(sum(lactation),0) as lactation,
         ifnull(sum(sow_count),0) as sow_count,
         ifnull(sum(days),0) as days,
-        sum_at
+        sum_at,
+        farm_id,
+        org_id
         FROM
         <include refid="tb"/>
         GROUP BY
-        <if test="orgType==2">
-            org_id
-        </if>
+        <!--<if test="orgType==2">-->
+            <!--org_id-->
+        <!--</if>-->
         <if test="orgType==3">
             farm_id
         </if>
