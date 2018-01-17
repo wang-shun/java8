@@ -168,7 +168,7 @@ public class DoctorDeliverSynchronizer {
 
     private Double outAvgWeight28(DoctorReportDeliver deliver) {
         Integer STANDARD_AGE = 28;
-        return (deliver.getWeanWeightPerFarrow() / deliver.getWeanDayAge())
+        return (EventUtil.getAvgWeight(deliver.getWeanWeightPerFarrow(), deliver.getWeanDayAge()))
                 * (STANDARD_AGE - deliver.getWeanDayAge())
                 + deliver.getWeanWeightPerFarrow();
     }

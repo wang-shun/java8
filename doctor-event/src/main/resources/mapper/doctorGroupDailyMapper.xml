@@ -245,9 +245,9 @@
         ifnull(sum(turn_actual_count), 0) as turnActualCount,
         ifnull(sum(turn_actual_weight), 0) as turnActualWeight,
         ifnull(sum(turn_actual_age), 0) as turnActualAge,
-        ifnull(sum(net_weight_gain), 0) as netWeightGain,
-        ifnull(sum(deliver_turn_out_weight), 0) as deliverTurnOutWeight,
-        ifnull(sum(deliver_turn_out_age), 0) as deliverTurnOutAge
+        ifnull(sum(net_weight_gain), 0) as netWeightGain
+--         ifnull(sum(deliver_turn_out_weight), 0) as deliverTurnOutWeight,
+--         ifnull(sum(deliver_turn_out_age), 0) as deliverTurnOutAge
     </sql>
 
     <select id="sumForDimension" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="io.terminus.doctor.event.dto.reportBi.DoctorGroupDailyExtend">

@@ -65,7 +65,7 @@ public class DoctorWarehouseReportDao {
      * @return
      */
     public Double materialApply(DoctorDimensionCriteria dimensionCriteria) {
-        return sqlSession.selectOne(namespace + "materialApply", dimensionCriteria);
+        return sqlSession.selectOne(namespace + ".materialApply", dimensionCriteria);
     }
 
 }

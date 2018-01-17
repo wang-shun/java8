@@ -488,7 +488,6 @@
         ifnull(sum(sow_cf_dead), 0) as sowCfDead,
         ifnull(sum(sow_cf_sale), 0) as sowCfSale,
         ifnull(sum(sow_cf_chg_farm), 0) as sowCfChgFarm,
-        ifnull(sum(sow_cf_Wean_Out), 0) as sowCfWeanOut,
         ifnull(sum(sow_cf_other_out), 0) as sowCfOtherOut,
         ifnull(sum(early_mating), 0) as earlyMating,
         ifnull(sum(early_farrow_nest), 0) as earlyFarrowNest,

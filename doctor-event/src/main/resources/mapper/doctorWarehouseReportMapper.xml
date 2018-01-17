@@ -149,7 +149,7 @@
     </select>
 
     <select id="materialApply" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="double">
-        select sum(quantity)
+        select ifnull(sum(quantity), 0)
         from doctor_groups a left join `doctor_warehouse_material_apply` b
         on a.id = b.pig_group_id
         where

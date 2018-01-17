@@ -15,8 +15,6 @@ import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorPigDaily;
-import io.terminus.doctor.event.model.DoctorReportNpd;
-import io.terminus.doctor.event.reportBi.synchronizer.*;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorBoarSynchronizer;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorDeliverSynchronizer;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorEfficiencySynchronizer;
@@ -354,6 +352,9 @@ public class DoctorReportBiDataSynchronize {
             dailyExtend.setSowPhEnd(end.getSowPhEnd());
             dailyExtend.setSowEnd(end.getSowEnd());
             dailyExtend.setBoarEnd(end.getBoarEnd());
+            dailyExtend.setSowPhMating(end.getSowPhMating());
+            dailyExtend.setSowPhKonghuai(end.getSowPhKonghuai());
+            dailyExtend.setSowPhPregnant(end.getSowPhPregnant());
         }
         boarSynchronizer.synchronize(dailyExtend, dimensionCriteria);
         sowSynchronizer.synchronize(dailyExtend, dimensionCriteria);
