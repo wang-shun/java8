@@ -94,10 +94,6 @@ public class DoctorFattenSynchronizer {
             reportBi.setFeedMeatRate(feedMeatRate(groupDaily,
                     new DoctorDimensionCriteria(reportBi.getOrzId(), reportBi.getOrzType(), reportBi.getSumAt(),
                             reportBi.getDateType(), groupDaily.getPigType())));
-        } else {
-            reportBi.setDeadWeedOutRate(0.0);
-            reportBi.setLivingRate(0.0);
-            reportBi.setFeedMeatRate(0.0);
         }
     }
 

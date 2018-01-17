@@ -97,10 +97,7 @@ public class DoctorReserveSynchronizer {
         if (DateDimension.YEARLY.contains(reportBi.getDateType())) {
             reportBi.setDeadWeedOutRate(fieldHelper.deadWeedOutRate(groupDaily, reportBi.getOrzType()));
             reportBi.setDailyLivestockOnHand(groupDaily.getDailyLivestockOnHand());
-            return reportBi;
         }
-        reportBi.setDeadWeedOutRate(0.0);
-        reportBi.setDailyLivestockOnHand(0.0);
         return reportBi;
     }
 

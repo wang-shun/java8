@@ -135,9 +135,6 @@ public class DoctorDeliverSynchronizer {
         if (DateDimension.YEARLY.contains(reportBi.getDateType())) {
             reportBi.setEarlyNestRate(fieldHelper.get(pigDaily.getFarrowNest(), pigDaily.getEarlyMating()));
             reportBi.setLaterNestRate(fieldHelper.get(pigDaily.getLaterNest(), pigDaily.getMatingCount()));
-        } else {
-            reportBi.setEarlyNestRate(0.0);
-            reportBi.setLaterNestRate(0.0);
         }
         reportBi.setEarlyMating(pigDaily.getEarlyMating());
         reportBi.setEarlyNest(pigDaily.getEarlyFarrowNest());
@@ -166,9 +163,6 @@ public class DoctorDeliverSynchronizer {
         if (DateDimension.YEARLY.contains(reportBi.getDateType())) {
             reportBi.setPigletDeadWeedOutRate(fieldHelper.deadWeedOutRate(groupDaily, reportBi.getOrzType()));
             reportBi.setPigletLivingRate(1 - reportBi.getPigletDeadWeedOutRate());
-        } else {
-            reportBi.setPigletDeadWeedOutRate(0.0);
-            reportBi.setPigletLivingRate(0.0);
         }
         reportBi.setTurnOutAvgWeight(0.0);
         reportBi.setTurnOutDay(0);

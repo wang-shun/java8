@@ -87,10 +87,7 @@ public class DoctorSowSynchronizer {
         if (DateDimension.YEARLY.contains(reportBi.getDateType())) {
             reportBi.setDeadWeedOutRate(sowDeadWeedOutRate(pigDaily, reportBi.getOrzType()));
             reportBi.setDailyLivestockOnHand(pigDaily.getSowDailyPigCount());
-            return;
         }
-        reportBi.setDeadWeedOutRate(0.0);
-        reportBi.setDailyLivestockOnHand(0.0);
     }
 
     /**
