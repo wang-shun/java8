@@ -465,10 +465,47 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
                                                 Integer konghuai, Integer pregant) {
         List<DoctorPigDaily> dailyList = doctorDailyPigDao.queryAfterSumAt(farmId, sumAt);
         dailyList.parallelStream().forEach(pigDaily -> {
-            pigDaily.setSowPhMating(mating);
-            pigDaily.setSowPhKonghuai(konghuai);
-            pigDaily.setSowPhPregnant(pregant);
+            pigDaily.setSowPhMating(pigDaily.getSowPhMating() + mating);
+            pigDaily.setSowPhKonghuai(pigDaily.getSowPhKonghuai() + konghuai);
+            pigDaily.setSowPhPregnant(pigDaily.getSowPhPregnant() + pregant);
+            doctorDailyPigDao.update(pigDaily);
         });
     }
 
+    /**
+     * 更新日期(包括更新日期)之后每日母猪存栏
+     *
+     * @param farmId          猪群id
+     * @param sumAt           日期
+     * @param liveChangeCount 存栏变动数量
+     * @param phChangeCount   配怀舍存栏变化
+     * @param cfChangeCount   产房存栏变化
+     */
+    protected void updateDailySowPigLiveStock(Long farmId, Date sumAt, Integer liveChangeCount,
+                                              Integer phChangeCount, Integer cfChangeCount) {
+        List<DoctorPigDaily> dailyList = doctorDailyPigDao.queryAfterSumAt(farmId, sumAt);
+        dailyList.parallelStream().forEach(pigDaily -> {
+            pigDaily.setSowPhStart(pigDaily.getSowPhStart() + phChangeCount);
+            pigDaily.setSowPhEnd(pigDaily.getSowPhEnd() + phChangeCount);
+            pigDaily.setSowCfStart(pigDaily.getSowCfStart() + cfChangeCount);
+            pigDaily.setSowCfEnd(pigDaily.getSowCfEnd() + cfChangeCount);
+            doctorDailyPigDao.update(pigDaily);
+        });
+    }
+
+    /**
+     * 更新日期(包括更新日期)之后每日公猪存栏
+     *
+     * @param farmId      猪群id
+     * @param sumAt       日期
+     * @param changeCount 变动数量
+     */
+    protected void updateDailyBoarPigLiveStock(Long farmId, Date sumAt, Integer changeCount) {
+        List<DoctorPigDaily> dailyList = doctorDailyPigDao.queryAfterSumAt(farmId, sumAt);
+        dailyList.parallelStream().forEach(pigDaily -> {
+            pigDaily.setBoarStart(pigDaily.getBoarStart() + changeCount);
+            pigDaily.setBoarEnd(pigDaily.getBoarEnd() + changeCount);
+            doctorDailyPigDao.update(pigDaily);
+        });
+    }
 }

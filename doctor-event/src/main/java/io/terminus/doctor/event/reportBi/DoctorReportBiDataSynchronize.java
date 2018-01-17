@@ -116,6 +116,8 @@ public class DoctorReportBiDataSynchronize {
         log.info("synchronize real time bi data starting");
         Date date = DateTime.now().minusMinutes(REAL_TIME_INTERVAL).toDate();
         synchronizeDeltaBiData(date);
+        warehouseSynchronizer.sync(date);
+//        efficiencySynchronizer.sync(date);
         log.info("synchronize real time bi data end");
     }
 
@@ -159,10 +161,6 @@ public class DoctorReportBiDataSynchronize {
             criteriaList.parallelStream().forEach(dimensionCriteria ->
                     synchronizePigBiData(doctorPigDailyDao.selectOneSumForDimension(dimensionCriteria), dimensionCriteria));
         }
-
-
-        warehouseSynchronizer.sync(date);
-        efficiencySynchronizer.sync(date);
 
     }
 
@@ -286,7 +284,7 @@ public class DoctorReportBiDataSynchronize {
         List<DoctorPigDailyExtend> pigDailyList = doctorPigDailyDao.sumForDimension(dimensionCriteria);
         pigDailyList.forEach(pigDaily -> synchronizePigBiData(pigDaily, dimensionCriteria));
 
-        efficiencySynchronizer.sync(dimensionCriteria);
+//        efficiencySynchronizer.sync(dimensionCriteria);
         warehouseSynchronizer.sync(dimensionCriteria);
     }
 

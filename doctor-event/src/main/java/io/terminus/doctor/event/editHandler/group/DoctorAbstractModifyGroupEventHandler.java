@@ -414,7 +414,12 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      * @param changeCount 存栏变化量
      */
     protected void updateDailyGroupLiveStock(Long farmId, Integer pigType, Date sumAt, Integer changeCount) {
-        doctorGroupDailyDao.updateDailyGroupLiveStock(farmId, pigType, sumAt, changeCount);
+        List<DoctorGroupDaily> groupDailyList = doctorGroupDailyDao.queryAfterSumAt(farmId, pigType, sumAt);
+        groupDailyList.parallelStream().forEach(groupDaily -> {
+            groupDaily.setStart(groupDaily.getStart() + changeCount);
+            groupDaily.setEnd(groupDaily.getEnd() + changeCount);
+            doctorGroupDailyDao.update(groupDaily);
+        });
     }
 
     /**

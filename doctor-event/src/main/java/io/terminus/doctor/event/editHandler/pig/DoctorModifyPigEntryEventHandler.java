@@ -128,14 +128,14 @@ public class DoctorModifyPigEntryEventHandler extends DoctorAbstractModifyPigEve
         doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig1, changeDto1));
         if (Objects.equals(oldPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
             //更新母猪存栏
-            doctorDailyPigDao.updateDailySowPigLiveStock(oldPigEvent.getFarmId(),  getAfterDay(oldPigEvent.getEventAt()),
+            updateDailySowPigLiveStock(oldPigEvent.getFarmId(),  getAfterDay(oldPigEvent.getEventAt()),
                     changeDto1.getEntryCountChange(), changeDto1.getPhCountChange(), changeDto1.getCfCountChange());
 
             //更新空怀母猪数
             updateDailyPhStatusLiveStock(oldPigEvent.getFarmId(), oldPigEvent.getEventAt()
                     , 0, -1, 0);
         } else {
-            doctorDailyPigDao.updateDailyBoarPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(oldPigEvent.getEventAt()), changeDto1.getEntryCountChange());
+            updateDailyBoarPigLiveStock(oldPigEvent.getFarmId(), getAfterDay(oldPigEvent.getEventAt()), changeDto1.getEntryCountChange());
         }
     }
 
@@ -162,7 +162,7 @@ public class DoctorModifyPigEntryEventHandler extends DoctorAbstractModifyPigEve
         doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig2, changeDto2));
         if (Objects.equals(newPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
             //更新母猪存栏
-            doctorDailyPigDao.updateDailySowPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()),
+            updateDailySowPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()),
                     changeDto2.getEntryCountChange(), changeDto2.getPhCountChange(), changeDto2.getCfCountChange());
 
             //更新空怀母猪数
@@ -170,7 +170,7 @@ public class DoctorModifyPigEntryEventHandler extends DoctorAbstractModifyPigEve
                     , 0, 1, 0);
 
         } else {
-            doctorDailyPigDao.updateDailyBoarPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()), changeDto2.getEntryCountChange());
+            updateDailyBoarPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()), changeDto2.getEntryCountChange());
         }
     }
 
