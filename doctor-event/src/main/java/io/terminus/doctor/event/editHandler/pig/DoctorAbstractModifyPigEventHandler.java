@@ -2,16 +2,30 @@ package io.terminus.doctor.event.editHandler.pig;
 
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.utils.Checks;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
-import io.terminus.doctor.event.dao.*;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
+import io.terminus.doctor.event.dao.DoctorPigDailyDao;
+import io.terminus.doctor.event.dao.DoctorPigDao;
+import io.terminus.doctor.event.dao.DoctorPigEventDao;
+import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.manager.DoctorDailyReportV2Manager;
-import io.terminus.doctor.event.model.*;
+import io.terminus.doctor.event.model.DoctorEventModifyLog;
+import io.terminus.doctor.event.model.DoctorEventModifyRequest;
+import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigDaily;
+import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -412,4 +426,49 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
         DoctorPigEvent lastEvent = doctorPigEventDao.findLastManualEventExcludeTypes(pigEvent.getPigId(), IGNORE_EVENT);
         return notNull(lastEvent) && Objects.equals(pigEvent.getId(), lastEvent.getId());
     }
+
+    /**
+     * 更新配怀舍各种状态母猪的数量
+     *
+     * @param pigEvent 猪事件事件
+     * @param count    变化数量
+     */
+    protected void updatePhSowStatusCount(DoctorPigEvent pigEvent, int count, Integer pigStatus) {
+        if (!PigType.MATING_TYPES.contains(pigEvent.getBarnType())) {
+            return;
+        }
+        int konghuai = 0;
+        int mating = 0;
+        int pregnant = 0;
+        PigStatus beforeStatus = PigStatus.from(pigStatus);
+        Checks.expectNotNull(beforeStatus, "event.before.status.is.null", pigEvent.getId());
+        switch (beforeStatus) {
+            case KongHuai:
+            case Wean:
+            case Entry:
+                konghuai = count;
+                break;
+            case Mate:
+                mating = count;
+                break;
+            case Pregnancy:
+                pregnant = count;
+                break;
+            default:
+                break;
+        }
+        updateDailyPhStatusLiveStock(pigEvent.getFarmId(), pigEvent.getEventAt()
+                , mating, konghuai, pregnant);
+    }
+
+    protected void updateDailyPhStatusLiveStock(Long farmId, Date sumAt, Integer mating,
+                                                Integer konghuai, Integer pregant) {
+        List<DoctorPigDaily> dailyList = doctorDailyPigDao.queryAfterSumAt(farmId, sumAt);
+        dailyList.parallelStream().forEach(pigDaily -> {
+            pigDaily.setSowPhMating(mating);
+            pigDaily.setSowPhKonghuai(konghuai);
+            pigDaily.setSowPhPregnant(pregant);
+        });
+    }
+
 }

@@ -73,6 +73,8 @@ public class DoctorModifyPigChgFarmInEventHandler extends DoctorAbstractModifyPi
                     changeDto2.getEntryCountChange(), changeDto2.getPhCountChange(), changeDto2.getCfCountChange());
 
             //更新空怀母猪数
+            updatePhSowStatusCount(deletePigEvent, -1, deletePigEvent.getPigStatusAfter());
+
         } else {
             doctorDailyPigDao.updateDailyBoarPigLiveStock(deletePigEvent.getFarmId(), getAfterDay(deletePigEvent.getEventAt()), changeDto2.getEntryCountChange());
         }
@@ -96,6 +98,7 @@ public class DoctorModifyPigChgFarmInEventHandler extends DoctorAbstractModifyPi
             doctorDailyPigDao.updateDailySowPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt())
                     , changeDto2.getEntryCountChange(), changeDto2.getPhCountChange(), changeDto2.getCfCountChange());
 
+            updatePhSowStatusCount(newPigEvent, 1, newPigEvent.getPigStatusAfter());
         } else {
             doctorDailyPigDao.updateDailyBoarPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt()), changeDto2.getEntryCountChange());
         }

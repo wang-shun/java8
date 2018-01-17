@@ -87,6 +87,17 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
     }
 
     /**
+     * 查询指定之间之后的日报，包含指定日期
+     * @param farmId 猪场id
+     * @param sumAt 指定日期
+     * @return
+     */
+    public List<DoctorPigDaily> queryAfterSumAt(Long farmId, Date sumAt) {
+        return getSqlSession().selectList(sqlId("queryAfterSumAt"),
+                ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
+    }
+
+    /**
      * 查询指定组织维度和时间维度下的聚合数据（不包含猪场日维度）
      *
      * @param dimensionCriteria 维度

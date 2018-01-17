@@ -124,7 +124,8 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
                     .build();
             matingChangeCount = 1;
             farrowChangCount = -1;
-
+            updateDailyPhStatusLiveStock(oldPigEvent.getFarmId(), oldPigEvent.getEventAt()
+                    , 0, 0, 1);
         } else if (Objects.equals(oldPigEvent.getType(), PigEvent.TO_MATING.getKey())) {
             changeDto = DoctorEventChangeDto.builder()
                     .chgLocationChangeCount(-1)
@@ -132,6 +133,8 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
                     .build();
             matingChangeCount = -1;
             farrowChangCount = 1;
+            updateDailyPhStatusLiveStock(oldPigEvent.getFarmId(), oldPigEvent.getEventAt()
+                    , 0, -1, 0);
         } else {
             return;
         }
@@ -153,6 +156,8 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
                     .build();
             matingChangeCount = -1;
             farrowChangCount = 1;
+            updateDailyPhStatusLiveStock(newPigEvent.getFarmId(), inputDto.eventAt()
+                    , 0, 0, -1);
         } else if (Objects.equals(newPigEvent.getType(), PigEvent.TO_MATING.getKey())) {
             changeDto = DoctorEventChangeDto.builder()
                     .chgLocationChangeCount(1)
@@ -160,6 +165,8 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
                     .build();
             matingChangeCount = 1;
             farrowChangCount = -1;
+            updateDailyPhStatusLiveStock(newPigEvent.getFarmId(), inputDto.eventAt()
+                    , 0, 1, 0);
         } else {
             return;
         }

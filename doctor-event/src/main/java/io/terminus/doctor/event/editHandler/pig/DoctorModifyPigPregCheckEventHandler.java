@@ -2,6 +2,7 @@ package io.terminus.doctor.event.editHandler.pig;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
@@ -146,6 +147,36 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
                 .pregCheckResultCountChange(-1)
                 .build();
         doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig1, changeDto1));
+
+
+        //更新配种、空怀、怀孕母猪数量
+        if (!PigType.MATING_TYPES.contains(oldPigEvent.getBarnType())) {
+            return;
+        }
+        Integer phMatingChangeCount = 0;
+        Integer phKongHuaiChangeCount = 0;
+        Integer phPregnantChangeCount = 0;
+        Integer afterStatus = getStatus(oldPigEvent.getPregCheckResult());
+        DoctorPigEvent beforeStatusEvent = doctorPigEventDao.getLastStatusEventBeforeEventAt(oldPigEvent.getPigId(), oldPigEvent.getEventAt());
+        Integer beforeStatus = getStatus(beforeStatusEvent);
+        if (Objects.equals(beforeStatus, afterStatus)) {
+            return;
+        }
+        if (Objects.equals(beforeStatus, PigStatus.Mate.getKey())) {
+            phMatingChangeCount = 1;
+        } else if (Objects.equals(beforeStatus, PigStatus.KongHuai.getKey())) {
+            phKongHuaiChangeCount = 1;
+        } else {
+            phPregnantChangeCount = 1;
+        }
+
+        if (Objects.equals(afterStatus, PigStatus.KongHuai.getKey())) {
+            phKongHuaiChangeCount = -1;
+        } else {
+            phPregnantChangeCount = -1;
+        }
+        updateDailyPhStatusLiveStock(oldPigEvent.getFarmId(), oldPigEvent.getEventAt()
+                , phMatingChangeCount, phKongHuaiChangeCount, phPregnantChangeCount);
     }
 
     @Override
@@ -157,6 +188,38 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
                 .pregCheckResultCountChange(1)
                 .build();
         doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig2, changeDto2));
+
+
+        //更新配种、空怀、怀孕母猪数量
+        if (!PigType.MATING_TYPES.contains(newPigEvent.getBarnType())) {
+            return;
+        }
+        Integer afterStatus = getStatus(newDto.getCheckResult());
+        Integer beforeStatus = newPigEvent.getPigStatusBefore();
+        if (Objects.equals(beforeStatus, afterStatus)) {
+            return;
+        }
+
+        Integer phMatingChangeCount = 0;
+        Integer phKongHuaiChangeCount= 0;
+        Integer phPregnantChangeCount = 0;
+        if (Objects.equals(beforeStatus, PigStatus.Mate.getKey())) {
+            phMatingChangeCount = -1;
+        }
+        else if (Objects.equals(newPigEvent.getPigStatusBefore(), PigStatus.KongHuai.getKey())) {
+            phKongHuaiChangeCount = -1;
+        } else {
+            phPregnantChangeCount = -1;
+        }
+
+        if (Objects.equals(afterStatus, PigStatus.KongHuai.getKey())) {
+            phKongHuaiChangeCount = 1;
+        } else {
+            phPregnantChangeCount = 1;
+        }
+        updateDailyPhStatusLiveStock(newPigEvent.getFarmId(), inputDto.eventAt()
+                , phMatingChangeCount, phKongHuaiChangeCount, phPregnantChangeCount);
+
     }
 
     @Override
