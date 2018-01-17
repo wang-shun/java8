@@ -183,16 +183,16 @@
         FROM
         <include refid="tb"/>
         GROUP BY
-        <if test="orgType =2">
+        <if test="orgType==2">
             org_id
         </if>
-        <if test="orgType =3">
+        <if test="orgType==3">
             farm_id
         </if>
-        <if test="dateType=5">
+        <if test="dateType==5">
             ,date_format(sum_at, '%Y')
         </if>
-        <if test="dateType=4">
+        <if test="dateType==4">
             ,concat(date_format(sum_at, '%Y-'), QUARTER(sum_at))
         </if>
     </select>

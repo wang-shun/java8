@@ -1607,4 +1607,24 @@
         WHERE created_at &gt;= #{startDate}
         group by farm_id
     </select>
+
+    <select id="findPigAt" parameterType="map" resultType="long">
+        select pig_id
+        FROM <include refid="tb"/>
+        <where>
+            <if test="farmIds !=null and farmIds.size()>0">
+                and
+                <foreach collection="farmIds" item="t" open="(" separator="or" close=")">
+                    farm_id=#{t}
+                </foreach>
+            </if>
+            <if test="beginDate !=null">
+                AND <![CDATA[ event_at >= #{beginDate} ]]>
+            </if>
+            <if test="endDate !=null">
+                AND <![CDATA[ event_at <= #{endDate} ]]>
+            </if>
+        </where>
+        group by pig_id
+    </select>
 </mapper>

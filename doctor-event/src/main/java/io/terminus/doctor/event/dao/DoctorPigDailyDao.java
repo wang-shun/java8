@@ -37,7 +37,7 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
         params.put("startDate", start);
         params.put("endDate", end);
 
-        return sqlSession.selectOne("report", params);
+        return sqlSession.selectOne(this.sqlId("report"), params);
     }
 
 
@@ -47,7 +47,7 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
         params.put("startDate", start);
         params.put("endDate", end);
 
-        return sqlSession.selectOne("report", params);
+        return sqlSession.selectOne(this.sqlId("report"), params);
     }
 
     public DoctorPigDaily countByOrg(Long orgId, Date start, Date end) {
@@ -56,7 +56,7 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
         params.put("startDate", start);
         params.put("endDate", end);
 
-        return sqlSession.selectOne("reportByOrg", params);
+        return sqlSession.selectOne(this.sqlId("reportByOrg"), params);
     }
 
     /**

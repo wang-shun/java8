@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -64,19 +65,17 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
     public void flushNPD(List<Long> farmIds, Date startDate, Date endDate) {
 
 
-        Map<Long/*farmID*/, Map<Integer/*month*/, Integer/*怀孕天数*/>> farmPregnancy = new HashMap<>();
-        Map<Long/*farmID*/, Map<Integer/*month*/, Integer/*哺乳天数*/>> farmLactation = new HashMap<>();
-        Map<Long/*farmID*/, Map<Integer/*month*/, Integer/*非生产天数*/>> farmNPD = new HashMap<>();
+        Map<Long/*farmID*/, Map<Integer/*month*/, Integer/*怀孕天数*/>> farmPregnancy = new ConcurrentHashMap<>();
+        Map<Long/*farmID*/, Map<Integer/*month*/, Integer/*哺乳天数*/>> farmLactation = new ConcurrentHashMap<>();
+        Map<Long/*farmID*/, Map<Integer/*month*/, Integer/*非生产天数*/>> farmNPD = new ConcurrentHashMap<>();
 
 
         Map<String, Object> params = new HashMap<>();
         params.put("farmIds", farmIds);
         params.put("beginDate", startDate);
         params.put("endDate", endDate);
-        Map<Long, List<DoctorPigEvent>> pigEvents = doctorPigEventDao.list(params)
-                .stream()
-                .collect(Collectors.groupingBy(DoctorPigEvent::getPigId));
-        pigEvents.forEach((pigId, events) -> {
+        List<Long> pigs = doctorPigEventDao.findPigAtEvent(startDate, endDate, farmIds);
+        pigs.parallelStream().forEach((pigId) -> {
 
             List<DoctorPigEvent> pigAllEvent = doctorPigEventDao.findByPigId(pigId);
 
@@ -160,8 +159,8 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                 DoctorPigDaily pigDaily = doctorPigDailyDao.countByFarm(f, monthStartDate, monthEndDate);
 
                 if (null != pigDaily) {
-                    int sowCount = pigDaily.getSowCfEnd() + pigDaily.getSowPhEnd();//母猪月存栏
-                    int sowNotMatingCount = pigDaily.getSowNotMatingCount();//母猪月进场未配种数
+                    int sowCount = (pigDaily.getSowCfEnd() == null ? 0 : pigDaily.getSowCfEnd()) + (pigDaily.getSowPhEnd() == null ? 0 : pigDaily.getSowPhEnd());//母猪月存栏
+                    int sowNotMatingCount = pigDaily.getSowNotMatingCount() == null ? 0 : pigDaily.getSowNotMatingCount();//母猪月进场未配种数
 
                     npd.setSowCount(sowCount - sowNotMatingCount);
                 } else {
@@ -288,16 +287,16 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
 
         List<DoctorPigEvent> filterMultiPreCheckEvents = new ArrayList<>();
         for (int i = 0; i < sortedByEventDate.size(); i++) { //过滤单月内多余的妊娠检查事件
-            if (i == pigEvents.size() - 1) {//最后一笔
-                DoctorPigEvent lastEvent = pigEvents.get(i);
+            if (i == sortedByEventDate.size() - 1) {//最后一笔
+                DoctorPigEvent lastEvent = sortedByEventDate.get(i);
                 if (lastEvent.getType().equals(PigEvent.PREG_CHECK.getKey()) && lastEvent.getPregCheckResult().equals(PregCheckResult.YANG.getKey())) {
                 } else {
-                    filterMultiPreCheckEvents.add(pigEvents.get(i));
+                    filterMultiPreCheckEvents.add(sortedByEventDate.get(i));
                 }
                 break;
             }
 
-            DoctorPigEvent currentEvent = pigEvents.get(i);
+            DoctorPigEvent currentEvent = sortedByEventDate.get(i);
 
             if (currentEvent.getType().equals(PigEvent.PREG_CHECK.getKey())) {
 
@@ -309,10 +308,10 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                 boolean remove = false;
                 for (int j = i + 1; j < sortedByEventDate.size(); j++) {
 
-                    if (pigEvents.get(j).getType().equals(PigEvent.PREG_CHECK.getKey()))//下一笔还是妊娠检查事件
+                    if (sortedByEventDate.get(j).getType().equals(PigEvent.PREG_CHECK.getKey()))//下一笔还是妊娠检查事件
                         //如果下一笔还是同一个月的
-                        if (new DateTime(pigEvents.get(j).getEventAt()).getMonthOfYear() ==
-                                new DateTime(pigEvents.get(i).getEventAt()).getMonthOfYear()) {
+                        if (new DateTime(sortedByEventDate.get(j).getEventAt()).getMonthOfYear() ==
+                                new DateTime(sortedByEventDate.get(i).getEventAt()).getMonthOfYear()) {
                             remove = true;
                             continue;//放弃这一笔的妊娠检查事件
                         }
@@ -322,7 +321,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
 
             }
 
-            filterMultiPreCheckEvents.add(pigEvents.get(i));
+            filterMultiPreCheckEvents.add(sortedByEventDate.get(i));
         }
         return Collections.unmodifiableList(filterMultiPreCheckEvents);
     }

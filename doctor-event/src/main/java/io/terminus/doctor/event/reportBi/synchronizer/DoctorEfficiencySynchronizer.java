@@ -138,19 +138,25 @@ public class DoctorEfficiencySynchronizer {
 
             DoctorPigDaily pigDaily = doctorPigDailyDao.countByFarm(npd.getFarmId(), start, end);
 
+            DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(npd.getFarmId()));
+
             DoctorReportEfficiency efficiency = new DoctorReportEfficiency();
             efficiency.setOrzId(npd.getFarmId());
             efficiency.setOrzType(OrzDimension.FARM.getValue());
             efficiency.setDateType(dateDimension.getValue());
+            efficiency.setOrzName(null == farm ? "" : farm.getName());
             efficiency.setSumAtName(DateHelper.dateCN(npd.getSumAt(), dateDimension));
 
             efficiency.setSumAt(npd.getSumAt());
             //非生产天数=非生产天数/母猪存栏/天数
-            efficiency.setNpd(npd.getNpd() / (npd.getSowCount() / npd.getDays()));
+            if (npd.getSowCount() != 0)
+                efficiency.setNpd(npd.getNpd() / (npd.getSowCount() / npd.getDays()));
             //年产胎次（月）=365-非生产天数*12/生产天数/总窝数
-            efficiency.setBirthPerYear((365 - efficiency.getNpd()) * 12 / ((npd.getPregnancy() + npd.getLactation()) / pigDaily.getFarrowNest()));
+            if (pigDaily.getFarrowNest() != null && pigDaily.getFarrowNest() != 0)
+                efficiency.setBirthPerYear((365 - efficiency.getNpd()) * 12 / ((npd.getPregnancy() + npd.getLactation()) / pigDaily.getFarrowNest()));
             //psy=年产胎次*断奶仔猪数/断奶窝数
-            efficiency.setPsy(efficiency.getBirthPerYear() * (pigDaily.getWeanCount() / pigDaily.getWeanNest()));
+            if (pigDaily.getWeanNest() != null && pigDaily.getWeanNest() != 0)
+                efficiency.setPsy(efficiency.getBirthPerYear() * (pigDaily.getWeanCount() / pigDaily.getWeanNest()));
             efficiency.setPregnancy(npd.getPregnancy());
             efficiency.setLactation(npd.getLactation());
 
