@@ -57,7 +57,7 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
                 log.info("flush farm daily farmId:{}, sumAt:{}", criteria1.getFarmId(), criteria1.getSumAt());
                 doctorDailyReportV2Manager.flushFarmDaily(criteria1);
             });
-            log.info("flush farm daily end, consume:{}m", stopwatch.elapsed(TimeUnit.SECONDS));
+            log.info("flush farm daily end, consume:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("flush farm daily failed, farmId:{}, startAt:{}, endAt:{}, cause:{}",
