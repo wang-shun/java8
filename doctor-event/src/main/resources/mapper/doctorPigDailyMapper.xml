@@ -31,10 +31,15 @@
         <result property="mateLc" column="mate_lc"/>
         <result property="mateYx" column="mate_yx"/>
         <result property="matingCount" column="mating_count"/>
+        <result property="sowPhMating" column="sow_ph_mating"/>
+        <result property="sowPhKonghuai" column="sow_ph_konghuai"/>
+        <result property="sowPhPregnant" column="sow_ph_pregnant"/>
         <result property="pregPositive" column="preg_positive"/>
         <result property="pregNegative" column="preg_negative"/>
         <result property="pregFanqing" column="preg_fanqing"/>
         <result property="pregLiuchan" column="preg_liuchan"/>
+        <result property="weanMate" column="wean_mate"/>
+        <result property="weanDeadWeedOut" column="wean_dead_weed_out"/>
         <result property="sowPhEnd" column="sow_ph_end"/>
         <result property="sowCfStart" column="sow_cf_start"/>
         <result property="sowCfEnd" column="sow_cf_end"/>
@@ -45,7 +50,9 @@
         <result property="sowCfSale" column="sow_cf_sale"/>
         <result property="sowCfChgFarm" column="sow_cf_chg_farm"/>
         <result property="sowCfOtherOut" column="sow_cf_other_out"/>
+        <result property="earlyMating" column="early_mating"/>
         <result property="earlyFarrowNest" column="early_farrow_nest"/>
+        <result property="laterNest" column="later_nest"/>
         <result property="farrowNest" column="farrow_nest"/>
         <result property="farrowLive" column="farrow_live"/>
         <result property="farrowHealth" column="farrow_health"/>
@@ -81,27 +88,13 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `sum_at`, `org_id`, `org_name`, `farm_id`, `farm_name`, `sow_ph_start`, `sow_ph_reserve_in`, `sow_ph_wean_in`,
-        `sow_ph_entry_in`, `sow_ph_chg_farm_in`, `sow_ph_dead`, `sow_ph_weed_out`, `sow_ph_sale`, `sow_ph_chg_farm`,
-        `sow_ph_other_out`, `mate_hb`, `mate_dn`, `mate_fq`, `mate_lc`, `mate_yx`, `mating_count`, `preg_positive`,
-        `preg_negative`, `preg_fanqing`, `preg_liuchan`, `sow_ph_end`, `sow_cf_start`, `sow_cf_end`, `sow_cf_in`,
-        `sow_cf_in_farm_in`, `sow_cf_dead`, `sow_cf_weed_out`, `sow_cf_sale`, `sow_cf_chg_farm`, `sow_cf_other_out`,
-        `early_farrow_nest`, `farrow_nest`, `farrow_live`, `farrow_health`, `farrow_weak`, `farrow_dead`, `farrowjmh`,
-        `farrow_weight`, `wean_nest`, `wean_qualified_count`, `wean_count`, `wean_day_age`, `wean_weight`, `boar_start`,
-        `boar_in`, `boar_dead`, `boar_weed_out`, `boar_sale`, `boar_other_out`, `boar_end`, `sow_not_mating_count`,
-        created_at, updated_at,`version`
+        `sum_at`, `org_id`, `org_name`, `farm_id`, `farm_name`, `sow_ph_start`, `sow_ph_reserve_in`, `sow_ph_wean_in`, `sow_ph_entry_in`, `sow_ph_chg_farm_in`, `sow_ph_dead`, `sow_ph_weed_out`, `sow_ph_sale`, `sow_ph_chg_farm`, `sow_ph_other_out`, `mate_hb`, `mate_dn`, `mate_fq`, `mate_lc`, `mate_yx`, `mating_count`, `sow_ph_mating`, `sow_ph_konghuai`, `sow_ph_pregnant`, `preg_positive`, `preg_negative`, `preg_fanqing`, `preg_liuchan`, `wean_mate`, `wean_dead_weed_out`, `sow_ph_end`, `sow_cf_start`, `sow_cf_end`, `sow_cf_in`, `sow_cf_in_farm_in`, `sow_cf_dead`, `sow_cf_weed_out`, `sow_cf_sale`, `sow_cf_chg_farm`, `sow_cf_other_out`, `early_mating`, `early_farrow_nest`, `later_nest`, `farrow_nest`, `farrow_live`, `farrow_health`, `farrow_weak`, `farrow_dead`, `farrowjmh`, `farrow_weight`, `wean_nest`, `wean_qualified_count`, `wean_count`, `wean_day_age`, `wean_weight`, `boar_start`, `boar_in`, `boar_dead`, `boar_weed_out`, `boar_sale`, `boar_other_out`, `boar_end`, `sow_not_mating_count`, `version`,
+        created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{sumAt}, #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{sowPhStart}, #{sowPhReserveIn}, #{sowPhWeanIn},
-        #{sowPhEntryIn}, #{sowPhChgFarmIn}, #{sowPhDead}, #{sowPhWeedOut}, #{sowPhSale}, #{sowPhChgFarm},
-        #{sowPhOtherOut}, #{mateHb}, #{mateDn}, #{mateFq}, #{mateLc}, #{mateYx}, #{matingCount}, #{pregPositive},
-        #{pregNegative}, #{pregFanqing}, #{pregLiuchan}, #{sowPhEnd}, #{sowCfStart}, #{sowCfEnd}, #{sowCfIn},
-        #{sowCfInFarmIn}, #{sowCfDead}, #{sowCfWeedOut}, #{sowCfSale}, #{sowCfChgFarm}, #{sowCfOtherOut},
-        #{earlyFarrowNest}, #{farrowNest}, #{farrowLive}, #{farrowHealth}, #{farrowWeak}, #{farrowDead}, #{farrowjmh},
-        #{farrowWeight}, #{weanNest}, #{weanQualifiedCount}, #{weanCount}, #{weanDayAge}, #{weanWeight}, #{boarStart},
-        #{boarIn}, #{boarDead}, #{boarWeedOut}, #{boarSale}, #{boarOtherOut}, #{boarEnd}, #{sowNotMatingCount},
-        now(), now(),1
+        #{sumAt}, #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{sowPhStart}, #{sowPhReserveIn}, #{sowPhWeanIn}, #{sowPhEntryIn}, #{sowPhChgFarmIn}, #{sowPhDead}, #{sowPhWeedOut}, #{sowPhSale}, #{sowPhChgFarm}, #{sowPhOtherOut}, #{mateHb}, #{mateDn}, #{mateFq}, #{mateLc}, #{mateYx}, #{matingCount}, #{sowPhMating}, #{sowPhKonghuai}, #{sowPhPregnant}, #{pregPositive}, #{pregNegative}, #{pregFanqing}, #{pregLiuchan}, #{weanMate}, #{weanDeadWeedOut}, #{sowPhEnd}, #{sowCfStart}, #{sowCfEnd}, #{sowCfIn}, #{sowCfInFarmIn}, #{sowCfDead}, #{sowCfWeedOut}, #{sowCfSale}, #{sowCfChgFarm}, #{sowCfOtherOut}, #{earlyMating}, #{earlyFarrowNest}, #{laterNest}, #{farrowNest}, #{farrowLive}, #{farrowHealth}, #{farrowWeak}, #{farrowDead}, #{farrowjmh}, #{farrowWeight}, #{weanNest}, #{weanQualifiedCount}, #{weanCount}, #{weanDayAge}, #{weanWeight}, #{boarStart}, #{boarIn}, #{boarDead}, #{boarWeedOut}, #{boarSale}, #{boarOtherOut}, #{boarEnd}, #{sowNotMatingCount}, 1,
+        now(), now()
     </sql>
 
     <sql id="criteria">
@@ -127,10 +120,15 @@
             <if test="mateLc != null">AND `mate_lc` = #{mateLc}</if>
             <if test="mateYx != null">AND `mate_yx` = #{mateYx}</if>
             <if test="matingCount != null">AND `mating_count` = #{matingCount}</if>
+            <if test="sowPhMating != null">AND `sow_ph_mating` = #{sowPhMating}</if>
+            <if test="sowPhKonghuai != null">AND `sow_ph_konghuai` = #{sowPhKonghuai}</if>
+            <if test="sowPhPregnant != null">AND `sow_ph_pregnant` = #{sowPhPregnant}</if>
             <if test="pregPositive != null">AND `preg_positive` = #{pregPositive}</if>
             <if test="pregNegative != null">AND `preg_negative` = #{pregNegative}</if>
             <if test="pregFanqing != null">AND `preg_fanqing` = #{pregFanqing}</if>
             <if test="pregLiuchan != null">AND `preg_liuchan` = #{pregLiuchan}</if>
+            <if test="weanMate != null">AND `wean_mate` = #{weanMate}</if>
+            <if test="weanDeadWeedOut != null">AND `wean_dead_weed_out` = #{weanDeadWeedOut}</if>
             <if test="sowPhEnd != null">AND `sow_ph_end` = #{sowPhEnd}</if>
             <if test="sowCfStart != null">AND `sow_cf_start` = #{sowCfStart}</if>
             <if test="sowCfEnd != null">AND `sow_cf_end` = #{sowCfEnd}</if>
@@ -141,7 +139,9 @@
             <if test="sowCfSale != null">AND `sow_cf_sale` = #{sowCfSale}</if>
             <if test="sowCfChgFarm != null">AND `sow_cf_chg_farm` = #{sowCfChgFarm}</if>
             <if test="sowCfOtherOut != null">AND `sow_cf_other_out` = #{sowCfOtherOut}</if>
+            <if test="earlyMating != null">AND `early_mating` = #{earlyMating}</if>
             <if test="earlyFarrowNest != null">AND `early_farrow_nest` = #{earlyFarrowNest}</if>
+            <if test="laterNest != null">AND `later_nest` = #{laterNest}</if>
             <if test="farrowNest != null">AND `farrow_nest` = #{farrowNest}</if>
             <if test="farrowLive != null">AND `farrow_live` = #{farrowLive}</if>
             <if test="farrowHealth != null">AND `farrow_health` = #{farrowHealth}</if>
@@ -220,10 +220,15 @@
             <if test="mateLc != null">`mate_lc` = #{mateLc},</if>
             <if test="mateYx != null">`mate_yx` = #{mateYx},</if>
             <if test="matingCount != null">`mating_count` = #{matingCount},</if>
+            <if test="sowPhMating != null">`sow_ph_mating` = #{sowPhMating},</if>
+            <if test="sowPhKonghuai != null">`sow_ph_konghuai` = #{sowPhKonghuai},</if>
+            <if test="sowPhPregnant != null">`sow_ph_pregnant` = #{sowPhPregnant},</if>
             <if test="pregPositive != null">`preg_positive` = #{pregPositive},</if>
             <if test="pregNegative != null">`preg_negative` = #{pregNegative},</if>
             <if test="pregFanqing != null">`preg_fanqing` = #{pregFanqing},</if>
             <if test="pregLiuchan != null">`preg_liuchan` = #{pregLiuchan},</if>
+            <if test="weanMate != null">`wean_mate` = #{weanMate},</if>
+            <if test="weanDeadWeedOut != null">`wean_dead_weed_out` = #{weanDeadWeedOut},</if>
             <if test="sowPhEnd != null">`sow_ph_end` = #{sowPhEnd},</if>
             <if test="sowCfStart != null">`sow_cf_start` = #{sowCfStart},</if>
             <if test="sowCfEnd != null">`sow_cf_end` = #{sowCfEnd},</if>
@@ -234,7 +239,9 @@
             <if test="sowCfSale != null">`sow_cf_sale` = #{sowCfSale},</if>
             <if test="sowCfChgFarm != null">`sow_cf_chg_farm` = #{sowCfChgFarm},</if>
             <if test="sowCfOtherOut != null">`sow_cf_other_out` = #{sowCfOtherOut},</if>
+            <if test="earlyMating != null">`early_mating` = #{earlyMating},</if>
             <if test="earlyFarrowNest != null">`early_farrow_nest` = #{earlyFarrowNest},</if>
+            <if test="laterNest != null">`later_nest` = #{laterNest},</if>
             <if test="farrowNest != null">`farrow_nest` = #{farrowNest},</if>
             <if test="farrowLive != null">`farrow_live` = #{farrowLive},</if>
             <if test="farrowHealth != null">`farrow_health` = #{farrowHealth},</if>
@@ -255,9 +262,8 @@
             <if test="boarOtherOut != null">`boar_other_out` = #{boarOtherOut},</if>
             <if test="boarEnd != null">`boar_end` = #{boarEnd},</if>
             <if test="sowNotMatingCount != null">`sow_not_mating_count` = #{sowNotMatingCount},</if>
-            <if test="version != null">`version` = #{version},</if>
-            updated_at = now(),
-            version = version + 1
+            version = version + 1,
+            updated_at = now()
         </set>
         WHERE id = #{id} and version = #{version}
     </update>
