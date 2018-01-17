@@ -218,52 +218,61 @@ public class DoctorReportBiDataSynchronize {
     private void synchronizeBiDataImpl() {
         //同步猪场日
         synchronizeFullBiDataForDay();
+        List<DoctorDimensionCriteria> dimensionCriteriaList = Lists.newArrayList();
         DoctorDimensionCriteria dimensionCriteria;
         //同步猪场周
         dimensionCriteria = new DoctorDimensionCriteria();
         dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
         dimensionCriteria.setDateType(DateDimension.WEEK.getValue());
-        synchronizeFullBiDataForDimension(dimensionCriteria);
+        dimensionCriteriaList.add(dimensionCriteria);
         //同步猪场月
         dimensionCriteria = new DoctorDimensionCriteria();
         dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
         dimensionCriteria.setDateType(DateDimension.MONTH.getValue());
-        synchronizeFullBiDataForDimension(dimensionCriteria);
+        dimensionCriteriaList.add(dimensionCriteria);
         //同步猪场季
         dimensionCriteria = new DoctorDimensionCriteria();
         dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
         dimensionCriteria.setDateType(DateDimension.QUARTER.getValue());
-        synchronizeFullBiDataForDimension(dimensionCriteria);
+        dimensionCriteriaList.add(dimensionCriteria);
+
         //同步猪场年
         dimensionCriteria = new DoctorDimensionCriteria();
         dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
         dimensionCriteria.setDateType(DateDimension.YEAR.getValue());
-        synchronizeFullBiDataForDimension(dimensionCriteria);
+        dimensionCriteriaList.add(dimensionCriteria);
+
         //同步公司日
         dimensionCriteria = new DoctorDimensionCriteria();
         dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
         dimensionCriteria.setDateType(DateDimension.DAY.getValue());
-        synchronizeFullBiDataForDimension(dimensionCriteria);
+        dimensionCriteriaList.add(dimensionCriteria);
+
         //同步公司周
         dimensionCriteria = new DoctorDimensionCriteria();
         dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
         dimensionCriteria.setDateType(DateDimension.WEEK.getValue());
-        synchronizeFullBiDataForDimension(dimensionCriteria);
+        dimensionCriteriaList.add(dimensionCriteria);
+
         //同步公司月
         dimensionCriteria = new DoctorDimensionCriteria();
         dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
         dimensionCriteria.setDateType(DateDimension.MONTH.getValue());
-        synchronizeFullBiDataForDimension(dimensionCriteria);
+        dimensionCriteriaList.add(dimensionCriteria);
+
         //同步公司季
         dimensionCriteria = new DoctorDimensionCriteria();
         dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
         dimensionCriteria.setDateType(DateDimension.QUARTER.getValue());
-        synchronizeFullBiDataForDimension(dimensionCriteria);
+        dimensionCriteriaList.add(dimensionCriteria);
+
         //同步公司年
         dimensionCriteria = new DoctorDimensionCriteria();
         dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
         dimensionCriteria.setDateType(DateDimension.YEAR.getValue());
-        synchronizeFullBiDataForDimension(dimensionCriteria);
+        dimensionCriteriaList.add(dimensionCriteria);
+
+        dimensionCriteriaList.parallelStream().forEach(this::synchronizeFullBiDataForDimension);
     }
 
     /**
@@ -275,7 +284,7 @@ public class DoctorReportBiDataSynchronize {
         List<DoctorGroupDailyExtend> groupDailyList = doctorGroupDailyDao.sumForDimension(dimensionCriteria);
         groupDailyList.forEach(groupDaily -> synchronizeGroupBiData(groupDaily, dimensionCriteria));
         List<DoctorPigDailyExtend> pigDailyList = doctorPigDailyDao.sumForDimension(dimensionCriteria);
-        pigDailyList.parallelStream().forEach(pigDaily -> synchronizePigBiData(pigDaily, dimensionCriteria));
+        pigDailyList.forEach(pigDaily -> synchronizePigBiData(pigDaily, dimensionCriteria));
 
         efficiencySynchronizer.sync(dimensionCriteria);
         warehouseSynchronizer.sync(dimensionCriteria);
