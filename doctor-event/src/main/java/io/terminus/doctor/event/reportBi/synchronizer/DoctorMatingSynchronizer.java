@@ -101,7 +101,11 @@ public class DoctorMatingSynchronizer {
     }
 
     private void buildDelay(DoctorPigDailyExtend pigDaily, DoctorReportMating reportBi) {
-        reportBi.setMatingRate(matingRate(pigDaily));
+        if (DateDimension.YEARLY.contains(reportBi.getDateType())) {
+            reportBi.setMatingRate(matingRate(pigDaily));
+            return;
+        }
+        reportBi.setMatingRate(0.0);
     }
 
     private Double matingRate(DoctorPigDailyExtend dailyExtend) {

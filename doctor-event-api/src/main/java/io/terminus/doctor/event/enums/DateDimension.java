@@ -1,8 +1,10 @@
 package io.terminus.doctor.event.enums;
 
 
+import com.google.common.collect.Lists;
 import lombok.Getter;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -43,4 +45,6 @@ public enum DateDimension {
         }
         return null;
     }
+
+    public static List<Integer> YEARLY = Lists.newArrayList(MONTH.getValue(), QUARTER.getValue(), YEAR.getValue());
 }

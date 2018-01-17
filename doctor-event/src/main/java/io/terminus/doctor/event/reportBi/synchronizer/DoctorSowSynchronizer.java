@@ -84,8 +84,13 @@ public class DoctorSowSynchronizer {
     }
 
     private void buildDelay(DoctorPigDailyExtend pigDaily, DoctorReportSow reportBi) {
-        reportBi.setDeadWeedOutRate(sowDeadWeedOutRate(pigDaily, reportBi.getOrzType()));
-        reportBi.setDailyLivestockOnHand(pigDaily.getSowDailyPigCount());
+        if (DateDimension.YEARLY.contains(reportBi.getDateType())) {
+            reportBi.setDeadWeedOutRate(sowDeadWeedOutRate(pigDaily, reportBi.getOrzType()));
+            reportBi.setDailyLivestockOnHand(pigDaily.getSowDailyPigCount());
+            return;
+        }
+        reportBi.setDeadWeedOutRate(0.0);
+        reportBi.setDailyLivestockOnHand(0.0);
     }
 
     /**

@@ -88,11 +88,17 @@ public class DoctorFattenSynchronizer {
         reportBi.setChgFarmAvgWeight(EventUtil.getAvgWeight(groupDaily.getChgFarmWeight(), groupDaily.getChgFarm()));
         reportBi.setDailyPigCount(groupDaily.getDailyLivestockOnHand());
         reportBi.setOutAvgWeight180(outAvgWeight180(groupDaily));
-        reportBi.setDeadWeedOutRate(fieldHelper.deadWeedOutRate(groupDaily, reportBi.getOrzType()));
-        reportBi.setLivingRate(1 - reportBi.getDeadWeedOutRate());
-        reportBi.setFeedMeatRate(feedMeatRate(groupDaily,
-                new DoctorDimensionCriteria(reportBi.getOrzId(), reportBi.getOrzType(), reportBi.getSumAt(),
-                        reportBi.getDateType(), groupDaily.getPigType())));
+        if (DateDimension.YEARLY.contains(reportBi.getDateType())) {
+            reportBi.setDeadWeedOutRate(fieldHelper.deadWeedOutRate(groupDaily, reportBi.getOrzType()));
+            reportBi.setLivingRate(1 - reportBi.getDeadWeedOutRate());
+            reportBi.setFeedMeatRate(feedMeatRate(groupDaily,
+                    new DoctorDimensionCriteria(reportBi.getOrzId(), reportBi.getOrzType(), reportBi.getSumAt(),
+                            reportBi.getDateType(), groupDaily.getPigType())));
+        } else {
+            reportBi.setDeadWeedOutRate(0.0);
+            reportBi.setLivingRate(0.0);
+            reportBi.setFeedMeatRate(0.0);
+        }
     }
 
     private Double outAvgWeight180(DoctorGroupDailyExtend dailyExtend) {
