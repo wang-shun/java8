@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2017-12-08 01:02:02
+ ~ Date: 2018-01-18 20:10:26
  ~ Created by [ your name ]
 -->
 
@@ -11,12 +11,14 @@
     <resultMap id="DoctorWarehouseMaterialApplyMap" type="DoctorWarehouseMaterialApply">
         <id property="id" column="id"/>
         <result property="materialHandleId" column="material_handle_id"/>
+        <result property="orgId" column="org_id"/>
         <result property="farmId" column="farm_id"/>
         <result property="warehouseId" column="warehouse_id"/>
         <result property="warehouseType" column="warehouse_type"/>
         <result property="warehouseName" column="warehouse_name"/>
         <result property="pigBarnId" column="pig_barn_id"/>
         <result property="pigBarnName" column="pig_barn_name"/>
+        <result property="pigType" column="pig_type"/>
         <result property="pigGroupId" column="pig_group_id"/>
         <result property="pigGroupName" column="pig_group_name"/>
         <result property="materialId" column="material_id"/>
@@ -45,24 +47,26 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `material_handle_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `pig_barn_id`, `pig_barn_name`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_id`, `apply_staff_name`, `apply_year`, `apply_month`, `material_name`, `type`, `unit`, `quantity`, `unit_price`, `apply_type`, 
+        `material_handle_id`, `org_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `pig_barn_id`, `pig_barn_name`, `pig_type`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_id`, `apply_staff_name`, `apply_year`, `apply_month`, `material_name`, `type`, `unit`, `quantity`, `unit_price`, `apply_type`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{materialHandleId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{pigBarnId}, #{pigBarnName}, #{pigGroupId}, #{pigGroupName}, #{materialId}, #{applyDate}, #{applyStaffId}, #{applyStaffName}, #{applyYear}, #{applyMonth}, #{materialName}, #{type}, #{unit}, #{quantity}, #{unitPrice}, #{applyType}, 
+        #{materialHandleId}, #{orgId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{pigBarnId}, #{pigBarnName}, #{pigType}, #{pigGroupId}, #{pigGroupName}, #{materialId}, #{applyDate}, #{applyStaffId}, #{applyStaffName}, #{applyYear}, #{applyMonth}, #{materialName}, #{type}, #{unit}, #{quantity}, #{unitPrice}, #{applyType}, 
         now(), now()
     </sql>
 
     <sql id="criteria">
         <where>
             <if test="materialHandleId != null">AND `material_handle_id` = #{materialHandleId}</if>
+            <if test="orgId != null">AND `org_id` = #{orgId}</if>
             <if test="farmId != null">AND `farm_id` = #{farmId}</if>
             <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
             <if test="warehouseType != null">AND `warehouse_type` = #{warehouseType}</if>
             <if test="warehouseName != null">AND `warehouse_name` = #{warehouseName}</if>
             <if test="pigBarnId != null">AND `pig_barn_id` = #{pigBarnId}</if>
             <if test="pigBarnName != null">AND `pig_barn_name` = #{pigBarnName}</if>
+            <if test="pigType != null">AND `pig_type` = #{pigType}</if>
             <if test="pigGroupId != null">AND `pig_group_id` = #{pigGroupId}</if>
             <if test="pigGroupName != null">AND `pig_group_name` = #{pigGroupName}</if>
             <if test="materialId != null">AND `material_id` = #{materialId}</if>
@@ -85,12 +89,14 @@
     <sql id="advCriteria">
         <where>
             <if test="materialHandleId != null">AND `material_handle_id` = #{materialHandleId}</if>
+            <if test="orgId != null">AND `org_id` = #{orgId}</if>
             <if test="farmId != null">AND `farm_id` = #{farmId}</if>
             <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
             <if test="warehouseType != null">AND `warehouse_type` = #{warehouseType}</if>
             <if test="warehouseName != null">AND `warehouse_name` = #{warehouseName}</if>
             <if test="pigBarnId != null">AND `pig_barn_id` = #{pigBarnId}</if>
             <if test="pigBarnName != null">AND `pig_barn_name` = #{pigBarnName}</if>
+            <if test="pigType != null">AND `pig_type` = #{pigType}</if>
             <if test="pigGroupId != null">AND `pig_group_id` = #{pigGroupId}</if>
             <if test="pigGroupName != null">AND `pig_group_name` = #{pigGroupName}</if>
             <if test="materialId != null">AND `material_id` = #{materialId}</if>
@@ -135,7 +141,6 @@
         </where>
     </sql>
 
-
     <insert id="create" parameterType="DoctorWarehouseMaterialApply" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO
         <include refid="tb"/>
@@ -168,12 +173,14 @@
         <include refid="tb"/>
         <set>
             <if test="materialHandleId != null">`material_handle_id` = #{materialHandleId},</if>
+            <if test="orgId != null">`org_id` = #{orgId},</if>
             <if test="farmId != null">`farm_id` = #{farmId},</if>
             <if test="warehouseId != null">`warehouse_id` = #{warehouseId},</if>
             <if test="warehouseType != null">`warehouse_type` = #{warehouseType},</if>
             <if test="warehouseName != null">`warehouse_name` = #{warehouseName},</if>
             <if test="pigBarnId != null">`pig_barn_id` = #{pigBarnId},</if>
             <if test="pigBarnName != null">`pig_barn_name` = #{pigBarnName},</if>
+            <if test="pigType != null">`pig_type` = #{pigType},</if>
             <if test="pigGroupId != null">`pig_group_id` = #{pigGroupId},</if>
             <if test="pigGroupName != null">`pig_group_name` = #{pigGroupName},</if>
             <if test="materialId != null">`material_id` = #{materialId},</if>

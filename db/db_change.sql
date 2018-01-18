@@ -2059,3 +2059,9 @@ CHANGE COLUMN `boar_medicine_amount` `boar_medicine_amount` DECIMAL(14,4) NOT NU
 ALTER TABLE `doctor_bi`.`doctor_report_materials`
 CHANGE COLUMN `boar_consume_amount` `boar_consume_amount` DECIMAL(14,4) NOT NULL COMMENT '公猪消耗品金额' ;
 
+
+-- 领用表添加公司编号，猪舍类型字段 2017-01-18
+ALTER TABLE `pig_doctor`.`doctor_warehouse_material_apply`
+ADD COLUMN `org_id` BIGINT(20) NULL COMMENT '公司ID' AFTER `material_handle_id`,
+ADD COLUMN `pig_type` SMALLINT(6) NULL COMMENT '猪舍类型' AFTER `pig_barn_name`;
+

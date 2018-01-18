@@ -527,6 +527,8 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
         StockContext context = getWarehouseAndSupportedBasicMaterial(stockOut.getFarmId(), stockOut.getWarehouseId());
 
+        Long orgId = stockOut.getOrgId();
+
         DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.handle(stockOut, context.getWareHouse(), WarehouseMaterialHandleType.OUT);
         List<WarehouseStockOutDto.WarehouseStockOutDetail> needProcessDetails;
         if (stockOut.getStockHandleId() != null)
@@ -546,7 +548,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                                     || !Objects.equals(source.getApplyPigBarnId(), apply.getPigBarnId())) {
 //                                doctorWarehouseMaterialApplyDao.delete(apply.getId());
                                 doctorWarehouseMaterialApplyDao.deleteByMaterialHandle(apply.getMaterialHandleId());//如果是猪群领用会有两条记录
-                                doctorWarehouseMaterialApplyManager.apply(target, source);
+                                doctorWarehouseMaterialApplyManager.apply(target, source, orgId);
                                 needUpdate = true;
                             }
 
@@ -585,7 +587,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                     .purchases(purchaseHandleContext.getPurchaseQuantity())
                     .stockHandle(stockHandle)
                     .build());
-            doctorWarehouseMaterialApplyManager.apply(materialHandle, detail);
+            doctorWarehouseMaterialApplyManager.apply(materialHandle, detail, orgId);
 
             doctorWarehouseStockMonthlyManager.count(stock.getWarehouseId(),
                     stock.getSkuId(),

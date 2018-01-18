@@ -20,6 +20,8 @@ public class WarehouseStockOutDto extends AbstractWarehouseStockDto implements S
 
     private static final long serialVersionUID = 9222667660305355019L;
 
+    private Long orgId;
+
     @Valid
     @NotEmpty(message = "stock.detail.empty", groups = AbstractWarehouseStockDetail.StockDefaultValid.class)
     private List<WarehouseStockOutDetail> details;
@@ -57,6 +59,8 @@ public class WarehouseStockOutDto extends AbstractWarehouseStockDto implements S
 
         @NotBlank(message = "stock.apply.pig.house.name.null", groups = StockDefaultValid.class)
         private String applyPigBarnName;
+
+        private Integer pigType;
 
         /**
          * 领用猪群
