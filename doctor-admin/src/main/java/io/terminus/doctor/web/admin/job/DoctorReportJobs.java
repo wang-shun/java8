@@ -77,6 +77,28 @@ public class DoctorReportJobs {
         this.hostLeader = hostLeader;
     }
 
+    /**
+     * 猪场日报计算job
+     * 每天凌晨1点统计昨天的数据
+     */
+    @Scheduled(cron = "0 0 1 * * ?")
+    @RequestMapping(value = "/dailyV2", method = RequestMethod.GET)
+    public void dailyReportV2() {
+        try {
+            if(!hostLeader.isLeader())
+            {
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
+            log.info("daily report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
+
+            doctorDailyReportV2Service.generateYesterdayAndToday(getAllFarmIds());
+
+            log.info("daily report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+        } catch (Exception e) {
+            log.error("daily report job failed, cause:{}", Throwables.getStackTraceAsString(e));
+        }
+    }
 
 
     /**
@@ -94,7 +116,7 @@ public class DoctorReportJobs {
             }
             log.info("daily report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
 
-            doctorDailyReportV2Service.generateYesterdayAndToday(getAllFarmIds());
+            doctorDailyReportWriteService.generateYesterdayAndTodayReports(getAllFarmIds());
 
             log.info("daily report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
@@ -102,7 +124,7 @@ public class DoctorReportJobs {
         }
     }
 
-//    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "0 0 1 * * ?")
     @RequestMapping(value = "/group/daily", method = RequestMethod.GET)
     public void groupDaily() {
         try {
@@ -123,7 +145,7 @@ public class DoctorReportJobs {
      * 猪场月报计算job
      * 每两点执行一发
      */
-//    @Scheduled(cron = "0 0 2 * * ?")
+    @Scheduled(cron = "0 0 2 * * ?")
     @RequestMapping(value = "/farm/range", method = RequestMethod.GET)
     public void monthlyReport() {
         try {
@@ -145,7 +167,7 @@ public class DoctorReportJobs {
      * 公司月报计算job
      * 每两点执行一发
      */
-//    @Scheduled(cron = "0 0 3 * * ?")
+    @Scheduled(cron = "0 0 3 * * ?")
     @RequestMapping(value = "/org/range", method = RequestMethod.GET)
     public void monthlyOrgReport() {
         try {
