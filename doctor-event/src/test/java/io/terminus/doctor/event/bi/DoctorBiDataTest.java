@@ -75,4 +75,13 @@ public class DoctorBiDataTest extends BaseServiceTest {
         DoctorReportSow sow = doctorReportSowDao.findByDimension(doctorDimensionCriteria);
         Assert.assertNotNull(sow);
     }
+
+    @Test
+    public void dimensionReport() {
+        DoctorDimensionCriteria doctorDimensionCriteria = new DoctorDimensionCriteria();
+        doctorDimensionCriteria.setOrzId(1L);
+        doctorDimensionCriteria.setOrzType(3);
+        doctorDimensionCriteria.setDateType(1);
+
+    }
 }

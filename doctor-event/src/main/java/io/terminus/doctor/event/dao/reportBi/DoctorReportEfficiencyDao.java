@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.dao.reportBi;
 
 import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.model.DoctorReportEfficiency;
 import org.springframework.stereotype.Repository;
 
@@ -12,5 +13,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class DoctorReportEfficiencyDao extends MyBatisDao<DoctorReportEfficiency> {
-
+    public DoctorReportEfficiency findByDimension(DoctorDimensionCriteria dimensionCriteria) {
+        return getSqlSession().selectOne(sqlId("findByDimension"), dimensionCriteria);
+    }
 }

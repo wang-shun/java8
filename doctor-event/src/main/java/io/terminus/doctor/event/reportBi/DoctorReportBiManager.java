@@ -1,9 +1,7 @@
 package io.terminus.doctor.event.reportBi;
 
-import io.terminus.doctor.common.event.CoreEventDispatcher;
-import io.terminus.doctor.event.model.DoctorPigDaily;
-import io.terminus.doctor.event.reportBi.listener.DoctorReportBiEvent;
-import io.terminus.doctor.event.model.DoctorGroupDaily;
+import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
+import io.terminus.doctor.event.dto.reportBi.DoctorDimensionReport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,38 +11,14 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DoctorReportBiManager {
-    private final CoreEventDispatcher dispatcher;
     private final DoctorReportBiDataSynchronize synchronize;
+    private final DoctorReportBiDataQuery query;
 
     @Autowired
-    public DoctorReportBiManager(CoreEventDispatcher dispatcher, DoctorReportBiDataSynchronize synchronize) {
-        this.dispatcher = dispatcher;
+    public DoctorReportBiManager(DoctorReportBiDataSynchronize synchronize, DoctorReportBiDataQuery query) {
         this.synchronize = synchronize;
+        this.query = query;
     }
-
-    /**
-     * 同步猪报表数据到bi（t+0）
-     * @param pigDaily 猪日报表
-     */
-    public void synchronizePigData(DoctorPigDaily pigDaily) {
-        dispatcher.publish(new DoctorReportBiEvent(pigDaily.getOrgId(), pigDaily.getOrgName(),
-                pigDaily.getFarmId(), pigDaily.getFarmName(), null, pigDaily.getSumAt()));
-    }
-
-    /**
-     * 同步猪群报表数据到bi（t+0）
-     * @param groupDaily 猪群日报表
-     */
-    public void synchronizeGroupData(DoctorGroupDaily groupDaily){
-        dispatcher.publish(new DoctorReportBiEvent(groupDaily.getOrgId(), groupDaily.getOrgName(),
-                groupDaily.getFarmId(), groupDaily.getFarmName(), groupDaily.getPigType(), groupDaily.getSumAt()));
-
-    }
-
-    /**
-     * 同步特殊指标数据到bi（t+1）
-     */
-    public void synchronizeSpecificData(){}
 
     public void synchronizeDeltaDayBiData() {
         synchronize.synchronizeDeltaDayBiData();
@@ -58,5 +32,7 @@ public class DoctorReportBiManager {
     }
 
 
-    // TODO: 18/1/9 从bi拉取数据
-}
+    public DoctorDimensionReport dimensionReport(DoctorDimensionCriteria dimensionCriteria) {
+        return query.dimensionReport(dimensionCriteria);
+    }
+ }

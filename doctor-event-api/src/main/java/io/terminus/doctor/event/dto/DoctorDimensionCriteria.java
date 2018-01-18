@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -13,7 +14,8 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorDimensionCriteria {
+public class DoctorDimensionCriteria implements Serializable{
+    private static final long serialVersionUID = -2475954192377211983L;
     /**
      * 组织id
      */
@@ -47,5 +49,9 @@ public class DoctorDimensionCriteria {
         this.sumAt = sumAt;
         this.dateType = dateType;
         this.pigType = pigType;
+    }
+
+    public DoctorDimensionCriteria(Long orzId, Integer orzType, Date sumAt, Integer dateType) {
+        this(orzId, orzType, sumAt, dateType, null);
     }
 }

@@ -2,6 +2,8 @@ package io.terminus.doctor.event.service;
 
 
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
+import io.terminus.doctor.event.dto.reportBi.DoctorDimensionReport;
 
 import java.util.List;
 
@@ -55,4 +57,11 @@ public interface DoctorDailyReportV2Service {
      * @return
      */
     Response<Boolean> synchronizeFullBiData();
+
+    /**
+     * 查询某一时间维度的猪场报表数据
+     * @param dimensionCriteria 查询维度
+     * @return 报表数据
+     */
+    Response<DoctorDimensionReport> dimensionReport(DoctorDimensionCriteria dimensionCriteria);
 }

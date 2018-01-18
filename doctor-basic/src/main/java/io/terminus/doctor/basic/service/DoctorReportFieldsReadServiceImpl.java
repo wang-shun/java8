@@ -85,6 +85,7 @@ public class DoctorReportFieldsReadServiceImpl implements DoctorReportFieldsRead
                 DoctorReportFieldTypeDto fieldDto = new DoctorReportFieldTypeDto();
                 fieldDto.setId(type.getId());
                 fieldDto.setName(type.getName());
+                fieldDto.setReportField(type.getReportField());
 
 
                 if (allFields.containsKey(type.getId())) {
@@ -92,6 +93,7 @@ public class DoctorReportFieldsReadServiceImpl implements DoctorReportFieldsRead
                         DoctorReportFieldTypeDto.DoctorReportFieldDto child = new DoctorReportFieldTypeDto.DoctorReportFieldDto();
                         child.setId(field.getId());
                         child.setName(field.getName());
+                        child.setReportField(field.getReportField());
                         return child;
                     }).collect(Collectors.toList()));
                 } else {

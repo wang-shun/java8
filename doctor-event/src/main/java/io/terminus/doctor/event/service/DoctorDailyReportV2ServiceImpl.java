@@ -7,7 +7,9 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
+import io.terminus.doctor.event.dto.reportBi.DoctorDimensionReport;
 import io.terminus.doctor.event.manager.DoctorDailyReportV2Manager;
 import io.terminus.doctor.event.reportBi.DoctorReportBiManager;
 import lombok.extern.slf4j.Slf4j;
@@ -163,6 +165,16 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
         } catch (Exception e) {
             log.error("synchronize full bi data failed,cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("synchronize.full.bi.data.failed");
+        }
+    }
+
+    @Override
+    public Response<DoctorDimensionReport> dimensionReport(DoctorDimensionCriteria dimensionCriteria) {
+        try {
+            return Response.ok(doctorReportBiManager.dimensionReport(dimensionCriteria));
+        } catch (Exception e) {
+            log.error("dimension report failed,dimension:{}, cause:{}", dimensionCriteria, Throwables.getStackTraceAsString(e));
+            return Response.fail("dimension.report.failed");
         }
     }
 }

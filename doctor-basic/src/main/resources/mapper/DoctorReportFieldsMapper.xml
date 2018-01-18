@@ -12,6 +12,7 @@
         <id property="id" column="id"/>
         <result property="fId" column="f_id"/>
         <result property="name" column="name"/>
+        <result property="reportField" column="report_field"/>
         <result property="type" column="type"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
@@ -27,12 +28,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `f_id`, `name`, `type`, 
+        `f_id`, `name`, `report_field`, `type`,
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{fId}, #{name}, #{type}, 
+        #{fId}, #{name}, #{reportField}, #{type},
         now(), now()
     </sql>
 
@@ -40,6 +41,7 @@
         <where>
             <if test="fId != null">AND `f_id` = #{fId}</if>
             <if test="name != null">AND `name` = #{name}</if>
+            <if test="name != null">AND `report_filed` = #{reportField}</if>
             <if test="type != null">AND `type` = #{type}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
@@ -79,6 +81,7 @@
         <set>
             <if test="fId != null">`f_id` = #{fId},</if>
             <if test="name != null">`name` = #{name},</if>
+            <if test="reportField != null">`report_field` = #{reportField},</if>
             <if test="type != null">`type` = #{type},</if>
             updated_at = now()
         </set>

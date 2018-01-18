@@ -1,5 +1,6 @@
 package io.terminus.doctor.basic.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
@@ -21,6 +22,9 @@ public class DoctorReportFieldTypeDto implements Serializable {
 
     private String name;
 
+    @JsonIgnore
+    private String reportField;
+
     @Valid
     private List<DoctorReportFieldDto> fields;
 
@@ -34,6 +38,9 @@ public class DoctorReportFieldTypeDto implements Serializable {
         private Long id;
 
         private String name;
+
+        @JsonIgnore
+        private String reportField;
 
         private Boolean hidden;
 
