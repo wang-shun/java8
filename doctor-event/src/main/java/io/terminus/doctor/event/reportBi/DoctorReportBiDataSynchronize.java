@@ -106,6 +106,11 @@ public class DoctorReportBiDataSynchronize {
         Stopwatch stopwatch = Stopwatch.createStarted();
         Date date = DateTime.now().minusMinutes(DELTA_DAY).toDate();
         synchronizeDeltaBiData(date);
+
+        //TODO 物料消耗还需要刷历史
+        warehouseSynchronizer.sync(new Date());
+        efficiencySynchronizer.sync(new Date());
+
         log.info("synchronize delta day bi data end, minute:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
     }
 
@@ -115,6 +120,7 @@ public class DoctorReportBiDataSynchronize {
         synchronizeDeltaBiData(start);
         log.info("synchronize delta day bi data end, minute:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
     }
+
     /**
      * 同步实时数据
      */
