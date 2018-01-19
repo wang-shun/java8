@@ -16,12 +16,14 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigStatisticDao;
 import io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
+import io.terminus.doctor.event.enums.ReportTime;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.service.DoctorReportWriteService;
 import io.terminus.doctor.user.dto.DoctorDepartmentLinerDto;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -55,9 +57,10 @@ public class DoctorDailyReportV2Manager {
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorEventModifyLogDao doctorEventModifyLogDao;
     private final DoctorDepartmentCache departmentCache;
+    private final DoctorReportWriteService doctorReportWriteService;
 
     @Autowired
-    public DoctorDailyReportV2Manager(DoctorGroupStatisticDao groupStatisticDao, DoctorGroupDailyDao groupDailyDao, DoctorPigStatisticDao pigStatisticDao, DoctorPigDailyDao pigDailyDao, DoctorPigEventDao doctorPigEventDao, DoctorGroupEventDao doctorGroupEventDao, DoctorEventModifyLogDao doctorEventModifyLogDao, DoctorDepartmentCache departmentCache) {
+    public DoctorDailyReportV2Manager(DoctorGroupStatisticDao groupStatisticDao, DoctorGroupDailyDao groupDailyDao, DoctorPigStatisticDao pigStatisticDao, DoctorPigDailyDao pigDailyDao, DoctorPigEventDao doctorPigEventDao, DoctorGroupEventDao doctorGroupEventDao, DoctorEventModifyLogDao doctorEventModifyLogDao, DoctorDepartmentCache departmentCache, DoctorReportWriteService doctorReportWriteService) {
         this.groupStatisticDao = groupStatisticDao;
         this.groupDailyDao = groupDailyDao;
         this.pigStatisticDao = pigStatisticDao;
@@ -66,12 +69,13 @@ public class DoctorDailyReportV2Manager {
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorEventModifyLogDao = doctorEventModifyLogDao;
         this.departmentCache = departmentCache;
+        this.doctorReportWriteService = doctorReportWriteService;
     }
 
     /**
      * 刷新猪群日报
      */
-    public DoctorGroupDaily flushGroupDaily(DoctorStatisticCriteria criteria){
+    public DoctorGroupDaily flushGroupDaily(DoctorStatisticCriteria criteria) {
         DoctorGroupDaily doctorGroupDaily = groupDailyDao.findBy(criteria.getFarmId(), criteria.getPigType(), criteria.getSumAt());
         if (isNull(doctorGroupDaily)) {
             DoctorDepartmentLinerDto departmentLinerDto = departmentCache.getUnchecked(criteria.getFarmId());
@@ -102,16 +106,24 @@ public class DoctorDailyReportV2Manager {
 
         PigType pigType = expectNotNull(PigType.from(criteria.getPigType()), "pigType.is.illegal");
         switch (pigType) {
-            case DELIVER_SOW: flushDeliverDaily(doctorGroupDaily, criteria); break;
-            case NURSERY_PIGLET: flushNurseryDaily(doctorGroupDaily, criteria); break;
-            case FATTEN_PIG: flushFattenDaily(doctorGroupDaily, criteria); break;
-            case RESERVE: flushReserveDaily(doctorGroupDaily, criteria); break;
+            case DELIVER_SOW:
+                flushDeliverDaily(doctorGroupDaily, criteria);
+                break;
+            case NURSERY_PIGLET:
+                flushNurseryDaily(doctorGroupDaily, criteria);
+                break;
+            case FATTEN_PIG:
+                flushFattenDaily(doctorGroupDaily, criteria);
+                break;
+            case RESERVE:
+                flushReserveDaily(doctorGroupDaily, criteria);
+                break;
         }
         createOrUpdateGroupDaily(doctorGroupDaily);
         return doctorGroupDaily;
     }
 
-    public DoctorGroupDaily findDoctorGroupDaily(Long farmId, Integer pigType, Date sumAt){
+    public DoctorGroupDaily findDoctorGroupDaily(Long farmId, Integer pigType, Date sumAt) {
         DoctorGroupDaily doctorGroupDaily = groupDailyDao.findBy(farmId, pigType, sumAt);
 //        if (isNull(doctorGroupDaily)) {
 //            doctorGroupDaily = flushGroupDaily(new DoctorStatisticCriteria(farmId, pigType, DateUtil.toDateString(sumAt)));
@@ -150,7 +162,7 @@ public class DoctorDailyReportV2Manager {
         return doctorPigDaily;
     }
 
-    public DoctorPigDaily findDoctorPigDaily(Long farmId, Date sumAt){
+    public DoctorPigDaily findDoctorPigDaily(Long farmId, Date sumAt) {
         DoctorPigDaily doctorPigDaily = pigDailyDao.findBy(farmId, sumAt);
 //        if (isNull(doctorPigDaily)) {
 //            doctorPigDaily = flushPigDaily(new DoctorStatisticCriteria(farmId, DateUtil.toDateString(sumAt)));
@@ -168,6 +180,7 @@ public class DoctorDailyReportV2Manager {
 
     /**
      * 生成昨天和今天的猪场日报
+     *
      * @param farmIds 猪场ids
      */
     public void generateYesterdayAndToday(List<Long> farmIds) {
@@ -190,6 +203,9 @@ public class DoctorDailyReportV2Manager {
                 flushFarmDaily(criteria1);
             });
         });
+
+        doctorReportWriteService.flushNPD(farmIds, today, ReportTime.MONTH);
+
     }
 
     /**
@@ -207,10 +223,11 @@ public class DoctorDailyReportV2Manager {
 
     /**
      * 产房仔猪
+     *
      * @param doctorGroupDaily 猪群日报
-     * @param criteria 条件
+     * @param criteria         条件
      */
-    private void flushDeliverDaily(DoctorGroupDaily doctorGroupDaily, DoctorStatisticCriteria criteria){
+    private void flushDeliverDaily(DoctorGroupDaily doctorGroupDaily, DoctorStatisticCriteria criteria) {
         doctorGroupDaily.setToNursery(groupStatisticDao.toNursery(criteria));
         doctorGroupDaily.setToNurseryWeight(groupStatisticDao.toNurseryWeight(criteria));
         doctorGroupDaily.setDeliverHandTurnInto(groupStatisticDao.deliverHandTurnInto(criteria));
@@ -219,10 +236,11 @@ public class DoctorDailyReportV2Manager {
 
     /**
      * 保育
+     *
      * @param doctorGroupDaily 猪群日报
-     * @param criteria 条件
+     * @param criteria         条件
      */
-    private void flushNurseryDaily(DoctorGroupDaily doctorGroupDaily, DoctorStatisticCriteria criteria){
+    private void flushNurseryDaily(DoctorGroupDaily doctorGroupDaily, DoctorStatisticCriteria criteria) {
         doctorGroupDaily.setToFatten(groupStatisticDao.toFatten(criteria));
         doctorGroupDaily.setToFattenWeight(groupStatisticDao.toFattenWeight(criteria));
         doctorGroupDaily.setToHoubei(groupStatisticDao.toHoubei(criteria));
@@ -235,10 +253,11 @@ public class DoctorDailyReportV2Manager {
 
     /**
      * 育肥
+     *
      * @param doctorGroupDaily 猪群日报
-     * @param criteria 条件
+     * @param criteria         条件
      */
-    private void flushFattenDaily(DoctorGroupDaily doctorGroupDaily, DoctorStatisticCriteria criteria){
+    private void flushFattenDaily(DoctorGroupDaily doctorGroupDaily, DoctorStatisticCriteria criteria) {
         doctorGroupDaily.setToHoubei(groupStatisticDao.toHoubei(criteria));
         doctorGroupDaily.setToHoubeiWeight(groupStatisticDao.toHoubeiWeight(criteria));
         doctorGroupDaily.setTurnActualCount(groupStatisticDao.turnActualCount(criteria));
@@ -249,20 +268,22 @@ public class DoctorDailyReportV2Manager {
 
     /**
      * 后备
+     *
      * @param doctorGroupDaily 猪群日报
-     * @param criteria 条件
+     * @param criteria         条件
      */
-    private void flushReserveDaily(DoctorGroupDaily doctorGroupDaily, DoctorStatisticCriteria criteria){
+    private void flushReserveDaily(DoctorGroupDaily doctorGroupDaily, DoctorStatisticCriteria criteria) {
         doctorGroupDaily.setToFatten(groupStatisticDao.toFatten(criteria));
         doctorGroupDaily.setTurnSeed(groupStatisticDao.turnSeed(criteria));
     }
 
     /**
      * 配怀
+     *
      * @param doctorPigDaily 日报
-     * @param criteria 条件
+     * @param criteria       条件
      */
-    private void flushPhPigDaily(DoctorPigDaily doctorPigDaily, DoctorStatisticCriteria criteria){
+    private void flushPhPigDaily(DoctorPigDaily doctorPigDaily, DoctorStatisticCriteria criteria) {
         doctorPigDaily.setSowPhStart(pigStatisticDao.phLiveStock(criteria.getFarmId(),
                 DateUtil.toDateString(new DateTime(DateUtil.toDate(criteria.getSumAt())).minusDays(1).toDate())));
         doctorPigDaily.setSowPhReserveIn(pigStatisticDao.sowPhReserveIn(criteria));
@@ -294,10 +315,11 @@ public class DoctorDailyReportV2Manager {
 
     /**
      * 产房
+     *
      * @param doctorPigDaily 日报
-     * @param criteria 条件
+     * @param criteria       条件
      */
-    private void flushCfPigDaily(DoctorPigDaily doctorPigDaily, DoctorStatisticCriteria criteria){
+    private void flushCfPigDaily(DoctorPigDaily doctorPigDaily, DoctorStatisticCriteria criteria) {
         doctorPigDaily.setSowCfStart(pigStatisticDao.cfLiveStock(criteria.getFarmId(),
                 DateUtil.toDateString(new DateTime(DateUtil.toDate(criteria.getSumAt())).minusDays(1).toDate())));
         doctorPigDaily.setSowCfEnd(pigStatisticDao.cfLiveStock(criteria.getFarmId(), criteria.getSumAt()));
@@ -327,10 +349,11 @@ public class DoctorDailyReportV2Manager {
 
     /**
      * 公猪
+     *
      * @param doctorPigDaily 日报
-     * @param criteria 条件
+     * @param criteria       条件
      */
-    private void flushBoarPigDaily(DoctorPigDaily doctorPigDaily, DoctorStatisticCriteria criteria){
+    private void flushBoarPigDaily(DoctorPigDaily doctorPigDaily, DoctorStatisticCriteria criteria) {
         doctorPigDaily.setBoarStart(pigStatisticDao.boarLiveStock(criteria.getFarmId(),
                 DateUtil.toDateString(new DateTime(DateUtil.toDate(criteria.getSumAt())).minusDays(1).toDate())));
         doctorPigDaily.setBoarIn(pigStatisticDao.boarIn(criteria));
