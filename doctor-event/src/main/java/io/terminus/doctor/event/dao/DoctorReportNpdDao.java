@@ -72,12 +72,16 @@ public class DoctorReportNpdDao extends MyBatisDao<DoctorReportNpd> {
         return this.sqlSession.selectList(this.sqlId("findByOrg"), Collections.singletonMap("orgId", orgId));
     }
 
-    public List<DoctorReportNpd> count(DoctorDimensionCriteria dimensionCriteria) {
+    public List<DoctorReportNpd> count(DoctorDimensionCriteria dimensionCriteria, Date start, Date end) {
 
         Map<String, Object> params = new HashMap<>();
         params.put("orgType", dimensionCriteria.getOrzType());
         params.put("dateType", dimensionCriteria.getDateType());
         params.put("sumAt", dimensionCriteria.getSumAt());
+        if (null != start)
+            params.put("start", start);
+        if (null != end)
+            params.put("end", end);
 
         return this.sqlSession.selectList(this.sqlId("report"), params);
     }

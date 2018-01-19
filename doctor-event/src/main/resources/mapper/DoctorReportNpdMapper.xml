@@ -160,15 +160,15 @@
         FROM
         <include refid="tb"/>
         <where>
-        <if test="farmIds !=null and farmIds.size()>0">
-            <foreach collection="farmIds" item="t" open="(" separator="or" close=")">
-                farm_id=#{t}
-            </foreach>
-        </if>
-        <if test="orgId !=null">
-            org_id=#{orgId}
-        </if>
-        and sum_at=DATE_FORMAT(#{sumAt},'%Y-%m-%d')
+            <if test="farmIds !=null and farmIds.size()>0">
+                <foreach collection="farmIds" item="t" open="(" separator="or" close=")">
+                    farm_id=#{t}
+                </foreach>
+            </if>
+            <if test="orgId !=null">
+                org_id=#{orgId}
+            </if>
+            and sum_at=DATE_FORMAT(#{sumAt},'%Y-%m-%d')
         </where>
     </select>
 
@@ -185,6 +185,16 @@
         org_id
         FROM
         <include refid="tb"/>
+        <where>
+            <if test="start !=null">
+                and
+                <![CDATA[sum_at >= #{start}]]>
+            </if>
+            <if test="end !=null">
+                and
+                <![CDATA[sum_at <= #{end}]]>
+            </if>
+        </where>
         GROUP BY
         <if test="orgType==2">
             org_id,
@@ -193,7 +203,7 @@
             farm_id,
         </if>
         <if test="dateType==5">
-            date_format(sum_at, '%Y'),
+            date_format(sum_at, '%Y')
         </if>
         <if test="dateType==4">
             concat(date_format(sum_at, '%Y-'), QUARTER(sum_at))

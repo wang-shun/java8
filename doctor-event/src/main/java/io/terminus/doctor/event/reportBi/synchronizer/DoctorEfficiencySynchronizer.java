@@ -22,9 +22,11 @@ import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -34,6 +36,7 @@ import java.util.stream.Collectors;
 /**
  * Created by sunbo@terminus.io on 2018/1/15.
  */
+@Slf4j
 @Component
 public class DoctorEfficiencySynchronizer {
 
@@ -66,7 +69,7 @@ public class DoctorEfficiencySynchronizer {
                 || dimensionCriteria.getDateType().equals(DateDimension.WEEK.getValue()))
             return;
 
-        List<DoctorReportNpd> npds = doctorReportNpdDao.count(dimensionCriteria);
+        List<DoctorReportNpd> npds = doctorReportNpdDao.count(dimensionCriteria, null, null);
         for (DoctorReportNpd npd : npds) {
             DoctorReportEfficiency efficiency = new DoctorReportEfficiency();
             efficiency.setOrzId(dimensionCriteria.getOrzId());
@@ -122,7 +125,7 @@ public class DoctorEfficiencySynchronizer {
         start = dateDuration.getStart();
         end = dateDuration.getEnd();
 
-        npds = doctorReportNpdDao.count(criteria);
+        npds = doctorReportNpdDao.count(criteria, start, end);
         create(npds, DateDimension.QUARTER, start, end);
 
         criteria = new DoctorDimensionCriteria();
@@ -133,7 +136,7 @@ public class DoctorEfficiencySynchronizer {
         start = dateDuration.getStart();
         end = dateDuration.getEnd();
 
-        npds = doctorReportNpdDao.count(criteria);
+        npds = doctorReportNpdDao.count(criteria, start, end);
         create(npds, DateDimension.YEAR, start, end);
 
 
@@ -142,6 +145,7 @@ public class DoctorEfficiencySynchronizer {
     private void create(List<DoctorReportNpd> npds, DateDimension dateDimension, Date start, Date end) {
 
         Set<Long> orgIds = new HashSet<>();
+
         for (DoctorReportNpd npd : npds) {
 
             DoctorPigDaily pigDaily = doctorPigDailyDao.countByFarm(npd.getFarmId(), start, end);
@@ -157,12 +161,18 @@ public class DoctorEfficiencySynchronizer {
 
             efficiency.setSumAt(npd.getSumAt());
             //非生产天数=非生产天数/母猪存栏/天数
-            if (npd.getSowCount() != 0)
-                efficiency.setNpd(npd.getNpd() / (npd.getSowCount() / npd.getDays()));
+            if (npd.getSowCount() != 0) {
+
+                efficiency.setNpd(new BigDecimal(npd.getNpd()).divide(new BigDecimal(npd.getSowCount()).divide(new BigDecimal(npd.getDays()), 2, BigDecimal.ROUND_HALF_UP), 2, BigDecimal.ROUND_HALF_UP).intValue());
+            }
 
             //年产胎次（月）=365-非生产天数*12/生产天数/总窝数
-            if (null != pigDaily && pigDaily.getFarrowNest() != null && pigDaily.getFarrowNest() != 0 && efficiency.getNpd() != null)
-                efficiency.setBirthPerYear((365 - efficiency.getNpd()) * 12 / ((npd.getPregnancy() + npd.getLactation()) / pigDaily.getFarrowNest()));
+            if (null != pigDaily && pigDaily.getFarrowNest() != null && pigDaily.getFarrowNest() != 0 && efficiency.getNpd() != null
+                    && (npd.getPregnancy() + npd.getLactation() != 0)) {
+                BigDecimal mi = new BigDecimal(npd.getPregnancy()).add(new BigDecimal(npd.getLactation())).divide(new BigDecimal(pigDaily.getFarrowNest()), 2, BigDecimal.ROUND_HALF_UP);
+                BigDecimal re = new BigDecimal(365).subtract(new BigDecimal(efficiency.getNpd())).multiply(new BigDecimal(12)).divide(mi, 2, BigDecimal.ROUND_HALF_UP);
+                efficiency.setBirthPerYear(re.intValue());
+            }
 
             //psy=年产胎次*断奶仔猪数/断奶窝数
             if (null != pigDaily && pigDaily.getWeanNest() != null && pigDaily.getWeanNest() != 0 && efficiency.getBirthPerYear() != null)
@@ -170,7 +180,7 @@ public class DoctorEfficiencySynchronizer {
             efficiency.setPregnancy(npd.getPregnancy());
             efficiency.setLactation(npd.getLactation());
 
-            doctorReportEfficiencyDao.create(efficiency);
+//            doctorReportEfficiencyDao.create(efficiency);
             orgIds.add(npd.getOrgId());
         }
 
@@ -180,6 +190,8 @@ public class DoctorEfficiencySynchronizer {
             DoctorReportNpd npd = doctorReportNpdDao.findByOrgAndSumAt(orgId, start);
 
             DoctorPigDaily pigDaily = doctorPigDailyDao.countByOrg(orgId, start, end);
+
+            log.info("准备同步公司的效率指标【{}】,{}", npd.getOrgId(), pigDaily.getFarrowNest(), pigDaily.getWeanNest());
 
             DoctorReportEfficiency efficiency = new DoctorReportEfficiency();
             efficiency.setOrzId(orgId);
@@ -204,7 +216,7 @@ public class DoctorEfficiencySynchronizer {
             efficiency.setPregnancy(npd.getPregnancy());
             efficiency.setLactation(npd.getLactation());
 
-            doctorReportEfficiencyDao.create(efficiency);
+//            doctorReportEfficiencyDao.create(efficiency);
         }
     }
 }
