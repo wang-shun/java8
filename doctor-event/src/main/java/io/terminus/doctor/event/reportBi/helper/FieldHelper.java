@@ -2,6 +2,7 @@ package io.terminus.doctor.event.reportBi.helper;
 
 import com.google.common.base.MoreObjects;
 import io.terminus.doctor.common.utils.Checks;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.reportBi.DoctorFiledUrlDao;
 import io.terminus.doctor.event.dto.reportBi.DoctorFiledUrlCriteria;
@@ -10,6 +11,7 @@ import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.model.DoctorFiledUrl;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorPigDaily;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +28,7 @@ import static java.util.Objects.isNull;
  * Created by xjn on 18/1/14.
  * email:xiaojiannan@terminus.io
  */
+@Slf4j
 @Component
 public class FieldHelper {
     private final DoctorFiledUrlDao doctorFiledUrlDao;
@@ -45,8 +48,8 @@ public class FieldHelper {
             filedUrlCriteria.setFarmId(groupDaily.getFarmId());
             filedUrlCriteria.setPigType(groupDaily.getPigType());
             DateDimension dateDimension = DateDimension.from(dateType);
-            filedUrlCriteria.setStart(DateHelper.withDateStartDay(groupDaily.getSumAt(), dateDimension));
-            filedUrlCriteria.setEnd(DateHelper.withDateEndDay(groupDaily.getSumAt(), dateDimension));
+            filedUrlCriteria.setStart(DateUtil.toDateString(DateHelper.withDateStartDay(groupDaily.getSumAt(), dateDimension)));
+            filedUrlCriteria.setEnd(DateUtil.toDateString(DateHelper.withDateEndDay(groupDaily.getSumAt(), dateDimension)));
         }
     }
 
@@ -54,8 +57,8 @@ public class FieldHelper {
         if (Objects.equals(orzType, OrzDimension.FARM.getValue())) {
             filedUrlCriteria.setFarmId(pigDaily.getFarmId());
             DateDimension dateDimension = DateDimension.from(dateType);
-            filedUrlCriteria.setStart(DateHelper.withDateStartDay(pigDaily.getSumAt(), dateDimension));
-            filedUrlCriteria.setEnd(DateHelper.withDateEndDay(pigDaily.getSumAt(), dateDimension));
+            filedUrlCriteria.setStart(DateUtil.toDateString(DateHelper.withDateStartDay(pigDaily.getSumAt(), dateDimension)));
+            filedUrlCriteria.setEnd(DateUtil.toDateString((DateHelper.withDateEndDay(pigDaily.getSumAt(), dateDimension))));
         }
     }
 
@@ -80,16 +83,17 @@ public class FieldHelper {
             return get(deadWeedOut, groupDaily.getStart() + groupDaily.getTurnInto()
                     - MoreObjects.firstNonNull(groupDaily.getChgFarmIn(), 0));
         } catch (Exception e) {
-            System.out.println("");
+            log.error("dead weed out rate failed, groupDaily:{}, orzType:{}", groupDaily, orzType);
         }
         return 0.0;
     }
 
-    public String filedUrl(DoctorFiledUrlCriteria criteria) {
+    private String filedUrl(DoctorFiledUrlCriteria criteria) {
         String url = Checks.expectNotNull(filedUrlMap.get(criteria.getFiledName()), "filed.name.is.illegal");
-        url = url + "&farmId=" + criteria.getFarmId();
-
-        // TODO: 18/1/1
+        url = url + "&farmId=" + criteria.getFarmId() + "&beginDate=" + criteria.getStart() + "&endDate=" + criteria.getEnd();
+        if (!isNull(criteria.getPigType())) {
+            url = url + "&pigType=" + criteria.getPigType().toString();
+        }
 
         map.put("value", criteria.getValue());
         map.put("url", url);
