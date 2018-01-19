@@ -50,4 +50,9 @@ public class DoctorFarmLiveStockDto implements Serializable{
      * 后备猪数
      */
     private Integer houbei;
+
+    /**
+     * 配怀猪数
+     */
+    private Integer peihuai;
 }

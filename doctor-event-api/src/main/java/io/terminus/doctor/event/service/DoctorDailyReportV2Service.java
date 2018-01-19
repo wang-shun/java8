@@ -3,6 +3,7 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
+import io.terminus.doctor.event.dto.report.daily.DoctorFarmLiveStockDto;
 import io.terminus.doctor.event.dto.reportBi.DoctorDimensionReport;
 
 import java.util.Date;
@@ -80,4 +81,12 @@ public interface DoctorDailyReportV2Service {
     Response<DoctorDimensionReport> dimensionReport(DoctorDimensionCriteria dimensionCriteria);
 
     Response<Boolean> sy(Date date);
+
+    /**
+     * 查询过个猪场的存栏
+     * @param farmIdList 猪场id列表
+     * @return
+     */
+    Response<List<DoctorFarmLiveStockDto>> findFarmsLiveStock(List<Long> farmIdList);
+
 }

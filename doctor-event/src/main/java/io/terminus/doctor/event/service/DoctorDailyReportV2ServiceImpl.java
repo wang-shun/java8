@@ -9,7 +9,10 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
+import io.terminus.doctor.event.dto.report.daily.DoctorFarmLiveStockDto;
 import io.terminus.doctor.event.dto.reportBi.DoctorDimensionReport;
+import io.terminus.doctor.event.enums.DateDimension;
+import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.manager.DoctorDailyReportV2Manager;
 import io.terminus.doctor.event.reportBi.DoctorReportBiManager;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorEfficiencySynchronizer;
@@ -21,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 
 /**
@@ -197,12 +201,39 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
 
     }
 
+    @Override
     public Response<Boolean> sy(Date date) {
         efficiencySynchronizer.sync(date);
 
         return Response.ok(true);
     }
 
+    @Override
+    public Response<List<DoctorFarmLiveStockDto>> findFarmsLiveStock(List<Long> farmIdList) {
+        try {
+            Date now = new Date();
+            List<DoctorFarmLiveStockDto> dtos = farmIdList.parallelStream().map(farmId -> {
+                DoctorDimensionCriteria dimensionCriteria =
+                        new DoctorDimensionCriteria(farmId, OrzDimension.FARM.getValue(), now, DateDimension.DAY.getValue());
+                DoctorDimensionReport report = doctorReportBiManager.dimensionReport(dimensionCriteria);
+                return DoctorFarmLiveStockDto.builder()
+                        .farmId(farmId)
+                        .boar(report.getReportBoar().getEnd())
+                        .farrow(report.getReportDeliver().getPigletEnd())
+                        .sow(report.getReportSow().getEnd())
+                        .houbei(report.getReportReserve().getEnd())
+                        .peihuai(report.getReportMating().getEnd())
+                        .nursery(report.getReportNursery().getEnd())
+                        .fatten(report.getReportFatten().getEnd())
+                        .build();
+
+            }).collect(Collectors.toList());
+            return Response.ok(dtos);
+        } catch (Exception e) {
+            log.error("find farms live stock failed,cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find.farms.live.stock.failed");
+        }
+    }
 }
 
 
