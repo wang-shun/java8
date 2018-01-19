@@ -76,6 +76,7 @@ public class DoctorBiDataTest extends BaseServiceTest {
         Assert.assertNotNull(sow);
     }
 
+
     @Test
     public void dimensionReport() {
         DoctorDimensionCriteria doctorDimensionCriteria = new DoctorDimensionCriteria();

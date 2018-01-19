@@ -356,3 +356,50 @@ CREATE TABLE `doctor_warehouse_sku` (
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) COMMENT='仓库物料表';
+
+CREATE TABLE `doctor_barns` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(64) DEFAULT NULL COMMENT '猪舍名称',
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司id',
+  `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类名称 枚举9种',
+  `can_open_group` smallint(6) DEFAULT NULL COMMENT '能否建群 -1:不能, 1:能',
+  `status` smallint(6) DEFAULT NULL COMMENT '使用状态 0:未用 1:在用 -1:已删除',
+  `capacity` int(11) DEFAULT NULL COMMENT '猪舍容量',
+  `staff_id` bigint(20) DEFAULT NULL COMMENT '工作人员id',
+  `staff_name` varchar(64) DEFAULT NULL COMMENT '工作人员name',
+  `out_id` varchar(128) DEFAULT NULL COMMENT '外部id',
+  `extra` text COMMENT '附加字段',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_doctor_barns_farm_id` (`farm_id`)
+) COMMENT='猪舍表';
+
+CREATE TABLE `doctor_farms` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `farm_code` varchar(64) DEFAULT NULL COMMENT '猪场号',
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司id',
+  `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `province_id` int(11) DEFAULT NULL COMMENT '所在省id',
+  `province_name` varchar(64) DEFAULT NULL COMMENT '所在省',
+  `city_id` int(11) DEFAULT NULL COMMENT '所在城市id',
+  `city_name` varchar(64) DEFAULT NULL COMMENT '所在城市',
+  `district_id` int(11) DEFAULT NULL COMMENT '区id',
+  `district_name` varchar(64) DEFAULT NULL COMMENT '区名称',
+  `detail_address` varchar(256) DEFAULT NULL COMMENT '区之后的具体地址',
+  `out_id` varchar(128) DEFAULT NULL COMMENT '外部id',
+  `source` tinyint(4) DEFAULT NULL COMMENT '来源,1:软件录入,2:excel导入,3:旧软件迁移，',
+  `extra` text COMMENT '附加字段',
+  `is_intelligent` smallint(6) DEFAULT '0' COMMENT '是否是智能猪舍（物联网使用默认是0）1->智能猪场 0不是猪场',
+  `is_weak` smallint(6) DEFAULT '1' COMMENT '弱仔数是否作为活仔数, 1->作为活仔数 0不作为活仔数，默认为1',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_doctor_farms_org_id` (`org_id`)
+)  COMMENT='猪场表';
+
+

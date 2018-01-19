@@ -6,5 +6,15 @@
 --(1,'2017-11-06',2,4,2,1,4),
 --(1,'2017-11-30',2,4,2,1,4);
 
-insert into doctor_warehouse_material_apply(farm_id,apply_date,quantity,unit_price,apply_type,type)values (1,'2017-11-01',11,4,2,1);
-insert into doctor_warehouse_material_apply(farm_id,apply_date,quantity,unit_price,apply_type,type)values (1,'2017-11-01',11,4,2,2);
+--org 2 pig_type 4 type 1 12
+-- org 2 pig_type 3 type 2 11
+insert into doctor_warehouse_material_apply(farm_id,apply_date,quantity,unit_price,apply_type,type,pig_barn_id)values (1,'2017-11-01',11,4,0,1,1);
+insert into doctor_warehouse_material_apply(farm_id,apply_date,quantity,unit_price,apply_type,type,pig_barn_id)values (1,'2017-11-01',1,4,0,1,1);
+insert into doctor_warehouse_material_apply(farm_id,apply_date,quantity,unit_price,apply_type,type,pig_barn_id)values (1,'2017-11-01',11,4,0,2,2);
+insert into doctor_warehouse_material_apply(farm_id,apply_date,quantity,unit_price,apply_type,type,pig_barn_id)values (1,'2017-11-01',1,4,1,1,4);
+insert into doctor_warehouse_material_apply(farm_id,apply_date,quantity,unit_price,apply_type,type,pig_barn_id)values (1,'2017-11-01',2,4,1,2,4);
+insert into doctor_warehouse_material_apply(farm_id,apply_date,quantity,unit_price,apply_type,type,pig_barn_id)values (2,'2017-11-02',9,4,0,2,3);
+
+insert into doctor_barns(id,pig_type)values (1,4),(2,3),(3,3),(4,7);
+
+insert into doctor_farms(id,org_id)values (1,2),(2,4);
