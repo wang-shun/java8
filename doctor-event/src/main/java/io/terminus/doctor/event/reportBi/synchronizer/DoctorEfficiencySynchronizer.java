@@ -264,9 +264,6 @@ public class DoctorEfficiencySynchronizer {
 
                 DoctorPigDaily pigDaily = doctorPigDailyDao.countByOrg(o.getId(), start, end);
 
-                log.info("准备同步公司的效率指标【{}】,{}", npd.getOrgId(), pigDaily.getFarrowNest(), pigDaily.getWeanNest());
-
-
                 efficiency.setOrzId(o.getId());
                 efficiency.setOrzType(OrzDimension.ORG.getValue());
                 efficiency.setDateType(dateDimension.getValue());
