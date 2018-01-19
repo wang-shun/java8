@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class DoctorDepartmentCache {
     private LoadingCache<Long, DoctorDepartmentLinerDto> organizationCache;
-//    @RpcConsumer
+    @RpcConsumer
     private DoctorDepartmentReadService doctorDepartmentReadService;
 
     @PostConstruct
