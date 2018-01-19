@@ -36,6 +36,10 @@ public class DoctorGroupStatisticDao {
         return sqlSession.selectOne(sqlId("chgFarmIn"), criteria.toMap());
     }
 
+    public Integer deliverHandTurnInto(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("deliverHandTurnInto"), criteria.toMap());
+    }
+
     public Double turnIntoWeight(DoctorStatisticCriteria criteria) {
         return sqlSession.selectOne(sqlId("turnIntoWeight"), criteria.toMap());
     }

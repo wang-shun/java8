@@ -400,4 +400,10 @@ public class DoctorEventChangeDto {
      */
     private Boolean isFarrowIn;
 
+    /**
+     * 是否是手动事件
+     * @see io.terminus.doctor.event.enums.IsOrNot
+     */
+    private Integer isAuto;
+
 }

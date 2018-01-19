@@ -147,7 +147,7 @@ public class DoctorDeliverSynchronizer {
         fieldHelper.fillGroupFiledUrl(filedUrlCriteria, groupDaily, reportBi.getOrzType(), reportBi.getDateType());
 
         reportBi.setPigletStart(groupDaily.getStart());
-        reportBi.setPigletOtherIn(0);
+        reportBi.setPigletOtherIn(EventUtil.plusInt(groupDaily.getChgFarmIn(), groupDaily.getDeliverHandTurnInto()));
         reportBi.setPigletChgFarmOut(groupDaily.getChgFarm());
         reportBi.setToNursery(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getToNursery(), "toNursery"));
         reportBi.setPigletDead(groupDaily.getDead());
@@ -175,10 +175,6 @@ public class DoctorDeliverSynchronizer {
                 * (STANDARD_AGE - deliver.getWeanDayAge())
                 + deliver.getWeanWeightPerFarrow();
     }
-
-//    private Integer pigletOtherIn(DoctorGroupDailyExtend groupDaily, String orzType){
-//        Integer otherIn =
-//    }
 
     public void deleteAll() {
         doctorReportDeliverDao.deleteAll();

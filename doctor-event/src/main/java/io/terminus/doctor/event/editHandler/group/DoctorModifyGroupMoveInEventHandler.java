@@ -9,6 +9,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.InType;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -57,6 +58,7 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
                 EventUtil.getWeight(oldInput.getAvgWeight(), oldInput.getQuantity())));
         changeDto.setAgeChange(EventUtil.minusInt(EventUtil.get(newInput.getAvgDayAge(), newInput.getQuantity()),
                 EventUtil.get(oldInput.getAvgDayAge(), oldInput.getQuantity())));
+        changeDto.setIsAuto(oldGroupEvent.getIsAuto());
 
         //母猪触发
         if (notNull(oldGroupEvent.getSowId())) {
@@ -150,6 +152,7 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
         }
         DoctorMoveInGroupInput input1 = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorMoveInGroupInput.class);
         DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
+                .isAuto(oldGroupEvent.getIsAuto())
                 .quantityChange(EventUtil.minusInt(0, input1.getQuantity()))
                 .weightChange(EventUtil.minusDouble(0.0, EventUtil.getWeight(input1.getAvgWeight(), input1.getQuantity())))
                 .ageChange(EventUtil.minusInt(0, EventUtil.get(input1.getAvgDayAge(), input1.getQuantity())))
@@ -172,6 +175,7 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
         Date eventAt = DateUtil.toDate(input.getEventAt());
         DoctorMoveInGroupInput input2 = (DoctorMoveInGroupInput) input;
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
+                .isAuto(newGroupEvent.getIsAuto())
                 .quantityChange(input2.getQuantity())
                 .quantityChange(EventUtil.get(input2.getAvgDayAge(), input2.getQuantity()))
                 .weightChange(EventUtil.getWeight(input2.getAvgWeight(), input2.getQuantity()))
@@ -203,6 +207,10 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
             oldDailyGroup.setEnd(EventUtil.plusInt(oldDailyGroup.getEnd(), changeDto.getQuantityChange()));
             if (Objects.equals(changeDto.getInType(), InType.FARM.getValue())) {
                 oldDailyGroup.setChgFarmIn(EventUtil.plusInt(oldDailyGroup.getChgFarmIn(), changeDto.getQuantityChange()));
+            }
+
+            if (Objects.equals(changeDto.getIsAuto(), IsOrNot.NO.getValue())) {
+                oldDailyGroup.setDeliverHandTurnInto(EventUtil.plusInt(oldDailyGroup.getDeliverHandTurnInto(), changeDto.getQuantityChange()));
             }
         }
         return oldDailyGroup;

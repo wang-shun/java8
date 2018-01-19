@@ -213,6 +213,8 @@ public class DoctorDailyReportV2Manager {
     private void flushDeliverDaily(DoctorGroupDaily doctorGroupDaily, DoctorStatisticCriteria criteria){
         doctorGroupDaily.setToNursery(groupStatisticDao.toNursery(criteria));
         doctorGroupDaily.setToNurseryWeight(groupStatisticDao.toNurseryWeight(criteria));
+        doctorGroupDaily.setDeliverHandTurnInto(groupStatisticDao.deliverHandTurnInto(criteria));
+
     }
 
     /**

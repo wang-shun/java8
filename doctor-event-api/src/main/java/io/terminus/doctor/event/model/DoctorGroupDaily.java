@@ -67,6 +67,11 @@ public class DoctorGroupDaily implements Serializable {
     private Integer chgFarmIn;
 
     /**
+     * 产房手动操作转入猪群数量
+     */
+    private Integer deliverHandTurnInto;
+
+    /**
      * 转场
      */
     private Integer chgFarm;
