@@ -163,7 +163,8 @@ public class DoctorEfficiencySynchronizer {
             //非生产天数=非生产天数/母猪存栏/天数
             if (npd.getSowCount() != 0) {
 
-                efficiency.setNpd(new BigDecimal(npd.getNpd()).divide(new BigDecimal(npd.getSowCount()).divide(new BigDecimal(npd.getDays()), 2, BigDecimal.ROUND_HALF_UP), 2, BigDecimal.ROUND_HALF_UP).intValue());
+                int dayCount = DateUtil.getDeltaDays(start, end) + 1;
+                efficiency.setNpd(new BigDecimal(npd.getNpd()).divide(new BigDecimal(npd.getSowCount()).divide(new BigDecimal(dayCount), 2, BigDecimal.ROUND_HALF_UP), 2, BigDecimal.ROUND_HALF_UP).intValue());
             }
 
             //年产胎次（月）=365-非生产天数*12/生产天数/总窝数
