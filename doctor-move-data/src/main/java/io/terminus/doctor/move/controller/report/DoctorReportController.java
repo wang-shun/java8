@@ -2,11 +2,13 @@ package io.terminus.doctor.move.controller.report;
 
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.reportBi.synchronizer.DoctorWarehouseSynchronizer;
 import io.terminus.doctor.event.service.DoctorDailyReportV2Service;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,6 +32,7 @@ public class DoctorReportController {
 
     private final DoctorDailyReportV2Service doctorDailyReportV2Service;
     private final DoctorFarmReadService doctorFarmReadService;
+
 
     @Autowired
     public DoctorReportController(DoctorDailyReportV2Service doctorDailyReportV2Service, DoctorFarmReadService doctorFarmReadService) {
@@ -113,6 +116,7 @@ public class DoctorReportController {
 
     /**
      * 全量同步报表数据
+     *
      * @return
      */
     @RequestMapping(value = "/synchronize/full/bi/data", method = RequestMethod.GET)
@@ -120,10 +124,10 @@ public class DoctorReportController {
         return RespHelper.or500(doctorDailyReportV2Service.synchronizeFullBiData());
     }
 
-    @RequestMapping(method = RequestMethod.PUT, value = "/flush/npd")
-    public void flushNPD() {
-        //
-        Date start, end;
-
+    @RequestMapping(method = RequestMethod.GET, value = "/flush/warehouse")
+    public void flushNPD(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyyMMdd") Date date) {
+        if (null == date)
+            date = new Date();
+        doctorDailyReportV2Service.sy(date);
     }
 }

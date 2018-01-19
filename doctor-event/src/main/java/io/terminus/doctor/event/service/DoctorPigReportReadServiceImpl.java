@@ -117,7 +117,7 @@ public class DoctorPigReportReadServiceImpl implements DoctorPigReportReadServic
             DateTime d = new DateTime(countDate);
             int year = d.getYear();
 
-            start = DateUtil.toYYYYMM(year + "-01");
+            start = DateUtil.toDate(year + "-01-01");
             end = DateUtil.getMonthEnd(new DateTime(year, 12, 1, 0, 0)).toDate();
         }
         return new DateDuration(start, end);

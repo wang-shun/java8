@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.reportBi.synchronizer;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorWarehouseReportDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportMaterialDao;
@@ -15,6 +16,9 @@ import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
+import io.terminus.parana.auth.model.App;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +29,7 @@ import java.util.stream.Collectors;
 /**
  * Created by sunbo@terminus.io on 2018/1/15.
  */
+@Slf4j
 @Component
 public class DoctorWarehouseSynchronizer {
 
@@ -263,17 +268,53 @@ public class DoctorWarehouseSynchronizer {
 
 
     public void sync(DoctorDimensionCriteria dimensionCriteria) {
-        List<Long> farmIds = new ArrayList<>();
+
+        OrzDimension orzDimension = OrzDimension.from(dimensionCriteria.getOrzType());
+        DateDimension dateDimension = DateDimension.from(dimensionCriteria.getDateType());
+
         if (dimensionCriteria.getOrzType().equals(OrzDimension.FARM.getValue())) {
-            farmIds.add(dimensionCriteria.getOrzId());
+
         } else {
-            farmIds.addAll(RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(dimensionCriteria.getOrzId()))
-                    .stream().map(DoctorFarm::getId)
-                    .collect(Collectors.toList()));
+
+            //TODO 日量太多需要优化
+
+            log.info("开始同步物料领用->➡️BI物料报表：组织维度【{}】，时间维度【{}】", orzDimension.getName(), dateDimension.getName());
+
+            List<DoctorWarehouseReportDao.WarehouseReport> warehouseReports = doctorWarehouseReportDao.count(dimensionCriteria.getDateType())
+                    .parallelStream()
+                    .sorted((r1, r2) -> r1.getApplyDate().compareTo(r2.getApplyDate()))
+                    .collect(Collectors.toList());
+
+            Date start = DateHelper.withDateStartDay(warehouseReports.get(0).getApplyDate(), DateDimension.from(dimensionCriteria.getDateType()));
+            Date end = DateHelper.withDateEndDay(warehouseReports.get(warehouseReports.size() - 1).getApplyDate(), DateDimension.from(dimensionCriteria.getDateType()));
+
+            int offset = DateUtil.getDeltaDays(start, end) + 1;
+
+            log.info("同步开始日期【{}】至结束日期【{}】,共【{}】笔需同步，实际有【{}】可同步", start, end, offset, warehouseReports.size());
+
+            Map<Date, List<DoctorWarehouseReportDao.WarehouseReport>> map = warehouseReports.parallelStream().collect(Collectors.groupingBy(DoctorWarehouseReportDao.WarehouseReport::getApplyDate));
+//            for (Date i = start; i.after(DateUtils.addDays(end, 1)); i = DateUtils.addDays(i, 1)) {
+//
+//
+//
+//                DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(report.getOrgId()));
+//
+//                DoctorReportMaterial material = new DoctorReportMaterial();
+//                material.setSumAt(report.getApplyDate());
+//                material.setSumAtName(DateHelper.dateCN(report.getApplyDate(), DateDimension.from(dimensionCriteria.getDateType())));
+//                material.setDateType(DateDimension.YEAR.getValue());
+//                material.setOrzId(report.getOrgId());
+//                material.setOrzName(org == null ? "" : org.getName());
+//                material.setOrzType(OrzDimension.ORG.getValue());
+//
+//                material.setHoubeiFeedQuantity(report.getHoubeiFeedCount().intValue());
+//                material.setHoubeiFeedAmount(report.getHoubeiFeedAmount().divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_UP));
+//
+//                doctorReportMaterialDao.create(material);
+//            }
+
         }
 
-
-        
 
     }
 

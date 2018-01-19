@@ -12,6 +12,8 @@ import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
 import io.terminus.doctor.event.dto.reportBi.DoctorDimensionReport;
 import io.terminus.doctor.event.manager.DoctorDailyReportV2Manager;
 import io.terminus.doctor.event.reportBi.DoctorReportBiManager;
+import io.terminus.doctor.event.reportBi.synchronizer.DoctorEfficiencySynchronizer;
+import io.terminus.doctor.event.reportBi.synchronizer.DoctorWarehouseSynchronizer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +34,11 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
 
     private final DoctorDailyReportV2Manager doctorDailyReportV2Manager;
     private final DoctorReportBiManager doctorReportBiManager;
+
+    @Autowired
+    private DoctorWarehouseSynchronizer warehouseSynchronizer;
+    @Autowired
+    private DoctorEfficiencySynchronizer efficiencySynchronizer;
 
     @Autowired
     public DoctorDailyReportV2ServiceImpl(DoctorDailyReportV2Manager doctorDailyReportV2Manager, DoctorReportBiManager doctorReportBiManager) {
@@ -64,7 +71,7 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
         } catch (Exception e) {
             log.error("flush farm daily failed, farmId:{}, startAt:{}, endAt:{}, cause:{}",
                     farmId, startAt, endAt, Throwables.getStackTraceAsString(e));
-        return Response.fail("flush.farm.daily.failed");
+            return Response.fail("flush.farm.daily.failed");
         }
     }
 
@@ -77,7 +84,7 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("flush group daily failed, farmId:{}, startAt:{}, endAt:{}, cause:{}",
-                    farmId, startAt , endAt, Throwables.getStackTraceAsString(e));
+                    farmId, startAt, endAt, Throwables.getStackTraceAsString(e));
             return Response.fail("flush.group.daily.failed");
         }
     }
@@ -99,7 +106,7 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
                 log.error("flush group daily startAt or endAt is illegal, startAt:{}, endAt:{}", startAt, endAt);
                 return Response.fail("startAt.or.endAt.is.error");
             }
-            
+
             list.forEach(date -> {
                 criteria.setSumAt(DateUtil.toDateString(date));
                 log.info("flush group daily farmId:{}, pigType:{}, sumAt:{}", criteria.getFarmId(), criteria.getPigType(), criteria.getSumAt());
@@ -109,7 +116,7 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("flush group daily failed, farmId:{}, pigType:{}, startAt:{}, endAt:{}, cause:{}",
-                    farmId, pigType, startAt , endAt, Throwables.getStackTraceAsString(e));
+                    farmId, pigType, startAt, endAt, Throwables.getStackTraceAsString(e));
             return Response.fail("flush.group.daily.failed");
         }
     }
@@ -176,5 +183,15 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
             log.error("dimension report failed,dimension:{}, cause:{}", dimensionCriteria, Throwables.getStackTraceAsString(e));
             return Response.fail("dimension.report.failed");
         }
+
     }
+
+    public Response<Boolean> sy(Date date) {
+        efficiencySynchronizer.sync(date);
+
+        return Response.ok(true);
+    }
+
 }
+
+

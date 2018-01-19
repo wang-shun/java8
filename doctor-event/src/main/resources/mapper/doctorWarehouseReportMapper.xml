@@ -149,13 +149,70 @@
     </select>
 
     <select id="countByOrg" parameterType="map" resultType="map">
-        SELECT t1.org_id,type,pig_type,sum(quantity),sum(quantity * unit_price) AS amount
+        SELECT t1.org_id as orgId,type as type,pig_type as pigType,sum(quantity) as quantity,sum(quantity * unit_price)
+        AS amount,apply_date as applyType
         from doctor_warehouse_material_apply t0
         LEFT JOIN doctor_farms t1 on t0.farm_id=t1.id
         LEFT JOIN doctor_barns t2 on t0.pig_barn_id=t2.id
         where apply_type=0
-        GROUP BY t1.org_id,t2.pig_type,type;
+        GROUP BY t1.org_id,t2.pig_type,type
+        <choose>
+            <when test="type==1">
+                ,apply_date;
+            </when>
+            <when test="type==2">
+                ,date_format(apply_date,'%x-%v');
+            </when>
+            <when test="type==3">
+                ,date_format(apply_date,'%y-%m');
+            </when>
+            <when test="type==4">
+                ,concat(date_format(apply_date, '%y-'), QUARTER(apply_date));
+            </when>
+            <otherwise>
+                ,date_format(apply_date,'%y');
+            </otherwise>
+        </choose>
     </select>
+    <select id="countFarrowByOrg" parameterType="map" resultType="map">
+        SELECT t1.org_id as orgId,type as type,pig_type as pigType,sum(quantity) as quantity,sum(quantity * unit_price)
+        AS amount
+        from doctor_warehouse_material_apply t0
+        LEFT JOIN doctor_farms t1 on t0.farm_id=t1.id
+        LEFT JOIN doctor_barns t2 on t0.pig_barn_id=t2.id
+        where apply_type=1 and t2.pig_type=7
+        <if test="startAt != null">AND apply_date &gt;= #{startAt}</if>
+        <if test="endAt != null">AND apply_date &lt;= #{endAt}</if>
+        GROUP BY t1.org_id,type;
+    </select>
+    <select id="countFarrowSowByOrg" parameterType="map" resultType="map">
+        SELECT t1.org_id as orgId,type as type,pig_type as pigType,sum(quantity) as quantity,sum(quantity * unit_price)
+        AS amount
+        from doctor_warehouse_material_apply t0
+        LEFT JOIN doctor_farms t1 on t0.farm_id=t1.id
+        LEFT JOIN doctor_barns t2 on t0.pig_barn_id=t2.id
+        where apply_type=2
+        <if test="startAt != null">AND apply_date &gt;= #{startAt}</if>
+        <if test="endAt != null">AND apply_date &lt;= #{endAt}</if>
+        GROUP BY t1.org_id,type;
+    </select>
+
+    <select id="findDate" parameterType="int" resultType="date">
+        SELECT apply_date from doctor_warehouse_material_apply
+        GROUP BY
+        <if test="type==1">
+            apply_date;
+        </if>
+        <choose>
+            <when test="type==1">
+                apply_date;
+            </when>
+            <when test="type==2">
+
+            </when>
+        </choose>
+    </select>
+
 
 
     <select id="materialApply" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="double">
@@ -166,7 +223,7 @@
         a.status = -1
         and b.type = 1
         <if test="orzType == 2">AND a.org_id = #{orzId}</if>
-        <if test="orzType == 3">AND  a.farm_id = #{orzId}</if>
+        <if test="orzType == 3">AND a.farm_id = #{orzId}</if>
         <if test="dateType == 1">AND date_format(a.close_at, '%y-%m-%d') = date_format(#{sumAt}, '%y-%m-%d')</if>
         <if test="dateType == 2">AND date_format(a.close_at, '%x-%v') = date_format(#{sumAt}, '%x-%v')</if>
         <if test="dateType == 3">AND date_format(a.close_at, '%y-%m') = date_format(#{sumAt}, '%y-%m')</if>

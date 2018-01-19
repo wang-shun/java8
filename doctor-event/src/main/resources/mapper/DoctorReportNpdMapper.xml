@@ -196,7 +196,7 @@
             date_format(sum_at, '%Y'),
         </if>
         <if test="dateType==4">
-            concat(date_format(sum_at, '%Y-'), QUARTER(sum_at)),
+            concat(date_format(sum_at, '%Y-'), QUARTER(sum_at))
         </if>
     </select>
 
