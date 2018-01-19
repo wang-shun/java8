@@ -125,14 +125,22 @@ public class DoctorReportController {
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/flush/warehouse")
-    public void flushNPD(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyyMMdd") Date date) {
+    public void flushWarehouse(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyyMMdd") Date date) {
         if (null == date)
             date = new Date();
-        doctorDailyReportV2Service.sy(date);
+        doctorDailyReportV2Service.syncWarehouse(date);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/flush/efficiency")
+    public void flushEfficiency(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyyMMdd") Date date) {
+        if (null == date)
+            date = new Date();
+        doctorDailyReportV2Service.syncEfficiency(date);
     }
 
     /**
      * 增量同步报表数据
+     *
      * @return
      */
     @RequestMapping(value = "/synchronize/delta/bi/data", method = RequestMethod.GET)

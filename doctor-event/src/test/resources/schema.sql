@@ -312,12 +312,14 @@ CREATE TABLE `doctor_warehouse_stock_monthly` (
 CREATE TABLE `doctor_warehouse_material_apply` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
   `material_handle_id` bigint(20) NOT NULL COMMENT '物料处理编号',
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司ID',
   `farm_id` bigint(20) DEFAULT NULL COMMENT '猪厂编号',
   `warehouse_id` bigint(20) NOT NULL COMMENT '仓库编号',
   `warehouse_type` smallint(6) NOT NULL COMMENT '仓库类型',
   `warehouse_name` varchar(64) DEFAULT NULL COMMENT '仓库名',
   `pig_barn_id` bigint(20) NOT NULL COMMENT '领用猪舍编号',
   `pig_barn_name` varchar(64) DEFAULT NULL COMMENT '领用猪舍名称',
+  `pig_type` smallint(6) DEFAULT NULL COMMENT '猪舍类型',
   `pig_group_id` bigint(20) DEFAULT NULL COMMENT '领用猪群编号',
   `pig_group_name` varchar(64) DEFAULT NULL COMMENT '领用猪群名称',
   `material_id` bigint(20) NOT NULL COMMENT '物料编号',
@@ -337,7 +339,8 @@ CREATE TABLE `doctor_warehouse_material_apply` (
   PRIMARY KEY (`id`),
   KEY `index_farm` (`farm_id`),
   KEY `index_warehouse` (`warehouse_id`)
-) COMMENT='仓库物料领用表';
+) ;
+
 
 CREATE TABLE `doctor_warehouse_sku` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '编号',
@@ -402,4 +405,27 @@ CREATE TABLE `doctor_farms` (
   KEY `idx_doctor_farms_org_id` (`org_id`)
 )  COMMENT='猪场表';
 
+CREATE TABLE `doctor_orgs` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `mobile` varchar(16) DEFAULT NULL COMMENT '手机号码',
+  `license` varchar(512) DEFAULT NULL COMMENT '营业执照复印件图片地址',
+  `out_id` varchar(128) DEFAULT NULL COMMENT '外部id',
+  `extra` text COMMENT '附加字段',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  `parent_id` bigint(20) DEFAULT NULL,
+  `type` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) COMMENT='公司表';
+
+CREATE TABLE `doctor_filed_urls` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` varchar(32) NOT NULL COMMENT '字段名称',
+  `url` varchar(512) NOT NULL COMMENT '字段跳转url',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_name` (`name`)
+) COMMENT='字段跳转url';
 

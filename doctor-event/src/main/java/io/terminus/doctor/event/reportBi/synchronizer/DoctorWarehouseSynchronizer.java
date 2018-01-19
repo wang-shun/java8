@@ -45,6 +45,12 @@ public class DoctorWarehouseSynchronizer {
     @RpcConsumer
     private DoctorPigReportReadService doctorPigReportReadService;
 
+    /**
+     * 刷新某一日期所在的日、周、月、季、年
+     * 猪场和公司10个
+     *
+     * @param date
+     */
     public void sync(Date date) {
 
         //日
@@ -269,51 +275,37 @@ public class DoctorWarehouseSynchronizer {
 
     public void sync(DoctorDimensionCriteria dimensionCriteria) {
 
-        OrzDimension orzDimension = OrzDimension.from(dimensionCriteria.getOrzType());
-        DateDimension dateDimension = DateDimension.from(dimensionCriteria.getDateType());
-
-        if (dimensionCriteria.getOrzType().equals(OrzDimension.FARM.getValue())) {
-
-        } else {
-
-            //TODO 日量太多需要优化
-
-            log.info("开始同步物料领用->➡️BI物料报表：组织维度【{}】，时间维度【{}】", orzDimension.getName(), dateDimension.getName());
-
-            List<DoctorWarehouseReportDao.WarehouseReport> warehouseReports = doctorWarehouseReportDao.count(dimensionCriteria.getDateType())
-                    .parallelStream()
-                    .sorted((r1, r2) -> r1.getApplyDate().compareTo(r2.getApplyDate()))
-                    .collect(Collectors.toList());
-
-            Date start = DateHelper.withDateStartDay(warehouseReports.get(0).getApplyDate(), DateDimension.from(dimensionCriteria.getDateType()));
-            Date end = DateHelper.withDateEndDay(warehouseReports.get(warehouseReports.size() - 1).getApplyDate(), DateDimension.from(dimensionCriteria.getDateType()));
-
-            int offset = DateUtil.getDeltaDays(start, end) + 1;
-
-            log.info("同步开始日期【{}】至结束日期【{}】,共【{}】笔需同步，实际有【{}】可同步", start, end, offset, warehouseReports.size());
-
-            Map<Date, List<DoctorWarehouseReportDao.WarehouseReport>> map = warehouseReports.parallelStream().collect(Collectors.groupingBy(DoctorWarehouseReportDao.WarehouseReport::getApplyDate));
-//            for (Date i = start; i.after(DateUtils.addDays(end, 1)); i = DateUtils.addDays(i, 1)) {
+//        OrzDimension orzDimension = OrzDimension.from(dimensionCriteria.getOrzType());
+//        DateDimension dateDimension = DateDimension.from(dimensionCriteria.getDateType());
+//
+//        if (dimensionCriteria.getOrzType().equals(OrzDimension.FARM.getValue())) {
+//
+//        } else {
+//
+//            Map<String, Date> maxAndMinDate = doctorWarehouseReportDao.getMaxAndMinDate();
+//            if (null == maxAndMinDate) //自开天辟地以来，从来没有发生过领用。虽然这不可能发生
+//                return;
 //
 //
+//            //TODO 日量太多需要优化
 //
-//                DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(report.getOrgId()));
+//            log.info("开始同步物料领用->➡️BI物料报表：组织维度【{}】，时间维度【{}】", orzDimension.getName(), dateDimension.getName());
 //
-//                DoctorReportMaterial material = new DoctorReportMaterial();
-//                material.setSumAt(report.getApplyDate());
-//                material.setSumAtName(DateHelper.dateCN(report.getApplyDate(), DateDimension.from(dimensionCriteria.getDateType())));
-//                material.setDateType(DateDimension.YEAR.getValue());
-//                material.setOrzId(report.getOrgId());
-//                material.setOrzName(org == null ? "" : org.getName());
-//                material.setOrzType(OrzDimension.ORG.getValue());
+//            List<DoctorWarehouseReportDao.WarehouseReport> warehouseReports = doctorWarehouseReportDao.count(dimensionCriteria.getDateType())
+//                    .parallelStream()
+//                    .sorted((r1, r2) -> r1.getSumAt().compareTo(r2.getSumAt()))
+//                    .collect(Collectors.toList());
 //
-//                material.setHoubeiFeedQuantity(report.getHoubeiFeedCount().intValue());
-//                material.setHoubeiFeedAmount(report.getHoubeiFeedAmount().divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_UP));
+//            Date start = DateHelper.withDateStartDay(warehouseReports.get(0).getSumAt(), DateDimension.from(dimensionCriteria.getDateType()));
+//            Date end = DateHelper.withDateEndDay(warehouseReports.get(warehouseReports.size() - 1).getSumAt(), DateDimension.from(dimensionCriteria.getDateType()));
 //
-//                doctorReportMaterialDao.create(material);
-//            }
-
-        }
+//            int offset = DateUtil.getDeltaDays(start, end) + 1;
+//
+//            log.info("同步开始日期【{}】至结束日期【{}】,共【{}】笔需同步，实际有【{}】可同步", start, end, offset, warehouseReports.size());
+//
+//            Map<Date, List<DoctorWarehouseReportDao.WarehouseReport>> map = warehouseReports.parallelStream().collect(Collectors.groupingBy(DoctorWarehouseReportDao.WarehouseReport::getSumAt));
+//
+//        }
 
 
     }

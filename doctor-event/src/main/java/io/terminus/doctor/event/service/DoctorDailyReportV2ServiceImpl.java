@@ -202,7 +202,14 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
     }
 
     @Override
-    public Response<Boolean> sy(Date date) {
+    public Response<Boolean> syncWarehouse(Date date) {
+        warehouseSynchronizer.sync(date);
+
+        return Response.ok(true);
+    }
+
+    @Override
+    public Response<Boolean> syncEfficiency(Date date) {
         efficiencySynchronizer.sync(date);
 
         return Response.ok(true);
@@ -234,6 +241,7 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
             log.error("find farms live stock failed,cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("find.farms.live.stock.failed");
         }
+
     }
 }
 

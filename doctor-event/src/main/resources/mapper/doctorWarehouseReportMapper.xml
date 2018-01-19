@@ -7,6 +7,20 @@
 <mapper namespace="DoctorWarehouseReportDao">
 
 
+    <resultMap id="TempResultMap" type="io.terminus.doctor.event.reportBi.model.WarehouseReportTempResult">
+        <result property="orgId" column="id"/>
+        <result property="orgName" column="name"/>
+        <result property="quantity" column="quantity"/>
+        <result property="amount" column="amount"/>
+        <result property="pigType" column="pig_type"/>
+        <result property="type" column="type"/>
+        <result property="date" column="date"/>
+    </resultMap>
+
+    <select id="findMaxAndMinDate" resultType="map">
+        SELECT max(apply_date) as max,min(apply_date) as min from doctor_warehouse_material_apply;
+    </select>
+
     <!--产房母猪-->
     <select id="countFarrowSow" parameterType="map" resultType="map">
         SELECT
@@ -148,69 +162,97 @@
         group by farm_id
     </select>
 
-    <select id="countByOrg" parameterType="map" resultType="map">
-        SELECT t1.id,t1.name,pig_type,ifnull(sum(quantity),0) as quantity,ifnull(sum(quantity*unit_price),0) as amount
-        ,
+    <select id="countByOrg" parameterType="map" resultMap="TempResultMap">
+        SELECT t0.id,t0.name,t1.quantity,t1.amount,t1.pig_type,t1.type,t1.date
+        FROM doctor_orgs t0
+        LEFT JOIN
+        (SELECT org_id,pig_type,type,sum(quantity) as quantity,sum(quantity*unit_price) as amount,
+        apply_date
+        as date
+        from doctor_warehouse_material_apply
+        WHERE apply_type=0 and pig_type!=7
+        GROUP BY org_id,pig_type,type,
         <choose>
             <when test="type==1">
-                apply_date;
+                apply_date
             </when>
             <when test="type==2">
-                date_format(apply_date,'%x-%v');
+                date_format(apply_date,'%x-%v')
             </when>
             <when test="type==3">
-                date_format(apply_date,'%y-%m');
+                date_format(apply_date,'%y-%m')
             </when>
             <when test="type==4">
-                concat(date_format(apply_date, '%y-'), QUARTER(apply_date));
+                concat(date_format(apply_date, '%y-'), QUARTER(apply_date))
             </when>
             <otherwise>
-                date_format(apply_date,'%y');
+                date_format(apply_date,'%y')
             </otherwise>
         </choose>
-        from doctor_orgs t1
-        LEFT JOIN doctor_warehouse_material_apply t2 on t1.id=t2.org_id
-        GROUP BY t1.id,t2.pig_type,t2.type,
-        <choose>
-            <when test="type==1">
-                apply_date;
-            </when>
-            <when test="type==2">
-                date_format(apply_date,'%x-%v');
-            </when>
-            <when test="type==3">
-                date_format(apply_date,'%y-%m');
-            </when>
-            <when test="type==4">
-                concat(date_format(apply_date, '%y-'), QUARTER(apply_date));
-            </when>
-            <otherwise>
-                date_format(apply_date,'%y');
-            </otherwise>
-        </choose>
+        ) t1
+        ON t0.id=t1.org_id;
+
     </select>
 
-    <select id="countFarrowByOrg" parameterType="map" resultType="map">
-        SELECT t1.org_id as orgId,type as type,pig_type as pigType,sum(quantity) as quantity,sum(quantity * unit_price)
-        AS amount
-        from doctor_warehouse_material_apply t0
-        LEFT JOIN doctor_farms t1 on t0.farm_id=t1.id
-        LEFT JOIN doctor_barns t2 on t0.pig_barn_id=t2.id
-        where apply_type=1 and t2.pig_type=7
-        <if test="startAt != null">AND apply_date &gt;= #{startAt}</if>
-        <if test="endAt != null">AND apply_date &lt;= #{endAt}</if>
-        GROUP BY t1.org_id,type;
+    <select id="countFarrowByOrg" parameterType="map" resultMap="TempResultMap">
+
+        SELECT t0.id,t0.name,t1.quantity,t1.amount,t1.pig_type,t1.type,t1.date FROM doctor_orgs t0
+        LEFT JOIN
+        (SELECT org_id,pig_type,type,sum(quantity) as quantity,sum(quantity*unit_price) as amount,
+        apply_date
+        as date
+        from doctor_warehouse_material_apply
+        WHERE apply_type=1 and pig_type=7
+        GROUP BY org_id,pig_type,type,
+        <choose>
+            <when test="type==1">
+                apply_date
+            </when>
+            <when test="type==2">
+                date_format(apply_date,'%x-%v')
+            </when>
+            <when test="type==3">
+                date_format(apply_date,'%y-%m')
+            </when>
+            <when test="type==4">
+                concat(date_format(apply_date, '%y-'), QUARTER(apply_date))
+            </when>
+            <otherwise>
+                date_format(apply_date,'%y')
+            </otherwise>
+        </choose>
+        ) t1
+        ON t0.id=t1.org_id;
+
     </select>
-    <select id="countFarrowSowByOrg" parameterType="map" resultType="map">
-        SELECT t1.org_id as orgId,type as type,pig_type as pigType,sum(quantity) as quantity,sum(quantity * unit_price)
-        AS amount
-        from doctor_warehouse_material_apply t0
-        LEFT JOIN doctor_farms t1 on t0.farm_id=t1.id
-        LEFT JOIN doctor_barns t2 on t0.pig_barn_id=t2.id
-        where apply_type=2
-        <if test="startAt != null">AND apply_date &gt;= #{startAt}</if>
-        <if test="endAt != null">AND apply_date &lt;= #{endAt}</if>
-        GROUP BY t1.org_id,type;
+    <select id="countFarrowSowByOrg" parameterType="map" resultMap="TempResultMap">
+        SELECT t0.id,t0.name,t1.quantity,t1.amount,t1.pig_type,t1.type,t1.date FROM doctor_orgs t0
+        LEFT JOIN
+        (SELECT org_id,pig_type,type,sum(quantity) as quantity,sum(quantity*unit_price) as amount,
+        apply_date
+        as date
+        from doctor_warehouse_material_apply
+        WHERE apply_type=2
+        GROUP BY org_id,pig_type,type,
+        <choose>
+            <when test="type==1">
+                apply_date
+            </when>
+            <when test="type==2">
+                date_format(apply_date,'%x-%v')
+            </when>
+            <when test="type==3">
+                date_format(apply_date,'%y-%m')
+            </when>
+            <when test="type==4">
+                concat(date_format(apply_date, '%y-'), QUARTER(apply_date))
+            </when>
+            <otherwise>
+                date_format(apply_date,'%y')
+            </otherwise>
+        </choose>
+        ) t1
+        ON t0.id=t1.org_id;
     </select>
 
     <select id="findDate" parameterType="int" resultType="date">
@@ -228,7 +270,6 @@
             </when>
         </choose>
     </select>
-
 
 
     <select id="materialApply" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="double">
