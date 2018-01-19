@@ -130,4 +130,19 @@ public class DoctorReportController {
             date = new Date();
         doctorDailyReportV2Service.sy(date);
     }
+
+    /**
+     * 增量同步报表数据
+     * @return
+     */
+    @RequestMapping(value = "/synchronize/delta/bi/data", method = RequestMethod.GET)
+    public Boolean synchronizeDeltaDayBiData(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start) {
+        return RespHelper.or500(doctorDailyReportV2Service.synchronizeDeltaDayBiData(start));
+    }
+
+    @RequestMapping(method = RequestMethod.PUT, value = "/flush/npd")
+    public void flushNPD() {
+        //
+        Date start, end;
+    }
 }

@@ -176,6 +176,17 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
     }
 
     @Override
+    public Response<Boolean> synchronizeDeltaDayBiData(Date start) {
+        try {
+            doctorReportBiManager.synchronizeDeltaDayBiData(start);
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("synchronize delta day bi data failed,cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("synchronize.delta.day.bi.data.failed");
+        }
+    }
+
+    @Override
     public Response<DoctorDimensionReport> dimensionReport(DoctorDimensionCriteria dimensionCriteria) {
         try {
             return Response.ok(doctorReportBiManager.dimensionReport(dimensionCriteria));

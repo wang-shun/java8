@@ -57,7 +57,7 @@ public class DoctorReportBiDataSynchronize {
     private final DoctorWarehouseSynchronizer warehouseSynchronizer;
     private final DoctorEfficiencySynchronizer efficiencySynchronizer;
 
-    private final Integer DELTA_DAY = 1440;
+    private final Integer DELTA_DAY = 600;
     private final Integer REAL_TIME_INTERVAL = 1;
 
     @Autowired
@@ -109,6 +109,12 @@ public class DoctorReportBiDataSynchronize {
         log.info("synchronize delta day bi data end, minute:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
     }
 
+    public void synchronizeDeltaDayBiData(Date start) {
+        log.info("synchronize delta day bi data starting, start:{}", start);
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        synchronizeDeltaBiData(start);
+        log.info("synchronize delta day bi data end, minute:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
+    }
     /**
      * 同步实时数据
      */

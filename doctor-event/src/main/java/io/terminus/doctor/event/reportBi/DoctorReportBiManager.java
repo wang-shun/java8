@@ -5,6 +5,8 @@ import io.terminus.doctor.event.dto.reportBi.DoctorDimensionReport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+
 /**
  * Created by xjn on 18/1/9.
  * email:xiaojiannan@terminus.io
@@ -24,6 +26,9 @@ public class DoctorReportBiManager {
         synchronize.synchronizeDeltaDayBiData();
     }
 
+    public void synchronizeDeltaDayBiData(Date start) {
+        synchronize.synchronizeDeltaDayBiData(start);
+    }
     /**
      * 全量同步数据到bi(手动)
      */
