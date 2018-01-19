@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.report;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -12,6 +13,7 @@ import io.terminus.doctor.basic.service.DoctorReportFieldCustomizesReadService;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
+import io.terminus.doctor.event.dto.report.daily.DoctorFarmLiveStockDto;
 import io.terminus.doctor.event.dto.reportBi.DoctorDimensionReport;
 import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.DoctorReportRegion;
@@ -126,6 +128,11 @@ public class ReportBoardController {
         DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, OrzDimension.FARM.getValue(),
                 date, DateDimension.YEAR.getValue());
         return fieldWithHidden(dimensionCriteria);
+    }
+
+    @RequestMapping(value = "/live/stock")
+    public DoctorFarmLiveStockDto realTimeLiveStock(@PathVariable Long farmId){
+        return RespHelper.or500(doctorDailyReportV2Service.findFarmsLiveStock(Lists.newArrayList(farmId))).get(0);
     }
 
     private List<DoctorReportFieldTypeDto> fieldWithHidden(DoctorDimensionCriteria dimensionCriteria) {
