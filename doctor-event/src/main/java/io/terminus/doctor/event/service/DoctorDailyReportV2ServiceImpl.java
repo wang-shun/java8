@@ -220,6 +220,7 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
                         .farmId(farmId)
                         .boar(report.getReportBoar().getEnd())
                         .farrow(report.getReportDeliver().getPigletEnd())
+                        .deliverSow(report.getReportDeliver().getEnd())
                         .sow(report.getReportSow().getEnd())
                         .houbei(report.getReportReserve().getEnd())
                         .peihuai(report.getReportMating().getEnd())

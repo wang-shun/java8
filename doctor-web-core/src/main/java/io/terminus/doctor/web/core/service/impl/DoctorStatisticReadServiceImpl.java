@@ -177,6 +177,8 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
                         (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getFatten(), 0))),       //育肥猪
                 new DoctorStatisticDto(DoctorStatisticDto.PigType.HOUBEI.getCutDesc(),
                         (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getHoubei(), 0))),        //后备猪
+                new DoctorStatisticDto(DoctorStatisticDto.PigType.DELIVER_SOW.getCutDesc(),
+                        (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getDeliverSow(), 0))),        //后备猪
                 new DoctorStatisticDto(DoctorStatisticDto.PigType.PEIHUAI.getCutDesc(),
                         (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getPeihuai(), 0)))        //配怀猪
 
