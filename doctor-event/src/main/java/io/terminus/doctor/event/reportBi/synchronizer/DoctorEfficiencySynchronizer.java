@@ -27,10 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -109,6 +106,32 @@ public class DoctorEfficiencySynchronizer {
         }
     }
 
+    /**
+     * 刷新该猪场的指定日期所在的月、季、年
+     * 和所在的公司的月、季、年
+     *
+     * @param farmId
+     * @param date
+     */
+    public void syncFarm(Long farmId, Date date) {
+
+    }
+
+    /**
+     * 刷新该公司指定日期所在的月、季、年
+     *
+     * @param orgId
+     * @param date
+     */
+    public void syncOrg(Long orgId, Date date) {
+
+    }
+
+    /**
+     * 刷新所有猪场和公司指定日期所在的月、季、年
+     *
+     * @param date
+     */
     public void sync(Date date) {
         //
         Date start = DateHelper.withDateStartDay(date, DateDimension.MONTH);
@@ -119,7 +142,6 @@ public class DoctorEfficiencySynchronizer {
         DoctorDimensionCriteria criteria = new DoctorDimensionCriteria();
         criteria.setOrzType(OrzDimension.FARM.getValue());
         criteria.setDateType(DateDimension.QUARTER.getValue());
-
 
         DoctorPigReportReadService.DateDuration dateDuration = doctorPigReportReadService.getDuration(date, ReportTime.SEASON);
         start = dateDuration.getStart();
@@ -138,86 +160,140 @@ public class DoctorEfficiencySynchronizer {
 
         npds = doctorReportNpdDao.count(criteria, start, end);
         create(npds, DateDimension.YEAR, start, end);
-
-
     }
 
     private void create(List<DoctorReportNpd> npds, DateDimension dateDimension, Date start, Date end) {
 
         Set<Long> orgIds = new HashSet<>();
 
-        for (DoctorReportNpd npd : npds) {
+        Map<Long, List<DoctorReportNpd>> npdMap = npds.stream().collect(Collectors.groupingBy(DoctorReportNpd::getFarmId));
+        RespHelper.orServEx(doctorFarmReadService.findAllFarms()).stream().forEach(f -> {
 
-            DoctorPigDaily pigDaily = doctorPigDailyDao.countByFarm(npd.getFarmId(), start, end);
+            DoctorReportEfficiency efficiency;
+            DoctorDimensionCriteria criteria = new DoctorDimensionCriteria();
+            criteria.setOrzId(f.getId());
+            criteria.setDateType(dateDimension.getValue());
+            criteria.setOrzType(OrzDimension.FARM.getValue());
+            criteria.setSumAt(start);
+            efficiency = doctorReportEfficiencyDao.findByDimension(criteria);
+            if (null == efficiency) efficiency = new DoctorReportEfficiency();
 
-            DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(npd.getFarmId()));
+            if (!npdMap.containsKey(f.getId())) {
+                //补
+                efficiency.setOrzId(f.getId());
+                efficiency.setOrzType(OrzDimension.FARM.getValue());
+                efficiency.setDateType(dateDimension.getValue());
+                efficiency.setOrzName(f.getName());
+                efficiency.setSumAt(start);
+                efficiency.setSumAtName(DateHelper.dateCN(start, dateDimension));
 
-            DoctorReportEfficiency efficiency = new DoctorReportEfficiency();
-            efficiency.setOrzId(npd.getFarmId());
-            efficiency.setOrzType(OrzDimension.FARM.getValue());
-            efficiency.setDateType(dateDimension.getValue());
-            efficiency.setOrzName(null == farm ? "" : farm.getName());
-            efficiency.setSumAtName(DateHelper.dateCN(npd.getSumAt(), dateDimension));
+                efficiency.setPregnancy(0);
+                efficiency.setLactation(0);
+                if (null == efficiency.getId())
+                    doctorReportEfficiencyDao.create(efficiency);
+                else
+                    doctorReportEfficiencyDao.update(efficiency);
+            } else {
+                DoctorReportNpd npd = npdMap.get(f.getId()).get(0);//每个猪场只会有一条，无论是月、季、年
+                DoctorPigDaily pigDaily = doctorPigDailyDao.countByFarm(npd.getFarmId(), start, end);
 
-            efficiency.setSumAt(npd.getSumAt());
-            //非生产天数=非生产天数/母猪存栏/天数
-            if (npd.getSowCount() != 0) {
+                efficiency.setOrzId(npd.getFarmId());
+                efficiency.setOrzType(OrzDimension.FARM.getValue());
+                efficiency.setDateType(dateDimension.getValue());
+                efficiency.setOrzName(f.getName());
+                efficiency.setSumAtName(DateHelper.dateCN(npd.getSumAt(), dateDimension));
 
-                int dayCount = DateUtil.getDeltaDays(start, end) + 1;
-                efficiency.setNpd(new BigDecimal(npd.getNpd()).divide(new BigDecimal(npd.getSowCount()).divide(new BigDecimal(dayCount), 2, BigDecimal.ROUND_HALF_UP), 2, BigDecimal.ROUND_HALF_UP).intValue());
+                efficiency.setSumAt(npd.getSumAt());
+                //非生产天数=非生产天数/母猪存栏/天数
+                if (npd.getSowCount() != 0) {
+
+                    int dayCount = DateUtil.getDeltaDays(start, end) + 1;
+                    efficiency.setNpd(new BigDecimal(npd.getNpd()).divide(new BigDecimal(npd.getSowCount()).divide(new BigDecimal(dayCount), 2, BigDecimal.ROUND_HALF_UP), 2, BigDecimal.ROUND_HALF_UP).intValue());
+                }
+
+                //年产胎次（月）=365-非生产天数*12/生产天数/总窝数
+                if (null != pigDaily && pigDaily.getFarrowNest() != null && pigDaily.getFarrowNest() != 0 && efficiency.getNpd() != null
+                        && (npd.getPregnancy() + npd.getLactation() != 0)) {
+                    BigDecimal mi = new BigDecimal(npd.getPregnancy()).add(new BigDecimal(npd.getLactation())).divide(new BigDecimal(pigDaily.getFarrowNest()), 2, BigDecimal.ROUND_HALF_UP);
+                    BigDecimal re = new BigDecimal(365).subtract(new BigDecimal(efficiency.getNpd())).multiply(new BigDecimal(12)).divide(mi, 2, BigDecimal.ROUND_HALF_UP);
+                    efficiency.setBirthPerYear(re.intValue());
+                }
+
+                //psy=年产胎次*断奶仔猪数/断奶窝数
+                if (null != pigDaily && pigDaily.getWeanNest() != null && pigDaily.getWeanNest() != 0 && efficiency.getBirthPerYear() != null)
+                    efficiency.setPsy(efficiency.getBirthPerYear() * (pigDaily.getWeanCount() / pigDaily.getWeanNest()));
+                efficiency.setPregnancy(npd.getPregnancy());
+                efficiency.setLactation(npd.getLactation());
+
+                if (efficiency.getId() == null)
+                    doctorReportEfficiencyDao.create(efficiency);
+                else
+                    doctorReportEfficiencyDao.update(efficiency);
+                orgIds.add(npd.getOrgId());
             }
+        });
 
-            //年产胎次（月）=365-非生产天数*12/生产天数/总窝数
-            if (null != pigDaily && pigDaily.getFarrowNest() != null && pigDaily.getFarrowNest() != 0 && efficiency.getNpd() != null
-                    && (npd.getPregnancy() + npd.getLactation() != 0)) {
-                BigDecimal mi = new BigDecimal(npd.getPregnancy()).add(new BigDecimal(npd.getLactation())).divide(new BigDecimal(pigDaily.getFarrowNest()), 2, BigDecimal.ROUND_HALF_UP);
-                BigDecimal re = new BigDecimal(365).subtract(new BigDecimal(efficiency.getNpd())).multiply(new BigDecimal(12)).divide(mi, 2, BigDecimal.ROUND_HALF_UP);
-                efficiency.setBirthPerYear(re.intValue());
+        RespHelper.orServEx(doctorOrgReadService.findAllOrgs()).stream().forEach(o -> {
+
+            DoctorReportEfficiency efficiency;
+            DoctorDimensionCriteria criteria = new DoctorDimensionCriteria();
+            criteria.setOrzId(o.getId());
+            criteria.setDateType(dateDimension.getValue());
+            criteria.setOrzType(OrzDimension.ORG.getValue());
+            criteria.setSumAt(start);
+            efficiency = doctorReportEfficiencyDao.findByDimension(criteria);
+            if (null == efficiency) efficiency = new DoctorReportEfficiency();
+
+            if (!orgIds.contains(o.getId())) {
+                //补
+                efficiency.setOrzId(o.getId());
+                efficiency.setOrzType(OrzDimension.ORG.getValue());
+                efficiency.setDateType(dateDimension.getValue());
+                efficiency.setOrzName(o.getName());
+                efficiency.setSumAt(start);
+                efficiency.setSumAtName(DateHelper.dateCN(start, dateDimension));
+
+                efficiency.setPregnancy(0);
+                efficiency.setLactation(0);
+                if (null == efficiency.getId())
+                    doctorReportEfficiencyDao.create(efficiency);
+                else
+                    doctorReportEfficiencyDao.update(efficiency);
+            } else {
+                DoctorReportNpd npd = doctorReportNpdDao.findByOrgAndSumAt(o.getId(), start);
+
+                DoctorPigDaily pigDaily = doctorPigDailyDao.countByOrg(o.getId(), start, end);
+
+                log.info("准备同步公司的效率指标【{}】,{}", npd.getOrgId(), pigDaily.getFarrowNest(), pigDaily.getWeanNest());
+
+
+                efficiency.setOrzId(o.getId());
+                efficiency.setOrzType(OrzDimension.ORG.getValue());
+                efficiency.setDateType(dateDimension.getValue());
+                efficiency.setSumAtName(DateHelper.dateCN(start, dateDimension));
+//                DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(orgId));
+                efficiency.setOrzName(o.getName());
+
+                efficiency.setSumAt(start);
+                //非生产天数=非生产天数/母猪存栏/天数
+                if (npd.getSowCount() != 0)
+                    efficiency.setNpd(npd.getNpd() / (npd.getSowCount() / npd.getDays()));
+
+                //年产胎次（月）=365-非生产天数*12/生产天数/总窝数
+                if (null != pigDaily && pigDaily.getFarrowNest() != null && pigDaily.getFarrowNest() != 0 && efficiency.getNpd() != null)
+                    efficiency.setBirthPerYear((365 - efficiency.getNpd()) * 12 / ((npd.getPregnancy() + npd.getLactation()) / pigDaily.getFarrowNest()));
+
+                //psy=年产胎次*断奶仔猪数/断奶窝数
+                if (null != pigDaily && pigDaily.getWeanNest() != null && pigDaily.getWeanNest() != 0 && efficiency.getBirthPerYear() != null)
+                    efficiency.setPsy(efficiency.getBirthPerYear() * (pigDaily.getWeanCount() / pigDaily.getWeanNest()));
+                efficiency.setPregnancy(npd.getPregnancy());
+                efficiency.setLactation(npd.getLactation());
+
+                if (efficiency.getId() == null)
+                    doctorReportEfficiencyDao.create(efficiency);
+                else
+                    doctorReportEfficiencyDao.update(efficiency);
             }
-
-            //psy=年产胎次*断奶仔猪数/断奶窝数
-            if (null != pigDaily && pigDaily.getWeanNest() != null && pigDaily.getWeanNest() != 0 && efficiency.getBirthPerYear() != null)
-                efficiency.setPsy(efficiency.getBirthPerYear() * (pigDaily.getWeanCount() / pigDaily.getWeanNest()));
-            efficiency.setPregnancy(npd.getPregnancy());
-            efficiency.setLactation(npd.getLactation());
-
-//            doctorReportEfficiencyDao.create(efficiency);
-            orgIds.add(npd.getOrgId());
-        }
-
-
-        for (Long orgId : orgIds) {
-
-            DoctorReportNpd npd = doctorReportNpdDao.findByOrgAndSumAt(orgId, start);
-
-            DoctorPigDaily pigDaily = doctorPigDailyDao.countByOrg(orgId, start, end);
-
-            log.info("准备同步公司的效率指标【{}】,{}", npd.getOrgId(), pigDaily.getFarrowNest(), pigDaily.getWeanNest());
-
-            DoctorReportEfficiency efficiency = new DoctorReportEfficiency();
-            efficiency.setOrzId(orgId);
-            efficiency.setOrzType(OrzDimension.ORG.getValue());
-            efficiency.setDateType(dateDimension.getValue());
-            efficiency.setSumAtName(DateHelper.dateCN(start, dateDimension));
-            DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(orgId));
-            efficiency.setOrzName(org == null ? "" : org.getName());
-
-            efficiency.setSumAt(start);
-            //非生产天数=非生产天数/母猪存栏/天数
-            if (npd.getSowCount() != 0)
-                efficiency.setNpd(npd.getNpd() / (npd.getSowCount() / npd.getDays()));
-
-            //年产胎次（月）=365-非生产天数*12/生产天数/总窝数
-            if (null != pigDaily && pigDaily.getFarrowNest() != null && pigDaily.getFarrowNest() != 0 && efficiency.getNpd() != null)
-                efficiency.setBirthPerYear((365 - efficiency.getNpd()) * 12 / ((npd.getPregnancy() + npd.getLactation()) / pigDaily.getFarrowNest()));
-
-            //psy=年产胎次*断奶仔猪数/断奶窝数
-            if (null != pigDaily && pigDaily.getWeanNest() != null && pigDaily.getWeanNest() != 0 && efficiency.getBirthPerYear() != null)
-                efficiency.setPsy(efficiency.getBirthPerYear() * (pigDaily.getWeanCount() / pigDaily.getWeanNest()));
-            efficiency.setPregnancy(npd.getPregnancy());
-            efficiency.setLactation(npd.getLactation());
-
-//            doctorReportEfficiencyDao.create(efficiency);
-        }
+        });
     }
 }
