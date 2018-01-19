@@ -94,11 +94,23 @@ public class DoctorEfficiencySynchronizer {
 
             efficiency.setSumAt(npd.getSumAt());
             //非生产天数=非生产天数/母猪存栏/天数
-            efficiency.setNpd(npd.getNpd() / (npd.getSowCount() / npd.getDays()));
+            if (npd.getSowCount() != 0) {
+
+                int dayCount = DateUtil.getDeltaDays(npd.getSumAt(), end) + 1;
+                efficiency.setNpd(new BigDecimal(npd.getNpd()).divide(new BigDecimal(npd.getSowCount()).divide(new BigDecimal(dayCount), 2, BigDecimal.ROUND_HALF_UP), 2, BigDecimal.ROUND_HALF_UP).intValue());
+            }
+
             //年产胎次（月）=365-非生产天数*12/生产天数/总窝数
-            efficiency.setBirthPerYear((365 - efficiency.getNpd()) * 12 / ((npd.getPregnancy() + npd.getLactation()) / pigDaily.getFarrowNest()));
+            if (null != pigDaily && pigDaily.getFarrowNest() != null && pigDaily.getFarrowNest() != 0 && efficiency.getNpd() != null
+                    && (npd.getPregnancy() + npd.getLactation() != 0)) {
+                BigDecimal mi = new BigDecimal(npd.getPregnancy()).add(new BigDecimal(npd.getLactation())).divide(new BigDecimal(pigDaily.getFarrowNest()), 2, BigDecimal.ROUND_HALF_UP);
+                BigDecimal re = new BigDecimal(365).subtract(new BigDecimal(efficiency.getNpd())).multiply(new BigDecimal(12)).divide(mi, 2, BigDecimal.ROUND_HALF_UP);
+                efficiency.setBirthPerYear(re.intValue());
+            }
+
             //psy=年产胎次*断奶仔猪数/断奶窝数
-            efficiency.setPsy(efficiency.getBirthPerYear() * (pigDaily.getWeanCount() / pigDaily.getWeanNest()));
+            if (null != pigDaily && pigDaily.getWeanNest() != null && pigDaily.getWeanNest() != 0 && efficiency.getBirthPerYear() != null)
+                efficiency.setPsy(efficiency.getBirthPerYear() * (pigDaily.getWeanCount() / pigDaily.getWeanNest()));
             efficiency.setPregnancy(npd.getPregnancy());
             efficiency.setLactation(npd.getLactation());
 
