@@ -213,8 +213,8 @@ public class DoctorReportBiDataSynchronize {
         reserveSynchronizer.deleteAll();
         boarSynchronizer.deleteAll();
         sowSynchronizer.deleteAll();
-        matingSynchronizer.deleteAll();
-        efficiencySynchronizer.deleteAll();
+//        matingSynchronizer.deleteAll();
+//        efficiencySynchronizer.deleteAll();
     }
 
     private void synchronizeBiDataImpl() {
