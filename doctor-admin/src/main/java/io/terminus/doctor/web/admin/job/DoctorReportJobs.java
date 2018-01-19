@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.admin.job;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Response;
@@ -92,7 +93,8 @@ public class DoctorReportJobs {
             }
             log.info("daily report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
 
-            doctorDailyReportV2Service.generateYesterdayAndToday(getAllFarmIds());
+            // TODO: 18/1/19 测试这两个猪场
+            doctorDailyReportV2Service.generateYesterdayAndToday(Lists.newArrayList(404L,407L));
 
             log.info("daily report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
