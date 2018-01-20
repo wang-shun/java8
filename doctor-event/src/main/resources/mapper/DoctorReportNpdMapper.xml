@@ -202,6 +202,9 @@
         <if test="orgType==3">
             farm_id,
         </if>
+        <if test="dateType==3">
+            sum_at
+        </if>
         <if test="dateType==5">
             date_format(sum_at, '%Y')
         </if>

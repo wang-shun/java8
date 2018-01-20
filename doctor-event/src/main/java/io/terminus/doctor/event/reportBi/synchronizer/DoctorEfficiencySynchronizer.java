@@ -69,7 +69,10 @@ public class DoctorEfficiencySynchronizer {
         List<DoctorReportNpd> npds = doctorReportNpdDao.count(dimensionCriteria, null, null);
         for (DoctorReportNpd npd : npds) {
             DoctorReportEfficiency efficiency = new DoctorReportEfficiency();
-            efficiency.setOrzId(dimensionCriteria.getOrzId());
+            if (dimensionCriteria.getOrzType().equals(OrzDimension.FARM.getValue()))
+                efficiency.setOrzId(npd.getFarmId());
+            else
+                efficiency.setOrzId(npd.getOrgId());
             efficiency.setOrzType(dimensionCriteria.getOrzType());
             efficiency.setDateType(dimensionCriteria.getDateType());
             efficiency.setSumAtName(DateHelper.dateCN(npd.getSumAt(), DateDimension.from(dimensionCriteria.getDateType())));
