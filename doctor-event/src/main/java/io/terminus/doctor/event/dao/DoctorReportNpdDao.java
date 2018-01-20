@@ -2,6 +2,7 @@ package io.terminus.doctor.event.dao;
 
 import io.terminus.common.mysql.dao.MyBatisDao;
 
+import io.terminus.doctor.event.dto.DataFactorDto;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.enums.ReportTime;
 import io.terminus.doctor.event.model.DoctorReportNpd;
@@ -85,6 +86,17 @@ public class DoctorReportNpdDao extends MyBatisDao<DoctorReportNpd> {
 
         return this.sqlSession.selectList(this.sqlId("report"), params);
     }
+
+    /**
+     * 获取doctor_report_npd表中记录的最大最小月份
+     *
+     * @return
+     */
+    public Map<String, Date> getMaxAndMinDate() {
+        Map<String, Date> maxAndMin = this.sqlSession.selectOne(this.sqlId("findMaxAndMinDate"));
+        return maxAndMin;
+    }
+
 
     public void delete() {
         this.sqlSession.delete(this.sqlId("deleteAll"));

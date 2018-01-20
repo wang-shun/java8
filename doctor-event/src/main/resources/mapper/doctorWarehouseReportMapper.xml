@@ -61,9 +61,9 @@
         FROM
         (
         SELECT sum(quantity) AS quantity,sum(quantity * unit_price) AS amount,type
-        FROM doctor_warehouse_material_apply t0 LEFT JOIN doctor_barns t1 on t0.pig_barn_id=t1.id
-        WHERE apply_type=1 and (t1.pig_type=1 or t1.pig_type=7)
-        <if test="farmId != null and farmId.size() >0">AND t0.farm_id in
+        FROM doctor_warehouse_material_apply
+        WHERE apply_type=1 and (pig_type=1 or pig_type=7)
+        <if test="farmId != null and farmId.size() >0">AND farm_id in
             <foreach item="id" collection="farmId" open="(" separator="," close=")">
                 #{id}
             </foreach>
@@ -138,17 +138,17 @@
         sum(quantity) as quantity,
         sum(quantity * unit_price) AS amount,
         type
-        FROM doctor_warehouse_material_apply t0
-        LEFT JOIN doctor_barns t1 ON t0.pig_barn_id = t1.id
+        FROM doctor_warehouse_material_apply
+
         WHERE apply_type = 0
-        <if test="farmId != null and farmId.size() >0">AND t0.farm_id in
+        <if test="farmId != null and farmId.size() >0">AND farm_id in
             <foreach item="id" collection="farmId" open="(" separator="," close=")">
                 #{id}
             </foreach>
         </if>
-        <if test="startAt != null">AND t0.apply_date &gt;= #{startAt}</if>
-        <if test="endAt != null">AND t0.apply_date &lt;= #{endAt}</if>
-        GROUP BY t1.pig_type, type
+        <if test="startAt != null">AND apply_date &gt;= #{startAt}</if>
+        <if test="endAt != null">AND apply_date &lt;= #{endAt}</if>
+        GROUP BY pig_type, type
         ) AS a
     </select>
 

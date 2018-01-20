@@ -3,6 +3,7 @@ package io.terminus.doctor.event.model;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -56,17 +57,17 @@ public class DoctorReportEfficiency implements Serializable {
     /**
      * 非生产天数
      */
-    private Integer npd;
+    private BigDecimal npd;
     
     /**
      * 年生产胎次
      */
-    private Integer birthPerYear;
+    private BigDecimal birthPerYear;
     
     /**
      * psy
      */
-    private Integer psy;
+    private BigDecimal psy;
     
     /**
      * 妊娠期
