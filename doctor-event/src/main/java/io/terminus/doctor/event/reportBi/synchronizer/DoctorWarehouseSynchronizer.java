@@ -506,47 +506,6 @@ public class DoctorWarehouseSynchronizer {
         return Collections.unmodifiableMap(result);
     }
 
-    public static void main(String[] args) {
-
-        DateDimension dateDimension = DateDimension.YEAR;
-
-        Date minDate = DateUtil.toDate("2017-04-01");
-        Date maxDate = DateUtil.toDate("2017-08-01");
-        Date current = DateHelper.withDateStartDay(minDate, dateDimension);
-
-
-        Date last;
-        if (dateDimension == DateDimension.DAY)
-            last = DateUtils.addDays(maxDate, 1);
-        else if (dateDimension == DateDimension.WEEK) {
-            last = DateUtils.addWeeks(DateHelper.withDateStartDay(maxDate, dateDimension), 1);
-        } else if (dateDimension == DateDimension.MONTH) {
-            last = DateUtils.addMonths(DateHelper.withDateStartDay(maxDate, dateDimension), 1);
-        } else if (dateDimension == DateDimension.QUARTER)
-            last = DateUtils.addMonths(DateHelper.withDateStartDay(maxDate, dateDimension), 3);
-        else
-            last = DateUtils.addYears(DateHelper.withDateStartDay(maxDate, dateDimension), 1);
-
-
-        System.out.println("last:" + DateUtil.toDateString(last));
-
-        while (current.before(last)) {
-
-            System.out.println(DateUtil.toDateString(current));
-
-            if (dateDimension == DateDimension.DAY)
-                current = DateUtils.addDays(current, 1);
-            else if (dateDimension == DateDimension.WEEK) {
-                current = DateUtils.addWeeks(DateHelper.withDateStartDay(current, dateDimension), 1);
-            } else if (dateDimension == DateDimension.MONTH) {
-                current = DateUtils.addMonths(DateHelper.withDateStartDay(current, dateDimension), 1);
-            } else if (dateDimension == DateDimension.QUARTER)
-                current = DateUtils.addMonths(DateHelper.withDateStartDay(current, dateDimension), 3);
-            else
-                current = DateUtils.addYears(DateHelper.withDateStartDay(current, dateDimension), 1);
-        }
-    }
-
 
     private void fill(DoctorReportMaterial material, Map<String, Object> result) {
         material.setHoubeiFeedQuantity(((BigDecimal) (result.get("houbeiFeedCount"))).intValue());
