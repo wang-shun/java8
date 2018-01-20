@@ -130,7 +130,7 @@ public class DoctorDeliverSynchronizer {
         reportBi.setPigletWeakCountPerFarrow(fieldHelper.get(reportBi.getFarrowWeak(), pigDaily.getFarrowNest()));
         reportBi.setAvgWeightPerFarrow(EventUtil.getAvgWeight(pigDaily.getFarrowWeight(), pigDaily.getFarrowNest()));
         reportBi.setFirstBornWeight(EventUtil.getAvgWeight(pigDaily.getFarrowWeight(), pigDaily.getFarrowLive()));
-        reportBi.setWeanDayAge(EventUtil.get(pigDaily.getWeanDayAge(), pigDaily.getWeanCount()));
+        reportBi.setWeanDayAge(FieldHelper.getInteger(pigDaily.getWeanDayAge(), pigDaily.getWeanCount()));
         reportBi.setWeanWeightPerFarrow(EventUtil.getAvgWeight(pigDaily.getWeanWeight(), pigDaily.getWeanCount()));
         if (DateDimension.YEARLY.contains(reportBi.getDateType())) {
             reportBi.setEarlyNestRate(fieldHelper.get(pigDaily.getFarrowNest(), pigDaily.getEarlyMating()));
