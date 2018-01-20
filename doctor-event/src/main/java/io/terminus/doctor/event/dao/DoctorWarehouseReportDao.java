@@ -61,206 +61,102 @@ public class DoctorWarehouseReportDao {
     }
 
 
-    public List<WarehouseReport> count(Integer dateType) {
+    public Map<Long, List<WarehouseReportTempResult>> count(Integer dateType, Integer orgType) {
 
-        List<WarehouseReportTempResult> otherCount = this.sqlSession.selectList(namespace + ".countByOrg", Collections.singletonMap("type", dateType));
-        List<WarehouseReportTempResult> farrowCount = this.sqlSession.selectList(namespace + ".countFarrowByOrg", Collections.singletonMap("type", dateType));
-        List<WarehouseReportTempResult> farrowSowCount = this.sqlSession.selectList(namespace + ".countFarrowSowByOrg", Collections.singletonMap("type", dateType));
-        farrowCount.forEach(f -> f.setPigType(22));
+        Map<String, Object> params = new HashMap<>();
+        params.put("dateType", dateType);
+        params.put("orgType", orgType);
 
-        List<WarehouseReportTempResult> allCount = new ArrayList<>();
-        allCount.addAll(otherCount);
-        allCount.addAll(farrowCount);
-        allCount.addAll(farrowCount);
+        List<WarehouseReportTempResult> other = this.sqlSession.selectList(namespace + ".countOrg", params);
+        //产房仔猪,其中的pig_type都为7，需要设置一个另外的值，为了与产房母猪区分，因为枚举中没有区分，就设一个魔法值
+        List<WarehouseReportTempResult> farrow = this.sqlSession.selectList(namespace + ".countFarrowOrg", params);
+        farrow.forEach(f -> f.setPigType(22));
+        //产房母猪,其中的pig_type也都为7
+        List<WarehouseReportTempResult> farrowSow = this.sqlSession.selectList(namespace + ".countFarrowSowOrg", params);
 
-        Map<Long, List<WarehouseReportTempResult>> tempResultMap = allCount.stream().collect(Collectors.groupingBy(WarehouseReportTempResult::getOrgId));
-
-//        List<Map<String, Object>> orgFarrowCounts = this.sqlSession.selectList(namespace + ".countFarrowByOrg", Collections.singletonMap("type", dateType));
-
-//        for (Map<String, Object> farrow : orgFarrowCounts) {
-//            farrow.put("pigType".toUpperCase(), 22);//修改产房仔猪类型，不然会与产房母猪冲突，无法区分
-//        }
-
-//        List<Map<String, Object>> orgFarrowSowCounts = this.sqlSession.selectList(namespace + ".countFarrowSowByOrg", Collections.singletonMap("type", dateType));
-
-//        Map<Long/*公司*/, Map<Short/*猪舍类型*/, Map<Short/*物料类型*/, AmountAndQuantityDto>>> middleResult = new HashMap<>();
-//        Map<Long/*公司*/, Date> orgDate = new HashMap<>();
-
-
-//        convert(Lists.newArrayList(orgOtherCounts, orgFarrowCounts, orgFarrowSowCounts), middleResult, orgDate);
-
-        List<WarehouseReport> result = new ArrayList<>();
-        for (Long orgId : tempResultMap.keySet()) {
-
-            if (tempResultMap.get(orgId).get(0).getDate() == null) {
-                WarehouseReport report = new WarehouseReport();
-                report.setOrgId(orgId);
-                report.setOrgName(tempResultMap.get(orgId).get(0).getOrgName());
-                result.add(report);
-            } else {
-
-                Map<Date, List<WarehouseReportTempResult>> dateResult = new HashMap<>();
-                for (WarehouseReportTempResult tempResult : tempResultMap.get(orgId)) {
-                    if (dateResult.containsKey(tempResult.getDate()))
-                        dateResult.get(tempResult.getDate()).add(tempResult);
-                    else {
-                        List<WarehouseReportTempResult> d = new ArrayList<>();
-                        d.add(tempResult);
-                        dateResult.put(tempResult.getDate(), d);
-                    }
-                }
-
-                dateResult.forEach((d, r) -> {
-                    WarehouseReport report = new WarehouseReport();
-                    report.setOrgId(orgId);
-                    report.setOrgName(r.get(0).getOrgName());
-                    report.setSumAt(DateHelper.withDateStartDay(r.get(0).getDate(), DateDimension.from(dateType)));
-
-                    r.forEach(rr -> {
-                        /*产房仔猪--并没有这个猪舍类型，只能自定义一个不重复的魔法值*/
-                        if (rr.getPigType().equals(22)) {
-                            switch (rr.getType()) {
-                                case 1:
-                                    report.setFarrowFeedCount(rr.getQuantity().longValue());
-                                    report.setFarrowFeedAmount(rr.getAmount().divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_UP));
-                                    break;
-                                case 2:
-                                    report.setFarrowMaterialCount(rr.getQuantity().longValue());
-                                    report.setFarrowMaterialAmount(rr.getAmount().divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_UP));
-                                    break;
-                                case 3:
-                                    report.setFarrowVaccineAmount(rr.getAmount().divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_UP));
-                                    break;
-                                case 4:
-                                    report.setFarrowDrugAmount(rr.getAmount().divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_UP));
-                                    break;
-                                case 5:
-                                    report.setFarrowConsumerAmount(rr.getAmount().divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_UP));
-                            }
-
-                        }
-                    });
-
-                    result.add(report);
-                });
-            }
-//
-//            WarehouseReport report = new WarehouseReport();
-//            report.setOrgId(orgId);
-////            report.setApplyDate(orgDate.get(orgId));
-//
-//            AmountAndQuantityDto amountAndQuantityDto;
-//
-//            Map<Short, Map<Short, AmountAndQuantityDto>> otherApply = middleResult.get(orgId);
-//
-//
-//            amountAndQuantityDto = getValue(otherApply, 22, WareHouseType.FEED.getKey());
-//            report.setFarrowFeedCount(amountAndQuantityDto.getQuantity());
-//            report.setFarrowFeedAmount(amountAndQuantityDto.getAmount());
-//            amountAndQuantityDto = getValue(otherApply, 22, WareHouseType.MATERIAL.getKey());
-//            report.setFarrowMaterialAmount(amountAndQuantityDto.getAmount());
-//            report.setFarrowMaterialCount(amountAndQuantityDto.getQuantity());
-//            amountAndQuantityDto = getValue(otherApply, 22, WareHouseType.VACCINATION.getKey());
-//            report.setFarrowVaccineAmount(amountAndQuantityDto.getAmount());
-//            amountAndQuantityDto = getValue(otherApply, 22, WareHouseType.MEDICINE.getKey());
-//            report.setFarrowDrugAmount(amountAndQuantityDto.getAmount());
-//            amountAndQuantityDto = getValue(otherApply, 22, WareHouseType.CONSUME.getKey());
-//            report.setFarrowConsumerAmount(amountAndQuantityDto.getAmount());
-//
-//            /*产房母猪*/
-//            amountAndQuantityDto = getValue(otherApply, PigType.DELIVER_SOW.getValue(), WareHouseType.FEED.getKey());
-//            report.setFarrowFeedCount(amountAndQuantityDto.getQuantity());
-//            report.setFarrowFeedAmount(amountAndQuantityDto.getAmount());
-//            amountAndQuantityDto = getValue(otherApply, PigType.DELIVER_SOW.getValue(), WareHouseType.MATERIAL.getKey());
-//            report.setFarrowMaterialAmount(amountAndQuantityDto.getAmount());
-//            report.setFarrowMaterialCount(amountAndQuantityDto.getQuantity());
-//            amountAndQuantityDto = getValue(otherApply, PigType.DELIVER_SOW.getValue(), WareHouseType.VACCINATION.getKey());
-//            report.setFarrowVaccineAmount(amountAndQuantityDto.getAmount());
-//            amountAndQuantityDto = getValue(otherApply, PigType.DELIVER_SOW.getValue(), WareHouseType.MEDICINE.getKey());
-//            report.setFarrowDrugAmount(amountAndQuantityDto.getAmount());
-//            amountAndQuantityDto = getValue(otherApply, PigType.DELIVER_SOW.getValue(), WareHouseType.CONSUME.getKey());
-//            report.setFarrowConsumerAmount(amountAndQuantityDto.getAmount());
-//
-//            /*后备*/
-//            amountAndQuantityDto = getValue(otherApply, PigType.RESERVE.getValue(), WareHouseType.FEED.getKey());
-//            report.setHoubeiFeedAmount(amountAndQuantityDto.getAmount());
-//            report.setHoubeiFeedCount(amountAndQuantityDto.getQuantity());
-//            amountAndQuantityDto = getValue(otherApply, PigType.RESERVE.getValue(), WareHouseType.MATERIAL.getKey());
-//            report.setHoubeiMaterialAmount(amountAndQuantityDto.getAmount());
-//            report.setHoubeiMaterialCount(amountAndQuantityDto.getQuantity());
-//            amountAndQuantityDto = getValue(otherApply, PigType.RESERVE.getValue(), WareHouseType.VACCINATION.getKey());
-//            report.setHoubeiVaccineAmount(amountAndQuantityDto.getAmount());
-//            amountAndQuantityDto = getValue(otherApply, PigType.RESERVE.getValue(), WareHouseType.MEDICINE.getKey());
-//            report.setHoubeiDrugAmount(amountAndQuantityDto.getAmount());
-//            amountAndQuantityDto = getValue(otherApply, PigType.RESERVE.getValue(), WareHouseType.CONSUME.getKey());
-//            report.setHoubeiConsumerAmount(amountAndQuantityDto.getAmount());
-//
-//            /*配怀*/
-//            amountAndQuantityDto = merge(getValue(otherApply, PigType.MATE_SOW.getValue(), WareHouseType.FEED.getKey()),
-//                    getValue(otherApply, PigType.PREG_SOW.getValue(), WareHouseType.FEED.getKey()));
-//            report.setPeiHuaiFeedCount(amountAndQuantityDto.getQuantity());
-//            report.setPeiHuaiFeedAmount(amountAndQuantityDto.getAmount());
-//            amountAndQuantityDto = merge(getValue(otherApply, PigType.MATE_SOW.getValue(), WareHouseType.MATERIAL.getKey()),
-//                    getValue(otherApply, PigType.PREG_SOW.getValue(), WareHouseType.MATERIAL.getKey()));
-//            report.setPeiHuaiMaterialCount(amountAndQuantityDto.getQuantity());
-//            report.setPeiHuaiMaterialAmount(amountAndQuantityDto.getAmount());
-//            amountAndQuantityDto = merge(getValue(otherApply, PigType.MATE_SOW.getValue(), WareHouseType.VACCINATION.getKey()),
-//                    getValue(otherApply, PigType.PREG_SOW.getValue(), WareHouseType.VACCINATION.getKey()));
-//            report.setPeiHuaiVaccineAmount(amountAndQuantityDto.getAmount());
-//            amountAndQuantityDto = merge(getValue(otherApply, PigType.MATE_SOW.getValue(), WareHouseType.MEDICINE.getKey()),
-//                    getValue(otherApply, PigType.PREG_SOW.getValue(), WareHouseType.MEDICINE.getKey()));
-//            report.setPeiHuaiDrugAmount(amountAndQuantityDto.getAmount());
-//            amountAndQuantityDto = merge(getValue(otherApply, PigType.MATE_SOW.getValue(), WareHouseType.CONSUME.getKey()),
-//                    getValue(otherApply, PigType.PREG_SOW.getValue(), WareHouseType.CONSUME.getKey()));
-//            report.setPeiHuaiConsumerAmount(amountAndQuantityDto.getAmount());
-//
-//            /*保育*/
-//            amountAndQuantityDto = getValue(otherApply, PigType.NURSERY_PIGLET.getValue(), WareHouseType.FEED.getKey());
-//            report.setNurseryFeedAmount(amountAndQuantityDto.getAmount());
-//            report.setNurseryFeedCount(amountAndQuantityDto.getQuantity());
-//            amountAndQuantityDto = getValue(otherApply, PigType.NURSERY_PIGLET.getValue(), WareHouseType.MATERIAL.getKey());
-//            report.setNurseryMaterialAmount(amountAndQuantityDto.getAmount());
-//            report.setNurseryMaterialCount(amountAndQuantityDto.getQuantity());
-//            amountAndQuantityDto = getValue(otherApply, PigType.NURSERY_PIGLET.getValue(), WareHouseType.VACCINATION.getKey());
-//            report.setNurseryVaccineAmount(amountAndQuantityDto.getAmount());
-//            amountAndQuantityDto = getValue(otherApply, PigType.NURSERY_PIGLET.getValue(), WareHouseType.MEDICINE.getKey());
-//            report.setNurseryDrugAmount(amountAndQuantityDto.getAmount());
-//            amountAndQuantityDto = getValue(otherApply, PigType.NURSERY_PIGLET.getValue(), WareHouseType.CONSUME.getKey());
-//            report.setNurseryConsumerAmount(amountAndQuantityDto.getAmount());
-//
-//            /*育肥*/
-//            amountAndQuantityDto = getValue(otherApply, PigType.FATTEN_PIG.getValue(), WareHouseType.FEED.getKey());
-//            report.setFattenFeedAmount(amountAndQuantityDto.getAmount());
-//            report.setFattenFeedCount(amountAndQuantityDto.getQuantity());
-//            amountAndQuantityDto = getValue(otherApply, PigType.FATTEN_PIG.getValue(), WareHouseType.MATERIAL.getKey());
-//            report.setFattenMaterialAmount(amountAndQuantityDto.getAmount());
-//            report.setFattenMaterialCount(amountAndQuantityDto.getQuantity());
-//            amountAndQuantityDto = getValue(otherApply, PigType.FATTEN_PIG.getValue(), WareHouseType.VACCINATION.getKey());
-//            report.setFattenVaccineAmount(amountAndQuantityDto.getAmount());
-//            amountAndQuantityDto = getValue(otherApply, PigType.FATTEN_PIG.getValue(), WareHouseType.MEDICINE.getKey());
-//            report.setFattenDrugAmount(amountAndQuantityDto.getAmount());
-//            amountAndQuantityDto = getValue(otherApply, PigType.FATTEN_PIG.getValue(), WareHouseType.CONSUME.getKey());
-//            report.setFattenConsumerAmount(amountAndQuantityDto.getAmount());
-//
-//            /*公猪*/
-//            amountAndQuantityDto = getValue(otherApply, PigType.BOAR.getValue(), WareHouseType.FEED.getKey());
-//            report.setBoarFeedAmount(amountAndQuantityDto.getAmount());
-//            report.setBoarFeedCount(amountAndQuantityDto.getQuantity());
-//            amountAndQuantityDto = getValue(otherApply, PigType.BOAR.getValue(), WareHouseType.MATERIAL.getKey());
-//            report.setBoarMaterialAmount(amountAndQuantityDto.getAmount());
-//            report.setBoarMaterialCount(amountAndQuantityDto.getQuantity());
-//            amountAndQuantityDto = getValue(otherApply, PigType.BOAR.getValue(), WareHouseType.VACCINATION.getKey());
-//            report.setBoarVaccineAmount(amountAndQuantityDto.getAmount());
-//            amountAndQuantityDto = getValue(otherApply, PigType.BOAR.getValue(), WareHouseType.MEDICINE.getKey());
-//            report.setBoarDrugAmount(amountAndQuantityDto.getAmount());
-//            amountAndQuantityDto = getValue(otherApply, PigType.BOAR.getValue(), WareHouseType.CONSUME.getKey());
-//            report.setBoarConsumerAmount(amountAndQuantityDto.getAmount());
-//
-//            result.add(report);
-        }
-
-        return result;
+        List<WarehouseReportTempResult> all = new ArrayList<>();
+        all.addAll(other);
+        all.addAll(farrow);
+        all.addAll(farrowSow);
+        return all.stream().collect(Collectors.groupingBy(WarehouseReportTempResult::getOrgOrFarmId));
     }
+
+
+//    @Deprecated
+//    public List<WarehouseReport> count(Integer dateType) {
+//
+//        List<WarehouseReportTempResult> otherCount = this.sqlSession.selectList(namespace + ".countByOrg", Collections.singletonMap("type", dateType));
+//        List<WarehouseReportTempResult> farrowCount = this.sqlSession.selectList(namespace + ".countFarrowByOrg", Collections.singletonMap("type", dateType));
+//        List<WarehouseReportTempResult> farrowSowCount = this.sqlSession.selectList(namespace + ".countFarrowSowByOrg", Collections.singletonMap("type", dateType));
+//        farrowCount.forEach(f -> f.setPigType(22));
+//
+//        List<WarehouseReportTempResult> allCount = new ArrayList<>();
+//        allCount.addAll(otherCount);
+//        allCount.addAll(farrowCount);
+//        allCount.addAll(farrowCount);
+//
+//        Map<Long, List<WarehouseReportTempResult>> tempResultMap = allCount.stream().collect(Collectors.groupingBy(WarehouseReportTempResult::getOrgId));
+//
+//
+//        List<WarehouseReport> result = new ArrayList<>();
+//        for (Long orgId : tempResultMap.keySet()) {
+//
+//            if (tempResultMap.get(orgId).get(0).getDate() == null) {
+//                WarehouseReport report = new WarehouseReport();
+//                report.setOrgId(orgId);
+//                report.setOrgName(tempResultMap.get(orgId).get(0).getOrgName());
+//                result.add(report);
+//            } else {
+//
+//                Map<Date, List<WarehouseReportTempResult>> dateResult = new HashMap<>();
+//                for (WarehouseReportTempResult tempResult : tempResultMap.get(orgId)) {
+//                    if (dateResult.containsKey(tempResult.getDate()))
+//                        dateResult.get(tempResult.getDate()).add(tempResult);
+//                    else {
+//                        List<WarehouseReportTempResult> d = new ArrayList<>();
+//                        d.add(tempResult);
+//                        dateResult.put(tempResult.getDate(), d);
+//                    }
+//                }
+//
+//                dateResult.forEach((d, r) -> {
+//                    WarehouseReport report = new WarehouseReport();
+//                    report.setOrgId(orgId);
+//                    report.setOrgName(r.get(0).getOrgName());
+//                    report.setSumAt(DateHelper.withDateStartDay(r.get(0).getDate(), DateDimension.from(dateType)));
+//
+//                    r.forEach(rr -> {
+//                        /*产房仔猪--并没有这个猪舍类型，只能自定义一个不重复的魔法值*/
+//                        if (rr.getPigType().equals(22)) {
+//                            switch (rr.getType()) {
+//                                case 1:
+//                                    report.setFarrowFeedCount(rr.getQuantity().longValue());
+//                                    report.setFarrowFeedAmount(rr.getAmount().divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_UP));
+//                                    break;
+//                                case 2:
+//                                    report.setFarrowMaterialCount(rr.getQuantity().longValue());
+//                                    report.setFarrowMaterialAmount(rr.getAmount().divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_UP));
+//                                    break;
+//                                case 3:
+//                                    report.setFarrowVaccineAmount(rr.getAmount().divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_UP));
+//                                    break;
+//                                case 4:
+//                                    report.setFarrowDrugAmount(rr.getAmount().divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_UP));
+//                                    break;
+//                                case 5:
+//                                    report.setFarrowConsumerAmount(rr.getAmount().divide(new BigDecimal(100), 4, BigDecimal.ROUND_HALF_UP));
+//                            }
+//
+//                        }
+//                    });
+//
+//                    result.add(report);
+//                });
+//            }
+//        }
+//
+//        return result;
+//    }
 
     @Deprecated
     private void convert(List<List<Map<String, Object>>> orgCounts,
@@ -427,9 +323,11 @@ public class DoctorWarehouseReportDao {
     }
 
     @Data
-    public class AmountAndQuantityDto {
+    public static class AmountAndQuantityDto {
 
         public AmountAndQuantityDto() {
+            this.amount = new BigDecimal(0);
+            this.quantity = 0L;
         }
 
         public AmountAndQuantityDto(BigDecimal amount, Long quantity) {

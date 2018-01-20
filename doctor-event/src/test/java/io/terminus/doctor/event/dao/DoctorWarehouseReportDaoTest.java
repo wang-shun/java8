@@ -2,6 +2,7 @@ package io.terminus.doctor.event.dao;
 
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.enums.DateDimension;
+import io.terminus.doctor.event.enums.OrzDimension;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -31,29 +32,6 @@ public class DoctorWarehouseReportDaoTest extends BaseDaoTest {
         doctorWarehouseReportDao.count(Collections.singletonList(1L), start, end);
     }
 
-
-    @Test
-    public void testCountByOrgWithMonth() {
-
-        List<DoctorWarehouseReportDao.WarehouseReport> reports = doctorWarehouseReportDao.count(DateDimension.MONTH.getValue());
-
-        reports.forEach(r -> System.out.println(r.getOrgName()));
-
-        Assert.assertEquals(102, reports.size());
-
-//        Assert.assertEquals(1L, reports.get(0).getFarrowFeedCount().longValue());
-//        Assert.assertEquals(12L, reports.get(0).getHoubeiFeedCount().longValue());
-    }
-
-    @Test
-    public void testGetMaxAndMinDate() {
-        Map<String, Date> maxAndMin = doctorWarehouseReportDao.getMaxAndMinDate();
-        System.out.println(maxAndMin);
-//        System.out.println(maxAndMin.get("max"));
-//        System.out.println(maxAndMin.get("min"));
-//        Assert.assertTrue(DateUtils.isSameDay(DateUtil.toDate("2018-01-09"), maxAndMin.get("max")));
-//        Assert.assertTrue(DateUtils.isSameDay(DateUtil.toDate("2017-11-28"), maxAndMin.get("min")));
-    }
 
 
 }

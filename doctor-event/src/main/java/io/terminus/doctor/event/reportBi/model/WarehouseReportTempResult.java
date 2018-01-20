@@ -11,7 +11,8 @@ import java.util.Date;
 @Data
 public class WarehouseReportTempResult {
 
-    private Long orgId;
+
+    private Long orgOrFarmId;//公司或猪场ID
     private String orgName;
     private BigDecimal quantity;
     private BigDecimal amount;

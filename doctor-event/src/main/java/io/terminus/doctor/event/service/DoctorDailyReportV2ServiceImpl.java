@@ -204,7 +204,15 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
     @Override
     public Response<Boolean> syncWarehouse(Date date) {
         warehouseSynchronizer.sync(date);
+        return Response.ok(true);
+    }
 
+    @Override
+    public Response<Boolean> syncWarehouse(Integer dateType, Integer orgType) {
+        DoctorDimensionCriteria criteria = new DoctorDimensionCriteria();
+        criteria.setDateType(dateType);
+        criteria.setOrzType(orgType);
+        warehouseSynchronizer.sync(criteria);
         return Response.ok(true);
     }
 

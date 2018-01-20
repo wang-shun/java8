@@ -1,7 +1,10 @@
 package io.terminus.doctor.move.controller.report;
 
+import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.enums.DateDimension;
+import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorWarehouseSynchronizer;
 import io.terminus.doctor.event.service.DoctorDailyReportV2Service;
 import io.terminus.doctor.user.model.DoctorFarm;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.sql.rowset.serial.SerialException;
 import java.util.Date;
 import java.util.List;
 
@@ -129,6 +133,16 @@ public class DoctorReportController {
         if (null == date)
             date = new Date();
         doctorDailyReportV2Service.syncWarehouse(date);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/flush/warehouse/all")
+    public void flushWarehouseAll(@RequestParam Integer dateType, @RequestParam Integer orgType) {
+
+        if (null == DateDimension.from(dateType))
+            throw new ServiceException("date.type.not.support");
+        if (null == OrzDimension.from(orgType))
+            throw new ServiceException("org.type.not.support");
+        doctorDailyReportV2Service.syncWarehouse(dateType, orgType);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/flush/efficiency")

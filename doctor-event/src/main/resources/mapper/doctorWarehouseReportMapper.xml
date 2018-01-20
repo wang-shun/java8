@@ -8,7 +8,7 @@
 
 
     <resultMap id="TempResultMap" type="io.terminus.doctor.event.reportBi.model.WarehouseReportTempResult">
-        <result property="orgId" column="id"/>
+        <result property="orgOrFarmId" column="org_or_farm_id"/>
         <result property="orgName" column="name"/>
         <result property="quantity" column="quantity"/>
         <result property="amount" column="amount"/>
@@ -271,6 +271,137 @@
         </choose>
     </select>
 
+
+    <select id="countOrg" parameterType="map" resultMap="TempResultMap">
+        SELECT
+        <choose>
+            <when test="orgType==3">
+                farm_id as org_or_farm_id
+            </when>
+            <otherwise>
+                org_id as org_or_farm_id
+            </otherwise>
+        </choose>
+        ,pig_type,type,sum(quantity) as quantity,sum(quantity*unit_price) as amount,
+        apply_date
+        as date
+        from doctor_warehouse_material_apply
+        WHERE apply_type=0 and pig_type!=7
+        GROUP BY
+        <choose>
+            <when test="orgType==3">
+                farm_id
+            </when>
+            <otherwise>
+                org_id
+            </otherwise>
+        </choose>
+        ,pig_type,type,
+        <choose>
+            <when test="dateType==1">
+                apply_date
+            </when>
+            <when test="dateType==2">
+                date_format(apply_date,'%x-%v')
+            </when>
+            <when test="dateType==3">
+                date_format(apply_date,'%y-%m')
+            </when>
+            <when test="dateType==4">
+                concat(date_format(apply_date, '%y-'), QUARTER(apply_date))
+            </when>
+            <otherwise>
+                date_format(apply_date,'%y')
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="countFarrowOrg" parameterType="map" resultMap="TempResultMap">
+        SELECT
+        <choose>
+            <when test="orgType==3">
+                farm_id as org_or_farm_id
+            </when>
+            <otherwise>
+                org_id as org_or_farm_id
+            </otherwise>
+        </choose>
+        ,pig_type,type,sum(quantity) as quantity,sum(quantity*unit_price) as amount,
+        apply_date
+        as date
+        from doctor_warehouse_material_apply
+        WHERE apply_type=1 and pig_type=7
+        GROUP BY
+        <choose>
+            <when test="orgType==3">
+                farm_id
+            </when>
+            <otherwise>
+                org_id
+            </otherwise>
+        </choose>
+        ,pig_type,type,
+        <choose>
+            <when test="dateType==1">
+                apply_date
+            </when>
+            <when test="dateType==2">
+                date_format(apply_date,'%x-%v')
+            </when>
+            <when test="dateType==3">
+                date_format(apply_date,'%y-%m')
+            </when>
+            <when test="dateType==4">
+                concat(date_format(apply_date, '%y-'), QUARTER(apply_date))
+            </when>
+            <otherwise>
+                date_format(apply_date,'%y')
+            </otherwise>
+        </choose>
+    </select>
+    <select id="countFarrowSowOrg" parameterType="map" resultMap="TempResultMap">
+        SELECT
+        <choose>
+            <when test="orgType==3">
+                farm_id as org_or_farm_id
+            </when>
+            <otherwise>
+                org_id as org_or_farm_id
+            </otherwise>
+        </choose>
+        ,pig_type,type,sum(quantity) as quantity,sum(quantity*unit_price) as amount,
+        apply_date
+        as date
+        from doctor_warehouse_material_apply
+        WHERE apply_type=2
+        GROUP BY
+        <choose>
+            <when test="orgType==3">
+                farm_id
+            </when>
+            <otherwise>
+                org_id
+            </otherwise>
+        </choose>
+        ,pig_type,type,
+        <choose>
+            <when test="dateType==1">
+                apply_date
+            </when>
+            <when test="dateType==2">
+                date_format(apply_date,'%x-%v')
+            </when>
+            <when test="dateType==3">
+                date_format(apply_date,'%y-%m')
+            </when>
+            <when test="dateType==4">
+                concat(date_format(apply_date, '%y-'), QUARTER(apply_date))
+            </when>
+            <otherwise>
+                date_format(apply_date,'%y')
+            </otherwise>
+        </choose>
+    </select>
 
     <select id="materialApply" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="double">
         select ifnull(sum(quantity), 0)
