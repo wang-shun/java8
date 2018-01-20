@@ -14,6 +14,17 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DoctorReportEfficiencyDao extends MyBatisDao<DoctorReportEfficiency> {
     public DoctorReportEfficiency findByDimension(DoctorDimensionCriteria dimensionCriteria) {
-        return getSqlSession().selectOne(sqlId("findByDimension"), dimensionCriteria);
+        DoctorReportEfficiency efficiency = getSqlSession().selectOne(sqlId("findByDimension"), dimensionCriteria);
+
+
+        if (null == efficiency) {
+            efficiency = new DoctorReportEfficiency();
+            efficiency.setOrzId(dimensionCriteria.getOrzId());
+            efficiency.setSumAt(dimensionCriteria.getSumAt());
+            efficiency.setLactation(0);
+            efficiency.setPregnancy(0);
+        }
+
+        return efficiency;
     }
 }

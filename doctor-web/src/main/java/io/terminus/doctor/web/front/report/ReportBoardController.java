@@ -150,15 +150,15 @@ public class ReportBoardController {
                 case BOAR: subField(doctorReportFieldTypeDto, report.getReportBoar()); break;
                 case MATERIAL:
                     // TODO: 18/1/18 物料数据错误太多
-//                    subField(doctorReportFieldTypeDto, report.getReportMaterial());
+                    subField(doctorReportFieldTypeDto, report.getReportMaterial());
                     break;
                 case EFFICIENCY:
                     // TODO: 18/1/18 效率指标数据错误太多
-//                    if (DateDimension.YEARLY.contains(dimensionCriteria.getDateType())) {
-//                        subField(doctorReportFieldTypeDto, report.getReportEfficiency());
-//                    } else {
-//                        subFieldDefault(doctorReportFieldTypeDto);
-//                    }
+                    if (DateDimension.YEARLY.contains(dimensionCriteria.getDateType())) {
+                        subField(doctorReportFieldTypeDto, report.getReportEfficiency());
+                    } else {
+                        subFieldDefault(doctorReportFieldTypeDto);
+                    }
                     break;
                 default:
                     throw new JsonResponseException("region.is.illegal");
