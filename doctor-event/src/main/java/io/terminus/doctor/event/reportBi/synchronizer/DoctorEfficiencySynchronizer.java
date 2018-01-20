@@ -68,6 +68,10 @@ public class DoctorEfficiencySynchronizer {
 
         List<DoctorReportNpd> npds = doctorReportNpdDao.count(dimensionCriteria, null, null);
         for (DoctorReportNpd npd : npds) {
+
+
+
+
             DoctorReportEfficiency efficiency = new DoctorReportEfficiency();
             if (dimensionCriteria.getOrzType().equals(OrzDimension.FARM.getValue()))
                 efficiency.setOrzId(npd.getFarmId());
@@ -78,10 +82,10 @@ public class DoctorEfficiencySynchronizer {
             efficiency.setSumAtName(DateHelper.dateCN(npd.getSumAt(), DateDimension.from(dimensionCriteria.getDateType())));
 
             if (dimensionCriteria.getOrzType().equals(OrzDimension.FARM.getValue())) {
-                DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(dimensionCriteria.getOrzId()));
+                DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(npd.getFarmId()));
                 efficiency.setOrzName(farm == null ? "" : farm.getName());
             } else if (dimensionCriteria.getOrzType().equals(OrzDimension.ORG.getValue())) {
-                DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(dimensionCriteria.getOrzId()));
+                DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(npd.getOrgId()));
                 efficiency.setOrzName(org == null ? "" : org.getName());
             }
 
