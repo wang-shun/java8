@@ -124,11 +124,7 @@ public class DoctorGroupStatisticDao {
         return sqlSession.selectOne(sqlId("netWeightGain"), criteria.toMap());
     }
 
-    public Double deliverTurnOutWeight(DoctorStatisticCriteria criteria) {
-        return sqlSession.selectOne(sqlId("deliverTurnOutWeight"), criteria.toMap());
-    }
-
-    public Double deliverTurnOutAge(DoctorStatisticCriteria criteria) {
+    public Integer deliverTurnOutAge(DoctorStatisticCriteria criteria) {
         return sqlSession.selectOne(sqlId("deliverTurnOutAge"), criteria.toMap());
     }
 

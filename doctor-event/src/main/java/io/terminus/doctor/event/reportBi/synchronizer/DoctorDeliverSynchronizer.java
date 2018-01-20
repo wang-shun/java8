@@ -164,8 +164,9 @@ public class DoctorDeliverSynchronizer {
             reportBi.setPigletDeadWeedOutRate(fieldHelper.deadWeedOutRate(groupDaily, reportBi.getOrzType()));
             reportBi.setPigletLivingRate(1 - reportBi.getPigletDeadWeedOutRate());
         }
-        reportBi.setTurnOutAvgWeight(0.0);
-        reportBi.setTurnOutDay(0);
+        reportBi.setTurnOutAvgWeight(EventUtil.getAvgWeight(EventUtil.plusDouble(groupDaily.getToNurseryWeight(), groupDaily.getSaleWeight()),
+                EventUtil.plusInt(groupDaily.getToNursery(), groupDaily.getSale())));
+        reportBi.setTurnOutDay(FieldHelper.getInteger(groupDaily.getDeliverTurnOutAge(), EventUtil.plusInt(groupDaily.getToNursery(), groupDaily.getSale())));
         reportBi.setPigletSaleAveWeight(EventUtil.getAvgWeight(groupDaily.getSaleWeight(), groupDaily.getSale()));
     }
 

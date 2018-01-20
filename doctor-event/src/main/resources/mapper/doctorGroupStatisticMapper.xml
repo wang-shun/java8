@@ -389,4 +389,20 @@
         FROM dual
     </select>
 
+    <select id="deliverTurnOutAge" parameterType="map" resultType="int">
+        SELECT ifnull(sum(avg_day_age * quantity), 0)
+        FROM doctor_group_events
+        <where>
+            <include refid="groupCriteria"/>
+            and(
+            (`type` = 4
+            and trans_group_type = 1
+            )
+            OR (`type` = 3
+            and change_type_id = 109
+            )
+            )
+        </where>
+    </select>
+
 </mapper>

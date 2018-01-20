@@ -231,6 +231,7 @@ public class DoctorDailyReportV2Manager {
         doctorGroupDaily.setToNursery(groupStatisticDao.toNursery(criteria));
         doctorGroupDaily.setToNurseryWeight(groupStatisticDao.toNurseryWeight(criteria));
         doctorGroupDaily.setDeliverHandTurnInto(groupStatisticDao.deliverHandTurnInto(criteria));
+        doctorGroupDaily.setDeliverTurnOutAge(groupStatisticDao.deliverTurnOutAge(criteria));
 
     }
 

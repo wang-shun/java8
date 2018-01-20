@@ -100,10 +100,17 @@ public class FieldHelper {
         return JSON.toJson(map);
     }
 
-    public Double get(Integer denominator, Integer molecular) {
+    public static Double get(Integer denominator, Integer molecular) {
         if (isNull(denominator) || isNull(molecular) || molecular == 0) {
             return 0D;
         }
         return new BigDecimal(denominator).divide(new BigDecimal(molecular), BigDecimal.ROUND_HALF_UP).doubleValue();
+    }
+
+    public static Integer getInteger(Integer denominator, Integer molecular) {
+        if (isNull(denominator) || isNull(molecular) || molecular == 0) {
+            return 0;
+        }
+        return new BigDecimal(denominator).divide(new BigDecimal(molecular), BigDecimal.ROUND_HALF_UP).intValue();
     }
 }

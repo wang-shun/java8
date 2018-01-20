@@ -38,6 +38,7 @@
         <result property="turnActualWeight" column="turn_actual_weight"/>
         <result property="turnActualAge" column="turn_actual_age"/>
         <result property="netWeightGain" column="net_weight_gain"/>
+        <result property="deliverTurnOutAge" column="deliver_turn_out_age"/>
         <result property="end" column="end"/>
         <result property="version" column="version"/>
         <result property="createdAt" column="created_at"/>
@@ -54,12 +55,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `org_id`, `org_name`, `farm_id`, `farm_name`, `pig_type`, `sum_at`, `start`, `turn_into`, `turn_into_weight`, `turn_into_age`, `chg_farm_in`, `deliver_hand_turn_into`, `chg_farm`, `chg_farm_weight`, `sale`, `sale_weight`, `dead`, `weed_out`, `other_change`, `to_nursery`, `to_nursery_weight`, `to_fatten`, `to_fatten_weight`, `to_houbei`, `to_houbei_weight`, `turn_seed`, `turn_out_weight`, `turn_actual_count`, `turn_actual_weight`, `turn_actual_age`, `net_weight_gain`, `end`, `version`,
+        `org_id`, `org_name`, `farm_id`, `farm_name`, `pig_type`, `sum_at`, `start`, `turn_into`, `turn_into_weight`, `turn_into_age`, `chg_farm_in`, `deliver_hand_turn_into`, `chg_farm`, `chg_farm_weight`, `sale`, `sale_weight`, `dead`, `weed_out`, `other_change`, `to_nursery`, `to_nursery_weight`, `to_fatten`, `to_fatten_weight`, `to_houbei`, `to_houbei_weight`, `turn_seed`, `turn_out_weight`, `turn_actual_count`, `turn_actual_weight`, `turn_actual_age`, `net_weight_gain`, `deliver_turn_out_age`, `end`, `version`,
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{pigType}, #{sumAt}, #{start}, #{turnInto}, #{turnIntoWeight}, #{turnIntoAge}, #{chgFarmIn}, #{deliverHandTurnInto}, #{chgFarm}, #{chgFarmWeight}, #{sale}, #{saleWeight}, #{dead}, #{weedOut}, #{otherChange}, #{toNursery}, #{toNurseryWeight}, #{toFatten}, #{toFattenWeight}, #{toHoubei}, #{toHoubeiWeight}, #{turnSeed}, #{turnOutWeight}, #{turnActualCount}, #{turnActualWeight}, #{turnActualAge}, #{netWeightGain}, #{end}, 1,
+        #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{pigType}, #{sumAt}, #{start}, #{turnInto}, #{turnIntoWeight}, #{turnIntoAge}, #{chgFarmIn}, #{deliverHandTurnInto}, #{chgFarm}, #{chgFarmWeight}, #{sale}, #{saleWeight}, #{dead}, #{weedOut}, #{otherChange}, #{toNursery}, #{toNurseryWeight}, #{toFatten}, #{toFattenWeight}, #{toHoubei}, #{toHoubeiWeight}, #{turnSeed}, #{turnOutWeight}, #{turnActualCount}, #{turnActualWeight}, #{turnActualAge}, #{netWeightGain}, #{deliverTurnOutAge}, #{end}, 1,
         now(), now()
     </sql>
 
@@ -96,6 +97,7 @@
             <if test="turnActualWeight != null">AND `turn_actual_weight` = #{turnActualWeight}</if>
             <if test="turnActualAge != null">AND `turn_actual_age` = #{turnActualAge}</if>
             <if test="netWeightGain != null">AND `net_weight_gain` = #{netWeightGain}</if>
+            <if test="deliverTurnOutAge != null">AND `deliver_turn_out_age` = #{deliverTurnOutAge}</if>
             <if test="end != null">AND `end` = #{end}</if>
             <if test="version != null">AND `version` = #{version}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
@@ -165,6 +167,7 @@
             <if test="turnActualWeight != null">`turn_actual_weight` = #{turnActualWeight},</if>
             <if test="turnActualAge != null">`turn_actual_age` = #{turnActualAge},</if>
             <if test="netWeightGain != null">`net_weight_gain` = #{netWeightGain},</if>
+            <if test="deliverTurnOutAge != null">`deliver_turn_out_age` = #{deliverTurnOutAge},</if>
             <if test="end != null">`end` = #{end},</if>
             <if test="version != null">`version` = #{version},</if>
             version= version +1,
@@ -261,9 +264,8 @@
         ifnull(sum(turn_actual_count), 0) as turnActualCount,
         ifnull(sum(turn_actual_weight), 0) as turnActualWeight,
         ifnull(sum(turn_actual_age), 0) as turnActualAge,
-        ifnull(sum(net_weight_gain), 0) as netWeightGain
---         ifnull(sum(deliver_turn_out_weight), 0) as deliverTurnOutWeight,
---         ifnull(sum(deliver_turn_out_age), 0) as deliverTurnOutAge
+        ifnull(sum(net_weight_gain), 0) as netWeightGain,
+        ifnull(sum(deliver_turn_out_age), 0) as deliverTurnOutAge
     </sql>
 
     <select id="sumForDimension" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="io.terminus.doctor.event.dto.reportBi.DoctorGroupDailyExtend">
