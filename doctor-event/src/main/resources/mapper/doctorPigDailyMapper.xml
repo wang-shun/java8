@@ -630,7 +630,7 @@
         <if test="dateType == 5">date_format(sum_at, '%y')</if>
     </select>
 
-    <select id="start" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
+    <select id="farmStart" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
             resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
         SELECT
         sow_ph_start as sowPhStart,
@@ -644,7 +644,21 @@
         limit 1
     </select>
 
-    <select id="end" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
+    <select id="orgStart" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
+            resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
+        SELECT
+        sum(sow_ph_start) as sowPhStart,
+        sum(sow_cf_start) as sowCfStart,
+        sum(boar_start) as boarStart,
+        sum(sow_ph_start + sow_cf_start) as sowStart
+        FROM
+        <include refid="tb"/>
+        <include refid="dimensionCri"/>
+        order by sum_at asc
+        limit 1
+    </select>
+
+    <select id="farmEnd" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
             resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
         SELECT
         sow_ph_end as sowPhEnd,
@@ -657,6 +671,25 @@
         FROM
         <include refid="tb"/>
         <include refid="dimensionCri"/>
+        group by sum_at
+        order by sum_at desc
+        limit 1
+    </select>
+
+    <select id="orgEnd" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
+            resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
+        SELECT
+        sum(sow_ph_end) as sowPhEnd,
+        sum(sow_cf_end) as sowCfEnd,
+        sum(sow_ph_end + sow_cf_end) as sowEnd,
+        sum(boar_end) as boarEnd,
+        sum(sow_ph_mating) as sowPhMating,
+        sum(sow_ph_konghuai) as sowPhKonghuai,
+        sum(sow_ph_pregnant) as sowPhPregnant
+        FROM
+        <include refid="tb"/>
+        <include refid="dimensionCri"/>
+        group by sum_at
         order by sum_at desc
         limit 1
     </select>

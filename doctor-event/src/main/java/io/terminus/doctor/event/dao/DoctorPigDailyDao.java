@@ -144,11 +144,19 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
                 ImmutableMap.of("sumAt", sumAt, "dateType", dateType, "orzType", orzType));
     }
 
-    public DoctorPigDailyExtend start(DoctorDimensionCriteria dimensionCriteria) {
-        return getSqlSession().selectOne(sqlId("start"), dimensionCriteria);
+    public DoctorPigDailyExtend farmStart(DoctorDimensionCriteria dimensionCriteria) {
+        return getSqlSession().selectOne(sqlId("farmStart"), dimensionCriteria);
     }
 
-    public DoctorPigDailyExtend end(DoctorDimensionCriteria dimensionCriteria) {
-        return getSqlSession().selectOne(sqlId("end"), dimensionCriteria);
+    public DoctorPigDailyExtend farmEnd(DoctorDimensionCriteria dimensionCriteria) {
+        return getSqlSession().selectOne(sqlId("farmEnd"), dimensionCriteria);
+    }
+
+    public DoctorPigDailyExtend orgStart(DoctorDimensionCriteria dimensionCriteria) {
+        return getSqlSession().selectOne(sqlId("orgStart"), dimensionCriteria);
+    }
+
+    public DoctorPigDailyExtend orgEnd(DoctorDimensionCriteria dimensionCriteria) {
+        return getSqlSession().selectOne(sqlId("orgEnd"), dimensionCriteria);
     }
 }

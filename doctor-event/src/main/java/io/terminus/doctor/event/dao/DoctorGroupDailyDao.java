@@ -78,11 +78,19 @@ public class DoctorGroupDailyDao extends MyBatisDao<DoctorGroupDaily> {
                 ImmutableMap.of("sumAt", sumAt, "dateType", dateType, "orzType", orzType));
     }
 
-    public Integer start(DoctorDimensionCriteria dimensionCriteria){
-        return getSqlSession().selectOne(sqlId("start"), dimensionCriteria);
+    public Integer farmStart(DoctorDimensionCriteria dimensionCriteria){
+        return getSqlSession().selectOne(sqlId("farmStart"), dimensionCriteria);
     }
 
-    public Integer end(DoctorDimensionCriteria dimensionCriteria){
-        return getSqlSession().selectOne(sqlId("end"), dimensionCriteria);
+    public Integer farmEnd(DoctorDimensionCriteria dimensionCriteria){
+        return getSqlSession().selectOne(sqlId("farmEnd"), dimensionCriteria);
+    }
+
+    public Integer orgStart(DoctorDimensionCriteria dimensionCriteria){
+        return getSqlSession().selectOne(sqlId("orgStart"), dimensionCriteria);
+    }
+
+    public Integer orgEnd(DoctorDimensionCriteria dimensionCriteria){
+        return getSqlSession().selectOne(sqlId("orgEnd"), dimensionCriteria);
     }
 }

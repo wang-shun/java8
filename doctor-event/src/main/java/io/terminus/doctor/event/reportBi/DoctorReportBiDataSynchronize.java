@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
 import io.terminus.doctor.event.dao.DoctorPigDailyDao;
 import io.terminus.doctor.event.dao.DoctorReportNpdDao;
@@ -234,43 +233,43 @@ public class DoctorReportBiDataSynchronize {
     }
 
     private void synchronizeBiDataImpl() {
-        //同步猪场日
-        synchronizeFullBiDataForDay();
+//        //同步猪场日
+//        synchronizeFullBiDataForDay();
         List<DoctorDimensionCriteria> dimensionCriteriaList = Lists.newArrayList();
         DoctorDimensionCriteria dimensionCriteria;
-        //同步猪场周
-        dimensionCriteria = new DoctorDimensionCriteria();
-        dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
-        dimensionCriteria.setDateType(DateDimension.WEEK.getValue());
-        dimensionCriteriaList.add(dimensionCriteria);
-        //同步猪场月
-        dimensionCriteria = new DoctorDimensionCriteria();
-        dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
-        dimensionCriteria.setDateType(DateDimension.MONTH.getValue());
-        dimensionCriteriaList.add(dimensionCriteria);
-        //同步猪场季
-        dimensionCriteria = new DoctorDimensionCriteria();
-        dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
-        dimensionCriteria.setDateType(DateDimension.QUARTER.getValue());
-        dimensionCriteriaList.add(dimensionCriteria);
-
-        //同步猪场年
-        dimensionCriteria = new DoctorDimensionCriteria();
-        dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
-        dimensionCriteria.setDateType(DateDimension.YEAR.getValue());
-        dimensionCriteriaList.add(dimensionCriteria);
-
-        //同步公司日
-        dimensionCriteria = new DoctorDimensionCriteria();
-        dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
-        dimensionCriteria.setDateType(DateDimension.DAY.getValue());
-        dimensionCriteriaList.add(dimensionCriteria);
-
-        //同步公司周
-        dimensionCriteria = new DoctorDimensionCriteria();
-        dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
-        dimensionCriteria.setDateType(DateDimension.WEEK.getValue());
-        dimensionCriteriaList.add(dimensionCriteria);
+//        //同步猪场周
+//        dimensionCriteria = new DoctorDimensionCriteria();
+//        dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
+//        dimensionCriteria.setDateType(DateDimension.WEEK.getValue());
+//        dimensionCriteriaList.add(dimensionCriteria);
+//        //同步猪场月
+//        dimensionCriteria = new DoctorDimensionCriteria();
+//        dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
+//        dimensionCriteria.setDateType(DateDimension.MONTH.getValue());
+//        dimensionCriteriaList.add(dimensionCriteria);
+//        //同步猪场季
+//        dimensionCriteria = new DoctorDimensionCriteria();
+//        dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
+//        dimensionCriteria.setDateType(DateDimension.QUARTER.getValue());
+//        dimensionCriteriaList.add(dimensionCriteria);
+//
+//        //同步猪场年
+//        dimensionCriteria = new DoctorDimensionCriteria();
+//        dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
+//        dimensionCriteria.setDateType(DateDimension.YEAR.getValue());
+//        dimensionCriteriaList.add(dimensionCriteria);
+//
+//        //同步公司日
+//        dimensionCriteria = new DoctorDimensionCriteria();
+//        dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
+//        dimensionCriteria.setDateType(DateDimension.DAY.getValue());
+//        dimensionCriteriaList.add(dimensionCriteria);
+//
+//        //同步公司周
+//        dimensionCriteria = new DoctorDimensionCriteria();
+//        dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
+//        dimensionCriteria.setDateType(DateDimension.WEEK.getValue());
+//        dimensionCriteriaList.add(dimensionCriteria);
 
         //同步公司月
         dimensionCriteria = new DoctorDimensionCriteria();
@@ -278,17 +277,17 @@ public class DoctorReportBiDataSynchronize {
         dimensionCriteria.setDateType(DateDimension.MONTH.getValue());
         dimensionCriteriaList.add(dimensionCriteria);
 
-        //同步公司季
-        dimensionCriteria = new DoctorDimensionCriteria();
-        dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
-        dimensionCriteria.setDateType(DateDimension.QUARTER.getValue());
-        dimensionCriteriaList.add(dimensionCriteria);
-
-        //同步公司年
-        dimensionCriteria = new DoctorDimensionCriteria();
-        dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
-        dimensionCriteria.setDateType(DateDimension.YEAR.getValue());
-        dimensionCriteriaList.add(dimensionCriteria);
+//        //同步公司季
+//        dimensionCriteria = new DoctorDimensionCriteria();
+//        dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
+//        dimensionCriteria.setDateType(DateDimension.QUARTER.getValue());
+//        dimensionCriteriaList.add(dimensionCriteria);
+//
+//        //同步公司年
+//        dimensionCriteria = new DoctorDimensionCriteria();
+//        dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
+//        dimensionCriteria.setDateType(DateDimension.YEAR.getValue());
+//        dimensionCriteriaList.add(dimensionCriteria);
 
         dimensionCriteriaList.parallelStream().forEach(this::synchronizeFullBiDataForDimension);
     }
@@ -340,9 +339,17 @@ public class DoctorReportBiDataSynchronize {
         dimensionCriteria.setPigType(groupDaily.getPigType());
         if (!Objects.equals(dimensionCriteria.getDateType(), DateDimension.DAY.getValue())
                 || !Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.FARM.getValue())) {
-
-            groupDaily.setStart(doctorGroupDailyDao.start(dimensionCriteria));
-            groupDaily.setEnd(doctorGroupDailyDao.end(dimensionCriteria));
+            Integer start;
+            Integer end;
+            if (Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.FARM.getValue())) {
+                start = doctorGroupDailyDao.farmStart(dimensionCriteria);
+                end = doctorGroupDailyDao.farmEnd(dimensionCriteria);
+            } else {
+                start = doctorGroupDailyDao.orgStart(dimensionCriteria);
+                end = doctorGroupDailyDao.orgEnd(dimensionCriteria);
+            }
+            groupDaily.setStart(start);
+            groupDaily.setEnd(end);
         }
         switch (pigType) {
             case DELIVER_SOW:
@@ -355,6 +362,7 @@ public class DoctorReportBiDataSynchronize {
                 fattenSynchronizer.synchronize(groupDaily, dimensionCriteria);
                 break;
             case RESERVE:
+
                 reserveSynchronizer.synchronize(groupDaily, dimensionCriteria);
                 break;
         }
@@ -369,12 +377,19 @@ public class DoctorReportBiDataSynchronize {
         dimensionCriteria.setSumAt(dailyExtend.getSumAt());
         if (!Objects.equals(dimensionCriteria.getDateType(), DateDimension.DAY.getValue())
                 || !Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.FARM.getValue())) {
-            DoctorPigDailyExtend start = doctorPigDailyDao.start(dimensionCriteria);
+            DoctorPigDailyExtend start;
+            DoctorPigDailyExtend end;
+            if (Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.FARM.getValue())) {
+                start = doctorPigDailyDao.farmStart(dimensionCriteria);
+                end = doctorPigDailyDao.farmEnd(dimensionCriteria);
+            } else {
+                start = doctorPigDailyDao.orgStart(dimensionCriteria);
+                end = doctorPigDailyDao.orgEnd(dimensionCriteria);
+            }
             dailyExtend.setSowCfStart(start.getSowCfStart());
             dailyExtend.setSowPhStart(start.getSowPhStart());
             dailyExtend.setSowStart(start.getSowStart());
             dailyExtend.setBoarStart(start.getBoarStart());
-            DoctorPigDailyExtend end = doctorPigDailyDao.end(dimensionCriteria);
             dailyExtend.setSowCfEnd(end.getSowCfEnd());
             dailyExtend.setSowPhEnd(end.getSowPhEnd());
             dailyExtend.setSowEnd(end.getSowEnd());
