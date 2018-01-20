@@ -119,6 +119,15 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                         farmLactation.put(nextEvent.getFarmId(), monthLactation);
                     }
                 } else {
+
+                    log.debug("猪【{}】的本次事件为【{}】【{}】，下次事件为【{}】【{}】，间隔为【{}】，计入{}月", pigId,
+                            PigEvent.from(currentEvent.getType()),
+                            DateUtil.toDateString(currentEvent.getEventAt()),
+                            PigEvent.from(nextEvent.getType()),
+                            DateUtil.toDateString(nextEvent.getEventAt()),
+                            days,
+                            month);
+
                     if (farmNPD.containsKey(nextEvent.getFarmId())) {
                         Map<Integer, Integer> monthNPD = farmNPD.get(nextEvent.getFarmId());
                         if (monthNPD.containsKey(month))
