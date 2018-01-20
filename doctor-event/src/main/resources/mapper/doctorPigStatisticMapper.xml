@@ -635,8 +635,8 @@
         (
         SELECT ifnull(sum(
         case
-        when `type` = 6 then 1
-        when `type` in (7,20) then -1 else 0
+        when `type` = 6 then -1
+        when `type` in (7,20) then 1 else 0
         END
         ),0)
         FROM doctor_pig_events
