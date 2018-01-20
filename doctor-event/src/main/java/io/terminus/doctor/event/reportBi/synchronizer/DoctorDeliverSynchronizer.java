@@ -103,7 +103,7 @@ public class DoctorDeliverSynchronizer {
         reportBi.setStart(pigDaily.getSowCfStart());
         reportBi.setEnd(pigDaily.getSowCfEnd());
         reportBi.setSowCfIn(pigDaily.getSowCfIn());
-        reportBi.setOtherIn(pigDaily.getSowPhChgFarmIn());
+        reportBi.setOtherIn(otherIn(pigDaily, reportBi.getOrzType()));
         reportBi.setDead(pigDaily.getSowCfDead());
         reportBi.setWeedOut(pigDaily.getSowCfWeedOut());
         reportBi.setSale(pigDaily.getSowCfSale());
@@ -170,6 +170,12 @@ public class DoctorDeliverSynchronizer {
         reportBi.setPigletSaleAveWeight(EventUtil.getAvgWeight(groupDaily.getSaleWeight(), groupDaily.getSale()));
     }
 
+    public Integer otherIn(DoctorPigDailyExtend dailyExtend, Integer orzType) {
+        if (Objects.equals(orzType, OrzDimension.FARM.getValue())) {
+            return dailyExtend.getSowCfInFarmIn();
+        }
+        return 0;
+    }
     private Double outAvgWeight28(DoctorReportDeliver deliver) {
         Integer STANDARD_AGE = 28;
         return (EventUtil.getAvgWeight(deliver.getWeanWeightPerFarrow(), deliver.getWeanDayAge()))
