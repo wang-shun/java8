@@ -88,12 +88,30 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `sum_at`, `org_id`, `org_name`, `farm_id`, `farm_name`, `sow_ph_start`, `sow_ph_reserve_in`, `sow_ph_wean_in`, `sow_ph_entry_in`, `sow_ph_chg_farm_in`, `sow_ph_dead`, `sow_ph_weed_out`, `sow_ph_sale`, `sow_ph_chg_farm`, `sow_ph_other_out`, `mate_hb`, `mate_dn`, `mate_fq`, `mate_lc`, `mate_yx`, `mating_count`, `sow_ph_mating`, `sow_ph_konghuai`, `sow_ph_pregnant`, `preg_positive`, `preg_negative`, `preg_fanqing`, `preg_liuchan`, `wean_mate`, `wean_dead_weed_out`, `sow_ph_end`, `sow_cf_start`, `sow_cf_end`, `sow_cf_in`, `sow_cf_in_farm_in`, `sow_cf_dead`, `sow_cf_weed_out`, `sow_cf_sale`, `sow_cf_chg_farm`, `sow_cf_other_out`, `early_mating`, `early_farrow_nest`, `later_nest`, `farrow_nest`, `farrow_live`, `farrow_health`, `farrow_weak`, `farrow_dead`, `farrowjmh`, `farrow_weight`, `wean_nest`, `wean_qualified_count`, `wean_count`, `wean_day_age`, `wean_weight`, `boar_start`, `boar_in`, `boar_dead`, `boar_weed_out`, `boar_sale`, `boar_other_out`, `boar_end`, `sow_not_mating_count`, `version`,
+        `sum_at`, `org_id`, `org_name`, `farm_id`, `farm_name`, `sow_ph_start`, `sow_ph_reserve_in`, `sow_ph_wean_in`,
+        `sow_ph_entry_in`, `sow_ph_chg_farm_in`, `sow_ph_dead`, `sow_ph_weed_out`, `sow_ph_sale`, `sow_ph_chg_farm`,
+        `sow_ph_other_out`, `mate_hb`, `mate_dn`, `mate_fq`, `mate_lc`, `mate_yx`, `mating_count`, `sow_ph_mating`,
+        `sow_ph_konghuai`, `sow_ph_pregnant`, `preg_positive`, `preg_negative`, `preg_fanqing`, `preg_liuchan`,
+        `wean_mate`, `wean_dead_weed_out`, `sow_ph_end`, `sow_cf_start`, `sow_cf_end`, `sow_cf_in`, `sow_cf_in_farm_in`,
+        `sow_cf_dead`, `sow_cf_weed_out`, `sow_cf_sale`, `sow_cf_chg_farm`, `sow_cf_other_out`, `early_mating`,
+        `early_farrow_nest`, `later_nest`, `farrow_nest`, `farrow_live`, `farrow_health`, `farrow_weak`, `farrow_dead`,
+        `farrowjmh`, `farrow_weight`, `wean_nest`, `wean_qualified_count`, `wean_count`, `wean_day_age`, `wean_weight`,
+        `boar_start`, `boar_in`, `boar_dead`, `boar_weed_out`, `boar_sale`, `boar_other_out`, `boar_end`,
+        `sow_not_mating_count`, `version`,
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{sumAt}, #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{sowPhStart}, #{sowPhReserveIn}, #{sowPhWeanIn}, #{sowPhEntryIn}, #{sowPhChgFarmIn}, #{sowPhDead}, #{sowPhWeedOut}, #{sowPhSale}, #{sowPhChgFarm}, #{sowPhOtherOut}, #{mateHb}, #{mateDn}, #{mateFq}, #{mateLc}, #{mateYx}, #{matingCount}, #{sowPhMating}, #{sowPhKonghuai}, #{sowPhPregnant}, #{pregPositive}, #{pregNegative}, #{pregFanqing}, #{pregLiuchan}, #{weanMate}, #{weanDeadWeedOut}, #{sowPhEnd}, #{sowCfStart}, #{sowCfEnd}, #{sowCfIn}, #{sowCfInFarmIn}, #{sowCfDead}, #{sowCfWeedOut}, #{sowCfSale}, #{sowCfChgFarm}, #{sowCfOtherOut}, #{earlyMating}, #{earlyFarrowNest}, #{laterNest}, #{farrowNest}, #{farrowLive}, #{farrowHealth}, #{farrowWeak}, #{farrowDead}, #{farrowjmh}, #{farrowWeight}, #{weanNest}, #{weanQualifiedCount}, #{weanCount}, #{weanDayAge}, #{weanWeight}, #{boarStart}, #{boarIn}, #{boarDead}, #{boarWeedOut}, #{boarSale}, #{boarOtherOut}, #{boarEnd}, #{sowNotMatingCount}, 1,
+        #{sumAt}, #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{sowPhStart}, #{sowPhReserveIn}, #{sowPhWeanIn},
+        #{sowPhEntryIn}, #{sowPhChgFarmIn}, #{sowPhDead}, #{sowPhWeedOut}, #{sowPhSale}, #{sowPhChgFarm},
+        #{sowPhOtherOut}, #{mateHb}, #{mateDn}, #{mateFq}, #{mateLc}, #{mateYx}, #{matingCount}, #{sowPhMating},
+        #{sowPhKonghuai}, #{sowPhPregnant}, #{pregPositive}, #{pregNegative}, #{pregFanqing}, #{pregLiuchan},
+        #{weanMate}, #{weanDeadWeedOut}, #{sowPhEnd}, #{sowCfStart}, #{sowCfEnd}, #{sowCfIn}, #{sowCfInFarmIn},
+        #{sowCfDead}, #{sowCfWeedOut}, #{sowCfSale}, #{sowCfChgFarm}, #{sowCfOtherOut}, #{earlyMating},
+        #{earlyFarrowNest}, #{laterNest}, #{farrowNest}, #{farrowLive}, #{farrowHealth}, #{farrowWeak}, #{farrowDead},
+        #{farrowjmh}, #{farrowWeight}, #{weanNest}, #{weanQualifiedCount}, #{weanCount}, #{weanDayAge}, #{weanWeight},
+        #{boarStart}, #{boarIn}, #{boarDead}, #{boarWeedOut}, #{boarSale}, #{boarOtherOut}, #{boarEnd},
+        #{sowNotMatingCount}, 1,
         now(), now()
     </sql>
 
@@ -300,6 +318,27 @@
         ORDER BY `id` DESC
     </select>
 
+    <select id="countSow" parameterType="map" resultType="map">
+        SELECT
+        ifnull(sum(sow_cf_end),0)+ifnull(sum(sow_ph_end),0)-ifnull(sum(sow_not_mating_count),0) as sow_count
+        FROM
+        <include refid="tb"/>
+        <where>
+            <if test="farmId !=null">
+                AND farm_id=#{farmId}
+            </if>
+            <if test="farmIds !=null and farmIds.size() >0">
+                AND
+                <foreach collection="farmIds" item="fid" open="(" separator="or" close=")">
+                    farm_id=#{fid}
+                </foreach>
+            </if>
+            <if test="startDate !=null">AND <![CDATA[sum_at >= #{startDate}]]></if>
+            <if test="endDate !=null">AND <![CDATA[sum_at <= #{endDate}]]></if>
+        </where>
+
+    </select>
+
     <select id="report" parameterType="map" resultMap="DoctorPigDailyMap">
         SELECT
         min(`sow_ph_start`) as sow_ph_start,
@@ -363,6 +402,7 @@
         </where>
 
     </select>
+
 
     <select id="reportByOrg" parameterType="map" resultMap="DoctorPigDailyMap">
         SELECT
@@ -456,7 +496,7 @@
         AND sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
     </update>
 
-    <select id="queryAfterSumAt" parameterType="map" resultMap="DoctorPigDailyMap" >
+    <select id="queryAfterSumAt" parameterType="map" resultMap="DoctorPigDailyMap">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -614,7 +654,8 @@
         sow_ph_mating as sowPhMating,
         sow_ph_konghuai as sowPhKonghuai,
         sow_ph_pregnant as sowPhPregnant
-        FROM <include refid="tb"/>
+        FROM
+        <include refid="tb"/>
         <include refid="dimensionCri"/>
         order by sum_at desc
         limit 1

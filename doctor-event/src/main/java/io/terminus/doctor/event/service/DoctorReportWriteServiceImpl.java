@@ -156,16 +156,17 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                 npd.setFarmId(f);
                 npd.setDays(dayCount);
 
-                DoctorPigDaily pigDaily = doctorPigDailyDao.countByFarm(f, monthStartDate, monthEndDate);
-
-                if (null != pigDaily) {
-                    int sowCount = (pigDaily.getSowCfEnd() == null ? 0 : pigDaily.getSowCfEnd()) + (pigDaily.getSowPhEnd() == null ? 0 : pigDaily.getSowPhEnd());//母猪月存栏
-                    int sowNotMatingCount = pigDaily.getSowNotMatingCount() == null ? 0 : pigDaily.getSowNotMatingCount();//母猪月进场未配种数
-
-                    npd.setSowCount(sowCount - sowNotMatingCount);
-                } else {
-                    npd.setSowCount(0);
-                }
+//                DoctorPigDaily pigDaily = doctorPigDailyDao.countByFarm(f, monthStartDate, monthEndDate);
+                Integer sowCount = doctorPigDailyDao.countSow(f, monthStartDate, monthEndDate);
+                npd.setSowCount(sowCount);
+//                if (null != pigDaily) {
+//                    int sowCount = (pigDaily.getSowCfEnd() == null ? 0 : pigDaily.getSowCfEnd()) + (pigDaily.getSowPhEnd() == null ? 0 : pigDaily.getSowPhEnd());//母猪月存栏
+//                    int sowNotMatingCount = pigDaily.getSowNotMatingCount() == null ? 0 : pigDaily.getSowNotMatingCount();//母猪月进场未配种数
+//
+//                    npd.setSowCount(sowCount - sowNotMatingCount);
+//                } else {
+//                    npd.setSowCount(0);
+//                }
 
 
                 npd.setSumAt(monthStartDate);

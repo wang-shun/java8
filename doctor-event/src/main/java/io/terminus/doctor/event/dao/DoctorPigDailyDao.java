@@ -9,6 +9,7 @@ import io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend;
 import io.terminus.doctor.event.model.DoctorPigDaily;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +39,22 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
         params.put("endDate", end);
 
         return sqlSession.selectOne(this.sqlId("report"), params);
+    }
+
+
+    /**
+     * 求指定期限内母猪的存栏之和
+     * 产房母猪+配坏母猪
+     *
+     * @return
+     */
+    public Integer countSow(Long farmId, Date start, Date end) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("farmId", farmId);
+        params.put("startDate", start);
+        params.put("endDate", end);
+        Map<String, BigDecimal> sowCount = sqlSession.selectOne(this.sqlId("countSow"), params);
+        return sowCount.get("sow_count").intValue();
     }
 
 
@@ -88,8 +105,9 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
 
     /**
      * 查询指定之间之后的日报，包含指定日期
+     *
      * @param farmId 猪场id
-     * @param sumAt 指定日期
+     * @param sumAt  指定日期
      * @return
      */
     public List<DoctorPigDaily> queryAfterSumAt(Long farmId, Date sumAt) {
