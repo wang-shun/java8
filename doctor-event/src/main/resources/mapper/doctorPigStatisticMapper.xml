@@ -268,7 +268,7 @@
         case when type in (2,6,11) and pig_status_before = 3 then 1 else 0 end)
         ,0)
         from doctor_pig_events
-        where event_at &gt; #{startAt}
+        where event_at &gt; #{sumAt}
         and farm_id = #{farmId}
         and type in(2, 6, 9, 11)
         and barn_type in(5,6)
@@ -298,7 +298,7 @@
         )
         ,0)
         from doctor_pig_events
-        where event_at &gt; #{startAt}
+        where event_at &gt; #{sumAt}
         and farm_id = #{farmId}
         and type in(2,6,7,9,11,12,20)
         and status =1
@@ -324,7 +324,7 @@
         )
         ,0)
         from doctor_pig_events
-        where event_at &gt; #{startAt}
+        where event_at &gt; #{sumAt}
         and farm_id = #{farmId}
         and type in(2,6,11,14,20)
         and barn_type in(5,6)
