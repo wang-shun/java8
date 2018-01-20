@@ -218,10 +218,7 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
 
     @Override
     public Response<Boolean> syncEfficiency(Date date) {
-        DoctorDimensionCriteria criteria = new DoctorDimensionCriteria();
-        criteria.setDateType(DateDimension.MONTH.getValue());
-        criteria.setOrzType(OrzDimension.FARM.getValue());
-        efficiencySynchronizer.sync(criteria);
+        efficiencySynchronizer.sync(date);
 
         return Response.ok(true);
     }
