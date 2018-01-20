@@ -75,7 +75,7 @@
         <where>
             <include refid="groupCriteria"/>
             and `type` = 2
-            and trans_group_type = 1
+            and ( in_type != 3  or (in_type = 3 and trans_group_type != 0 ) )
         </where>
     </select>
 
