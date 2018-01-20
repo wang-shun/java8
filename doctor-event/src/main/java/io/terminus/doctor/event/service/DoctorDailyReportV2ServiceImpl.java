@@ -223,6 +223,16 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
         return Response.ok(true);
     }
 
+
+    @Override
+    public Response<Boolean> syncEfficiency(Integer dateType, Integer orgType) {
+        DoctorDimensionCriteria criteria = new DoctorDimensionCriteria();
+        criteria.setDateType(dateType);
+        criteria.setOrzType(orgType);
+        efficiencySynchronizer.sync(criteria);
+        return Response.ok(true);
+    }
+
     @Override
     public Response<List<DoctorFarmLiveStockDto>> findFarmsLiveStock(List<Long> farmIdList) {
         try {

@@ -96,4 +96,6 @@ public interface DoctorDailyReportV2Service {
     Response<Boolean> syncWarehouse(Integer dateType, Integer orgType);
 
     Response<Boolean> syncEfficiency(Date date);
+
+    Response<Boolean> syncEfficiency(Integer dateType, Integer orgType);
 }

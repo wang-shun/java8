@@ -152,6 +152,16 @@ public class DoctorReportController {
         doctorDailyReportV2Service.syncEfficiency(date);
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = "/flush/efficiency/all")
+    public void flushEfficiencyAll(@RequestParam Integer dateType, @RequestParam Integer orgType) {
+
+        if (null == DateDimension.from(dateType))
+            throw new ServiceException("date.type.not.support");
+        if (null == OrzDimension.from(orgType))
+            throw new ServiceException("org.type.not.support");
+        doctorDailyReportV2Service.syncEfficiency(dateType, orgType);
+    }
+
     /**
      * 增量同步报表数据
      *

@@ -69,6 +69,10 @@ public class DoctorEfficiencySynchronizer {
             log.warn("不支持同步日、周类型的效率指标到BI");
             return;
         }
+        if (dimensionCriteria.getOrzType().equals(OrzDimension.CLIQUE.getValue())) {
+            log.warn("暂无集团维度");
+            return;
+        }
 
         List<DoctorReportNpd> npds = doctorReportNpdDao.count(dimensionCriteria, null, null);
         for (DoctorReportNpd npd : npds) {
