@@ -50,6 +50,18 @@ public class DoctorWarehouseSynchronizer {
     @RpcConsumer
     private DoctorPigReportReadService doctorPigReportReadService;
 
+
+    /**
+     * 获取指定日期内更新的领用记录的操作日期
+     *
+     * @param date
+     * @return
+     */
+    public List<Date> getChangedDate(Date date) {
+
+        return doctorWarehouseReportDao.getChangedDate(date);
+    }
+
     /**
      * 刷新某一日期所在的日、周、月、季、年
      * 猪场和公司10个

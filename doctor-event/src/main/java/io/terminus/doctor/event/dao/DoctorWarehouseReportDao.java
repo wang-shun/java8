@@ -38,6 +38,10 @@ public class DoctorWarehouseReportDao {
     private final String namespace = "DoctorWarehouseReportDao";
 
 
+    public List<Date> getChangedDate(Date date) {
+        return this.sqlSession.selectList(namespace + ".findChangedDate", Collections.singletonMap("date", date));
+    }
+
     public Map<String, Object> count(List<Long> farmIds, Date start, Date end) {
 
         Map<String, Object> params = new HashMap<>();

@@ -403,6 +403,10 @@
         </choose>
     </select>
 
+    <select id="findChangedDate" parameterType="date" resultType="date">
+        SELECT DISTINCT apply_date from doctor_warehouse_material_apply where to_days(updated_at)=to_days(#{date});
+    </select>
+
     <select id="materialApply" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="double">
         select ifnull(sum(quantity), 0)
         from doctor_groups a left join `doctor_warehouse_material_apply` b

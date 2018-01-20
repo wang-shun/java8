@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
 import io.terminus.doctor.event.dao.DoctorPigDailyDao;
 import io.terminus.doctor.event.dao.DoctorReportNpdDao;
@@ -25,6 +26,7 @@ import io.terminus.doctor.event.reportBi.synchronizer.DoctorReserveSynchronizer;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorSowSynchronizer;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorWarehouseSynchronizer;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -107,7 +109,15 @@ public class DoctorReportBiDataSynchronize {
         Date date = DateTime.now().minusMinutes(DELTA_DAY).toDate();
         synchronizeDeltaBiData(date);
 
-        //TODO 物料消耗还需要刷历史
+        //如果当天更改了历史数据，找出历史数据，重刷历史数据所在的期间
+        List<Date> dates = warehouseSynchronizer.getChangedDate(new Date());
+        for (Date d : dates) {
+            if (DateUtils.isSameDay(d, new Date()))
+                continue;
+            
+            warehouseSynchronizer.sync(d);
+        }
+
         warehouseSynchronizer.sync(new Date());
         efficiencySynchronizer.sync(new Date());
 
