@@ -184,7 +184,7 @@ public class DoctorReportBiDataSynchronize {
         doctorDimensionCriteria.setDateType(DateDimension.DAY.getValue());
         groupDailyList.forEach(groupDaily -> {
             BeanMapper.copy(groupDaily, extend);
-            extend.setDailyLivestockOnHand(groupDaily.getEnd().doubleValue());
+            extend.setDailyLivestockOnHand(groupDaily.getEnd());
             extend.setStart(groupDaily.getStart());
             extend.setEnd(groupDaily.getEnd());
             synchronizeGroupBiData(extend, doctorDimensionCriteria);
@@ -203,8 +203,8 @@ public class DoctorReportBiDataSynchronize {
             BeanMapper.copy(pigDaily, extend);
             extend.setSowStart(pigDaily.getSowPhStart() + pigDaily.getSowCfStart());
             extend.setSowEnd(pigDaily.getSowPhEnd() + pigDaily.getSowCfEnd());
-            extend.setSowDailyPigCount(extend.getSowEnd().doubleValue());
-            extend.setBoarDailyPigCount(pigDaily.getBoarEnd().doubleValue());
+            extend.setSowDailyPigCount(extend.getSowEnd());
+            extend.setBoarDailyPigCount(pigDaily.getBoarEnd());
             synchronizePigBiData(extend, doctorDimensionCriteria);
         });
     }

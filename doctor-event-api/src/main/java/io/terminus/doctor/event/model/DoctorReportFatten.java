@@ -126,7 +126,7 @@ public class DoctorReportFatten implements Serializable {
     /**
      * 日均存栏
      */
-    private Double dailyPigCount;
+    private Integer dailyPigCount;
     
     /**
      * 育肥出栏均重（180日龄（26周龄重））

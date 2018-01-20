@@ -10,8 +10,8 @@ import lombok.Data;
 @Data
 public class DoctorPigDailyExtend extends DoctorPigDaily {
     private static final long serialVersionUID = -599859298774041243L;
-    private Double sowDailyPigCount;
-    private Double boarDailyPigCount;
+    private Integer sowDailyPigCount;
+    private Integer boarDailyPigCount;
 
     private Integer sowStart;
     private Integer sowEnd;

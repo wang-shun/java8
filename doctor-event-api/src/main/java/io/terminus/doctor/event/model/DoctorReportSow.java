@@ -101,7 +101,7 @@ public class DoctorReportSow implements Serializable {
     /**
      * 日均存栏
      */
-    private Double dailyLivestockOnHand;
+    private Integer dailyLivestockOnHand;
     
     /**
      * 期末存栏

@@ -10,5 +10,5 @@ import lombok.Data;
 @Data
 public class DoctorGroupDailyExtend extends DoctorGroupDaily{
     private static final long serialVersionUID = 4698248782160808926L;
-    private Double dailyLivestockOnHand;
+    private Integer dailyLivestockOnHand;
 }

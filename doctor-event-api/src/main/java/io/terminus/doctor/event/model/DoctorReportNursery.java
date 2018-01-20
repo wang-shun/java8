@@ -136,7 +136,7 @@ public class DoctorReportNursery implements Serializable {
     /**
      * 日均存栏
      */
-    private Double dailyPigCount;
+    private Integer dailyPigCount;
     
     /**
      * 保育转出均重（70日龄（10周龄重））
