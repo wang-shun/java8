@@ -77,9 +77,6 @@ public class FieldHelper {
             if (Objects.equals(orzType, OrzDimension.FARM.getValue())) {
                 return get(deadWeedOut, groupDaily.getStart() + groupDaily.getTurnInto());
             }
-            if (isNull(groupDaily.getChgFarmIn())) {
-                System.out.println("");;
-            }
             return get(deadWeedOut, groupDaily.getStart() + groupDaily.getTurnInto()
                     - MoreObjects.firstNonNull(groupDaily.getChgFarmIn(), 0));
         } catch (Exception e) {
@@ -104,7 +101,7 @@ public class FieldHelper {
         if (isNull(denominator) || isNull(molecular) || molecular == 0) {
             return 0D;
         }
-        return new BigDecimal(denominator).divide(new BigDecimal(molecular), BigDecimal.ROUND_HALF_UP).doubleValue();
+        return new BigDecimal(denominator).divide(new BigDecimal(molecular), 4, BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
     public static Integer getInteger(Integer denominator, Integer molecular) {
