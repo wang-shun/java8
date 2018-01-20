@@ -113,6 +113,7 @@
             <include refid="criteria"/>
             and kind = 1
             and type = 20
+            and barn_type in (5,6)
         </where>
     </select>
 
@@ -577,7 +578,7 @@
     </select>
 
     <select id="weanNest" parameterType="map" resultType="int">
-        SELECT ifnull(sum(farrow_weight), 0)
+        SELECT ifnull(count(1), 0)
         FROM doctor_pig_events
         <where>
             <include refid="criteria" />
