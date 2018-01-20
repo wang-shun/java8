@@ -20,12 +20,12 @@
         select
         (
         SELECT ifnull(count(1) , 0)
-        FROM doctor_pig_tracks a
-        left join doctor_barns b on a.current_barn_id = b.id
+        FROM doctor_pig_tracks
         WHERE
-        a.farm_id = #{farmId} AND
-        a.is_removal = 0 AND
-        b.pig_type = 7 -- 产房
+        farm_id = #{farmId} AND
+        is_removal = 0 AND
+        pig_type = 1 and
+        current_barn_type = 7 -- 配怀舍
         )
         -
         (
@@ -47,13 +47,12 @@
         select
         (
         SELECT ifnull(count(1) , 0)
-        FROM doctor_pig_tracks a
-        left join doctor_barns b on a.current_barn_id = b.id
+        FROM doctor_pig_tracks
         WHERE
-        a.farm_id = #{farmId} AND
-        a.is_removal = 0 AND
-        a.pig_type = 1 and
-        b.pig_type in (5 ,6 ) -- 配怀舍
+        farm_id = #{farmId} AND
+        is_removal = 0 AND
+        pig_type = 1 and
+        current_barn_type in (5 ,6 ) -- 配怀舍
         )
         -
         (
