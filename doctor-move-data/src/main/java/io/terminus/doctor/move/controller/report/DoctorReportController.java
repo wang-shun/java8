@@ -162,9 +162,9 @@ public class DoctorReportController {
     }
 
     /**
-     * 增量同步报表数据
-     *
-     * @return
+     * 增量同步
+     * @param farmId 猪场id
+     * @param start 开始的同步日期 与日报中sumAt比较
      */
     @RequestMapping(value = "/synchronize/delta/bi/data/{farmId}", method = RequestMethod.GET)
     public Boolean synchronizeDeltaDayBiData(@PathVariable Long farmId,

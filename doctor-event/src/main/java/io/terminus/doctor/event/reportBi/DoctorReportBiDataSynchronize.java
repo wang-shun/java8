@@ -123,6 +123,10 @@ public class DoctorReportBiDataSynchronize {
         log.info("synchronize delta day bi data end, minute:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
     }
 
+    /**
+     * 增量更新
+     * @param start 开始的同步日期 与日报中updateAt 比较
+     */
     public void synchronizeDeltaDayBiData(Date start) {
         log.info("synchronize delta day bi data starting, start:{}", start);
         Stopwatch stopwatch = Stopwatch.createStarted();
@@ -130,6 +134,11 @@ public class DoctorReportBiDataSynchronize {
         log.info("synchronize delta day bi data end, minute:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
     }
 
+    /**
+     * 增量同步
+     * @param farmId 猪场id
+     * @param start 开始的同步日期 与日报中sumAt比较
+     */
     public void synchronizeDeltaDayBiData(Long farmId, Date start) {
         log.info("synchronize delta day bi data starting, farmId:{}, start:{}", farmId, start);
         Stopwatch stopwatch = Stopwatch.createStarted();
@@ -190,6 +199,7 @@ public class DoctorReportBiDataSynchronize {
 
     }
 
+
     private void synchronizeDeltaBiData(Long farmId, Date date) {
 
         List<DoctorGroupDaily> groupDailyList = doctorGroupDailyDao.findByFarmAndAfter(farmId, date);
@@ -233,6 +243,10 @@ public class DoctorReportBiDataSynchronize {
 
     }
 
+    /**
+     * 增量同步猪场天维度
+     * @param groupDailyList
+     */
     private void synchronizeGroupForDay(List<DoctorGroupDaily> groupDailyList) {
         if (Arguments.isNullOrEmpty(groupDailyList)) {
             return;
@@ -250,6 +264,10 @@ public class DoctorReportBiDataSynchronize {
         });
     }
 
+    /**
+     * 增量同步猪场天维度
+     * @param pigDailyList
+     */
     public void synchronizePigForDay(List<DoctorPigDaily> pigDailyList) {
         if (Arguments.isNullOrEmpty(pigDailyList)) {
             return;
@@ -282,6 +300,9 @@ public class DoctorReportBiDataSynchronize {
 //        efficiencySynchronizer.deleteAll();
     }
 
+    /**
+     * 全量同步实现
+     */
     private void synchronizeBiDataImpl() {
         //同步猪场日
         synchronizeFullBiDataForDay();
@@ -357,6 +378,9 @@ public class DoctorReportBiDataSynchronize {
 //        warehouseSynchronizer.sync(dimensionCriteria);
     }
 
+    /**
+     * 全量同步猪场日维度
+     */
     private void synchronizeFullBiDataForDay() {
         List<DoctorGroupDaily> groupDailyList;
         Integer pageSize = 5000;
@@ -378,6 +402,11 @@ public class DoctorReportBiDataSynchronize {
         }
     }
 
+    /**
+     * 同步某一维度猪群数据最终地方
+     * @param groupDaily
+     * @param dimensionCriteria
+     */
     private void synchronizeGroupBiData(DoctorGroupDailyExtend groupDaily, DoctorDimensionCriteria dimensionCriteria) {
         PigType pigType = expectNotNull(PigType.from(groupDaily.getPigType()), "pigType.is.illegal");
         if (Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.ORG.getValue())) {
@@ -418,6 +447,11 @@ public class DoctorReportBiDataSynchronize {
         }
     }
 
+    /**
+     * 同步某一维度猪数据最终地方
+     * @param dailyExtend
+     * @param dimensionCriteria
+     */
     private void synchronizePigBiData(DoctorPigDailyExtend dailyExtend, DoctorDimensionCriteria dimensionCriteria) {
         if (Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.ORG.getValue())) {
             dimensionCriteria.setOrzId(dailyExtend.getOrgId());
