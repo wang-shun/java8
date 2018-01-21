@@ -255,6 +255,7 @@
         ifnull(sum(weed_out), 0) as weedOut,
         ifnull(sum(other_change), 0) as otherChange,
         ifnull(sum(to_nursery), 0) as toNursery,
+        ifnull(sum(to_nursery_weight), 0) as toNurseryWeight,
         ifnull(sum(to_fatten), 0) as toFatten,
         ifnull(sum(to_fatten_weight), 0) as toFattenWeight,
         ifnull(sum(to_houbei), 0) as toHoubei,
