@@ -608,7 +608,7 @@
 
 
     <select id="weanWeight" parameterType="map" resultType="double">
-        SELECT ifnull(sum(wean_avg_weight), 0)
+        select ifnull(sum(wean_count*wean_avg_weight),0)
         FROM doctor_pig_events
         <where>
             <include refid="criteria" />
