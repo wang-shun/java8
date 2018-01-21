@@ -42,8 +42,8 @@
                 #{id}
             </foreach>
         </if>
-        <if test="startAt != null">AND apply_date &gt;= #{startAt}</if>
-        <if test="endAt != null">AND apply_date &lt;= #{endAt}</if>
+        <if test="startAt != null">AND <![CDATA[to_days(apply_date) >= to_days(#{startAt})]]></if>
+        <if test="endAt != null">AND <![CDATA[to_days(apply_date) <= to_days(#{endAt})]]></if>
         GROUP BY type
         ) AS a
     </select>
@@ -68,8 +68,8 @@
                 #{id}
             </foreach>
         </if>
-        <if test="startAt != null">AND apply_date &gt;= #{startAt}</if>
-        <if test="endAt != null">AND apply_date &lt;= #{endAt}</if>
+        <if test="startAt != null">AND <![CDATA[to_days(apply_date) >= to_days(#{startAt})]]></if>
+        <if test="endAt != null">AND <![CDATA[to_days(apply_date) <= to_days(#{endAt})]]></if>
         GROUP BY type
         ) AS a
     </select>
@@ -146,8 +146,8 @@
                 #{id}
             </foreach>
         </if>
-        <if test="startAt != null">AND apply_date &gt;= #{startAt}</if>
-        <if test="endAt != null">AND apply_date &lt;= #{endAt}</if>
+        <if test="startAt != null">AND <![CDATA[to_days(apply_date) >= to_days(#{startAt})]]></if>
+        <if test="endAt != null">AND <![CDATA[to_days(apply_date) <= to_days(#{endAt})]]></if>
         GROUP BY pig_type, type
         ) AS a
     </select>
@@ -157,8 +157,8 @@
         farm_id
         FROM doctor_warehouse_material_apply
         WHERE
-        apply_date &gt;= #{startAt}
-        AND apply_date &lt;= #{endAt}
+        <![CDATA[to_days(apply_date) >= to_days(#{startAt})]]>
+        AND <![CDATA[to_days(apply_date) <= to_days(#{endAt})]]>
         group by farm_id
     </select>
 

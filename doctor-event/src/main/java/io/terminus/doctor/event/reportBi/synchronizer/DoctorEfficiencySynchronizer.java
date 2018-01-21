@@ -23,6 +23,7 @@ import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -191,24 +192,28 @@ public class DoctorEfficiencySynchronizer {
 
         Set<Long> orgIds = new HashSet<>();
 
-        Map<Long, List<DoctorReportNpd>> npdMap = npds.stream().collect(Collectors.groupingBy(DoctorReportNpd::getFarmId));
-        RespHelper.orServEx(doctorFarmReadService.findAllFarms()).stream().forEach(f -> {
+        Map<Long, List<DoctorFarm>> farmMap = RespHelper.orServEx(doctorFarmReadService.findFarmsByIds(npds.stream().map(DoctorReportNpd::getFarmId).collect(Collectors.toList())))
+                .stream().collect(Collectors.groupingBy(DoctorFarm::getId));
 
+
+        Map<Long, List<DoctorReportNpd>> npdMap = npds.stream().collect(Collectors.groupingBy(DoctorReportNpd::getFarmId));
+//        RespHelper.orServEx(doctorFarmReadService.findAllFarms()).stream().forEach(f -> {
+        npdMap.forEach((f, v) -> {
             DoctorReportEfficiency efficiency;
             DoctorDimensionCriteria criteria = new DoctorDimensionCriteria();
-            criteria.setOrzId(f.getId());
+            criteria.setOrzId(f);
             criteria.setDateType(dateDimension.getValue());
             criteria.setOrzType(OrzDimension.FARM.getValue());
             criteria.setSumAt(start);
             efficiency = doctorReportEfficiencyDao.findByDimension(criteria);
             if (null == efficiency) efficiency = new DoctorReportEfficiency();
 
-            if (!npdMap.containsKey(f.getId())) {
+            if (!npdMap.containsKey(f)) {
                 //补
-                efficiency.setOrzId(f.getId());
+                efficiency.setOrzId(f);
                 efficiency.setOrzType(OrzDimension.FARM.getValue());
                 efficiency.setDateType(dateDimension.getValue());
-                efficiency.setOrzName(f.getName());
+                efficiency.setOrzName(farmMap.containsKey(f) ? farmMap.get(f).get(0).getName() : "");
                 efficiency.setSumAt(start);
                 efficiency.setSumAtName(DateHelper.dateCN(start, dateDimension));
 
@@ -219,13 +224,13 @@ public class DoctorEfficiencySynchronizer {
                 else
                     doctorReportEfficiencyDao.update(efficiency);
             } else {
-                DoctorReportNpd npd = npdMap.get(f.getId()).get(0);//每个猪场只会有一条，无论是月、季、年
+                DoctorReportNpd npd = npdMap.get(f).get(0);//每个猪场只会有一条，无论是月、季、年
                 DoctorPigDaily pigDaily = doctorPigDailyDao.countByFarm(npd.getFarmId(), start, end);
 
                 efficiency.setOrzId(npd.getFarmId());
                 efficiency.setOrzType(OrzDimension.FARM.getValue());
                 efficiency.setDateType(dateDimension.getValue());
-                efficiency.setOrzName(f.getName());
+                efficiency.setOrzName(farmMap.containsKey(f) ? farmMap.get(f).get(0).getName() : "");
                 efficiency.setSumAtName(DateHelper.dateCN(npd.getSumAt(), dateDimension));
 
                 efficiency.setSumAt(npd.getSumAt());
@@ -255,23 +260,26 @@ public class DoctorEfficiencySynchronizer {
             }
         });
 
-        RespHelper.orServEx(doctorOrgReadService.findAllOrgs()).stream().forEach(o -> {
+//        RespHelper.orServEx(doctorOrgReadService.findAllOrgs()).stream().forEach(o -> {
 
+        Map<Long, List<DoctorOrg>> orgMap = RespHelper.orServEx(doctorOrgReadService.findOrgByIds(orgIds.stream().collect(Collectors.toList())))
+                .stream().collect(Collectors.groupingBy(DoctorOrg::getId));
+        orgIds.forEach(o -> {
             DoctorReportEfficiency efficiency;
             DoctorDimensionCriteria criteria = new DoctorDimensionCriteria();
-            criteria.setOrzId(o.getId());
+            criteria.setOrzId(o);
             criteria.setDateType(dateDimension.getValue());
             criteria.setOrzType(OrzDimension.ORG.getValue());
             criteria.setSumAt(start);
             efficiency = doctorReportEfficiencyDao.findByDimension(criteria);
             if (null == efficiency) efficiency = new DoctorReportEfficiency();
 
-            if (!orgIds.contains(o.getId())) {
+            if (!orgIds.contains(o)) {
                 //补
-                efficiency.setOrzId(o.getId());
+                efficiency.setOrzId(o);
                 efficiency.setOrzType(OrzDimension.ORG.getValue());
                 efficiency.setDateType(dateDimension.getValue());
-                efficiency.setOrzName(o.getName());
+                efficiency.setOrzName(orgMap.containsKey(o) ? orgMap.get(o).get(0).getName() : "");
                 efficiency.setSumAt(start);
                 efficiency.setSumAtName(DateHelper.dateCN(start, dateDimension));
 
@@ -282,16 +290,16 @@ public class DoctorEfficiencySynchronizer {
                 else
                     doctorReportEfficiencyDao.update(efficiency);
             } else {
-                DoctorReportNpd npd = doctorReportNpdDao.findByOrgAndSumAt(o.getId(), start);
+                DoctorReportNpd npd = doctorReportNpdDao.findByOrgAndSumAt(o, start);
 
-                DoctorPigDaily pigDaily = doctorPigDailyDao.countByOrg(o.getId(), start, end);
+                DoctorPigDaily pigDaily = doctorPigDailyDao.countByOrg(o, start, end);
 
-                efficiency.setOrzId(o.getId());
+                efficiency.setOrzId(o);
                 efficiency.setOrzType(OrzDimension.ORG.getValue());
                 efficiency.setDateType(dateDimension.getValue());
                 efficiency.setSumAtName(DateHelper.dateCN(start, dateDimension));
 //                DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(orgId));
-                efficiency.setOrzName(o.getName());
+                efficiency.setOrzName(orgMap.containsKey(o) ? orgMap.get(o).get(0).getName() : "");
 
                 efficiency.setSumAt(start);
                 //非生产天数=非生产天数/母猪存栏/天数

@@ -72,6 +72,37 @@ public class DoctorWarehouseSynchronizer {
 
         //日
         List<Long> farmIds = doctorWarehouseReportDao.findApplyFarm(date, date);
+        Set<Long> orgIds = flushFarm(farmIds, date, date, DateDimension.DAY);
+        flushOrg(orgIds, date, date, DateDimension.DAY);
+
+        //周
+        DoctorPigReportReadService.DateDuration dateDuration = doctorPigReportReadService.getDuration(date, ReportTime.WEEK);
+        farmIds = doctorWarehouseReportDao.findApplyFarm(dateDuration.getStart(), dateDuration.getEnd());
+        orgIds = flushFarm(farmIds, dateDuration.getStart(), dateDuration.getEnd(), DateDimension.WEEK);
+        flushOrg(orgIds, dateDuration.getStart(), dateDuration.getEnd(), DateDimension.WEEK);
+
+        //月
+        dateDuration = doctorPigReportReadService.getDuration(date, ReportTime.MONTH);
+        farmIds = doctorWarehouseReportDao.findApplyFarm(dateDuration.getStart(), dateDuration.getEnd());
+        orgIds = flushFarm(farmIds, dateDuration.getStart(), dateDuration.getEnd(), DateDimension.MONTH);
+        flushOrg(orgIds, dateDuration.getStart(), dateDuration.getEnd(), DateDimension.MONTH);
+
+        //季
+        dateDuration = doctorPigReportReadService.getDuration(date, ReportTime.SEASON);
+        farmIds = doctorWarehouseReportDao.findApplyFarm(dateDuration.getStart(), dateDuration.getEnd());
+        orgIds = flushFarm(farmIds, dateDuration.getStart(), dateDuration.getEnd(), DateDimension.QUARTER);
+        flushOrg(orgIds, dateDuration.getStart(), dateDuration.getEnd(), DateDimension.QUARTER);
+
+        //年
+        dateDuration = doctorPigReportReadService.getDuration(date, ReportTime.YEAR);
+        farmIds = doctorWarehouseReportDao.findApplyFarm(dateDuration.getStart(), dateDuration.getEnd());
+        orgIds = flushFarm(farmIds, dateDuration.getStart(), dateDuration.getEnd(), DateDimension.YEAR);
+        flushOrg(orgIds, dateDuration.getStart(), dateDuration.getEnd(), DateDimension.YEAR);
+
+    }
+
+
+    private Set<Long> flushFarm(List<Long> farmIds, Date start, Date end, DateDimension dateDimension) {
         Set<Long> orgIds = new HashSet<>();
         for (Long f : farmIds) {
 
@@ -80,213 +111,58 @@ public class DoctorWarehouseSynchronizer {
                 orgIds.add(farm.getOrgId());
             }
 
-            Map<String, Object> result = doctorWarehouseReportDao.count(Collections.singletonList(f), date, date);
+            Map<String, Object> result = doctorWarehouseReportDao.count(Collections.singletonList(f), start, start);
 
-            DoctorReportMaterial material = new DoctorReportMaterial();
-            material.setSumAt(date);
-            material.setSumAtName(DateHelper.dateCN(date, DateDimension.DAY));
-            material.setDateType(DateDimension.DAY.getValue());
+            DoctorReportMaterial material = getOldOrCreate(start, f, dateDimension, OrzDimension.FARM);
+            material.setSumAt(start);
+            material.setSumAtName(DateHelper.dateCN(start, dateDimension));
+            material.setDateType(dateDimension.getValue());
             material.setOrzId(f);
             material.setOrzName(farm == null ? "" : farm.getName());
             material.setOrzType(OrzDimension.FARM.getValue());
 
             fill(material, result);
 
-            doctorReportMaterialDao.create(material);
+            if (null == material.getId())
+                doctorReportMaterialDao.create(material);
+            else
+                doctorReportMaterialDao.update(material);
         }
-        orgIds.forEach(o ->
 
-        {
+        return Collections.unmodifiableSet(orgIds);
+    }
+
+    private void flushOrg(Set<Long> orgIds, Date start, Date end, DateDimension dateDimension) {
+        orgIds.forEach(o -> {
             DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(o));
             List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(o));
 
-            Map<String, Object> result = doctorWarehouseReportDao.count(farms.stream().map(DoctorFarm::getId).collect(Collectors.toList()), date, date);
+            Map<String, Object> result = doctorWarehouseReportDao.count(farms.stream().map(DoctorFarm::getId).collect(Collectors.toList()), start, end);
 
-            DoctorReportMaterial material = new DoctorReportMaterial();
-            material.setSumAt(date);
-            material.setSumAtName(DateHelper.dateCN(date, DateDimension.DAY));
-            material.setDateType(DateDimension.DAY.getValue());
+            DoctorReportMaterial material = getOldOrCreate(start, o, dateDimension, OrzDimension.ORG);
+            material.setSumAt(start);
+            material.setSumAtName(DateHelper.dateCN(start, dateDimension));
+            material.setDateType(dateDimension.getValue());
             material.setOrzId(o);
             material.setOrzName(org == null ? "" : org.getName());
             material.setOrzType(OrzDimension.ORG.getValue());
 
             fill(material, result);
 
-            doctorReportMaterialDao.create(material);
+            if (null == material.getId())
+                doctorReportMaterialDao.create(material);
+            else doctorReportMaterialDao.update(material);
         });
-        //周
-        DoctorPigReportReadService.DateDuration dateDuration = doctorPigReportReadService.getDuration(date, ReportTime.WEEK);
-        farmIds = doctorWarehouseReportDao.findApplyFarm(dateDuration.getStart(), dateDuration.getEnd());
-        orgIds = new HashSet<>();
-        for (Long f : farmIds) {
+    }
 
-            DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(f));
-            if (null != farm) {
-                orgIds.add(farm.getOrgId());
-            }
 
-            Map<String, Object> result = doctorWarehouseReportDao.count(Collections.singletonList(f), dateDuration.getStart(), dateDuration.getEnd());
-
-            DoctorReportMaterial material = new DoctorReportMaterial();
-            material.setSumAt(dateDuration.getStart());
-            material.setSumAtName(DateHelper.dateCN(dateDuration.getStart(), DateDimension.WEEK));
-            material.setDateType(DateDimension.WEEK.getValue());
-            material.setOrzId(f);
-            material.setOrzName(farm == null ? "" : farm.getName());
-            material.setOrzType(OrzDimension.FARM.getValue());
-
-            fill(material, result);
-
-            doctorReportMaterialDao.create(material);
-        }
-        for (Long o : orgIds) {
-            DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(o));
-            List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(o));
-
-            Map<String, Object> result = doctorWarehouseReportDao.count(farms.stream().map(DoctorFarm::getId).collect(Collectors.toList()), dateDuration.getStart(), dateDuration.getEnd());
-
-            DoctorReportMaterial material = new DoctorReportMaterial();
-            material.setSumAt(dateDuration.getStart());
-            material.setSumAtName(DateHelper.dateCN(dateDuration.getStart(), DateDimension.WEEK));
-            material.setDateType(DateDimension.WEEK.getValue());
-            material.setOrzId(o);
-            material.setOrzName(org == null ? "" : org.getName());
-            material.setOrzType(OrzDimension.ORG.getValue());
-
-            fill(material, result);
-
-            doctorReportMaterialDao.create(material);
-        }
-        //月
-        dateDuration = doctorPigReportReadService.getDuration(date, ReportTime.MONTH);
-        farmIds = doctorWarehouseReportDao.findApplyFarm(dateDuration.getStart(), dateDuration.getEnd());
-        orgIds = new HashSet<>();
-        for (Long f : farmIds) {
-
-            DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(f));
-            if (null != farm) {
-                orgIds.add(farm.getOrgId());
-            }
-
-            Map<String, Object> result = doctorWarehouseReportDao.count(Collections.singletonList(f), dateDuration.getStart(), dateDuration.getEnd());
-
-            DoctorReportMaterial material = new DoctorReportMaterial();
-            material.setSumAt(dateDuration.getStart());
-            material.setSumAtName(DateHelper.dateCN(dateDuration.getStart(), DateDimension.MONTH));
-            material.setDateType(DateDimension.MONTH.getValue());
-            material.setOrzId(f);
-            material.setOrzName(farm == null ? "" : farm.getName());
-            material.setOrzType(OrzDimension.FARM.getValue());
-
-            fill(material, result);
-
-            doctorReportMaterialDao.create(material);
-        }
-        for (Long o : orgIds) {
-            DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(o));
-            List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(o));
-
-            Map<String, Object> result = doctorWarehouseReportDao.count(farms.stream().map(DoctorFarm::getId).collect(Collectors.toList()), dateDuration.getStart(), dateDuration.getEnd());
-
-            DoctorReportMaterial material = new DoctorReportMaterial();
-            material.setSumAt(dateDuration.getStart());
-            material.setSumAtName(DateHelper.dateCN(dateDuration.getStart(), DateDimension.MONTH));
-            material.setDateType(DateDimension.MONTH.getValue());
-            material.setOrzId(o);
-            material.setOrzName(org == null ? "" : org.getName());
-            material.setOrzType(OrzDimension.ORG.getValue());
-
-            fill(material, result);
-
-            doctorReportMaterialDao.create(material);
-        }
-        //季
-        dateDuration = doctorPigReportReadService.getDuration(date, ReportTime.SEASON);
-        farmIds = doctorWarehouseReportDao.findApplyFarm(dateDuration.getStart(), dateDuration.getEnd());
-        orgIds = new HashSet<>();
-        for (Long f : farmIds) {
-
-            DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(f));
-            if (null != farm) {
-                orgIds.add(farm.getOrgId());
-            }
-
-            Map<String, Object> result = doctorWarehouseReportDao.count(Collections.singletonList(f), dateDuration.getStart(), dateDuration.getEnd());
-
-            DoctorReportMaterial material = new DoctorReportMaterial();
-            material.setSumAt(dateDuration.getStart());
-            material.setSumAtName(DateHelper.dateCN(dateDuration.getStart(), DateDimension.QUARTER));
-            material.setDateType(DateDimension.QUARTER.getValue());
-            material.setOrzId(f);
-            material.setOrzName(farm == null ? "" : farm.getName());
-            material.setOrzType(OrzDimension.FARM.getValue());
-
-            fill(material, result);
-
-            doctorReportMaterialDao.create(material);
-        }
-        for (Long o : orgIds) {
-            DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(o));
-            List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(o));
-
-            Map<String, Object> result = doctorWarehouseReportDao.count(farms.stream().map(DoctorFarm::getId).collect(Collectors.toList()), dateDuration.getStart(), dateDuration.getEnd());
-
-            DoctorReportMaterial material = new DoctorReportMaterial();
-            material.setSumAt(dateDuration.getStart());
-            material.setSumAtName(DateHelper.dateCN(dateDuration.getStart(), DateDimension.QUARTER));
-            material.setDateType(DateDimension.QUARTER.getValue());
-            material.setOrzId(o);
-            material.setOrzName(org == null ? "" : org.getName());
-            material.setOrzType(OrzDimension.ORG.getValue());
-
-            fill(material, result);
-
-            doctorReportMaterialDao.create(material);
-        }
-        //年
-        dateDuration = doctorPigReportReadService.getDuration(date, ReportTime.YEAR);
-        farmIds = doctorWarehouseReportDao.findApplyFarm(dateDuration.getStart(), dateDuration.getEnd());
-        orgIds = new HashSet<>();
-        for (Long f : farmIds) {
-
-            DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(f));
-            if (null != farm) {
-                orgIds.add(farm.getOrgId());
-            }
-
-            Map<String, Object> result = doctorWarehouseReportDao.count(Collections.singletonList(f), dateDuration.getStart(), dateDuration.getEnd());
-
-            DoctorReportMaterial material = new DoctorReportMaterial();
-            material.setSumAt(date);
-            material.setSumAtName(DateHelper.dateCN(date, DateDimension.YEAR));
-            material.setDateType(DateDimension.YEAR.getValue());
-            material.setOrzId(f);
-            material.setOrzName(farm == null ? "" : farm.getName());
-            material.setOrzType(OrzDimension.FARM.getValue());
-
-            fill(material, result);
-
-            doctorReportMaterialDao.create(material);
-        }
-        for (Long o : orgIds) {
-            DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(o));
-            List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(o));
-
-            Map<String, Object> result = doctorWarehouseReportDao.count(farms.stream().map(DoctorFarm::getId).collect(Collectors.toList()), dateDuration.getStart(), dateDuration.getEnd());
-
-            DoctorReportMaterial material = new DoctorReportMaterial();
-            material.setSumAt(dateDuration.getStart());
-            material.setSumAtName(DateHelper.dateCN(dateDuration.getStart(), DateDimension.YEAR));
-            material.setDateType(DateDimension.YEAR.getValue());
-            material.setOrzId(o);
-            material.setOrzName(org == null ? "" : org.getName());
-            material.setOrzType(OrzDimension.ORG.getValue());
-
-            fill(material, result);
-
-            doctorReportMaterialDao.create(material);
-        }
-
+    private DoctorReportMaterial getOldOrCreate(Date sumAt, Long orzId, DateDimension dateDimension, OrzDimension orzDimension) {
+        DoctorDimensionCriteria criteria = new DoctorDimensionCriteria();
+        criteria.setSumAt(sumAt);
+        criteria.setOrzType(orzDimension.getValue());
+        criteria.setDateType(dateDimension.getValue());
+        criteria.setOrzId(orzId);
+        return doctorReportMaterialDao.findByDimension(criteria);
     }
 
 
