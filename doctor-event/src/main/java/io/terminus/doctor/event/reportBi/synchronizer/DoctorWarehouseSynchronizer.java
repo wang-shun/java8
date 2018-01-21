@@ -374,7 +374,12 @@ public class DoctorWarehouseSynchronizer {
 //            return Collections.emptyMap();
 //
         Map<WareHouseType, DoctorWarehouseReportDao.AmountAndQuantityDto> result = new HashMap<>();
-        Map<Integer, List<WarehouseReportTempResult>> eachMaterialType = reportTempResults.stream().collect(Collectors.groupingBy(WarehouseReportTempResult::getType));
+
+        Map<Integer, List<WarehouseReportTempResult>> eachMaterialType;
+        if (reportTempResults.isEmpty())
+            eachMaterialType = new HashMap<>();
+        else
+            eachMaterialType = reportTempResults.stream().collect(Collectors.groupingBy(WarehouseReportTempResult::getType));
 
 
         Stream.of(WareHouseType.values()).forEach(w -> {
@@ -387,7 +392,7 @@ public class DoctorWarehouseSynchronizer {
                     totalQuantity = totalQuantity.add(r.getQuantity());
                     totalAmount = totalAmount.add(r.getAmount());
                 }
-                result.put(w, new DoctorWarehouseReportDao.AmountAndQuantityDto(totalAmount, totalQuantity.longValue()));
+                result.put(w, new DoctorWarehouseReportDao.AmountAndQuantityDto(totalAmount.divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP), totalQuantity.longValue()));
             }
         });
 
