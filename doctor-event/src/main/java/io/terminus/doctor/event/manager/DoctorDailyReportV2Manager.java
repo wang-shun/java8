@@ -358,6 +358,7 @@ public class DoctorDailyReportV2Manager {
         doctorPigDaily.setBoarStart(pigStatisticDao.boarLiveStock(criteria.getFarmId(),
                 DateUtil.toDateString(new DateTime(DateUtil.toDate(criteria.getSumAt())).minusDays(1).toDate())));
         doctorPigDaily.setBoarIn(pigStatisticDao.boarIn(criteria));
+        doctorPigDaily.setBoarChgFarmIn(pigStatisticDao.boarChgFarmIn(criteria));
         doctorPigDaily.setBoarDead(pigStatisticDao.boarDead(criteria));
         doctorPigDaily.setBoarWeedOut(pigStatisticDao.boarWeedOut(criteria));
         doctorPigDaily.setBoarSale(pigStatisticDao.boarSale(criteria));
