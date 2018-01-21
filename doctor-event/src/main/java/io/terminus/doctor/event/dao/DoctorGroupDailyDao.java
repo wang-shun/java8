@@ -83,6 +83,11 @@ public class DoctorGroupDailyDao extends MyBatisDao<DoctorGroupDaily> {
                 ImmutableMap.of("sumAt", sumAt, "dateType", dateType, "orzType", orzType));
     }
 
+    public List<DoctorDimensionCriteria> findBySumAt(Date sumAt, Integer dateType, Integer orzType) {
+        return getSqlSession().selectList(sqlId("findBySumAt"),
+                ImmutableMap.of("sumAt", sumAt, "dateType", dateType, "orzType", orzType));
+    }
+
     public Integer farmStart(DoctorDimensionCriteria dimensionCriteria){
         return getSqlSession().selectOne(sqlId("farmStart"), dimensionCriteria);
     }

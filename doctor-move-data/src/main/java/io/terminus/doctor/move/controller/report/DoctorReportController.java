@@ -5,19 +5,18 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
-import io.terminus.doctor.event.reportBi.synchronizer.DoctorWarehouseSynchronizer;
 import io.terminus.doctor.event.service.DoctorDailyReportV2Service;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.sql.rowset.serial.SerialException;
 import java.util.Date;
 import java.util.List;
 
@@ -167,9 +166,10 @@ public class DoctorReportController {
      *
      * @return
      */
-    @RequestMapping(value = "/synchronize/delta/bi/data", method = RequestMethod.GET)
-    public Boolean synchronizeDeltaDayBiData(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start) {
-        return RespHelper.or500(doctorDailyReportV2Service.synchronizeDeltaDayBiData(start));
+    @RequestMapping(value = "/synchronize/delta/bi/data/{farmId}", method = RequestMethod.GET)
+    public Boolean synchronizeDeltaDayBiData(@PathVariable Long farmId,
+                                             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start) {
+        return RespHelper.or500(doctorDailyReportV2Service.synchronizeDeltaDayBiData(farmId, start));
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/flush/npd")

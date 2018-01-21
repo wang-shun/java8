@@ -180,12 +180,13 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
     }
 
     @Override
-    public Response<Boolean> synchronizeDeltaDayBiData(Date start) {
+    public Response<Boolean> synchronizeDeltaDayBiData(Long farmI, Date start) {
         try {
-            doctorReportBiManager.synchronizeDeltaDayBiData(start);
+            doctorReportBiManager.synchronizeDeltaDayBiData(farmI, start);
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
-            log.error("synchronize delta day bi data failed,cause:{}", Throwables.getStackTraceAsString(e));
+            log.error("synchronize delta day bi data failed,farmId:{}, start:{}, cause:{}",
+                    farmI, start, Throwables.getStackTraceAsString(e));
             return Response.fail("synchronize.delta.day.bi.data.failed");
         }
     }

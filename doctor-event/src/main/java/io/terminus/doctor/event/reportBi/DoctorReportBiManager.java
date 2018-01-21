@@ -26,8 +26,8 @@ public class DoctorReportBiManager {
         synchronize.synchronizeDeltaDayBiData();
     }
 
-    public void synchronizeDeltaDayBiData(Date start) {
-        synchronize.synchronizeDeltaDayBiData(start);
+    public void synchronizeDeltaDayBiData(Long farmId, Date start) {
+        synchronize.synchronizeDeltaDayBiData(farmId, start);
     }
     /**
      * 全量同步数据到bi(手动)

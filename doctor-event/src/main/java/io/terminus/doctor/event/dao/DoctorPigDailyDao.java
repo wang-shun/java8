@@ -139,8 +139,18 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
         return getSqlSession().selectList(sqlId("findByAfter"), updatedAt);
     }
 
+    public List<DoctorPigDaily> findByFarmAndAfter(Long farmId, Date sumAt){
+        return getSqlSession().selectList(sqlId("findByFarmAndAfter"), ImmutableMap.of(
+                "farmId", farmId, "sumAt", sumAt));
+    }
+
     public List<DoctorDimensionCriteria> findByDateType(Date sumAt, Integer dateType, Integer orzType) {
         return getSqlSession().selectList(sqlId("findByDateType"),
+                ImmutableMap.of("sumAt", sumAt, "dateType", dateType, "orzType", orzType));
+    }
+
+    public List<DoctorDimensionCriteria> findBySumAt(Date sumAt, Integer dateType, Integer orzType) {
+        return getSqlSession().selectList(sqlId("findBySumAt"),
                 ImmutableMap.of("sumAt", sumAt, "dateType", dateType, "orzType", orzType));
     }
 

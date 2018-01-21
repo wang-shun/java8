@@ -333,6 +333,27 @@
         pig_type
     </select>
 
+    <select id="findBySumAt" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorDimensionCriteria">
+        SELECT
+        case WHEN #{orzType} = 2 then org_id else farm_id end as orzId,
+        #{orzType} as orzType,
+        sum_at as sumAt,
+        #{dateType} as dateType,
+        pig_type as pigType
+        FROM <include refid="tb"/>
+        WHERE
+        sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
+        GROUP BY
+        <if test="orzType == 2">org_id,</if>
+        <if test="orzType == 3">farm_id,</if>
+        <if test="dateType == 1"> date_format(sum_at, '%y-%m-%d'),</if>
+        <if test="dateType == 2"> date_format(sum_at, '%x-%v'),</if>
+        <if test="dateType == 3"> date_format(sum_at, '%y-%m'),</if>
+        <if test="dateType == 4"> concat(date_format(sum_at, '%y-'), QUARTER(sum_at)),</if>
+        <if test="dateType == 5"> date_format(sum_at, '%y'),</if>
+        pig_type
+    </select>
+
     <select id="farmStart" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="int">
         SELECT
         `start`
@@ -374,7 +395,7 @@
     <select id="findByFarmAndAfter" parameterType="map" resultMap="DoctorGroupDailyMap">
         SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
         WHERE
-        farm_id = #{farm}
+        farm_id = #{farmId}
         AND sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
     </select>
 </mapper>

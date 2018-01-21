@@ -2,7 +2,6 @@ package io.terminus.doctor.event.service;
 
 
 import io.terminus.common.model.Response;
-import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.report.daily.DoctorFarmLiveStockDto;
 import io.terminus.doctor.event.dto.reportBi.DoctorDimensionReport;
@@ -72,7 +71,7 @@ public interface DoctorDailyReportV2Service {
      *
      * @return
      */
-    Response<Boolean> synchronizeDeltaDayBiData(Date start);
+    Response<Boolean> synchronizeDeltaDayBiData(Long farmId, Date start);
 
     /**
      * 查询某一时间维度的猪场报表数据
