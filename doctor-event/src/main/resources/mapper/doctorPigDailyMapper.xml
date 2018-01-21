@@ -684,6 +684,7 @@
         FROM
         <include refid="tb"/>
         <include refid="dimensionCri"/>
+        group by sum_at
         order by sum_at asc
         limit 1
     </select>
@@ -701,7 +702,6 @@
         FROM
         <include refid="tb"/>
         <include refid="dimensionCri"/>
-        group by sum_at
         order by sum_at desc
         limit 1
     </select>
