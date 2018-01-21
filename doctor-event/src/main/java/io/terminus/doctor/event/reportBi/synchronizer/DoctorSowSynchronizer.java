@@ -112,7 +112,7 @@ public class DoctorSowSynchronizer {
             sowIn = sowIn + pigDaily.getSowPhChgFarmIn()
                     + pigDaily.getSowCfInFarmIn();
         }
-        return fieldHelper.get(sowDeadWeedOut, sowIn);
+        return fieldHelper.get(sowDeadWeedOut, pigDaily.getSowStart() + sowIn);
     }
 
     public void deleteAll() {
