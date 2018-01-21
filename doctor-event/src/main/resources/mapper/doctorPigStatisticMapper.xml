@@ -89,7 +89,6 @@
         <where>
             <include refid="criteria"/>
             and `type` = 12
-            and pig_status_before = 9
         </where>
     </select>
 
@@ -284,7 +283,6 @@
         from doctor_pig_tracks
         where status in (1,5,9)
         and farm_id = #{farmId}
-        and current_barn_type in(5,6)
         )
         -
         (
@@ -341,7 +339,6 @@
             <include refid="criteria" />
             AND `type` = 11
             AND preg_check_result = 1
-            AND barn_type in (5,6)
         </where>
     </select>
 
@@ -352,7 +349,6 @@
             <include refid="criteria" />
             AND `type` = 11
             AND preg_check_result = 2
-            AND barn_type in (5,6)
         </where>
     </select>
 
@@ -363,7 +359,6 @@
             <include refid="criteria" />
             AND `type` = 11
             AND preg_check_result = 4
-            AND barn_type in (5,6)
         </where>
     </select>
 
@@ -374,7 +369,6 @@
             <include refid="criteria" />
             AND `type` = 11
             AND preg_check_result = 3
-            AND barn_type in (5,6)
         </where>
     </select>
 

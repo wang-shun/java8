@@ -2,7 +2,6 @@ package io.terminus.doctor.event.editHandler.pig;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
-import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
@@ -150,9 +149,9 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
 
 
         //更新配种、空怀、怀孕母猪数量
-        if (!PigType.MATING_TYPES.contains(oldPigEvent.getBarnType())) {
-            return;
-        }
+//        if (!PigType.MATING_TYPES.contains(oldPigEvent.getBarnType())) {
+//            return;
+//        }
         Integer phMatingChangeCount = 0;
         Integer phKongHuaiChangeCount = 0;
         Integer phPregnantChangeCount = 0;
@@ -191,9 +190,9 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
 
 
         //更新配种、空怀、怀孕母猪数量
-        if (!PigType.MATING_TYPES.contains(newPigEvent.getBarnType())) {
-            return;
-        }
+//        if (!PigType.MATING_TYPES.contains(newPigEvent.getBarnType())) {
+//            return;
+//        }
         Integer afterStatus = getStatus(newDto.getCheckResult());
         Integer beforeStatus = newPigEvent.getPigStatusBefore();
         if (Objects.equals(beforeStatus, afterStatus)) {
