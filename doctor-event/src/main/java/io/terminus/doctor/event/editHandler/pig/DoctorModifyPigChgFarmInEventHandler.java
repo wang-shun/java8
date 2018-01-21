@@ -117,6 +117,7 @@ public class DoctorModifyPigChgFarmInEventHandler extends DoctorAbstractModifyPi
            }
 
         } else {
+            oldDailyPig.setBoarChgFarmIn(EventUtil.plusInt(oldDailyPig.getBoarChgFarmIn(), changeDto.getEntryCountChange()));
             oldDailyPig.setBoarIn(EventUtil.plusInt(oldDailyPig.getBoarIn(), changeDto.getEntryCountChange()));
             oldDailyPig.setBoarEnd(EventUtil.plusInt(oldDailyPig.getBoarEnd(), changeDto.getEntryCountChange()));
         }

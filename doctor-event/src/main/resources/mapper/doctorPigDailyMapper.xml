@@ -67,6 +67,7 @@
         <result property="weanWeight" column="wean_weight"/>
         <result property="boarStart" column="boar_start"/>
         <result property="boarIn" column="boar_in"/>
+        <result property="boarChgFarmIn" column="boar_chg_farm_in"/>
         <result property="boarDead" column="boar_dead"/>
         <result property="boarWeedOut" column="boar_weed_out"/>
         <result property="boarSale" column="boar_sale"/>
@@ -96,7 +97,7 @@
         `sow_cf_dead`, `sow_cf_weed_out`, `sow_cf_sale`, `sow_cf_chg_farm`, `sow_cf_other_out`, `early_mating`,
         `early_farrow_nest`, `later_nest`, `farrow_nest`, `farrow_live`, `farrow_health`, `farrow_weak`, `farrow_dead`,
         `farrowjmh`, `farrow_weight`, `wean_nest`, `wean_qualified_count`, `wean_count`, `wean_day_age`, `wean_weight`,
-        `boar_start`, `boar_in`, `boar_dead`, `boar_weed_out`, `boar_sale`, `boar_other_out`, `boar_end`,
+        `boar_start`, `boar_in`, `boar_chg_farm_in`, `boar_dead`, `boar_weed_out`, `boar_sale`, `boar_other_out`, `boar_end`,
         `sow_not_mating_count`, `version`,
         created_at, updated_at
     </sql>
@@ -110,7 +111,7 @@
         #{sowCfDead}, #{sowCfWeedOut}, #{sowCfSale}, #{sowCfChgFarm}, #{sowCfOtherOut}, #{earlyMating},
         #{earlyFarrowNest}, #{laterNest}, #{farrowNest}, #{farrowLive}, #{farrowHealth}, #{farrowWeak}, #{farrowDead},
         #{farrowjmh}, #{farrowWeight}, #{weanNest}, #{weanQualifiedCount}, #{weanCount}, #{weanDayAge}, #{weanWeight},
-        #{boarStart}, #{boarIn}, #{boarDead}, #{boarWeedOut}, #{boarSale}, #{boarOtherOut}, #{boarEnd},
+        #{boarStart}, #{boarIn}, #{boarChgFarmIn}, #{boarDead}, #{boarWeedOut}, #{boarSale}, #{boarOtherOut}, #{boarEnd},
         #{sowNotMatingCount}, 1,
         now(), now()
     </sql>
@@ -174,6 +175,7 @@
             <if test="weanWeight != null">AND `wean_weight` = #{weanWeight}</if>
             <if test="boarStart != null">AND `boar_start` = #{boarStart}</if>
             <if test="boarIn != null">AND `boar_in` = #{boarIn}</if>
+            <if test="boarChgFarmIn != null">AND `boar_chg_farm_in` = #{boarChgFarmIn}</if>
             <if test="boarDead != null">AND `boar_dead` = #{boarDead}</if>
             <if test="boarWeedOut != null">AND `boar_weed_out` = #{boarWeedOut}</if>
             <if test="boarSale != null">AND `boar_sale` = #{boarSale}</if>
@@ -274,6 +276,7 @@
             <if test="weanWeight != null">`wean_weight` = #{weanWeight},</if>
             <if test="boarStart != null">`boar_start` = #{boarStart},</if>
             <if test="boarIn != null">`boar_in` = #{boarIn},</if>
+            <if test="boarChgFarmIn != null">`boar_chg_farm_in` = #{boarChgFarmIn},</if>
             <if test="boarDead != null">`boar_dead` = #{boarDead},</if>
             <if test="boarWeedOut != null">`boar_weed_out` = #{boarWeedOut},</if>
             <if test="boarSale != null">`boar_sale` = #{boarSale},</if>
@@ -556,6 +559,7 @@
         ifnull(sum(wean_day_age), 0) as weanDayAge,
         ifnull(sum(wean_weight), 0) as weanWeight,
         ifnull(sum(boar_in), 0) as boarIn,
+        ifnull(sum(boar_chg_farm_in), 0) as boarChgFarmIn,
         ifnull(sum(boar_dead), 0) as boarDead,
         ifnull(sum(boar_weed_out), 0) as boarWeedOut,
         ifnull(sum(boar_sale), 0) as boarSale,

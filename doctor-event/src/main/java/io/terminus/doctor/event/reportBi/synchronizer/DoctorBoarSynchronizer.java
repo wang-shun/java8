@@ -71,7 +71,7 @@ public class DoctorBoarSynchronizer {
         DoctorFiledUrlCriteria filedUrlCriteria = new DoctorFiledUrlCriteria();
         fieldHelper.fillPigFiledUrl(filedUrlCriteria, pigDaily, reportBi.getOrzType(), reportBi.getDateType());
         reportBi.setStart(pigDaily.getBoarStart());
-        reportBi.setTurnInto(pigDaily.getBoarIn());
+        reportBi.setTurnInto(turnInto(pigDaily, reportBi));
         reportBi.setDead(fieldHelper.filedUrl(filedUrlCriteria, pigDaily.getBoarDead(), "boarDead"));
         reportBi.setWeedOut(fieldHelper.filedUrl(filedUrlCriteria, pigDaily.getBoarWeedOut(), "boarWeedOut"));
         reportBi.setSale(fieldHelper.filedUrl(filedUrlCriteria, pigDaily.getBoarSale(), "boarSale"));
@@ -81,6 +81,13 @@ public class DoctorBoarSynchronizer {
 
     private void buildDelay(DoctorPigDailyExtend pigDaily, DoctorReportBoar reportBi) {
         reportBi.setDailyPigCount(pigDaily.getBoarDailyPigCount());
+    }
+
+    public Integer turnInto(DoctorPigDailyExtend dailyExtend, DoctorReportBoar reportBi) {
+        if (Objects.equals(reportBi.getOrzType(), OrzDimension.ORG.getValue())) {
+            return dailyExtend.getBoarIn() - dailyExtend.getBoarChgFarmIn();
+        }
+        return dailyExtend.getBoarIn();
     }
 
     public void deleteAll() {

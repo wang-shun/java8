@@ -644,11 +644,22 @@
     </select>
 
     <select id="boarIn" parameterType="map" resultType="int">
-        SELECT ifnull(sum(wean_avg_weight), 0)
+        SELECT ifnull(count(1), 0)
         FROM doctor_pig_events
         <where>
             <include refid="criteria" />
             AND `type` IN (7, 20)
+            AND boar_type = 1
+            AND kind = 2
+        </where>
+    </select>
+
+    <select id="boarChgFarmIn" parameterType="map" resultType="int">
+        SELECT ifnull(count(1), 0)
+        FROM doctor_pig_events
+        <where>
+            <include refid="criteria" />
+            AND `type` = 20
             AND boar_type = 1
             AND kind = 2
         </where>

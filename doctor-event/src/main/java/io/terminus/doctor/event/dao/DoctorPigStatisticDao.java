@@ -223,6 +223,10 @@ public class DoctorPigStatisticDao {
         return sqlSession.selectOne(sqlId("boarIn"), criteria.toMap());
     }
 
+    public Integer boarChgFarmIn(DoctorStatisticCriteria criteria) {
+        return sqlSession.selectOne(sqlId("boarChgFarmIn"), criteria.toMap());
+    }
+
     public Integer boarDead(DoctorStatisticCriteria criteria) {
         return sqlSession.selectOne(sqlId("boarDead"), criteria.toMap());
     }

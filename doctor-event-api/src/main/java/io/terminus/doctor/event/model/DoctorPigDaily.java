@@ -311,6 +311,11 @@ public class DoctorPigDaily implements Serializable {
      * 公猪转入数量
      */
     private Integer boarIn;
+
+    /**
+     * 公猪转场转入
+     */
+    private Integer boarChgFarmIn;
     
     /**
      * 公猪死亡数量
