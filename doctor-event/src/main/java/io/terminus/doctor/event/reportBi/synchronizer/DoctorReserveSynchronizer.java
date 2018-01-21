@@ -80,7 +80,7 @@ public class DoctorReserveSynchronizer {
         DoctorFiledUrlCriteria filedUrlCriteria = new DoctorFiledUrlCriteria();
         fieldHelper.fillGroupFiledUrl(filedUrlCriteria, groupDaily, reportBi.getOrzType(), reportBi.getDateType());
         reportBi.setStart(groupDaily.getStart());
-        reportBi.setTurnInto(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getTurnInto(), "turnInto"));
+        reportBi.setTurnInto(fieldHelper.filedUrl(filedUrlCriteria, fieldHelper.groupTurnInto(groupDaily, reportBi.getOrzType()), "turnInto"));
         reportBi.setTurnSeed(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getTurnSeed(), "turnSeed"));
         reportBi.setDead(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getDead(), "dead"));
         reportBi.setWeedOut(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getWeedOut(), "weedOut"));

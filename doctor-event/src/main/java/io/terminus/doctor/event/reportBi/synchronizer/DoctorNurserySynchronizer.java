@@ -70,7 +70,7 @@ public class DoctorNurserySynchronizer {
         fieldHelper.fillGroupFiledUrl(filedUrlCriteria, groupDaily, reportBi.getOrzType(), reportBi.getDateType());
 
         reportBi.setStart(groupDaily.getStart());
-        reportBi.setTurnInto(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getTurnInto(), "turnInto"));
+        reportBi.setTurnInto(fieldHelper.filedUrl(filedUrlCriteria, fieldHelper.groupTurnInto(groupDaily, reportBi.getOrzType()), "turnInto"));
         reportBi.setSale(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getSale(), "sale"));
         reportBi.setToHoubei(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getToHoubei(), "toHoubei"));
         reportBi.setToFatten(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getToFatten(), "toFatten"));

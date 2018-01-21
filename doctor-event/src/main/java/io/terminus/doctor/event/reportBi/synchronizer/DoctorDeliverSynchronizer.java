@@ -148,7 +148,7 @@ public class DoctorDeliverSynchronizer {
         fieldHelper.fillGroupFiledUrl(filedUrlCriteria, groupDaily, reportBi.getOrzType(), reportBi.getDateType());
 
         reportBi.setPigletStart(groupDaily.getStart());
-        reportBi.setPigletOtherIn(EventUtil.plusInt(groupDaily.getChgFarmIn(), groupDaily.getDeliverHandTurnInto()));
+        reportBi.setPigletOtherIn(otherIn(groupDaily, reportBi.getOrzType()));
         reportBi.setPigletChgFarmOut(groupDaily.getChgFarm());
         reportBi.setToNursery(fieldHelper.filedUrl(filedUrlCriteria, groupDaily.getToNursery(), "toNursery"));
         reportBi.setPigletDead(groupDaily.getDead());
@@ -176,6 +176,14 @@ public class DoctorDeliverSynchronizer {
             return dailyExtend.getSowCfInFarmIn();
         }
         return 0;
+    }
+
+    public Integer otherIn(DoctorGroupDailyExtend dailyExtend, Integer orzType) {
+        int otherIn = dailyExtend.getDeliverHandTurnInto();
+        if (Objects.equals(orzType, OrzDimension.FARM.getValue())) {
+            return otherIn + dailyExtend.getChgFarmIn();
+        }
+        return otherIn;
     }
     private Double outAvgWeight28(DoctorReportDeliver deliver) {
         Integer STANDARD_AGE = 28;

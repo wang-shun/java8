@@ -6,11 +6,13 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.reportBi.DoctorFiledUrlDao;
 import io.terminus.doctor.event.dto.reportBi.DoctorFiledUrlCriteria;
+import io.terminus.doctor.event.dto.reportBi.DoctorGroupDailyExtend;
 import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.model.DoctorFiledUrl;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorPigDaily;
+import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -83,6 +85,13 @@ public class FieldHelper {
             log.error("dead weed out rate failed, groupDaily:{}, orzType:{}", groupDaily, orzType);
         }
         return 0.0;
+    }
+
+    public Integer groupTurnInto(DoctorGroupDailyExtend dailyExtend, Integer orzType) {
+        if (Objects.equals(orzType, OrzDimension.FARM.getValue())) {
+            return dailyExtend.getTurnInto();
+        }
+        return EventUtil.minusInt(dailyExtend.getTurnInto(), dailyExtend.getChgFarmIn());
     }
 
     private String filedUrl(DoctorFiledUrlCriteria criteria) {
