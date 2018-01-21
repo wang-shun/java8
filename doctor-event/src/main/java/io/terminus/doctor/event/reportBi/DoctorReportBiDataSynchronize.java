@@ -426,6 +426,7 @@ public class DoctorReportBiDataSynchronize {
             } else {
                 start = doctorGroupDailyDao.orgStart(dimensionCriteria);
                 end = doctorGroupDailyDao.orgEnd(dimensionCriteria);
+                groupDaily.setDailyLivestockOnHand(doctorGroupDailyDao.orgDayAvgLiveStock(dimensionCriteria));
             }
             groupDaily.setStart(start);
             groupDaily.setEnd(end);
@@ -469,6 +470,10 @@ public class DoctorReportBiDataSynchronize {
             } else {
                 start = doctorPigDailyDao.orgStart(dimensionCriteria);
                 end = doctorPigDailyDao.orgEnd(dimensionCriteria);
+                DoctorPigDailyExtend dayAvgLiveStock = doctorPigDailyDao.orgSumDimension(dimensionCriteria);
+                int count = doctorPigDailyDao.countDimension(dimensionCriteria);
+                dailyExtend.setBoarDailyPigCount(dayAvgLiveStock.getBoarDailyPigCount()/count);
+                dailyExtend.setSowDailyPigCount(dayAvgLiveStock.getSowDailyPigCount()/count);
             }
             dailyExtend.setSowCfStart(start.getSowCfStart());
             dailyExtend.setSowPhStart(start.getSowPhStart());

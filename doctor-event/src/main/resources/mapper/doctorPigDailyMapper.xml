@@ -724,4 +724,22 @@
         limit 1
     </select>
 
+    <select id="orgSumDimension" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
+            resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
+        SELECT
+        sum(sow_ph_end + sow_cf_end) as sowDailyPigCount,
+        sum(boar_end) as boarDailyPigCount
+        FROM <include refid="tb"/>
+        <include refid="dimensionCri"/>
+    </select>
+
+    <select id="countDimension" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
+            resultType="int">
+        select count(1)
+        from (select *
+        FROM <include refid="tb"/>
+        <include refid="dimensionCri"/>
+        group by sum_at
+        ) a
+    </select>
 </mapper>

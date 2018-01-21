@@ -169,4 +169,12 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
     public DoctorPigDailyExtend orgEnd(DoctorDimensionCriteria dimensionCriteria) {
         return getSqlSession().selectOne(sqlId("orgEnd"), dimensionCriteria);
     }
+
+    public DoctorPigDailyExtend orgSumDimension(DoctorDimensionCriteria dimensionCriteria){
+        return getSqlSession().selectOne(sqlId("orgSumDimension"), dimensionCriteria);
+    }
+
+    public Integer countDimension(DoctorDimensionCriteria dimensionCriteria){
+        return getSqlSession().selectOne(sqlId("countDimension"), dimensionCriteria);
+    }
 }

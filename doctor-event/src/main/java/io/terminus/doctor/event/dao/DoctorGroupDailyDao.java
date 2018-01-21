@@ -103,4 +103,8 @@ public class DoctorGroupDailyDao extends MyBatisDao<DoctorGroupDaily> {
     public Integer orgEnd(DoctorDimensionCriteria dimensionCriteria){
         return getSqlSession().selectOne(sqlId("orgEnd"), dimensionCriteria);
     }
+
+    public Integer orgDayAvgLiveStock(DoctorDimensionCriteria dimensionCriteria){
+        return getSqlSession().selectOne(sqlId("orgDayAvgLiveStock"), dimensionCriteria);
+    }
 }
