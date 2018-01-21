@@ -3,9 +3,13 @@ package io.terminus.doctor.event.bi;
 import com.google.common.collect.Lists;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
+import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorPigDailyDao;
+import io.terminus.doctor.event.dao.DoctorPigStatisticDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportSowDao;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
+import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
+import io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend;
 import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.model.DoctorPigDaily;
@@ -15,6 +19,7 @@ import io.terminus.doctor.event.test.BaseServiceTest;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.TestExecutionListeners;
 
 import java.util.List;
 
@@ -31,6 +36,10 @@ public class DoctorBiDataTest extends BaseServiceTest {
     private DoctorPigDailyDao pigDailyDao;
     @Autowired
     private DoctorReportSowDao doctorReportSowDao;
+    @Autowired
+    private DoctorPigStatisticDao doctorPigStatisticDao;
+    @Autowired
+    private DoctorKpiDao doctorKpiDao;
 
     @Test
     public void fullSynchronizeTest() {
@@ -84,5 +93,61 @@ public class DoctorBiDataTest extends BaseServiceTest {
         doctorDimensionCriteria.setOrzType(3);
         doctorDimensionCriteria.setDateType(1);
 
+    }
+
+    @Test
+    public void startTest() {
+        DoctorDimensionCriteria doctorDimensionCriteria = new DoctorDimensionCriteria();
+        doctorDimensionCriteria.setOrzId(188L);
+        doctorDimensionCriteria.setOrzType(2);
+        doctorDimensionCriteria.setDateType(3);
+        doctorDimensionCriteria.setSumAt(DateUtil.toDate("2018-01-01"));
+        DoctorPigDailyExtend sow = pigDailyDao.orgStart(doctorDimensionCriteria);
+        System.out.println(sow);
+    }
+
+    @Test
+    public void orgDayAvgLiveStockTest() {
+        DoctorDimensionCriteria doctorDimensionCriteria = new DoctorDimensionCriteria();
+        doctorDimensionCriteria.setOrzId(188L);
+        doctorDimensionCriteria.setOrzType(2);
+        doctorDimensionCriteria.setDateType(3);
+        doctorDimensionCriteria.setPigType(4);
+        doctorDimensionCriteria.setSumAt(DateUtil.toDate("2018-01-01"));
+        Integer sow = doctorGroupDailyDao.orgDayAvgLiveStock(doctorDimensionCriteria);
+        System.out.println(sow);
+    }
+
+    @Test
+    public void orgPidDay() {
+        DoctorDimensionCriteria doctorDimensionCriteria = new DoctorDimensionCriteria();
+        doctorDimensionCriteria.setOrzId(188L);
+        doctorDimensionCriteria.setOrzType(2);
+        doctorDimensionCriteria.setDateType(3);
+        doctorDimensionCriteria.setPigType(4);
+        doctorDimensionCriteria.setSumAt(DateUtil.toDate("2018-01-01"));
+        DoctorPigDailyExtend dayAvgLiveStock = pigDailyDao.orgSumDimension(doctorDimensionCriteria);
+        int count = pigDailyDao.countDimension(doctorDimensionCriteria);
+        System.out.println(dayAvgLiveStock.getBoarDailyPigCount()/count);
+        System.out.println(dayAvgLiveStock.getSowDailyPigCount()/count);
+    }
+
+    @Test
+    public void earlyMatingCount() {
+        DoctorStatisticCriteria criteria = new DoctorStatisticCriteria(404L, null);
+        criteria.setStartAt("2017-09-01");
+        criteria.setEndAt("2017-09-30");
+        int early = doctorPigStatisticDao.earlyMating(criteria);
+        System.out.println(early);
+    }
+
+    @Test
+    public void boarLiveStock() {
+        DoctorStatisticCriteria criteria = new DoctorStatisticCriteria(404L, null);
+        criteria.setStartAt("2017-09-01");
+        criteria.setEndAt("2017-09-30");
+        int early = doctorPigStatisticDao.boarLiveStock(404L, "2018-01-15");
+        System.out.println(doctorKpiDao.realTimeLiveStockBoar(404L, DateUtil.toDate("2018-01-15")));
+        System.out.println(early);
     }
 }
