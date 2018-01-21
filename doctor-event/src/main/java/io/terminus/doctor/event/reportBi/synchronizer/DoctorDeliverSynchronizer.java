@@ -135,6 +135,7 @@ public class DoctorDeliverSynchronizer {
         if (DateDimension.YEARLY.contains(reportBi.getDateType())) {
             reportBi.setEarlyNestRate(fieldHelper.get(pigDaily.getFarrowNest(), pigDaily.getEarlyMating()));
             reportBi.setLaterNestRate(fieldHelper.get(pigDaily.getLaterNest(), pigDaily.getMatingCount()));
+            reportBi.setPigletLivingRate(1 - FieldHelper.get(EventUtil.plusInt(reportBi.getPigletDead(), reportBi.getPigletWeedOut()), reportBi.getFarrowHealth()));
         }
         reportBi.setEarlyMating(pigDaily.getEarlyMating());
         reportBi.setEarlyNest(pigDaily.getEarlyFarrowNest());
@@ -162,7 +163,7 @@ public class DoctorDeliverSynchronizer {
         reportBi.setToNurseryAvgWeight(EventUtil.getAvgWeight(groupDaily.getToNurseryWeight(), groupDaily.getToNursery()));
         if (DateDimension.YEARLY.contains(reportBi.getDateType())) {
             reportBi.setPigletDeadWeedOutRate(fieldHelper.deadWeedOutRate(groupDaily, reportBi.getOrzType()));
-            reportBi.setPigletLivingRate(1 - reportBi.getPigletDeadWeedOutRate());
+            reportBi.setPigletLivingRate(1 - FieldHelper.get(EventUtil.plusInt(reportBi.getPigletDead(), reportBi.getPigletWeedOut()), reportBi.getFarrowHealth()));
         }
         reportBi.setTurnOutAvgWeight(EventUtil.getAvgWeight(EventUtil.plusDouble(groupDaily.getToNurseryWeight(), groupDaily.getSaleWeight()),
                 EventUtil.plusInt(groupDaily.getToNursery(), groupDaily.getSale())));
