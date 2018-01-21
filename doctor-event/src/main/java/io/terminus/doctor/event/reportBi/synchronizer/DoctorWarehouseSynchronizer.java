@@ -77,25 +77,25 @@ public class DoctorWarehouseSynchronizer {
 
         //周
         DoctorPigReportReadService.DateDuration dateDuration = doctorPigReportReadService.getDuration(date, ReportTime.WEEK);
-        farmIds = doctorWarehouseReportDao.findApplyFarm(dateDuration.getStart(), dateDuration.getEnd());
+//        farmIds = doctorWarehouseReportDao.findApplyFarm(dateDuration.getStart(), dateDuration.getEnd());
         orgIds = flushFarm(farmIds, dateDuration.getStart(), dateDuration.getEnd(), DateDimension.WEEK);
         flushOrg(orgIds, dateDuration.getStart(), dateDuration.getEnd(), DateDimension.WEEK);
 
         //月
         dateDuration = doctorPigReportReadService.getDuration(date, ReportTime.MONTH);
-        farmIds = doctorWarehouseReportDao.findApplyFarm(dateDuration.getStart(), dateDuration.getEnd());
+//        farmIds = doctorWarehouseReportDao.findApplyFarm(dateDuration.getStart(), dateDuration.getEnd());
         orgIds = flushFarm(farmIds, dateDuration.getStart(), dateDuration.getEnd(), DateDimension.MONTH);
         flushOrg(orgIds, dateDuration.getStart(), dateDuration.getEnd(), DateDimension.MONTH);
 
         //季
         dateDuration = doctorPigReportReadService.getDuration(date, ReportTime.SEASON);
-        farmIds = doctorWarehouseReportDao.findApplyFarm(dateDuration.getStart(), dateDuration.getEnd());
+//        farmIds = doctorWarehouseReportDao.findApplyFarm(dateDuration.getStart(), dateDuration.getEnd());
         orgIds = flushFarm(farmIds, dateDuration.getStart(), dateDuration.getEnd(), DateDimension.QUARTER);
         flushOrg(orgIds, dateDuration.getStart(), dateDuration.getEnd(), DateDimension.QUARTER);
 
         //年
         dateDuration = doctorPigReportReadService.getDuration(date, ReportTime.YEAR);
-        farmIds = doctorWarehouseReportDao.findApplyFarm(dateDuration.getStart(), dateDuration.getEnd());
+//        farmIds = doctorWarehouseReportDao.findApplyFarm(dateDuration.getStart(), dateDuration.getEnd());
         orgIds = flushFarm(farmIds, dateDuration.getStart(), dateDuration.getEnd(), DateDimension.YEAR);
         flushOrg(orgIds, dateDuration.getStart(), dateDuration.getEnd(), DateDimension.YEAR);
 
