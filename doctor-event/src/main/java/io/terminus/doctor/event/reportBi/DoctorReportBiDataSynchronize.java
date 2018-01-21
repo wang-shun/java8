@@ -183,6 +183,8 @@ public class DoctorReportBiDataSynchronize {
 
     }
 
+
+
     private void synchronizeGroupForDay(List<DoctorGroupDaily> groupDailyList) {
         if (Arguments.isNullOrEmpty(groupDailyList)) {
             return;
@@ -233,43 +235,43 @@ public class DoctorReportBiDataSynchronize {
     }
 
     private void synchronizeBiDataImpl() {
-//        //同步猪场日
-//        synchronizeFullBiDataForDay();
+        //同步猪场日
+        synchronizeFullBiDataForDay();
         List<DoctorDimensionCriteria> dimensionCriteriaList = Lists.newArrayList();
         DoctorDimensionCriteria dimensionCriteria;
-//        //同步猪场周
-//        dimensionCriteria = new DoctorDimensionCriteria();
-//        dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
-//        dimensionCriteria.setDateType(DateDimension.WEEK.getValue());
-//        dimensionCriteriaList.add(dimensionCriteria);
-//        //同步猪场月
-//        dimensionCriteria = new DoctorDimensionCriteria();
-//        dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
-//        dimensionCriteria.setDateType(DateDimension.MONTH.getValue());
-//        dimensionCriteriaList.add(dimensionCriteria);
-//        //同步猪场季
-//        dimensionCriteria = new DoctorDimensionCriteria();
-//        dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
-//        dimensionCriteria.setDateType(DateDimension.QUARTER.getValue());
-//        dimensionCriteriaList.add(dimensionCriteria);
-//
-//        //同步猪场年
-//        dimensionCriteria = new DoctorDimensionCriteria();
-//        dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
-//        dimensionCriteria.setDateType(DateDimension.YEAR.getValue());
-//        dimensionCriteriaList.add(dimensionCriteria);
-//
-//        //同步公司日
-//        dimensionCriteria = new DoctorDimensionCriteria();
-//        dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
-//        dimensionCriteria.setDateType(DateDimension.DAY.getValue());
-//        dimensionCriteriaList.add(dimensionCriteria);
-//
-//        //同步公司周
-//        dimensionCriteria = new DoctorDimensionCriteria();
-//        dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
-//        dimensionCriteria.setDateType(DateDimension.WEEK.getValue());
-//        dimensionCriteriaList.add(dimensionCriteria);
+        //同步猪场周
+        dimensionCriteria = new DoctorDimensionCriteria();
+        dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
+        dimensionCriteria.setDateType(DateDimension.WEEK.getValue());
+        dimensionCriteriaList.add(dimensionCriteria);
+        //同步猪场月
+        dimensionCriteria = new DoctorDimensionCriteria();
+        dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
+        dimensionCriteria.setDateType(DateDimension.MONTH.getValue());
+        dimensionCriteriaList.add(dimensionCriteria);
+        //同步猪场季
+        dimensionCriteria = new DoctorDimensionCriteria();
+        dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
+        dimensionCriteria.setDateType(DateDimension.QUARTER.getValue());
+        dimensionCriteriaList.add(dimensionCriteria);
+
+        //同步猪场年
+        dimensionCriteria = new DoctorDimensionCriteria();
+        dimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
+        dimensionCriteria.setDateType(DateDimension.YEAR.getValue());
+        dimensionCriteriaList.add(dimensionCriteria);
+
+        //同步公司日
+        dimensionCriteria = new DoctorDimensionCriteria();
+        dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
+        dimensionCriteria.setDateType(DateDimension.DAY.getValue());
+        dimensionCriteriaList.add(dimensionCriteria);
+
+        //同步公司周
+        dimensionCriteria = new DoctorDimensionCriteria();
+        dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
+        dimensionCriteria.setDateType(DateDimension.WEEK.getValue());
+        dimensionCriteriaList.add(dimensionCriteria);
 
         //同步公司月
         dimensionCriteria = new DoctorDimensionCriteria();
@@ -277,17 +279,17 @@ public class DoctorReportBiDataSynchronize {
         dimensionCriteria.setDateType(DateDimension.MONTH.getValue());
         dimensionCriteriaList.add(dimensionCriteria);
 
-//        //同步公司季
-//        dimensionCriteria = new DoctorDimensionCriteria();
-//        dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
-//        dimensionCriteria.setDateType(DateDimension.QUARTER.getValue());
-//        dimensionCriteriaList.add(dimensionCriteria);
-//
-//        //同步公司年
-//        dimensionCriteria = new DoctorDimensionCriteria();
-//        dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
-//        dimensionCriteria.setDateType(DateDimension.YEAR.getValue());
-//        dimensionCriteriaList.add(dimensionCriteria);
+        //同步公司季
+        dimensionCriteria = new DoctorDimensionCriteria();
+        dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
+        dimensionCriteria.setDateType(DateDimension.QUARTER.getValue());
+        dimensionCriteriaList.add(dimensionCriteria);
+
+        //同步公司年
+        dimensionCriteria = new DoctorDimensionCriteria();
+        dimensionCriteria.setOrzType(OrzDimension.ORG.getValue());
+        dimensionCriteria.setDateType(DateDimension.YEAR.getValue());
+        dimensionCriteriaList.add(dimensionCriteria);
 
         dimensionCriteriaList.parallelStream().forEach(this::synchronizeFullBiDataForDimension);
     }
