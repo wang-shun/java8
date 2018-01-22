@@ -100,7 +100,7 @@ public class DoctorFattenSynchronizer {
     private Double outAvgWeight180(DoctorGroupDailyExtend dailyExtend) {
         Integer STANDARD_AGE = 180;
         Double FACTOR = 1.77;
-        return (STANDARD_AGE - dailyExtend.getTurnActualAge()
+        return (STANDARD_AGE - FieldHelper.get(dailyExtend.getTurnActualAge(), dailyExtend.getTurnActualCount())
                 + EventUtil.getAvgWeight(dailyExtend.getTurnActualWeight(), dailyExtend.getTurnActualCount()) * FACTOR) / FACTOR;
     }
 

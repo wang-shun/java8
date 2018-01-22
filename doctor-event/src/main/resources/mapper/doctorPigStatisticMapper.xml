@@ -380,7 +380,8 @@
             and a.type = 16
             and b.type = 9
             and b.current_mating_count = 1
-            and datediff(a.event_at, b.event_at) &lt;= 7;
+            and datediff(a.event_at, b.event_at) &lt;= 7
+            and a.event_at = #{sumAt}
         </where>
     </select>
 
@@ -392,7 +393,8 @@
             and a.type = 16
             and b.type = 6
             AND b.change_type_id in (110,111)
-            and datediff(a.event_at, b.event_at) &lt;= 7;
+            and datediff(a.event_at, b.event_at) &lt;= 7
+            and a.event_at = #{sumAt}
         </where>
     </select>
 
