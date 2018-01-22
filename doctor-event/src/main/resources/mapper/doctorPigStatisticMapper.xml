@@ -66,11 +66,12 @@
         kind = 1 AND
         status = 1 AND
         event_source != 5 AND
-        (( barn_type in ( 5, 6 ) and type in(2,6,7,14) ) OR ( barn_type = 7 and type = 12 ) )  -- 保育舍发生的转场+销售+转分娩舍-(产房发生的进场+转配怀舍)
+        (( barn_type in ( 5, 6 ) and type in(2,6,7,14) ) OR ( barn_type = 7 and type = 12 ) ) --
+        保育舍发生的转场+销售+转分娩舍-(产房发生的进场+转配怀舍)
         )
     </select>
 
-    <select id="sowPhReserveIn" parameterType="map" resultType="int" >
+    <select id="sowPhReserveIn" parameterType="map" resultType="int">
         SELECT
         ifnull(count(*),0)
         FROM doctor_pig_events
@@ -166,7 +167,7 @@
         SELECT ifnull(count(1), 0)
         FROM doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             AND `type` = 6
             AND barn_type in (5,6)
             AND change_type_id not in( 109, 110, 111)
@@ -178,7 +179,7 @@
         select ifnull(count(1),0)
         from doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             and `type` = 9
             and kind = 1
             and `doctor_mate_type` = 1
@@ -191,7 +192,7 @@
         select ifnull(count(1),0)
         from doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             and `type` = 9
             and kind = 1
             and `doctor_mate_type` in (2, 3)
@@ -204,7 +205,7 @@
         select ifnull(count(1),0)
         from doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             and `type` = 9
             and kind = 1
             and `doctor_mate_type` = 4
@@ -217,7 +218,7 @@
         select ifnull(count(1),0)
         from doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             and `type` = 9
             and kind = 1
             and `doctor_mate_type` = 5
@@ -229,7 +230,7 @@
     <select id="mateFq" parameterType="map" resultType="int">
         select ifnull(count(1),0) from doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             and `type` = 9
             and kind = 1
             and `doctor_mate_type` = 6
@@ -242,14 +243,14 @@
         SELECT ifnull(count(1), 0)
         FROM doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             AND `type` = 9
             AND current_mating_count = 1
             AND barn_type in (5,6)
         </where>
     </select>
 
-    <select id="sowPhMating" parameterType="map" resultType="int" >
+    <select id="sowPhMating" parameterType="map" resultType="int">
         select
         (
         select count(1)
@@ -276,7 +277,7 @@
         )
     </select>
 
-    <select id="sowPhKonghuai" parameterType="map" resultType="int" >
+    <select id="sowPhKonghuai" parameterType="map" resultType="int">
         select
         (
         select count(1)
@@ -305,7 +306,7 @@
         )
     </select>
 
-    <select id="sowPhPregnant" parameterType="map" resultType="int" >
+    <select id="sowPhPregnant" parameterType="map" resultType="int">
         select
         (
         select count(1)
@@ -318,7 +319,7 @@
         (
         select ifnull(sum(
         case when type in (11,20) and pig_status_after = 4 then 1 else 0 end -
-        case when type in (2,6,11,14) and pig_status_before = 4  then 1 else 0 end
+        case when type in (2,6,11,14) and pig_status_before = 4 then 1 else 0 end
         )
         ,0)
         from doctor_pig_events
@@ -337,7 +338,7 @@
         SELECT ifnull(count(1), 0)
         FROM doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             AND `type` = 11
             AND preg_check_result = 1
             AND barn_type in(5, 6)
@@ -348,7 +349,7 @@
         SELECT ifnull(count(1), 0)
         FROM doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             AND `type` = 11
             AND preg_check_result = 2
             AND barn_type in(5, 6)
@@ -359,7 +360,7 @@
         SELECT ifnull(count(1), 0)
         FROM doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             AND `type` = 11
             AND preg_check_result = 4
             AND barn_type in(5, 6)
@@ -370,7 +371,7 @@
         SELECT ifnull(count(1), 0)
         FROM doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             AND `type` = 11
             AND preg_check_result = 3
             AND barn_type in(5, 6)
@@ -411,7 +412,7 @@
         SELECT ifnull(count(1), 0)
         FROM doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             AND `type` = 14
         </where>
     </select>
@@ -420,7 +421,7 @@
         SELECT ifnull(count(1), 0)
         FROM doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             and kind = 1
             AND `type` = 20
             AND barn_type = 7
@@ -478,7 +479,7 @@
         SELECT ifnull(count(1), 0)
         FROM doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             AND `type` = 6
             AND barn_type = 7
             AND change_type_id not in( 109, 110, 111)
@@ -512,7 +513,7 @@
 
     <select id="earlyFarrowNest" parameterType="map" resultType="int">
         select ifnull(count(distinct b.id),0)
-        from doctor_pig_events  a left join doctor_pig_events b on a.pig_id = b.pig_id
+        from doctor_pig_events a left join doctor_pig_events b on a.pig_id = b.pig_id
         where a.farm_id =#{farmId}
         and a.type = 9
         and a.`current_mating_count` = 1
@@ -527,7 +528,7 @@
         SELECT ifnull(count(1), 0)
         FROM doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             AND `type` = 15
         </where>
     </select>
@@ -536,7 +537,7 @@
         SELECT ifnull(sum(live_count), 0)
         FROM doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             AND `type` = 15
         </where>
     </select>
@@ -545,7 +546,7 @@
         SELECT ifnull(sum(health_count), 0)
         FROM doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             AND `type` = 15
         </where>
     </select>
@@ -554,7 +555,7 @@
         SELECT ifnull(sum(weak_count), 0)
         FROM doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             AND `type` = 15
         </where>
     </select>
@@ -563,7 +564,7 @@
         SELECT ifnull(sum(dead_count), 0)
         FROM doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             AND `type` = 15
         </where>
     </select>
@@ -572,7 +573,7 @@
         SELECT ifnull(sum(mny_count), 0) + ifnull(sum(jx_count), 0) + ifnull(sum(black_count), 0)
         FROM doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             AND `type` = 15
         </where>
     </select>
@@ -581,7 +582,7 @@
         SELECT ifnull(sum(farrow_weight), 0)
         FROM doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             AND `type` = 15
         </where>
     </select>
@@ -590,7 +591,7 @@
         SELECT ifnull(count(1), 0)
         FROM doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             AND `type` = 16
         </where>
     </select>
@@ -599,7 +600,7 @@
         SELECT ifnull(sum(health_count), 0)
         FROM doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             AND `type` = 16
         </where>
     </select>
@@ -608,7 +609,7 @@
         SELECT ifnull(sum(wean_count), 0)
         FROM doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             AND `type` = 16
         </where>
     </select>
@@ -617,7 +618,7 @@
         SELECT ifnull(sum(wean_count * feed_days) , 0)
         FROM doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             AND `type` = 16
         </where>
     </select>
@@ -627,7 +628,7 @@
         select ifnull(sum(wean_count*wean_avg_weight),0)
         FROM doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             AND `type` = 16
         </where>
     </select>
@@ -665,7 +666,7 @@
         SELECT ifnull(count(1), 0)
         FROM doctor_pig_events
         <where>
-            <include refid="criteria" />
+            <include refid="criteria"/>
             AND `type` IN (7, 20)
             AND boar_type = 1
             AND kind = 2
@@ -728,5 +729,15 @@
             and kind = 2
             and (`type` = 2 OR ( `type`= 6 and change_type_id not in (109,110,111)))
         </where>
+    </select>
+
+    <!--查询某一个猪场下在某一个时间点之前进场的母猪个数-->
+    <select id="countSow" parameterType="map" resultType="int">
+        SELECT count(*) from (
+        SELECT pig_id from doctor_pig_events
+        where farm_id=#{farmId} and kind=1 and type=#{type}
+        and <![CDATA[event_at = #{sumAt}]]>
+        GROUP BY pig_id
+        ) as t
     </select>
 </mapper>

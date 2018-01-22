@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class DoctorStatisticDaoTest extends BaseDaoTest {
     @Autowired
     private DoctorGroupStatisticDao doctorGroupStatisticDao;
+    @Autowired
+    private DoctorPigStatisticDao doctorPigStatisticDao;
 
     @Test
     public void groupLiveStockTest() {
@@ -26,4 +28,26 @@ public class DoctorStatisticDaoTest extends BaseDaoTest {
         Integer turnActualCount = doctorGroupStatisticDao.turnActualCount(criteria);
         System.out.println(turnActualCount);
     }
- }
+
+
+    @Test
+    public void testSowEntryAndNoMating() {
+
+        DoctorStatisticCriteria criteria = new DoctorStatisticCriteria();
+        criteria.setFarmId(1L);
+        criteria.setSumAt("2012-02-22");
+
+        Assert.assertEquals(1, doctorPigStatisticDao.sowEntryAndNotMatingNum(criteria).intValue());
+    }
+
+    @Test
+    public void testSowEntryAndMating() {
+        DoctorStatisticCriteria criteria = new DoctorStatisticCriteria();
+        criteria.setFarmId(2L);
+        criteria.setSumAt("2012-02-22");
+
+        Assert.assertEquals(0, doctorPigStatisticDao.sowEntryAndNotMatingNum(criteria).intValue());
+    }
+
+
+}

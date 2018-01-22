@@ -1,10 +1,14 @@
 package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
+import io.terminus.doctor.event.enums.PigEvent;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
+import java.util.Map;
 
 /**
  * Created by xjn on 17/12/11.
@@ -24,7 +28,7 @@ public class DoctorPigStatisticDao {
     }
 
     public Integer cfLiveStock(Long farmId, String sumAt) {
-        return  sqlSession.selectOne(sqlId("cfLiveStock"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
+        return sqlSession.selectOne(sqlId("cfLiveStock"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
     }
 
     public Integer phLiveStock(Long farmId, String sumAt) {
@@ -241,5 +245,21 @@ public class DoctorPigStatisticDao {
 
     public Integer boarOtherOut(DoctorStatisticCriteria criteria) {
         return sqlSession.selectOne(sqlId("boarOtherOut"), criteria.toMap());
+    }
+
+    public Integer sowEntryAndNotMatingNum(DoctorStatisticCriteria criteria) {
+
+        Map<String, Object> params = criteria.toMap();
+        params.put("type", PigEvent.ENTRY.getKey());
+
+        //某一日进场母猪数
+        Integer entryNum = sqlSession.selectOne(sqlId("countSow"), params);
+
+        params.put("type", PigEvent.MATING.getKey());
+        //某一日配种母猪数
+        Integer matingNum = sqlSession.selectOne(sqlId("countSow"), params);
+
+
+        return entryNum - matingNum;
     }
 }

@@ -154,6 +154,10 @@ public class DoctorDailyReportV2Manager {
             doctorPigDaily.setSumAt(DateUtil.toDate(criteria.getSumAt()));
         }
 
+
+        //统计进场未配种的母猪数。目前只在计算NPD时用到
+        doctorPigDaily.setSowNotMatingCount(pigStatisticDao.sowEntryAndNotMatingNum(criteria));
+
         flushPhPigDaily(doctorPigDaily, criteria);
         flushCfPigDaily(doctorPigDaily, criteria);
         flushBoarPigDaily(doctorPigDaily, criteria);
