@@ -2,6 +2,7 @@ package io.terminus.doctor.event.editHandler.group;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
@@ -177,7 +178,7 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                 .isAuto(newGroupEvent.getIsAuto())
                 .quantityChange(input2.getQuantity())
-                .quantityChange(EventUtil.get(input2.getAvgDayAge(), input2.getQuantity()))
+                .ageChange(EventUtil.get(input2.getAvgDayAge(), input2.getQuantity()))
                 .weightChange(EventUtil.getWeight(input2.getAvgWeight(), input2.getQuantity()))
                 .transGroupType(newGroupEvent.getTransGroupType())
                 .isSowTrigger(notNull(newGroupEvent.getSowId()))
@@ -209,7 +210,8 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
                 oldDailyGroup.setChgFarmIn(EventUtil.plusInt(oldDailyGroup.getChgFarmIn(), changeDto.getQuantityChange()));
             }
 
-            if (Objects.equals(changeDto.getIsAuto(), IsOrNot.NO.getValue())) {
+            if (Objects.equals(changeDto.getIsAuto(), IsOrNot.NO.getValue())
+                    && Objects.equals(oldDailyGroup.getPigType(), PigType.DELIVER_SOW.getValue())) {
                 oldDailyGroup.setDeliverHandTurnInto(EventUtil.plusInt(oldDailyGroup.getDeliverHandTurnInto(), changeDto.getQuantityChange()));
             }
         }

@@ -297,13 +297,14 @@
             b.status = 1
             AND b.farm_id = #{farmId}
             AND b.event_at = #{sumAt}
-            <if test="pigType = 2">and
+            AND b.pig_type = #{pigType}
+            <if test="pigType == 2">and
                 (
                   (`type` = 4 and trans_group_type = 1 and other_barn_type = 3 )
                   OR (`type` = 3 and change_type_id = 109)
                 )
             </if>
-            <if test="pigType = 3">and
+            <if test="pigType == 3">and
                 (
                   (`type` = 4 and trans_group_type = 1 and other_barn_type = 4 )
                   OR (`type` = 3 and change_type_id = 109)
@@ -320,13 +321,14 @@
             b.status = 1
             AND b.farm_id = #{farmId}
             AND b.event_at = #{sumAt}
-            <if test="pigType = 2">and
+            AND b.pig_type = #{pigType}
+            <if test="pigType == 2">and
                 (
                 (`type` = 4 and trans_group_type = 1 and other_barn_type = 3 )
                 OR (`type` = 3 and change_type_id = 109)
                 )
             </if>
-            <if test="pigType = 3">and
+            <if test="pigType == 3">and
                 (
                 (`type` = 4 and trans_group_type = 1 and other_barn_type = 4 )
                 OR (`type` = 3 and change_type_id = 109)
@@ -343,13 +345,14 @@
             b.status = 1
             AND b.farm_id = #{farmId}
             AND b.event_at = #{sumAt}
-            <if test="pigType = 2">and
+            AND b.pig_type = #{pigType}
+            <if test="pigType == 2">and
                 (
                 (`type` = 4 and trans_group_type = 1 and other_barn_type = 3 )
                 OR (`type` = 3 and change_type_id = 109)
                 )
             </if>
-            <if test="pigType = 3">and
+            <if test="pigType == 3">and
                 (
                 (`type` = 4 and trans_group_type = 1 and other_barn_type = 4 )
                 OR (`type` = 3 and change_type_id = 109)
