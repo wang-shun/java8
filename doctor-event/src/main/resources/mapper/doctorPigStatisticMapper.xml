@@ -489,6 +489,8 @@
             and `type` = 9
             and current_mating_count = 1
             and event_at = date_sub(#{sumAt}, INTERVAL 114 DAY )
+            and status = 1
+            AND event_source != 5
         </where>
     </select>
 
