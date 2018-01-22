@@ -129,8 +129,8 @@ public class DoctorModifyGroupTransFarmEventHandler extends DoctorAbstractModify
     protected DoctorGroupDaily buildDailyGroup(DoctorGroupDaily oldDailyGroup, DoctorEventChangeDto changeDto) {
         oldDailyGroup = super.buildDailyGroup(oldDailyGroup, changeDto);
         oldDailyGroup.setChgFarm(EventUtil.plusInt(oldDailyGroup.getChgFarm(), changeDto.getQuantityChange()));
-        oldDailyGroup.setChgFarmWeight(EventUtil.plusDouble(oldDailyGroup.getChgFarmWeight(), changeDto.getWeightChange()));
-        oldDailyGroup.setTurnOutWeight(EventUtil.plusDouble(oldDailyGroup.getTurnOutWeight(), changeDto.getWeightChange()));
+//        oldDailyGroup.setChgFarmWeight(EventUtil.plusDouble(oldDailyGroup.getChgFarmWeight(), changeDto.getWeightChange()));
+//        oldDailyGroup.setTurnOutWeight(EventUtil.plusDouble(oldDailyGroup.getTurnOutWeight(), changeDto.getWeightChange()));
         oldDailyGroup.setEnd(EventUtil.minusInt(oldDailyGroup.getEnd(), changeDto.getQuantityChange()));
         return oldDailyGroup;
     }

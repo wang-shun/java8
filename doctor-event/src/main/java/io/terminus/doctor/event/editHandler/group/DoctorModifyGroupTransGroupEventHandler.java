@@ -235,16 +235,17 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
     protected DoctorGroupDaily buildDailyGroup(DoctorGroupDaily oldDailyGroup, DoctorEventChangeDto changeDto) {
         oldDailyGroup = super.buildDailyGroup(oldDailyGroup, changeDto);
         oldDailyGroup.setEnd(EventUtil.minusInt(oldDailyGroup.getEnd(), changeDto.getQuantityChange()));
-        oldDailyGroup.setTurnOutWeight(EventUtil.plusDouble(oldDailyGroup.getTurnOutWeight(), changeDto.getWeightChange()));
+//        oldDailyGroup.setTurnOutWeight(EventUtil.plusDouble(oldDailyGroup.getTurnOutWeight(), changeDto.getWeightChange()));
 
         if (Objects.equals(changeDto.getTransBarnType(), PigType.FATTEN_PIG.getValue())) {
             oldDailyGroup.setToFatten(EventUtil.plusInt(oldDailyGroup.getToFatten(), changeDto.getQuantityChange()));
-            oldDailyGroup.setToFattenWeight(EventUtil.plusDouble(oldDailyGroup.getToFattenWeight(), changeDto.getWeightChange()));
+//            oldDailyGroup.setToFattenWeight(EventUtil.plusDouble(oldDailyGroup.getToFattenWeight(), changeDto.getWeightChange()));
         }else if (Objects.equals(changeDto.getTransBarnType(), PigType.RESERVE.getValue())) {
             oldDailyGroup.setToHoubei(EventUtil.plusInt(oldDailyGroup.getToHoubei(), changeDto.getQuantityChange()));
-            oldDailyGroup.setToHoubeiWeight(EventUtil.plusDouble(oldDailyGroup.getToHoubeiWeight(), changeDto.getWeightChange()));
+//            oldDailyGroup.setToHoubeiWeight(EventUtil.plusDouble(oldDailyGroup.getToHoubeiWeight(), changeDto.getWeightChange()));
         } else if (Objects.equals(changeDto.getTransBarnType(), PigType.NURSERY_PIGLET.getValue())) {
             oldDailyGroup.setToNursery(EventUtil.plusInt(oldDailyGroup.getToNursery(), changeDto.getQuantityChange()));
+//            oldDailyGroup.setToNurseryWeight(EventUtil.plusDouble(oldDailyGroup.getToNurseryWeight(), changeDto.getWeightChange()));
         }
         return oldDailyGroup;
     }

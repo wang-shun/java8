@@ -207,7 +207,7 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
         oldDailyGroup.setTurnOutWeight(EventUtil.plusDouble(oldDailyGroup.getSaleWeight(), weightChange));
         if (Objects.equals(changeTypeId, SALE)) {
             oldDailyGroup.setSale(EventUtil.plusInt(oldDailyGroup.getSale(), quantityChange));
-            oldDailyGroup.setSaleWeight(EventUtil.plusDouble(oldDailyGroup.getSaleWeight(), weightChange));
+//            oldDailyGroup.setSaleWeight(EventUtil.plusDouble(oldDailyGroup.getSaleWeight(), weightChange));
         } else if (Objects.equals(changeTypeId, DEAD)) {
             oldDailyGroup.setDead(EventUtil.plusInt(oldDailyGroup.getDead(), quantityChange));
         } else if (Objects.equals(changeTypeId, WEED)) {

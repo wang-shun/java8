@@ -203,8 +203,8 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
         oldDailyGroup = super.buildDailyGroup(oldDailyGroup, changeDto);
         if (Objects.equals(changeDto.getTransGroupType(), DoctorGroupEvent.TransGroupType.OUT.getValue())) {
             oldDailyGroup.setTurnInto(EventUtil.plusInt(oldDailyGroup.getTurnInto(), changeDto.getQuantityChange()));
-            oldDailyGroup.setTurnIntoWeight(EventUtil.plusDouble(oldDailyGroup.getTurnIntoWeight(), changeDto.getWeightChange()));
-            oldDailyGroup.setTurnIntoAge(EventUtil.plusInt(oldDailyGroup.getTurnIntoAge(), changeDto.getAgeChange()));
+//            oldDailyGroup.setTurnIntoWeight(EventUtil.plusDouble(oldDailyGroup.getTurnIntoWeight(), changeDto.getWeightChange()));
+//            oldDailyGroup.setTurnIntoAge(EventUtil.plusInt(oldDailyGroup.getTurnIntoAge(), changeDto.getAgeChange()));
             oldDailyGroup.setEnd(EventUtil.plusInt(oldDailyGroup.getEnd(), changeDto.getQuantityChange()));
             if (Objects.equals(changeDto.getInType(), InType.FARM.getValue())) {
                 oldDailyGroup.setChgFarmIn(EventUtil.plusInt(oldDailyGroup.getChgFarmIn(), changeDto.getQuantityChange()));
