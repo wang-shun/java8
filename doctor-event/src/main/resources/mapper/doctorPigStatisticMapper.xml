@@ -387,6 +387,8 @@
             and b.current_mating_count = 1
             and datediff(a.event_at, b.event_at) &lt;= 7
             and a.event_at = #{sumAt}
+            and a.status = 1
+            AND a.event_source != 5
         </where>
     </select>
 
@@ -400,6 +402,8 @@
             AND b.change_type_id in (110,111)
             and datediff(a.event_at, b.event_at) &lt;= 7
             and a.event_at = #{sumAt}
+            and a.status = 1
+            AND a.event_source != 5
         </where>
     </select>
 
@@ -502,6 +506,8 @@
             and `type` = 9
             and current_mating_count = 1
             and event_at = date_add(#{sumAt}, INTERVAL 114 DAY )
+            and status = 1
+            AND event_source != 5
         </where>
     </select>
 
@@ -514,6 +520,8 @@
         and a.event_at = date_sub(#{sumAt}, INTERVAL 114 DAY)
         and b.type = 15
         and a.`parity` = b.`parity`
+        and a.status = 1
+        AND a.event_source != 5
     </select>
 
     <select id="farrowNest" parameterType="map" resultType="int">
@@ -647,6 +655,8 @@
             AND `type` IN (2, 6, 7, 20)
             AND kind = 2
             AND boar_type = 1
+            AND status = 1
+            AND event_source != 5
         </where>
         )
         FROM dual
