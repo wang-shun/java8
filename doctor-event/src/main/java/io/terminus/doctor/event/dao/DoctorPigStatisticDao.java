@@ -164,7 +164,7 @@ public class DoctorPigStatisticDao {
     }
 
     public Integer laterNest(DoctorStatisticCriteria criteria) {
-        return sqlSession.selectOne(sqlId("earlyFarrowNest"), criteria.toMap());
+        return sqlSession.selectOne(sqlId("laterNest"), criteria.toMap());
     }
 
     public Integer farrowNest(DoctorStatisticCriteria criteria) {
