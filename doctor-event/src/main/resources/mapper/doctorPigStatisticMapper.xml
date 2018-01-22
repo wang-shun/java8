@@ -503,8 +503,7 @@
         FROM doctor_pig_events
         <where>
             farm_id = #{farmId}
-            and `type` = 9
-            and current_mating_count = 1
+            and `type` = 15
             and event_at = date_add(#{sumAt}, INTERVAL 114 DAY )
             and status = 1
             AND event_source != 5
