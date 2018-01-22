@@ -213,6 +213,8 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
         DoctorDimensionCriteria criteria = new DoctorDimensionCriteria();
         criteria.setDateType(dateType);
         criteria.setOrzType(orgType);
+
+        warehouseSynchronizer.delete(criteria);
         warehouseSynchronizer.sync(criteria);
         return Response.ok(true);
     }
@@ -230,6 +232,8 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
         DoctorDimensionCriteria criteria = new DoctorDimensionCriteria();
         criteria.setDateType(dateType);
         criteria.setOrzType(orgType);
+
+        efficiencySynchronizer.delete(criteria);
         efficiencySynchronizer.sync(criteria);
         return Response.ok(true);
     }

@@ -55,9 +55,13 @@ public class DoctorEfficiencySynchronizer {
 
 
     public void deleteAll() {
-        doctorReportNpdDao.delete();
+        doctorReportEfficiencyDao.delete();
     }
 
+
+    public void delete(DoctorDimensionCriteria criteria) {
+        doctorReportEfficiencyDao.delete(criteria);
+    }
 
     /**
      * 从doctor_report_npd表同步到doctor_report_efficiency

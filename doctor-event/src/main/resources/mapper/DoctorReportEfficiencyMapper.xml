@@ -152,4 +152,27 @@
         </where>
     </select>
 
+
+    <delete id="deleteAll">
+        delete from <include refid="tb"/>
+    </delete>
+
+    <delete id="deleteBy" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria">
+        delete from
+        <include refid="tb"/>
+        <where>
+            <if test="orzId !=null">
+                and orz_id=#{orzId}
+            </if>
+            <if test="orzType!=null">
+                and orz_type=#{orzType}
+            </if>
+            <if test="dateType!=null">
+                and date_type=#{dateType}
+            </if>
+            <if test="sumAt !=null">
+                and sum_at=#{sumAt}
+            </if>
+        </where>
+    </delete>
 </mapper>

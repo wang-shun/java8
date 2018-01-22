@@ -83,4 +83,12 @@ public class DoctorReportMaterialDao extends MyBatisDao<DoctorReportMaterial> {
         }
         return material;
     }
+
+    public void delete() {
+        this.sqlSession.delete(sqlId("deleteAll"));
+    }
+
+    public void delete(DoctorDimensionCriteria criteria) {
+        this.sqlSession.delete(sqlId("deleteBy"), criteria);
+    }
 }

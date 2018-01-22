@@ -113,7 +113,7 @@ public class DoctorReportBiDataSynchronize {
         for (Date d : dates) {
             if (DateUtils.isSameDay(d, new Date()))
                 continue;
-            
+
             warehouseSynchronizer.sync(d);
         }
 
@@ -125,6 +125,7 @@ public class DoctorReportBiDataSynchronize {
 
     /**
      * 增量更新
+     *
      * @param start 开始的同步日期 与日报中updateAt 比较
      */
     public void synchronizeDeltaDayBiData(Date start) {
@@ -136,8 +137,9 @@ public class DoctorReportBiDataSynchronize {
 
     /**
      * 增量同步
+     *
      * @param farmId 猪场id
-     * @param start 开始的同步日期 与日报中sumAt比较
+     * @param start  开始的同步日期 与日报中sumAt比较
      */
     public void synchronizeDeltaDayBiData(Long farmId, Date start) {
         log.info("synchronize delta day bi data starting, farmId:{}, start:{}", farmId, start);
@@ -245,6 +247,7 @@ public class DoctorReportBiDataSynchronize {
 
     /**
      * 增量同步猪场天维度
+     *
      * @param groupDailyList
      */
     private void synchronizeGroupForDay(List<DoctorGroupDaily> groupDailyList) {
@@ -266,6 +269,7 @@ public class DoctorReportBiDataSynchronize {
 
     /**
      * 增量同步猪场天维度
+     *
      * @param pigDailyList
      */
     public void synchronizePigForDay(List<DoctorPigDaily> pigDailyList) {
@@ -297,7 +301,8 @@ public class DoctorReportBiDataSynchronize {
         boarSynchronizer.deleteAll();
         sowSynchronizer.deleteAll();
 //        matingSynchronizer.deleteAll();
-//        efficiencySynchronizer.deleteAll();
+        efficiencySynchronizer.deleteAll();
+        warehouseSynchronizer.deleteAll();
     }
 
     /**
@@ -374,8 +379,8 @@ public class DoctorReportBiDataSynchronize {
         List<DoctorPigDailyExtend> pigDailyList = doctorPigDailyDao.sumForDimension(dimensionCriteria);
         pigDailyList.forEach(pigDaily -> synchronizePigBiData(pigDaily, dimensionCriteria));
 
-//        efficiencySynchronizer.sync(dimensionCriteria);
-//        warehouseSynchronizer.sync(dimensionCriteria);
+        efficiencySynchronizer.sync(dimensionCriteria);
+        warehouseSynchronizer.sync(dimensionCriteria);
     }
 
     /**
@@ -400,10 +405,16 @@ public class DoctorReportBiDataSynchronize {
             if (pigDailyList.size() < 5000) break;
             pageNo += 5000;
         }
+
+        DoctorDimensionCriteria criteria = new DoctorDimensionCriteria();
+        criteria.setDateType(DateDimension.DAY.getValue());
+        criteria.setOrzType(OrzDimension.FARM.getValue());
+        warehouseSynchronizer.sync(criteria);
     }
 
     /**
      * 同步某一维度猪群数据最终地方
+     *
      * @param groupDaily
      * @param dimensionCriteria
      */
@@ -450,6 +461,7 @@ public class DoctorReportBiDataSynchronize {
 
     /**
      * 同步某一维度猪数据最终地方
+     *
      * @param dailyExtend
      * @param dimensionCriteria
      */
@@ -472,8 +484,8 @@ public class DoctorReportBiDataSynchronize {
                 end = doctorPigDailyDao.orgEnd(dimensionCriteria);
                 DoctorPigDailyExtend dayAvgLiveStock = doctorPigDailyDao.orgSumDimension(dimensionCriteria);
                 int count = doctorPigDailyDao.countDimension(dimensionCriteria);
-                dailyExtend.setBoarDailyPigCount(dayAvgLiveStock.getBoarDailyPigCount()/count);
-                dailyExtend.setSowDailyPigCount(dayAvgLiveStock.getSowDailyPigCount()/count);
+                dailyExtend.setBoarDailyPigCount(dayAvgLiveStock.getBoarDailyPigCount() / count);
+                dailyExtend.setSowDailyPigCount(dayAvgLiveStock.getSowDailyPigCount() / count);
             }
             dailyExtend.setSowCfStart(start.getSowCfStart());
             dailyExtend.setSowPhStart(start.getSowPhStart());

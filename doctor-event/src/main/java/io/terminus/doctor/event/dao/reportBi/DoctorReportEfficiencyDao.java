@@ -27,4 +27,13 @@ public class DoctorReportEfficiencyDao extends MyBatisDao<DoctorReportEfficiency
 
         return efficiency;
     }
+
+    public void delete() {
+        this.sqlSession.delete(sqlId("deleteAll"));
+    }
+
+
+    public void delete(DoctorDimensionCriteria criteria) {
+        this.sqlSession.delete(sqlId("deleteBy"), criteria);
+    }
 }

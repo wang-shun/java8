@@ -51,6 +51,14 @@ public class DoctorWarehouseSynchronizer {
     private DoctorPigReportReadService doctorPigReportReadService;
 
 
+    public void deleteAll() {
+        doctorReportMaterialDao.delete();
+    }
+
+    public void delete(DoctorDimensionCriteria criteria) {
+        doctorReportMaterialDao.delete(criteria);
+    }
+
     /**
      * 获取指定日期内更新的领用记录的操作日期
      *
