@@ -4,7 +4,12 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
-import io.terminus.doctor.event.model.*;
+import io.terminus.doctor.event.enums.BoarEntryType;
+import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigDaily;
+import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -64,6 +69,11 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
 
     @Override
     public void updateDailyOfDelete(DoctorPigEvent oldPigEvent) {
+        if (Objects.equals(oldPigEvent.getKind(), DoctorPig.PigSex.BOAR.getKey())
+                && !Objects.equals(oldPigEvent.getBoarType(), BoarEntryType.HGZ.getKey())) {
+            return;
+        }
+
         DoctorPigDaily oldDailyPig1 = doctorDailyReportManager.findDoctorPigDaily(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
         DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
                 .pigSex(oldPigEvent.getKind())
@@ -88,6 +98,11 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
 
     @Override
     public void updateDailyOfNew(DoctorPigEvent newPigEvent, BasePigEventInputDto inputDto) {
+        if (Objects.equals(newPigEvent.getKind(), DoctorPig.PigSex.BOAR.getKey())
+                && !Objects.equals(newPigEvent.getBoarType(), BoarEntryType.HGZ.getKey())) {
+            return;
+        }
+
         DoctorPigDaily oldDailyPig2 = doctorDailyReportManager.findDoctorPigDaily(newPigEvent.getFarmId(), inputDto.eventAt());
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                 .pigSex(newPigEvent.getKind())
@@ -115,7 +130,7 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
         oldDailyPig = super.buildDailyPig(oldDailyPig, changeDto);
         //公猪
         if (Objects.equals(changeDto.getPigSex(), DoctorPig.PigSex.BOAR.getKey())) {
-            oldDailyPig.setBoarOtherOut(EventUtil.minusInt(oldDailyPig.getBoarOtherOut(), changeDto.getRemoveCountChange()));
+            oldDailyPig.setBoarOtherOut(EventUtil.plusInt(oldDailyPig.getBoarOtherOut(), changeDto.getRemoveCountChange()));
             oldDailyPig.setBoarEnd(EventUtil.minusInt(oldDailyPig.getBoarEnd(), changeDto.getRemoveCountChange()));
            return oldDailyPig;
         }
