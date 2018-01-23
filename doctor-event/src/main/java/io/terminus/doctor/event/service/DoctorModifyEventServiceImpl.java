@@ -73,7 +73,8 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
     public RespWithEx<Boolean> modifyGroupEvent(BaseGroupInput inputDto, Long eventId, Integer eventType) {
         try {
             groupEventManager.modifyGroupEventHandle(inputDto, eventId, eventType);
-            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent());
+
+            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(doctorGroupEventDao.findEventById(eventId).getFarmId()));
             return RespWithEx.ok(true);
         } catch (InvalidException e) {
             log.error("modify pig event failed , inputDto:{}, cuase:{}", inputDto, Throwables.getStackTraceAsString(e));
@@ -89,7 +90,7 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
     public RespWithEx<Boolean> modifyPigEvent(String oldPigEvent, DoctorPigEvent pigEvent) {
         try {
             doctorPigEventManager.modifyPigEvent(pigEvent, oldPigEvent);
-            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent());
+            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(pigEvent.getFarmId()));
             return RespWithEx.ok(true);
         } catch (Exception e) {
             log.error("modify pig event failed , inputDto:{}, cause:{}", oldPigEvent, Throwables.getStackTraceAsString(e));

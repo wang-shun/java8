@@ -246,9 +246,9 @@ public class DoctorPigEventManager {
      */
     public static void checkAndPublishEvent(List<DoctorEventInfo> dtos, CoreEventDispatcher coreEventDispatcher, Publisher publisher) {
         try {
-            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent());
             if (notEmpty(dtos)) {
                 //checkFarmIdAndEventAt(dtos);
+                coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(dtos.get(0).getFarmId()));
                 publishPigEvent(dtos, coreEventDispatcher, publisher);
             }
         } catch (Exception e) {

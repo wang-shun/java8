@@ -510,6 +510,17 @@
         </where>
     </select>
 
+    <update id="updateDailyPhStatusLiveStock" parameterType="map" >
+        UPDATE <include refid="tb"/>
+        SET sow_ph_mating = ifnull(sow_ph_mating,0) + #{phMatingChangeCount},
+        `sow_ph_konghuai` = ifnull(`sow_ph_konghuai`,0) + #{phKonghuaiChangeCount},
+        `sow_ph_pregnant` = ifnull(`sow_ph_pregnant`,0) + #{phPregnantChangeCount}
+
+        WHERE
+        farm_id = #{farmId}
+        AND sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
+    </update>
+
     <sql id="forSum">
         org_id as orgId,
         org_name as orgName,

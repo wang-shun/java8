@@ -104,6 +104,21 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
     }
 
     /**
+     * 更新日期(包括更新日期)之后配怀舍个状态母猪数
+     * @param farmId 猪场id
+     * @param sumAt 日期
+     * @param phMatingChangeCount 配种母猪变化量
+     * @param phKonghuaiChangeCount 空怀母猪变化量
+     * @param phPregnantChangeCount 怀孕母猪变化量
+     */
+    public void updateDailyPhStatusLiveStock(Long farmId, Date sumAt, Integer phMatingChangeCount
+            , Integer phKonghuaiChangeCount, Integer phPregnantChangeCount) {
+        getSqlSession().update(sqlId("updateDailyPhStatusLiveStock"), ImmutableMap.of("farmId"
+                , farmId, "sumAt", DateUtil.toDateString(sumAt), "phMatingChangeCount", phMatingChangeCount
+                , "phKonghuaiChangeCount", phKonghuaiChangeCount, "phPregnantChangeCount", phPregnantChangeCount));
+    }
+
+    /**
      * 查询指定之间之后的日报，包含指定日期
      *
      * @param farmId 猪场id
