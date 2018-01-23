@@ -261,7 +261,6 @@ public class DoctorWarehouseSynchronizer {
                 material.setSumAt(current);
                 material.setSumAtName(DateHelper.dateCN(current, dateDimension));
 
-
                 Map<WareHouseType, DoctorWarehouseReportDao.AmountAndQuantityDto> materialUsage = getMaterialUsageUnderPigType(getPigType(eachPeriod.get(current), PigType.RESERVE.getValue()));
                 material.setHoubeiFeedQuantity(materialUsage.get(WareHouseType.FEED).getQuantity().intValue());
                 material.setHoubeiFeedAmount(materialUsage.get(WareHouseType.FEED).getAmount());
@@ -360,13 +359,12 @@ public class DoctorWarehouseSynchronizer {
         List<WarehouseReportTempResult> materialUsedUnderPigType = new ArrayList<>();
 
         if (reportTempResults != null) {
-            reportTempResults.parallelStream().forEach(r -> {
-                if (Stream.of(pigTypes).anyMatch(p -> r.getPigType().equals(p))) {
+            reportTempResults.stream().forEach(r -> {
+                if (null != r && Stream.of(pigTypes).anyMatch(p -> r.getPigType().equals(p))) {
                     materialUsedUnderPigType.add(r);
                 }
             });
         }
-
 
         return Collections.unmodifiableList(materialUsedUnderPigType);
     }
@@ -381,6 +379,7 @@ public class DoctorWarehouseSynchronizer {
 //        if (reportTempResults.isEmpty())
 //            return Collections.emptyMap();
 //
+
         Map<WareHouseType, DoctorWarehouseReportDao.AmountAndQuantityDto> result = new HashMap<>();
 
         Map<Integer, List<WarehouseReportTempResult>> eachMaterialType;
