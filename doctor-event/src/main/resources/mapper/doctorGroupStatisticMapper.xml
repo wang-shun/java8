@@ -373,6 +373,7 @@
             AND a.status = -1
             AND date_format(a.close_at, '%Y-%m-%d') = #{sumAt}
             AND `type` in (3,4,9)
+            AND a.pig_type = #{pigType}
         </where>
         )
         -
@@ -387,6 +388,7 @@
             AND date_format(a.close_at, '%Y-%m-%d') = #{sumAt}
             AND `type` = 2
             AND trans_group_type = 1
+            AND a.pig_type = #{pigType}
         </where>
         )
         FROM dual

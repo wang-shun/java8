@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.dao;
 
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
 import org.junit.Assert;
 import org.junit.Test;
@@ -15,6 +16,8 @@ public class DoctorStatisticDaoTest extends BaseDaoTest {
     private DoctorGroupStatisticDao doctorGroupStatisticDao;
     @Autowired
     private DoctorPigStatisticDao doctorPigStatisticDao;
+    @Autowired
+    private DoctorWarehouseReportDao doctorWarehouseReportDao;
 
     @Test
     public void groupLiveStockTest() {
@@ -58,6 +61,17 @@ public class DoctorStatisticDaoTest extends BaseDaoTest {
         int early = doctorPigStatisticDao.boarOtherOut(criteria);
 //        System.out.println(doctorKpiDao.realTimeLiveStockBoar(404L, DateUtil.toDate("2018-01-23")));
         System.out.println(early);
+    }
+
+    @Test
+    public void materialApplyTest() {
+        DoctorDimensionCriteria criteria = new DoctorDimensionCriteria();
+        criteria.setOrzId(404L);
+        criteria.setOrzType(3);
+        criteria.setSumAt(DateUtil.toDate("2018-01-23"));
+        criteria.setDateType(3);
+        criteria.setPigType(2);
+        System.out.println(doctorWarehouseReportDao.materialApply(criteria));
     }
 
 }
