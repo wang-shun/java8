@@ -550,12 +550,13 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                             if (!Objects.equals(source.getApplyPigGroupId(), apply.getPigGroupId())
                                     || !Objects.equals(source.getApplyPigBarnId(), apply.getPigBarnId())
                                     || !sameHandleDate) {
-//                                doctorWarehouseMaterialApplyDao.delete(apply.getId());
-                                doctorWarehouseMaterialApplyDao.deleteByMaterialHandle(apply.getMaterialHandleId());//如果是猪群领用会有两条记录
-                                doctorWarehouseMaterialApplyManager.apply(target, source, orgId);
 
                                 if (!sameHandleDate)
                                     target.setHandleDate(stockOut.getHandleDate().getTime());
+
+                                doctorWarehouseMaterialApplyDao.deleteByMaterialHandle(apply.getMaterialHandleId());//如果是猪群领用会有两条记录
+                                doctorWarehouseMaterialApplyManager.apply(target, source, orgId);
+
                                 needUpdate = !sameHandleDate;
                             }
 
