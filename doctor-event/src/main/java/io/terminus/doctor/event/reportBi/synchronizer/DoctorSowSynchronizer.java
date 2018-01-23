@@ -77,7 +77,7 @@ public class DoctorSowSynchronizer {
         reportBi.setWeedOut(fieldHelper.filedUrl(filedUrlCriteria, EventUtil.plusInt(pigDaily.getSowPhWeedOut(), pigDaily.getSowCfWeedOut()), "sowWeedOut"));
         reportBi.setSale(fieldHelper.filedUrl(filedUrlCriteria, EventUtil.plusInt(pigDaily.getSowPhSale(), pigDaily.getSowCfSale()), "sowSale"));
         reportBi.setChgFarmOut(EventUtil.plusInt(pigDaily.getSowPhChgFarm(), pigDaily.getSowCfChgFarm()));
-        reportBi.setOtherChange(pigDaily.getBoarOtherOut());
+        reportBi.setOtherChange(EventUtil.plusInt(pigDaily.getSowPhOtherOut(), pigDaily.getSowCfOtherOut()));
         reportBi.setHoubeiIn(pigDaily.getSowPhReserveIn());
         reportBi.setOtherIn(otherIn(pigDaily, reportBi.getOrzType()));
         reportBi.setEnd(pigDaily.getSowEnd());
