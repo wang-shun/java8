@@ -86,7 +86,7 @@ public class DoctorStatisticDaoTest extends BaseDaoTest {
     @Test
     public void phStockLive() {
         DoctorStatisticCriteria criteria = new DoctorStatisticCriteria(404L, "2018-01-23");
-        String date = "2018-01-13";
+        String date = "2017-08-31";
         System.out.println(doctorPigStatisticDao.phLiveStock(404L, date));
         System.out.println(doctorPigStatisticDao.cfLiveStock(404L, date));
         System.out.println(doctorKpiDao.realTimeLiveStockSow(404L, DateUtil.toDate(date)));

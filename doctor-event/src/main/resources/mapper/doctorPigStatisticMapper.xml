@@ -31,7 +31,7 @@
         (
         SELECT
         ifnull(sum(case type when 20 then 1 when 14 then 1 else 0 end ), 0) -
-        ifnull(sum(case type when 6 then 1 when 10 then 1 when 12 then 1 else 0 end ), 0)
+        ifnull(sum(case type when 2 then 1 when 6 then 1 when 10 then 1 when 12 then 1 else 0 end ), 0)
         FROM doctor_pig_events a
         WHERE
         a.farm_id = #{farmId} AND
