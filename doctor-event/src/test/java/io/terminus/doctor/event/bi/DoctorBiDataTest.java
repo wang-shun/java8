@@ -54,7 +54,7 @@ public class DoctorBiDataTest extends BaseServiceTest {
 
     @Test
     public void findByDateTypeTest() {
-        System.out.println(doctorGroupDailyDao.findByDateType(null, DateUtil.toDate("2017-01-01"), DateDimension.WEEK.getValue(), OrzDimension.FARM.getValue()));
+//        System.out.println(doctorGroupDailyDao.findByDateType(null, DateUtil.toDate("2017-01-01"), DateDimension.WEEK.getValue(), OrzDimension.FARM.getValue()));
     }
 
     @Test

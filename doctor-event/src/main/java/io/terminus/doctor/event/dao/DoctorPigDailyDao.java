@@ -150,13 +150,13 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
         return getSqlSession().selectOne(sqlId("selectOneSumForDimension"), dimensionCriteria);
     }
 
-    public List<DoctorPigDaily> findByAfter(Long farmId, Date sumAt, Date updatedAt){
+    public List<DoctorPigDaily> findByAfter(Long farmId, Date sumAt, Integer type){
         return getSqlSession().selectList(sqlId("findByAfter"), MapBuilder.of().put("farmId", farmId)
-                .put("sumAt", sumAt).put("updateAt", updatedAt).map());
+                .put("sumAt", sumAt).put("type", type).map());
     }
 
-    public List<DoctorDimensionCriteria> findByDateType(Date updateAt, Date sumAt, Integer dateType, Integer orzType) {
-        return getSqlSession().selectList(sqlId("findByDateType"), MapBuilder.of().put("updateAt", updateAt)
+    public List<DoctorDimensionCriteria> findByDateType(Date sumAt, Integer type,  Integer dateType, Integer orzType) {
+        return getSqlSession().selectList(sqlId("findByDateType"), MapBuilder.of().put("type", type)
                 .put("sumAt", sumAt).put("dateType", dateType).put("orzType", orzType).map());
     }
 

@@ -622,10 +622,10 @@
         FROM
         <include refid="tb"/>
         <where>
-            <if test="sumAt != null">
+            <if test="type == 1">
                 sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
             </if>
-            <if test="updateAt != null">
+            <if test="type == 2">
                 updated_at &gt;= date_format(#{sumAt}, '%Y-%m-%d %H:%i:%s')
             </if>
             <if test="farmId != null">and farm_id = #{farmId}</if>
@@ -641,10 +641,10 @@
         FROM
         <include refid="tb"/>
         <where>
-            <if test="sumAt != null">
+            <if test="type == 1">
                 sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
             </if>
-            <if test="updateAt != null">
+            <if test="type == 2">
                 updated_at &gt;= date_format(#{sumAt}, '%Y-%m-%d %H:%i:%s')
             </if>
         </where>

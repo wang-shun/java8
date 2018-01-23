@@ -70,14 +70,14 @@ public class DoctorGroupDailyDao extends MyBatisDao<DoctorGroupDaily> {
         return getSqlSession().selectOne(sqlId("selectOneSumForDimension"), dimensionCriteria);
     }
 
-    public List<DoctorGroupDaily> findByAfter(Long farmId, Date sumAt, Date updatedAt){
+    public List<DoctorGroupDaily> findByAfter(Long farmId, Date sumAt, Integer type){
         return getSqlSession().selectList(sqlId("findByAfter"), MapBuilder.of().put("farmId", farmId)
-                .put("sumAt", sumAt).put("updateAt", updatedAt).map());
+                .put("sumAt", sumAt).put("type", type).map());
     }
 
-    public List<DoctorDimensionCriteria> findByDateType(Date sumAt, Date updateAt, Integer dateType, Integer orzType) {
+    public List<DoctorDimensionCriteria> findByDateType(Date sumAt, Integer type, Integer dateType, Integer orzType) {
         return getSqlSession().selectList(sqlId("findByDateType"),
-                MapBuilder.of().put("sumAt", sumAt).put("updateAt", updateAt)
+                MapBuilder.of().put("sumAt", sumAt).put("type", type)
                         .put("dateType", dateType).put("orzType", orzType).map());
     }
 
