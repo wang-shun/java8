@@ -49,12 +49,12 @@ public class DoctorBiDataTest extends BaseServiceTest {
     @Test
     public void synchronizeRealTimeBiDataTest() {
         synchronizer.cleanFullBiData();
-        synchronizer.synchronizeRealTimeBiData();
+        synchronizer.synchronizeRealTimeBiData(404L);
     }
 
     @Test
     public void findByDateTypeTest() {
-        System.out.println(doctorGroupDailyDao.findByDateType(DateUtil.toDate("2017-01-01"), DateDimension.WEEK.getValue(), OrzDimension.FARM.getValue()));
+        System.out.println(doctorGroupDailyDao.findByDateType(null, DateUtil.toDate("2017-01-01"), DateDimension.WEEK.getValue(), OrzDimension.FARM.getValue()));
     }
 
     @Test

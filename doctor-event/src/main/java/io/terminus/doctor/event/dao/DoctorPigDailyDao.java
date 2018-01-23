@@ -135,23 +135,14 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
         return getSqlSession().selectOne(sqlId("selectOneSumForDimension"), dimensionCriteria);
     }
 
-    public List<DoctorPigDaily> findByAfter(Date updatedAt) {
-        return getSqlSession().selectList(sqlId("findByAfter"), updatedAt);
+    public List<DoctorPigDaily> findByAfter(Long farmId, Date sumAt, Date updatedAt){
+        return getSqlSession().selectList(sqlId("findByAfter"), MapBuilder.of().put("farmId", farmId)
+                .put("sumAt", sumAt).put("updateAt", updatedAt).map());
     }
 
-    public List<DoctorPigDaily> findByFarmAndAfter(Long farmId, Date sumAt){
-        return getSqlSession().selectList(sqlId("findByFarmAndAfter"), ImmutableMap.of(
-                "farmId", farmId, "sumAt", sumAt));
-    }
-
-    public List<DoctorDimensionCriteria> findByDateType(Date sumAt, Integer dateType, Integer orzType) {
-        return getSqlSession().selectList(sqlId("findByDateType"),
-                ImmutableMap.of("sumAt", sumAt, "dateType", dateType, "orzType", orzType));
-    }
-
-    public List<DoctorDimensionCriteria> findBySumAt(Date sumAt, Integer dateType, Integer orzType) {
-        return getSqlSession().selectList(sqlId("findBySumAt"),
-                ImmutableMap.of("sumAt", sumAt, "dateType", dateType, "orzType", orzType));
+    public List<DoctorDimensionCriteria> findByDateType(Date updateAt, Date sumAt, Integer dateType, Integer orzType) {
+        return getSqlSession().selectList(sqlId("findByDateType"), MapBuilder.of().put("updateAt", updateAt)
+                .put("sumAt", sumAt).put("dateType", dateType).put("orzType", orzType).map());
     }
 
     public DoctorPigDailyExtend farmStart(DoctorDimensionCriteria dimensionCriteria) {

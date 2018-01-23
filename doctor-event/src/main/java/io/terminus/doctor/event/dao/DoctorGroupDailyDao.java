@@ -2,6 +2,7 @@ package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.reportBi.DoctorGroupDailyExtend;
@@ -69,23 +70,15 @@ public class DoctorGroupDailyDao extends MyBatisDao<DoctorGroupDaily> {
         return getSqlSession().selectOne(sqlId("selectOneSumForDimension"), dimensionCriteria);
     }
 
-    public List<DoctorGroupDaily> findByAfter(Date updatedAt){
-        return getSqlSession().selectList(sqlId("findByAfter"), updatedAt);
+    public List<DoctorGroupDaily> findByAfter(Long farmId, Date sumAt, Date updatedAt){
+        return getSqlSession().selectList(sqlId("findByAfter"), MapBuilder.of().put("farmId", farmId)
+                .put("sumAt", sumAt).put("updateAt", updatedAt).map());
     }
 
-    public List<DoctorGroupDaily> findByFarmAndAfter(Long farmId, Date sumAt){
-        return getSqlSession().selectList(sqlId("findByFarmAndAfter"), ImmutableMap.of(
-                "farmId", farmId, "sumAt", sumAt));
-    }
-
-    public List<DoctorDimensionCriteria> findByDateType(Date sumAt, Integer dateType, Integer orzType) {
+    public List<DoctorDimensionCriteria> findByDateType(Date sumAt, Date updateAt, Integer dateType, Integer orzType) {
         return getSqlSession().selectList(sqlId("findByDateType"),
-                ImmutableMap.of("sumAt", sumAt, "dateType", dateType, "orzType", orzType));
-    }
-
-    public List<DoctorDimensionCriteria> findBySumAt(Date sumAt, Integer dateType, Integer orzType) {
-        return getSqlSession().selectList(sqlId("findBySumAt"),
-                ImmutableMap.of("sumAt", sumAt, "dateType", dateType, "orzType", orzType));
+                MapBuilder.of().put("sumAt", sumAt).put("updateAt", updateAt)
+                        .put("dateType", dateType).put("orzType", orzType).map());
     }
 
     public Integer farmStart(DoctorDimensionCriteria dimensionCriteria){
