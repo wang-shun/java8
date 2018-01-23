@@ -15,6 +15,7 @@ import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorPigDaily;
+import io.terminus.doctor.event.reportBi.helper.FieldHelper;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorBoarSynchronizer;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorDeliverSynchronizer;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorEfficiencySynchronizer;
@@ -484,8 +485,8 @@ public class DoctorReportBiDataSynchronize {
                 end = doctorPigDailyDao.orgEnd(dimensionCriteria);
                 DoctorPigDailyExtend dayAvgLiveStock = doctorPigDailyDao.orgSumDimension(dimensionCriteria);
                 int count = doctorPigDailyDao.countDimension(dimensionCriteria);
-                dailyExtend.setBoarDailyPigCount(dayAvgLiveStock.getBoarDailyPigCount() / count);
-                dailyExtend.setSowDailyPigCount(dayAvgLiveStock.getSowDailyPigCount() / count);
+                dailyExtend.setBoarDailyPigCount(FieldHelper.getInteger(dayAvgLiveStock.getBoarDailyPigCount(), count));
+                dailyExtend.setSowDailyPigCount(FieldHelper.getInteger(dayAvgLiveStock.getSowDailyPigCount(), count));
             }
             dailyExtend.setSowCfStart(start.getSowCfStart());
             dailyExtend.setSowPhStart(start.getSowPhStart());

@@ -241,7 +241,7 @@
         farm_name as farmName,
         pig_type as pigType,
         sum_at as sumAt,
-        AVG(`end`) as dailyLivestockOnHand,
+        round(AVG(`end`),0) as dailyLivestockOnHand,
         ifnull(sum(turn_into), 0) as turnInto,
         ifnull(sum(chg_farm_in), 0) as chgFarmIn,
         ifnull(sum(deliver_hand_turn_into), 0) as deliverHandTurnInto,
@@ -401,7 +401,8 @@
     </select>
 
     <select id="orgDayAvgLiveStock" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="int">
-        SELECT (
+        SELECT
+        round((
         select sum(`end`)
         FROM <include refid="tb"/>
         <include refid="dimensionCri"/>
@@ -414,7 +415,7 @@
         <include refid="dimensionCri"/>
         group by sum_at
         ) a
-        )
+        ), 0)
         from dual
     </select>
 
