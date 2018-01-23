@@ -29,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.jboss.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -543,13 +544,19 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                         public boolean notImportDifferentProcess(WarehouseStockOutDto.WarehouseStockOutDetail source, DoctorWarehouseMaterialHandle target) {
 
                             boolean needUpdate = false;
+
                             DoctorWarehouseMaterialApply apply = doctorWarehouseMaterialApplyDao.findMaterialHandle(target.getId());
+                            boolean sameHandleDate = DateUtils.isSameDay(stockOut.getHandleDate().getTime(), apply.getApplyDate());
                             if (!Objects.equals(source.getApplyPigGroupId(), apply.getPigGroupId())
-                                    || !Objects.equals(source.getApplyPigBarnId(), apply.getPigBarnId())) {
+                                    || !Objects.equals(source.getApplyPigBarnId(), apply.getPigBarnId())
+                                    || !sameHandleDate) {
 //                                doctorWarehouseMaterialApplyDao.delete(apply.getId());
                                 doctorWarehouseMaterialApplyDao.deleteByMaterialHandle(apply.getMaterialHandleId());//如果是猪群领用会有两条记录
                                 doctorWarehouseMaterialApplyManager.apply(target, source, orgId);
-                                needUpdate = true;
+
+                                if (!sameHandleDate)
+                                    target.setHandleDate(stockOut.getHandleDate().getTime());
+                                needUpdate = !sameHandleDate;
                             }
 
                             if (!Objects.equals(source.getRemark(), target.getRemark())) {
