@@ -66,8 +66,7 @@
         kind = 1 AND
         status = 1 AND
         event_source != 5 AND
-        (( barn_type in ( 5, 6 ) and type in(2,6,7,14) ) OR ( barn_type = 7 and type = 12 ) ) --
-        保育舍发生的转场+销售+转分娩舍-(产房发生的进场+转配怀舍)
+        (( barn_type in ( 5, 6 ) and type in(2,6,7,14) ) OR ( barn_type = 7 and type = 12 ) ) -- 保育舍发生的转场+销售+转分娩舍-(产房发生的进场+转配怀舍)
         )
     </select>
 
