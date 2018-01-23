@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dao;
 
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
 import org.junit.Assert;
 import org.junit.Test;
@@ -49,5 +50,14 @@ public class DoctorStatisticDaoTest extends BaseDaoTest {
         Assert.assertEquals(0, doctorPigStatisticDao.sowEntryAndNotMatingNum(criteria).intValue());
     }
 
+    @Test
+    public void boarLiveStock() {
+        DoctorStatisticCriteria criteria = new DoctorStatisticCriteria(404L, "2018-01-23");
+        criteria.setStartAt("2017-09-01");
+        criteria.setEndAt("2017-09-30");
+        int early = doctorPigStatisticDao.boarOtherOut(criteria);
+//        System.out.println(doctorKpiDao.realTimeLiveStockBoar(404L, DateUtil.toDate("2018-01-23")));
+        System.out.println(early);
+    }
 
 }

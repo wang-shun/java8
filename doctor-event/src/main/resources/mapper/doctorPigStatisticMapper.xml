@@ -692,6 +692,7 @@
             and type = 6
             and change_type_id = 110
             and kind = 2
+            and boar_type = 1
         </where>
     </select>
 
@@ -704,6 +705,7 @@
             and type = 6
             and change_type_id = 111
             and kind = 2
+            and boar_type = 1
         </where>
     </select>
 
@@ -716,6 +718,7 @@
             and type = 6
             and change_type_id = 109
             and kind = 2
+            and boar_type = 1
         </where>
     </select>
 
@@ -726,6 +729,7 @@
         <where>
             <include refid="criteria"/>
             and kind = 2
+            and boar_type = 1
             and (`type` = 2 OR ( `type`= 6 and change_type_id not in (109,110,111)))
         </where>
     </select>

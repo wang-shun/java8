@@ -28,7 +28,7 @@ import java.util.List;
  * email:xiaojiannan@terminus.io
  */
 public class DoctorBiDataTest extends BaseServiceTest {
-    @Autowired
+//    @Autowired
     private DoctorReportBiDataSynchronize synchronizer;
     @Autowired
     private DoctorGroupDailyDao doctorGroupDailyDao;
@@ -146,8 +146,8 @@ public class DoctorBiDataTest extends BaseServiceTest {
         DoctorStatisticCriteria criteria = new DoctorStatisticCriteria(404L, null);
         criteria.setStartAt("2017-09-01");
         criteria.setEndAt("2017-09-30");
-        int early = doctorPigStatisticDao.boarLiveStock(404L, "2018-01-15");
-        System.out.println(doctorKpiDao.realTimeLiveStockBoar(404L, DateUtil.toDate("2018-01-15")));
+        int early = doctorPigStatisticDao.boarLiveStock(404L, "2018-01-23");
+        System.out.println(doctorKpiDao.realTimeLiveStockBoar(404L, DateUtil.toDate("2018-01-23")));
         System.out.println(early);
     }
 }
