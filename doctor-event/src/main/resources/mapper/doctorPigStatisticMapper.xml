@@ -57,7 +57,7 @@
         -
         (
         SELECT
-        ifnull(sum(case type when 7 then 1 when 12 then 1 else 0 end ), 0) -
+        ifnull(sum(case type when 20 then 1 when 7 then 1 when 12 then 1 else 0 end ), 0) -
         ifnull(sum(case type when 2 then 1 when 6 then 1 when 14 then 1 else 0 end ), 0)
         FROM doctor_pig_events
         WHERE
@@ -66,7 +66,7 @@
         kind = 1 AND
         status = 1 AND
         event_source != 5 AND
-        (( barn_type in ( 5, 6 ) and type in(2,6,7,14) ) OR ( barn_type = 7 and type = 12 ) ) -- 保育舍发生的转场+销售+转分娩舍-(产房发生的进场+转配怀舍)
+        (( barn_type in ( 5, 6 ) and type in(2,6,7,14,20)) OR ( barn_type = 7 and type = 12 ) ) -- 保育舍发生的转场+销售+转分娩舍-(产房发生的进场+转配怀舍)
         )
     </select>
 

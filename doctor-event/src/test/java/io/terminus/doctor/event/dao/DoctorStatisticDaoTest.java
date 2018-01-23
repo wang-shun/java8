@@ -18,6 +18,8 @@ public class DoctorStatisticDaoTest extends BaseDaoTest {
     private DoctorPigStatisticDao doctorPigStatisticDao;
     @Autowired
     private DoctorWarehouseReportDao doctorWarehouseReportDao;
+    @Autowired
+    private DoctorKpiDao doctorKpiDao;
 
     @Test
     public void groupLiveStockTest() {
@@ -70,8 +72,25 @@ public class DoctorStatisticDaoTest extends BaseDaoTest {
         criteria.setOrzType(3);
         criteria.setSumAt(DateUtil.toDate("2018-01-23"));
         criteria.setDateType(3);
-        criteria.setPigType(2);
+        criteria.setPigType(3);
         System.out.println(doctorWarehouseReportDao.materialApply(criteria));
+    }
+
+
+    @Test
+    public void netWeightGainTest() {
+        DoctorStatisticCriteria criteria = new DoctorStatisticCriteria(404L, 3, "2018-01-23");
+        System.out.println(doctorGroupStatisticDao.netWeightGain(criteria));
+    }
+
+    @Test
+    public void phStockLive() {
+        DoctorStatisticCriteria criteria = new DoctorStatisticCriteria(404L, "2018-01-23");
+        String date = "2018-01-13";
+        System.out.println(doctorPigStatisticDao.phLiveStock(404L, date));
+        System.out.println(doctorPigStatisticDao.cfLiveStock(404L, date));
+        System.out.println(doctorKpiDao.realTimeLiveStockSow(404L, DateUtil.toDate(date)));
+        System.out.println(doctorKpiDao.realTimeLiveStockFarrowSow(404L, DateUtil.toDate(date)));
     }
 
 }
