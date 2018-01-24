@@ -117,7 +117,7 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
             return;
         }
         if (DateUtils.isSameDay(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
-            DoctorGroupDaily oldDailyGroup = doctorDailyReportManager.findDoctorGroupDaily(changeDto.getFarmId(), changeDto.getPigType(), changeDto.getOldEventAt());
+            DoctorGroupDaily oldDailyGroup = doctorDailyReportManager.findDoctorGroupDaily(oldGroupEvent.getFarmId(), oldGroupEvent.getPigType(), changeDto.getOldEventAt());
             buildDailyGroup(oldDailyGroup, changeDto);
             doctorGroupDailyDao.update(oldDailyGroup);
             updateDailyGroupLiveStock(changeDto.getFarmId(), changeDto.getPigType(), getAfterDay(changeDto.getOldEventAt()), changeDto.getQuantityChange());

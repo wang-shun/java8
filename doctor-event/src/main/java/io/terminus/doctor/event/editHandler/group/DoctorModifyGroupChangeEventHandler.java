@@ -87,8 +87,8 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
     @Override
     protected void updateDailyForModify(DoctorGroupEvent oldGroupEvent, BaseGroupInput input, DoctorEventChangeDto changeDto) {
         if (DateUtils.isSameDay(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
-                       DoctorGroupDaily oldDailyGroup = doctorDailyReportManager.findDoctorGroupDaily(changeDto.getFarmId(), 
-                               changeDto.getPigType(), changeDto.getOldEventAt());
+                       DoctorGroupDaily oldDailyGroup = doctorDailyReportManager.findDoctorGroupDaily(oldGroupEvent.getFarmId(),
+                               oldGroupEvent.getPigType(), changeDto.getOldEventAt());
             if (Objects.equals(changeDto.getNewChangeTypeId(), changeDto.getOldChangeTypeId())) {
                 changeDto.setChangeTypeId(changeDto.getOldChangeTypeId());
                 buildDailyGroup(oldDailyGroup, changeDto);
