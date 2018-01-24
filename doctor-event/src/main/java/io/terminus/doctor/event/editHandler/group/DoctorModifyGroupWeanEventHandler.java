@@ -22,6 +22,7 @@ public class DoctorModifyGroupWeanEventHandler extends DoctorAbstractModifyGroup
         DoctorWeanGroupInput newDto = (DoctorWeanGroupInput) input;
         return DoctorEventChangeDto.builder()
                 .farmId(oldGroupEvent.getFarmId())
+                .pigType(oldGroupEvent.getPigType())
                 .businessId(oldGroupEvent.getGroupId())
                 .newEventAt(DateUtil.toDate(newDto.getEventAt()))
                 .oldEventAt(DateUtil.toDate(oldDto.getEventAt()))

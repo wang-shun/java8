@@ -66,6 +66,7 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
         DoctorBarn toBarn = doctorBarnDao.findById(oldInput.getToBarnId());
         return DoctorEventChangeDto.builder()
                 .farmId(oldGroupEvent.getFarmId())
+                .pigType(oldGroupEvent.getPigType())
                 .businessId(oldGroupEvent.getGroupId())
                 .oldToGroupId(oldInput.getToGroupId())
                 .toGroupId(newInput.getToGroupId())

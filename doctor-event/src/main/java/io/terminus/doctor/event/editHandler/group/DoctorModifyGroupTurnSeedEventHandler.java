@@ -60,6 +60,7 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
         DoctorTurnSeedGroupInput newInput = (DoctorTurnSeedGroupInput) input;
         return DoctorEventChangeDto.builder()
                 .farmId(oldGroupEvent.getFarmId())
+                .pigType(oldGroupEvent.getPigType())
                 .businessId(oldGroupEvent.getGroupId())
                 .oldEventAt(oldGroupEvent.getEventAt())
                 .newEventAt(DateUtil.toDate(newInput.getEventAt()))
