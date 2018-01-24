@@ -256,6 +256,11 @@ public class DoctorEventChangeDto {
     private Integer weanCountChange;
 
     /**
+     * 断奶合格数
+     */
+    private Integer weanQualifiedCount;
+
+    /**
      * 猪断奶均重变化量
      */
     private Double weanAvgWeight;

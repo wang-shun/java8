@@ -45,6 +45,7 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
                 .newEventAt(newDto.eventAt())
                 .oldEventAt(oldDto.eventAt())
                 .weanCountChange(EventUtil.minusInt(newDto.getPartWeanPigletsCount(), oldDto.getPartWeanPigletsCount()))
+                .weanQualifiedCount(EventUtil.minusInt(newDto.getQualifiedCount(), oldDto.getQualifiedCount()))
                 .weanAvgWeight(newDto.getPartWeanAvgWeight())
                 .build();
     }
@@ -55,6 +56,7 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
         DoctorWeanDto newDto = (DoctorWeanDto) inputDto;
         newEvent.setFeedDays(getWeanAvgAge(oldPigEvent.getPigId(), oldPigEvent.getParity(), newDto.eventAt()));
         newEvent.setWeanCount(newDto.getPartWeanPigletsCount());
+        newEvent.setHealthCount(newDto.getQualifiedCount());
         newEvent.setWeanAvgWeight(newDto.getPartWeanAvgWeight());
         return newEvent;
     }
@@ -127,6 +129,7 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
         DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
                 .weanAvgWeight(oldPigEvent.getWeanAvgWeight())
                 .weanCountChange(-oldPigEvent.getWeanCount())
+                .weanQualifiedCount(EventUtil.minusInt(0, oldPigEvent.getHealthCount()))
                 .weanNestChange(-1)
                 .weanDayAge(getWeanAvgAge(oldPigEvent.getPigId(), oldPigEvent.getParity(), oldPigEvent.getEventAt()))
                 .build();
@@ -141,6 +144,7 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                 .weanAvgWeight(weanDto2.getPartWeanAvgWeight())
                 .weanCountChange(weanDto2.getPartWeanPigletsCount())
+                .weanQualifiedCount(weanDto2.getQualifiedCount())
                 .weanNestChange(1)
                 .weanDayAge(getWeanAvgAge(newPigEvent.getPigId(), newPigEvent.getParity(), inputDto.eventAt()))
                 .build();
@@ -154,6 +158,7 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
         oldDailyPig.setWeanWeight(EventUtil.plusDouble(oldDailyPig.getWeanWeight(), oldDailyPig.getWeanWeight()));
         oldDailyPig.setWeanNest(EventUtil.plusInt(oldDailyPig.getWeanNest(), changeDto.getWeanNestChange()));
         oldDailyPig.setWeanCount(EventUtil.plusInt(oldDailyPig.getWeanCount(), changeDto.getWeanCountChange()));
+        oldDailyPig.setWeanQualifiedCount(EventUtil.plusInt(oldDailyPig.getWeanQualifiedCount(), changeDto.getWeanQualifiedCount()));
         return oldDailyPig;
     }
 

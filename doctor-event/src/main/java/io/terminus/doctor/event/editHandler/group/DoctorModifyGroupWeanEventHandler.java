@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.editHandler.group;
 
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorWeanGroupInput;
@@ -14,6 +15,21 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DoctorModifyGroupWeanEventHandler extends DoctorAbstractModifyGroupEventHandler {
+
+    @Override
+    public DoctorEventChangeDto buildEventChange(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
+        DoctorWeanGroupInput oldDto = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorWeanGroupInput.class);
+        DoctorWeanGroupInput newDto = (DoctorWeanGroupInput) input;
+        return DoctorEventChangeDto.builder()
+                .farmId(oldGroupEvent.getFarmId())
+                .businessId(oldGroupEvent.getGroupId())
+                .newEventAt(DateUtil.toDate(newDto.getEventAt()))
+                .oldEventAt(DateUtil.toDate(oldDto.getEventAt()))
+                .quantityChange(EventUtil.minusInt(newDto.getPartWeanPigletsCount(), oldDto.getPartWeanPigletsCount()))
+                .weightChange(EventUtil.minusDouble(EventUtil.getWeight(newDto.getPartWeanAvgWeight(), newDto.getPartWeanPigletsCount()),
+                        EventUtil.getWeight(oldDto.getPartWeanAvgWeight(), oldDto.getPartWeanPigletsCount())))
+                .build();
+    }
 
     @Override
     public DoctorGroupEvent buildNewEvent(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
