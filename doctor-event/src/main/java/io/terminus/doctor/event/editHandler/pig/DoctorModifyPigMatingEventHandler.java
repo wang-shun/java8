@@ -14,6 +14,7 @@ import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
+import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
@@ -83,7 +84,7 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
 
     @Override
     protected void updateDailyForModify(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto) {
-        if (!Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
+        if (!DateUtils.isSameDay(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
             //原日期记录更新
             updateDailyOfDelete(oldPigEvent);
 

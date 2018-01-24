@@ -11,8 +11,13 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
-import io.terminus.doctor.event.model.*;
+import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigDaily;
+import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
+import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.springframework.stereotype.Component;
@@ -94,7 +99,7 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
 
     @Override
     protected void updateDailyForModify(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto) {
-        if (Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())
+        if (DateUtils.isSameDay(changeDto.getNewEventAt(), changeDto.getOldEventAt())
                 && !Objects.equals(changeDto.getNewChangeTypeId(), changeDto.getOldChangeTypeId())) {
             DoctorPigDaily oldDailyPig = doctorDailyReportManager.findDoctorPigDaily(changeDto.getFarmId(), changeDto.getOldEventAt());
             DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()

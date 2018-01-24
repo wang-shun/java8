@@ -12,8 +12,13 @@ import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTransGroupEve
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.model.*;
+import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorPigDaily;
+import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -57,7 +62,7 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
 
     @Override
     protected void updateDailyForModify(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto) {
-        if (!Objects.equals(changeDto.getOldEventAt(), changeDto.getNewEventAt())) {
+        if (!DateUtils.isSameDay(changeDto.getOldEventAt(), changeDto.getNewEventAt())) {
             updateDailyOfDelete(oldPigEvent);
             updateDailyOfNew(oldPigEvent, inputDto);
         }

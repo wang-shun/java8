@@ -12,6 +12,7 @@ import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.util.EventUtil;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -85,7 +86,7 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
 
     @Override
     protected void updateDailyForModify(DoctorGroupEvent oldGroupEvent, BaseGroupInput input, DoctorEventChangeDto changeDto) {
-        if (Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
+        if (DateUtils.isSameDay(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
                        DoctorGroupDaily oldDailyGroup = doctorDailyReportManager.findDoctorGroupDaily(changeDto.getFarmId(), 
                                changeDto.getPigType(), changeDto.getOldEventAt());
             if (Objects.equals(changeDto.getNewChangeTypeId(), changeDto.getOldChangeTypeId())) {

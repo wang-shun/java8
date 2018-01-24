@@ -1,11 +1,14 @@
 package io.terminus.doctor.event.dao;
 
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Date;
 
 /**
  * Created by xjn on 17/12/19.
@@ -99,5 +102,11 @@ public class DoctorStatisticDaoTest extends BaseDaoTest {
         System.out.println(doctorPigStatisticDao.weanNest(criteria));
         System.out.println(doctorPigStatisticDao.weanMate(criteria));
         System.out.println(doctorPigStatisticDao.weanDeadWeedOut(criteria));
+    }
+
+
+    public void dateTest() {
+        System.out.println(JsonMapper.nonEmptyMapper().fromJson(JsonMapper.nonEmptyMapper().toJson(DateUtil.toDate("2017-01-01")), Date.class));
+
     }
 }

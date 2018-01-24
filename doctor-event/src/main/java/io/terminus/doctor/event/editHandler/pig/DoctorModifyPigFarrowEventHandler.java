@@ -13,9 +13,18 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupMoveInEventHandler;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupNewEventHandler;
-import io.terminus.doctor.event.enums.*;
-import io.terminus.doctor.event.model.*;
+import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.InType;
+import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.enums.PigSource;
+import io.terminus.doctor.event.enums.PigStatus;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.DoctorPigDaily;
+import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -107,7 +116,7 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
 
     @Override
     protected void updateDailyForModify(DoctorPigEvent oldEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto) {
-        if (Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
+        if (DateUtils.isSameDay(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
             DoctorPigDaily oldDailyPig = doctorDailyReportManager.findDoctorPigDaily(changeDto.getFarmId(), changeDto.getNewEventAt());
             doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
         } else {

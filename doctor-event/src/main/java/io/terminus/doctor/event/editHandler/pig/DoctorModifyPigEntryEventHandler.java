@@ -9,6 +9,7 @@ import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -77,7 +78,7 @@ public class DoctorModifyPigEntryEventHandler extends DoctorAbstractModifyPigEve
 
     @Override
     protected void updateDailyForModify(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto) {
-        if (Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())
+        if (DateUtils.isSameDay(changeDto.getNewEventAt(), changeDto.getOldEventAt())
                 && Objects.equals(oldPigEvent.getKind(), DoctorPig.PigSex.BOAR.getKey())) {
             DoctorFarmEntryDto newDto = (DoctorFarmEntryDto) inputDto;
 

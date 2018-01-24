@@ -16,6 +16,7 @@ import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
@@ -115,7 +116,7 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
         if (Objects.equals(oldGroupEvent.getTransGroupType(), DoctorGroupEvent.TransGroupType.IN.getValue())) {
             return;
         }
-        if (Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
+        if (DateUtils.isSameDay(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
             DoctorGroupDaily oldDailyGroup = doctorDailyReportManager.findDoctorGroupDaily(changeDto.getFarmId(), changeDto.getPigType(), changeDto.getOldEventAt());
             buildDailyGroup(oldDailyGroup, changeDto);
             doctorGroupDailyDao.update(oldDailyGroup);
