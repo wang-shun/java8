@@ -102,6 +102,22 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
                     .pregCheckResultCountChange(1)
                     .build();
             doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig, changeDto2));
+
+            //更新配种、空怀、怀孕母猪数量
+            if (!PigType.MATING_TYPES.contains(oldPigEvent.getBarnType())) {
+                return;
+            }
+
+            if (Objects.equals(changeDto.getOldPregCheckResult(), PregCheckResult.YANG.getKey())
+                    && !Objects.equals(changeDto.getNewPregCheckResult(), PregCheckResult.YANG.getKey())) {
+                updateDailyPhStatusLiveStock(oldPigEvent.getFarmId(), oldPigEvent.getEventAt()
+                        , 0, 1, -1);
+            } else if (!Objects.equals(changeDto.getOldPregCheckResult(), PregCheckResult.YANG.getKey())
+                    && Objects.equals(changeDto.getNewPregCheckResult(), PregCheckResult.YANG.getKey())) {
+                updateDailyPhStatusLiveStock(oldPigEvent.getFarmId(), oldPigEvent.getEventAt()
+                        , 0, -1, 1);
+            }
+
         } else {
             updateDailyOfDelete(oldPigEvent);
             updateDailyOfNew(oldPigEvent, inputDto);
