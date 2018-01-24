@@ -93,4 +93,11 @@ public class DoctorStatisticDaoTest extends BaseDaoTest {
         System.out.println(doctorKpiDao.realTimeLiveStockFarrowSow(404L, DateUtil.toDate(date)));
     }
 
+    @Test
+    public void weanMate() {
+        DoctorStatisticCriteria criteria = new DoctorStatisticCriteria(404L, "2017-09-06");
+        System.out.println(doctorPigStatisticDao.weanNest(criteria));
+        System.out.println(doctorPigStatisticDao.weanMate(criteria));
+        System.out.println(doctorPigStatisticDao.weanDeadWeedOut(criteria));
+    }
 }
