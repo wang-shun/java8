@@ -3,6 +3,7 @@ package io.terminus.doctor.event.service;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorPigDailyDao;
@@ -120,10 +121,10 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                     }
                 } else {
 
-                    log.debug("猪【{}】的本次事件为【{}】【{}】，下次事件为【{}】【{}】，间隔为【{}】，计入{}月", pigId,
-                            PigEvent.from(currentEvent.getType()),
+                    log.info("猪【{}】的本次事件为【{}】【{}】，下次事件为【{}】【{}】，间隔为【{}】，计入{}月", pigId,
+                            PigEvent.from(currentEvent.getType()).getName(),
                             DateUtil.toDateString(currentEvent.getEventAt()),
-                            PigEvent.from(nextEvent.getType()),
+                            PigEvent.from(nextEvent.getType()).getName(),
                             DateUtil.toDateString(nextEvent.getEventAt()),
                             days,
                             month);
@@ -250,6 +251,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                 filterMultiPreCheckEvents.add(events.get(i));
             }
 
+
             for (int i = 0; i < filterMultiPreCheckEvents.size(); i++) {
                 if (i == filterMultiPreCheckEvents.size() - 1)
                     break;
@@ -281,10 +283,11 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
 
 
     /**
-     * 过滤多余的妊娠检查事件
+     * 过滤多余的事件
      * 先按照事件发生日期排序，正序
      * 如果是妊娠检查，结果为阳性事件一律去除
      * 如果是妊娠检查，结果为反情，流产，阴性，一个月内保留最后一个妊娠检查事件，其余去除
+     * 如果是体况，疾病，拼窝，仔猪变动，转舍事件，过滤
      * 其他事件类型不影响
      *
      * @return
@@ -293,6 +296,14 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
 
         List<DoctorPigEvent> sortedByEventDate = pigEvents.stream()
                 .sorted((e1, e2) -> e1.getEventAt().compareTo(e2.getEventAt()))
+                .filter(e -> !e.getType().equals(PigEvent.CONDITION.getKey())
+                        && !e.getType().equals(PigEvent.DISEASE.getKey())
+                        && !e.getType().equals(PigEvent.FOSTERS_BY.getKey())
+                        && !e.getType().equals(PigEvent.PIGLETS_CHG.getKey())
+                        && !e.getType().equals(PigEvent.CHG_LOCATION.getKey())
+                        && !e.getType().equals(PigEvent.TO_MATING.getKey())
+                        && !e.getType().equals(PigEvent.TO_FARROWING.getKey())
+                        && !e.getType().equals(PigEvent.TO_PREG.getKey()))
                 .collect(Collectors.toList());
 
         List<DoctorPigEvent> filterMultiPreCheckEvents = new ArrayList<>();
@@ -307,6 +318,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
             }
 
             DoctorPigEvent currentEvent = sortedByEventDate.get(i);
+
 
             if (currentEvent.getType().equals(PigEvent.PREG_CHECK.getKey())) {
 
@@ -331,7 +343,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
 
             }
 
-            filterMultiPreCheckEvents.add(sortedByEventDate.get(i));
+            filterMultiPreCheckEvents.add(currentEvent);
         }
         return Collections.unmodifiableList(filterMultiPreCheckEvents);
     }
