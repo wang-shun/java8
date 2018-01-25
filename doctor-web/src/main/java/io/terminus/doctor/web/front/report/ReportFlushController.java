@@ -38,4 +38,12 @@ public class ReportFlushController {
         doctorReportWriteService.flushNPD(Collections.singletonList(farmId), date, reportTime);
 
     }
+
+    @RequestMapping("all/npd")
+    public void flushNPD(@RequestParam Long farmId,
+                         @RequestParam @DateTimeFormat(pattern = "yyyyMM") Date date) {
+
+        doctorReportWriteService.flushNPD(Collections.singletonList(farmId), date);
+    }
+
 }

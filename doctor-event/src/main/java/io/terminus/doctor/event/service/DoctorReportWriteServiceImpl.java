@@ -63,22 +63,23 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
     @Override
     public void flushNPD(List<Long> farmIds, Date start) {
         Date startAtMonth = DateUtil.monthStart(start);//日期所在月的第一天
-        Date end = new Date();
+        Date end = DateUtil.monthEnd(new Date());
 
-        int max = DateUtil.getDeltaMonths(startAtMonth, end);
-        for (int i = 0; i <= max; i++) {
-            flushNPD(farmIds, startAtMonth, DateUtil.monthEnd(startAtMonth));
-            startAtMonth = DateUtils.addMinutes(start, 1);
-        }
+//        int max = DateUtil.getDeltaMonths(startAtMonth, end);
+//        for (int i = 0; i <= max; i++) {
+//            flushNPD(farmIds, startAtMonth, DateUtil.monthEnd(startAtMonth));
+        //            startAtMonth = DateUtils.addMinutes(start, 1);
+//        }
 
+        flushNPD(farmIds, startAtMonth, end);
     }
 
     public void flushNPD(List<Long> farmIds, Date startDate, Date endDate) {
 
 
-        Map<Long/*farmID*/, Map<Integer/*month*/, Integer/*怀孕天数*/>> farmPregnancy = new ConcurrentHashMap<>();
-        Map<Long/*farmID*/, Map<Integer/*month*/, Integer/*哺乳天数*/>> farmLactation = new ConcurrentHashMap<>();
-        Map<Long/*farmID*/, Map<Integer/*month*/, Integer/*非生产天数*/>> farmNPD = new ConcurrentHashMap<>();
+        Map<Long/*farmID*/, Map<String/*year-month*/, Integer/*怀孕天数*/>> farmPregnancy = new ConcurrentHashMap<>();
+        Map<Long/*farmID*/, Map<String/*year-month*/, Integer/*哺乳天数*/>> farmLactation = new ConcurrentHashMap<>();
+        Map<Long/*farmID*/, Map<String/*year-month*/, Integer/*非生产天数*/>> farmNPD = new ConcurrentHashMap<>();
 
 
         Map<String, Object> params = new HashMap<>();
@@ -86,7 +87,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
         params.put("beginDate", startDate);
         params.put("endDate", endDate);
         List<Long> pigs = doctorPigEventDao.findPigAtEvent(startDate, endDate, farmIds);
-        pigs.parallelStream().forEach((pigId) -> {
+        pigs.stream().forEach((pigId) -> {
 
             List<DoctorPigEvent> pigAllEvent = doctorPigEventDao.findByPigId(pigId);
 
@@ -105,28 +106,32 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
 
                 int days = DateUtil.getDeltaDays(currentEvent.getEventAt(), nextEvent.getEventAt());//天数
                 int month = new DateTime(nextEvent.getEventAt()).getMonthOfYear();
+                int year = new DateTime(nextEvent.getEventAt()).getYear();
+
+                String yearAndMonthKey = year + "-" + month;
+
                 if (nextEvent.getType().equals(PigEvent.FARROWING.getKey())) {
                     if (farmPregnancy.containsKey(nextEvent.getFarmId())) {
-                        Map<Integer, Integer> monthPregnancy = farmPregnancy.get(nextEvent.getFarmId());
-                        if (monthPregnancy.containsKey(month))
-                            monthPregnancy.put(month, monthPregnancy.get(month) + days);
+                        Map<String, Integer> monthPregnancy = farmPregnancy.get(nextEvent.getFarmId());
+                        if (monthPregnancy.containsKey(yearAndMonthKey))
+                            monthPregnancy.put(yearAndMonthKey, monthPregnancy.get(yearAndMonthKey) + days);
                         else
-                            monthPregnancy.put(month, days);
+                            monthPregnancy.put(yearAndMonthKey, days);
                     } else {
-                        Map<Integer, Integer> monthPregnancy = new HashMap<>();
-                        monthPregnancy.put(month, days);
+                        Map<String, Integer> monthPregnancy = new HashMap<>();
+                        monthPregnancy.put(yearAndMonthKey, days);
                         farmPregnancy.put(nextEvent.getFarmId(), monthPregnancy);
                     }
                 } else if (nextEvent.getType().equals(PigEvent.WEAN)) {
                     if (farmLactation.containsKey(nextEvent.getFarmId())) {
-                        Map<Integer, Integer> monthLactation = farmLactation.get(nextEvent.getFarmId());
-                        if (monthLactation.containsKey(month))
-                            monthLactation.put(month, monthLactation.get(month) + days);
+                        Map<String, Integer> monthLactation = farmLactation.get(nextEvent.getFarmId());
+                        if (monthLactation.containsKey(yearAndMonthKey))
+                            monthLactation.put(yearAndMonthKey, monthLactation.get(yearAndMonthKey) + days);
                         else
-                            monthLactation.put(month, days);
+                            monthLactation.put(yearAndMonthKey, days);
                     } else {
-                        Map<Integer, Integer> monthLactation = new HashMap<>();
-                        monthLactation.put(month, days);
+                        Map<String, Integer> monthLactation = new HashMap<>();
+                        monthLactation.put(yearAndMonthKey, days);
                         farmLactation.put(nextEvent.getFarmId(), monthLactation);
                     }
                 } else {
@@ -140,14 +145,14 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                             month);
 
                     if (farmNPD.containsKey(nextEvent.getFarmId())) {
-                        Map<Integer, Integer> monthNPD = farmNPD.get(nextEvent.getFarmId());
-                        if (monthNPD.containsKey(month))
-                            monthNPD.put(month, monthNPD.get(month) + days);
+                        Map<String, Integer> monthNPD = farmNPD.get(nextEvent.getFarmId());
+                        if (monthNPD.containsKey(yearAndMonthKey))
+                            monthNPD.put(yearAndMonthKey, monthNPD.get(yearAndMonthKey) + days);
                         else
-                            monthNPD.put(month, days);
+                            monthNPD.put(yearAndMonthKey, days);
                     } else {
-                        Map<Integer, Integer> monthNPD = new HashMap<>();
-                        monthNPD.put(month, days);
+                        Map<String, Integer> monthNPD = new HashMap<>();
+                        monthNPD.put(yearAndMonthKey, days);
                         farmNPD.put(nextEvent.getFarmId(), monthNPD);
                     }
                 }
@@ -156,28 +161,29 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
         });
 
 
-        int year = new DateTime(startDate).getYear();
-        int monthStart = new DateTime(startDate).getMonthOfYear();
-        int monthEnd = new DateTime(endDate).getMonthOfYear() + 1;
+//        int year = new DateTime(startDate).getYear();
+//        int monthStart = new DateTime(startDate).getMonthOfYear();
+//        int monthEnd = new DateTime(endDate).getMonthOfYear() + 1;
 
+        Date last = DateUtils.addMonths(endDate, 1);
 
         farmIds.forEach(f -> {
 
             DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(f));
 
-            for (int i = monthStart; i < monthEnd; i++) {
+            for (Date i = startDate; i.before(last); i = DateUtils.addMonths(i, 1)) {
 
-                Date monthStartDate = new DateTime(year, i, 1, 0, 0).toDate();
-                Date monthEndDate = DateUtil.monthEnd(monthStartDate);
+//                Date monthStartDate = new DateTime(year, i, 1, 0, 0).toDate();
+                Date monthEndDate = DateUtil.monthEnd(i);
 
-                int dayCount = DateUtil.getDeltaDays(monthStartDate, monthEndDate) + 1;
+                int dayCount = DateUtil.getDeltaDays(i, monthEndDate) + 1;
 
-                DoctorReportNpd npd = doctorReportNpdDao.findByFarmAndSumAt(f, monthStartDate).orElseGet(() -> new DoctorReportNpd());
+                DoctorReportNpd npd = doctorReportNpdDao.findByFarmAndSumAt(f, i).orElseGet(() -> new DoctorReportNpd());
                 npd.setFarmId(f);
                 npd.setDays(dayCount);
 
 //                DoctorPigDaily pigDaily = doctorPigDailyDao.countByFarm(f, monthStartDate, monthEndDate);
-                Integer sowCount = doctorPigDailyDao.countSow(f, monthStartDate, monthEndDate);
+                Integer sowCount = doctorPigDailyDao.countSow(f, i, monthEndDate);
                 npd.setSowCount(sowCount);
 //                if (null != pigDaily) {
 //                    int sowCount = (pigDaily.getSowCfEnd() == null ? 0 : pigDaily.getSowCfEnd()) + (pigDaily.getSowPhEnd() == null ? 0 : pigDaily.getSowPhEnd());//母猪月存栏
@@ -189,34 +195,38 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
 //                }
 
 
-                npd.setSumAt(monthStartDate);
+                npd.setSumAt(i);
+
+                int year = new DateTime(i).getYear();
+                int month = new DateTime(i).getMonthOfYear();
+                String monthAndYearKey = year + "-" + month;
 
                 if (!farmNPD.containsKey(f))
                     npd.setNpd(0);
                 else {
-                    Map<Integer, Integer> monthNPD = farmNPD.get(f);
-                    if (!monthNPD.containsKey(i))
+                    Map<String, Integer> monthNPD = farmNPD.get(f);
+                    if (!monthNPD.containsKey(monthAndYearKey))
                         npd.setNpd(0);
                     else
-                        npd.setNpd(monthNPD.get(i));
+                        npd.setNpd(monthNPD.get(monthAndYearKey));
                 }
                 if (!farmPregnancy.containsKey(f))
                     npd.setPregnancy(0);
                 else {
-                    Map<Integer, Integer> monthPregnancy = farmPregnancy.get(f);
-                    if (!monthPregnancy.containsKey(i))
+                    Map<String, Integer> monthPregnancy = farmPregnancy.get(f);
+                    if (!monthPregnancy.containsKey(monthAndYearKey))
                         npd.setPregnancy(0);
                     else
-                        npd.setPregnancy(monthPregnancy.get(i));
+                        npd.setPregnancy(monthPregnancy.get(monthAndYearKey));
                 }
                 if (!farmLactation.containsKey(f))
                     npd.setLactation(0);
                 else {
-                    Map<Integer, Integer> monthLactation = farmLactation.get(f);
-                    if (!monthLactation.containsKey(i))
+                    Map<String, Integer> monthLactation = farmLactation.get(f);
+                    if (!monthLactation.containsKey(monthAndYearKey))
                         npd.setLactation(0);
                     else
-                        npd.setLactation(monthLactation.get(i));
+                        npd.setLactation(monthLactation.get(monthAndYearKey));
                 }
 
                 npd.setOrgId(null == farm ? null : farm.getOrgId());
