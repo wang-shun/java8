@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
@@ -90,67 +91,68 @@ public class DoctorGroupManager {
      */
     @Transactional
     public Long createNewGroup(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorNewGroupInput newGroupInput) {
-        expectTrue(doctorConcurrentControl.setKey(group.getFarmId() + group.getGroupCode()),
-                "event.concurrent.error", group.getGroupCode());
-        try {
-            newGroupInput.setEventType(GroupEventType.NEW.getValue());
-            checkFarrowGroupUnique(newGroupInput.getPigType(), newGroupInput.getBarnId(), group.getGroupCode());
 
-            //0.校验猪群号是否重复
-            checkGroupCodeExist(newGroupInput.getFarmId(), newGroupInput.getGroupCode());
-
-            //1. 创建猪群
-            doctorGroupDao.create(getNewGroup(group, newGroupInput));
-            Long groupId = group.getId();
-
-            //2. 创建新建猪群事件
-            DoctorGroupEvent groupEvent = getNewGroupEvent(group, newGroupInput);
-            groupEvent.setSowId(newGroupInput.getSowId());
-            groupEvent.setSowCode(newGroupInput.getSowCode());
-            doctorGroupEventDao.create(groupEvent);
-
-            //3. 创建猪群跟踪
-            DoctorGroupTrack groupTrack = BeanMapper.map(groupEvent, DoctorGroupTrack.class);
-            groupTrack.setGroupId(groupId);
-            groupTrack.setRelEventId(groupEvent.getId());
-            groupTrack.setBoarQty(0);
-            groupTrack.setSowQty(0);
-            groupTrack.setQuantity(0);
-            groupTrack.setBirthDate(DateUtil.toDate(newGroupInput.getEventAt()));    //出生日期(用于计算日龄)
-
-            int age = DateUtil.getDeltaDaysAbs(groupTrack.getBirthDate(), new Date());
-            groupTrack.setAvgDayAge(age + 1);             //日龄
-
-            groupTrack.setSex(newGroupInput.getSex());
-            groupTrack.setWeanWeight(0D);
-            groupTrack.setBirthWeight(0D);
-            groupTrack.setNest(0);
-            groupTrack.setLiveQty(0);
-            groupTrack.setHealthyQty(0);
-            groupTrack.setWeakQty(0);
-            groupTrack.setWeanQty(0);
-            groupTrack.setWeanWeight(0D);
-            groupTrack.setUnweanQty(0);
-            groupTrack.setQuaQty(0);
-            groupTrack.setUnqQty(0);
-            doctorGroupTrackDao.create(groupTrack);
-
-            DoctorEventInfo eventInfo = DoctorEventInfo.builder()
-                    .orgId(group.getOrgId())
-                    .farmId(group.getFarmId())
-                    .eventId(groupEvent.getId())
-                    .eventType(groupEvent.getType())
-                    .businessId(group.getId())
-                    .businessType(DoctorEventInfo.Business_Type.GROUP.getValue())
-                    .code(group.getGroupCode())
-                    .build();
-            eventInfoList.add(eventInfo);
-
-            autoDailyGroup(groupEvent.getFarmId(), groupEvent.getGroupId(), group.getPigType(), groupEvent.getEventAt());
-            return groupId;
-        } finally {
-            doctorConcurrentControl.delKey(group.getFarmId() + group.getGroupCode());
+        if (isNull(newGroupInput.getEventSource()) || Objects.equals(newGroupInput.getEventSource(), SourceType.INPUT.getValue())) {
+            String key = group.getFarmId().toString() + group.getGroupCode();
+            expectTrue(doctorConcurrentControl.setKey(key),
+                    "event.concurrent.error", group.getGroupCode());
         }
+
+        newGroupInput.setEventType(GroupEventType.NEW.getValue());
+        checkFarrowGroupUnique(newGroupInput.getPigType(), newGroupInput.getBarnId(), group.getGroupCode());
+
+        //0.校验猪群号是否重复
+        checkGroupCodeExist(newGroupInput.getFarmId(), newGroupInput.getGroupCode());
+
+        //1. 创建猪群
+        doctorGroupDao.create(getNewGroup(group, newGroupInput));
+        Long groupId = group.getId();
+
+        //2. 创建新建猪群事件
+        DoctorGroupEvent groupEvent = getNewGroupEvent(group, newGroupInput);
+        groupEvent.setSowId(newGroupInput.getSowId());
+        groupEvent.setSowCode(newGroupInput.getSowCode());
+        doctorGroupEventDao.create(groupEvent);
+
+        //3. 创建猪群跟踪
+        DoctorGroupTrack groupTrack = BeanMapper.map(groupEvent, DoctorGroupTrack.class);
+        groupTrack.setGroupId(groupId);
+        groupTrack.setRelEventId(groupEvent.getId());
+        groupTrack.setBoarQty(0);
+        groupTrack.setSowQty(0);
+        groupTrack.setQuantity(0);
+        groupTrack.setBirthDate(DateUtil.toDate(newGroupInput.getEventAt()));    //出生日期(用于计算日龄)
+
+        int age = DateUtil.getDeltaDaysAbs(groupTrack.getBirthDate(), new Date());
+        groupTrack.setAvgDayAge(age + 1);             //日龄
+
+        groupTrack.setSex(newGroupInput.getSex());
+        groupTrack.setWeanWeight(0D);
+        groupTrack.setBirthWeight(0D);
+        groupTrack.setNest(0);
+        groupTrack.setLiveQty(0);
+        groupTrack.setHealthyQty(0);
+        groupTrack.setWeakQty(0);
+        groupTrack.setWeanQty(0);
+        groupTrack.setWeanWeight(0D);
+        groupTrack.setUnweanQty(0);
+        groupTrack.setQuaQty(0);
+        groupTrack.setUnqQty(0);
+        doctorGroupTrackDao.create(groupTrack);
+
+        DoctorEventInfo eventInfo = DoctorEventInfo.builder()
+                .orgId(group.getOrgId())
+                .farmId(group.getFarmId())
+                .eventId(groupEvent.getId())
+                .eventType(groupEvent.getType())
+                .businessId(group.getId())
+                .businessType(DoctorEventInfo.Business_Type.GROUP.getValue())
+                .code(group.getGroupCode())
+                .build();
+        eventInfoList.add(eventInfo);
+
+        autoDailyGroup(groupEvent.getFarmId(), groupEvent.getGroupId(), group.getPigType(), groupEvent.getEventAt());
+        return groupId;
     }
 
     /**

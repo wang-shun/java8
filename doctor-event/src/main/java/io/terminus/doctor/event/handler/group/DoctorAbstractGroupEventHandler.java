@@ -35,6 +35,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.enums.PigType.*;
@@ -81,27 +82,23 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     @Override
     public <I extends BaseGroupInput> void handle(List<DoctorEventInfo> eventInfoList, DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
-        String key = "group" + group.getId().toString();
-        expectTrue(doctorConcurrentControl.setKey(key),
-                "event.concurrent.error", group.getGroupCode());
-        try {
-            handleEvent(eventInfoList, group, groupTrack, input);
-            DoctorEventInfo eventInfo = DoctorEventInfo.builder()
-                    .businessId(group.getId())
-                    .businessType(DoctorEventInfo.Business_Type.GROUP.getValue())
-                    .eventAt(DateUtil.toDate(input.getEventAt()))
-                    .eventType(input.getEventType())
-                    .code(group.getGroupCode())
-                    .farmId(group.getFarmId())
-                    .orgId(group.getOrgId())
-                    .pigType(group.getPigType())
-                    .build();
-            eventInfoList.add(eventInfo);
-        } catch (Exception e) {
-            throw e;
-        }finally {
-            doctorConcurrentControl.delKey(key);
+        if (isNull(input.getEventSource()) || Objects.equals(input.getEventSource(), SourceType.INPUT.getValue())) {
+            String key = "group" + group.getId().toString();
+            expectTrue(doctorConcurrentControl.setKey(key),
+                    "event.concurrent.error", group.getGroupCode());
         }
+        handleEvent(eventInfoList, group, groupTrack, input);
+        DoctorEventInfo eventInfo = DoctorEventInfo.builder()
+                .businessId(group.getId())
+                .businessType(DoctorEventInfo.Business_Type.GROUP.getValue())
+                .eventAt(DateUtil.toDate(input.getEventAt()))
+                .eventType(input.getEventType())
+                .code(group.getGroupCode())
+                .farmId(group.getFarmId())
+                .orgId(group.getOrgId())
+                .pigType(group.getPigType())
+                .build();
+        eventInfoList.add(eventInfo);
     }
 
     @Override
