@@ -19,6 +19,7 @@ import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.helper.DoctorConcurrentControl;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -54,6 +55,8 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
     protected  DoctorRevertLogDao doctorRevertLogDao;
     @Autowired
     protected DoctorBarnDao doctorBarnDao;
+    @Autowired
+    protected DoctorConcurrentControl doctorConcurrentControl;
 
     protected static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_EMPTY_MAPPER;
 
@@ -68,6 +71,10 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
 
     @Override
     public void handle(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        if (isNull(executeEvent.getEventSource()) || Objects.equals(executeEvent.getEventSource(), SourceType.INPUT.getValue())) {
+            String key = "pig" + executeEvent.getPigId().toString();
+            expectTrue(doctorConcurrentControl.setKey(key), "event.concurrent.error", executeEvent.getPigCode());
+        }
 
         //上一个事件
         Long currentEventId = fromTrack.getCurrentEventId();

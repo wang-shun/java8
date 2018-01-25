@@ -92,6 +92,19 @@ public class DoctorConcurrentControl {
         }
     }
 
+    public void delAll() {
+        threadLocal.get().forEach((key, val) -> {
+            String value = jedisTemplate.execute(jedis -> {
+                return jedis.get(key);
+            });
+            if (val.getValue().equals(value)) {
+                jedisTemplate.execute(jedis -> {
+                    return jedis.del(key);
+                });
+            }
+        });
+    }
+
 //    public void delKey(String key) {
 //        try {
 //            InterProcessMutex mutex = threadLocal.get().get(key);

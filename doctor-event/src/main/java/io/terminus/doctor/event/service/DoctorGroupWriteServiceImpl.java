@@ -35,6 +35,7 @@ import io.terminus.doctor.event.handler.group.DoctorMoveInGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorTransFarmGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorTransGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorTurnSeedGroupEventHandler;
+import io.terminus.doctor.event.helper.DoctorConcurrentControl;
 import io.terminus.doctor.event.manager.DoctorGroupEventManager;
 import io.terminus.doctor.event.manager.DoctorGroupManager;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
@@ -78,6 +79,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     private CoreEventDispatcher coreEventDispatcher;
     @Autowired(required = false)
     private Publisher publisher;
+    @Autowired
+    private DoctorConcurrentControl doctorConcurrentControl;
 
     @Override
     public RespWithEx<Long> createNewGroup(DoctorGroup group, @Valid DoctorNewGroupInput newGroupInput) {
@@ -95,6 +98,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         } catch (Exception e) {
             log.error("create group failed, group:{}, newGroupInput:{}, cause:{}", group, newGroupInput, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("group.create.fail");
+        } finally {
+            doctorConcurrentControl.delAll();
         }
     }
 
@@ -114,6 +119,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         } catch (Exception e) {
             log.error("groupEventAntiepidemic failed, groupDetail:{}, antiepidemic:{}, cause:{}", groupDetail, antiepidemic, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("group.event.antiepidemic.fail");
+        } finally {
+            doctorConcurrentControl.delAll();
         }
     }
 
@@ -133,6 +140,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         } catch (Exception e) {
             log.error("groupEventChange failed, groupDetail:{}, change:{}, cause:{}", groupDetail, change, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("group.event.change.fail");
+        } finally {
+            doctorConcurrentControl.delAll();
         }
     }
 
@@ -152,6 +161,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         } catch (Exception e) {
             log.error("groupEventClose failed, groupDetail:{}, close:{}, cause:{}", groupDetail, close, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("group.event.close.fail");
+        } finally {
+            doctorConcurrentControl.delAll();
         }
     }
 
@@ -171,6 +182,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         } catch (Exception e) {
             log.error("groupEventDisease failed, groupDetail:{}, disease:{}, cause:{}", groupDetail, disease, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("group.event.disease.fail");
+        } finally {
+            doctorConcurrentControl.delAll();
         }
     }
 
@@ -190,6 +203,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         } catch (Exception e) {
             log.error("groupEventLiveStock failed, groupDetail:{}, liveStock:{}, cause:{}", groupDetail, liveStock, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("group.event.liveStock.fail");
+        } finally {
+            doctorConcurrentControl.delAll();
         }
     }
 
@@ -209,6 +224,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         } catch (Exception e) {
             log.error("groupEventMoveIn failed, groupDetail:{}, moveIn:{}, cause:{}", groupDetail, moveIn, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("group.event.moveIn.fail");
+        } finally {
+            doctorConcurrentControl.delAll();
         }
     }
 
@@ -228,6 +245,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         } catch (Exception e) {
             log.error("groupEventTransFarm failed, groupDetail:{}, transFarm:{}, cause:{}", groupDetail, transFarm, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("group.event.transFarm.fail");
+        } finally {
+            doctorConcurrentControl.delAll();
         }
     }
 
@@ -251,6 +270,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         } catch (Exception e) {
             log.error("groupEventTransGroup failed, groupDetail:{}, transGroup:{}, cause:{}", groupDetail, transGroup, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("group.event.transGroup.fail");
+        } finally {
+            doctorConcurrentControl.delAll();
         }
     }
 
@@ -273,6 +294,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         } catch (Exception e) {
             log.error("groupEventTurnSeed failed, groupDetail:{}, turnSeed:{}, cause:{}", groupDetail, turnSeed, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("group.event.turnSeed.fail");
+        } finally {
+            doctorConcurrentControl.delAll();
         }
     }
 
@@ -292,6 +315,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         } catch (Exception e) {
             log.error("batch.new.group.event.failed, inputInfoList:{}, cause:{}", inputInfoList, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("batch.new.group.event.fail");
+        } finally {
+            doctorConcurrentControl.delAll();
         }
     }
 
@@ -300,7 +325,6 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         try {
             List<DoctorEventInfo> eventInfoList = doctorGroupEventManager.batchHandleEvent(inputInfoList, eventType);
             DoctorPigEventManager.checkAndPublishEvent(eventInfoList, coreEventDispatcher, publisher);
-
             return RespWithEx.ok(Boolean.TRUE);
         } catch (InvalidException e) {
             log.error("batch.new.group.event.failed, inputInfoList:{}, eventType:{}, cause:{}", inputInfoList, eventType, Throwables.getStackTraceAsString(e));
@@ -311,6 +335,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         } catch (Exception e) {
             log.error("batch.group.event.handle.failed, inputInfoList:{}, eventType:{}, cause:{}", inputInfoList, eventType, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("batch.group.event.handle.failed");
+        } finally {
+            doctorConcurrentControl.delAll();
         }
     }
 
