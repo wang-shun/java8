@@ -434,7 +434,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
                 GroupEventType.TRANS_FARM.getValue(), GroupEventType.TRANS_GROUP.getValue());
         List<DoctorGroupEvent> groupEventList = doctorGroupEventDao.findEventIncludeTypesForDesc(groupId, includeTypes, DateUtil.toDateString(sumAt));
         DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(groupId);
-        int quantity = EventUtil.minusInt(groupTrack.getQuantity(), changeCount);
+        int quantity = EventUtil.plusInt(groupTrack.getQuantity(), changeCount);
         for (DoctorGroupEvent groupEvent: groupEventList) {
             if (quantity < 0) {
                 return false;
@@ -463,18 +463,20 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      */
     protected void validGroupLiveStock(Long groupId, String groupCode, Date oldEventAt, Date newEventAt, Integer oldQuantity,
                                        Integer newQuantity,  Integer changeCount){
+        oldEventAt = new DateTime(oldEventAt).withTimeAtStartOfDay().toDate();
+        newEventAt = new DateTime(newEventAt).withTimeAtStartOfDay().toDate();
         Date sumAt = oldEventAt.before(newEventAt) ? oldEventAt : newEventAt;
         List<Integer> includeTypes = Lists.newArrayList(GroupEventType.CHANGE.getValue(), GroupEventType.MOVE_IN.getValue(),
                 GroupEventType.TRANS_FARM.getValue(), GroupEventType.TRANS_GROUP.getValue());
         List<DoctorGroupEvent> groupEventList = doctorGroupEventDao.findEventIncludeTypesForDesc(groupId, includeTypes, DateUtil.toDateString(sumAt));
         DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(groupId);
         int quantity = oldEventAt.equals(newEventAt)
-                ? EventUtil.minusInt(groupTrack.getQuantity(), changeCount)
+                ? EventUtil.plusInt(groupTrack.getQuantity(), changeCount)
                 : groupTrack.getQuantity() + newQuantity - oldQuantity;
 
         for (DoctorGroupEvent groupEvent : groupEventList) {
             if (quantity < 0) {
-                throw new InvalidException("group.live.stock.lower.zero", groupCode, groupEvent.getEventAt());
+                throw new InvalidException("group.live.stock.lower.zero", groupCode, DateUtil.toDateString(groupEvent.getEventAt()));
             }
 
             if (Objects.equals(groupEvent.getType(), GroupEventType.MOVE_IN.getValue())) {
