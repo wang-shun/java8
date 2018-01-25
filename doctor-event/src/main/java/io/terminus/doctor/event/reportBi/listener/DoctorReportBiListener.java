@@ -24,7 +24,7 @@ public class DoctorReportBiListener implements EventListener{
     @Subscribe
     @AllowConcurrentEvents
     public void synchronizeRealTimeData(DoctorReportBiReaTimeEvent reportBiReaTimeEvent) {
-        synchronize.synchronizeRealTimeBiData(reportBiReaTimeEvent.getFarmId());
+        synchronize.synchronizeRealTimeBiData(reportBiReaTimeEvent.getOrzId(), reportBiReaTimeEvent.getOrzType());
     }
 
 }

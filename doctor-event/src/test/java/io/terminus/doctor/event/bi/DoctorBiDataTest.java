@@ -49,7 +49,7 @@ public class DoctorBiDataTest extends BaseServiceTest {
     @Test
     public void synchronizeRealTimeBiDataTest() {
         synchronizer.cleanFullBiData();
-        synchronizer.synchronizeRealTimeBiData(404L);
+//        synchronizer.synchronizeRealTimeBiData(404L);
     }
 
     @Test

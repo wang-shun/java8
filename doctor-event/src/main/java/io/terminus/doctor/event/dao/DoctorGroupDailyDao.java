@@ -70,9 +70,9 @@ public class DoctorGroupDailyDao extends MyBatisDao<DoctorGroupDaily> {
         return getSqlSession().selectOne(sqlId("selectOneSumForDimension"), dimensionCriteria);
     }
 
-    public List<DoctorGroupDaily> findByAfter(Long farmId, Date sumAt, Integer type){
-        return getSqlSession().selectList(sqlId("findByAfter"), MapBuilder.of().put("farmId", farmId)
-                .put("sumAt", sumAt).put("type", type).map());
+    public List<DoctorGroupDaily> findByAfter(Long orzId, Integer orzType, Date sumAt, Integer type){
+        return getSqlSession().selectList(sqlId("findByAfter"), MapBuilder.of().put("orzId", orzId)
+                .put("orzType", orzType).put("sumAt", sumAt).put("type", type).map());
     }
 
     public List<DoctorDimensionCriteria> findByDateType(Date sumAt, Integer type, Integer dateType, Integer orzType) {

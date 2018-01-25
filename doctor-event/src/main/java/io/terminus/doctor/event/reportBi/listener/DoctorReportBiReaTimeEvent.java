@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.reportBi.listener;
 
+import io.terminus.doctor.event.enums.OrzDimension;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,5 +13,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DoctorReportBiReaTimeEvent {
-    private Long farmId;
+    private Long orzId;
+
+    /**
+     * 组织类型
+     * @see io.terminus.doctor.event.enums.OrzDimension
+     */
+    private Integer orzType;
+
+    public DoctorReportBiReaTimeEvent(Long orzId) {
+        this(orzId, OrzDimension.ORG.getValue());
+    }
+
 }

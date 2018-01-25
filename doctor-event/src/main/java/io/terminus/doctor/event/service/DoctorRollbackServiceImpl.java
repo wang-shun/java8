@@ -83,7 +83,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                 throw  new InvalidException("group.event.not.found", eventId);
             }
             doctorRollbackManager.rollbackGroup(groupEvent, operatorId, operatorName);
-            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(groupEvent.getFarmId()));
+            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(groupEvent.getOrgId()));
             return RespWithEx.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             return RespWithEx.fail(e.getMessage());
@@ -103,7 +103,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                 throw new InvalidException("pig.event.not.found", eventId);
             }
             doctorRollbackManager.rollbackPig(pigEvent, operatorId, operatorName);
-            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(pigEvent.getFarmId()));
+            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(pigEvent.getOrgId()));
             return RespWithEx.ok(Boolean.TRUE);
         } catch (InvalidException e) {
             return RespWithEx.exception(e);

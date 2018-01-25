@@ -248,7 +248,7 @@ public class DoctorPigEventManager {
         try {
             if (notEmpty(dtos)) {
                 //checkFarmIdAndEventAt(dtos);
-                coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(dtos.get(0).getFarmId()));
+                coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(dtos.get(0).getOrgId()));
                 publishPigEvent(dtos, coreEventDispatcher, publisher);
             }
         } catch (Exception e) {
