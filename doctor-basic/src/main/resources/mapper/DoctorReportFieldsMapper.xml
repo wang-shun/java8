@@ -14,6 +14,7 @@
         <result property="name" column="name"/>
         <result property="reportField" column="report_field"/>
         <result property="type" column="type"/>
+        <result property="dataFormatter" column="data_formatter"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
@@ -28,12 +29,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `f_id`, `name`, `report_field`, `type`,
+        `f_id`, `name`, `report_field`, `type`, `data_formatter`,
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{fId}, #{name}, #{reportField}, #{type},
+        #{fId}, #{name}, #{reportField}, #{type}, #{dataFormatter},
         now(), now()
     </sql>
 
@@ -83,6 +84,7 @@
             <if test="name != null">`name` = #{name},</if>
             <if test="reportField != null">`report_field` = #{reportField},</if>
             <if test="type != null">`type` = #{type},</if>
+            <if test="dataFormatter != null">`data_formatter` = #{dataFormatter},</if>
             updated_at = now()
         </set>
         WHERE id = #{id}

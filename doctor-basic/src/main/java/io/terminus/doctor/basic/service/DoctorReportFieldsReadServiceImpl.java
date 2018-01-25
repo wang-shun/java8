@@ -94,6 +94,7 @@ public class DoctorReportFieldsReadServiceImpl implements DoctorReportFieldsRead
                         child.setId(field.getId());
                         child.setName(field.getName());
                         child.setReportField(field.getReportField());
+                        child.setDataFormatter(field.getDataFormatter());
                         return child;
                     }).collect(Collectors.toList()));
                 } else {

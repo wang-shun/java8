@@ -22,7 +22,10 @@ import io.terminus.doctor.event.model.DoctorReportNursery;
 import io.terminus.doctor.event.model.DoctorReportReserve;
 import io.terminus.doctor.event.model.DoctorReportSow;
 import io.terminus.doctor.event.service.DoctorDailyReportV2Service;
+import io.terminus.doctor.web.front.report.DataFormatter.DataFormatter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -44,10 +47,15 @@ public class ReportBoardHelper {
     private DoctorReportFieldCustomizesReadService doctorReportFieldCustomizesReadService;
     @RpcConsumer
     private DoctorDailyReportV2Service doctorDailyReportV2Service;
+    @Autowired
+    private ApplicationContext applicationContext;
     private Map<String, Method> methodMap;
+    private Map<String, DataFormatter> dataFormatterMap;
+
 
     @PostConstruct
     public void init() {
+        dataFormatterMap = applicationContext.getBeansOfType(DataFormatter.class);
         methodMap = Maps.newHashMap();
         map(DoctorReportReserve.class.getSimpleName(), DoctorReportReserve.class.getMethods(), methodMap);
         map(DoctorReportSow.class.getSimpleName(), DoctorReportSow.class.getMethods(), methodMap);
@@ -101,7 +109,7 @@ public class ReportBoardHelper {
             Method method = methodMap.get(methodName);
             try {
                 Object value = method.invoke(obj);
-                subField.setValue(getValue(value));
+                subField.setValue(getValue(value, subField.getDataFormatter()));
             } catch (Exception e) {
                 log.error("method invoke error, methodName:{}, cause:{}", methodName, Throwables.getStackTraceAsString(e));
                 throw new JsonResponseException("method.invoke.error");
@@ -121,14 +129,18 @@ public class ReportBoardHelper {
         }
     }
 
-    private String getValue(Object value) {
+    private String getValue(Object value, String dataFormatter) {
 
         if (isNull(value)) {
             return "-";
         }
         String val = value.toString();
         if (!val.startsWith("{")) {
-            return val;
+            DataFormatter formatter = dataFormatterMap.get(dataFormatter);
+            if (isNull(formatter)) {
+                return val;
+            }
+            return formatter.format(val);
         }
         Map map = JsonMapperUtil.nonEmptyMapper().fromJson(val, Map.class);
         return map.get("value").toString();

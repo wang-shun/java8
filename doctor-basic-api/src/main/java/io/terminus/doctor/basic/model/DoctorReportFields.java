@@ -41,6 +41,11 @@ public class DoctorReportFields implements Serializable {
      * 字段英文名称，对应九张报表中字段名
      */
     private String reportField;
+
+    /**
+     * 数据格式处理类名
+     */
+    private String dataFormatter;
     
     /**
      * 类型

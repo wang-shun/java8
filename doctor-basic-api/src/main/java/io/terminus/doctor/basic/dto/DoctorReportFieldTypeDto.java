@@ -42,6 +42,9 @@ public class DoctorReportFieldTypeDto implements Serializable {
         @JsonIgnore
         private String reportField;
 
+        @JsonIgnore
+        private String dataFormatter;
+
         private Boolean hidden;
 
         private String value;
