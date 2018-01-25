@@ -3,7 +3,6 @@ package io.terminus.doctor.event.service;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
-import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorPigDailyDao;
@@ -13,14 +12,12 @@ import io.terminus.doctor.event.dao.DoctorReportNpdDao;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.enums.ReportTime;
-import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorReportNpd;
 import io.terminus.doctor.user.model.DoctorFarm;
-import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
-import io.terminus.doctor.user.service.DoctorOrgReadService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -61,6 +58,19 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
         DoctorPigReportReadService.DateDuration dateDuration = doctorPigReportReadService.getDuration(countDate, reportTime);
 
         flushNPD(farmIds, dateDuration.getStart(), dateDuration.getEnd());
+    }
+
+    @Override
+    public void flushNPD(List<Long> farmIds, Date start) {
+        Date startAtMonth = DateUtil.monthStart(start);//日期所在月的第一天
+        Date end = new Date();
+
+        int max = DateUtil.getDeltaMonths(startAtMonth, end);
+        for (int i = 0; i <= max; i++) {
+            flushNPD(farmIds, startAtMonth, DateUtil.monthEnd(startAtMonth));
+            startAtMonth = DateUtils.addMinutes(start, 1);
+        }
+
     }
 
     public void flushNPD(List<Long> farmIds, Date startDate, Date endDate) {

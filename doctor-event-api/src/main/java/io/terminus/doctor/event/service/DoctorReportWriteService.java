@@ -24,4 +24,11 @@ public interface DoctorReportWriteService {
     void flushNPD(List<Long> farmIds, Date countDate, ReportTime reportTime);
 
 
+    /**
+     * 生成非生产天数
+     *
+     * @param farmIds
+     * @param start
+     */
+    void flushNPD(List<Long> farmIds, Date start);
 }
