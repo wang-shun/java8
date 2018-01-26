@@ -301,7 +301,7 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
             }).collect(Collectors.toList());
             return Response.ok(dtos);
         } catch (Exception e) {
-            log.error("find farms live stock failed,cause:{}", Throwables.getStackTraceAsString(e));
+            log.error("find farms live stock failed, farmIdList:{}, cause:{}", farmIdList, Throwables.getStackTraceAsString(e));
             return Response.fail("find.farms.live.stock.failed");
         }
 
