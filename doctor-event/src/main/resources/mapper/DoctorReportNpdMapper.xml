@@ -194,6 +194,9 @@
                 and
                 <![CDATA[sum_at <= #{end}]]>
             </if>
+            <if test="orzId!=null">
+                farm_id=#{orzId}
+            </if>
         </where>
         GROUP BY
         <if test="orgType==2">

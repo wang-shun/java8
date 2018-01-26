@@ -83,6 +83,7 @@ public class DoctorReportNpdDao extends MyBatisDao<DoctorReportNpd> {
             params.put("start", start);
         if (null != end)
             params.put("end", end);
+        params.put("orzId", dimensionCriteria.getOrzId());
 
         return this.sqlSession.selectList(this.sqlId("report"), params);
     }

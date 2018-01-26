@@ -161,10 +161,17 @@ public class DoctorReportController {
         doctorDailyReportV2Service.syncEfficiency(dateType, orgType);
     }
 
+
+    @RequestMapping(method = RequestMethod.GET, value = "/flush/efficiency/all/{farmId}")
+    public void flushEfficiencyAll(@PathVariable Long farmId) {
+        doctorDailyReportV2Service.syncEfficiency(farmId);
+    }
+
     /**
      * 增量同步
+     *
      * @param farmId 猪场id
-     * @param start 开始的同步日期 与日报中sumAt比较
+     * @param start  开始的同步日期 与日报中sumAt比较
      */
     @RequestMapping(value = "/synchronize/delta/bi/data/{farmId}", method = RequestMethod.GET)
     public Boolean synchronizeDeltaDayBiData(@PathVariable Long farmId,

@@ -7,6 +7,7 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
 import io.terminus.doctor.event.dto.report.daily.DoctorFarmLiveStockDto;
@@ -17,6 +18,8 @@ import io.terminus.doctor.event.manager.DoctorDailyReportV2Manager;
 import io.terminus.doctor.event.reportBi.DoctorReportBiManager;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorEfficiencySynchronizer;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorWarehouseSynchronizer;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -235,6 +238,43 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
 
         efficiencySynchronizer.delete(criteria);
         efficiencySynchronizer.sync(criteria);
+        return Response.ok(true);
+    }
+
+    @Override
+    public Response<Boolean> syncEfficiency(Long farmId) {
+
+        DoctorDimensionCriteria criteria = new DoctorDimensionCriteria();
+        criteria.setDateType(DateDimension.MONTH.getValue());
+        criteria.setOrzType(OrzDimension.FARM.getValue());
+        criteria.setOrzId(farmId);
+
+        efficiencySynchronizer.delete(criteria);
+        efficiencySynchronizer.sync(criteria);
+
+
+        criteria.setDateType(DateDimension.QUARTER.getValue());
+        efficiencySynchronizer.delete(criteria);
+        efficiencySynchronizer.sync(criteria);
+
+        criteria.setDateType(DateDimension.YEAR.getValue());
+        efficiencySynchronizer.delete(criteria);
+        efficiencySynchronizer.sync(criteria);
+
+
+        criteria.setDateType(DateDimension.MONTH.getValue());
+        criteria.setOrzDimensionName(OrzDimension.ORG.getName());
+        efficiencySynchronizer.delete(criteria);
+        efficiencySynchronizer.sync(criteria);
+
+        criteria.setDateType(DateDimension.QUARTER.getValue());
+        efficiencySynchronizer.delete(criteria);
+        efficiencySynchronizer.sync(criteria);
+
+        criteria.setDateType(DateDimension.YEAR.getValue());
+        efficiencySynchronizer.delete(criteria);
+        efficiencySynchronizer.sync(criteria);
+
         return Response.ok(true);
     }
 

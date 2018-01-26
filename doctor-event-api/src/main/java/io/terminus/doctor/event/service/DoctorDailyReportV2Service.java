@@ -97,4 +97,14 @@ public interface DoctorDailyReportV2Service {
     Response<Boolean> syncEfficiency(Date date);
 
     Response<Boolean> syncEfficiency(Integer dateType, Integer orgType);
+
+    /**
+     * 刷新单个猪场
+     * 月、季、年
+     * 猪场、公司
+     *
+     * @param farmId
+     * @return
+     */
+    Response<Boolean> syncEfficiency(Long farmId);
 }
