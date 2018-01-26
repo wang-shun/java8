@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.service;
 
+import com.google.common.base.Stopwatch;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -70,8 +72,10 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
 //            flushNPD(farmIds, startAtMonth, DateUtil.monthEnd(startAtMonth));
         //            startAtMonth = DateUtils.addMinutes(start, 1);
 //        }
-
+        Stopwatch stopwatch = Stopwatch.createStarted();
         flushNPD(farmIds, startAtMonth, end);
+        System.out.println(stopwatch.elapsed(TimeUnit.MILLISECONDS));
+
     }
 
     public void flushNPD(List<Long> farmIds, Date startDate, Date endDate) {
@@ -136,7 +140,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                     }
                 } else {
 
-                    log.info("猪【{}】的本次事件为【{}】【{}】，下次事件为【{}】【{}】，间隔为【{}】，计入{}月", pigId,
+                    log.debug("猪【{}】的本次事件为【{}】【{}】，下次事件为【{}】【{}】，间隔为【{}】，计入{}月", pigId,
                             PigEvent.from(currentEvent.getType()).getName(),
                             DateUtil.toDateString(currentEvent.getEventAt()),
                             PigEvent.from(nextEvent.getType()).getName(),
