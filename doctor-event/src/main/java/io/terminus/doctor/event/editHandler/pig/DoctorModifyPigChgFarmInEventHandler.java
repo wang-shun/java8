@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 import static io.terminus.doctor.event.editHandler.group.DoctorAbstractModifyGroupEventHandler.getAfterDay;
 
 /**
@@ -25,6 +26,8 @@ public class DoctorModifyPigChgFarmInEventHandler extends DoctorAbstractModifyPi
 
     @Override
     public void rollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
+        String key = "pig" + deletePigEvent.getPigId().toString();
+        expectTrue(doctorConcurrentControl.setKey(key), "event.concurrent.error", deletePigEvent.getPigCode());
 
         //1.删除转场触发的事件
         doctorPigEventDao.deleteByChgFarm(deletePigEvent.getPigId());

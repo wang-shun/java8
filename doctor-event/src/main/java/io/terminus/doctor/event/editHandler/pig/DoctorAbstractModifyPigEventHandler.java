@@ -22,6 +22,9 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.manager.DoctorDailyReportManager;
 import io.terminus.doctor.event.manager.DoctorDailyReportV2Manager;
+import io.terminus.doctor.event.helper.DoctorConcurrentControl;
+import io.terminus.doctor.event.manager.DoctorDailyReportManager;
+import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -39,6 +42,7 @@ import java.util.Objects;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.enums.SourceType.UN_MODIFY;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 import static io.terminus.doctor.event.dto.DoctorBasicInputInfoDto.generateEventDescFromExtra;
 import static io.terminus.doctor.event.editHandler.group.DoctorAbstractModifyGroupEventHandler.validEventAt;
 import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.IGNORE_EVENT;
@@ -72,6 +76,9 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     @Autowired
     protected DoctorDailyReportManager oldDailyReportManager;
 
+    @Autowired
+    protected DoctorConcurrentControl doctorConcurrentControl;
+
     protected final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
     protected final ToJsonMapper TO_JSON_MAPPER = ToJsonMapper.JSON_NON_DEFAULT_MAPPER;
@@ -93,6 +100,10 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     public void modifyHandle(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
         log.info("modify pig event handler starting, oldPigEvent:{}", oldPigEvent);
         log.info("inputDto:{}", inputDto);
+
+        String key = "pig" + oldPigEvent.getPigId().toString();
+        expectTrue(doctorConcurrentControl.setKey(key), "event.concurrent.error", oldPigEvent.getPigCode());
+
         //1.校验
         modifyHandleCheck(oldPigEvent, inputDto);
 
@@ -139,6 +150,8 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     @Override
     public void rollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
         log.info("rollback handle starting, deletePigEvent:{}", deletePigEvent);
+        String key = "pig" + deletePigEvent.getPigId().toString();
+        expectTrue(doctorConcurrentControl.setKey(key), "event.concurrent.error", deletePigEvent.getPigCode());
 
         //1.删除触发事件
         triggerEventRollbackHandle(deletePigEvent, operatorId, operatorName);

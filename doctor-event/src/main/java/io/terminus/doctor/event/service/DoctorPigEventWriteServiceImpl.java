@@ -60,8 +60,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
         } catch (Exception e) {
             log.error("pig.event.handle.failed, input:{}, basic:{}, cause by :{}", inputDto, basic, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("pig.event.handle.failed");
-        } finally {
-            doctorConcurrentControl.delAll();
         }
     }
 
@@ -80,8 +78,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
         } catch (Exception e) {
             log.error("batch.pig.event.handle.failed, input:{}, basic:{}, cause by :{}", inputDtos, basic, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("batch.pig.event.handle.failed");
-        } finally {
-            doctorConcurrentControl.delAll();
         }
     }
 
