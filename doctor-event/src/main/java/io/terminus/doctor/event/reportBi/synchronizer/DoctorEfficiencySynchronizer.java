@@ -79,6 +79,8 @@ public class DoctorEfficiencySynchronizer {
             return;
         }
 
+        log.info("start sync from npd to efficiency:{},{}", DateDimension.from(dimensionCriteria.getDateType()).getName(),
+                OrzDimension.from(dimensionCriteria.getOrzType()).getName());
         List<DoctorReportNpd> npds = doctorReportNpdDao.count(dimensionCriteria, null, null);
         for (DoctorReportNpd npd : npds) {
 
@@ -134,6 +136,9 @@ public class DoctorEfficiencySynchronizer {
 
             doctorReportEfficiencyDao.create(efficiency);
         }
+
+        log.info("finish sync from npd to efficiency:{},{}", DateDimension.from(dimensionCriteria.getDateType()).getName(),
+                OrzDimension.from(dimensionCriteria.getOrzType()).getName());
     }
 
     /**

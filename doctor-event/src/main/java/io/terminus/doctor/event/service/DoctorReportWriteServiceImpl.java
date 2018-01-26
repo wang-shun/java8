@@ -67,14 +67,9 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
         Date startAtMonth = DateUtil.monthStart(start);//日期所在月的第一天
         Date end = DateUtil.monthEnd(new Date());
 
-//        int max = DateUtil.getDeltaMonths(startAtMonth, end);
-//        for (int i = 0; i <= max; i++) {
-//            flushNPD(farmIds, startAtMonth, DateUtil.monthEnd(startAtMonth));
-        //            startAtMonth = DateUtils.addMinutes(start, 1);
-//        }
         Stopwatch stopwatch = Stopwatch.createStarted();
         flushNPD(farmIds, startAtMonth, end);
-        System.out.println(stopwatch.elapsed(TimeUnit.MILLISECONDS));
+        log.debug("use {}", stopwatch.elapsed(TimeUnit.MILLISECONDS));
 
     }
 
@@ -165,10 +160,6 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
         });
 
 
-//        int year = new DateTime(startDate).getYear();
-//        int monthStart = new DateTime(startDate).getMonthOfYear();
-//        int monthEnd = new DateTime(endDate).getMonthOfYear() + 1;
-
         Date last = DateUtils.addMonths(endDate, 1);
 
         farmIds.forEach(f -> {
@@ -177,7 +168,6 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
 
             for (Date i = startDate; i.before(last); i = DateUtils.addMonths(i, 1)) {
 
-//                Date monthStartDate = new DateTime(year, i, 1, 0, 0).toDate();
                 Date monthEndDate = DateUtil.monthEnd(i);
 
                 int dayCount = DateUtil.getDeltaDays(i, monthEndDate) + 1;
@@ -186,18 +176,8 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                 npd.setFarmId(f);
                 npd.setDays(dayCount);
 
-//                DoctorPigDaily pigDaily = doctorPigDailyDao.countByFarm(f, monthStartDate, monthEndDate);
                 Integer sowCount = doctorPigDailyDao.countSow(f, i, monthEndDate);
                 npd.setSowCount(sowCount);
-//                if (null != pigDaily) {
-//                    int sowCount = (pigDaily.getSowCfEnd() == null ? 0 : pigDaily.getSowCfEnd()) + (pigDaily.getSowPhEnd() == null ? 0 : pigDaily.getSowPhEnd());//母猪月存栏
-//                    int sowNotMatingCount = pigDaily.getSowNotMatingCount() == null ? 0 : pigDaily.getSowNotMatingCount();//母猪月进场未配种数
-//
-//                    npd.setSowCount(sowCount - sowNotMatingCount);
-//                } else {
-//                    npd.setSowCount(0);
-//                }
-
 
                 npd.setSumAt(i);
 
