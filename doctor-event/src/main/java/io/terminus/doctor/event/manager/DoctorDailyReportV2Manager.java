@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.manager;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Dates;
@@ -192,20 +193,24 @@ public class DoctorDailyReportV2Manager {
         Date yesterday = new DateTime(today).minusDays(10).toDate();
         Map<Long, Date> farmToDate = queryFarmEarlyEventAtImpl(DateUtil.toDateString(yesterday));
         farmIds.parallelStream().forEach(farmId -> {
-            DoctorStatisticCriteria criteria = new DoctorStatisticCriteria();
-            log.info("generate farm daily, farmId:{}", farmId);
-            criteria.setFarmId(farmId);
-            Date temp = yesterday;
-            if (farmToDate.containsKey(farmId)) {
-                temp = farmToDate.get(farmId);
+            try {
+                DoctorStatisticCriteria criteria = new DoctorStatisticCriteria();
+                log.info("generate farm daily, farmId:{}", farmId);
+                criteria.setFarmId(farmId);
+                Date temp = yesterday;
+                if (farmToDate.containsKey(farmId)) {
+                    temp = farmToDate.get(farmId);
+                }
+                List<Date> list = DateUtil.getDates(temp, today);
+                list.parallelStream().forEach(date -> {
+                    DoctorStatisticCriteria criteria1 = new DoctorStatisticCriteria();
+                    BeanMapper.copy(criteria, criteria1);
+                    criteria1.setSumAt(DateUtil.toDateString(date));
+                    flushFarmDaily(criteria1);
+                });
+            } catch (Exception e) {
+                log.error("generate yesterday and today, farmId:{},cause:{}", farmId, Throwables.getStackTraceAsString(e));
             }
-            List<Date> list = DateUtil.getDates(temp, today);
-            list.parallelStream().forEach(date -> {
-                DoctorStatisticCriteria criteria1 = new DoctorStatisticCriteria();
-                BeanMapper.copy(criteria, criteria1);
-                criteria1.setSumAt(DateUtil.toDateString(date));
-                flushFarmDaily(criteria1);
-            });
         });
 
         doctorReportWriteService.flushNPD(farmIds, today, ReportTime.MONTH);
