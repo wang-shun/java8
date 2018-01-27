@@ -80,6 +80,11 @@ public class DoctorReportController {
             doctorDailyReportV2Service.flushFarmDaily(doctorFarmEarlyEventAtDto.getFarmId(), DateUtil.toDateString(doctorFarmEarlyEventAtDto.getEventAt()), end);
         });
         log.info("flush.all.daily.end, consume:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
+
+        log.info("synchronize.all.daily.starting");
+        RespHelper.or500(doctorDailyReportV2Service.synchronizeFullBiData());
+        log.info("synchronize.all.daily.end, consume:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
+
         return Boolean.TRUE;
     }
 
