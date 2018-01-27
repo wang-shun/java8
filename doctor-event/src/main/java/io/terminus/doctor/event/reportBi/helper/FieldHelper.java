@@ -119,4 +119,19 @@ public class FieldHelper {
         }
         return new BigDecimal(denominator).divide(new BigDecimal(molecular), BigDecimal.ROUND_HALF_UP).intValue();
     }
+
+    public Integer turnIntoAge(DoctorGroupDailyExtend groupDaily, Integer orzType) {
+        if (Objects.equals(orzType, OrzDimension.ORG.getValue())) {
+            return EventUtil.minusInt(groupDaily.getTurnIntoAge(), groupDaily.getChgFarmInAge());
+        }
+        return groupDaily.getTurnIntoAge();
+    }
+
+    public Double turnIntoWeight(DoctorGroupDailyExtend groupDaily, Integer orzType) {
+        if (Objects.equals(orzType, OrzDimension.ORG.getValue())) {
+            return EventUtil.minusDouble(groupDaily.getTurnIntoWeight(), groupDaily.getChgFarmInWeight());
+        }
+        return groupDaily.getTurnIntoWeight();
+    }
+
 }

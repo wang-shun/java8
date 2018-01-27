@@ -259,6 +259,8 @@ public class DoctorDailyReportV2Manager {
         doctorGroupDaily.setTurnActualWeight(groupStatisticDao.turnActualWeight(criteria));
         doctorGroupDaily.setTurnActualAge(groupStatisticDao.turnActualAge(criteria));
         doctorGroupDaily.setNetWeightGain(groupStatisticDao.netWeightGain(criteria));
+        doctorGroupDaily.setChgFarmInWeight(groupStatisticDao.chgFarmInWeight(criteria));
+        doctorGroupDaily.setChgFarmInAge(groupStatisticDao.chgFarmInAge(criteria));
     }
 
     /**
@@ -274,6 +276,8 @@ public class DoctorDailyReportV2Manager {
         doctorGroupDaily.setTurnActualWeight(groupStatisticDao.turnActualWeight(criteria));
         doctorGroupDaily.setTurnActualAge(groupStatisticDao.turnActualAge(criteria));
         doctorGroupDaily.setNetWeightGain(groupStatisticDao.netWeightGain(criteria));
+        doctorGroupDaily.setChgFarmInWeight(groupStatisticDao.chgFarmInWeight(criteria));
+        doctorGroupDaily.setChgFarmInAge(groupStatisticDao.chgFarmInAge(criteria));
     }
 
     /**

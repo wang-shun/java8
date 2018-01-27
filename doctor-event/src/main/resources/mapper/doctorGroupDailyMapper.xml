@@ -17,6 +17,8 @@
         <result property="turnInto" column="turn_into"/>
         <result property="turnIntoWeight" column="turn_into_weight"/>
         <result property="turnIntoAge" column="turn_into_age"/>
+        <result property="chgFarmInWeight" column="chg_farm_in_weight"/>
+        <result property="chgFarmInAge" column="chg_farm_in_age"/>
         <result property="chgFarmIn" column="chg_farm_in"/>
         <result property="deliverHandTurnInto" column="deliver_hand_turn_into"/>
         <result property="chgFarm" column="chg_farm"/>
@@ -55,12 +57,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `org_id`, `org_name`, `farm_id`, `farm_name`, `pig_type`, `sum_at`, `start`, `turn_into`, `turn_into_weight`, `turn_into_age`, `chg_farm_in`, `deliver_hand_turn_into`, `chg_farm`, `chg_farm_weight`, `sale`, `sale_weight`, `dead`, `weed_out`, `other_change`, `to_nursery`, `to_nursery_weight`, `to_fatten`, `to_fatten_weight`, `to_houbei`, `to_houbei_weight`, `turn_seed`, `turn_out_weight`, `turn_actual_count`, `turn_actual_weight`, `turn_actual_age`, `net_weight_gain`, `deliver_turn_out_age`, `end`, `version`,
+        `org_id`, `org_name`, `farm_id`, `farm_name`, `pig_type`, `sum_at`, `start`, `turn_into`, `turn_into_weight`, `turn_into_age`, `chg_farm_in_weight`, `chg_farm_in_age`, `chg_farm_in`, `deliver_hand_turn_into`, `chg_farm`, `chg_farm_weight`, `sale`, `sale_weight`, `dead`, `weed_out`, `other_change`, `to_nursery`, `to_nursery_weight`, `to_fatten`, `to_fatten_weight`, `to_houbei`, `to_houbei_weight`, `turn_seed`, `turn_out_weight`, `turn_actual_count`, `turn_actual_weight`, `turn_actual_age`, `net_weight_gain`, `deliver_turn_out_age`, `end`, `version`,
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{pigType}, #{sumAt}, #{start}, #{turnInto}, #{turnIntoWeight}, #{turnIntoAge}, #{chgFarmIn}, #{deliverHandTurnInto}, #{chgFarm}, #{chgFarmWeight}, #{sale}, #{saleWeight}, #{dead}, #{weedOut}, #{otherChange}, #{toNursery}, #{toNurseryWeight}, #{toFatten}, #{toFattenWeight}, #{toHoubei}, #{toHoubeiWeight}, #{turnSeed}, #{turnOutWeight}, #{turnActualCount}, #{turnActualWeight}, #{turnActualAge}, #{netWeightGain}, #{deliverTurnOutAge}, #{end}, 1,
+        #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{pigType}, #{sumAt}, #{start}, #{turnInto}, #{turnIntoWeight}, #{turnIntoAge}, #{chgFarmInWeight},#{chgFarmInAge},#{chgFarmIn}, #{deliverHandTurnInto}, #{chgFarm}, #{chgFarmWeight}, #{sale}, #{saleWeight}, #{dead}, #{weedOut}, #{otherChange}, #{toNursery}, #{toNurseryWeight}, #{toFatten}, #{toFattenWeight}, #{toHoubei}, #{toHoubeiWeight}, #{turnSeed}, #{turnOutWeight}, #{turnActualCount}, #{turnActualWeight}, #{turnActualAge}, #{netWeightGain}, #{deliverTurnOutAge}, #{end}, 1,
         now(), now()
     </sql>
 
@@ -76,6 +78,8 @@
             <if test="turnInto != null">AND `turn_into` = #{turnInto}</if>
             <if test="turnIntoWeight != null">AND `turn_into_weight` = #{turnIntoWeight}</if>
             <if test="turnIntoAge != null">AND `turn_into_age` = #{turnIntoAge}</if>
+            <if test="chgFarmInWeight != null">AND `chg_farm_in_weight` = #{chgFarmInWeight}</if>
+            <if test="chgFarmInAge != null">AND `chg_farm_in_age` = #{chgFarmInAge}</if>
             <if test="chgFarmIn != null">AND `chg_farm_in` = #{chgFarmIn}</if>
             <if test="deliverHandTurnInto != null">AND `deliver_hand_turn_into` = #{deliverHandTurnInto}</if>
             <if test="chgFarm != null">AND `chg_farm` = #{chgFarm}</if>
@@ -146,6 +150,8 @@
             <if test="turnInto != null">`turn_into` = #{turnInto},</if>
             <if test="turnIntoWeight != null">`turn_into_weight` = #{turnIntoWeight},</if>
             <if test="turnIntoAge != null">`turn_into_age` = #{turnIntoAge},</if>
+            <if test="chgFarmInWeight != null">`chg_farm_in_weight` = #{chgFarmInWeight},</if>
+            <if test="chgFarmInAge != null">`chg_farm_in_age` = #{chgFarmInAge},</if>
             <if test="chgFarmIn != null">`chg_farm_in` = #{chgFarmIn},</if>
             <if test="deliverHandTurnInto != null">`deliver_hand_turn_into` = #{deliverHandTurnInto},</if>
             <if test="chgFarm != null">`chg_farm` = #{chgFarm},</if>
@@ -243,6 +249,8 @@
         sum_at as sumAt,
         round(AVG(`end`),0) as dailyLivestockOnHand,
         ifnull(sum(turn_into), 0) as turnInto,
+        ifnull(sum(chg_farm_in_weight), 0) as chgFarmInWeight,
+        ifnull(sum(chg_farm_in_age), 0) as chgFarmInAge,
         ifnull(sum(chg_farm_in), 0) as chgFarmIn,
         ifnull(sum(deliver_hand_turn_into), 0) as deliverHandTurnInto,
         ifnull(sum(turn_into_weight), 0) as turnIntoWeight,

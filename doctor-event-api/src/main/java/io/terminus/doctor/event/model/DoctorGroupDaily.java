@@ -51,15 +51,26 @@ public class DoctorGroupDaily implements Serializable {
      */
     private Integer turnInto;
 
+
     /**
      * 转入总重
      */
     private Double turnIntoWeight;
 
     /**
+     * 转场转入总重
+     */
+    private Double chgFarmInWeight;
+
+    /**
      * 转入总日龄
      */
     private Integer turnIntoAge;
+
+    /**
+     * 转场转入总日龄
+     */
+    private Integer chgFarmInAge;
 
     /**
      * 转场转入数量

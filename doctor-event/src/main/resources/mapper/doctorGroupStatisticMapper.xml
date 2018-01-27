@@ -79,6 +79,30 @@
         </where>
     </select>
 
+    <select id="chgFarmInWeight" parameterType="map" resultType="double">
+        SELECT
+        ifnull(sum(weight),0)
+        from doctor_group_events
+        <where>
+            <include refid="groupCriteria"/>
+            and `type` = 2
+            and trans_group_type = 1
+            and in_type = 5
+        </where>
+    </select>
+
+    <select id="chgFarmInAge" parameterType="map" resultType="int">
+        SELECT
+        ifnull(sum(avg_day_age * quantity),0)
+        from doctor_group_events
+        <where>
+            <include refid="groupCriteria"/>
+            and `type` = 2
+            and trans_group_type = 1
+            and in_type = 5
+        </where>
+    </select>
+
     <select id="chgFarmIn" parameterType="map" resultType="int">
         SELECT
         ifnull(sum(quantity),0)

@@ -81,8 +81,8 @@ public class DoctorFattenSynchronizer {
     }
 
     private void buildDelay(DoctorGroupDailyExtend groupDaily, DoctorReportFatten reportBi) {
-        reportBi.setTurnIntoAge(FieldHelper.getInteger(groupDaily.getTurnIntoAge(), groupDaily.getTurnInto()));
-        reportBi.setTurnIntoAvgWeight(EventUtil.getAvgWeight(groupDaily.getTurnIntoWeight(), groupDaily.getTurnInto()));
+        reportBi.setTurnIntoAge(FieldHelper.getInteger(fieldHelper.turnIntoAge(groupDaily, reportBi.getOrzType()), fieldHelper.groupTurnInto(groupDaily, reportBi.getOrzType())));
+        reportBi.setTurnIntoAvgWeight(EventUtil.getAvgWeight(fieldHelper.turnIntoWeight(groupDaily, reportBi.getOrzType()), fieldHelper.groupTurnInto(groupDaily, reportBi.getOrzType())));
         reportBi.setSaleAvgWeight(EventUtil.getAvgWeight(groupDaily.getSaleWeight(), groupDaily.getSale()));
         reportBi.setToHoubeiAvgWeight(EventUtil.getAvgWeight(groupDaily.getToHoubeiWeight(), groupDaily.getToHoubei()));
         reportBi.setChgFarmAvgWeight(EventUtil.getAvgWeight(groupDaily.getChgFarmWeight(), groupDaily.getChgFarm()));
