@@ -137,13 +137,13 @@ public class DoctorEntryInputBuilder implements DoctorPigEventInputBuilder {
         expectTrue(notNull(source), "source.not.fund", importPigEvent.getSource());
         farmEntryDto.setSource(source.getKey());
 
-
         farmEntryDto.setBreed(importBasicData.getBreedMap().get(importPigEvent.getBreedName()));
         farmEntryDto.setBreedName(importPigEvent.getBreedName());
 //        farmEntryDto.setBreedType();
 //        farmEntryDto.setBreedTypeName();
 
         farmEntryDto.setParity(importPigEvent.getParity());
+        farmEntryDto.setOrigin(importPigEvent.getOrigin());
         return farmEntryDto;
     }
 

@@ -11,6 +11,8 @@ CREATE TABLE `doctor_group_dailies` (
   `turn_into` int(11) DEFAULT NULL COMMENT '转入数量',
   `turn_into_weight` double DEFAULT NULL COMMENT '转入总重',
   `turn_into_age` int(11) DEFAULT NULL COMMENT '转入总日龄',
+  `chg_farm_in_weight` double DEFAULT NULL COMMENT '转场转入重量',
+  `chg_farm_in_age` int(11) DEFAULT NULL COMMENT '转场转入日龄',
   `chg_farm_in` int(11) DEFAULT NULL COMMENT '转场转入数量',
   `deliver_hand_turn_into` int(11) DEFAULT NULL COMMENT '产房手动操作转入猪群数量',
   `chg_farm` int(11) DEFAULT NULL COMMENT '转场数量',
@@ -40,9 +42,8 @@ CREATE TABLE `doctor_group_dailies` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_doctor_daily_groups_farm_id_type_sum_at` (`farm_id`,`pig_type`,`sum_at`),
   KEY `idx_doctor_group_dailies_farm_id` (`farm_id`),
-  KEY `idx_doctor_group_dailies_sum_at` (`sum_at`),
-  KEY `idx_doctor_group_dailies_org_id` (`org_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=55949 DEFAULT CHARSET=utf8 COMMENT='猪群相关的指标';
+  KEY `idx_doctor_group_dailies_sum_at` (`sum_at`)
+) ENGINE=InnoDB AUTO_INCREMENT=9057 DEFAULT CHARSET=utf8 COMMENT='猪群相关的指标';
 
 -- Create syntax for TABLE 'doctor_pig_dailies'
 CREATE TABLE `doctor_pig_dailies` (

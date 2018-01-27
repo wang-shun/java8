@@ -160,4 +160,11 @@ public class EventUtil {
         return divisor / divided;
     }
 
+    public static Long getCent(Double yuan) {
+        if (isNull(yuan)) {
+            return 0L;
+        }
+        return Double.valueOf(yuan * 100).longValue();
+    }
+
 }

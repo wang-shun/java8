@@ -1589,7 +1589,6 @@ CREATE TABLE `doctor_warehouse_item_org` (
 ALTER TABLE doctor_warehouse_stock_handle ADD warehouse_type TINYINT(4) NULL COMMENT '仓库类型';
 ALTER TABLE doctor_warehouse_material_handle ADD before_inventory_quantity DECIMAL(23,2) NULL COMMENT '盘点前库存数量';
 
-
 -- 物料领用添加领用类型 2017-11-28
 ALTER TABLE `doctor_warehouse_material_apply`
 ADD COLUMN `apply_type` TINYINT(4) NOT NULL COMMENT '领用类型。0猪舍，1猪群，2母猪' AFTER `updated_at`;
@@ -1602,6 +1601,7 @@ ADD COLUMN `apply_staff_id` BIGINT(20) NULL COMMENT '领用人编号' AFTER `app
 ALTER TABLE `doctor_warehouse_stock_monthly`
 ADD COLUMN `handle_date` DATE NULL COMMENT '处理日期' AFTER `updated_at`;
 
+<<<<<<< HEAD
 -- 猪 猪群原值 2017-12-20
 ALTER TABLE `doctor_pig_events` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `remark`;
 ALTER TABLE `doctor_group_events` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `remark`;
@@ -2066,3 +2066,11 @@ ALTER TABLE `pig_doctor`.`doctor_warehouse_material_apply`
 ADD COLUMN `org_id` BIGINT(20) NULL COMMENT '公司ID' AFTER `material_handle_id`,
 ADD COLUMN `pig_type` SMALLINT(6) NULL COMMENT '猪舍类型' AFTER `pig_barn_name`;
 
+-- 弱仔数是否作为活仔数 2017-12-26
+ALTER TABLE `doctor_farms`
+ADD COLUMN `is_weak` SMALLINT(6) DEFAULT 1 COMMENT '弱仔数是否作为活仔数' AFTER `is_intelligent`;
+
+-- 猪 猪群原值 2017-12-20
+ALTER TABLE `doctor_pig_events` ADD COLUMN `origin` bigint(20) DEFAULT NULL COMMENT '原值' after `remark`;
+ALTER TABLE `doctor_group_events` ADD COLUMN `origin` bigint(20) DEFAULT NULL COMMENT '原值' after `remark`;
+ALTER TABLE `doctor_pigs` ADD COLUMN `origin` bigint(20) DEFAULT NULL COMMENT '原值' after `pig_code`;

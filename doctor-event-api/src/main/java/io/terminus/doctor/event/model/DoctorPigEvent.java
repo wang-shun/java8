@@ -47,6 +47,11 @@ public class DoctorPigEvent implements Serializable {
     private String pigCode; // 猪Code
 
     /**
+     * 原值(单位分)
+     */
+    private Long origin;
+
+    /**
      * @see io.terminus.doctor.event.enums.IsOrNot
      */
     private Integer isAuto; //是否是自动生成的事件 0 否 1 是
