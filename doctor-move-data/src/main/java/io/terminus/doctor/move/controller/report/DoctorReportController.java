@@ -88,6 +88,31 @@ public class DoctorReportController {
         return Boolean.TRUE;
     }
 
+    @RequestMapping(value = "/flush/daily/after")
+    public Boolean flushDailyAfter(@RequestParam String startAt) {
+        log.info("flush.all.daily.after.starting");
+        Date start = DateUtil.toDate(startAt);
+        Stopwatch stopwatch = Stopwatch.createStarted();
+        List<DoctorFarmEarlyEventAtDto> list = RespHelper.or500(doctorDailyReportV2Service.findEarLyAt());
+        String end = DateUtil.toDateString(new Date());
+        list.forEach(doctorFarmEarlyEventAtDto -> {
+            Date begin;
+            if (doctorFarmEarlyEventAtDto.getEventAt().before(start)) {
+                begin = start;
+            } else {
+                begin = doctorFarmEarlyEventAtDto.getEventAt();
+            }
+            doctorDailyReportV2Service.flushFarmDaily(doctorFarmEarlyEventAtDto.getFarmId(), DateUtil.toDateString(begin), end);
+        });
+        log.info("flush.all.daily.end, consume:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
+
+        log.info("synchronize.all.daily.starting");
+        RespHelper.or500(doctorDailyReportV2Service.synchronizeFullBiData());
+        log.info("synchronize.all.daily.end, consume:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
+
+        return Boolean.TRUE;
+    }
+
     /**
      * @param farmId 猪场id 可选，默认全部猪场
      * @param from   开始时间 yyyy-MM-dd
