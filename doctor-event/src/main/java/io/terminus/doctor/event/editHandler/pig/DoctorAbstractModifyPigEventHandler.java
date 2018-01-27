@@ -2,32 +2,31 @@ package io.terminus.doctor.event.editHandler.pig;
 
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.Checks;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
-import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
+import io.terminus.doctor.event.dao.DoctorPigDailyDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.manager.DoctorDailyReportManager;
-import io.terminus.doctor.event.model.DoctorDailyReport;
+import io.terminus.doctor.event.manager.DoctorDailyReportV2Manager;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -36,7 +35,6 @@ import java.util.List;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
-import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
 import static io.terminus.doctor.common.enums.SourceType.UN_MODIFY;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.event.dto.DoctorBasicInputInfoDto.generateEventDescFromExtra;
@@ -58,7 +56,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     @Autowired
     protected DoctorPigDao doctorPigDao;
     @Autowired
-    protected DoctorDailyReportDao doctorDailyPigDao;
+    protected DoctorPigDailyDao doctorDailyPigDao;
     @Autowired
     protected DoctorGroupEventDao doctorGroupEventDao;
     @Autowired
@@ -66,7 +64,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     @Autowired
     protected DoctorBarnDao doctorBarnDao;
     @Autowired
-    protected DoctorDailyReportManager doctorDailyReportManager;
+    protected DoctorDailyReportV2Manager doctorDailyReportManager;
 
     protected final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
@@ -240,7 +238,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      * @param changeDto   变化量
      * @return 新记录
      */
-    protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
+    protected DoctorPigDaily buildDailyPig(DoctorPigDaily oldDailyPig, DoctorEventChangeDto changeDto) {
         return expectNotNull(oldDailyPig, "daily.pig.not.null");
     }
 
@@ -460,9 +458,58 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
             default:
                 break;
         }
-        doctorDailyPigDao.updateDailyPhStatusLiveStock(pigEvent.getFarmId(), pigEvent.getEventAt()
+        updateDailyPhStatusLiveStock(pigEvent.getFarmId(), pigEvent.getEventAt()
                 , mating, konghuai, pregnant);
     }
 
+    protected void updateDailyPhStatusLiveStock(Long farmId, Date sumAt, Integer mating,
+                                                Integer konghuai, Integer pregant) {
+//        doctorDailyPigDao.updateDailyPhStatusLiveStock(farmId, sumAt, mating, konghuai, pregant);
+        List<DoctorPigDaily> dailyList = doctorDailyPigDao.queryAfterSumAt(farmId, sumAt);
+        dailyList.forEach(pigDaily -> {
+            pigDaily.setSowPhMating(pigDaily.getSowPhMating() + mating);
+            pigDaily.setSowPhKonghuai(pigDaily.getSowPhKonghuai() + konghuai);
+            pigDaily.setSowPhPregnant(pigDaily.getSowPhPregnant() + pregant);
+            doctorDailyPigDao.update(pigDaily);
+        });
+    }
 
+    /**
+     * 更新日期(包括更新日期)之后每日母猪存栏
+     *
+     * @param farmId          猪群id
+     * @param sumAt           日期
+     * @param liveChangeCount 存栏变动数量
+     * @param phChangeCount   配怀舍存栏变化
+     * @param cfChangeCount   产房存栏变化
+     */
+    protected void updateDailySowPigLiveStock(Long farmId, Date sumAt, Integer liveChangeCount,
+                                              Integer phChangeCount, Integer cfChangeCount) {
+//        doctorDailyPigDao.updateDailySowPigLiveStock(farmId, sumAt, liveChangeCount, phChangeCount, cfChangeCount);
+        List<DoctorPigDaily> dailyList = doctorDailyPigDao.queryAfterSumAt(farmId, sumAt);
+        dailyList.forEach(pigDaily -> {
+            pigDaily.setSowPhStart(EventUtil.plusInt(pigDaily.getSowPhStart(), phChangeCount));
+            pigDaily.setSowPhEnd(EventUtil.plusInt(pigDaily.getSowPhEnd(), phChangeCount));
+            pigDaily.setSowCfStart(EventUtil.plusInt(pigDaily.getSowCfStart(), cfChangeCount));
+            pigDaily.setSowCfEnd(EventUtil.plusInt(pigDaily.getSowCfEnd(), cfChangeCount));
+            doctorDailyPigDao.update(pigDaily);
+        });
+    }
+
+    /**
+     * 更新日期(包括更新日期)之后每日公猪存栏
+     *
+     * @param farmId      猪群id
+     * @param sumAt       日期
+     * @param changeCount 变动数量
+     */
+    protected void updateDailyBoarPigLiveStock(Long farmId, Date sumAt, Integer changeCount) {
+//        doctorDailyPigDao.updateDailyBoarPigLiveStock(farmId, sumAt, changeCount);
+        List<DoctorPigDaily> dailyList = doctorDailyPigDao.queryAfterSumAt(farmId, sumAt);
+        dailyList.forEach(pigDaily -> {
+            pigDaily.setBoarStart(pigDaily.getBoarStart() + changeCount);
+            pigDaily.setBoarEnd(pigDaily.getBoarEnd() + changeCount);
+            doctorDailyPigDao.update(pigDaily);
+        });
+    }
 }

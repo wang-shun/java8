@@ -15,9 +15,14 @@ import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
 import io.terminus.doctor.basic.service.warehouseV2.*;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseStockStatisticsVo;
@@ -65,6 +70,10 @@ public class StockController {
 
     @RpcConsumer
     private DoctorBasicReadService doctorBasicReadService;
+    @RpcConsumer
+    private DoctorBarnReadService doctorBarnReadService;
+    @RpcConsumer
+    private DoctorOrgReadService doctorOrgReadService;
 
     @RequestMapping(method = RequestMethod.PUT, value = "in")
     public Long in(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockInDto stockIn, Errors errors) {
@@ -97,11 +106,22 @@ public class StockController {
             throw new JsonResponseException("user.not.found");
         stockOut.setOperatorName(userResponse.getResult().getRealName());
 
+
+        DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(stockOut.getFarmId()));
+        if (null == farm)
+            throw new JsonResponseException("farm.not.found");
+        stockOut.setOrgId(farm.getOrgId());
+
         stockOut.getDetails().forEach(detail -> {
             Response<String> realNameResponse = doctorGroupWebService.findRealName(detail.getApplyStaffId());
             if (!realNameResponse.isSuccess())
                 throw new JsonResponseException(realNameResponse.getError());
             detail.setApplyStaffName(realNameResponse.getResult());
+
+            DoctorBarn barn = RespHelper.orServEx(doctorBarnReadService.findBarnById(detail.getApplyPigBarnId()));
+            if (null == barn)
+                throw new InvalidException("barn.not.null", detail.getApplyPigBarnId());
+            detail.setPigType(barn.getPigType());
         });
 
         Response<Long> response = doctorWarehouseStockWriteService.out(stockOut);

@@ -3,6 +3,7 @@ package io.terminus.doctor.basic.manager;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialApplyDao;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockOutDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialApplyType;
+import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import org.springframework.beans.BeanUtils;
@@ -37,10 +38,11 @@ public class DoctorWarehouseMaterialApplyManager {
     }
 
     //    @Transactional(propagation = Propagation.NESTED)
-    public void apply(DoctorWarehouseMaterialHandle handle, WarehouseStockOutDto.WarehouseStockOutDetail outDetail) {
+    public void apply(DoctorWarehouseMaterialHandle handle, WarehouseStockOutDto.WarehouseStockOutDetail outDetail, Long orgId) {
         DoctorWarehouseMaterialApply materialApply = new DoctorWarehouseMaterialApply();
         materialApply.setWarehouseId(handle.getWarehouseId());
         materialApply.setFarmId(handle.getFarmId());
+        materialApply.setOrgId(orgId);
         materialApply.setWarehouseName(handle.getWarehouseName());
         materialApply.setWarehouseType(handle.getWarehouseType());
         materialApply.setMaterialId(handle.getMaterialId());
@@ -55,6 +57,7 @@ public class DoctorWarehouseMaterialApplyManager {
         materialApply.setApplyMonth(handle.getHandleMonth());
         materialApply.setMaterialHandleId(handle.getId());
         materialApply.setPigBarnId(outDetail.getApplyPigBarnId());
+        materialApply.setPigType(outDetail.getPigType());
         materialApply.setPigBarnName(outDetail.getApplyPigBarnName());
 
         if (null != outDetail.getApplyPigGroupId()) { //猪群和母猪领用
@@ -76,7 +79,7 @@ public class DoctorWarehouseMaterialApplyManager {
         } else { //猪舍领用
             materialApply.setApplyType(WarehouseMaterialApplyType.BARN.getValue());
         }
-        
+
         materialApply.setApplyStaffName(outDetail.getApplyStaffName());
         materialApply.setApplyStaffId(outDetail.getApplyStaffId());
         doctorWarehouseMaterialApplyDao.create(materialApply);

@@ -5,6 +5,7 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Dates;
+import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespWithEx;
@@ -27,6 +28,7 @@ import io.terminus.doctor.event.manager.DoctorRollbackManager;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.reportBi.listener.DoctorReportBiReaTimeEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +55,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
     private final DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
     private final DoctorRollbackManager doctorRollbackManager;
     private final DoctorDailyReportCache doctorDailyReportCache;
+    private final CoreEventDispatcher coreEventDispatcher;
 
     @Autowired
     public DoctorRollbackServiceImpl(DoctorGroupEventDao doctorGroupEventDao,
@@ -61,7 +64,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                                      DoctorKpiDao doctorKpiDao,
                                      DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService,
                                      DoctorRollbackManager doctorRollbackManager,
-                                     DoctorDailyReportCache doctorDailyReportCache) {
+                                     DoctorDailyReportCache doctorDailyReportCache, CoreEventDispatcher coreEventDispatcher) {
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorGroupBatchSummaryDao = doctorGroupBatchSummaryDao;
@@ -69,6 +72,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         this.doctorPigTypeStatisticWriteService = doctorPigTypeStatisticWriteService;
         this.doctorRollbackManager = doctorRollbackManager;
         this.doctorDailyReportCache = doctorDailyReportCache;
+        this.coreEventDispatcher = coreEventDispatcher;
     }
 
     @Override
@@ -79,6 +83,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                 throw  new InvalidException("group.event.not.found", eventId);
             }
             doctorRollbackManager.rollbackGroup(groupEvent, operatorId, operatorName);
+            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(groupEvent.getOrgId()));
             return RespWithEx.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             return RespWithEx.fail(e.getMessage());
@@ -98,6 +103,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                 throw new InvalidException("pig.event.not.found", eventId);
             }
             doctorRollbackManager.rollbackPig(pigEvent, operatorId, operatorName);
+            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(pigEvent.getOrgId()));
             return RespWithEx.ok(Boolean.TRUE);
         } catch (InvalidException e) {
             return RespWithEx.exception(e);

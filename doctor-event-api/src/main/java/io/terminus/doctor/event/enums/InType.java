@@ -11,7 +11,8 @@ public enum InType {
     PIGLET(1, "仔猪转入"),
     SEED(2, "种猪转商品猪"),
     GROUP(3, "群间转移"),
-    BUY(4, "购买");
+    BUY(4, "购买"),
+    FARM(5, "转场转入");
 
     @Getter
     private Integer value;

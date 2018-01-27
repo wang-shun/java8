@@ -7,10 +7,6 @@ package io.terminus.doctor.web;
 import io.terminus.doctor.user.service.SubRoleReadService;
 import io.terminus.doctor.web.core.DoctorCoreWebConfiguration;
 import io.terminus.doctor.web.core.advices.JsonExceptionResolver;
-import io.terminus.doctor.web.core.export.ColumnFormatterRegistry;
-import io.terminus.doctor.web.core.export.DefaultExporter;
-import io.terminus.doctor.web.core.export.Exporter;
-import io.terminus.doctor.web.core.export.property.ExportTables;
 import io.terminus.doctor.web.core.msg.email.CommonEmailServiceConfig;
 import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
 import io.terminus.doctor.web.core.service.OtherSystemServiceConfig;
@@ -26,6 +22,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
@@ -60,6 +57,16 @@ public class DoctorWebConfiguration extends WebMvcConfigurerAdapter {
         CustomRoleLoaderConfigurer configurer = new DoctorCustomRoleLoaderConfigurer(subRoleReadService);
         configurer.configureCustomRoleLoader(customRoleLoaderRegistry);
         return configurer;
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+
+        registry.addResourceHandler("swagger-ui.html")
+                .addResourceLocations("classpath*:/META-INF/resources/");
+
+        registry.addResourceHandler("/webjars/**")
+                .addResourceLocations("classpath*:/META-INF/resources/webjars/");
     }
 
 }

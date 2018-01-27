@@ -7,6 +7,7 @@ import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.dto.DoctorDepartmentDto;
+import io.terminus.doctor.user.dto.DoctorDepartmentLinerDto;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,5 +136,24 @@ public class DoctorDepartmentManager {
             return new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), 1, null);
         }
         return findClique(doctorOrg.getParentId());
+    }
+
+    public DoctorDepartmentLinerDto findLinerBy(Long farmId) {
+        DoctorFarm farm = doctorFarmDao.findById(farmId);
+        DoctorDepartmentLinerDto linerDto = new DoctorDepartmentLinerDto();
+        linerDto.setFarmId(farmId);
+        linerDto.setFarmName(farm.getName());
+        DoctorOrg doctorOrg = doctorOrgDao.findById(farm.getOrgId());
+        linerDto.setOrgId(doctorOrg.getId());
+        linerDto.setOrgName(doctorOrg.getName());
+        if (Objects.equals(doctorOrg.getType(), DoctorOrg.Type.CLIQUE.getValue())){
+            linerDto.setCliqueId(doctorOrg.getId());
+            linerDto.setCliqueName(doctorOrg.getName());
+        } else {
+            DoctorOrg clique = doctorOrgDao.findById(doctorOrg.getParentId());
+            linerDto.setCliqueId(clique.getId());
+            linerDto.setCliqueName(clique.getName());
+        }
+        return linerDto;
     }
 }

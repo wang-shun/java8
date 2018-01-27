@@ -11,6 +11,7 @@ import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
 import io.terminus.doctor.event.service.DoctorDailyGroupWriteService;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
+import io.terminus.doctor.event.service.DoctorDailyReportV2Service;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorRangeReportWriteService;
@@ -66,6 +67,8 @@ public class DoctorReportJobs {
     private DoctorOrgReadService doctorOrgReadService;
     @RpcConsumer
     private DoctorDepartmentReadService doctorDepartmentReadService;
+    @RpcConsumer
+    private DoctorDailyReportV2Service doctorDailyReportV2Service;
 
     private final HostLeader hostLeader;
 
@@ -79,6 +82,30 @@ public class DoctorReportJobs {
      * 每天凌晨1点统计昨天的数据
      */
     @Scheduled(cron = "0 0 1 * * ?")
+    @RequestMapping(value = "/dailyV2", method = RequestMethod.GET)
+    public void dailyReportV2() {
+        try {
+            if(!hostLeader.isLeader())
+            {
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
+            log.info("daily report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
+
+            doctorDailyReportV2Service.generateYesterdayAndToday(getAllFarmIds());
+
+            log.info("daily report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+        } catch (Exception e) {
+            log.error("daily report job failed, cause:{}", Throwables.getStackTraceAsString(e));
+        }
+    }
+
+
+    /**
+     * 猪场日报计算job
+     * 每天凌晨1点统计昨天的数据
+     */
+    @Scheduled(cron = "0 0 5 * * ?")
     @RequestMapping(value = "/daily", method = RequestMethod.GET)
     public void dailyReport() {
         try {
@@ -97,7 +124,7 @@ public class DoctorReportJobs {
         }
     }
 
-    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "0 0 5 * * ?")
     @RequestMapping(value = "/group/daily", method = RequestMethod.GET)
     public void groupDaily() {
         try {
@@ -118,7 +145,7 @@ public class DoctorReportJobs {
      * 猪场月报计算job
      * 每两点执行一发
      */
-    @Scheduled(cron = "0 0 2 * * ?")
+    @Scheduled(cron = "0 0 6 * * ?")
     @RequestMapping(value = "/farm/range", method = RequestMethod.GET)
     public void monthlyReport() {
         try {
@@ -140,7 +167,7 @@ public class DoctorReportJobs {
      * 公司月报计算job
      * 每两点执行一发
      */
-    @Scheduled(cron = "0 0 3 * * ?")
+    @Scheduled(cron = "0 0 7 * * ?")
     @RequestMapping(value = "/org/range", method = RequestMethod.GET)
     public void monthlyOrgReport() {
         try {

@@ -40,6 +40,9 @@ import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.handler.admin.SmartPigEventHandler;
+import io.terminus.doctor.event.model.*;
+import io.terminus.doctor.event.reportBi.listener.DoctorReportBiReaTimeEvent;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -232,6 +235,7 @@ public class DoctorPigEventManager {
         try {
             if (notEmpty(dtos)) {
                 //checkFarmIdAndEventAt(dtos);
+                coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(dtos.get(0).getOrgId()));
                 publishPigEvent(dtos, coreEventDispatcher, publisher);
             }
         } catch (Exception e) {

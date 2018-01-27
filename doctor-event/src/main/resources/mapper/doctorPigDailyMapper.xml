@@ -1,0 +1,744 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+ ~ Desc:
+ ~ Mail: [ your email ]
+ ~ Date: 2018-01-12 17:01:12
+ ~ Created by [ your name ]
+-->
+
+<mapper namespace="DoctorPigDaily">
+    <resultMap id="DoctorPigDailyMap" type="DoctorPigDaily">
+        <id property="id" column="id"/>
+        <result property="sumAt" column="sum_at"/>
+        <result property="orgId" column="org_id"/>
+        <result property="orgName" column="org_name"/>
+        <result property="farmId" column="farm_id"/>
+        <result property="farmName" column="farm_name"/>
+        <result property="sowPhStart" column="sow_ph_start"/>
+        <result property="sowPhReserveIn" column="sow_ph_reserve_in"/>
+        <result property="sowPhWeanIn" column="sow_ph_wean_in"/>
+        <result property="sowPhEntryIn" column="sow_ph_entry_in"/>
+        <result property="sowPhChgFarmIn" column="sow_ph_chg_farm_in"/>
+        <result property="sowPhDead" column="sow_ph_dead"/>
+        <result property="sowPhWeedOut" column="sow_ph_weed_out"/>
+        <result property="sowPhSale" column="sow_ph_sale"/>
+        <result property="sowPhChgFarm" column="sow_ph_chg_farm"/>
+        <result property="sowPhOtherOut" column="sow_ph_other_out"/>
+        <result property="mateHb" column="mate_hb"/>
+        <result property="mateDn" column="mate_dn"/>
+        <result property="mateFq" column="mate_fq"/>
+        <result property="mateLc" column="mate_lc"/>
+        <result property="mateYx" column="mate_yx"/>
+        <result property="matingCount" column="mating_count"/>
+        <result property="sowPhMating" column="sow_ph_mating"/>
+        <result property="sowPhKonghuai" column="sow_ph_konghuai"/>
+        <result property="sowPhPregnant" column="sow_ph_pregnant"/>
+        <result property="pregPositive" column="preg_positive"/>
+        <result property="pregNegative" column="preg_negative"/>
+        <result property="pregFanqing" column="preg_fanqing"/>
+        <result property="pregLiuchan" column="preg_liuchan"/>
+        <result property="weanMate" column="wean_mate"/>
+        <result property="weanDeadWeedOut" column="wean_dead_weed_out"/>
+        <result property="sowPhEnd" column="sow_ph_end"/>
+        <result property="sowCfStart" column="sow_cf_start"/>
+        <result property="sowCfEnd" column="sow_cf_end"/>
+        <result property="sowCfIn" column="sow_cf_in"/>
+        <result property="sowCfInFarmIn" column="sow_cf_in_farm_in"/>
+        <result property="sowCfDead" column="sow_cf_dead"/>
+        <result property="sowCfWeedOut" column="sow_cf_weed_out"/>
+        <result property="sowCfSale" column="sow_cf_sale"/>
+        <result property="sowCfChgFarm" column="sow_cf_chg_farm"/>
+        <result property="sowCfOtherOut" column="sow_cf_other_out"/>
+        <result property="earlyMating" column="early_mating"/>
+        <result property="earlyFarrowNest" column="early_farrow_nest"/>
+        <result property="laterNest" column="later_nest"/>
+        <result property="farrowNest" column="farrow_nest"/>
+        <result property="farrowLive" column="farrow_live"/>
+        <result property="farrowHealth" column="farrow_health"/>
+        <result property="farrowWeak" column="farrow_weak"/>
+        <result property="farrowDead" column="farrow_dead"/>
+        <result property="farrowjmh" column="farrowjmh"/>
+        <result property="farrowWeight" column="farrow_weight"/>
+        <result property="weanNest" column="wean_nest"/>
+        <result property="weanQualifiedCount" column="wean_qualified_count"/>
+        <result property="weanCount" column="wean_count"/>
+        <result property="weanDayAge" column="wean_day_age"/>
+        <result property="weanWeight" column="wean_weight"/>
+        <result property="boarStart" column="boar_start"/>
+        <result property="boarIn" column="boar_in"/>
+        <result property="boarChgFarmIn" column="boar_chg_farm_in"/>
+        <result property="boarDead" column="boar_dead"/>
+        <result property="boarWeedOut" column="boar_weed_out"/>
+        <result property="boarSale" column="boar_sale"/>
+        <result property="boarOtherOut" column="boar_other_out"/>
+        <result property="boarEnd" column="boar_end"/>
+        <result property="sowNotMatingCount" column="sow_not_mating_count"/>
+        <result property="version" column="version"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <sql id="tb">
+        doctor_pig_dailies
+    </sql>
+
+    <sql id="cols_all">
+        id,
+        <include refid="cols_exclude_id"/>
+    </sql>
+
+    <sql id="cols_exclude_id">
+        `sum_at`, `org_id`, `org_name`, `farm_id`, `farm_name`, `sow_ph_start`, `sow_ph_reserve_in`, `sow_ph_wean_in`,
+        `sow_ph_entry_in`, `sow_ph_chg_farm_in`, `sow_ph_dead`, `sow_ph_weed_out`, `sow_ph_sale`, `sow_ph_chg_farm`,
+        `sow_ph_other_out`, `mate_hb`, `mate_dn`, `mate_fq`, `mate_lc`, `mate_yx`, `mating_count`, `sow_ph_mating`,
+        `sow_ph_konghuai`, `sow_ph_pregnant`, `preg_positive`, `preg_negative`, `preg_fanqing`, `preg_liuchan`,
+        `wean_mate`, `wean_dead_weed_out`, `sow_ph_end`, `sow_cf_start`, `sow_cf_end`, `sow_cf_in`, `sow_cf_in_farm_in`,
+        `sow_cf_dead`, `sow_cf_weed_out`, `sow_cf_sale`, `sow_cf_chg_farm`, `sow_cf_other_out`, `early_mating`,
+        `early_farrow_nest`, `later_nest`, `farrow_nest`, `farrow_live`, `farrow_health`, `farrow_weak`, `farrow_dead`,
+        `farrowjmh`, `farrow_weight`, `wean_nest`, `wean_qualified_count`, `wean_count`, `wean_day_age`, `wean_weight`,
+        `boar_start`, `boar_in`, `boar_chg_farm_in`, `boar_dead`, `boar_weed_out`, `boar_sale`, `boar_other_out`, `boar_end`,
+        `sow_not_mating_count`, `version`,
+        created_at, updated_at
+    </sql>
+
+    <sql id="vals">
+        #{sumAt}, #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{sowPhStart}, #{sowPhReserveIn}, #{sowPhWeanIn},
+        #{sowPhEntryIn}, #{sowPhChgFarmIn}, #{sowPhDead}, #{sowPhWeedOut}, #{sowPhSale}, #{sowPhChgFarm},
+        #{sowPhOtherOut}, #{mateHb}, #{mateDn}, #{mateFq}, #{mateLc}, #{mateYx}, #{matingCount}, #{sowPhMating},
+        #{sowPhKonghuai}, #{sowPhPregnant}, #{pregPositive}, #{pregNegative}, #{pregFanqing}, #{pregLiuchan},
+        #{weanMate}, #{weanDeadWeedOut}, #{sowPhEnd}, #{sowCfStart}, #{sowCfEnd}, #{sowCfIn}, #{sowCfInFarmIn},
+        #{sowCfDead}, #{sowCfWeedOut}, #{sowCfSale}, #{sowCfChgFarm}, #{sowCfOtherOut}, #{earlyMating},
+        #{earlyFarrowNest}, #{laterNest}, #{farrowNest}, #{farrowLive}, #{farrowHealth}, #{farrowWeak}, #{farrowDead},
+        #{farrowjmh}, #{farrowWeight}, #{weanNest}, #{weanQualifiedCount}, #{weanCount}, #{weanDayAge}, #{weanWeight},
+        #{boarStart}, #{boarIn}, #{boarChgFarmIn}, #{boarDead}, #{boarWeedOut}, #{boarSale}, #{boarOtherOut}, #{boarEnd},
+        #{sowNotMatingCount}, 1,
+        now(), now()
+    </sql>
+
+    <sql id="criteria">
+        <where>
+            <if test="sumAt != null">AND `sum_at` = #{sumAt}</if>
+            <if test="orgId != null">AND `org_id` = #{orgId}</if>
+            <if test="orgName != null">AND `org_name` = #{orgName}</if>
+            <if test="farmId != null">AND `farm_id` = #{farmId}</if>
+            <if test="farmName != null">AND `farm_name` = #{farmName}</if>
+            <if test="sowPhStart != null">AND `sow_ph_start` = #{sowPhStart}</if>
+            <if test="sowPhReserveIn != null">AND `sow_ph_reserve_in` = #{sowPhReserveIn}</if>
+            <if test="sowPhWeanIn != null">AND `sow_ph_wean_in` = #{sowPhWeanIn}</if>
+            <if test="sowPhEntryIn != null">AND `sow_ph_entry_in` = #{sowPhEntryIn}</if>
+            <if test="sowPhChgFarmIn != null">AND `sow_ph_chg_farm_in` = #{sowPhChgFarmIn}</if>
+            <if test="sowPhDead != null">AND `sow_ph_dead` = #{sowPhDead}</if>
+            <if test="sowPhWeedOut != null">AND `sow_ph_weed_out` = #{sowPhWeedOut}</if>
+            <if test="sowPhSale != null">AND `sow_ph_sale` = #{sowPhSale}</if>
+            <if test="sowPhChgFarm != null">AND `sow_ph_chg_farm` = #{sowPhChgFarm}</if>
+            <if test="sowPhOtherOut != null">AND `sow_ph_other_out` = #{sowPhOtherOut}</if>
+            <if test="mateHb != null">AND `mate_hb` = #{mateHb}</if>
+            <if test="mateDn != null">AND `mate_dn` = #{mateDn}</if>
+            <if test="mateFq != null">AND `mate_fq` = #{mateFq}</if>
+            <if test="mateLc != null">AND `mate_lc` = #{mateLc}</if>
+            <if test="mateYx != null">AND `mate_yx` = #{mateYx}</if>
+            <if test="matingCount != null">AND `mating_count` = #{matingCount}</if>
+            <if test="sowPhMating != null">AND `sow_ph_mating` = #{sowPhMating}</if>
+            <if test="sowPhKonghuai != null">AND `sow_ph_konghuai` = #{sowPhKonghuai}</if>
+            <if test="sowPhPregnant != null">AND `sow_ph_pregnant` = #{sowPhPregnant}</if>
+            <if test="pregPositive != null">AND `preg_positive` = #{pregPositive}</if>
+            <if test="pregNegative != null">AND `preg_negative` = #{pregNegative}</if>
+            <if test="pregFanqing != null">AND `preg_fanqing` = #{pregFanqing}</if>
+            <if test="pregLiuchan != null">AND `preg_liuchan` = #{pregLiuchan}</if>
+            <if test="weanMate != null">AND `wean_mate` = #{weanMate}</if>
+            <if test="weanDeadWeedOut != null">AND `wean_dead_weed_out` = #{weanDeadWeedOut}</if>
+            <if test="sowPhEnd != null">AND `sow_ph_end` = #{sowPhEnd}</if>
+            <if test="sowCfStart != null">AND `sow_cf_start` = #{sowCfStart}</if>
+            <if test="sowCfEnd != null">AND `sow_cf_end` = #{sowCfEnd}</if>
+            <if test="sowCfIn != null">AND `sow_cf_in` = #{sowCfIn}</if>
+            <if test="sowCfInFarmIn != null">AND `sow_cf_in_farm_in` = #{sowCfInFarmIn}</if>
+            <if test="sowCfDead != null">AND `sow_cf_dead` = #{sowCfDead}</if>
+            <if test="sowCfWeedOut != null">AND `sow_cf_weed_out` = #{sowCfWeedOut}</if>
+            <if test="sowCfSale != null">AND `sow_cf_sale` = #{sowCfSale}</if>
+            <if test="sowCfChgFarm != null">AND `sow_cf_chg_farm` = #{sowCfChgFarm}</if>
+            <if test="sowCfOtherOut != null">AND `sow_cf_other_out` = #{sowCfOtherOut}</if>
+            <if test="earlyMating != null">AND `early_mating` = #{earlyMating}</if>
+            <if test="earlyFarrowNest != null">AND `early_farrow_nest` = #{earlyFarrowNest}</if>
+            <if test="laterNest != null">AND `later_nest` = #{laterNest}</if>
+            <if test="farrowNest != null">AND `farrow_nest` = #{farrowNest}</if>
+            <if test="farrowLive != null">AND `farrow_live` = #{farrowLive}</if>
+            <if test="farrowHealth != null">AND `farrow_health` = #{farrowHealth}</if>
+            <if test="farrowWeak != null">AND `farrow_weak` = #{farrowWeak}</if>
+            <if test="farrowDead != null">AND `farrow_dead` = #{farrowDead}</if>
+            <if test="farrowjmh != null">AND `farrowjmh` = #{farrowjmh}</if>
+            <if test="farrowWeight != null">AND `farrow_weight` = #{farrowWeight}</if>
+            <if test="weanNest != null">AND `wean_nest` = #{weanNest}</if>
+            <if test="weanQualifiedCount != null">AND `wean_qualified_count` = #{weanQualifiedCount}</if>
+            <if test="weanCount != null">AND `wean_count` = #{weanCount}</if>
+            <if test="weanDayAge != null">AND `wean_day_age` = #{weanDayAge}</if>
+            <if test="weanWeight != null">AND `wean_weight` = #{weanWeight}</if>
+            <if test="boarStart != null">AND `boar_start` = #{boarStart}</if>
+            <if test="boarIn != null">AND `boar_in` = #{boarIn}</if>
+            <if test="boarChgFarmIn != null">AND `boar_chg_farm_in` = #{boarChgFarmIn}</if>
+            <if test="boarDead != null">AND `boar_dead` = #{boarDead}</if>
+            <if test="boarWeedOut != null">AND `boar_weed_out` = #{boarWeedOut}</if>
+            <if test="boarSale != null">AND `boar_sale` = #{boarSale}</if>
+            <if test="boarOtherOut != null">AND `boar_other_out` = #{boarOtherOut}</if>
+            <if test="boarEnd != null">AND `boar_end` = #{boarEnd}</if>
+            <if test="sowNotMatingCount != null">AND `sow_not_mating_count` = #{sowNotMatingCount}</if>
+            <if test="version != null">AND `version` = #{version}</if>
+            <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
+            <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
+        </where>
+    </sql>
+
+    <insert id="create" parameterType="DoctorPigDaily" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        <include refid="tb"/>
+        (<include refid="cols_exclude_id"/>)
+        VALUES
+        (<include refid="vals"/>)
+    </insert>
+
+    <select id="findById" parameterType="long" resultMap="DoctorPigDailyMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE id = #{id} LIMIT 1
+    </select>
+
+    <select id="findByIds" parameterType="list" resultMap="DoctorPigDailyMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <update id="update" parameterType="DoctorPigDaily">
+        UPDATE
+        <include refid="tb"/>
+        <set>
+            <if test="sumAt != null">`sum_at` = #{sumAt},</if>
+            <if test="orgId != null">`org_id` = #{orgId},</if>
+            <if test="orgName != null">`org_name` = #{orgName},</if>
+            <if test="farmId != null">`farm_id` = #{farmId},</if>
+            <if test="farmName != null">`farm_name` = #{farmName},</if>
+            <if test="sowPhStart != null">`sow_ph_start` = #{sowPhStart},</if>
+            <if test="sowPhReserveIn != null">`sow_ph_reserve_in` = #{sowPhReserveIn},</if>
+            <if test="sowPhWeanIn != null">`sow_ph_wean_in` = #{sowPhWeanIn},</if>
+            <if test="sowPhEntryIn != null">`sow_ph_entry_in` = #{sowPhEntryIn},</if>
+            <if test="sowPhChgFarmIn != null">`sow_ph_chg_farm_in` = #{sowPhChgFarmIn},</if>
+            <if test="sowPhDead != null">`sow_ph_dead` = #{sowPhDead},</if>
+            <if test="sowPhWeedOut != null">`sow_ph_weed_out` = #{sowPhWeedOut},</if>
+            <if test="sowPhSale != null">`sow_ph_sale` = #{sowPhSale},</if>
+            <if test="sowPhChgFarm != null">`sow_ph_chg_farm` = #{sowPhChgFarm},</if>
+            <if test="sowPhOtherOut != null">`sow_ph_other_out` = #{sowPhOtherOut},</if>
+            <if test="mateHb != null">`mate_hb` = #{mateHb},</if>
+            <if test="mateDn != null">`mate_dn` = #{mateDn},</if>
+            <if test="mateFq != null">`mate_fq` = #{mateFq},</if>
+            <if test="mateLc != null">`mate_lc` = #{mateLc},</if>
+            <if test="mateYx != null">`mate_yx` = #{mateYx},</if>
+            <if test="matingCount != null">`mating_count` = #{matingCount},</if>
+            <if test="sowPhMating != null">`sow_ph_mating` = #{sowPhMating},</if>
+            <if test="sowPhKonghuai != null">`sow_ph_konghuai` = #{sowPhKonghuai},</if>
+            <if test="sowPhPregnant != null">`sow_ph_pregnant` = #{sowPhPregnant},</if>
+            <if test="pregPositive != null">`preg_positive` = #{pregPositive},</if>
+            <if test="pregNegative != null">`preg_negative` = #{pregNegative},</if>
+            <if test="pregFanqing != null">`preg_fanqing` = #{pregFanqing},</if>
+            <if test="pregLiuchan != null">`preg_liuchan` = #{pregLiuchan},</if>
+            <if test="weanMate != null">`wean_mate` = #{weanMate},</if>
+            <if test="weanDeadWeedOut != null">`wean_dead_weed_out` = #{weanDeadWeedOut},</if>
+            <if test="sowPhEnd != null">`sow_ph_end` = #{sowPhEnd},</if>
+            <if test="sowCfStart != null">`sow_cf_start` = #{sowCfStart},</if>
+            <if test="sowCfEnd != null">`sow_cf_end` = #{sowCfEnd},</if>
+            <if test="sowCfIn != null">`sow_cf_in` = #{sowCfIn},</if>
+            <if test="sowCfInFarmIn != null">`sow_cf_in_farm_in` = #{sowCfInFarmIn},</if>
+            <if test="sowCfDead != null">`sow_cf_dead` = #{sowCfDead},</if>
+            <if test="sowCfWeedOut != null">`sow_cf_weed_out` = #{sowCfWeedOut},</if>
+            <if test="sowCfSale != null">`sow_cf_sale` = #{sowCfSale},</if>
+            <if test="sowCfChgFarm != null">`sow_cf_chg_farm` = #{sowCfChgFarm},</if>
+            <if test="sowCfOtherOut != null">`sow_cf_other_out` = #{sowCfOtherOut},</if>
+            <if test="earlyMating != null">`early_mating` = #{earlyMating},</if>
+            <if test="earlyFarrowNest != null">`early_farrow_nest` = #{earlyFarrowNest},</if>
+            <if test="laterNest != null">`later_nest` = #{laterNest},</if>
+            <if test="farrowNest != null">`farrow_nest` = #{farrowNest},</if>
+            <if test="farrowLive != null">`farrow_live` = #{farrowLive},</if>
+            <if test="farrowHealth != null">`farrow_health` = #{farrowHealth},</if>
+            <if test="farrowWeak != null">`farrow_weak` = #{farrowWeak},</if>
+            <if test="farrowDead != null">`farrow_dead` = #{farrowDead},</if>
+            <if test="farrowjmh != null">`farrowjmh` = #{farrowjmh},</if>
+            <if test="farrowWeight != null">`farrow_weight` = #{farrowWeight},</if>
+            <if test="weanNest != null">`wean_nest` = #{weanNest},</if>
+            <if test="weanQualifiedCount != null">`wean_qualified_count` = #{weanQualifiedCount},</if>
+            <if test="weanCount != null">`wean_count` = #{weanCount},</if>
+            <if test="weanDayAge != null">`wean_day_age` = #{weanDayAge},</if>
+            <if test="weanWeight != null">`wean_weight` = #{weanWeight},</if>
+            <if test="boarStart != null">`boar_start` = #{boarStart},</if>
+            <if test="boarIn != null">`boar_in` = #{boarIn},</if>
+            <if test="boarChgFarmIn != null">`boar_chg_farm_in` = #{boarChgFarmIn},</if>
+            <if test="boarDead != null">`boar_dead` = #{boarDead},</if>
+            <if test="boarWeedOut != null">`boar_weed_out` = #{boarWeedOut},</if>
+            <if test="boarSale != null">`boar_sale` = #{boarSale},</if>
+            <if test="boarOtherOut != null">`boar_other_out` = #{boarOtherOut},</if>
+            <if test="boarEnd != null">`boar_end` = #{boarEnd},</if>
+            <if test="sowNotMatingCount != null">`sow_not_mating_count` = #{sowNotMatingCount},</if>
+            version = version + 1,
+            updated_at = now()
+        </set>
+        WHERE id = #{id} and version = #{version}
+    </update>
+
+    <delete id="delete" parameterType="long">
+        DELETE FROM
+        <include refid="tb"/>
+        WHERE id = #{id}
+    </delete>
+
+    <select id="count" parameterType="map" resultType="long">
+        SELECT COUNT(1)
+        FROM
+        <include refid="tb"/>
+        <include refid="criteria"/>
+    </select>
+
+    <select id="paging" parameterType="map" resultMap="DoctorPigDailyMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        <include refid="criteria"/>
+        ORDER BY `id` DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="list" parameterType="map" resultMap="DoctorPigDailyMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        <include refid="criteria"/>
+        ORDER BY `id` DESC
+    </select>
+
+    <select id="countSow" parameterType="map" resultType="map">
+        SELECT
+        ifnull(sum(sow_cf_end),0)+ifnull(sum(sow_ph_end),0)-ifnull(sum(sow_not_mating_count),0) as sow_count
+        FROM
+        <include refid="tb"/>
+        <where>
+            <if test="farmId !=null">
+                AND farm_id=#{farmId}
+            </if>
+            <if test="farmIds !=null and farmIds.size() >0">
+                AND
+                <foreach collection="farmIds" item="fid" open="(" separator="or" close=")">
+                    farm_id=#{fid}
+                </foreach>
+            </if>
+            <if test="startDate !=null">AND <![CDATA[sum_at >= #{startDate}]]></if>
+            <if test="endDate !=null">AND <![CDATA[sum_at <= #{endDate}]]></if>
+        </where>
+
+    </select>
+
+    <select id="report" parameterType="map" resultMap="DoctorPigDailyMap">
+        SELECT
+        min(`sow_ph_start`) as sow_ph_start,
+        sum(`sow_ph_reserve_in`) as sow_ph_reserve_in,
+        sum(`sow_ph_wean_in`) as sow_ph_wean_in,
+        sum(`sow_ph_entry_in`) as sow_ph_entry_in,
+        sum(`sow_ph_chg_farm_in`) as sow_ph_chg_farm_in,
+        sum(`sow_ph_dead`) as sow_ph_dead,
+        sum(`sow_ph_weed_out`) as sow_ph_weed_out,
+        sum(`sow_ph_sale`) as sow_ph_sale,
+        sum(`sow_ph_chg_farm`) as sow_ph_chg_farm,
+        sum(`sow_ph_other_out`) as sow_ph_other_out,
+        sum(`mating_count`) as mating_count,
+        sum(`preg_positive`) as preg_positive,
+        sum(`preg_negative`) as preg_negative,
+        sum(`preg_fanqing`) as preg_fanqing,
+        sum(`preg_liuchan`) as preg_liuchan,
+        max(`sow_ph_end`) as sow_ph_end,
+        min(`sow_cf_start`) as sow_cf_start,
+        max(`sow_cf_end`) as sow_cf_end,
+        sum(`sow_cf_in`) as sow_cf_in,
+        sum(`sow_cf_in_farm_in`) as sow_cf_in_farm_in,
+        sum(`sow_cf_dead`) as sow_cf_dead,
+        sum(`sow_cf_weed_out`) as sow_cf_weed_out,
+        sum(`sow_cf_sale`) as sow_cf_sale,
+        sum(`sow_cf_chg_farm`) as sow_cf_chg_farm,
+        sum(`sow_cf_other_out`) as sow_cf_other_out,
+        sum(`farrow_nest`) as farrow_nest,
+        sum(`farrow_health`) as farrow_health,
+        sum(`farrow_weak`) as farrow_weak,
+        sum(`farrow_dead`) as farrow_dead,
+        sum(`farrowjmh`) as farrowjmh,
+        sum(`farrow_weight`) as farrow_weight,
+        sum(`wean_nest`) as wean_nest,
+        sum(`wean_qualified_count`) as wean_qualified_count,
+        sum(`wean_count`) as wean_count,
+        sum(`wean_day_age`) as wean_day_age,
+        sum(`wean_weight`) as wean_weight,
+        min(`boar_start`) as boar_start,
+        sum(`boar_in`) as boar_in,
+        sum(`boar_dead`) as boar_dead,
+        sum(`boar_weed_out`) as boar_weed_out,
+        sum(`boar_sale`) as boar_sale,
+        sum(`boar_other_out`) as boar_other_out,
+        max(`boar_end`) as boar_end,
+        sum(`sow_not_mating_count`) as sow_not_mating_count
+        FROM
+        <include refid="tb"/>
+        <where>
+            <if test="farmId !=null">
+                AND farm_id=#{farmId}
+            </if>
+            <if test="farmIds !=null and farmIds.size() >0">
+                AND
+                <foreach collection="farmIds" item="fid" open="(" separator="or" close=")">
+                    farm_id=#{fid}
+                </foreach>
+            </if>
+            <if test="startDate !=null">AND <![CDATA[sum_at >= #{startDate}]]></if>
+            <if test="endDate !=null">AND <![CDATA[sum_at <= #{endDate}]]></if>
+        </where>
+
+    </select>
+
+
+    <select id="reportByOrg" parameterType="map" resultMap="DoctorPigDailyMap">
+        SELECT
+        min(`sow_ph_start`) as sow_ph_start,
+        sum(`sow_ph_reserve_in`) as sow_ph_reserve_in,
+        sum(`sow_ph_wean_in`) as sow_ph_wean_in,
+        sum(`sow_ph_entry_in`) as sow_ph_entry_in,
+        sum(`sow_ph_chg_farm_in`) as sow_ph_chg_farm_in,
+        sum(`sow_ph_dead`) as sow_ph_dead,
+        sum(`sow_ph_weed_out`) as sow_ph_weed_out,
+        sum(`sow_ph_sale`) as sow_ph_sale,
+        sum(`sow_ph_chg_farm`) as sow_ph_chg_farm,
+        sum(`sow_ph_other_out`) as sow_ph_other_out,
+        sum(`mating_count`) as mating_count,
+        sum(`preg_positive`) as preg_positive,
+        sum(`preg_negative`) as preg_negative,
+        sum(`preg_fanqing`) as preg_fanqing,
+        sum(`preg_liuchan`) as preg_liuchan,
+        max(`sow_ph_end`) as sow_ph_end,
+        min(`sow_cf_start`) as sow_cf_start,
+        max(`sow_cf_end`) as sow_cf_end,
+        sum(`sow_cf_in`) as sow_cf_in,
+        sum(`sow_cf_in_farm_in`) as sow_cf_in_farm_in,
+        sum(`sow_cf_dead`) as sow_cf_dead,
+        sum(`sow_cf_weed_out`) as sow_cf_weed_out,
+        sum(`sow_cf_sale`) as sow_cf_sale,
+        sum(`sow_cf_chg_farm`) as sow_cf_chg_farm,
+        sum(`sow_cf_other_out`) as sow_cf_other_out,
+        sum(`farrow_nest`) as farrow_nest,
+        sum(`farrow_health`) as farrow_health,
+        sum(`farrow_weak`) as farrow_weak,
+        sum(`farrow_dead`) as farrow_dead,
+        sum(`farrowjmh`) as farrowjmh,
+        sum(`farrow_weight`) as farrow_weight,
+        sum(`wean_nest`) as wean_nest,
+        sum(`wean_qualified_count`) as wean_qualified_count,
+        sum(`wean_count`) as wean_count,
+        sum(`wean_day_age`) as wean_day_age,
+        sum(`wean_weight`) as wean_weight,
+        min(`boar_start`) as boar_start,
+        sum(`boar_in`) as boar_in,
+        sum(`boar_dead`) as boar_dead,
+        sum(`boar_weed_out`) as boar_weed_out,
+        sum(`boar_sale`) as boar_sale,
+        sum(`boar_other_out`) as boar_other_out,
+        max(`boar_end`) as boar_end,
+        sum(`sow_not_mating_count`) as sow_not_mating_count
+        FROM
+        <include refid="tb"/>
+        <where>
+            <if test="orgId !=null">
+                AND org_id=#{orgId}
+            </if>
+            <if test="startDate !=null">AND <![CDATA[sum_at >= #{startDate}]]></if>
+            <if test="endDate !=null">AND <![CDATA[sum_at <= #{endDate}]]></if>
+        </where>
+
+    </select>
+
+
+    <select id="findBy" parameterType="map" resultMap="DoctorPigDailyMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE
+        farm_id = #{farmId}
+        AND sum_at = #{sumAt}
+    </select>
+
+    <update id="updateDailySowPigLiveStock" parameterType="map">
+        UPDATE
+        <include refid="tb"/>
+        SET
+        sow_ph_start = ifnull(sow_ph_start, 0) + ifnull(#{phChangeCount}, 0),
+        sow_ph_end = ifnull(sow_ph_end, 0) + ifnull(#{phChangeCount}, 0),
+        sow_cf_start = ifnull(sow_cf_start, 0) + ifnull(#{cfChangeCount}, 0),
+        sow_cf_end = ifnull(sow_cf_end, 0) + ifnull(#{cfChangeCount}, 0)
+        WHERE
+        farm_id = #{farmId}
+        AND sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
+    </update>
+
+    <update id="updateDailyBoarPigLiveStock" parameterType="map">
+        UPDATE
+        <include refid="tb"/>
+        SET boar_start = boar_start + #{changeCount},
+        `boar_end` = `boar_end` + #{changeCount}
+        WHERE
+        farm_id = #{farmId}
+        AND sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
+    </update>
+
+    <select id="queryAfterSumAt" parameterType="map" resultMap="DoctorPigDailyMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        <where>
+            farm_id = #{farmId}
+            AND sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
+        </where>
+    </select>
+
+    <update id="updateDailyPhStatusLiveStock" parameterType="map" >
+        UPDATE <include refid="tb"/>
+        SET sow_ph_mating = ifnull(sow_ph_mating,0) + #{phMatingChangeCount},
+        `sow_ph_konghuai` = ifnull(`sow_ph_konghuai`,0) + #{phKonghuaiChangeCount},
+        `sow_ph_pregnant` = ifnull(`sow_ph_pregnant`,0) + #{phPregnantChangeCount}
+
+        WHERE
+        farm_id = #{farmId}
+        AND sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
+    </update>
+
+    <sql id="forSum">
+        org_id as orgId,
+        org_name as orgName,
+        farm_id as farmId,
+        farm_name as farmName,
+        sum_at as sumAt,
+        round(AVG(`boar_end`),0) as boarDailyPigCount,
+        round(AVG(`sow_ph_end`+`sow_cf_end`),0) as sowDailyPigCount,
+        ifnull(sum(sow_ph_start), 0) as sowPhStart,
+        ifnull(sum(sow_ph_reserve_in), 0) as sowPhReserveIn,
+        ifnull(sum(sow_ph_wean_in), 0) as sowPhWeanIn,
+        ifnull(sum(sow_ph_entry_in), 0) as sowPhEntryIn,
+        ifnull(sum(sow_ph_chg_farm_in), 0) as sowPhChgFarmIn,
+        ifnull(sum(sow_ph_dead), 0) as sowPhDead,
+        ifnull(sum(sow_ph_weed_out), 0) as sowPhWeedOut,
+        ifnull(sum(sow_ph_sale), 0) as sowPhSale,
+        ifnull(sum(sow_ph_chg_farm), 0) as sowPhChgFarm,
+        ifnull(sum(sow_ph_other_out), 0) as sowPhOtherOut,
+        ifnull(sum(mating_count), 0) as matingCount,
+        ifnull(sum(preg_positive), 0) as pregPositive,
+        ifnull(sum(preg_negative), 0) as pregNegative,
+        ifnull(sum(preg_fanqing), 0) as pregFanqing,
+        ifnull(sum(preg_liuchan), 0) as pregLiuchan,
+        ifnull(sum(wean_mate), 0) as weanMate,
+        ifnull(sum(wean_dead_weed_out), 0) as weanDeadWeedOut,
+        ifnull(sum(sow_cf_in), 0) as sowCfIn,
+        ifnull(sum(sow_cf_in_farm_in), 0) as sowCfInFarmIn,
+        ifnull(sum(sow_cf_dead), 0) as sowCfDead,
+        ifnull(sum(sow_cf_weed_out), 0) as sowCfWeedOut,
+        ifnull(sum(sow_cf_dead), 0) as sowCfDead,
+        ifnull(sum(sow_cf_sale), 0) as sowCfSale,
+        ifnull(sum(sow_cf_chg_farm), 0) as sowCfChgFarm,
+        ifnull(sum(sow_cf_other_out), 0) as sowCfOtherOut,
+        ifnull(sum(early_mating), 0) as earlyMating,
+        ifnull(sum(early_farrow_nest), 0) as earlyFarrowNest,
+        ifnull(sum(later_nest), 0) as laterNest,
+        ifnull(sum(farrow_nest), 0) as farrowNest,
+        ifnull(sum(farrow_live), 0) as farrowLive,
+        ifnull(sum(farrow_health), 0) as farrowHealth,
+        ifnull(sum(farrow_weak), 0) as farrowWeak,
+        ifnull(sum(farrow_dead), 0) as farrowDead,
+        ifnull(sum(farrowjmh), 0) as farrowjmh,
+        ifnull(sum(farrow_weight), 0) as farrowWeight,
+        ifnull(sum(wean_nest), 0) as weanNest,
+        ifnull(sum(wean_qualified_count), 0) as weanQualifiedCount,
+        ifnull(sum(wean_count), 0) as weanCount,
+        ifnull(sum(wean_day_age), 0) as weanDayAge,
+        ifnull(sum(wean_weight), 0) as weanWeight,
+        ifnull(sum(boar_in), 0) as boarIn,
+        ifnull(sum(boar_chg_farm_in), 0) as boarChgFarmIn,
+        ifnull(sum(boar_dead), 0) as boarDead,
+        ifnull(sum(boar_weed_out), 0) as boarWeedOut,
+        ifnull(sum(boar_sale), 0) as boarSale,
+        ifnull(sum(boar_other_out), 0) as boarOtherOut
+    </sql>
+
+    <select id="sumForDimension" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
+            resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
+        SELECT
+        <include refid="forSum"/>
+        FROM
+        <include refid="tb"/>
+        GROUP BY
+        <if test="orzType == 2">org_id,</if>
+        <if test="orzType == 3">farm_id,</if>
+        <if test="dateType == 1">date_format(sum_at, '%y-%m-%d')</if>
+        <if test="dateType == 2">date_format(sum_at, '%x-%v')</if>
+        <if test="dateType == 3">date_format(sum_at, '%y-%m')</if>
+        <if test="dateType == 4">concat(date_format(sum_at, '%y-'), QUARTER(sum_at))</if>
+        <if test="dateType == 5">date_format(sum_at, '%y')</if>
+    </select>
+
+    <sql id="dimensionCri">
+        <where>
+            1=1
+            <if test="orzType == 2">AND org_id = #{orzId}</if>
+            <if test="orzType == 3">AND farm_id = #{orzId}</if>
+            <if test="dateType == 1">AND date_format(sum_at, '%y-%m-%d') = date_format(#{sumAt}, '%y-%m-%d')</if>
+            <if test="dateType == 2">AND date_format(sum_at, '%x-%v') = date_format(#{sumAt}, '%x-%v')</if>
+            <if test="dateType == 3">AND date_format(sum_at, '%y-%m') = date_format(#{sumAt}, '%y-%m')</if>
+            <if test="dateType == 4">AND concat(date_format(sum_at, '%y-'), QUARTER(sum_at)) =
+                concat(date_format(#{sumAt}, '%y-'), QUARTER(#{sumAt}))
+            </if>
+            <if test="dateType == 5">AND date_format(sum_at, '%y') = date_format(#{sumAt}, '%y')</if>
+        </where>
+    </sql>
+    <select id="selectOneSumForDimension" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
+            resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
+        SELECT
+        <include refid="forSum"/>
+        FROM
+        <include refid="tb"/>
+        <include refid="dimensionCri"/>
+    </select>
+
+    <select id="findByAfter" parameterType="map" resultMap="DoctorPigDailyMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        <where>
+            <if test="type == 1">
+                sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
+            </if>
+            <if test="type == 2">
+                updated_at &gt;= date_format(#{sumAt}, '%Y-%m-%d %H:%i:%s')
+            </if>
+            <if test="orzType == 2">and org_id = #{orzId}</if>
+            <if test="orzType == 3">and farm_id = #{orzId}</if>
+        </where>
+    </select>
+
+    <select id="findByDateType" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorDimensionCriteria">
+        SELECT
+        case WHEN #{orzType} = 2 then org_id else farm_id end as orzId,
+        #{orzType} as orzType,
+        sum_at as sumAt,
+        #{dateType} as dateType
+        FROM
+        <include refid="tb"/>
+        <where>
+            <if test="type == 1">
+                sum_at &gt;= date_format(#{sumAt}, '%Y-%m-%d')
+            </if>
+            <if test="type == 2">
+                updated_at &gt;= date_format(#{sumAt}, '%Y-%m-%d %H:%i:%s')
+            </if>
+        </where>
+        GROUP BY
+        <if test="orzType == 2">org_id,</if>
+        <if test="orzType == 3">farm_id,</if>
+        <if test="dateType == 1">date_format(sum_at, '%y-%m-%d')</if>
+        <if test="dateType == 2">date_format(sum_at, '%x-%v')</if>
+        <if test="dateType == 3">date_format(sum_at, '%y-%m')</if>
+        <if test="dateType == 4">concat(date_format(sum_at, '%y-'), QUARTER(sum_at))</if>
+        <if test="dateType == 5">date_format(sum_at, '%y')</if>
+    </select>
+
+    <select id="farmStart" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
+            resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
+        SELECT
+        sow_ph_start as sowPhStart,
+        sow_cf_start as sowCfStart,
+        boar_start as boarStart,
+        sow_ph_start + sow_cf_start as sowStart
+        FROM
+        <include refid="tb"/>
+        <include refid="dimensionCri"/>
+        order by sum_at asc
+        limit 1
+    </select>
+
+    <select id="orgStart" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
+            resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
+        SELECT
+        sum(sow_ph_start) as sowPhStart,
+        sum(sow_cf_start) as sowCfStart,
+        sum(boar_start) as boarStart,
+        sum(sow_ph_start + sow_cf_start) as sowStart
+        FROM
+        <include refid="tb"/>
+        <include refid="dimensionCri"/>
+        group by sum_at
+        order by sum_at asc
+        limit 1
+    </select>
+
+    <select id="farmEnd" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
+            resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
+        SELECT
+        sow_ph_end as sowPhEnd,
+        sow_cf_end as sowCfEnd,
+        sow_ph_end + sow_cf_end as sowEnd,
+        boar_end as boarEnd,
+        sow_ph_mating as sowPhMating,
+        sow_ph_konghuai as sowPhKonghuai,
+        sow_ph_pregnant as sowPhPregnant
+        FROM
+        <include refid="tb"/>
+        <include refid="dimensionCri"/>
+        order by sum_at desc
+        limit 1
+    </select>
+
+    <select id="orgEnd" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
+            resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
+        SELECT
+        sum(sow_ph_end) as sowPhEnd,
+        sum(sow_cf_end) as sowCfEnd,
+        sum(sow_ph_end + sow_cf_end) as sowEnd,
+        sum(boar_end) as boarEnd,
+        sum(sow_ph_mating) as sowPhMating,
+        sum(sow_ph_konghuai) as sowPhKonghuai,
+        sum(sow_ph_pregnant) as sowPhPregnant
+        FROM
+        <include refid="tb"/>
+        <include refid="dimensionCri"/>
+        group by sum_at
+        order by sum_at desc
+        limit 1
+    </select>
+
+    <select id="orgSumDimension" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
+            resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
+        SELECT
+        sum(sow_ph_end + sow_cf_end) as sowDailyPigCount,
+        sum(boar_end) as boarDailyPigCount
+        FROM <include refid="tb"/>
+        <include refid="dimensionCri"/>
+    </select>
+
+    <select id="countDimension" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
+            resultType="int">
+        select count(1)
+        from (select *
+        FROM <include refid="tb"/>
+        <include refid="dimensionCri"/>
+        group by sum_at
+        ) a
+    </select>
+</mapper>

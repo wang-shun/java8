@@ -5,6 +5,7 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dto.DoctorDepartmentDto;
+import io.terminus.doctor.user.dto.DoctorDepartmentLinerDto;
 import io.terminus.doctor.user.manager.DoctorDepartmentManager;
 import io.terminus.doctor.user.model.DoctorFarm;
 import lombok.extern.slf4j.Slf4j;
@@ -75,6 +76,16 @@ public class DoctorDepartmentReadServiceImpl implements DoctorDepartmentReadServ
             log.error("find clique faied, departmentId:{}, isFarm:{}, cause:{}"
                     , departmentId, isFarm, Throwables.getStackTraceAsString(e));
             return Response.fail("find.clique.failed");
+        }
+    }
+
+    @Override
+    public Response<DoctorDepartmentLinerDto> findLinerBy(Long farmId) {
+        try {
+            return Response.ok(doctorDepartmentManager.findLinerBy(farmId));
+        } catch (Exception e) {
+            log.error("find liner by failed,farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.line.by.failed");
         }
     }
 }

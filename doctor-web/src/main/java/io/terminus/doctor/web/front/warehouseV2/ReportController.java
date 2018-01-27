@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
  * Created by sunbo@terminus.io on 2017/8/9.
  */
 @Slf4j
-@RestController
+@RestController("warehouseReportController")
 @RequestMapping("api/doctor/warehouse/report")
 public class ReportController {
 

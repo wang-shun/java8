@@ -39,7 +39,9 @@ public class DoctorStatisticDto implements Serializable {
         NURSERY_PIGLET("保育猪存栏量（头）", "保育猪"),
         FATTEN_PIG("育肥猪存栏量（头）", "育肥猪"),
         BREEDING_PIG("育种猪存栏量（头）", "育种猪"),
-        HOUBEI("后备猪存栏量（头）", "后备猪");
+        HOUBEI("后备猪存栏量（头）", "后备猪"),
+        DELIVER_SOW("产妇母猪猪存栏量（头）", "产房母猪"),
+        PEIHUAI("配怀猪存栏量（头）", "配怀猪");
 
         @Getter
         private final String desc;
