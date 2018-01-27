@@ -23,7 +23,7 @@ import static io.terminus.doctor.common.utils.Checks.expectTrue;
  */
 @Aspect
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(Ordered.LOWEST_PRECEDENCE -1)
 public class ConcurrentControllerAdvicor {
 
     private final DoctorConcurrentControl doctorConcurrentControl;
