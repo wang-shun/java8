@@ -3,12 +3,12 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
+import io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorFarmLiveStockDto;
 import io.terminus.doctor.event.dto.reportBi.DoctorDimensionReport;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by xjn on 17/12/12.
@@ -109,5 +109,5 @@ public interface DoctorDailyReportV2Service {
      */
     Response<Boolean> syncEfficiency(Long farmId);
 
-    Response<Map<Long, Date>> findEarLyAt();
+    Response<List<DoctorFarmEarlyEventAtDto>> findEarLyAt();
 }

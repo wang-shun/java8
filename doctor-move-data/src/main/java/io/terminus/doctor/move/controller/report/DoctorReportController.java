@@ -1,9 +1,10 @@
 package io.terminus.doctor.move.controller.report;
 
-import io.terminus.common.exception.ServiceException;
 import com.google.common.base.Stopwatch;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto;
 import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.service.DoctorDailyReportV2Service;
@@ -20,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Objects.isNull;
@@ -74,10 +74,10 @@ public class DoctorReportController {
     public Boolean flushAllDaily() {
         log.info("flush.all.daily.starting");
         Stopwatch stopwatch = Stopwatch.createStarted();
-        Map<Long, Date> map = RespHelper.or500(doctorDailyReportV2Service.findEarLyAt());
+        List<DoctorFarmEarlyEventAtDto> list = RespHelper.or500(doctorDailyReportV2Service.findEarLyAt());
         String end = DateUtil.toDateString(new Date());
-        map.entrySet().parallelStream().forEach(entry -> {
-            doctorDailyReportV2Service.flushFarmDaily(entry.getKey(), DateUtil.toDateString(entry.getValue()), end);
+        list.forEach(doctorFarmEarlyEventAtDto -> {
+            doctorDailyReportV2Service.flushFarmDaily(doctorFarmEarlyEventAtDto.getFarmId(), DateUtil.toDateString(doctorFarmEarlyEventAtDto.getEventAt()), end);
         });
         log.info("flush.all.daily.end, consume:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
         return Boolean.TRUE;

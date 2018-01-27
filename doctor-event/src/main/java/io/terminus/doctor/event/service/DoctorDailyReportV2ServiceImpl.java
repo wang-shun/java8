@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
@@ -314,15 +315,15 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
     }
 
     @Override
-    public Response<Map<Long, Date>> findEarLyAt() {
+    public Response<List<DoctorFarmEarlyEventAtDto>> findEarLyAt() {
         try {
             List<DoctorFarmEarlyEventAtDto> pigList = doctorPigEventDao.findEarLyAt();
             List<DoctorFarmEarlyEventAtDto> groupList = doctorGroupEventDao.findEarLyAt();
             pigList.addAll(groupList);
             Map<Long, List<DoctorFarmEarlyEventAtDto>> map = pigList.stream().collect(Collectors.groupingBy(DoctorFarmEarlyEventAtDto::getFarmId));
-            Map<Long, Date> map1 = Maps.newHashMap();
-            map.forEach((key, value) -> map1.put(key, value.stream().map(DoctorFarmEarlyEventAtDto::getEventAt).min(Date::compareTo).get()));
-            return Response.ok(map1);
+            List<DoctorFarmEarlyEventAtDto> list = Lists.newArrayList();
+            map.forEach((key, value) -> list.add(new DoctorFarmEarlyEventAtDto(key, value.stream().map(DoctorFarmEarlyEventAtDto::getEventAt).min(Date::compareTo).get())));
+            return Response.ok(list);
         } catch (Exception e) {
             log.error("find early at failed,cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("find.early.at.failed");
