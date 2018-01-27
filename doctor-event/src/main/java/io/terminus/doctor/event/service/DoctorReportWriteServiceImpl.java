@@ -67,14 +67,15 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
         Date startAtMonth = DateUtil.monthStart(start);//日期所在月的第一天
         Date end = DateUtil.monthEnd(new Date());
 
-        Stopwatch stopwatch = Stopwatch.createStarted();
+
         flushNPD(farmIds, startAtMonth, end);
-        log.debug("use {}", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+
 
     }
 
     public void flushNPD(List<Long> farmIds, Date startDate, Date endDate) {
 
+        Stopwatch stopwatch = Stopwatch.createStarted();
 
         Map<Long/*farmID*/, Map<String/*year-month*/, Integer/*怀孕天数*/>> farmPregnancy = new ConcurrentHashMap<>();
         Map<Long/*farmID*/, Map<String/*year-month*/, Integer/*哺乳天数*/>> farmLactation = new ConcurrentHashMap<>();
@@ -110,6 +111,15 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                 String yearAndMonthKey = year + "-" + month;
 
                 if (nextEvent.getType().equals(PigEvent.FARROWING.getKey())) {
+
+                    log.debug("猪【{}】的本次事件为【{}】【{}】，下次事件为【{}】【{}】，间隔为【{}】，计入{}月的怀孕期", pigId,
+                            PigEvent.from(currentEvent.getType()).getName(),
+                            DateUtil.toDateString(currentEvent.getEventAt()),
+                            PigEvent.from(nextEvent.getType()).getName(),
+                            DateUtil.toDateString(nextEvent.getEventAt()),
+                            days,
+                            month);
+
                     if (farmPregnancy.containsKey(nextEvent.getFarmId())) {
                         Map<String, Integer> monthPregnancy = farmPregnancy.get(nextEvent.getFarmId());
                         if (monthPregnancy.containsKey(yearAndMonthKey))
@@ -121,7 +131,16 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                         monthPregnancy.put(yearAndMonthKey, days);
                         farmPregnancy.put(nextEvent.getFarmId(), monthPregnancy);
                     }
-                } else if (nextEvent.getType().equals(PigEvent.WEAN)) {
+                } else if (nextEvent.getType().equals(PigEvent.WEAN.getKey())) {
+
+                    log.debug("猪【{}】的本次事件为【{}】【{}】，下次事件为【{}】【{}】，间隔为【{}】，计入{}月的哺乳期", pigId,
+                            PigEvent.from(currentEvent.getType()).getName(),
+                            DateUtil.toDateString(currentEvent.getEventAt()),
+                            PigEvent.from(nextEvent.getType()).getName(),
+                            DateUtil.toDateString(nextEvent.getEventAt()),
+                            days,
+                            month);
+
                     if (farmLactation.containsKey(nextEvent.getFarmId())) {
                         Map<String, Integer> monthLactation = farmLactation.get(nextEvent.getFarmId());
                         if (monthLactation.containsKey(yearAndMonthKey))
@@ -135,7 +154,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                     }
                 } else {
 
-                    log.debug("猪【{}】的本次事件为【{}】【{}】，下次事件为【{}】【{}】，间隔为【{}】，计入{}月", pigId,
+                    log.debug("猪【{}】的本次事件为【{}】【{}】，下次事件为【{}】【{}】，间隔为【{}】，计入{}月的NPD", pigId,
                             PigEvent.from(currentEvent.getType()).getName(),
                             DateUtil.toDateString(currentEvent.getEventAt()),
                             PigEvent.from(nextEvent.getType()).getName(),
@@ -219,6 +238,8 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                 else doctorReportNpdDao.update(npd);
             }
         });
+
+        log.debug("use {}", stopwatch.elapsed(TimeUnit.MILLISECONDS));
     }
 
 
@@ -296,7 +317,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
      *
      * @return
      */
-    private List<DoctorPigEvent> filterMultiPregnancyCheckEvent(List<DoctorPigEvent> pigEvents) {
+    public List<DoctorPigEvent> filterMultiPregnancyCheckEvent(List<DoctorPigEvent> pigEvents) {
 
         List<DoctorPigEvent> sortedByEventDate = pigEvents.stream()
                 .sorted((e1, e2) -> e1.getEventAt().compareTo(e2.getEventAt()))
@@ -307,8 +328,12 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                         && !e.getType().equals(PigEvent.CHG_LOCATION.getKey())
                         && !e.getType().equals(PigEvent.TO_MATING.getKey())
                         && !e.getType().equals(PigEvent.TO_FARROWING.getKey())
-                        && !e.getType().equals(PigEvent.TO_PREG.getKey()))
+                        && !e.getType().equals(PigEvent.TO_PREG.getKey())
+                        && !e.getType().equals(PigEvent.VACCINATION.getKey()))
                 .collect(Collectors.toList());
+//        List<DoctorPigEvent> sortedByEventDate = pigEvents.stream()
+//                .sorted((e1, e2) -> e1.getEventAt().compareTo(e2.getEventAt()))
+//                .collect(Collectors.toList());
 
         List<DoctorPigEvent> filterMultiPreCheckEvents = new ArrayList<>();
         for (int i = 0; i < sortedByEventDate.size(); i++) { //过滤单月内多余的妊娠检查事件
@@ -322,7 +347,6 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
             }
 
             DoctorPigEvent currentEvent = sortedByEventDate.get(i);
-
 
             if (currentEvent.getType().equals(PigEvent.PREG_CHECK.getKey())) {
 

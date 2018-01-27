@@ -112,11 +112,13 @@ public class DoctorEfficiencySynchronizer {
             }
             DoctorPigDaily pigDaily = doctorPigDailyDao.countByFarm(dimensionCriteria.getOrzId(), npd.getSumAt(), end);
 
+
+            int dayCount = DateUtil.getDeltaDays(npd.getSumAt(), end) + 1;
+
             efficiency.setSumAt(npd.getSumAt());
             //非生产天数=非生产天数/母猪存栏/天数
             if (npd.getSowCount() != 0) {
 
-                int dayCount = DateUtil.getDeltaDays(npd.getSumAt(), end) + 1;
                 efficiency.setNpd(new BigDecimal(npd.getNpd()).divide(new BigDecimal(npd.getSowCount()).divide(new BigDecimal(dayCount), 2, BigDecimal.ROUND_HALF_UP), 2, BigDecimal.ROUND_HALF_UP));
             }
 
@@ -131,13 +133,21 @@ public class DoctorEfficiencySynchronizer {
             //psy=年产胎次*断奶仔猪数/断奶窝数
             if (null != pigDaily && pigDaily.getWeanNest() != null && pigDaily.getWeanNest() != 0 && efficiency.getBirthPerYear() != null)
                 efficiency.setPsy(efficiency.getBirthPerYear().multiply(new BigDecimal(pigDaily.getWeanCount()).divide(new BigDecimal(pigDaily.getWeanNest()), 2, BigDecimal.ROUND_HALF_UP)));
-            efficiency.setPregnancy(npd.getPregnancy());
-            efficiency.setLactation(npd.getLactation());
+
+
+            BigDecimal avgSow = new BigDecimal(npd.getSowCount()).divide(new BigDecimal(dayCount), 2, BigDecimal.ROUND_HALF_UP);
+            if (avgSow.compareTo(new BigDecimal(0)) == 0) {
+                efficiency.setPregnancy(0);
+                efficiency.setLactation(0);
+            } else {
+                efficiency.setPregnancy(new BigDecimal(npd.getPregnancy()).divide(avgSow, 2, BigDecimal.ROUND_HALF_UP).intValue());
+                efficiency.setLactation(new BigDecimal(npd.getLactation()).divide(avgSow, 2, BigDecimal.ROUND_HALF_UP).intValue());
+            }
 
             doctorReportEfficiencyDao.create(efficiency);
         }
 
-        log.info("finish sync from npd to efficiency:{},{}", DateDimension.from(dimensionCriteria.getDateType()).getName(),
+        log.debug("finish sync from npd to efficiency:{},{}", DateDimension.from(dimensionCriteria.getDateType()).getName(),
                 OrzDimension.from(dimensionCriteria.getOrzType()).getName());
     }
 
@@ -242,11 +252,12 @@ public class DoctorEfficiencySynchronizer {
                 efficiency.setOrzName(farmMap.containsKey(f) ? farmMap.get(f).get(0).getName() : "");
                 efficiency.setSumAtName(DateHelper.dateCN(npd.getSumAt(), dateDimension));
 
+                int dayCount = DateUtil.getDeltaDays(start, end) + 1;
+
                 efficiency.setSumAt(npd.getSumAt());
                 //非生产天数=非生产天数/母猪存栏/天数
                 if (npd.getSowCount() != 0) {
 
-                    int dayCount = DateUtil.getDeltaDays(start, end) + 1;
                     efficiency.setNpd(new BigDecimal(npd.getNpd()).divide(new BigDecimal(npd.getSowCount()).divide(new BigDecimal(dayCount), 2, BigDecimal.ROUND_HALF_UP), 2, BigDecimal.ROUND_HALF_UP));
                 }
                 //年产胎次（月）=365-非生产天数*12/生产天数/总窝数
@@ -260,6 +271,15 @@ public class DoctorEfficiencySynchronizer {
                 //psy=年产胎次*断奶仔猪数/断奶窝数
                 if (null != pigDaily && pigDaily.getWeanNest() != null && pigDaily.getWeanNest() != 0 && efficiency.getBirthPerYear() != null)
                     efficiency.setPsy(efficiency.getBirthPerYear().multiply(new BigDecimal(pigDaily.getWeanCount()).divide(new BigDecimal(pigDaily.getWeanNest()), 2, BigDecimal.ROUND_HALF_UP)));
+
+                BigDecimal avgSow = new BigDecimal(npd.getSowCount()).divide(new BigDecimal(dayCount), 2, BigDecimal.ROUND_HALF_UP);
+                if (avgSow.compareTo(new BigDecimal(0)) == 0) {
+                    efficiency.setPregnancy(0);
+                    efficiency.setLactation(0);
+                } else {
+                    efficiency.setPregnancy(new BigDecimal(npd.getPregnancy()).divide(avgSow, 2, BigDecimal.ROUND_HALF_UP).intValue());
+                    efficiency.setLactation(new BigDecimal(npd.getLactation()).divide(avgSow, 2, BigDecimal.ROUND_HALF_UP).intValue());
+                }
 
                 if (efficiency.getId() == null)
                     doctorReportEfficiencyDao.create(efficiency);
