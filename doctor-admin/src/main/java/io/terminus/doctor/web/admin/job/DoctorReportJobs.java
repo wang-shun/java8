@@ -81,7 +81,8 @@ public class DoctorReportJobs {
      * 猪场日报计算job
      * 每天凌晨1点统计昨天的数据
      */
-    @Scheduled(cron = "0 0 1 * * ?")
+    // TODO: 18/1/28 今天暂停，明天开始 
+//    @Scheduled(cron = "0 0 1 * * ?")
     @RequestMapping(value = "/dailyV2", method = RequestMethod.GET)
     public void dailyReportV2() {
         try {
