@@ -1627,4 +1627,11 @@
         </where>
         group by pig_id
     </select>
+
+
+    <select id="findEarLyAt" resultType="io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto">
+        select farm_id as farmId, min(event_at) as eventAt
+        from <include refid="tb"/>
+        group by farm_id
+    </select>
 </mapper>

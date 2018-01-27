@@ -8,6 +8,7 @@ import io.terminus.doctor.event.dto.reportBi.DoctorDimensionReport;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by xjn on 17/12/12.
@@ -107,4 +108,6 @@ public interface DoctorDailyReportV2Service {
      * @return
      */
     Response<Boolean> syncEfficiency(Long farmId);
+
+    Response<Map<Long, Date>> findEarLyAt();
 }

@@ -305,4 +305,8 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
     public List<DoctorPigSalesExportDto> findFattenSales(Map<String, Object> map) {
         return sqlSession.selectList(sqlId("findFattenSales"), map);
     }
+
+    public List<DoctorFarmEarlyEventAtDto> findEarLyAt(){
+        return sqlSession.selectList(sqlId("findEarLyAt"));
+    }
 }

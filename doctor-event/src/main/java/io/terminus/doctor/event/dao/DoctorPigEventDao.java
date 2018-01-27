@@ -720,4 +720,8 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
         return this.sqlSession.selectList(this.sqlId("findPigAt"), params);
     }
+
+    public List<DoctorFarmEarlyEventAtDto> findEarLyAt(){
+        return sqlSession.selectList(sqlId("findEarLyAt"));
+    }
 }

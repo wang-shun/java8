@@ -2,13 +2,16 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
+import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
-import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
+import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
+import io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
 import io.terminus.doctor.event.dto.report.daily.DoctorFarmLiveStockDto;
 import io.terminus.doctor.event.dto.reportBi.DoctorDimensionReport;
@@ -18,14 +21,13 @@ import io.terminus.doctor.event.manager.DoctorDailyReportV2Manager;
 import io.terminus.doctor.event.reportBi.DoctorReportBiManager;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorEfficiencySynchronizer;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorWarehouseSynchronizer;
-import io.terminus.doctor.user.model.DoctorFarm;
-import io.terminus.doctor.user.service.DoctorFarmReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -41,6 +43,8 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
 
     private final DoctorDailyReportV2Manager doctorDailyReportV2Manager;
     private final DoctorReportBiManager doctorReportBiManager;
+    private final DoctorPigEventDao doctorPigEventDao;
+    private final DoctorGroupEventDao doctorGroupEventDao;
 
     @Autowired
     private DoctorWarehouseSynchronizer warehouseSynchronizer;
@@ -48,9 +52,11 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
     private DoctorEfficiencySynchronizer efficiencySynchronizer;
 
     @Autowired
-    public DoctorDailyReportV2ServiceImpl(DoctorDailyReportV2Manager doctorDailyReportV2Manager, DoctorReportBiManager doctorReportBiManager) {
+    public DoctorDailyReportV2ServiceImpl(DoctorDailyReportV2Manager doctorDailyReportV2Manager, DoctorReportBiManager doctorReportBiManager, DoctorPigEventDao doctorPigEventDao, DoctorGroupEventDao doctorGroupEventDao) {
         this.doctorDailyReportV2Manager = doctorDailyReportV2Manager;
         this.doctorReportBiManager = doctorReportBiManager;
+        this.doctorPigEventDao = doctorPigEventDao;
+        this.doctorGroupEventDao = doctorGroupEventDao;
     }
 
     @Override
@@ -305,6 +311,22 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
             return Response.fail("find.farms.live.stock.failed");
         }
 
+    }
+
+    @Override
+    public Response<Map<Long, Date>> findEarLyAt() {
+        try {
+            List<DoctorFarmEarlyEventAtDto> pigList = doctorPigEventDao.findEarLyAt();
+            List<DoctorFarmEarlyEventAtDto> groupList = doctorGroupEventDao.findEarLyAt();
+            pigList.addAll(groupList);
+            Map<Long, List<DoctorFarmEarlyEventAtDto>> map = pigList.stream().collect(Collectors.groupingBy(DoctorFarmEarlyEventAtDto::getFarmId));
+            Map<Long, Date> map1 = Maps.newHashMap();
+            map.forEach((key, value) -> map1.put(key, value.stream().map(DoctorFarmEarlyEventAtDto::getEventAt).min(Date::compareTo).get()));
+            return Response.ok(map1);
+        } catch (Exception e) {
+            log.error("find early at failed,cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find.early.at.failed");
+        }
     }
 }
 

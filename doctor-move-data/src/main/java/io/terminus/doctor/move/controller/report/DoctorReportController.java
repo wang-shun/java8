@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Objects.isNull;
 
@@ -64,6 +65,16 @@ public class DoctorReportController {
         List<DoctorFarm> farmList = RespHelper.or500(doctorFarmReadService.findAllFarms());
         farmList.stream().parallel().forEach(doctorFarm ->
                 RespHelper.or500(doctorDailyReportV2Service.flushFarmDaily(doctorFarm.getId(), from, temp)));
+        return Boolean.TRUE;
+    }
+
+    @RequestMapping(value = "/flush/all/daily")
+    public Boolean flushAllDaily() {
+        Map<Long, Date> map = RespHelper.or500(doctorDailyReportV2Service.findEarLyAt());
+        String end = DateUtil.toDateString(new Date());
+        map.entrySet().parallelStream().forEach(entry -> {
+            doctorDailyReportV2Service.flushFarmDaily(entry.getKey(), DateUtil.toDateString(entry.getValue()), end);
+        });
         return Boolean.TRUE;
     }
 

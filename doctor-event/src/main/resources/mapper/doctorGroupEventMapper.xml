@@ -857,4 +857,10 @@
         <if test="startDate != null">AND <![CDATA[ event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
     </sql>
+
+    <select id="findEarLyAt" resultType="io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto">
+        select farm_id as farmId, min(event_at) as eventAt
+        from <include refid="tb"/>
+        group by farm_id
+    </select>
 </mapper>
