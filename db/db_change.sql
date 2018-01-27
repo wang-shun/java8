@@ -2068,7 +2068,7 @@ ADD COLUMN `pig_type` SMALLINT(6) NULL COMMENT '猪舍类型' AFTER `pig_barn_na
 
 -- 弱仔数是否作为活仔数 2017-12-26
 ALTER TABLE `doctor_farms`
-ADD COLUMN `is_weak` SMALLINT(6) DEFAULT 1 COMMENT '弱仔数是否作为活仔数' AFTER `is_intelligent`;
+ADD COLUMN `is_weak` SMALLINT(6) DEFAULT 1 COMMENT '弱仔数是否作为活仔数' AFTER `extra`;
 
 -- 猪 猪群原值 2017-12-20
 ALTER TABLE `doctor_pig_events` ADD COLUMN `origin` bigint(20) DEFAULT NULL COMMENT '原值' after `remark`;

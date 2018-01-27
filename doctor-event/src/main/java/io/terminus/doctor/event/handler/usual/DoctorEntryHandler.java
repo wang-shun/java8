@@ -65,6 +65,13 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
 //            DoctorPig updatePig = doctorPigDao.findById(executeEvent.getPigId());
 //            doctorPigDao.update(buildUpdatePig(executeEvent, updatePig));
 //        }
+
+        if (isNull(executeEvent.getEventSource())
+                || Objects.equals(executeEvent.getEventSource(), SourceType.INPUT.getValue())) {
+            String key = executeEvent.getFarmId().toString() + executeEvent.getKind().toString() + executeEvent.getPigCode();
+            expectTrue(doctorConcurrentControl.setKey(key), "event.concurrent.error", executeEvent.getPigCode());
+        }
+
         Long oldEventId = executeEvent.getId();
         //1.创建事件
         doctorPigEventDao.create(executeEvent);

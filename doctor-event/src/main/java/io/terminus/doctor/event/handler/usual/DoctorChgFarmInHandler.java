@@ -36,6 +36,12 @@ public class DoctorChgFarmInHandler extends DoctorAbstractEventHandler {
     private DoctorModifyPigChgFarmInEventHandler modifyPigChgFarmInEventHandler;
 
     public void handle(DoctorPigEvent executeEvent, DoctorPigTrack oldTrack, DoctorPig oldPig) {
+        if (isNull(executeEvent.getEventSource())
+                || Objects.equals(executeEvent.getEventSource(), SourceType.INPUT.getValue())) {
+            String key = executeEvent.getFarmId().toString() + executeEvent.getKind().toString() + executeEvent.getPigCode();
+            expectTrue(doctorConcurrentControl.setKey(key), "event.concurrent.error", executeEvent.getPigCode());
+        }
+
         DoctorChgFarmDto chgFarmDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorChgFarmDto.class);
         DoctorPig newPig = BeanMapper.map(oldPig, DoctorPig.class);
         DoctorBarn toBarn = doctorBarnDao.findById(chgFarmDto.getToBarnId());
