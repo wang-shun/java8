@@ -56,6 +56,22 @@ public class DefaultExporter implements Exporter{
     }
 
     @Override
+    public void exportForPortrait(List dataList, String exportName, HttpServletRequest request, HttpServletResponse response) {
+        ExportTable table = tables.getTables().get(exportName);
+        if (table == null) {
+            log.error("download the excel of {} failed, cause={}", exportName, "table.config.missing");
+            throw new JsonResponseException("table.config.missing");
+        }
+        try {
+            setHttpServletResponse(request, response, table.getDisplay());
+            XSSFWorkbook book = exportForPortrait(dataList, exportName);
+            book.write(response.getOutputStream());
+        } catch (Exception e) {
+            log.error("download the excel of{} failed, cause={}", exportName, Throwables.getStackTraceAsString(e));
+        }
+    }
+
+    @Override
      public void export(List dataList, String exportName, HttpServletRequest request, HttpServletResponse response) {
         ExportTable table = tables.getTables().get(exportName);
         if (table == null) {
@@ -121,6 +137,32 @@ public class DefaultExporter implements Exporter{
         }
     }
 
+    private XSSFWorkbook exportForPortrait(List<List> dataList, String exportName) {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        try {
+            ExportTable table = tables.getTables().get(exportName);
+            XSSFSheet sheet = workbook.createSheet(table.getDisplay());
+            for (int i = 0; i < table.getColumns().size(); i++) {
+                List data = dataList.get(i);
+                Row row = sheet.createRow(i);
+                ExportColumn column = table.getColumns().get(i);
+                ColumnFormatter formatter = columnFormatterRegistry.getFormatter(column.getFormat());
+                row.createCell(0).setCellValue(column.getDisplay());
+                sheet.setColumnWidth(0, column.getWidth());
+                for (int j = 1; j <= dataList.size(); j++) {
+                    Cell cell = row.createCell(j);
+                    sheet.setColumnWidth(j, column.getWidth());
+                    Object value = data.get(--j);
+                    cell.setCellValue(formatter.format(value));
+                }
+            }
+        } catch (Exception e) {
+            log.error("export for portrait fail, dataList:{}, exportName:{}, cause={}",
+                    dataList, exportName, Throwables.getStackTraceAsString(e));
+        }
+        return workbook;
+    }
+
     //创建表头
     private void createTitle(XSSFSheet sheet, ExportTable table) {
         Row titleRow = sheet.createRow(0);
@@ -129,6 +171,7 @@ public class DefaultExporter implements Exporter{
             Cell cell = titleRow.createCell(i);
             cell.setCellValue(column.getDisplay());
             sheet.setColumnWidth(i, column.getWidth());
+
         }
     }
 

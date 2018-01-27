@@ -13,10 +13,11 @@ import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.InType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorDailyGroup;
+import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.util.EventUtil;
+import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -65,6 +66,7 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
         DoctorBarn toBarn = doctorBarnDao.findById(oldInput.getToBarnId());
         return DoctorEventChangeDto.builder()
                 .farmId(oldGroupEvent.getFarmId())
+                .pigType(oldGroupEvent.getPigType())
                 .businessId(oldGroupEvent.getGroupId())
                 .oldToGroupId(oldInput.getToGroupId())
                 .toGroupId(newInput.getToGroupId())
@@ -103,10 +105,14 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
 
     @Override
     protected void updateDailyForModify(DoctorGroupEvent oldGroupEvent, BaseGroupInput input, DoctorEventChangeDto changeDto) {
-        if (Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
-            DoctorDailyGroup oldDailyGroup = doctorDailyGroupDao.findByGroupIdAndSumAt(changeDto.getBusinessId(), changeDto.getOldEventAt());
-            doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup, changeDto));
-            updateDailyGroupLiveStock(changeDto.getBusinessId(), getAfterDay(oldGroupEvent.getEventAt()), EventUtil.minusInt(0, changeDto.getQuantityChange()));
+        if (Objects.equals(oldGroupEvent.getTransGroupType(), DoctorGroupEvent.TransGroupType.IN.getValue())) {
+            return;
+        }
+        if (DateUtils.isSameDay(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
+            DoctorGroupDaily oldDailyGroup = doctorDailyReportManager.findDoctorGroupDaily(oldGroupEvent.getFarmId(), oldGroupEvent.getPigType(), changeDto.getOldEventAt());
+            doctorGroupDailyDao.update(buildDailyGroup(oldDailyGroup, changeDto));
+            updateDailyGroupLiveStock(changeDto.getFarmId(), changeDto.getPigType(),
+                    getAfterDay(oldGroupEvent.getEventAt()), EventUtil.minusInt(0, changeDto.getQuantityChange()));
         } else {
             updateDailyOfDelete(oldGroupEvent);
             updateDailyOfNew(oldGroupEvent, input);
@@ -190,70 +196,58 @@ public class DoctorModifyGroupTransGroupEventHandler extends DoctorAbstractModif
 
     @Override
     public void updateDailyOfDelete(DoctorGroupEvent oldGroupEvent) {
+        if (Objects.equals(oldGroupEvent.getTransGroupType(), DoctorGroupEvent.TransGroupType.IN.getValue())) {
+            return;
+        }
         DoctorTransGroupInput oldInput = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorTransGroupInput.class);
         DoctorBarn toBarn = doctorBarnDao.findById(oldInput.getToBarnId());
         DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
                 .quantityChange(EventUtil.minusInt(0, oldInput.getQuantity()))
+                .weightChange(EventUtil.minusDouble(0D, oldInput.getWeight()))
                 .transBarnType(toBarn.getPigType())
                 .transGroupType(oldGroupEvent.getTransGroupType())
                 .build();
-        DoctorDailyGroup oldDailyGroup1 = doctorDailyGroupDao.findByGroupIdAndSumAt(oldGroupEvent.getGroupId(), oldGroupEvent.getEventAt());
-        doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup1, changeDto1));
-        updateDailyGroupLiveStock(oldGroupEvent.getGroupId(), getAfterDay(oldGroupEvent.getEventAt()), -changeDto1.getQuantityChange());
-
-        Integer unweanChangeCount = 0;
-        Integer weanChangeCount = 0;
-        if (notNull(oldGroupEvent.getSowId())) {
-            unweanChangeCount = oldGroupEvent.getQuantity();
-        } else {
-            weanChangeCount = oldGroupEvent.getQuantity();
-        }
-        doctorDailyGroupDao.updateUnweanAndWeanLiveStock(oldGroupEvent.getGroupId()
-                , oldGroupEvent.getEventAt(), unweanChangeCount, weanChangeCount);
+        DoctorGroupDaily oldDailyGroup1 = doctorDailyReportManager.findDoctorGroupDaily(oldGroupEvent.getFarmId(), oldGroupEvent.getPigType(), oldGroupEvent.getEventAt());
+        doctorGroupDailyDao.update(buildDailyGroup(oldDailyGroup1, changeDto1));
+        updateDailyGroupLiveStock(oldGroupEvent.getFarmId(), oldGroupEvent.getPigType(),
+                getAfterDay(oldGroupEvent.getEventAt()), -changeDto1.getQuantityChange());
     }
 
     @Override
     public void updateDailyOfNew(DoctorGroupEvent newGroupEvent, BaseGroupInput input) {
+        if (Objects.equals(newGroupEvent.getTransGroupType(), DoctorGroupEvent.TransGroupType.IN.getValue())) {
+            return;
+        }
         Date eventAt = DateUtil.toDate(input.getEventAt());
         DoctorTransGroupInput newInput = (DoctorTransGroupInput) input;
         DoctorBarn toBarn = doctorBarnDao.findById(newInput.getToBarnId());
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                 .quantityChange(newInput.getQuantity())
+                .weightChange(newInput.getWeight())
                 .transBarnType(toBarn.getPigType())
                 .transGroupType(newGroupEvent.getTransGroupType())
                 .build();
-        DoctorDailyGroup oldDailyGroup2 = doctorDailyReportManager.findByGroupIdAndSumAt(newGroupEvent.getGroupId(), eventAt);
-        doctorDailyReportManager.createOrUpdateDailyGroup(buildDailyGroup(oldDailyGroup2, changeDto2));
-        updateDailyGroupLiveStock(newGroupEvent.getGroupId(), getAfterDay(eventAt), -changeDto2.getQuantityChange());
-
-        Integer unweanChangeCount = 0;
-        Integer weanChangeCount = 0;
-        if (notNull(newGroupEvent.getSowId())) {
-            unweanChangeCount = -newInput.getQuantity();
-        } else {
-            weanChangeCount = -newInput.getQuantity();
-        }
-        doctorDailyGroupDao.updateUnweanAndWeanLiveStock(newGroupEvent.getGroupId()
-                , eventAt, unweanChangeCount, weanChangeCount);
+        DoctorGroupDaily oldDailyGroup2 = doctorDailyReportManager.findDoctorGroupDaily(newGroupEvent.getFarmId(), newGroupEvent.getPigType(), eventAt);
+        doctorDailyReportManager.createOrUpdateGroupDaily(buildDailyGroup(oldDailyGroup2, changeDto2));
+        updateDailyGroupLiveStock(newGroupEvent.getFarmId(), newGroupEvent.getPigType(),
+                getAfterDay(eventAt), -changeDto2.getQuantityChange());
     }
 
     @Override
-    protected DoctorDailyGroup buildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
+    protected DoctorGroupDaily buildDailyGroup(DoctorGroupDaily oldDailyGroup, DoctorEventChangeDto changeDto) {
         oldDailyGroup = super.buildDailyGroup(oldDailyGroup, changeDto);
-
         oldDailyGroup.setEnd(EventUtil.minusInt(oldDailyGroup.getEnd(), changeDto.getQuantityChange()));
-
-        if (Objects.equals(changeDto.getTransGroupType(), DoctorGroupEvent.TransGroupType.IN.getValue())) {
-            oldDailyGroup.setInnerOut(EventUtil.plusInt(oldDailyGroup.getInnerOut(), changeDto.getQuantityChange()));
-            return oldDailyGroup;
-        }
+//        oldDailyGroup.setTurnOutWeight(EventUtil.plusDouble(oldDailyGroup.getTurnOutWeight(), changeDto.getWeightChange()));
 
         if (Objects.equals(changeDto.getTransBarnType(), PigType.FATTEN_PIG.getValue())) {
             oldDailyGroup.setToFatten(EventUtil.plusInt(oldDailyGroup.getToFatten(), changeDto.getQuantityChange()));
+//            oldDailyGroup.setToFattenWeight(EventUtil.plusDouble(oldDailyGroup.getToFattenWeight(), changeDto.getWeightChange()));
         }else if (Objects.equals(changeDto.getTransBarnType(), PigType.RESERVE.getValue())) {
             oldDailyGroup.setToHoubei(EventUtil.plusInt(oldDailyGroup.getToHoubei(), changeDto.getQuantityChange()));
+//            oldDailyGroup.setToHoubeiWeight(EventUtil.plusDouble(oldDailyGroup.getToHoubeiWeight(), changeDto.getWeightChange()));
         } else if (Objects.equals(changeDto.getTransBarnType(), PigType.NURSERY_PIGLET.getValue())) {
             oldDailyGroup.setToNursery(EventUtil.plusInt(oldDailyGroup.getToNursery(), changeDto.getQuantityChange()));
+//            oldDailyGroup.setToNurseryWeight(EventUtil.plusDouble(oldDailyGroup.getToNurseryWeight(), changeDto.getWeightChange()));
         }
         return oldDailyGroup;
     }

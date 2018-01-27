@@ -378,6 +378,12 @@
                 #{i}
             </foreach>
         </if>
+        <if test="farmIds != null &amp;&amp; farmIds.size() > 0">
+            AND `farm_id` IN
+            <foreach collection="farmIds" item="i" open="(" close=")" separator=",">
+                #{i}
+            </foreach>
+        </if>
         <if test="barnTypes != null &amp;&amp; barnTypes.size() > 0">
             AND `barn_type` IN
             <foreach collection="barnTypes" item="barnType" open="(" close=")" separator=",">
@@ -1606,6 +1612,33 @@
         SELECT farm_id as farmId, min(event_at) as eventAt
         FROM <include refid="tb"/>
         WHERE updated_at &gt;= #{startDate}
+        group by farm_id
+    </select>
+
+    <select id="findPigAt" parameterType="map" resultType="long">
+        select pig_id
+        FROM <include refid="tb"/>
+        <where>
+            <if test="farmIds !=null and farmIds.size()>0">
+                and
+                <foreach collection="farmIds" item="t" open="(" separator="or" close=")">
+                    farm_id=#{t}
+                </foreach>
+            </if>
+            <if test="beginDate !=null">
+                AND <![CDATA[ event_at >= #{beginDate} ]]>
+            </if>
+            <if test="endDate !=null">
+                AND <![CDATA[ event_at <= #{endDate} ]]>
+            </if>
+        </where>
+        group by pig_id
+    </select>
+
+
+    <select id="findEarLyAt" resultType="io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto">
+        select farm_id as farmId, min(event_at) as eventAt
+        from <include refid="tb"/>
         group by farm_id
     </select>
 </mapper>

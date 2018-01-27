@@ -6,9 +6,12 @@ import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.service.DoctorDailyGroupWriteService;
+import io.terminus.doctor.event.service.DoctorDailyReportV2Service;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
+import io.terminus.doctor.event.service.DoctorReportWriteService;
 import io.terminus.doctor.move.dto.DoctorFarmWithMobile;
 import io.terminus.doctor.move.dto.DoctorImportBasicData;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
@@ -22,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -52,6 +56,10 @@ public class DoctorMoveAndImportService {
     public DoctorDailyGroupWriteService doctorDailyGroupWriteService;
     @Autowired
     public DoctorMoveReportService doctorMoveReportService;
+    @Autowired
+    public DoctorDailyReportV2Service doctorDailyReportV2Service;
+    @Autowired
+    public DoctorReportWriteService doctorReportWriteService;
 
     public List<DoctorFarm> moveData(Long moveId, Sheet sheet) {
         log.info("move data starting");
@@ -258,11 +266,16 @@ public class DoctorMoveAndImportService {
             DateTime end = DateTime.now().withTimeAtStartOfDay(); //昨天开始时间
             DateTime begin = end.minusYears(1);
             new Thread(() -> {
-                doctorDailyReportWriteService.createDailyReports(farmId, begin.toDate(), end.toDate());
-                doctorDailyGroupWriteService.createDailyGroupsByDateRange(farmId, begin.toDate(), end.toDate());
-                doctorMoveReportService.moveDoctorRangeReport(farmId, 12);
+//                doctorDailyReportWriteService.createDailyReports(farmId, begin.toDate(), end.toDate());
+//                doctorDailyGroupWriteService.createDailyGroupsByDateRange(farmId, begin.toDate(), end.toDate());
+//                doctorMoveReportService.moveDoctorRangeReport(farmId, 12);
+                doctorDailyReportV2Service.flushFarmDaily(farmId, DateUtil.toDateString(begin.toDate()), DateUtil.toDateString(end.toDate()));
+                doctorReportWriteService.flushNPD(Collections.singletonList(farmId), begin.toDate());
                 doctorMoveReportService.moveParityMonthlyReport(farmId, 12);
                 doctorMoveReportService.moveBoarMonthlyReport(farmId, 12);
+
+                doctorDailyReportV2Service.synchronizeDeltaDayBiData(farmId, begin.toDate());
+                doctorDailyReportV2Service.syncEfficiency(farmId);
             }).start();
         } catch (Exception e) {
             log.error("generate report error. farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));

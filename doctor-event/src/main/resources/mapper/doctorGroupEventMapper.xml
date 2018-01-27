@@ -576,6 +576,21 @@
         ORDER BY date_format(event_at, '%Y-%m-%d') ASC , id ASC
     </select>
 
+    <select id="findEventIncludeTypesForDesc" parameterType="map" resultMap="DoctorGroupEventMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE status = 1
+        AND event_at &gt;= #{eventAt}
+        AND group_id = #{groupId}
+        <if test="types != null &amp;&amp; types.size() > 0">
+            AND `type` IN
+            <foreach collection="types" item="i" open="(" close=")" separator=",">
+                #{i}
+            </foreach>
+        </if>
+        ORDER BY date_format(event_at, '%Y-%m-%d') DESC , id DESC
+    </select>
+
     <select id="findLastManualEventByGroupId" parameterType="long" resultMap="DoctorGroupEventMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
@@ -848,4 +863,10 @@
         <if test="startDate != null">AND <![CDATA[ event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
     </sql>
+
+    <select id="findEarLyAt" resultType="io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto">
+        select farm_id as farmId, min(event_at) as eventAt
+        from <include refid="tb"/>
+        group by farm_id
+    </select>
 </mapper>

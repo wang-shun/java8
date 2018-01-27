@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+ ~ Desc:
+ ~ Mail: [ your email ]
+ ~ Date: 2018-01-16 15:30:16
+ ~ Created by [ your name ]
+-->
+
+<mapper namespace="DoctorReportNpd">
+    <resultMap id="DoctorReportNpdMap" type="DoctorReportNpd">
+        <id property="id" column="id"/>
+        <result property="farmId" column="farm_id"/>
+        <result property="orgId" column="org_id"/>
+        <result property="sumAt" column="sum_at"/>
+        <result property="npd" column="npd"/>
+        <result property="pregnancy" column="pregnancy"/>
+        <result property="sowCount" column="sow_count"/>
+        <result property="days" column="days"/>
+        <result property="lactation" column="lactation"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <sql id="tb">
+        doctor_report_npds
+    </sql>
+
+    <sql id="cols_all">
+        id,
+        <include refid="cols_exclude_id"/>
+    </sql>
+
+    <sql id="cols_exclude_id">
+        `farm_id`, `org_id`, `sum_at`, `npd`, `pregnancy`, `sow_count`, `days`, `lactation`,
+        created_at, updated_at
+    </sql>
+
+    <sql id="vals">
+        #{farmId}, #{orgId}, #{sumAt}, #{npd}, #{pregnancy}, #{sowCount}, #{days}, #{lactation},
+        now(), now()
+    </sql>
+
+    <sql id="criteria">
+        <where>
+            <if test="farmId != null">AND `farm_id` = #{farmId}</if>
+            <if test="orgId != null">AND `org_id` = #{orgId}</if>
+            <if test="sumAt != null">AND `sum_at` = #{sumAt}</if>
+            <if test="npd != null">AND `npd` = #{npd}</if>
+            <if test="pregnancy != null">AND `pregnancy` = #{pregnancy}</if>
+            <if test="sowCount != null">AND `sow_count` = #{sowCount}</if>
+            <if test="days != null">AND `days` = #{days}</if>
+            <if test="lactation != null">AND `lactation` = #{lactation}</if>
+            <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
+            <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
+        </where>
+    </sql>
+
+    <insert id="create" parameterType="DoctorReportNpd" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        <include refid="tb"/>
+        (<include refid="cols_exclude_id"/>)
+        VALUES
+        (<include refid="vals"/>)
+    </insert>
+
+    <select id="findById" parameterType="long" resultMap="DoctorReportNpdMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE id = #{id} LIMIT 1
+    </select>
+
+    <select id="findByIds" parameterType="list" resultMap="DoctorReportNpdMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <update id="update" parameterType="DoctorReportNpd">
+        UPDATE
+        <include refid="tb"/>
+        <set>
+            <if test="farmId != null">`farm_id` = #{farmId},</if>
+            <if test="orgId != null">`org_id` = #{orgId},</if>
+            <if test="sumAt != null">`sum_at` = #{sumAt},</if>
+            <if test="npd != null">`npd` = #{npd},</if>
+            <if test="pregnancy != null">`pregnancy` = #{pregnancy},</if>
+            <if test="sowCount != null">`sow_count` = #{sowCount},</if>
+            <if test="days != null">`days` = #{days},</if>
+            <if test="lactation != null">`lactation` = #{lactation},</if>
+            updated_at = now()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="long">
+        DELETE FROM
+        <include refid="tb"/>
+        WHERE id = #{id}
+    </delete>
+
+    <select id="count" parameterType="map" resultType="long">
+        SELECT COUNT(1)
+        FROM
+        <include refid="tb"/>
+        <include refid="criteria"/>
+    </select>
+
+    <select id="paging" parameterType="map" resultMap="DoctorReportNpdMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        <include refid="criteria"/>
+        ORDER BY `id` DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="list" parameterType="map" resultMap="DoctorReportNpdMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        <include refid="criteria"/>
+        ORDER BY `id` DESC
+    </select>
+
+    <select id="findByFarmAndSumAt" parameterType="map" resultMap="DoctorReportNpdMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        <where>
+            <if test="farmId !=null">
+                and farm_id=#{farmId}
+            </if>
+            <if test="sumAt !=null">
+                and sum_at=#{sumAt}
+            </if>
+        </where>
+
+
+    </select>
+
+    <select id="findByOrgAndSumAt" parameterType="map" resultMap="DoctorReportNpdMap">
+        SELECT
+        ifnull(sum(npd),0) as npd,
+        ifnull(sum(pregnancy),0) as pregnancy,
+        ifnull(sum(lactation),0) as lactation,
+        ifnull(sum(sow_count),0) as sow_count,
+        ifnull(sum(days),0) as days,
+        sum_at
+        FROM
+        <include refid="tb"/>
+        <where>
+            <if test="farmIds !=null and farmIds.size()>0">
+                <foreach collection="farmIds" item="t" open="(" separator="or" close=")">
+                    farm_id=#{t}
+                </foreach>
+            </if>
+            <if test="orgId !=null">
+                org_id=#{orgId}
+            </if>
+            and sum_at=DATE_FORMAT(#{sumAt},'%Y-%m-%d')
+        </where>
+    </select>
+
+    <select id="report" parameterType="map" resultMap="DoctorReportNpdMap">
+
+        SELECT
+        ifnull(sum(npd),0) as npd,
+        ifnull(sum(pregnancy),0) as pregnancy,
+        ifnull(sum(lactation),0) as lactation,
+        ifnull(sum(sow_count),0) as sow_count,
+        ifnull(sum(days),0) as days,
+        sum_at,
+        farm_id,
+        org_id
+        FROM
+        <include refid="tb"/>
+        <where>
+            <if test="start !=null">
+                and
+                <![CDATA[sum_at >= #{start}]]>
+            </if>
+            <if test="end !=null">
+                and
+                <![CDATA[sum_at <= #{end}]]>
+            </if>
+            <if test="orzId!=null">
+                farm_id=#{orzId}
+            </if>
+        </where>
+        GROUP BY
+        <if test="orgType==2">
+            org_id,
+        </if>
+        <if test="orgType==3">
+            farm_id,
+        </if>
+        <if test="dateType==3">
+            sum_at
+        </if>
+        <if test="dateType==5">
+            date_format(sum_at, '%Y')
+        </if>
+        <if test="dateType==4">
+            concat(date_format(sum_at, '%Y-'), QUARTER(sum_at))
+        </if>
+    </select>
+
+
+    <select id="findMaxAndMinDate" parameterType="map" resultType="map">
+        select max(sum_at) as max,min(sum_at) as min
+        from
+        <include refid="tb"/>
+    </select>
+
+    <delete id="deleteAll">
+        DELETE FROM
+        <include refid="tb"/>
+    </delete>
+
+</mapper>

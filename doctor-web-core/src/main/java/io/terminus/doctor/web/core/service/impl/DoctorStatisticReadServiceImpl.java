@@ -11,6 +11,7 @@ import io.terminus.doctor.common.utils.CountUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.report.daily.DoctorFarmLiveStockDto;
 import io.terminus.doctor.event.service.DoctorCommonReportReadService;
+import io.terminus.doctor.event.service.DoctorDailyReportV2Service;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
@@ -54,6 +55,9 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
 
     @RpcConsumer
     private DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
+
+    @RpcConsumer
+    private DoctorDailyReportV2Service doctorDailyReportV2Service;
 
 
     @Override
@@ -132,9 +136,9 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
                 return Response.ok(new DoctorBasicDto(org, Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
             }
 
-            List<DoctorFarmLiveStockDto> stats = RespHelper.orServEx(doctorCommonReportReadService.findFarmsLiveStock(farmIdList));
+            List<DoctorFarmLiveStockDto> stats = RespHelper.orServEx(doctorDailyReportV2Service.findFarmsLiveStock(farmIdList));
 
-            List<DoctorFarmBasicDto> farmBasicDtos = farmIdList.stream().map(this::buildFarmBasic).collect(Collectors.toList());
+            List<DoctorFarmBasicDto> farmBasicDtos = stats.stream().map(this::buildFarmBasic).collect(Collectors.toList());
 
             return Response.ok(new DoctorBasicDto(org, getStatistics(stats), farmBasicDtos, orgs));
         } catch (ServiceException e) {
@@ -143,6 +147,12 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
             log.error("get org statistic failed, userId:{}, cause:{}", userId, Throwables.getStackTraceAsString(e));
             return Response.fail("get.org.statistic.fail");
         }
+    }
+
+    private DoctorFarmBasicDto buildFarmBasic(DoctorFarmLiveStockDto stockDto) {
+        DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(stockDto.getFarmId()));
+        //查询猪只统计, 按照类型拼下list
+        return new DoctorFarmBasicDto(farm, getStatistics(Lists.newArrayList(MoreObjects.firstNonNull(stockDto, new DoctorFarmLiveStockDto()))));
     }
 
     private DoctorFarmBasicDto buildFarmBasic(Long farmId) {
@@ -166,7 +176,12 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
                 new DoctorStatisticDto(DoctorStatisticDto.PigType.FATTEN_PIG.getCutDesc(),
                         (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getFatten(), 0))),       //育肥猪
                 new DoctorStatisticDto(DoctorStatisticDto.PigType.HOUBEI.getCutDesc(),
-                        (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getHoubei(), 0)))        //后备猪
+                        (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getHoubei(), 0))),        //后备猪
+                new DoctorStatisticDto(DoctorStatisticDto.PigType.DELIVER_SOW.getCutDesc(),
+                        (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getDeliverSow(), 0))),        //后备猪
+                new DoctorStatisticDto(DoctorStatisticDto.PigType.PEIHUAI.getCutDesc(),
+                        (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getPeihuai(), 0)))        //配怀猪
+
         );
     }
 }

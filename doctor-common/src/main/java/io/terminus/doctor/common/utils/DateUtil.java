@@ -349,4 +349,22 @@ public class DateUtil {
         }
         return new Date();
     }
+
+    public static List<Date> getDates(Date startAt, Date endAt){
+        if (startAt == null || endAt == null || startAt.after(endAt)) {
+            return Lists.newArrayList();
+        }
+
+        if (startAt.equals(endAt)) {
+            return Lists.newArrayList(startAt);
+        }
+
+        List<Date> list = Lists.newArrayList();
+        while (startAt.before(endAt)) {
+            list.add(startAt);
+            startAt = new DateTime(startAt).plusDays(1).toDate();
+        }
+        list.add(endAt);
+        return list;
+    }
 }
