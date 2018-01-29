@@ -327,6 +327,9 @@ public class DoctorReportBiDataSynchronize {
      * @param dimensionCriteria
      */
     private void synchronizeFullBiDataForDimension(DoctorDimensionCriteria dimensionCriteria) {
+        log.info("========dimension starting:orz:{}, dateType:{}",
+                dimensionCriteria.getOrzType(), dimensionCriteria.getDateType());
+        Stopwatch stopwatch = Stopwatch.createStarted();
         List<DoctorGroupDailyExtend> groupDailyList = doctorGroupDailyDao.sumForDimension(dimensionCriteria);
         groupDailyList.forEach(groupDaily -> synchronizeGroupBiData(groupDaily, dimensionCriteria));
         List<DoctorPigDailyExtend> pigDailyList = doctorPigDailyDao.sumForDimension(dimensionCriteria);
@@ -334,6 +337,8 @@ public class DoctorReportBiDataSynchronize {
 
         efficiencySynchronizer.sync(dimensionCriteria);
         warehouseSynchronizer.sync(dimensionCriteria);
+
+        log.info("========dimension ending consume:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
     }
 
     /**
