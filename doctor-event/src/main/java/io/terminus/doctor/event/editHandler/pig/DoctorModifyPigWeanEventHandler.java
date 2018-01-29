@@ -144,7 +144,7 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                 .weanAvgWeight(weanDto2.getPartWeanAvgWeight())
                 .weanCountChange(weanDto2.getPartWeanPigletsCount())
-                .weanQualifiedCount(weanDto2.getQualifiedCount())
+                .weanQualifiedCount(newPigEvent.getHealthCount())
                 .weanNestChange(1)
                 .weanDayAge(getWeanAvgAge(newPigEvent.getPigId(), newPigEvent.getParity(), inputDto.eventAt()))
                 .build();
