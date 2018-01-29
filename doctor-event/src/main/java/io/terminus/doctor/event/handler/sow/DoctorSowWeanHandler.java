@@ -89,6 +89,9 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
         }
         doctorPigEvent.setHealthCount(quaQty);    //额 这个字段存一下合格数吧
         doctorPigEvent.setWeakCount(doctorPigEvent.getWeanCount() - quaQty);
+        Map<String, Object> extraMap = doctorPigEvent.getExtraMap();
+        extraMap.put("qualifiedCount", quaQty);
+        doctorPigEvent.setExtraMap(extraMap);
 
         expectTrue(notNull(pigTrack), "pig.track.not.null", inputDto.getPigId());
         expectTrue(notNull(pigTrack.getGroupId()), "farrow.groupId.not.null", weanDto.getPigId());

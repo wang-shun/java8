@@ -144,7 +144,7 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                 .weanAvgWeight(weanDto2.getPartWeanAvgWeight())
                 .weanCountChange(weanDto2.getPartWeanPigletsCount())
-                .weanQualifiedCount(weanDto2.getQualifiedCount())
+                .weanQualifiedCount(newPigEvent.getHealthCount())
                 .weanNestChange(1)
                 .weanDayAge(getWeanAvgAge(newPigEvent.getPigId(), newPigEvent.getParity(), inputDto.eventAt()))
                 .build();
@@ -155,7 +155,7 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
     @Override
     protected DoctorPigDaily buildDailyPig(DoctorPigDaily oldDailyPig, DoctorEventChangeDto changeDto) {
         oldDailyPig = super.buildDailyPig(oldDailyPig, changeDto);
-        oldDailyPig.setWeanWeight(EventUtil.plusDouble(oldDailyPig.getWeanWeight(), oldDailyPig.getWeanWeight()));
+//        oldDailyPig.setWeanWeight(EventUtil.plusDouble(oldDailyPig.getWeanWeight(), oldDailyPig.getWeanWeight()));
         oldDailyPig.setWeanNest(EventUtil.plusInt(oldDailyPig.getWeanNest(), changeDto.getWeanNestChange()));
         oldDailyPig.setWeanCount(EventUtil.plusInt(oldDailyPig.getWeanCount(), changeDto.getWeanCountChange()));
         oldDailyPig.setWeanQualifiedCount(EventUtil.plusInt(oldDailyPig.getWeanQualifiedCount(), changeDto.getWeanQualifiedCount()));
