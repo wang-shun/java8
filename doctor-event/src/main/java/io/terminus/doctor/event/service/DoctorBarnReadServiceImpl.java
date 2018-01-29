@@ -8,6 +8,7 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -20,6 +21,7 @@ import io.terminus.doctor.event.dto.DoctorBarnDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.IotBarnInfo;
+import io.terminus.doctor.event.dto.IotBarnWithStorage;
 import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
@@ -86,6 +88,36 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
         } catch (Exception e) {
             log.error("find barn by farm id fail, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("barn.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<IotBarnWithStorage>> findIotBarnWithStorage(Long farmId) {
+        try {
+            List<DoctorBarn> doctorBarns = doctorBarnDao.findByFarmId(farmId);
+            DoctorGroupSearchDto doctorGroupSearchDto = new DoctorGroupSearchDto();
+            doctorGroupSearchDto.setFarmId(farmId);
+            return Response.ok(doctorBarns.stream().map(doctorBarn -> {
+                IotBarnWithStorage iotBarnWithStorage = new IotBarnWithStorage();
+                BeanMapper.copy(doctorBarn, iotBarnWithStorage);
+                iotBarnWithStorage.setPigCount(0);
+                iotBarnWithStorage.setPigGroupCount(0L);
+                if (Objects.equal(doctorBarn.getStatus(), DoctorBarn.Status.USING.getValue())) {
+                    if (PigType.PIG_TYPES.contains(doctorBarn.getPigType())) {
+                        List<DoctorPigTrack> pigTracks = RespHelper.orServEx(doctorPigReadService.findActivePigTrackByCurrentBarnId(doctorBarn.getId()));
+                        iotBarnWithStorage.setPigCount(pigTracks.size());
+                    }
+                    if (PigType.GROUP_TYPES.contains(doctorBarn.getPigType())) {
+                        doctorGroupSearchDto.setCurrentBarnId(doctorBarn.getId());
+                        iotBarnWithStorage.setPigGroupCount(RespHelper.orServEx(doctorGroupReadService.getGroupCount(doctorGroupSearchDto)));
+                    }
+
+                }
+                return iotBarnWithStorage;
+            }).collect(Collectors.toList()));
+        } catch (Exception e) {
+            log.error("find iot barn with storage failed,farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.iot.barn.with.storage.failed");
         }
     }
 

@@ -5,6 +5,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorBarnCountForPigTypeDto;
 import io.terminus.doctor.event.dto.DoctorBarnDto;
 import io.terminus.doctor.event.dto.IotBarnInfo;
+import io.terminus.doctor.event.dto.IotBarnWithStorage;
 import io.terminus.doctor.event.model.DoctorBarn;
 
 import javax.validation.constraints.NotNull;
@@ -33,6 +34,13 @@ public interface DoctorBarnReadService {
      * @return 猪舍表
      */
     Response<List<DoctorBarn>> findBarnsByFarmId(@NotNull(message = "farmId.not.null") Long farmId);
+
+    /**
+     * 查询猪舍和
+     * @param farmId
+     * @return
+     */
+    Response<List<IotBarnWithStorage>> findIotBarnWithStorage(@NotNull(message = "farmId.not.null") Long farmId);
 
     /**
      * 根据farmIds查询猪舍表
