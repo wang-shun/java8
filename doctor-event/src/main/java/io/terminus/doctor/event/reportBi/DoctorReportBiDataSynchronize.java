@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -152,38 +153,48 @@ public class DoctorReportBiDataSynchronize {
     public void synchronizeRealTimeBiData(Long orzId, Integer orzType) {
         log.info("synchronize real time bi data starting");
         Date date = DateTime.now().minusMinutes(REAL_TIME_INTERVAL).toDate();
-        synchronizeDelta(orzId, orzType, date, 2);
+        synchronizeDelta(orzId, orzType, date, 2, IsOrNot.YES.getKey());
         log.info("synchronize real time bi data end");
     }
 
+    public void synchronizeDelta(Long orzId, Integer orzType, Date date, Integer type) {
+        synchronizeDelta(orzId, orzType, date, type, IsOrNot.NO.getKey());
+    }
     /**
      *
      *
      */
-    public void synchronizeDelta(Long orzId, Integer orzType, Date date, Integer type) {
+    public void synchronizeDelta(Long orzId, Integer orzType, Date date, Integer type, Integer isRealTime) {
 
         if (Objects.equals(orzType, OrzDimension.FARM.getValue())) {
             DoctorFarm doctorFarm = RespHelper.orServEx(doctorFarmReadService.findFarmById(orzId));
-            synchronizeDeltaBiData(orzId, orzType, date, type);
-            synchronizeDeltaBiData(doctorFarm.getOrgId(), OrzDimension.ORG.getValue(), date, type);
+            synchronizeDeltaBiData(orzId, orzType, date, type, isRealTime);
+            synchronizeDeltaBiData(doctorFarm.getOrgId(), OrzDimension.ORG.getValue(), date, type, isRealTime);
         } else if (Objects.equals(orzType, OrzDimension.ORG.getValue())) {
             List<DoctorFarm> farmList = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orzId));
             farmList.parallelStream().forEach(doctorFarm -> {
-                synchronizeDeltaBiData(doctorFarm.getId(), OrzDimension.FARM.getValue(), date, type);
+                synchronizeDeltaBiData(doctorFarm.getId(), OrzDimension.FARM.getValue(), date, type, isRealTime);
             });
-            synchronizeDeltaBiData(orzId, orzType, date, type);
+            synchronizeDeltaBiData(orzId, orzType, date, type, isRealTime);
         }
     }
 
-    /**
-     * 增量更新的实现
-     * @param orzId 组织id
-     * @param orzType 组织类型
-     *                @see OrzDimension
-     * @param date 查询date 之后的日报包含date
-     * @param type  标志日报中的哪个字段与date进行比较，1-》日报中的sumAt， 2-》日报中的updatedAt
-     */
+
     private void synchronizeDeltaBiData(Long orzId, Integer orzType, Date date, Integer type) {
+        synchronizeDeltaBiData(orzId, orzType, date, type, IsOrNot.NO.getKey());
+    }
+
+        /**
+         * 增量更新的实现
+         * @param orzId 组织id
+         * @param orzType 组织类型
+         *                @see OrzDimension
+         * @param date 查询date 之后的日报包含date
+         * @param type  标志日报中的哪个字段与date进行比较，1-》日报中的sumAt， 2-》日报中的updatedAt
+         * @param isRealTime
+         *
+         */
+    private void synchronizeDeltaBiData(Long orzId, Integer orzType, Date date, Integer type, Integer isRealTime) {
 
         List<DoctorGroupDaily> groupDailyList = doctorGroupDailyDao.findByAfter(orzId, orzType, date, type);
         if (!Arguments.isNullOrEmpty(groupDailyList)) {
@@ -206,13 +217,12 @@ public class DoctorReportBiDataSynchronize {
                 DateDimension dateDimension = DateDimension.from(dimensionCriteria.getDateType());
                 dimensionCriteria.setStartAt(DateHelper.withDateStartDay(dimensionCriteria.getSumAt(), dateDimension));
                 dimensionCriteria.setEndAt(DateHelper.withDateEndDay(dimensionCriteria.getSumAt(), dateDimension));
+                dimensionCriteria.setIsRealTime(isRealTime);
                 synchronizeGroupBiData(doctorGroupDailyDao.selectOneSumForDimension(dimensionCriteria), dimensionCriteria);
             });
         }
         List<DoctorPigDaily> pigDailyList = doctorPigDailyDao.findByAfter(orzId, orzType, date, type);
         if (!Arguments.isNullOrEmpty(pigDailyList)) {
-
-
 //            synchronizePigForDay(pigDailyList);
 //            List<DoctorDimensionCriteria> orgs = pigDailyList.stream().map(pigDaily ->
 //                    new DoctorDimensionCriteria(pigDaily.getOrgId(), OrzDimension.ORG.getValue(), pigDaily.getSumAt(), DateDimension.DAY.getValue(), null)
@@ -234,6 +244,7 @@ public class DoctorReportBiDataSynchronize {
                 DateDimension dateDimension = DateDimension.from(dimensionCriteria.getDateType());
                 dimensionCriteria.setStartAt(DateHelper.withDateStartDay(dimensionCriteria.getSumAt(), dateDimension));
                 dimensionCriteria.setEndAt(DateHelper.withDateEndDay(dimensionCriteria.getSumAt(), dateDimension));
+                dimensionCriteria.setIsRealTime(isRealTime);
                 synchronizePigBiData(doctorPigDailyDao.selectOneSumForDimension(dimensionCriteria), dimensionCriteria);
             });
         }
@@ -245,7 +256,7 @@ public class DoctorReportBiDataSynchronize {
      *
      * @param groupDailyList
      */
-    private void synchronizeGroupForDay(List<DoctorGroupDaily> groupDailyList) {
+    private void synchronizeGroupForDay(List<DoctorGroupDaily> groupDailyList, Integer isRealTime) {
         if (Arguments.isNullOrEmpty(groupDailyList)) {
             return;
         }
@@ -253,6 +264,7 @@ public class DoctorReportBiDataSynchronize {
         DoctorDimensionCriteria doctorDimensionCriteria = new DoctorDimensionCriteria();
         doctorDimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
         doctorDimensionCriteria.setDateType(DateDimension.DAY.getValue());
+        doctorDimensionCriteria.setIsRealTime(isRealTime);
         groupDailyList.forEach(groupDaily -> {
             BeanMapper.copy(groupDaily, extend);
             extend.setDailyLivestockOnHand(groupDaily.getEnd());
@@ -267,7 +279,7 @@ public class DoctorReportBiDataSynchronize {
      *
      * @param pigDailyList
      */
-    public void synchronizePigForDay(List<DoctorPigDaily> pigDailyList) {
+    public void synchronizePigForDay(List<DoctorPigDaily> pigDailyList, Integer isRealTime) {
         if (Arguments.isNullOrEmpty(pigDailyList)) {
             return;
         }
@@ -275,6 +287,7 @@ public class DoctorReportBiDataSynchronize {
         DoctorDimensionCriteria doctorDimensionCriteria = new DoctorDimensionCriteria();
         doctorDimensionCriteria.setOrzType(OrzDimension.FARM.getValue());
         doctorDimensionCriteria.setDateType(DateDimension.DAY.getValue());
+        doctorDimensionCriteria.setIsRealTime(isRealTime);
         pigDailyList.forEach(pigDaily -> {
             BeanMapper.copy(pigDaily, extend);
             extend.setSowStart(pigDaily.getSowPhStart() + pigDaily.getSowCfStart());
@@ -395,7 +408,7 @@ public class DoctorReportBiDataSynchronize {
         Integer pageNo = 0;
         while (true) {
             groupDailyList = doctorGroupDailyDao.paging(pageNo, pageSize).getData();
-            synchronizeGroupForDay(groupDailyList);
+            synchronizeGroupForDay(groupDailyList, IsOrNot.NO.getKey());
             if (groupDailyList.size() < 5000) break;
             pageNo += 5000;
         }
@@ -404,7 +417,7 @@ public class DoctorReportBiDataSynchronize {
         pageNo = 0;
         while (true) {
             pigDailyList = doctorPigDailyDao.paging(pageNo, pageSize).getData();
-            synchronizePigForDay(pigDailyList);
+            synchronizePigForDay(pigDailyList, IsOrNot.NO.getKey());
             if (pigDailyList.size() < 5000) break;
             pageNo += 5000;
         }

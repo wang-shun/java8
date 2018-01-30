@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.reportBi.synchronizer;
 
+import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.event.dao.DoctorWarehouseReportDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportNurseryDao;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
@@ -46,10 +47,10 @@ public class DoctorNurserySynchronizer {
             reportBI.setOrzType(dimensionCriteria.getOrzType());
             reportBI.setDateType(dimensionCriteria.getDateType());
         }
-        insertOrUpdate(build(groupDaily, reportBI));
+        insertOrUpdate(build(groupDaily, reportBI, dimensionCriteria.getIsRealTime()));
     }
 
-    public DoctorReportNursery build(DoctorGroupDailyExtend groupDaily, DoctorReportNursery reportBi) {
+    public DoctorReportNursery build(DoctorGroupDailyExtend groupDaily, DoctorReportNursery reportBi, Integer isRealTime) {
         if (Objects.equals(reportBi.getOrzType(), OrzDimension.FARM.getValue())) {
             reportBi.setOrzId(groupDaily.getFarmId());
             reportBi.setOrzName(groupDaily.getFarmName());
@@ -61,7 +62,9 @@ public class DoctorNurserySynchronizer {
         reportBi.setSumAt(withDateStartDay(groupDaily.getSumAt(), dateDimension));
         reportBi.setSumAtName(dateCN(groupDaily.getSumAt(), dateDimension));
         buildRealTime(groupDaily, reportBi);
-        buildDelay(groupDaily, reportBi);
+        if (!Objects.equals(isRealTime, IsOrNot.YES.getKey())) {
+            buildDelay(groupDaily, reportBi);
+        }
         return reportBi;
     }
 
