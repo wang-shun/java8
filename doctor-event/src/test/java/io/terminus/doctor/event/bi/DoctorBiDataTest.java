@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.bi;
 
 import com.google.common.collect.Lists;
+import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.BaseDaoTest;
 import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
@@ -70,7 +71,7 @@ public class DoctorBiDataTest extends BaseDaoTest {
     @Test
     public void synchronizePigForDayTest() {
         List<DoctorPigDaily> doctorPigDailies = Lists.newArrayList(pigDailyDao.findBy(1L, "2017-02-01"));
-        synchronizer.synchronizePigForDay(doctorPigDailies);
+        synchronizer.synchronizePigForDay(doctorPigDailies, IsOrNot.NO.getKey());
     }
 
     @Test

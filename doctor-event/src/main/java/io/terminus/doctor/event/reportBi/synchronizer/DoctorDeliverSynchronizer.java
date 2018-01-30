@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.reportBi.synchronizer;
 
+import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportDeliverDao;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.reportBi.DoctorFiledUrlCriteria;
@@ -42,7 +43,7 @@ public class DoctorDeliverSynchronizer {
             reportBI.setOrzType(dimensionCriteria.getOrzType());
             reportBI.setDateType(dimensionCriteria.getDateType());
         }
-        insertOrUpdate(build(pigDaily, reportBI));
+        insertOrUpdate(build(pigDaily, reportBI, dimensionCriteria.getIsRealTime()));
     }
 
     public void synchronize(DoctorGroupDailyExtend groupDaily,
@@ -53,7 +54,7 @@ public class DoctorDeliverSynchronizer {
             reportBI.setOrzType(dimensionCriteria.getOrzType());
             reportBI.setDateType(dimensionCriteria.getDateType());
         }
-        insertOrUpdate(build(groupDaily, reportBI));
+        insertOrUpdate(build(groupDaily, reportBI, dimensionCriteria.getIsRealTime()));
     }
 
     private void insertOrUpdate(DoctorReportDeliver reportBi){
@@ -64,7 +65,7 @@ public class DoctorDeliverSynchronizer {
         doctorReportDeliverDao.update(reportBi);
     }
 
-    public DoctorReportDeliver build(DoctorPigDailyExtend pigDaily, DoctorReportDeliver reportBi) {
+    public DoctorReportDeliver build(DoctorPigDailyExtend pigDaily, DoctorReportDeliver reportBi, Integer isRealTime) {
         if (Objects.equals(reportBi.getOrzType(), OrzDimension.FARM.getValue())) {
             reportBi.setOrzId(pigDaily.getFarmId());
             reportBi.setOrzName(pigDaily.getFarmName());
@@ -76,11 +77,13 @@ public class DoctorDeliverSynchronizer {
         reportBi.setSumAt(withDateStartDay(pigDaily.getSumAt(), dateDimension));
         reportBi.setSumAtName(dateCN(pigDaily.getSumAt(), dateDimension));
         buildRealTime(pigDaily, reportBi);
-        buildDelay(pigDaily, reportBi);
+        if (!Objects.equals(isRealTime, IsOrNot.YES.getKey())) {
+            buildDelay(pigDaily, reportBi);
+        }
         return reportBi;
     }
 
-    public DoctorReportDeliver build(DoctorGroupDailyExtend dailyExtend, DoctorReportDeliver reportBi) {
+    public DoctorReportDeliver build(DoctorGroupDailyExtend dailyExtend, DoctorReportDeliver reportBi, Integer isRealTime) {
         if (Objects.equals(reportBi.getOrzType(), OrzDimension.FARM.getValue())) {
             reportBi.setOrzId(dailyExtend.getFarmId());
             reportBi.setOrzName(dailyExtend.getFarmName());
@@ -92,7 +95,9 @@ public class DoctorDeliverSynchronizer {
         reportBi.setSumAt(withDateStartDay(dailyExtend.getSumAt(), dateDimension));
         reportBi.setSumAtName(dateCN(dailyExtend.getSumAt(), dateDimension));
         buildRealTime(dailyExtend, reportBi);
-        buildDelay(dailyExtend, reportBi);
+        if (!Objects.equals(isRealTime, IsOrNot.YES.getKey())) {
+            buildDelay(dailyExtend, reportBi);
+        }
         return reportBi;
     }
 

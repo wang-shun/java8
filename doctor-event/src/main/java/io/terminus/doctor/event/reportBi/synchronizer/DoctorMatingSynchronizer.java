@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.reportBi.synchronizer;
 
+import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportMatingDao;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.reportBi.DoctorFiledUrlCriteria;
@@ -41,7 +42,7 @@ public class DoctorMatingSynchronizer {
             reportBI.setOrzType(dimensionCriteria.getOrzType());
             reportBI.setDateType(dimensionCriteria.getDateType());
         }
-        insertOrUpdate(build(pigDaily, reportBI));
+        insertOrUpdate(build(pigDaily, reportBI, dimensionCriteria.getIsRealTime()));
     }
 
     private void insertOrUpdate(DoctorReportMating reportBi){
@@ -52,7 +53,7 @@ public class DoctorMatingSynchronizer {
         doctorReportMatingDao.update(reportBi);
     }
 
-    public DoctorReportMating build(DoctorPigDailyExtend pigDaily, DoctorReportMating reportBi) {
+    public DoctorReportMating build(DoctorPigDailyExtend pigDaily, DoctorReportMating reportBi, Integer isRealTime) {
         if (Objects.equals(reportBi.getOrzType(), OrzDimension.FARM.getValue())) {
             reportBi.setOrzId(pigDaily.getFarmId());
             reportBi.setOrzName(pigDaily.getFarmName());
@@ -64,7 +65,9 @@ public class DoctorMatingSynchronizer {
         reportBi.setSumAt(withDateStartDay(pigDaily.getSumAt(), dateDimension));
         reportBi.setSumAtName(dateCN(pigDaily.getSumAt(), dateDimension));
         buildRealTime(pigDaily, reportBi);
-        buildDelay(pigDaily, reportBi);
+        if (!Objects.equals(isRealTime, IsOrNot.YES.getKey())) {
+            buildDelay(pigDaily, reportBi);
+        }
         return reportBi;
     }
 
