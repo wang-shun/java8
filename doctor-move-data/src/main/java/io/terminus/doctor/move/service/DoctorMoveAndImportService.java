@@ -7,6 +7,7 @@ import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.service.DoctorDailyGroupWriteService;
 import io.terminus.doctor.event.service.DoctorDailyReportV2Service;
@@ -274,7 +275,7 @@ public class DoctorMoveAndImportService {
                 doctorMoveReportService.moveParityMonthlyReport(farmId, 12);
                 doctorMoveReportService.moveBoarMonthlyReport(farmId, 12);
 
-                doctorDailyReportV2Service.synchronizeDeltaDayBiData(farmId, begin.toDate());
+                doctorDailyReportV2Service.synchronizeDeltaDayBiData(farmId, begin.toDate(), OrzDimension.FARM.getValue());
                 doctorDailyReportV2Service.syncEfficiency(farmId);
             }).start();
         } catch (Exception e) {

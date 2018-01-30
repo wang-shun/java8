@@ -171,4 +171,9 @@ public class DoctorBiDataTest extends BaseDaoTest {
     public void pigMaxDate(){
         System.out.println(pigDailyDao.maxDate(new DoctorDimensionCriteria(1L, 2, DateUtil.toDate("2017-01-01"), 4, 2)));
     }
+
+    @Test
+    public void test(){
+        doctorGroupDailyDao.selectOneSumForDimension(new DoctorDimensionCriteria(404L, 2, DateUtil.toDate("2017-01-01"), 4, 2));
+    }
 }

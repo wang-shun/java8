@@ -75,9 +75,9 @@ public class DoctorGroupDailyDao extends MyBatisDao<DoctorGroupDaily> {
                 .put("orzType", orzType).put("sumAt", sumAt).put("type", type).map());
     }
 
-    public List<DoctorDimensionCriteria> findByDateType(Date sumAt, Integer type, Integer dateType, Integer orzType) {
+    public List<DoctorDimensionCriteria> findByDateType(Long orzId, Date sumAt, Integer type, Integer dateType, Integer orzType) {
         return getSqlSession().selectList(sqlId("findByDateType"),
-                MapBuilder.of().put("sumAt", sumAt).put("type", type)
+                MapBuilder.of().put("orzId", orzId).put("sumAt", sumAt).put("type", type)
                         .put("dateType", dateType).put("orzType", orzType).map());
     }
 
