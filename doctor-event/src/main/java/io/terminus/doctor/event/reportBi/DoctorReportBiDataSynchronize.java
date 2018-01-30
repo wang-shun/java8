@@ -218,6 +218,7 @@ public class DoctorReportBiDataSynchronize {
                 DateDimension dateDimension = DateDimension.from(dimensionCriteria.getDateType());
                 dimensionCriteria.setStartAt(DateHelper.withDateStartDay(dimensionCriteria.getSumAt(), dateDimension));
                 dimensionCriteria.setEndAt(DateHelper.withDateEndDay(dimensionCriteria.getSumAt(), dateDimension));
+                dimensionCriteria.setIsRealTime(isRealTime);
                 synchronizeGroupBiData(doctorGroupDailyDao.selectOneSumForDimension(dimensionCriteria), dimensionCriteria);
             });
         }
