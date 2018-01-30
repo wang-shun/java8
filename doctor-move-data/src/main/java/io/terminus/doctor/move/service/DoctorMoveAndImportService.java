@@ -275,7 +275,7 @@ public class DoctorMoveAndImportService {
                 doctorMoveReportService.moveParityMonthlyReport(farmId, 12);
                 doctorMoveReportService.moveBoarMonthlyReport(farmId, 12);
 
-                doctorDailyReportV2Service.synchronizeDeltaDayBiData(farmId, begin.toDate(), OrzDimension.FARM.getValue());
+                doctorDailyReportV2Service.synchronizeDelta(farmId, begin.toDate(), OrzDimension.FARM.getValue());
                 doctorDailyReportV2Service.syncEfficiency(farmId);
             }).start();
         } catch (Exception e) {

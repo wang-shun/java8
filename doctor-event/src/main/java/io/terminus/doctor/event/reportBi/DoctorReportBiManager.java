@@ -29,6 +29,11 @@ public class DoctorReportBiManager {
     public void synchronizeDeltaDayBiData(Long farmId, Date start, Integer orzType) {
         synchronize.synchronizeDeltaDayBiData(farmId, start, orzType);
     }
+
+    public void synchronizeDelta(Long farmId, Date start, Integer orzType) {
+        synchronize.synchronizeDelta(farmId, orzType, start, 1);
+    }
+
     /**
      * 全量同步数据到bi(手动)
      */

@@ -2,10 +2,12 @@ package io.terminus.doctor.event.reportBi;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
 import io.terminus.doctor.event.dao.DoctorPigDailyDao;
 import io.terminus.doctor.event.dao.DoctorReportNpdDao;
@@ -27,6 +29,8 @@ import io.terminus.doctor.event.reportBi.synchronizer.DoctorNurserySynchronizer;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorReserveSynchronizer;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorSowSynchronizer;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorWarehouseSynchronizer;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
@@ -35,7 +39,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -64,6 +67,9 @@ public class DoctorReportBiDataSynchronize {
     private final Integer DELTA_DAY = 600;
     private final Integer REAL_TIME_INTERVAL = 1;
 
+    @RpcConsumer
+    private DoctorFarmReadService doctorFarmReadService;
+
     @Autowired
     public DoctorReportBiDataSynchronize(DoctorPigDailyDao doctorPigDailyDao,
                                          DoctorGroupDailyDao doctorGroupDailyDao,
@@ -90,9 +96,6 @@ public class DoctorReportBiDataSynchronize {
         this.warehouseSynchronizer = warehouseSynchronizer;
         this.efficiencySynchronizer = efficiencySynchronizer;
     }
-
-    private Map<String, Date> orgMinDateMap;
-    private Map<String, Date> orgMaxDateMap;
 
     /**
      * 全量同步数据
@@ -133,13 +136,13 @@ public class DoctorReportBiDataSynchronize {
     /**
      * 增量同步
      *
-     * @param farmId 猪场id
+     * @param orzId 组织id
      * @param start  开始的同步日期 与日报中sumAt比较
      */
-    public void synchronizeDeltaDayBiData(Long farmId, Date start, Integer orzType) {
-        log.info("synchronize delta day bi data starting, farmId:{}, start:{}", farmId, start);
+    public void synchronizeDeltaDayBiData(Long orzId, Date start, Integer orzType) {
+        log.info("synchronize delta day bi data starting, farmId:{}, start:{}", orzId, start);
         Stopwatch stopwatch = Stopwatch.createStarted();
-        synchronizeDeltaBiData(farmId, orzType, start, 1);
+        synchronizeDeltaBiData(orzId, orzType, start, 1);
         log.info("synchronize delta day bi data end, minute:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
     }
 
@@ -149,8 +152,27 @@ public class DoctorReportBiDataSynchronize {
     public void synchronizeRealTimeBiData(Long orzId, Integer orzType) {
         log.info("synchronize real time bi data starting");
         Date date = DateTime.now().minusMinutes(REAL_TIME_INTERVAL).toDate();
-        synchronizeDeltaBiData(orzId, orzType, date, 2);
+        synchronizeDelta(orzId, orzType, date, 2);
         log.info("synchronize real time bi data end");
+    }
+
+    /**
+     *
+     *
+     */
+    public void synchronizeDelta(Long orzId, Integer orzType, Date date, Integer type) {
+
+        if (Objects.equals(orzType, OrzDimension.FARM.getValue())) {
+            DoctorFarm doctorFarm = RespHelper.orServEx(doctorFarmReadService.findFarmById(orzId));
+            synchronizeDeltaBiData(orzId, orzType, date, type);
+            synchronizeDeltaBiData(doctorFarm.getOrgId(), OrzDimension.ORG.getValue(), date, type);
+        } else if (Objects.equals(orzType, OrzDimension.ORG.getValue())) {
+            List<DoctorFarm> farmList = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orzId));
+            farmList.parallelStream().forEach(doctorFarm -> {
+                synchronizeDeltaBiData(doctorFarm.getId(), OrzDimension.FARM.getValue(), date, type);
+            });
+            synchronizeDeltaBiData(orzId, orzType, date, type);
+        }
     }
 
     /**

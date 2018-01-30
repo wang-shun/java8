@@ -217,15 +217,33 @@ public class DoctorReportController {
     /**
      * 增量同步
      *
-     * @param farmId 猪场id
+     * @param orzId 猪场id
      * @param start  开始的同步日期 与日报中sumAt比较
      */
-    @RequestMapping(value = "/synchronize/delta/bi/data/{farmId}", method = RequestMethod.GET)
-    public Boolean synchronizeDeltaDayBiData(@PathVariable Long farmId,
+    @RequestMapping(value = "/synchronize/delta/bi/data/{orzId}", method = RequestMethod.GET)
+    public Boolean synchronizeDeltaDayBiData(@PathVariable Long orzId,
                                              @RequestParam Integer orzType,
                                              @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start) {
+        return RespHelper.or500(doctorDailyReportV2Service.synchronizeDeltaDayBiData(orzId, start, orzType));
+    }
 
-        return RespHelper.or500(doctorDailyReportV2Service.synchronizeDeltaDayBiData(farmId, start, orzType));
+    /**
+     * 增量同步
+     *
+     * @param start  开始的同步日期 与日报中sumAt比较
+     */
+    @RequestMapping(value = "/synchronize/all/bi/data", method = RequestMethod.GET)
+    public Boolean synchronizeAllDayBiData(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start) {
+
+        List<DoctorFarm> doctorFarms = RespHelper.orServEx(doctorFarmReadService.findAllFarms());
+        List<Long> orzList = doctorFarms.stream().map(DoctorFarm::getId).collect(Collectors.toList());
+        orzList.parallelStream().forEach(orzId ->
+                doctorDailyReportV2Service.synchronizeDeltaDayBiData(orzId, start, OrzDimension.FARM.getValue()));
+
+        orzList = doctorFarms.stream().map(DoctorFarm::getOrgId).collect(Collectors.toList());
+        orzList.parallelStream().forEach(orzId ->
+                doctorDailyReportV2Service.synchronizeDeltaDayBiData(orzId, start, OrzDimension.ORG.getValue()));
+        return Boolean.TRUE;
     }
 
     @RequestMapping(value = "/yesterday/and/today", method = RequestMethod.GET)

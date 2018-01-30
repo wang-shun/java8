@@ -75,6 +75,13 @@ public interface DoctorDailyReportV2Service {
     Response<Boolean> synchronizeDeltaDayBiData(Long farmId, Date start, Integer orzType);
 
     /**
+     * 增量同步报表数据
+     *
+     * @return
+     */
+    Response<Boolean> synchronizeDelta(Long farmId, Date start, Integer orzType);
+
+    /**
      * 查询某一时间维度的猪场报表数据
      *
      * @param dimensionCriteria 查询维度
