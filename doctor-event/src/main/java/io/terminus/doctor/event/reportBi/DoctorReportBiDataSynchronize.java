@@ -184,7 +184,6 @@ public class DoctorReportBiDataSynchronize {
         synchronizeDeltaBiData(orzId, orzType, date, type, IsOrNot.NO.getKey());
     }
 
-
         /**
          * 增量更新的实现
          * @param orzId 组织id
