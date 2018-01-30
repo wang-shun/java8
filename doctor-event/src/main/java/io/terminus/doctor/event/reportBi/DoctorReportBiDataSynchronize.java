@@ -16,6 +16,7 @@ import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorPigDaily;
+import io.terminus.doctor.event.reportBi.helper.DateHelper;
 import io.terminus.doctor.event.reportBi.helper.FieldHelper;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorBoarSynchronizer;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorDeliverSynchronizer;
@@ -179,8 +180,12 @@ public class DoctorReportBiDataSynchronize {
 //                    new DoctorDimensionCriteria(groupDaily.getOrgId(), OrzDimension.ORG.getValue(), groupDaily.getSumAt(), DateDimension.DAY.getValue(), groupDaily.getPigType())
 //            ).collect(Collectors.toList());
 //            dimensionCriteriaList.addAll(orgList);
-            dimensionCriteriaList.parallelStream().forEach(dimensionCriteria ->
-                    synchronizeGroupBiData(doctorGroupDailyDao.selectOneSumForDimension(dimensionCriteria), dimensionCriteria));
+            dimensionCriteriaList.parallelStream().forEach(dimensionCriteria -> {
+                DateDimension dateDimension = DateDimension.from(dimensionCriteria.getDateType());
+                dimensionCriteria.setStartAt(DateHelper.withDateStartDay(dimensionCriteria.getSumAt(), dateDimension));
+                dimensionCriteria.setEndAt(DateHelper.withDateEndDay(dimensionCriteria.getSumAt(), dateDimension));
+                synchronizeGroupBiData(doctorGroupDailyDao.selectOneSumForDimension(dimensionCriteria), dimensionCriteria);
+            });
         }
         List<DoctorPigDaily> pigDailyList = doctorPigDailyDao.findByAfter(orzId, orzType, date, type);
         if (!Arguments.isNullOrEmpty(pigDailyList)) {
@@ -203,8 +208,12 @@ public class DoctorReportBiDataSynchronize {
 //            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, date, type, DateDimension.YEAR.getValue(), OrzDimension.ORG.getValue()));
 
 
-            criteriaList.parallelStream().forEach(dimensionCriteria ->
-                    synchronizePigBiData(doctorPigDailyDao.selectOneSumForDimension(dimensionCriteria), dimensionCriteria));
+            criteriaList.parallelStream().forEach(dimensionCriteria -> {
+                DateDimension dateDimension = DateDimension.from(dimensionCriteria.getDateType());
+                dimensionCriteria.setStartAt(DateHelper.withDateStartDay(dimensionCriteria.getSumAt(), dateDimension));
+                dimensionCriteria.setEndAt(DateHelper.withDateEndDay(dimensionCriteria.getSumAt(), dateDimension));
+                synchronizePigBiData(doctorPigDailyDao.selectOneSumForDimension(dimensionCriteria), dimensionCriteria);
+            });
         }
 
     }

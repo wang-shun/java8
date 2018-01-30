@@ -598,13 +598,7 @@
             1=1
             <if test="orzType == 2">AND org_id = #{orzId}</if>
             <if test="orzType == 3">AND farm_id = #{orzId}</if>
-            <if test="dateType == 1">AND date_format(sum_at, '%y-%m-%d') = date_format(#{sumAt}, '%y-%m-%d')</if>
-            <if test="dateType == 2">AND date_format(sum_at, '%x-%v') = date_format(#{sumAt}, '%x-%v')</if>
-            <if test="dateType == 3">AND date_format(sum_at, '%y-%m') = date_format(#{sumAt}, '%y-%m')</if>
-            <if test="dateType == 4">AND concat(date_format(sum_at, '%y-'), QUARTER(sum_at)) =
-                concat(date_format(#{sumAt}, '%y-'), QUARTER(#{sumAt}))
-            </if>
-            <if test="dateType == 5">AND date_format(sum_at, '%y') = date_format(#{sumAt}, '%y')</if>
+            and sum_at &gt;= #{startAt} AND sum_at &lt;= #{endAt}
         </where>
     </sql>
     <select id="selectOneSumForDimension" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
@@ -684,6 +678,7 @@
         sum(sow_ph_start + sow_cf_start) as sowStart
         FROM
         <include refid="tb"/>
+        WHERE
         org_id = #{orgId}
         AND sum_at = #{sumAt}
     </select>
@@ -717,6 +712,7 @@
         sum(sow_ph_pregnant) as sowPhPregnant
         FROM
         <include refid="tb"/>
+        WHERE
         org_id = #{orgId}
         AND sum_at = #{sumAt}
     </select>
@@ -744,6 +740,7 @@
         SELECT
         sum(`start`)
         FROM <include refid="tb"/>
+        WHERE
         org_id = #{orgId}
         AND sum_at = #{sumAt}
     </select>

@@ -224,6 +224,7 @@ public class DoctorReportController {
     public Boolean synchronizeDeltaDayBiData(@PathVariable Long farmId,
                                              @RequestParam Integer orzType,
                                              @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start) {
+
         return RespHelper.or500(doctorDailyReportV2Service.synchronizeDeltaDayBiData(farmId, start, orzType));
     }
 
