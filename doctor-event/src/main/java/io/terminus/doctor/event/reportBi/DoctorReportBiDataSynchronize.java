@@ -95,7 +95,7 @@ public class DoctorReportBiDataSynchronize {
     public void synchronizeFullBiData() {
         log.info("synchronize full bi data starting");
         Stopwatch stopwatch = Stopwatch.createStarted();
-        cleanFullBiData();
+//        cleanFullBiData();
         synchronizeBiDataImpl();
         log.info("synchronize full bi data end, minute:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
     }
@@ -263,7 +263,7 @@ public class DoctorReportBiDataSynchronize {
      */
     private void synchronizeBiDataImpl() {
         //同步猪场日
-        synchronizeFullBiDataForDay();
+//        synchronizeFullBiDataForDay();
         List<DoctorDimensionCriteria> dimensionCriteriaList = Lists.newArrayList();
         DoctorDimensionCriteria dimensionCriteria;
         //同步猪场周
@@ -335,8 +335,8 @@ public class DoctorReportBiDataSynchronize {
         List<DoctorPigDailyExtend> pigDailyList = doctorPigDailyDao.sumForDimension(dimensionCriteria);
         pigDailyList.forEach(pigDaily -> synchronizePigBiData(pigDaily, dimensionCriteria));
 
-        efficiencySynchronizer.sync(dimensionCriteria);
-        warehouseSynchronizer.sync(dimensionCriteria);
+//        efficiencySynchronizer.sync(dimensionCriteria);
+//        warehouseSynchronizer.sync(dimensionCriteria);
 
         log.info("========dimension ending consume:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
     }

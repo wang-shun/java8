@@ -490,3 +490,5 @@ CREATE TABLE `doctor_report_fields` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=430 DEFAULT CHARSET=utf8 COMMENT='报表自定义字段表';
 
+
+

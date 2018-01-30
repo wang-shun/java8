@@ -1237,6 +1237,27 @@ VALUES
 	(19751, 44, 226, 229, '2018-01-27 20:11:44', '2018-01-27 20:11:44'),
 	(19752, 44, 226, 230, '2018-01-27 20:11:44', '2018-01-27 20:11:44');
 
+INSERT INTO `doctor_bi_pages` (`id`, `name`, `token`, `url`, `desc`, `created_at`, `updated_at`)
+VALUES
+	(1, 'houbei', '0d97727a37b046afaab7f9cf5034a1a7', 'http://bi.xrnm.com/console/share-temp?_project_key=d29fcb16d703494e84327f3e87299641&_board_key=3c369140fa5641d3a2d83ef780d0b4df&_role_key=projectManager', '适用后备区报表,组织维度-纵向报表', NULL, NULL),
+	(2, 'sow', 'c58c9bcb4fc641c9b1f7d09fc986c387', 'http://bi.xrnm.com/console/share-temp?_project_key=d29fcb16d703494e84327f3e87299641&_board_key=7d16cdf59f634a67a12e52dc60c7fd02&_role_key=projectManager', '适用母猪区报表,组织维度-纵向报表', NULL, NULL),
+	(3, 'peihuai', '3762347c4f2d4713b2aaa72a0b775525', 'http://bi.xrnm.com/console/share-temp?_project_key=d29fcb16d703494e84327f3e87299641&_board_key=38a486e736c34403abe6faaca73b26ae&_role_key=projectManager', '适用配怀区报表,组织维度-纵向报表', NULL, NULL),
+	(4, 'chanfang', 'd83abce0c404407c80c9846be3233f28', 'http://bi.xrnm.com/console/share-temp?_project_key=d29fcb16d703494e84327f3e87299641&_board_key=2e4168fe96d640c2a510fe2962b54c4a&_role_key=projectManager', '适用产房区报表,组织维度-纵向报表', NULL, NULL),
+	(5, 'nursery', 'cfe9786a463d4d49b9b6f2d6a4cca221', 'http://bi.xrnm.com/console/share-temp?_project_key=d29fcb16d703494e84327f3e87299641&_board_key=35b4537fb3a547b9b747793e9c3d3277&_role_key=projectManager', '适用保育区报表,组织维度-纵向报表', NULL, NULL),
+	(6, 'fatten', 'be7d3c1a95014fbda2c8b6dc04cf12ad', 'http://bi.xrnm.com/console/share-temp?_project_key=d29fcb16d703494e84327f3e87299641&_board_key=767b22ce3cf941748ad540e8d72f014f&_role_key=projectManager', '适用育肥区报表,组织维度-纵向报表', NULL, NULL),
+	(7, 'boar', 'ccfcfbcc50574990af6c6add0277aa0e', 'http://bi.xrnm.com/console/share-temp?_project_key=d29fcb16d703494e84327f3e87299641&_board_key=817ad72f9ca94cb1938a41ad406d777d&_role_key=projectManager', '适用公猪区报表,组织维度-纵向报表', NULL, NULL),
+	(8, 'material', 'a0a6de8e89124c9fa3337a50696169b9', 'http://bi.xrnm.com/console/share-temp?_project_key=d29fcb16d703494e84327f3e87299641&_board_key=10993edc75324eab90e1324c3894e2ae&_role_key=projectManager', '适用物料消耗报表,组织维度-纵向报表', NULL, NULL),
+	(9, 'index', 'c587e5d9805d45a3a45015c6fd995cd4', 'http://bi.xrnm.com/console/share-temp?_project_key=d29fcb16d703494e84327f3e87299641&_board_key=462524485afb41879bce8b647d293a74&_role_key=projectManager', '适用效率指标,组织维度-纵向报表', NULL, NULL),
+	(11, 'h_houbei', '3cc7d082c8984f12b6fb976272b17582', 'http://bi.xrnm.com/console/share-temp?_project_key=d29fcb16d703494e84327f3e87299641&_board_key=d980166bb76f4de0aa47c2056291b333&_role_key=projectManager', '适用组织维度-横向报表-后备', NULL, NULL),
+	(12, 'h_sow', '4cf334b859fd499c8fec435f5f94ed7c', 'http://bi.xrnm.com/console/share-temp?_project_key=d29fcb16d703494e84327f3e87299641&_board_key=58ba930111ee45c9bb7ad5eb90999e5e&_role_key=projectManager', '适用组织维度-横向报表-母猪', NULL, NULL),
+	(13, 'h_peihuai', '46f53f32dac74976854a06a8c700d048', 'http://bi.xrnm.com/console/share-temp?_project_key=d29fcb16d703494e84327f3e87299641&_board_key=7c4a66a6b3374f649f2bfd51d0633143&_role_key=projectManager', '适用组织维度-横向报表-配怀', NULL, NULL),
+	(14, 'h_chanfang', '6b6e6b5a3382412492937801c7b82714', 'http://bi.xrnm.com/console/share-temp?_project_key=d29fcb16d703494e84327f3e87299641&_board_key=144b70d0d3ae4070b0a33430da325d46&_role_key=projectManager', '适用组织维度-横向报表-产房', NULL, NULL),
+	(15, 'h_nursery', 'd116d9023a8b49ca90a689ef1e1043c8', 'http://bi.xrnm.com/console/share-temp?_project_key=d29fcb16d703494e84327f3e87299641&_board_key=ae8ba592393f4492801de07649277628&_role_key=projectManager', '适用组织维度-横向报表-保育', NULL, NULL),
+	(16, 'h_fatten', '6df276ab19714895942f0fadf2772b41', 'http://bi.xrnm.com/console/share-temp?_project_key=d29fcb16d703494e84327f3e87299641&_board_key=571acdbe9f7f443eb15a611d9a7df917&_role_key=projectManager', '适用组织维度-横向报表-育肥', NULL, NULL),
+	(17, 'h_boar', 'c29dffbf475c42eea5938ecfc83b0cf8', 'http://bi.xrnm.com/console/share-temp?_project_key=d29fcb16d703494e84327f3e87299641&_board_key=8a3b58cf0da64d42a46f46cf5c5dd5ca&_role_key=projectManager', '适用组织维度-横向报表-公猪', NULL, NULL),
+	(18, 'h_material', '7afde1b3fc1049f0a8adf2a822796e09', 'http://bi.xrnm.com/console/share-temp?_project_key=d29fcb16d703494e84327f3e87299641&_board_key=fd5322dcba7644f28b1d4f92339f1f66&_role_key=projectManager', '适用组织维度-横向报表-物料消耗', NULL, NULL),
+	(19, 'h_index', 'b7039dd4ac9e46b2ac86e8fd74e33ffa', 'http://bi.xrnm.com/console/share-temp?_project_key=d29fcb16d703494e84327f3e87299641&_board_key=6405d000730e4aec8831298ee596e230&_role_key=projectManager', '适用组织维度-横向报表-效率指标', NULL, NULL);
+
 -- 物料领用添加字段
 ALTER TABLE `pig_doctor`.`doctor_warehouse_material_apply`
 ADD COLUMN `org_id` BIGINT(20) NULL COMMENT '公司ID' AFTER `material_handle_id`,
