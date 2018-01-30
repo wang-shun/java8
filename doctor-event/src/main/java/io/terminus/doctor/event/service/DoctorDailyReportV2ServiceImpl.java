@@ -168,7 +168,7 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
             log.info("generate yesterday and today starting");
             Stopwatch stopWatch = Stopwatch.createStarted();
             doctorDailyReportV2Manager.generateYesterdayAndToday(farmIds);
-            doctorReportBiManager.synchronizeDeltaDayBiData();
+//            doctorReportBiManager.synchronizeDeltaDayBiData();
             log.info("generate yesterday and today end, consume:{}minute", stopWatch.elapsed(TimeUnit.MINUTES));
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {

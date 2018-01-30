@@ -43,6 +43,10 @@ public class DoctorDimensionCriteria implements Serializable{
 
     private Integer pigType;
 
+    private Date startAt;
+
+    private Date endAt;
+
     public DoctorDimensionCriteria(Long orzId, Integer orzType, Date sumAt, Integer dateType, Integer pigType) {
         this.orzId = orzId;
         this.orzType = orzType;

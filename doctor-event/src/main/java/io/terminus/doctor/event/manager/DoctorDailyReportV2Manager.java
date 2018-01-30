@@ -17,7 +17,6 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigStatisticDao;
 import io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
-import io.terminus.doctor.event.enums.ReportTime;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
@@ -213,7 +212,7 @@ public class DoctorDailyReportV2Manager {
             }
         });
 
-        doctorReportWriteService.flushNPD(farmIds, today, ReportTime.MONTH);
+//        doctorReportWriteService.flushNPD(farmIds, today, ReportTime.MONTH);
 
     }
 

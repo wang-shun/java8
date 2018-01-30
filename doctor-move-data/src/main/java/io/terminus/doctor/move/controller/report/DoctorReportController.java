@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 
@@ -224,6 +225,13 @@ public class DoctorReportController {
                                              @RequestParam Integer orzType,
                                              @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start) {
         return RespHelper.or500(doctorDailyReportV2Service.synchronizeDeltaDayBiData(farmId, start, orzType));
+    }
+
+    @RequestMapping(value = "/yesterday/and/today", method = RequestMethod.GET)
+    public Boolean yesterdayAndToday(){
+        List<Long> farmList = RespHelper.orServEx(doctorFarmReadService.findAllFarms()).stream().map(DoctorFarm::getId).collect(Collectors.toList());
+        doctorDailyReportV2Service.generateYesterdayAndToday(farmList);
+        return Boolean.TRUE;
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/flush/npd")
