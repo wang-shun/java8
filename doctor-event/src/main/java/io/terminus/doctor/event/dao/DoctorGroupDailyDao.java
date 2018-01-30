@@ -89,15 +89,19 @@ public class DoctorGroupDailyDao extends MyBatisDao<DoctorGroupDaily> {
         return getSqlSession().selectOne(sqlId("farmEnd"), dimensionCriteria);
     }
 
-    public Integer orgStart(DoctorDimensionCriteria dimensionCriteria){
-        return getSqlSession().selectOne(sqlId("orgStart"), dimensionCriteria);
-    }
-
-    public Integer orgEnd(DoctorDimensionCriteria dimensionCriteria){
-        return getSqlSession().selectOne(sqlId("orgEnd"), dimensionCriteria);
+    public Integer orgDayStock(Long orgId, Date sumAt){
+        return getSqlSession().selectOne(sqlId("orgDayStock"), ImmutableMap.of("orgId", orgId, "sumAt", sumAt));
     }
 
     public Integer orgDayAvgLiveStock(DoctorDimensionCriteria dimensionCriteria){
         return getSqlSession().selectOne(sqlId("orgDayAvgLiveStock"), dimensionCriteria);
+    }
+
+    public Date minDate(DoctorDimensionCriteria dimensionCriteria) {
+        return getSqlSession().selectOne(sqlId("minDate"), dimensionCriteria);
+    }
+
+    public Date maxDate(DoctorDimensionCriteria dimensionCriteria) {
+        return getSqlSession().selectOne(sqlId("maxDate"), dimensionCriteria);
     }
 }

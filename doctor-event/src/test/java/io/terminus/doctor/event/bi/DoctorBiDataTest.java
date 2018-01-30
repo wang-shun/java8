@@ -2,6 +2,7 @@ package io.terminus.doctor.event.bi;
 
 import com.google.common.collect.Lists;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.dao.BaseDaoTest;
 import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorPigDailyDao;
@@ -27,7 +28,7 @@ import java.util.List;
  * Created by xjn on 18/1/12.
  * email:xiaojiannan@terminus.io
  */
-public class DoctorBiDataTest extends BaseServiceTest {
+public class DoctorBiDataTest extends BaseDaoTest {
 //    @Autowired
     private DoctorReportBiDataSynchronize synchronizer;
     @Autowired
@@ -102,7 +103,7 @@ public class DoctorBiDataTest extends BaseServiceTest {
         doctorDimensionCriteria.setOrzType(2);
         doctorDimensionCriteria.setDateType(3);
         doctorDimensionCriteria.setSumAt(DateUtil.toDate("2018-01-01"));
-        DoctorPigDailyExtend sow = pigDailyDao.orgStart(doctorDimensionCriteria);
+        DoctorPigDailyExtend sow = pigDailyDao.orgStart(1L, DateUtil.toDate("2017-01-01"));
         System.out.println(sow);
     }
 
@@ -149,5 +150,25 @@ public class DoctorBiDataTest extends BaseServiceTest {
         int early = doctorPigStatisticDao.boarLiveStock(404L, "2018-01-23");
         System.out.println(doctorKpiDao.realTimeLiveStockBoar(404L, DateUtil.toDate("2018-01-23")));
         System.out.println(early);
+    }
+
+    @Test
+    public void minDate(){
+        System.out.println(doctorGroupDailyDao.minDate(new DoctorDimensionCriteria(1L, 2, DateUtil.toDate("2017-01-01"), 4, 2)));
+    }
+
+    @Test
+    public void maxDate(){
+        System.out.println(doctorGroupDailyDao.maxDate(new DoctorDimensionCriteria(1L, 2, DateUtil.toDate("2017-01-01"), 4, 2)));
+    }
+
+    @Test
+    public void pigMinDate(){
+        System.out.println(pigDailyDao.minDate(new DoctorDimensionCriteria(1L, 2, DateUtil.toDate("2017-01-01"), 4, 2)));
+    }
+
+    @Test
+    public void pigMaxDate(){
+        System.out.println(pigDailyDao.maxDate(new DoctorDimensionCriteria(1L, 2, DateUtil.toDate("2017-01-01"), 4, 2)));
     }
 }

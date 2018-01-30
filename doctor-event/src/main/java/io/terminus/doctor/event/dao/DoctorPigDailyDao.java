@@ -168,12 +168,12 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
         return getSqlSession().selectOne(sqlId("farmEnd"), dimensionCriteria);
     }
 
-    public DoctorPigDailyExtend orgStart(DoctorDimensionCriteria dimensionCriteria) {
-        return getSqlSession().selectOne(sqlId("orgStart"), dimensionCriteria);
+    public DoctorPigDailyExtend orgStart(Long orgId, Date sumAt) {
+        return getSqlSession().selectOne(sqlId("orgStart"), ImmutableMap.of("orgId", orgId, "sumAt", sumAt));
     }
 
-    public DoctorPigDailyExtend orgEnd(DoctorDimensionCriteria dimensionCriteria) {
-        return getSqlSession().selectOne(sqlId("orgEnd"), dimensionCriteria);
+    public DoctorPigDailyExtend orgEnd(Long orgId, Date sumAt) {
+        return getSqlSession().selectOne(sqlId("orgEnd"), ImmutableMap.of("orgId", orgId, "sumAt", sumAt));
     }
 
     public DoctorPigDailyExtend orgSumDimension(DoctorDimensionCriteria dimensionCriteria){
@@ -182,5 +182,21 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
 
     public Integer countDimension(DoctorDimensionCriteria dimensionCriteria){
         return getSqlSession().selectOne(sqlId("countDimension"), dimensionCriteria);
+    }
+
+    public DoctorPigDailyExtend orgDayStock(Long orgId, Date sumAt){
+        return getSqlSession().selectOne(sqlId("orgDayStock"), ImmutableMap.of("orgId", orgId, "sumAt", sumAt));
+    }
+
+    public Date minDate(DoctorDimensionCriteria dimensionCriteria) {
+        return getSqlSession().selectOne(sqlId("minDate"), dimensionCriteria);
+    }
+
+    public Date maxDate(DoctorDimensionCriteria dimensionCriteria) {
+        return getSqlSession().selectOne(sqlId("maxDate"), dimensionCriteria);
+    }
+
+    public List<Map<String, Object>> orgMinDate(){
+        return getSqlSession().selectList(sqlId("orgMinDate"));
     }
 }

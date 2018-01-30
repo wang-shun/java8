@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
 import io.terminus.doctor.event.dao.DoctorPigDailyDao;
 import io.terminus.doctor.event.dao.DoctorReportNpdDao;
@@ -33,6 +34,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -89,12 +91,16 @@ public class DoctorReportBiDataSynchronize {
         this.efficiencySynchronizer = efficiencySynchronizer;
     }
 
+    private Map<String, Date> orgMinDateMap;
+    private Map<String, Date> orgMaxDateMap;
+
     /**
      * 全量同步数据
      */
     public void synchronizeFullBiData() {
         log.info("synchronize full bi data starting");
         Stopwatch stopwatch = Stopwatch.createStarted();
+
 //        cleanFullBiData();
         synchronizeBiDataImpl();
         log.info("synchronize full bi data end, minute:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
@@ -331,9 +337,11 @@ public class DoctorReportBiDataSynchronize {
                 dimensionCriteria.getOrzType(), dimensionCriteria.getDateType());
         Stopwatch stopwatch = Stopwatch.createStarted();
         List<DoctorGroupDailyExtend> groupDailyList = doctorGroupDailyDao.sumForDimension(dimensionCriteria);
+        log.info("========group daily size:{}", groupDailyList.size());
         groupDailyList.forEach(groupDaily -> synchronizeGroupBiData(groupDaily, dimensionCriteria));
         List<DoctorPigDailyExtend> pigDailyList = doctorPigDailyDao.sumForDimension(dimensionCriteria);
         pigDailyList.forEach(pigDaily -> synchronizePigBiData(pigDaily, dimensionCriteria));
+        log.info("========pig daily size:{}", pigDailyList.size());
 
 //        efficiencySynchronizer.sync(dimensionCriteria);
 //        warehouseSynchronizer.sync(dimensionCriteria);
@@ -377,6 +385,7 @@ public class DoctorReportBiDataSynchronize {
      * @param dimensionCriteria
      */
     private void synchronizeGroupBiData(DoctorGroupDailyExtend groupDaily, DoctorDimensionCriteria dimensionCriteria) {
+//        log.info("dimension:orgId{}, farmId:{}, dimensionCriteria:{}", groupDaily.getOrgId(), groupDaily.getFarmId(), dimensionCriteria);
         PigType pigType = expectNotNull(PigType.from(groupDaily.getPigType()), "pigType.is.illegal");
         if (Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.ORG.getValue())) {
             dimensionCriteria.setOrzId(groupDaily.getOrgId());
@@ -393,9 +402,11 @@ public class DoctorReportBiDataSynchronize {
                 start = doctorGroupDailyDao.farmStart(dimensionCriteria);
                 end = doctorGroupDailyDao.farmEnd(dimensionCriteria);
             } else {
-                start = doctorGroupDailyDao.orgStart(dimensionCriteria);
-                end = doctorGroupDailyDao.orgEnd(dimensionCriteria);
-                groupDaily.setDailyLivestockOnHand(doctorGroupDailyDao.orgDayAvgLiveStock(dimensionCriteria));
+                Date minDate = doctorGroupDailyDao.minDate(dimensionCriteria);
+                Date maxDate = doctorGroupDailyDao.maxDate(dimensionCriteria);
+                start = doctorGroupDailyDao.orgDayStock(dimensionCriteria.getOrzId(), minDate);
+                end = doctorGroupDailyDao.orgDayStock(dimensionCriteria.getOrzId(), maxDate);
+                groupDaily.setDailyLivestockOnHand(FieldHelper.getInteger(doctorGroupDailyDao.orgDayAvgLiveStock(dimensionCriteria), DateUtil.getDeltaDaysAbs(maxDate, minDate)));
             }
             groupDaily.setStart(start);
             groupDaily.setEnd(end);
@@ -424,6 +435,7 @@ public class DoctorReportBiDataSynchronize {
      * @param dimensionCriteria
      */
     private void synchronizePigBiData(DoctorPigDailyExtend dailyExtend, DoctorDimensionCriteria dimensionCriteria) {
+//        log.info("dimension:orgId{}, farmId:{}, dimensionCriteria:{}", dailyExtend.getOrgId(), dailyExtend.getFarmId(), dimensionCriteria);
         if (Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.ORG.getValue())) {
             dimensionCriteria.setOrzId(dailyExtend.getOrgId());
         } else {
@@ -438,10 +450,12 @@ public class DoctorReportBiDataSynchronize {
                 start = doctorPigDailyDao.farmStart(dimensionCriteria);
                 end = doctorPigDailyDao.farmEnd(dimensionCriteria);
             } else {
-                start = doctorPigDailyDao.orgStart(dimensionCriteria);
-                end = doctorPigDailyDao.orgEnd(dimensionCriteria);
+                Date minDate = doctorPigDailyDao.minDate(dimensionCriteria);
+                Date maxDate = doctorPigDailyDao.maxDate(dimensionCriteria);
+                start = doctorPigDailyDao.orgStart(dimensionCriteria.getOrzId(), minDate);
+                end = doctorPigDailyDao.orgEnd(dimensionCriteria.getOrzId(), maxDate);
                 DoctorPigDailyExtend dayAvgLiveStock = doctorPigDailyDao.orgSumDimension(dimensionCriteria);
-                int count = doctorPigDailyDao.countDimension(dimensionCriteria);
+                int count = DateUtil.getDeltaDaysAbs(maxDate, minDate);
                 dailyExtend.setBoarDailyPigCount(FieldHelper.getInteger(dayAvgLiveStock.getBoarDailyPigCount(), count));
                 dailyExtend.setSowDailyPigCount(FieldHelper.getInteger(dayAvgLiveStock.getSowDailyPigCount(), count));
             }

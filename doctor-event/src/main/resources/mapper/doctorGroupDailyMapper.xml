@@ -374,43 +374,31 @@
         limit 1
     </select>
 
-    <select id="orgStart" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="int">
+    <select id="orgDayStock" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="int">
         SELECT
         sum(`start`)
         FROM <include refid="tb"/>
-        <include refid="dimensionCri"/>
-        group by sum_at
-        order by sum_at asc
-        limit 1
-    </select>
-
-    <select id="orgEnd" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="int">
-        SELECT
-        sum(`end`)
-        FROM <include refid="tb"/>
-        <include refid="dimensionCri"/>
-        group by sum_at
-        order by sum_at desc
-        limit 1
+        WHERE
+        org_id = #{orgId}
+        AND sum_at = date_format(#{sumAt}, '%Y-%m-%d')
     </select>
 
     <select id="orgDayAvgLiveStock" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="int">
-        SELECT
-        round((
         select sum(`end`)
         FROM <include refid="tb"/>
         <include refid="dimensionCri"/>
-        )
-        /
-        (
-        select count(1)
-        from (select *
+    </select>
+
+    <select id="minDate" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="date">
+        select min(sum_at)
         FROM <include refid="tb"/>
         <include refid="dimensionCri"/>
-        group by sum_at
-        ) a
-        ), 0)
-        from dual
+    </select>
+
+    <select id="maxDate" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="date">
+        select max(sum_at)
+        FROM <include refid="tb"/>
+        <include refid="dimensionCri"/>
     </select>
 
 </mapper>

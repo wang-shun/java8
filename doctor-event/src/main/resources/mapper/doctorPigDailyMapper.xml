@@ -682,10 +682,8 @@
         sum(sow_ph_start + sow_cf_start) as sowStart
         FROM
         <include refid="tb"/>
-        <include refid="dimensionCri"/>
-        group by sum_at
-        order by sum_at asc
-        limit 1
+        org_id = #{orgId}
+        AND sum_at = #{sumAt}
     </select>
 
     <select id="farmEnd" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
@@ -717,10 +715,8 @@
         sum(sow_ph_pregnant) as sowPhPregnant
         FROM
         <include refid="tb"/>
-        <include refid="dimensionCri"/>
-        group by sum_at
-        order by sum_at desc
-        limit 1
+        org_id = #{orgId}
+        AND sum_at = #{sumAt}
     </select>
 
     <select id="orgSumDimension" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
@@ -740,5 +736,25 @@
         <include refid="dimensionCri"/>
         group by sum_at
         ) a
+    </select>
+
+    <select id="orgDayStock" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="int">
+        SELECT
+        sum(`start`)
+        FROM <include refid="tb"/>
+        org_id = #{orgId}
+        AND sum_at = #{sumAt}
+    </select>
+
+    <select id="minDate" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="date">
+        select min(sum_at)
+        FROM <include refid="tb"/>
+        <include refid="dimensionCri"/>
+    </select>
+
+    <select id="maxDate" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="date">
+        select max(sum_at)
+        FROM <include refid="tb"/>
+        <include refid="dimensionCri"/>
     </select>
 </mapper>
