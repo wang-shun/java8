@@ -155,8 +155,8 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
                 .put("orzType", orzType).put("sumAt", sumAt).put("type", type).map());
     }
 
-    public List<DoctorDimensionCriteria> findByDateType(Date sumAt, Integer type,  Integer dateType, Integer orzType) {
-        return getSqlSession().selectList(sqlId("findByDateType"), MapBuilder.of().put("type", type)
+    public List<DoctorDimensionCriteria> findByDateType(Long orzId, Date sumAt, Integer type,  Integer dateType, Integer orzType) {
+        return getSqlSession().selectList(sqlId("findByDateType"), MapBuilder.of().put("orzId", orzId).put("type", type)
                 .put("sumAt", sumAt).put("dateType", dateType).put("orzType", orzType).map());
     }
 

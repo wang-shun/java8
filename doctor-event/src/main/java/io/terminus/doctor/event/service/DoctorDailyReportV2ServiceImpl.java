@@ -3,7 +3,6 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
@@ -190,9 +189,9 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
     }
 
     @Override
-    public Response<Boolean> synchronizeDeltaDayBiData(Long farmI, Date start) {
+    public Response<Boolean> synchronizeDeltaDayBiData(Long farmI, Date start, Integer orzType) {
         try {
-            doctorReportBiManager.synchronizeDeltaDayBiData(farmI, start);
+            doctorReportBiManager.synchronizeDeltaDayBiData(farmI, start, orzType);
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("synchronize delta day bi data failed,farmId:{}, start:{}, cause:{}",

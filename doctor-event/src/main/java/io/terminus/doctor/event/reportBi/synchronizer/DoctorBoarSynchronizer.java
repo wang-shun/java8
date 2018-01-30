@@ -8,6 +8,7 @@ import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.model.DoctorReportBoar;
 import io.terminus.doctor.event.reportBi.helper.FieldHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ import static java.util.Objects.isNull;
  * Created by xjn on 18/1/13.
  * email:xiaojiannan@terminus.io
  */
+@Slf4j
 @Component
 public class DoctorBoarSynchronizer {
     private final DoctorReportBoarDao doctorReportBoarDao;

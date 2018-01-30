@@ -72,7 +72,7 @@ public interface DoctorDailyReportV2Service {
      *
      * @return
      */
-    Response<Boolean> synchronizeDeltaDayBiData(Long farmId, Date start);
+    Response<Boolean> synchronizeDeltaDayBiData(Long farmId, Date start, Integer orzType);
 
     /**
      * 查询某一时间维度的猪场报表数据

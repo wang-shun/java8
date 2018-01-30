@@ -221,8 +221,9 @@ public class DoctorReportController {
      */
     @RequestMapping(value = "/synchronize/delta/bi/data/{farmId}", method = RequestMethod.GET)
     public Boolean synchronizeDeltaDayBiData(@PathVariable Long farmId,
+                                             @RequestParam Integer orzType,
                                              @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start) {
-        return RespHelper.or500(doctorDailyReportV2Service.synchronizeDeltaDayBiData(farmId, start));
+        return RespHelper.or500(doctorDailyReportV2Service.synchronizeDeltaDayBiData(farmId, start, orzType));
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/flush/npd")
