@@ -1625,6 +1625,9 @@
                     farm_id=#{t}
                 </foreach>
             </if>
+            <if test="kind !=null">
+                AND kind=#{kind}
+            </if>
             <if test="beginDate !=null">
                 AND <![CDATA[ event_at >= #{beginDate} ]]>
             </if>
