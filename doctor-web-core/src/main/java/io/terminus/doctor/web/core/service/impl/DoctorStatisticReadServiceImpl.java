@@ -94,9 +94,9 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
                 return Response.ok(new DoctorBasicDto(org, Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
             }
 
-            List<DoctorFarmLiveStockDto> stats = RespHelper.orServEx(doctorCommonReportReadService.findFarmsLiveStock(farmIdList));
+            List<DoctorFarmLiveStockDto> stats = RespHelper.orServEx(doctorDailyReportV2Service.findFarmsLiveStock(farmIdList));
 
-            List<DoctorFarmBasicDto> farmBasicDtos = farmIdList.stream().map(this::buildFarmBasic).collect(Collectors.toList());
+            List<DoctorFarmBasicDto> farmBasicDtos = stats.stream().map(this::buildFarmBasic).collect(Collectors.toList());
 
             return Response.ok(new DoctorBasicDto(org, getStatistics(stats), farmBasicDtos, orgs));
         } catch (ServiceException e) {
