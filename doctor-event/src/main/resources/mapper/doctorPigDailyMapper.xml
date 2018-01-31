@@ -756,4 +756,13 @@
         FROM <include refid="tb"/>
         <include refid="dimensionCri"/>
     </select>
+
+    <select id="minSumAtForUpdated" parameterType="map" resultType="date">
+        SELECT ifnull(min(sum_at), now())
+        FROM <include refid="tb"/>
+        WHERE
+        <if test="orzType == 2">org_id = #{orgId}</if>
+        <if test="orzType == 3">farm_id = #{farmId}</if>
+        AND updated_at &gt;= date_format(#{sumAt}, '%Y-%m-%d %H:%i:%s')
+    </select>
 </mapper>

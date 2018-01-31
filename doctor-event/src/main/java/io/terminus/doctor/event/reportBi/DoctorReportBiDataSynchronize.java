@@ -2,6 +2,7 @@ package io.terminus.doctor.event.reportBi;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
@@ -9,6 +10,7 @@ import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.cache.DoctorDepartmentCache;
 import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
 import io.terminus.doctor.event.dao.DoctorPigDailyDao;
 import io.terminus.doctor.event.dao.DoctorReportNpdDao;
@@ -40,6 +42,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -70,6 +73,8 @@ public class DoctorReportBiDataSynchronize {
 
     @RpcConsumer
     private DoctorFarmReadService doctorFarmReadService;
+    @RpcConsumer
+    private DoctorDepartmentCache cache;
 
     @Autowired
     public DoctorReportBiDataSynchronize(DoctorPigDailyDao doctorPigDailyDao,
@@ -113,11 +118,20 @@ public class DoctorReportBiDataSynchronize {
     /**
      * 增量同步数据
      */
-    public void synchronizeDeltaDayBiData() {
+    public void synchronizeDeltaDayBiData(Map<Long, Date> farmIdToSumAt) {
         log.info("synchronize delta day bi data starting");
         Stopwatch stopwatch = Stopwatch.createStarted();
-        Date date = DateTime.now().minusMinutes(DELTA_DAY).toDate();
-        synchronizeDeltaBiData(null, null, date, 2);
+        farmIdToSumAt.entrySet().parallelStream().forEach(entry ->
+                synchronizeDeltaBiData(entry.getKey(), OrzDimension.FARM.getValue(), entry.getValue(), 1));
+        Map<Long, Date> orgIdToSumAt = Maps.newHashMap();
+        farmIdToSumAt.forEach((key, value) -> {
+            Long orgId = cache.getUnchecked(key).getOrgId();
+            if (!orgIdToSumAt.containsKey(orgId) || value.before(orgIdToSumAt.get(orgId))) {
+                orgIdToSumAt.put(orgId, value);
+            }
+        });
+        orgIdToSumAt.entrySet().parallelStream().forEach(entry ->
+                synchronizeDeltaBiData(entry.getKey(), OrzDimension.ORG.getValue(), entry.getValue(), 1));
 
         //如果当天更改了历史数据，找出历史数据，重刷历史数据所在的期间
         List<Date> dates = warehouseSynchronizer.getChangedDate(new Date());
@@ -152,8 +166,10 @@ public class DoctorReportBiDataSynchronize {
      */
     public void synchronizeRealTimeBiData(Long orzId, Integer orzType) {
         log.info("synchronize real time bi data starting");
-        Date date = DateTime.now().minusMinutes(REAL_TIME_INTERVAL).toDate();
-        synchronizeDelta(orzId, orzType, date, 2, IsOrNot.YES.getKey());
+        Date updatedAt = DateTime.now().minusMinutes(REAL_TIME_INTERVAL).toDate();
+        Date pigSumAt = doctorPigDailyDao.minSumAtForUpdated(orzId, orzType, updatedAt);
+        Date groupSumAt = doctorGroupDailyDao.minSumAtForUpdated(orzId, orzType, updatedAt);
+        synchronizeDelta(orzId, orzType, pigSumAt.before(groupSumAt) ? pigSumAt : groupSumAt, 1, IsOrNot.YES.getKey());
         log.info("synchronize real time bi data end");
     }
 
@@ -196,6 +212,7 @@ public class DoctorReportBiDataSynchronize {
          */
     private void synchronizeDeltaBiData(Long orzId, Integer orzType, Date date, Integer type, Integer isRealTime) {
 
+        //猪群，日周月季年同步
         List<DoctorGroupDaily> groupDailyList = doctorGroupDailyDao.findByAfter(orzId, orzType, date, type);
         if (!Arguments.isNullOrEmpty(groupDailyList)) {
 //            synchronizeGroupForDay(groupDailyList);
@@ -221,6 +238,8 @@ public class DoctorReportBiDataSynchronize {
                 synchronizeGroupBiData(doctorGroupDailyDao.selectOneSumForDimension(dimensionCriteria), dimensionCriteria);
             });
         }
+
+        //猪日周月季年同步
         List<DoctorPigDaily> pigDailyList = doctorPigDailyDao.findByAfter(orzId, orzType, date, type);
         if (!Arguments.isNullOrEmpty(pigDailyList)) {
 //            synchronizePigForDay(pigDailyList);

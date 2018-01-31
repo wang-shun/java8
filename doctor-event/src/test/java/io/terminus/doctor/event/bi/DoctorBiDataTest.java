@@ -18,6 +18,7 @@ import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorReportSow;
 import io.terminus.doctor.event.reportBi.DoctorReportBiDataSynchronize;
 import io.terminus.doctor.event.test.BaseServiceTest;
+import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -171,10 +172,17 @@ public class DoctorBiDataTest extends BaseDaoTest {
     @Test
     public void pigMaxDate(){
         System.out.println(pigDailyDao.maxDate(new DoctorDimensionCriteria(1L, 2, DateUtil.toDate("2017-01-01"), 4, 2)));
+        System.out.println(pigDailyDao.maxDate(new DoctorDimensionCriteria(1L, 2, DateUtil.toDate("2017-01-01"), 4, 2)));
     }
 
     @Test
     public void test(){
         doctorGroupDailyDao.selectOneSumForDimension(new DoctorDimensionCriteria(404L, 2, DateUtil.toDate("2017-01-01"), 4, 2));
+    }
+
+    @Test
+    public void minSumAtForUpdatedTest(){
+        System.out.println(doctorGroupDailyDao.minSumAtForUpdated(188L, 2, DateUtil.toDate("2018-01-01")));
+        System.out.println(pigDailyDao.minSumAtForUpdated(188L, 2, DateUtil.toDate("2018-01-01")));
     }
 }
