@@ -91,12 +91,15 @@ public class DoctorReportController {
     }
 
     @RequestMapping(value = "/flush/daily/after")
-    public Boolean flushDailyAfter(@RequestParam String startAt) {
+    public Boolean flushDailyAfter(@RequestParam String startAt, @RequestParam(required = false) String end) {
         log.info("flush.all.daily.after.starting");
         Date start = DateUtil.toDate(startAt);
         Stopwatch stopwatch = Stopwatch.createStarted();
         List<DoctorFarmEarlyEventAtDto> list = RespHelper.or500(doctorDailyReportV2Service.findEarLyAt());
-        String end = DateUtil.toDateString(new Date());
+        if (isNull(end)) {
+             end = DateUtil.toDateString(new Date());
+        }
+        String endAt = end;
         list.forEach(doctorFarmEarlyEventAtDto -> {
             Date begin;
             if (doctorFarmEarlyEventAtDto.getEventAt().before(start)) {
@@ -104,7 +107,7 @@ public class DoctorReportController {
             } else {
                 begin = doctorFarmEarlyEventAtDto.getEventAt();
             }
-            doctorDailyReportV2Service.flushFarmDaily(doctorFarmEarlyEventAtDto.getFarmId(), DateUtil.toDateString(begin), end);
+            doctorDailyReportV2Service.flushFarmDaily(doctorFarmEarlyEventAtDto.getFarmId(), DateUtil.toDateString(begin), endAt);
         });
         log.info("flush.all.daily.end, consume:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
 
