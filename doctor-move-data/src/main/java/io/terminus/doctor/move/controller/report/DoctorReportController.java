@@ -228,6 +228,20 @@ public class DoctorReportController {
     }
 
     /**
+     * 增量同步一个公司以及公司下的所有猪场
+     *
+     * @param orzId 猪场id
+     * @param start  开始的同步日期 与日报中sumAt比较
+     */
+    @RequestMapping(value = "/synchronize/delta/{orzId}", method = RequestMethod.GET)
+    public Boolean synchronizeDelta(@PathVariable Long orzId,
+                                             @RequestParam (required = false, defaultValue = "2")Integer orzType,
+                                             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start) {
+        return RespHelper.or500(doctorDailyReportV2Service.synchronizeDelta(orzId, start, orzType));
+    }
+
+
+    /**
      * 增量同步
      *
      * @param start  开始的同步日期 与日报中sumAt比较
