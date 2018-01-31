@@ -218,14 +218,14 @@ public class DoctorReportBiDataSynchronize {
     private void synchronizeDeltaBiData(Long orzId, Integer orzType, Date pigDate, Date groupDate, Integer type, Integer isRealTime) {
 
         //猪群，日周月季年同步
-        List<DoctorGroupDaily> groupDailyList = doctorGroupDailyDao.findByAfter(orzId, orzType, pigDate, type);
+        List<DoctorGroupDaily> groupDailyList = doctorGroupDailyDao.findByAfter(orzId, orzType, groupDate, type);
         if (!Arguments.isNullOrEmpty(groupDailyList)) {
             List<DoctorDimensionCriteria> dimensionCriteriaList = Lists.newArrayList();
-            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, pigDate, type, DateDimension.DAY.getValue(), orzType));
-            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, pigDate, type, DateDimension.WEEK.getValue(), orzType));
-            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, pigDate, type, DateDimension.MONTH.getValue(), orzType));
-            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, pigDate, type, DateDimension.QUARTER.getValue(), orzType));
-            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, pigDate, type, DateDimension.YEAR.getValue(), orzType));
+            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, groupDate, type, DateDimension.DAY.getValue(), orzType));
+            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, groupDate, type, DateDimension.WEEK.getValue(), orzType));
+            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, groupDate, type, DateDimension.MONTH.getValue(), orzType));
+            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, groupDate, type, DateDimension.QUARTER.getValue(), orzType));
+            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, groupDate, type, DateDimension.YEAR.getValue(), orzType));
             dimensionCriteriaList.parallelStream().forEach(dimensionCriteria -> {
                 DateDimension dateDimension = DateDimension.from(dimensionCriteria.getDateType());
                 dimensionCriteria.setStartAt(DateHelper.withDateStartDay(dimensionCriteria.getSumAt(), dateDimension));
@@ -236,14 +236,14 @@ public class DoctorReportBiDataSynchronize {
         }
 
         //猪日周月季年同步
-        List<DoctorPigDaily> pigDailyList = doctorPigDailyDao.findByAfter(orzId, orzType, groupDate, type);
+        List<DoctorPigDaily> pigDailyList = doctorPigDailyDao.findByAfter(orzId, orzType, pigDate, type);
         if (!Arguments.isNullOrEmpty(pigDailyList)) {
             List<DoctorDimensionCriteria> criteriaList = Lists.newArrayList();
-            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, groupDate, type, DateDimension.DAY.getValue(), orzType));
-            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, groupDate, type, DateDimension.WEEK.getValue(), orzType));
-            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, groupDate, type, DateDimension.MONTH.getValue(), orzType));
-            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, groupDate, type, DateDimension.QUARTER.getValue(), orzType));
-            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, groupDate, type, DateDimension.YEAR.getValue(), orzType));
+            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, pigDate, type, DateDimension.DAY.getValue(), orzType));
+            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, pigDate, type, DateDimension.WEEK.getValue(), orzType));
+            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, pigDate, type, DateDimension.MONTH.getValue(), orzType));
+            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, pigDate, type, DateDimension.QUARTER.getValue(), orzType));
+            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, pigDate, type, DateDimension.YEAR.getValue(), orzType));
             criteriaList.parallelStream().forEach(dimensionCriteria -> {
                 DateDimension dateDimension = DateDimension.from(dimensionCriteria.getDateType());
                 dimensionCriteria.setStartAt(DateHelper.withDateStartDay(dimensionCriteria.getSumAt(), dateDimension));
