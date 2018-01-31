@@ -50,12 +50,6 @@ public class DoctorBiDataTest extends BaseDaoTest {
     }
 
     @Test
-    public void synchronizeRealTimeBiDataTest() {
-        synchronizer.cleanFullBiData();
-//        synchronizer.synchronizeRealTimeBiData(404L);
-    }
-
-    @Test
     public void findByDateTypeTest() {
 //        System.out.println(doctorGroupDailyDao.findByDateType(null, DateUtil.toDate("2017-01-01"), DateDimension.WEEK.getValue(), OrzDimension.FARM.getValue()));
     }
@@ -182,7 +176,12 @@ public class DoctorBiDataTest extends BaseDaoTest {
 
     @Test
     public void minSumAtForUpdatedTest(){
-        System.out.println(doctorGroupDailyDao.minSumAtForUpdated(188L, 2, DateUtil.toDate("2018-01-01")));
-        System.out.println(pigDailyDao.minSumAtForUpdated(188L, 2, DateUtil.toDate("2018-01-01")));
+        System.out.println(doctorGroupDailyDao.minSumAtForUpdated(188L, 2, DateUtil.toDateTime("2018-01-31 17:32:00")));
+        System.out.println(pigDailyDao.minSumAtForUpdated(188L, 2, DateUtil.toDateTime("2018-01-31 17:32:00")));
+    }
+
+    @Test
+    public void synchronizeRealTimeBiDataTest() {
+        synchronizer.synchronizeRealTimeBiData(188L, 2);
     }
 }

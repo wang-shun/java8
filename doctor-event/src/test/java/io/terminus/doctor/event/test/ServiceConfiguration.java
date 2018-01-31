@@ -2,7 +2,6 @@ package io.terminus.doctor.event.test;
 
 import com.google.common.collect.Maps;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
-import io.terminus.boot.rpc.dubbo.config.DubboBaseAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.event.editHandler.DoctorModifyGroupEventHandler;
 import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
@@ -91,9 +90,9 @@ import java.util.Map;
  * Date: 16/4/25
  */
 @Configuration
-@EnableAutoConfiguration(exclude = {DubboBaseAutoConfiguration.class})
+@EnableAutoConfiguration
 @Import({MessageAutoConfig.class, DoctorCommonConfiguration.class})
-@ComponentScan(basePackages = {"io.terminus.doctor.event.dao.*"})
+@ComponentScan(basePackages = {"io.terminus.doctor.event.*"})
 @AutoConfigureAfter(MybatisAutoConfiguration.class)
 public class ServiceConfiguration {
     @Bean

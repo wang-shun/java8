@@ -169,35 +169,35 @@ public class DoctorReportBiDataSynchronize {
         Date updatedAt = DateTime.now().minusMinutes(REAL_TIME_INTERVAL).toDate();
         Date pigSumAt = doctorPigDailyDao.minSumAtForUpdated(orzId, orzType, updatedAt);
         Date groupSumAt = doctorGroupDailyDao.minSumAtForUpdated(orzId, orzType, updatedAt);
-        synchronizeDelta(orzId, orzType, pigSumAt.before(groupSumAt) ? pigSumAt : groupSumAt, 1, IsOrNot.YES.getKey());
+        synchronizeDelta(orzId, orzType, pigSumAt, groupSumAt, 1, IsOrNot.YES.getKey());
         log.info("synchronize real time bi data end");
     }
 
     public void synchronizeDelta(Long orzId, Integer orzType, Date date, Integer type) {
-        synchronizeDelta(orzId, orzType, date, type, IsOrNot.NO.getKey());
+        synchronizeDelta(orzId, orzType, date, date, type, IsOrNot.NO.getKey());
     }
+
     /**
      *
      *
      */
-    public void synchronizeDelta(Long orzId, Integer orzType, Date date, Integer type, Integer isRealTime) {
+    public void synchronizeDelta(Long orzId, Integer orzType, Date pigDate, Date groupDate, Integer type, Integer isRealTime) {
 
         if (Objects.equals(orzType, OrzDimension.FARM.getValue())) {
             DoctorFarm doctorFarm = RespHelper.orServEx(doctorFarmReadService.findFarmById(orzId));
-            synchronizeDeltaBiData(orzId, orzType, date, type, isRealTime);
-            synchronizeDeltaBiData(doctorFarm.getOrgId(), OrzDimension.ORG.getValue(), date, type, isRealTime);
+            synchronizeDeltaBiData(orzId, orzType, pigDate, groupDate, type, isRealTime);
+            synchronizeDeltaBiData(doctorFarm.getOrgId(), OrzDimension.ORG.getValue(), pigDate, groupDate, type, isRealTime);
         } else if (Objects.equals(orzType, OrzDimension.ORG.getValue())) {
             List<DoctorFarm> farmList = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orzId));
             farmList.parallelStream().forEach(doctorFarm -> {
-                synchronizeDeltaBiData(doctorFarm.getId(), OrzDimension.FARM.getValue(), date, type, isRealTime);
+                synchronizeDeltaBiData(doctorFarm.getId(), OrzDimension.FARM.getValue(), pigDate, groupDate, type, isRealTime);
             });
-            synchronizeDeltaBiData(orzId, orzType, date, type, isRealTime);
+            synchronizeDeltaBiData(orzId, orzType, pigDate, groupDate, type, isRealTime);
         }
     }
 
-
     private void synchronizeDeltaBiData(Long orzId, Integer orzType, Date date, Integer type) {
-        synchronizeDeltaBiData(orzId, orzType, date, type, IsOrNot.NO.getKey());
+        synchronizeDeltaBiData(orzId, orzType, date, date, type, IsOrNot.NO.getKey());
     }
 
         /**
@@ -205,31 +205,23 @@ public class DoctorReportBiDataSynchronize {
          * @param orzId 组织id
          * @param orzType 组织类型
          *                @see OrzDimension
-         * @param date 查询date 之后的日报包含date
+         * @param pigDate 查询date 之后的日报包含date
+         * @param groupDate 查询date 之后的日报包含date
          * @param type  标志日报中的哪个字段与date进行比较，1-》日报中的sumAt， 2-》日报中的updatedAt
          * @param isRealTime
          *
          */
-    private void synchronizeDeltaBiData(Long orzId, Integer orzType, Date date, Integer type, Integer isRealTime) {
+    private void synchronizeDeltaBiData(Long orzId, Integer orzType, Date pigDate, Date groupDate, Integer type, Integer isRealTime) {
 
         //猪群，日周月季年同步
-        List<DoctorGroupDaily> groupDailyList = doctorGroupDailyDao.findByAfter(orzId, orzType, date, type);
+        List<DoctorGroupDaily> groupDailyList = doctorGroupDailyDao.findByAfter(orzId, orzType, pigDate, type);
         if (!Arguments.isNullOrEmpty(groupDailyList)) {
-//            synchronizeGroupForDay(groupDailyList);
             List<DoctorDimensionCriteria> dimensionCriteriaList = Lists.newArrayList();
-            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, date, type, DateDimension.DAY.getValue(), orzType));
-            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, date, type, DateDimension.WEEK.getValue(), orzType));
-            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, date, type, DateDimension.MONTH.getValue(), orzType));
-            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, date, type, DateDimension.QUARTER.getValue(), orzType));
-            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, date, type, DateDimension.YEAR.getValue(), orzType));
-//            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, date, type, DateDimension.WEEK.getValue(), OrzDimension.ORG.getValue()));
-//            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, date, type, DateDimension.MONTH.getValue(), OrzDimension.ORG.getValue()));
-//            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, date, type, DateDimension.QUARTER.getValue(), OrzDimension.ORG.getValue()));
-//            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, date, type, DateDimension.YEAR.getValue(), OrzDimension.ORG.getValue()));
-//            List<DoctorDimensionCriteria> orgList = groupDailyList.stream().map(groupDaily ->
-//                    new DoctorDimensionCriteria(groupDaily.getOrgId(), OrzDimension.ORG.getValue(), groupDaily.getSumAt(), DateDimension.DAY.getValue(), groupDaily.getPigType())
-//            ).collect(Collectors.toList());
-//            dimensionCriteriaList.addAll(orgList);
+            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, pigDate, type, DateDimension.DAY.getValue(), orzType));
+            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, pigDate, type, DateDimension.WEEK.getValue(), orzType));
+            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, pigDate, type, DateDimension.MONTH.getValue(), orzType));
+            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, pigDate, type, DateDimension.QUARTER.getValue(), orzType));
+            dimensionCriteriaList.addAll(doctorGroupDailyDao.findByDateType(orzId, pigDate, type, DateDimension.YEAR.getValue(), orzType));
             dimensionCriteriaList.parallelStream().forEach(dimensionCriteria -> {
                 DateDimension dateDimension = DateDimension.from(dimensionCriteria.getDateType());
                 dimensionCriteria.setStartAt(DateHelper.withDateStartDay(dimensionCriteria.getSumAt(), dateDimension));
@@ -240,25 +232,14 @@ public class DoctorReportBiDataSynchronize {
         }
 
         //猪日周月季年同步
-        List<DoctorPigDaily> pigDailyList = doctorPigDailyDao.findByAfter(orzId, orzType, date, type);
+        List<DoctorPigDaily> pigDailyList = doctorPigDailyDao.findByAfter(orzId, orzType, groupDate, type);
         if (!Arguments.isNullOrEmpty(pigDailyList)) {
-//            synchronizePigForDay(pigDailyList);
-//            List<DoctorDimensionCriteria> orgs = pigDailyList.stream().map(pigDaily ->
-//                    new DoctorDimensionCriteria(pigDaily.getOrgId(), OrzDimension.ORG.getValue(), pigDaily.getSumAt(), DateDimension.DAY.getValue(), null)
-//            ).collect(Collectors.toList());
-//            criteriaList.addAll(orgs);
             List<DoctorDimensionCriteria> criteriaList = Lists.newArrayList();
-            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, date, type, DateDimension.DAY.getValue(), orzType));
-            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, date, type, DateDimension.WEEK.getValue(), orzType));
-            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, date, type, DateDimension.MONTH.getValue(), orzType));
-            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, date, type, DateDimension.QUARTER.getValue(), orzType));
-            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, date, type, DateDimension.YEAR.getValue(), orzType));
-//            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, date, type, DateDimension.WEEK.getValue(), OrzDimension.ORG.getValue()));
-//            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, date, type, DateDimension.MONTH.getValue(), OrzDimension.ORG.getValue()));
-//            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, date, type, DateDimension.QUARTER.getValue(), OrzDimension.ORG.getValue()));
-//            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, date, type, DateDimension.YEAR.getValue(), OrzDimension.ORG.getValue()));
-
-
+            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, groupDate, type, DateDimension.DAY.getValue(), orzType));
+            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, groupDate, type, DateDimension.WEEK.getValue(), orzType));
+            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, groupDate, type, DateDimension.MONTH.getValue(), orzType));
+            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, groupDate, type, DateDimension.QUARTER.getValue(), orzType));
+            criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, groupDate, type, DateDimension.YEAR.getValue(), orzType));
             criteriaList.parallelStream().forEach(dimensionCriteria -> {
                 DateDimension dateDimension = DateDimension.from(dimensionCriteria.getDateType());
                 dimensionCriteria.setStartAt(DateHelper.withDateStartDay(dimensionCriteria.getSumAt(), dateDimension));
