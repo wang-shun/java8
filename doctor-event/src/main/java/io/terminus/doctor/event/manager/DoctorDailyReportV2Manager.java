@@ -382,7 +382,7 @@ public class DoctorDailyReportV2Manager {
         doctorPigDaily.setBoarEnd(pigStatisticDao.boarLiveStock(criteria.getFarmId(), criteria.getSumAt()));
     }
 
-    private Map<Long, Date> queryFarmEarlyEventAtImpl(String startDate) {
+    public Map<Long, Date> queryFarmEarlyEventAtImpl(String startDate) {
         List<DoctorFarmEarlyEventAtDto> list1 = doctorPigEventDao.getFarmEarlyEventAt(startDate);
         List<DoctorFarmEarlyEventAtDto> list2 = doctorGroupEventDao.getFarmEarlyEventAt(startDate);
         list1.addAll(list2);

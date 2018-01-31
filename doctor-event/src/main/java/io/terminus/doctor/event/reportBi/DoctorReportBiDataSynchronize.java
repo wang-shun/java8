@@ -121,8 +121,10 @@ public class DoctorReportBiDataSynchronize {
     public void synchronizeDeltaDayBiData(Map<Long, Date> farmIdToSumAt) {
         log.info("synchronize delta day bi data starting");
         Stopwatch stopwatch = Stopwatch.createStarted();
-        farmIdToSumAt.entrySet().parallelStream().forEach(entry ->
-                synchronizeDeltaBiData(entry.getKey(), OrzDimension.FARM.getValue(), entry.getValue(), 1));
+        farmIdToSumAt.entrySet().parallelStream().forEach(entry -> {
+            synchronizeDeltaBiData(entry.getKey(), OrzDimension.FARM.getValue(), entry.getValue(), 1);
+            log.info("synchronize delta farm ending: farmId:{}, date:{}", entry.getKey(), entry.getValue());
+        });
         Map<Long, Date> orgIdToSumAt = Maps.newHashMap();
         farmIdToSumAt.forEach((key, value) -> {
             Long orgId = cache.getUnchecked(key).getOrgId();
@@ -130,8 +132,10 @@ public class DoctorReportBiDataSynchronize {
                 orgIdToSumAt.put(orgId, value);
             }
         });
-        orgIdToSumAt.entrySet().parallelStream().forEach(entry ->
-                synchronizeDeltaBiData(entry.getKey(), OrzDimension.ORG.getValue(), entry.getValue(), 1));
+        orgIdToSumAt.entrySet().parallelStream().forEach(entry -> {
+            synchronizeDeltaBiData(entry.getKey(), OrzDimension.ORG.getValue(), entry.getValue(), 1);
+            log.info("synchronize delta orgId ending: orgId:{}, date:{}", entry.getKey(), entry.getValue());
+        });
 
         //如果当天更改了历史数据，找出历史数据，重刷历史数据所在的期间
         List<Date> dates = warehouseSynchronizer.getChangedDate(new Date());

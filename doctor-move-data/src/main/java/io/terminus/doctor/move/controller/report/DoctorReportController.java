@@ -271,6 +271,13 @@ public class DoctorReportController {
         return Boolean.TRUE;
     }
 
+    @RequestMapping(value = "/synchronize/yesterday/and/today", method = RequestMethod.GET)
+    public Boolean synchonizeYesterdayAndToday(@RequestParam String date){
+        List<Long> farmList = RespHelper.orServEx(doctorFarmReadService.findAllFarms()).stream().map(DoctorFarm::getId).collect(Collectors.toList());
+        doctorDailyReportV2Service.synchronizeYesterdayAndToday(farmList, new DateTime(DateUtil.toDate(date)).withTimeAtStartOfDay().toDate());
+        return Boolean.TRUE;
+    }
+
     @RequestMapping(method = RequestMethod.PUT, value = "/flush/npd")
     public void flushNPD() {
         //
