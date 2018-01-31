@@ -66,7 +66,7 @@ public class DoctorReportController {
 
         String temp = to;
         List<DoctorFarm> farmList = RespHelper.or500(doctorFarmReadService.findAllFarms());
-        farmList.stream().parallel().forEach(doctorFarm ->
+        farmList.parallelStream().forEach(doctorFarm ->
                 RespHelper.or500(doctorDailyReportV2Service.flushFarmDaily(doctorFarm.getId(), from, temp)));
         return Boolean.TRUE;
     }
