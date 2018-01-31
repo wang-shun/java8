@@ -92,7 +92,8 @@ public class DoctorReportJobs {
             }
             log.info("daily report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
 
-            doctorDailyReportV2Service.generateYesterdayAndToday(getAllFarmIds());
+            Date yestoday = DateTime.now().minusDays(10).toDate();
+            doctorDailyReportV2Service.generateYesterdayAndToday(getAllFarmIds(), yestoday);
 
             log.info("daily report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {

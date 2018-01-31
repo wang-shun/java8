@@ -58,7 +58,7 @@ public interface DoctorDailyReportV2Service {
      *
      * @param farmIds 猪场ids
      */
-    Response<Boolean> generateYesterdayAndToday(List<Long> farmIds);
+    Response<Boolean> generateYesterdayAndToday(List<Long> farmIds, Date date);
 
     /**
      * 全量同步报表数据

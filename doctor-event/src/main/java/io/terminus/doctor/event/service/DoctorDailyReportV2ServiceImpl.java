@@ -163,13 +163,14 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
     }
 
     @Override
-    public Response<Boolean> generateYesterdayAndToday(List<Long> farmIds) {
+    public Response<Boolean> generateYesterdayAndToday(List<Long> farmIds, Date date) {
         try {
             log.info("generate yesterday and today starting");
             Stopwatch stopWatch = Stopwatch.createStarted();
-            Map<Long, Date> longDateMap = doctorDailyReportV2Manager.generateYesterdayAndToday(farmIds);
-            doctorReportBiManager.synchronizeDeltaDayBiData(longDateMap);
+            Map<Long, Date> longDateMap = doctorDailyReportV2Manager.generateYesterdayAndToday(farmIds, date);
             log.info("generate yesterday and today end, consume:{}minute", stopWatch.elapsed(TimeUnit.MINUTES));
+            doctorReportBiManager.synchronizeDeltaDayBiData(longDateMap);
+            log.info("synchronize yesterday and today end, consume:{}minute", stopWatch.elapsed(TimeUnit.MINUTES));
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("generate yesterday and today failed, cause:{}", Throwables.getStackTraceAsString(e));

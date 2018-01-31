@@ -11,6 +11,7 @@ import io.terminus.doctor.event.service.DoctorDailyReportV2Service;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -108,7 +109,7 @@ public class DoctorReportController {
         log.info("flush.all.daily.end, consume:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
 
         log.info("synchronize.all.daily.starting");
-        RespHelper.or500(doctorDailyReportV2Service.synchronizeFullBiData());
+//        RespHelper.or500(doctorDailyReportV2Service.synchronizeFullBiData());
         log.info("synchronize.all.daily.end, consume:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
 
         return Boolean.TRUE;
@@ -261,9 +262,9 @@ public class DoctorReportController {
     }
 
     @RequestMapping(value = "/yesterday/and/today", method = RequestMethod.GET)
-    public Boolean yesterdayAndToday(){
+    public Boolean yesterdayAndToday(@RequestParam String date){
         List<Long> farmList = RespHelper.orServEx(doctorFarmReadService.findAllFarms()).stream().map(DoctorFarm::getId).collect(Collectors.toList());
-        doctorDailyReportV2Service.generateYesterdayAndToday(farmList);
+        doctorDailyReportV2Service.generateYesterdayAndToday(farmList, new DateTime(DateUtil.toDate(date)).withTimeAtStartOfDay().toDate());
         return Boolean.TRUE;
     }
 

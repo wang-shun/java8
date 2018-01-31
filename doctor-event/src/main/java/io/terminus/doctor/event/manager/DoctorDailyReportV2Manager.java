@@ -189,9 +189,8 @@ public class DoctorDailyReportV2Manager {
      *
      * @param farmIds 猪场ids
      */
-    public Map<Long, Date> generateYesterdayAndToday(List<Long> farmIds) {
+    public Map<Long, Date> generateYesterdayAndToday(List<Long> farmIds, Date yesterday) {
         Date today = Dates.startOfDay(new Date());
-        Date yesterday = new DateTime(today).minusDays(10).toDate();
         Map<Long, Date> longDateMap = Maps.newHashMap();
         Map<Long, Date> farmToDate = queryFarmEarlyEventAtImpl(DateUtil.toDateString(yesterday));
         farmIds.parallelStream().forEach(farmId -> {
@@ -224,12 +223,13 @@ public class DoctorDailyReportV2Manager {
      * 刷新猪场日报
      */
     public void flushFarmDaily(DoctorStatisticCriteria criteria) {
+        log.info("flush farmDaily starting farm:{}, sumAt:{}", criteria.getFarmId(), criteria.getSumAt());
         PigType.GROUP_TYPES.forEach(pigType -> {
             criteria.setPigType(pigType);
             flushGroupDaily(criteria);
         });
         flushPigDaily(criteria);
-
+        log.info("flush farmDaily end farm:{}, sumAt:{}", criteria.getFarmId(), criteria.getSumAt());
         // TODO: 17/12/21 效率指标 
     }
 
