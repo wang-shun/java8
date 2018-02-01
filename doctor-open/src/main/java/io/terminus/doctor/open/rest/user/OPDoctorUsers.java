@@ -181,7 +181,7 @@ public class OPDoctorUsers {
         });
         dto.setPigTrade(getPigIot(baseUser));
         dto.setPigJxy(getPigJxy(baseUser));
-        log.info("========userId:{}, dto:{}", baseUser.getId(), dto);
+//        log.info("========userId:{}, dto:{}", baseUser.getId(), dto);
         return dto;
     }
 
