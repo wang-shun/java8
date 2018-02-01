@@ -180,7 +180,7 @@ public class OPDoctorUsers {
         });
         dto.setPigIot(getPigIot(baseUser));
         dto.setPigJxy(getPigJxy(baseUser));
-        log.debug("========userId:{}, dto:{}", baseUser.getId(), dto);
+        log.info("========userId:{}, dto:{}", baseUser.getId(), dto);
         return dto;
     }
 
