@@ -22,6 +22,12 @@ public class DoctorTurnSeedGroupInput extends BaseGroupInput implements Serializ
     private static final long serialVersionUID = -2955174319148999586L;
 
     /**
+     * 原值
+     */
+    @NotNull(message = "origin.not.null")
+    private Long origin;
+
+    /**
      * 转种猪后的猪号
      */
     @NotEmpty(message = "pig.code.not.null")

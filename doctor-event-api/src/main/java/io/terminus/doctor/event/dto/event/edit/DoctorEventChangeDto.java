@@ -23,6 +23,11 @@ public class DoctorEventChangeDto {
     private Long farmId;
 
     /**
+     * 猪群类型
+     */
+    private Integer pigType;
+
+    /**
      * 目标id
      */
     private Long businessId;
@@ -211,6 +216,11 @@ public class DoctorEventChangeDto {
     private Double weightChange;
 
     /**
+     * 日龄变化量
+     */
+    private Integer ageChange;
+
+    /**
      * 超出重量变化
      */
     private Double overWeightChange;
@@ -244,6 +254,11 @@ public class DoctorEventChangeDto {
      * 猪断奶数变化量
      */
     private Integer weanCountChange;
+
+    /**
+     * 断奶合格数
+     */
+    private Integer weanQualifiedCount;
 
     /**
      * 猪断奶均重变化量
@@ -328,6 +343,12 @@ public class DoctorEventChangeDto {
     private Integer transGroupType;
 
     /**
+     * 转入类型
+     * @see io.terminus.doctor.event.enums.InType
+     */
+    private Integer inType;
+
+    /**
      * 转移类型(更新报表参数)
      */
     private Integer transBarnType;
@@ -383,5 +404,11 @@ public class DoctorEventChangeDto {
      * 是否是分娩转入
      */
     private Boolean isFarrowIn;
+
+    /**
+     * 是否是手动事件
+     * @see io.terminus.doctor.event.enums.IsOrNot
+     */
+    private Integer isAuto;
 
 }

@@ -10,6 +10,7 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 
 import com.google.common.base.Throwables;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockMonthly;
+import io.terminus.doctor.common.utils.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,25 +117,32 @@ public class DoctorWarehouseStockMonthlyReadServiceImpl implements DoctorWarehou
     @Override
     public Response<AmountAndQuantityDto> countMaterialBalance(Long warehouseId, Long materialId, int handleYear, int handleMonth) {
         try {
-            List<DoctorWarehouseStockMonthly> stockMonthlies = doctorWarehouseStockMonthlyDao.list(DoctorWarehouseStockMonthly.builder()
-                    .warehouseId(warehouseId)
-                    .materialId(materialId)
-                    .handleYear(handleYear)
-                    .handleMonth(handleMonth)
-                    .build());
-            if (stockMonthlies.isEmpty())
-                return Response.ok(new AmountAndQuantityDto(0, new BigDecimal(0)));
-
-            long totalAmount = 0;
-            BigDecimal totalQuantity = new BigDecimal(0);
-            for (DoctorWarehouseStockMonthly stockMonthly : stockMonthlies) {
-                totalAmount += stockMonthly.getBalacneAmount();
-                totalQuantity = totalQuantity.add(stockMonthly.getBalanceQuantity());
-            }
-            return Response.ok(new AmountAndQuantityDto(totalAmount, totalQuantity));
+//            List<DoctorWarehouseStockMonthly> stockMonthlies = doctorWarehouseStockMonthlyDao.list(DoctorWarehouseStockMonthly.builder()
+//                    .warehouseId(warehouseId)
+//                    .materialId(materialId)
+//                    .handleYear(handleYear)
+//                    .handleMonth(handleMonth)
+//                    .build());
+//            if (stockMonthlies.isEmpty())
+//                return Response.ok(new AmountAndQuantityDto(0, new BigDecimal(0)));
+//
+//            long totalAmount = 0;
+//            BigDecimal totalQuantity = new BigDecimal(0);
+//            for (DoctorWarehouseStockMonthly stockMonthly : stockMonthlies) {
+//                totalAmount += stockMonthly.getBalacneAmount();
+//                totalQuantity = totalQuantity.add(stockMonthly.getBalanceQuantity());
+//            }
+//            return Response.ok(new AmountAndQuantityDto(totalAmount, totalQuantity));
+            return Response.ok(doctorWarehouseStockMonthlyDao.statisticsGroupBySku(warehouseId, DateUtil.toYYYYMM(handleYear + "-" + handleMonth)).get(materialId));
         } catch (Exception e) {
             log.error("failed to count doctor warehouse stock monthly, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.stock.monthly.count.fail");
         }
+    }
+
+
+    @Override
+    public Response<Map<Long, AmountAndQuantityDto>> countEachMaterialBalance(Long warehouseId, int handleYear, int handleMonth) {
+        return Response.ok(doctorWarehouseStockMonthlyDao.statisticsGroupBySku(warehouseId, DateUtil.toYYYYMM(handleYear + "-" + handleMonth)));
     }
 }

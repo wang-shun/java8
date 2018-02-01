@@ -18,6 +18,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorWeanGroupInput;
@@ -131,12 +132,15 @@ public class DoctorCommonGroupEventHandler {
         moveIn.setCreatorName(transGroup.getCreatorName());
         moveIn.setRelGroupEventId(transGroup.getRelGroupEventId());
 
-        moveIn.setInType(InType.GROUP.getValue());       //转入类型
-        moveIn.setInTypeName(InType.GROUP.getDesc());
+        InType inType = transGroup instanceof DoctorTransFarmGroupInput ? InType.FARM : InType.GROUP;
+        moveIn.setInType(inType.getValue());       //转入类型
+        moveIn.setInTypeName(inType.getDesc());
         moveIn.setSource(transGroup.getSource());                 //来源可以分为 本场(转群), 外场(转场)
         moveIn.setSex(fromGroupTrack.getSex());
         moveIn.setBreedId(transGroup.getBreedId());
         moveIn.setBreedName(transGroup.getBreedName());
+        moveIn.setFromFarmId(fromGroup.getFarmId());
+        moveIn.setFromFarmName(fromGroup.getFarmName());
         moveIn.setFromBarnId(fromGroup.getCurrentBarnId());         //来源猪舍
         moveIn.setFromBarnName(fromGroup.getCurrentBarnName());
         moveIn.setFromGroupId(fromGroup.getId());                   //来源猪群
@@ -242,6 +246,7 @@ public class DoctorCommonGroupEventHandler {
         //基本信息
         farmEntryDto.setRelGroupEventId(input.getRelGroupEventId());
         farmEntryDto.setPigCode(input.getPigCode());
+        farmEntryDto.setOrigin(input.getOrigin());
         farmEntryDto.setBarnId(barn.getId());
         farmEntryDto.setBarnName(barn.getName());
         farmEntryDto.setBarnType(barn.getPigType());

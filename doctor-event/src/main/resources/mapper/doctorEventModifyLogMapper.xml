@@ -144,7 +144,7 @@
     <select id="getEventModifyLog" parameterType="string" resultMap="DoctorEventModifyLogMap" >
         SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
         <where>
-            created_at &gt;= #{startDate}
+            updated_at &gt;= #{startDate}
         </where>
     </select>
 

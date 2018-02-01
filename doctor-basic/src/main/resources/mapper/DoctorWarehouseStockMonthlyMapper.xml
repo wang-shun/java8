@@ -151,6 +151,7 @@
         FROM
         <include refid="tb"/>
         where warehouse_id =#{warehouseId}
+        <if test="handleDate !=null">AND <![CDATA[handle_date<=#{handleDate}]]></if>
         GROUP BY material_id
     </select>
 

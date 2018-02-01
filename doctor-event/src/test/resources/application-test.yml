@@ -3,7 +3,7 @@
 #  url: jdbc:h2:mem:test;MODE=MySQL
 datasource:
   driver-class-name: com.mysql.jdbc.Driver
-  url: jdbc:mysql://127.0.0.1:3306/pig_doctor1?useUnicode=true&characterEncoding=UTF8&autoReconnect=true
+  url: jdbc:mysql://101.201.44.35:3306/pig_doctor_v2?useUnicode=true&characterEncoding=UTF8&autoReconnect=true
   username: root
   password: anywhere
 
@@ -20,6 +20,11 @@ zookeeper:
   host: 127.0.0.1
   port: 2181
   zkTopic: pig.doctor.topic
+
+# Dubbo
+rpc.dubbo:
+    registryAddress: 127.0.0.1:2181
+    check: false   # 默认是true, 检查provider
 
 redis:
   host: 127.0.0.1

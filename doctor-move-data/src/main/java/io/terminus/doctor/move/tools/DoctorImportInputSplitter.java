@@ -83,6 +83,7 @@ public class DoctorImportInputSplitter {
                 .source(importBoar.getSource())
                 .breedName(importBoar.getBreedName())
                 .boarType(importBoar.getBoarType())
+                .origin(EventUtil.getCent(importBoar.getOrigin()))
                 .build();
     }
 
@@ -134,6 +135,7 @@ public class DoctorImportInputSplitter {
                 importGroupEvent.setQuantity(importGroup.getLiveStock());
                 importGroupEvent.setAvgDayAge(importGroup.getAvgDayAge());
                 importGroupEvent.setAvgWeight(importGroup.getAvgWeight());
+                importGroupEvent.setOrigin(EventUtil.getCent(importGroup.getOrigin()));
             }
             return importGroupEvent;
         }).collect(Collectors.toList());
@@ -171,6 +173,7 @@ public class DoctorImportInputSplitter {
             case ENTRY:
                 eventAt = importSow.getInFarmDate();
                 barnName = importSow.getPregBarn();
+                importPigEvent.setOrigin(EventUtil.getCent(importSow.getOrigin()));
                 break;
             case MATING:
                 eventAt = importSow.getMateDate();

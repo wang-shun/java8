@@ -51,4 +51,6 @@ public interface DoctorWarehouseStockMonthlyReadService {
     Response<AmountAndQuantityDto> countWarehouseBalance(Long warehouseId, Date handleDate);
 
     Response<AmountAndQuantityDto> countMaterialBalance(Long warehouseId, Long materialId, int handleYear, int handleMonth);
+
+    Response<Map<Long, AmountAndQuantityDto>> countEachMaterialBalance(Long warehouseId, int handleYear, int handleMonth);
 }

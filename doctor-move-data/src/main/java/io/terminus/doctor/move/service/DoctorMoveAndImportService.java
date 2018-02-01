@@ -6,9 +6,13 @@ import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.service.DoctorDailyGroupWriteService;
+import io.terminus.doctor.event.service.DoctorDailyReportV2Service;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
+import io.terminus.doctor.event.service.DoctorReportWriteService;
 import io.terminus.doctor.move.dto.DoctorFarmWithMobile;
 import io.terminus.doctor.move.dto.DoctorImportBasicData;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
@@ -22,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -52,6 +57,10 @@ public class DoctorMoveAndImportService {
     public DoctorDailyGroupWriteService doctorDailyGroupWriteService;
     @Autowired
     public DoctorMoveReportService doctorMoveReportService;
+    @Autowired
+    public DoctorDailyReportV2Service doctorDailyReportV2Service;
+    @Autowired
+    public DoctorReportWriteService doctorReportWriteService;
 
     public List<DoctorFarm> moveData(Long moveId, Sheet sheet) {
         log.info("move data starting");
@@ -83,30 +92,35 @@ public class DoctorMoveAndImportService {
     @Transactional
     public Long importData(DoctorImportSheet sheet) {
         log.info("import data starting");
+        DoctorFarm farm = null;
+        try {
+            //导入猪场和用户
+            farm = importFarmAndUser(sheet.getFarm(), sheet.getStaff());
 
-        //导入猪场和用户
-        DoctorFarm farm = importFarmAndUser(sheet.getFarm(), sheet.getStaff());
+            //导入基础数据
+            importBasic(farm, sheet.getBarn(), sheet.getBreed());
 
-        //导入基础数据
-        importBasic(farm, sheet.getBarn(), sheet.getBreed());
+            //打包数据
+            DoctorImportBasicData importBasicData = packageImportBasicData(farm);
 
-        //打包数据
-        DoctorImportBasicData importBasicData = packageImportBasicData(farm);
+            //导入猪事件
+            importPig(sheet.getBoar(), sheet.getSow(), importBasicData);
 
-        //导入猪事件
-        importPig(sheet.getBoar(), sheet.getSow(), importBasicData);
+            //导入猪群事件
+            importGroup(sheet.getGroup(), importBasicData);
 
-        //导入猪群事件
-        importGroup(sheet.getGroup(), importBasicData);
+            //导入仓库
+            importWareHouse();
 
-        //导入仓库
-        importWareHouse();
+            //基础数据与猪场关联
+            importFarmBasics(farm.getId());
 
-        //基础数据与猪场关联
-        importFarmBasics(farm.getId());
-
-        log.info("import data end");
-        return farm.getId();
+            log.info("import data end");
+            return farm.getId();
+        } catch (Exception e) {
+            importDataService.deleteUser(farm);
+            throw e;
+        }
     }
 
     private DoctorFarm importFarmAndUser(Sheet farmShit, Sheet staffShit) {
@@ -125,6 +139,7 @@ public class DoctorMoveAndImportService {
         log.info("import basic end");
     }
 
+    @Transactional
     public DoctorImportBasicData packageImportBasicData(DoctorFarm farm) {
         log.info("package import basic staring");
         Map<String, Long> userMap = moveBasicService.getSubMap(farm.getOrgId());
@@ -135,12 +150,14 @@ public class DoctorMoveAndImportService {
                 .build();
     }
 
+    @Transactional
     public void importPig(Sheet boarSheet, Sheet sowSheet, DoctorImportBasicData importBasicData) {
         log.info("import pig staring");
         moveAndImportManager.importPig(boarSheet, sowSheet, importBasicData);
         log.info("import pig end");
     }
 
+    @Transactional
     public void importGroup(Sheet groupSheet, DoctorImportBasicData importBasicData) {
         log.info("import group staring");
         moveAndImportManager.importGroup(groupSheet, importBasicData);
@@ -250,11 +267,16 @@ public class DoctorMoveAndImportService {
             DateTime end = DateTime.now().withTimeAtStartOfDay(); //昨天开始时间
             DateTime begin = end.minusYears(1);
             new Thread(() -> {
-                doctorDailyReportWriteService.createDailyReports(farmId, begin.toDate(), end.toDate());
-                doctorDailyGroupWriteService.createDailyGroupsByDateRange(farmId, begin.toDate(), end.toDate());
-                doctorMoveReportService.moveDoctorRangeReport(farmId, 12);
+//                doctorDailyReportWriteService.createDailyReports(farmId, begin.toDate(), end.toDate());
+//                doctorDailyGroupWriteService.createDailyGroupsByDateRange(farmId, begin.toDate(), end.toDate());
+//                doctorMoveReportService.moveDoctorRangeReport(farmId, 12);
+                doctorDailyReportV2Service.flushFarmDaily(farmId, DateUtil.toDateString(begin.toDate()), DateUtil.toDateString(end.toDate()));
+                doctorReportWriteService.flushNPD(Collections.singletonList(farmId), begin.toDate());
                 doctorMoveReportService.moveParityMonthlyReport(farmId, 12);
                 doctorMoveReportService.moveBoarMonthlyReport(farmId, 12);
+
+                doctorDailyReportV2Service.synchronizeDelta(farmId, begin.toDate(), OrzDimension.FARM.getValue());
+                doctorDailyReportV2Service.syncEfficiency(farmId);
             }).start();
         } catch (Exception e) {
             log.error("generate report error. farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));

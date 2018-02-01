@@ -49,6 +49,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -188,6 +189,11 @@ public class DoctorMoveDataController {
             log.error("move all data failed, mobile:{}, moveId:{}, cause:{}", mobile, moveId, Throwables.getStackTraceAsString(e));
             return false;
         }
+    }
+
+    @RequestMapping(value = "/generate/report/{farmId}")
+    public void generateReport(@PathVariable Long farmId) {
+        doctorMoveAndImportService.generateReport(farmId);
     }
 
     private Sheet importFarmInfoExcel(String path) {
@@ -1251,6 +1257,15 @@ public class DoctorMoveDataController {
         log.info("update user name starting, userId:{}, userName:{}", userId, userName);
         doctorMoveDataService.updateUserName(userId, userName);
         log.info("update user name ending");
+        return true;
+    }
+
+
+    @RequestMapping(value = "/deleteOrg", method = RequestMethod.GET)
+    public Boolean deleteOrg(@RequestParam Long orgId) {
+        log.info("delete org starting, orgId:{}");
+        doctorMoveDataService.deleteOrg(orgId);
+        log.info("delete org ending");
         return true;
     }
 

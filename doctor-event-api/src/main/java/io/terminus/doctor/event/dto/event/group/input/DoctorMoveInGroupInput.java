@@ -26,6 +26,12 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
     private static final long serialVersionUID = -2457482464847828070L;
 
     /**
+     * 原值
+     */
+    @NotNull(message = "origin.not.null")
+    private Long origin;
+
+    /**
      * 猪群转移类型
      * @see io.terminus.doctor.event.enums.InType
      */
@@ -60,12 +66,17 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
     private String breedName;
 
     /**
+     * 来源猪场id
+     */
+    private Long fromFarmId;
+
+    private String fromFarmName;
+
+    /**
      * 来源猪舍id
      */
     private Long fromBarnId;
-
     private String fromBarnName;
-
     private Integer fromBarnType;
 
     /**

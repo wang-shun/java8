@@ -8,10 +8,11 @@ import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.enums.GroupEventType;
-import io.terminus.doctor.event.model.DoctorDailyGroup;
+import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.util.EventUtil;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -48,6 +49,7 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
         DoctorChangeGroupInput newInput = (DoctorChangeGroupInput) input;
         return DoctorEventChangeDto.builder()
                 .farmId(oldGroupEvent.getFarmId())
+                .pigType(oldGroupEvent.getPigType())
                 .businessId(oldGroupEvent.getGroupId())
                 .newEventAt(DateUtil.toDate(newInput.getEventAt()))
                 .oldEventAt(DateUtil.toDate(oldInput.getEventAt()))
@@ -84,8 +86,9 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
 
     @Override
     protected void updateDailyForModify(DoctorGroupEvent oldGroupEvent, BaseGroupInput input, DoctorEventChangeDto changeDto) {
-        if (Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
-                       DoctorDailyGroup oldDailyGroup = doctorDailyGroupDao.findByGroupIdAndSumAt(changeDto.getBusinessId(), changeDto.getOldEventAt());
+        if (DateUtils.isSameDay(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
+                       DoctorGroupDaily oldDailyGroup = doctorDailyReportManager.findDoctorGroupDaily(oldGroupEvent.getFarmId(),
+                               oldGroupEvent.getPigType(), changeDto.getOldEventAt());
             if (Objects.equals(changeDto.getNewChangeTypeId(), changeDto.getOldChangeTypeId())) {
                 changeDto.setChangeTypeId(changeDto.getOldChangeTypeId());
                 buildDailyGroup(oldDailyGroup, changeDto);
@@ -94,6 +97,7 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
                 DoctorChangeGroupInput oldInput = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorChangeGroupInput.class);
                 DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
                         .quantityChange(EventUtil.minusInt(0, oldInput.getQuantity()))
+                        .weightChange(EventUtil.minusDouble(0.0, oldInput.getWeight()))
                         .changeTypeId(oldInput.getChangeTypeId())
                         .isSowTrigger(notNull(oldGroupEvent.getSowId()))
                         .build();
@@ -102,13 +106,14 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
                 DoctorChangeGroupInput newInput = (DoctorChangeGroupInput) input;
                 DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                         .quantityChange(newInput.getQuantity())
+                        .weightChange(newInput.getWeight())
                         .changeTypeId(newInput.getChangeTypeId())
                         .isSowTrigger(notNull(oldGroupEvent.getSowId()))
                         .build();
                 buildDailyGroup(oldDailyGroup, changeDto2);
             }
-            doctorDailyGroupDao.update(oldDailyGroup);
-            updateDailyGroupLiveStock(changeDto.getBusinessId(), getAfterDay(changeDto.getOldEventAt())
+            doctorGroupDailyDao.update(oldDailyGroup);
+            updateDailyGroupLiveStock(changeDto.getFarmId(), changeDto.getPigType(), getAfterDay(changeDto.getOldEventAt())
                     , -changeDto.getQuantityChange());
         } else {
             updateDailyForDelete(oldGroupEvent);
@@ -162,22 +167,13 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
         DoctorChangeGroupInput oldInput = JSON_MAPPER.fromJson(oldGroupEvent.getExtra(), DoctorChangeGroupInput.class);
         DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
                 .quantityChange(EventUtil.minusInt(0, oldInput.getQuantity()))
+                .weightChange(EventUtil.minusDouble(0.0, oldInput.getWeight()))
                 .changeTypeId(oldInput.getChangeTypeId())
                 .build();
-        DoctorDailyGroup oldDailyGroup1 = doctorDailyGroupDao.findByGroupIdAndSumAt(oldGroupEvent.getGroupId(), oldGroupEvent.getEventAt());
-        doctorDailyGroupDao.update(buildDailyGroup(oldDailyGroup1, changeDto1));
-        updateDailyGroupLiveStock(oldGroupEvent.getGroupId(), getAfterDay(oldGroupEvent.getEventAt()), -changeDto1.getQuantityChange());
-
-        Integer unweanChangeCount = 0;
-        Integer weanChangeCount = 0;
-        if (notNull(oldGroupEvent.getSowId())) {
-            unweanChangeCount = oldGroupEvent.getQuantity();
-        } else {
-            weanChangeCount = oldGroupEvent.getQuantity();
-        }
-        doctorDailyGroupDao.updateUnweanAndWeanLiveStock(oldGroupEvent.getGroupId()
-                , oldGroupEvent.getEventAt(), unweanChangeCount, weanChangeCount);
-
+        DoctorGroupDaily oldDailyGroup1 = doctorDailyReportManager.findDoctorGroupDaily(oldGroupEvent.getFarmId(), oldGroupEvent.getPigType(), oldGroupEvent.getEventAt());
+        doctorGroupDailyDao.update(buildDailyGroup(oldDailyGroup1, changeDto1));
+        updateDailyGroupLiveStock(oldGroupEvent.getFarmId(), oldGroupEvent.getPigType(), getAfterDay(oldGroupEvent.getEventAt()), -changeDto1.getQuantityChange());
+        
     }
 
     @Override
@@ -186,27 +182,18 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
         DoctorChangeGroupInput newInput = (DoctorChangeGroupInput) input;
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                 .quantityChange(newInput.getQuantity())
+                .weightChange(newInput.getWeight())
                 .changeTypeId(newInput.getChangeTypeId())
                 .build();
-        DoctorDailyGroup oldDailyGroup2 = doctorDailyReportManager.findByGroupIdAndSumAt(newGroupEvent.getGroupId(), eventAt);
-        doctorDailyReportManager.createOrUpdateDailyGroup(buildDailyGroup(oldDailyGroup2, changeDto2));
-        updateDailyGroupLiveStock(newGroupEvent.getGroupId(), getAfterDay(eventAt), -changeDto2.getQuantityChange());
-
-        Integer unweanChangeCount = 0;
-        Integer weanChangeCount = 0;
-        if (notNull(newGroupEvent.getSowId())) {
-            unweanChangeCount = - newInput.getQuantity();
-        } else {
-            weanChangeCount =  - newInput.getQuantity();
-        }
-        doctorDailyGroupDao.updateUnweanAndWeanLiveStock(newGroupEvent.getGroupId()
-                , eventAt, unweanChangeCount, weanChangeCount);
+        DoctorGroupDaily oldDailyGroup2 = doctorDailyReportManager.findDoctorGroupDaily(newGroupEvent.getFarmId(), newGroupEvent.getPigType(), eventAt);
+        doctorDailyReportManager.createOrUpdateGroupDaily(buildDailyGroup(oldDailyGroup2, changeDto2));
+        updateDailyGroupLiveStock(newGroupEvent.getFarmId(), newGroupEvent.getPigType(), getAfterDay(eventAt), -changeDto2.getQuantityChange());
     }
 
     @Override
-    protected DoctorDailyGroup buildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
+    protected DoctorGroupDaily buildDailyGroup(DoctorGroupDaily oldDailyGroup, DoctorEventChangeDto changeDto) {
         oldDailyGroup = super.buildDailyGroup(oldDailyGroup, changeDto);
-        updateChange(oldDailyGroup, changeDto.getQuantityChange(), changeDto.getChangeTypeId());
+        updateChange(oldDailyGroup, changeDto.getQuantityChange(), changeDto.getWeightChange(), changeDto.getChangeTypeId());
         oldDailyGroup.setEnd(EventUtil.minusInt(oldDailyGroup.getEnd(), changeDto.getQuantityChange()));
         return oldDailyGroup;
     }
@@ -217,9 +204,11 @@ public class DoctorModifyGroupChangeEventHandler extends DoctorAbstractModifyGro
      * @param quantityChange 变动数量
      * @param changeTypeId 变动类型
      */
-    private void updateChange(DoctorDailyGroup oldDailyGroup, Integer quantityChange, Long changeTypeId) {
+    private void updateChange(DoctorGroupDaily oldDailyGroup, Integer quantityChange, Double weightChange, Long changeTypeId) {
+        oldDailyGroup.setTurnOutWeight(EventUtil.plusDouble(oldDailyGroup.getSaleWeight(), weightChange));
         if (Objects.equals(changeTypeId, SALE)) {
             oldDailyGroup.setSale(EventUtil.plusInt(oldDailyGroup.getSale(), quantityChange));
+//            oldDailyGroup.setSaleWeight(EventUtil.plusDouble(oldDailyGroup.getSaleWeight(), weightChange));
         } else if (Objects.equals(changeTypeId, DEAD)) {
             oldDailyGroup.setDead(EventUtil.plusInt(oldDailyGroup.getDead(), quantityChange));
         } else if (Objects.equals(changeTypeId, WEED)) {

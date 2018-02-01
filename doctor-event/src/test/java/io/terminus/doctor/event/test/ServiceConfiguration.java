@@ -109,7 +109,7 @@ public class ServiceConfiguration {
     /**
      * 对应event handler
      */
-    @Bean
+//    @Bean
     public DoctorPigEventHandlers doctorPigEventHandlers(
             DoctorEntryHandler doctorEntryHandler,
             DoctorSemenHandler doctorSemenHandler,
@@ -153,7 +153,7 @@ public class ServiceConfiguration {
         return doctorEventHandlers;
     }
 
-    @Bean
+//    @Bean
     public DoctorGroupEventHandlers doctorGroupEventHandlers(DoctorAntiepidemicGroupEventHandler doctorAntiepidemicGroupEventHandler,
                                                              DoctorChangeGroupEventHandler doctorChangeGroupEventHandler,
                                                              DoctorCloseGroupEventHandler doctorCloseGroupEventHandler,
@@ -182,7 +182,7 @@ public class ServiceConfiguration {
         return doctorGroupEventHandlers;
     }
 
-    @Bean
+//    @Bean
     public DoctorModifyPigEventHandlers doctorModifyPigEventHandlers(
             DoctorModifyPigChgFarmEventHandler modifyPigChgFarmEventHandler,
             DoctorModifyPigChgFarmInEventHandler modifyPigChgFarmInEventHandler,
@@ -224,7 +224,7 @@ public class ServiceConfiguration {
         return modifyPigEventHandlers;
     }
 
-    @Bean
+//    @Bean
     public DoctorModifyGroupEventHandlers doctorModifyGroupEventHandlers(
             DoctorModifyGroupAntiepidemicEventHandler modifyGroupAntiepidemicEventHandler,
             DoctorModifyGroupChangeEventHandler modifyGroupChangeEventHandler,

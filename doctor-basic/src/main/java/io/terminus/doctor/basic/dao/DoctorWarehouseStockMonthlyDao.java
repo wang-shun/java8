@@ -38,9 +38,13 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
      * @param warehouseId
      * @return
      */
-    public Map<Long/*skuId*/, AmountAndQuantityDto> statisticsGroupBySku(Long warehouseId) {
+    public Map<Long/*skuId*/, AmountAndQuantityDto> statisticsGroupBySku(Long warehouseId, Date handleDate) {
 
-        List<DoctorWarehouseStockMonthly> monthlies = this.getSqlSession().selectList(this.sqlId("statisticsGroupBySku"), Collections.singletonMap("warehouseId", warehouseId));
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("handleDate", handleDate);
+        params.put("warehouseId", warehouseId);
+
+        List<DoctorWarehouseStockMonthly> monthlies = this.getSqlSession().selectList(this.sqlId("statisticsGroupBySku"), params);
 
         Map<Long, AmountAndQuantityDto> statistics = new HashMap<>();
         for (DoctorWarehouseStockMonthly monthly : monthlies) {

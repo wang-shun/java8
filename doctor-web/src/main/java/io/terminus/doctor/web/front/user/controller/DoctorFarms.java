@@ -1,8 +1,10 @@
 package io.terminus.doctor.web.front.user.controller;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.UserStatus;
@@ -14,12 +16,15 @@ import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorStaffReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
+import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.PrimaryUserReadService;
 import io.terminus.doctor.web.core.dto.DoctorBasicDto;
 import io.terminus.doctor.web.core.dto.FarmStaff;
 import io.terminus.doctor.web.core.service.DoctorStatisticReadService;
 import io.terminus.pampas.common.UserUtil;
+import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.model.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -33,6 +38,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc:
@@ -50,6 +56,8 @@ public class DoctorFarms {
     private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
     private final DoctorUserReadService doctorUserReadService;
     private final DoctorStatisticReadService doctorStatisticReadService;
+    @RpcConsumer
+    private DoctorUserProfileReadService doctorUserProfileReadService;
     @RpcConsumer
     private PrimaryUserReadService primaryUserReadService;
 
@@ -169,7 +177,15 @@ public class DoctorFarms {
             farmStaff.setFarmId(primaryUser.getRelFarmId());
             farmStaff.setUserId(primaryUser.getUserId());
             farmStaff.setStatus(primaryUser.getStatus());
-            farmStaff.setRealName(primaryUser.getRealName());
+            Response<UserProfile> userProfileResponse = doctorUserProfileReadService.findProfileByUserId(primaryUser.getUserId());
+            if (userProfileResponse.isSuccess()
+                    && notNull(userProfileResponse.getResult())
+                    && !Strings.isNullOrEmpty(userProfileResponse.getResult().getRealName())) {
+                farmStaff.setRealName(userProfileResponse.getResult().getRealName());
+            } else {
+                User user = RespHelper.or500(doctorUserReadService.findById(primaryUser.getUserId()));
+                farmStaff.setRealName(user.getName());
+            }
             staffList.add(farmStaff);
         }
         return staffList;

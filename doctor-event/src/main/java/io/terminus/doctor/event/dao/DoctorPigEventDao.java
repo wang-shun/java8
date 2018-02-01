@@ -55,7 +55,8 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
 
     /**
-     *查询最新的手动事件
+     * 查询最新的手动事件
+     *
      * @param pigId 猪id
      * @return 最新事件
      */
@@ -113,8 +114,8 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      * 查询这头母猪,最近一次断奶事件
      *
      * @param pigId
-     * @deprecated 建议查询最近一次导致其断奶的事件，而不是单纯查询断奶事件
      * @return
+     * @deprecated 建议查询最近一次导致其断奶的事件，而不是单纯查询断奶事件
      */
     public DoctorPigEvent queryLastWean(Long pigId) {
         return this.getSqlSession().selectOne(sqlId("queryLastEvent"), MapBuilder.<String, Object>of().put("pigId", pigId).put("type", PigEvent.WEAN.getKey()).map());
@@ -122,6 +123,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 获取猪某一事件类型的最新事件
+     *
      * @param pigId
      * @param type
      * @return
@@ -194,8 +196,8 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     /**
      * 根据猪场id和Kind查询
      *
-     * @param farmId 猪场id
-     * @param kind   猪类(公猪, 母猪)
+     * @param farmId     猪场id
+     * @param kind       猪类(公猪, 母猪)
      * @param eventTypes 事件类型
      * @return 事件list
      */
@@ -218,15 +220,16 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 查找一只猪(在指定时间之后)的第一个事件
-     * @param pigId 猪id, 不可为空
+     *
+     * @param pigId    猪id, 不可为空
      * @param fromDate 可为空
      * @return
      */
-    public DoctorPigEvent findFirstPigEvent(Long pigId, Date fromDate){
+    public DoctorPigEvent findFirstPigEvent(Long pigId, Date fromDate) {
         Map<String, Object> param;
-        if(fromDate == null){
+        if (fromDate == null) {
             param = ImmutableMap.of("pigId", pigId);
-        }else{
+        } else {
             param = ImmutableMap.of("pigId", pigId, "fromDate", fromDate);
         }
         return sqlSession.selectOne(sqlId("findFirstPigEvent"), param);
@@ -234,36 +237,39 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 查询一个猪舍累计有多少个事件
+     *
      * @param barnId 猪舍id
      * @return
      */
-    public Long countByBarnId(Long barnId){
+    public Long countByBarnId(Long barnId) {
         return sqlSession.selectOne(sqlId("countByBarnId"), barnId);
     }
 
     /**
      * 查询指定时间段内发生的事件, 匹配的是 eventAt
+     *
      * @param beginDate
      * @param endDate
      * @return 返回限制数量5000条
      */
-    public List<DoctorPigEvent> findByDateRange(Date beginDate, Date endDate){
+    public List<DoctorPigEvent> findByDateRange(Date beginDate, Date endDate) {
         Map<String, Object> param = new HashMap<>();
         param.put("beginDate", beginDate);
         param.put("endDate", endDate);
         return sqlSession.selectList(sqlId("findByDateRange"), ImmutableMap.copyOf(Params.filterNullOrEmpty(param)));
     }
 
-    public Boolean updates(List<DoctorPigEvent> lists){
+    public Boolean updates(List<DoctorPigEvent> lists) {
         return Boolean.valueOf(sqlSession.update(sqlId("updates"), lists) == 1);
     }
 
     /**
-     *根据条件查询操作人列表
+     * 根据条件查询操作人列表
+     *
      * @param criteria
      * @return
      */
-    public List<DoctorEventOperator> findOperators(Map<String, Object> criteria){
+    public List<DoctorEventOperator> findOperators(Map<String, Object> criteria) {
         return getSqlSession().selectList(sqlId("findOperators"), criteria);
     }
 
@@ -273,18 +279,20 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 事件列表(修复断奶事件暂时)
+     *
      * @return
      */
-    public List<DoctorPigEvent> addWeanEventAfterFosAndPigLets(){
+    public List<DoctorPigEvent> addWeanEventAfterFosAndPigLets() {
         return sqlSession.selectList(sqlId("addWeanEventAfterFosAndPigLets"));
     }
 
     /**
      * 能够回滚的事件
+     *
      * @param criteria
      * @return
      */
-    public DoctorPigEvent canRollbackEvent(Map<String, Object> criteria){
+    public DoctorPigEvent canRollbackEvent(Map<String, Object> criteria) {
         return getSqlSession().selectOne(sqlId("canRollbackEvent"), criteria);
     }
 
@@ -298,10 +306,11 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 临时使用
+     *
      * @param doctorPigEvent
      */
     @Deprecated
-    public void updatePigEvents(DoctorPigEvent doctorPigEvent){
+    public void updatePigEvents(DoctorPigEvent doctorPigEvent) {
         sqlSession.update("updatePigEvents", doctorPigEvent);
     }
 
@@ -311,6 +320,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 查询母猪胎次中数据平均值
+     *
      * @param pigId
      * @return
      */
@@ -320,6 +330,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 查询最新的几个事件
+     *
      * @param pigId 猪id
      * @param limit 查询几条
      * @return 猪事件列表
@@ -330,6 +341,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 查询和猪群相关联的猪事件
+     *
      * @param groupId 猪群id
      * @return 猪事件
      */
@@ -339,7 +351,8 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 去获取猪某一事件之后的事件列表
-     * @param pigId 猪id
+     *
+     * @param pigId   猪id
      * @param eventId 事件id
      * @return 事件列表
      */
@@ -349,7 +362,8 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 批量更改事件状态
-     * @param ids 事件id列表
+     *
+     * @param ids    事件id列表
      * @param status 需要更改的状态
      */
     public void updateEventsStatus(List<Long> ids, Integer status) {
@@ -358,6 +372,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 查询所有事件,包括无效事件
+     *
      * @param id 事件id
      * @return 事件
      */
@@ -383,7 +398,8 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 更改猪场名
-     * @param farmId 需要更改的猪场id
+     *
+     * @param farmId   需要更改的猪场id
      * @param farmName 新的猪场名
      */
     public void updateFarmName(Long farmId, String farmName) {
@@ -392,6 +408,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 查询没有相对应猪群断奶事件的猪断奶事件
+     *
      * @param excludeIds 过滤的事件ids
      * @return 猪断奶事件
      */
@@ -401,6 +418,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 查询之前手动添加的断奶事件
+     *
      * @return 断奶事件列表
      */
     public List<DoctorPigEvent> queryOldAddWeanEvent() {
@@ -409,6 +427,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 查询之前拼窝、仔猪变动触发的断奶事件
+     *
      * @return 断奶事件列表
      */
     public List<DoctorPigEvent> queryTriggerWeanEvent() {
@@ -417,6 +436,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 计算npd的数量用于计算分页数据
+     *
      * @param maps
      * @return
      */
@@ -426,6 +446,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * npd的计算
+     *
      * @param maps
      * @param offset
      * @param limit
@@ -437,7 +458,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
         maps = ImmutableMap.copyOf(Params.filterNullOrEmpty(maps));
         long total = countNpdWeanEvent(maps);
-        if (total <= 0){
+        if (total <= 0) {
             return new Paging<>(0L, Collections.<DoctorNpdExportDto>emptyList());
         }
         List<DoctorNpdExportDto> doctorNpdExportDtos = getSqlSession().selectList(sqlId("sumPngWeanEvent"), maps);
@@ -448,8 +469,10 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public Long countSaleEvent(Map<String, Object> maps) {
         return getSqlSession().selectOne(sqlId("countSales"), maps);
     }
+
     /**
      * 销售情况
+     *
      * @param maps
      * @param offset
      * @param limit
@@ -468,7 +491,8 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 获取猪某一胎次下的分娩事件
-     * @param pigId 猪id
+     *
+     * @param pigId  猪id
      * @param parity 胎次
      * @return 分娩事件
      */
@@ -478,7 +502,8 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 获取猪某一胎次下的断奶事件
-     * @param pigId 猪id
+     *
+     * @param pigId  猪id
      * @param parity 胎次
      * @return 断奶事件
      */
@@ -488,39 +513,43 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 获取某时间前的影响状态的最近的事件
-     * @param pigId 猪id
+     *
+     * @param pigId   猪id
      * @param eventAt 时间
      * @return 事件
      */
-    public DoctorPigEvent getLastStatusEventBeforeEventAt(Long pigId, Date eventAt){
-        return getSqlSession().selectOne(sqlId("getLastStatusEventBeforeEventAt"), ImmutableMap.of("pigId", pigId, "eventAt",eventAt));
+    public DoctorPigEvent getLastStatusEventBeforeEventAt(Long pigId, Date eventAt) {
+        return getSqlSession().selectOne(sqlId("getLastStatusEventBeforeEventAt"), ImmutableMap.of("pigId", pigId, "eventAt", eventAt));
     }
 
     /**
      * 获取某时间前的包括制定id的影响状态的最近的事件
-     * @param pigId 猪id
+     *
+     * @param pigId   猪id
      * @param eventAt 时间
-     * @param id 不包括的事件id
+     * @param id      不包括的事件id
      * @return 事件
      */
-    public DoctorPigEvent getLastStatusEventBeforeEventAtExcludeId(Long pigId, Date eventAt, Long id){
-        return getSqlSession().selectOne(sqlId("getLastStatusEventBeforeEventAtExcludeId"), ImmutableMap.of("pigId", pigId, "eventAt",eventAt, "id", id));
+    public DoctorPigEvent getLastStatusEventBeforeEventAtExcludeId(Long pigId, Date eventAt, Long id) {
+        return getSqlSession().selectOne(sqlId("getLastStatusEventBeforeEventAtExcludeId"), ImmutableMap.of("pigId", pigId, "eventAt", eventAt, "id", id));
     }
 
     /**
      * 获取某时间前的包括制定id的影响状态的最近的事件
-     * @param pigId 猪id
+     *
+     * @param pigId   猪id
      * @param eventAt 时间
-     * @param id 不包括的事件id
+     * @param id      不包括的事件id
      * @return 事件
      */
-    public DoctorPigEvent getLastStatusEventAfterEventAtExcludeId(Long pigId, Date eventAt, Long id){
-        return getSqlSession().selectOne(sqlId("getLastStatusEventAfterEventAtExcludeId"), ImmutableMap.of("pigId", pigId, "eventAt",eventAt, "id", id));
+    public DoctorPigEvent getLastStatusEventAfterEventAtExcludeId(Long pigId, Date eventAt, Long id) {
+        return getSqlSession().selectOne(sqlId("getLastStatusEventAfterEventAtExcludeId"), ImmutableMap.of("pigId", pigId, "eventAt", eventAt, "id", id));
     }
 
     /**
      * 获取时间前的初配事件
-     * @param pigId 猪id
+     *
+     * @param pigId   猪id
      * @param eventAt 时间
      * @return 初配事件
      */
@@ -531,6 +560,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     /**
      * 猪的不同种类进行金额的统计
      * 利润情况
+     *
      * @param maps
      * @return
      */
@@ -544,12 +574,13 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      */
     public void deleteByChgFarm(Long pigId) {
         getSqlSession().delete(sqlId("deleteByChgFarm"), pigId);
-     }
+    }
 
     /**
      * 获取离场前的最新事件
+     *
      * @param pigId 猪id
-     * @param id 离场事件id
+     * @param id    离场事件id
      * @return 离场前的最新事件
      */
     public DoctorPigEvent getLastEventBeforeRemove(Long pigId, Long id) {
@@ -558,6 +589,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 更新事件包括字段为null
+     *
      * @param pigEvent 猪事件
      * @return 更新是否成功
      */
@@ -567,6 +599,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 获取最新的胎次
+     *
      * @param pigId 猪id
      * @return 最新胎次
      */
@@ -576,18 +609,21 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 获取某一头某一胎次下未断奶数量
-     * @param pigId 猪id
+     *
+     * @param pigId  猪id
      * @param parity 胎次
      * @return 未断奶数
      */
     public Integer findUnWeanCountByParity(Long pigId, Integer parity) {
         return getSqlSession().selectOne(sqlId("findUnWeanCountByParity"), ImmutableMap.of("pigId", pigId, "parity", parity));
     }
+
     /**
      * 获取最新的去除(事件类型:3,4,5,8)
-     * @see PigEvent
+     *
      * @param pigId 猪id
      * @return 事件
+     * @see PigEvent
      */
     public DoctorPigEvent getLastStatusEvent(Long pigId) {
         return getSqlSession().selectOne(sqlId("getLastStatusEvent"), pigId);
@@ -595,10 +631,10 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 获取某猪某胎次下,妊娠检查时间前最近的初配事件
-     * @param pigId 猪id
-     * @param parity 胎次
-     * @param id 妊娠检查事件id
      *
+     * @param pigId  猪id
+     * @param parity 胎次
+     * @param id     妊娠检查事件id
      * @return 初配事件
      */
     public DoctorPigEvent getFirstMatingBeforePregCheck(Long pigId, Integer parity, Long id) {
@@ -613,6 +649,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 将猪场中转场转入事件前的事件置为eventSource=5
+     *
      * @param list 猪场id列表
      */
     public void flushChgFarmEventSource(List<Long> list) {
@@ -621,15 +658,17 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 获取猪场的事件
+     *
      * @param list 猪场id列表
      * @return 事件列表
      */
-    public List<DoctorPigEvent> findByFarmIds(List<Long> list){
+    public List<DoctorPigEvent> findByFarmIds(List<Long> list) {
         return sqlSession.selectList(sqlId("findByFarmIds"), list);
     }
 
     /**
      * 获取当前母猪未断奶数量
+     *
      * @param pigId 母猪id
      * @return 未断奶数量
      */
@@ -637,7 +676,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         return sqlSession.selectOne(sqlId("getSowUnweanCount"), pigId);
     }
 
-    public List<DoctorFarmEarlyEventAtDto> getFarmEarlyEventAt(String startDate)  {
+    public List<DoctorFarmEarlyEventAtDto> getFarmEarlyEventAt(String startDate) {
         return sqlSession.selectList(sqlId("getFarmEarlyEventAt"), startDate);
     }
 
@@ -653,14 +692,17 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
     /**
      * 修复窝号临时创建请勿使用
+     *
      * @return
      */
     @Deprecated
     public List<DoctorPigEvent> findAllFarrowNoNestCode() {
         return sqlSession.selectList(sqlId("findAllFarrowNoNestCode"));
     }
+
     /**
      * 修复窝号,临时创建请勿使用
+     *
      * @return
      */
     @Deprecated
@@ -671,5 +713,25 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     public List<DoctorPigSalesExportDto> findSales(Map<String, Object> map) {
         return sqlSession.selectList(sqlId("findSales"), map);
+    }
+
+
+    /**
+     * 查询在指定时间段内有事件发生的猪
+     *
+     * @return
+     */
+    public List<Long> findPigAtEvent(Date start, Date end, List<Long> farmIds) {
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("beginDate", start);
+        params.put("endDate", end);
+        params.put("farmIds", farmIds);
+
+        return this.sqlSession.selectList(this.sqlId("findPigAt"), params);
+    }
+
+    public List<DoctorFarmEarlyEventAtDto> findEarLyAt(){
+        return sqlSession.selectList(sqlId("findEarLyAt"));
     }
 }

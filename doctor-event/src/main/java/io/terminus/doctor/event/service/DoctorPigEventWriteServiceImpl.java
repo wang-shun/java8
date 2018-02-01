@@ -11,6 +11,7 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
+import io.terminus.doctor.event.helper.DoctorConcurrentControl;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.zookeeper.pubsub.Publisher;
@@ -41,6 +42,8 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     private CoreEventDispatcher coreEventDispatcher;
     @Autowired
     private Publisher publisher;
+    @Autowired
+    private DoctorConcurrentControl doctorConcurrentControl;
 
     @Override
     public RespWithEx<Boolean> pigEventHandle(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
@@ -57,6 +60,8 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
         } catch (Exception e) {
             log.error("pig.event.handle.failed, input:{}, basic:{}, cause by :{}", inputDto, basic, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("pig.event.handle.failed");
+        } finally {
+            doctorConcurrentControl.delAll();
         }
     }
 
@@ -75,6 +80,8 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
         } catch (Exception e) {
             log.error("batch.pig.event.handle.failed, input:{}, basic:{}, cause by :{}", inputDtos, basic, Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("batch.pig.event.handle.failed");
+        } finally {
+            doctorConcurrentControl.delAll();
         }
     }
 

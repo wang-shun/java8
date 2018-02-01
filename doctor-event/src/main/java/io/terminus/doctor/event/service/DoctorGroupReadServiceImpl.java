@@ -572,4 +572,14 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             return Response.fail("find.track.by.groupId");
         }
     }
+
+    @Override
+    public Response<List<DoctorGroup>> listOpenGroupsBy(String date) {
+        try {
+            return Response.ok(doctorGroupDao.listOpenGroupsBy(date));
+        } catch (Exception e) {
+            log.error("list open groups by, date:{},cause:{}",date, Throwables.getStackTraceAsString(e));
+            return Response.fail("list.open.groups.by.failed");
+        }
+    }
 }

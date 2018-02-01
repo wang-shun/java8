@@ -12,10 +12,11 @@ import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
-import io.terminus.doctor.event.model.DoctorDailyReport;
+import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -85,8 +86,8 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
 
     @Override
     protected void updateDailyForModify(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto) {
-        if (Objects.equals(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
-            DoctorDailyReport oldDailyPig = doctorDailyPigDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getOldEventAt());
+        if (DateUtils.isSameDay(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
+            DoctorPigDaily oldDailyPig = doctorDailyReportManager.findDoctorPigDaily(changeDto.getFarmId(), changeDto.getOldEventAt());
 
             //1.原妊娠检查结果
             DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
@@ -100,7 +101,23 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
                     .pregCheckResult(changeDto.getNewPregCheckResult())
                     .pregCheckResultCountChange(1)
                     .build();
-            doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig, changeDto2));
+            doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig, changeDto2));
+
+            //更新配种、空怀、怀孕母猪数量
+            if (!PigType.MATING_TYPES.contains(oldPigEvent.getBarnType())) {
+                return;
+            }
+
+            if (Objects.equals(changeDto.getOldPregCheckResult(), PregCheckResult.YANG.getKey())
+                    && !Objects.equals(changeDto.getNewPregCheckResult(), PregCheckResult.YANG.getKey())) {
+                updateDailyPhStatusLiveStock(oldPigEvent.getFarmId(), oldPigEvent.getEventAt()
+                        , 0, 1, -1);
+            } else if (!Objects.equals(changeDto.getOldPregCheckResult(), PregCheckResult.YANG.getKey())
+                    && Objects.equals(changeDto.getNewPregCheckResult(), PregCheckResult.YANG.getKey())) {
+                updateDailyPhStatusLiveStock(oldPigEvent.getFarmId(), oldPigEvent.getEventAt()
+                        , 0, -1, 1);
+            }
+
         } else {
             updateDailyOfDelete(oldPigEvent);
             updateDailyOfNew(oldPigEvent, inputDto);
@@ -141,19 +158,20 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
 
     @Override
     public void updateDailyOfDelete(DoctorPigEvent oldPigEvent) {
-        DoctorDailyReport oldDailyPig1 = doctorDailyPigDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
+        DoctorPigDaily oldDailyPig1 = doctorDailyReportManager.findDoctorPigDaily(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
         DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
                 .pregCheckResult(oldPigEvent.getPregCheckResult())
                 .pregCheckResultCountChange(-1)
                 .build();
-        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig1, changeDto1));
+        doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig1, changeDto1));
+
 
         //更新配种、空怀、怀孕母猪数量
         if (!PigType.MATING_TYPES.contains(oldPigEvent.getBarnType())) {
             return;
         }
         Integer phMatingChangeCount = 0;
-        Integer phKongHuaiChangeCount= 0;
+        Integer phKongHuaiChangeCount = 0;
         Integer phPregnantChangeCount = 0;
         Integer afterStatus = getStatus(oldPigEvent.getPregCheckResult());
         DoctorPigEvent beforeStatusEvent = doctorPigEventDao.getLastStatusEventBeforeEventAt(oldPigEvent.getPigId(), oldPigEvent.getEventAt());
@@ -174,23 +192,24 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
         } else {
             phPregnantChangeCount = -1;
         }
-        doctorDailyPigDao.updateDailyPhStatusLiveStock(oldPigEvent.getFarmId(), oldPigEvent.getEventAt()
+        updateDailyPhStatusLiveStock(oldPigEvent.getFarmId(), oldPigEvent.getEventAt()
                 , phMatingChangeCount, phKongHuaiChangeCount, phPregnantChangeCount);
     }
 
     @Override
     public void updateDailyOfNew(DoctorPigEvent newPigEvent, BasePigEventInputDto inputDto) {
         DoctorPregChkResultDto newDto = (DoctorPregChkResultDto) inputDto;
-        DoctorDailyReport oldDailyPig2 = doctorDailyPigDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), newDto.eventAt());
+        DoctorPigDaily oldDailyPig2 = doctorDailyReportManager.findDoctorPigDaily(newPigEvent.getFarmId(), newDto.eventAt());
         DoctorEventChangeDto changeDto2 = DoctorEventChangeDto.builder()
                 .pregCheckResult(newDto.getCheckResult())
                 .pregCheckResultCountChange(1)
                 .build();
-        doctorDailyReportManager.createOrUpdateDailyPig(buildDailyPig(oldDailyPig2, changeDto2));
+        doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig2, changeDto2));
+
 
         //更新配种、空怀、怀孕母猪数量
         if (!PigType.MATING_TYPES.contains(newPigEvent.getBarnType())) {
-           return;
+            return;
         }
         Integer afterStatus = getStatus(newDto.getCheckResult());
         Integer beforeStatus = newPigEvent.getPigStatusBefore();
@@ -215,12 +234,13 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
         } else {
             phPregnantChangeCount = 1;
         }
-        doctorDailyPigDao.updateDailyPhStatusLiveStock(newPigEvent.getFarmId(), inputDto.eventAt()
+        updateDailyPhStatusLiveStock(newPigEvent.getFarmId(), inputDto.eventAt()
                 , phMatingChangeCount, phKongHuaiChangeCount, phPregnantChangeCount);
+
     }
 
     @Override
-    protected DoctorDailyReport buildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
+    protected DoctorPigDaily buildDailyPig(DoctorPigDaily oldDailyPig, DoctorEventChangeDto changeDto) {
         oldDailyPig = super.buildDailyPig(oldDailyPig, changeDto);
         PregCheckResult checkResult = PregCheckResult.from(changeDto.getPregCheckResult());
         expectTrue(notNull(checkResult), "preg.check.result.error", changeDto.getPregCheckResult());

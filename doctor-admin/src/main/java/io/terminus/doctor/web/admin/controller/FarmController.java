@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.admin.controller;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -7,6 +8,7 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
@@ -20,6 +22,7 @@ import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorFarmWriteService;
 import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
+import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.PrimaryUserReadService;
 import io.terminus.doctor.web.admin.dto.UserApplyServiceDetailDto;
@@ -29,6 +32,7 @@ import io.terminus.doctor.web.core.dto.FarmStaff;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
 import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.model.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,6 +46,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Created by chenzenghui on 16/7/15.
@@ -61,6 +67,8 @@ public class FarmController {
     private PrimaryUserReadService primaryUserReadService;
     @RpcConsumer
     private DoctorBarnReadService doctorBarnReadService;
+    @RpcConsumer
+    private DoctorUserProfileReadService doctorUserProfileReadService;
 
     @Autowired
     public FarmController(DoctorFarmReadService doctorFarmReadService,
@@ -176,7 +184,9 @@ public class FarmController {
                                          @RequestParam(required = false) @ApiParam("页码") Integer pageNo,
                                          @RequestParam(required = false) @ApiParam("分页大小") Integer pageSize) {
         FarmCriteria farmCriteria = new FarmCriteria();
-        farmCriteria.setFuzzyName(fuzzyName);
+        if (!Strings.isNullOrEmpty(fuzzyName)) {
+            farmCriteria.setFuzzyName(fuzzyName);
+        }
         return RespHelper.or500(doctorFarmReadService.pagingFarm(farmCriteria, pageNo, pageSize));
     }
 
@@ -216,7 +226,15 @@ public class FarmController {
             farmStaff.setFarmId(primaryUser.getRelFarmId());
             farmStaff.setUserId(primaryUser.getUserId());
             farmStaff.setStatus(primaryUser.getStatus());
-            farmStaff.setRealName(primaryUser.getRealName());
+            Response<UserProfile> userProfileResponse = doctorUserProfileReadService.findProfileByUserId(primaryUser.getUserId());
+            if (userProfileResponse.isSuccess()
+                    && notNull(userProfileResponse.getResult())
+                    && !Strings.isNullOrEmpty(userProfileResponse.getResult().getRealName())) {
+                farmStaff.setRealName(userProfileResponse.getResult().getRealName());
+            } else {
+                User user = io.terminus.doctor.common.utils.RespHelper.or500(doctorUserReadService.findById(primaryUser.getUserId()));
+                farmStaff.setRealName(user.getName());
+            }
             staffList.add(farmStaff);
         }
         return staffList;

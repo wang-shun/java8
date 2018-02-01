@@ -80,7 +80,6 @@ public class DoctorFarm implements Serializable {
      * @see io.terminus.doctor.common.enums.IsOrNot
      */
     private Integer isWeak;
-    
     /**
      * 创建时间
      */

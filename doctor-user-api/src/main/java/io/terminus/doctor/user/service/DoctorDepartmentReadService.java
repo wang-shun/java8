@@ -3,6 +3,7 @@ package io.terminus.doctor.user.service;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dto.DoctorDepartmentDto;
+import io.terminus.doctor.user.dto.DoctorDepartmentLinerDto;
 import io.terminus.doctor.user.model.DoctorFarm;
 
 import javax.validation.constraints.NotNull;
@@ -58,4 +59,10 @@ public interface DoctorDepartmentReadService {
      * @return
      */
     Response<List<DoctorDepartmentDto>> findCliqueTree();
+    /**
+     * 获取猪场所属组织的线性结构
+     * @param farmId 猪场id
+     * @return
+     */
+    Response<DoctorDepartmentLinerDto> findLinerBy(Long farmId);
 }

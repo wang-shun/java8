@@ -4,7 +4,7 @@ import io.terminus.doctor.user.model.DoctorFarm;
 import lombok.Data;
 
 /**
- * Created by xjn on 17/11/27.
+ * Created by xjn on 18/1/8.
  * email:xiaojiannan@terminus.io
  */
 @Data

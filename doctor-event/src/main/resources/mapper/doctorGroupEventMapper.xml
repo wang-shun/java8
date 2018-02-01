@@ -13,6 +13,7 @@
         <result column="farm_name" property="farmName"/>
         <result column="group_id" property="groupId"/>
         <result column="group_code" property="groupCode"/>
+        <result column="origin" property="origin"/>
         <result column="event_at" property="eventAt"/>
         <result column="type" property="type"/>
         <result column="name" property="name"/>
@@ -75,6 +76,7 @@
         farm_name,
         group_id,
         group_code,
+        origin,
         event_at,
         `type`,
         `name`,
@@ -129,6 +131,7 @@
         #{farmName},
         #{groupId},
         #{groupCode},
+        #{origin},
         #{eventAt},
         #{type},
         #{name},
@@ -188,6 +191,7 @@
             #{item.farmName},
             #{item.groupId},
             #{item.groupCode},
+            #{item.origin},
             #{item.eventAt},
             #{item.type},
             #{item.name},
@@ -245,6 +249,7 @@
         <if test="farmName != null">AND farm_name = #{farmName}</if>
         <if test="groupId != null">AND group_id = #{groupId}</if>
         <if test="groupCode != null">AND group_code = #{groupCode}</if>
+        <if test="origin != null">AND origin = #{origin}</if>
         <if test="groupCodeFuzzy != null">AND group_code LIKE concat('%', #{groupCodeFuzzy},'%')</if>
         <if test="eventAt != null">AND event_at = #{eventAt}</if>
         <if test="beginDate != null">AND <![CDATA[ event_at >= #{beginDate} ]]> </if>
@@ -414,6 +419,7 @@
             <if test="farmName != null">farm_name = #{farmName},</if>
             <if test="groupId != null">group_id = #{groupId},</if>
             <if test="groupCode != null">group_code = #{groupCode},</if>
+            <if test="origin != null">origin = #{origin},</if>
             <if test="eventAt != null">event_at = #{eventAt},</if>
             <if test="type != null">`type` = #{type},</if>
             <if test="name != null">`name` = #{name},</if>
@@ -568,6 +574,21 @@
             </foreach>
         </if>
         ORDER BY date_format(event_at, '%Y-%m-%d') ASC , id ASC
+    </select>
+
+    <select id="findEventIncludeTypesForDesc" parameterType="map" resultMap="DoctorGroupEventMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE status = 1
+        AND event_at &gt;= #{eventAt}
+        AND group_id = #{groupId}
+        <if test="types != null &amp;&amp; types.size() > 0">
+            AND `type` IN
+            <foreach collection="types" item="i" open="(" close=")" separator=",">
+                #{i}
+            </foreach>
+        </if>
+        ORDER BY date_format(event_at, '%Y-%m-%d') DESC , id DESC
     </select>
 
     <select id="findLastManualEventByGroupId" parameterType="long" resultMap="DoctorGroupEventMap" >
@@ -752,7 +773,7 @@
     <select id="getFarmEarlyEventAt" parameterType="string" resultType="io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto" >
         SELECT farm_id as farmId, min(event_at) as eventAt
         FROM <include refid="tb"/>
-        WHERE created_at &gt;= #{startDate}
+        WHERE updated_at &gt;= #{startDate}
         group by farm_id
     </select>
 
@@ -842,4 +863,10 @@
         <if test="startDate != null">AND <![CDATA[ event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
     </sql>
+
+    <select id="findEarLyAt" resultType="io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto">
+        select farm_id as farmId, min(event_at) as eventAt
+        from <include refid="tb"/>
+        group by farm_id
+    </select>
 </mapper>
