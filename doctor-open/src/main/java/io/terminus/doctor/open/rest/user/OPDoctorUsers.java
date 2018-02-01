@@ -1,9 +1,13 @@
 package io.terminus.doctor.open.rest.user;
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
+import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.ToJsonMapper;
@@ -13,10 +17,12 @@ import io.terminus.doctor.open.util.OPRespHelper;
 import io.terminus.doctor.user.dto.DoctorMenuDto;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
+import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorMobileMenuReadService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
@@ -45,6 +51,7 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
@@ -69,6 +76,8 @@ public class OPDoctorUsers {
     private final DoctorServiceStatusReadService doctorServiceStatusReadService;
     private final PrimaryUserReadService primaryUserReadService;
     private final ServiceBetaStatusHandler serviceBetaStatusHandler;
+    @RpcConsumer
+    private DoctorFarmReadService doctorFarmReadService;
 
     //猪场软件链接url
     private final String farmManageMultiple = "pigdoctor://company?homepage_type=1";;
@@ -153,7 +162,7 @@ public class OPDoctorUsers {
                     break;
             }
         });
-
+        dto.setPigIot(getPigIot(baseUser));
         dto.setPigJxy(getPigJxy(baseUser));
         return dto;
     }
@@ -267,6 +276,39 @@ public class OPDoctorUsers {
         openDto.setType(DoctorServiceReview.Type.PIG_JXY.getValue());
         openDto.setStatus(DoctorServiceReview.Status.OK.getValue());
         openDto.setUrl("http://39.108.236.233/app");
+        return openDto;
+    }
+
+    private ServiceReviewOpenDto getPigIot(BaseUser baseUser) {
+        ServiceReviewOpenDto openDto = new ServiceReviewOpenDto();
+        openDto.setUserId(baseUser.getId());
+        openDto.setType(DoctorServiceReview.Type.PIG_IOT.getValue());
+        Response<DoctorUserDataPermission> permissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
+        if (!permissionResponse.isSuccess() || isNull(permissionResponse.getResult())
+                || Arguments.isNullOrEmpty(permissionResponse.getResult().getFarmIdsList())) {
+            openDto.setServiceStatus(DoctorServiceStatus.Status.CLOSED.value());
+            openDto.setStatus(DoctorServiceReview.Status.NOT_OK.getValue());
+            return openDto;
+        }
+
+        DoctorUserDataPermission permission = permissionResponse.getResult();
+        List<DoctorFarm> farmList = RespHelper.orServEx(doctorFarmReadService.findFarmsByIds(permission.getFarmIdsList()));
+        Boolean isIntelligent = false;
+        for (DoctorFarm doctorFarm: farmList) {
+            if (Objects.equals(doctorFarm.getIsIntelligent(), IsOrNot.YES.getKey())){
+                isIntelligent = true;
+                break;
+            }
+        }
+
+        if (isIntelligent) {
+            openDto.setServiceStatus(DoctorServiceStatus.Status.OPENED.value());
+            openDto.setStatus(DoctorServiceReview.Status.OK.getValue());
+            return openDto;
+        }
+
+        openDto.setServiceStatus(DoctorServiceStatus.Status.CLOSED.value());
+        openDto.setStatus(DoctorServiceReview.Status.NOT_OK.getValue());
         return openDto;
     }
 }

@@ -71,7 +71,8 @@ public class DoctorServiceReview implements Serializable {
         PIGMALL(2, "新融电商"),
         NEVEREST(3, "大数据"),
         PIG_TRADE(4, "生猪交易"),
-        PIG_JXY(5, "绩效云");
+        PIG_JXY(5, "绩效云"),
+        PIG_IOT(6, "物联网");
 
         @Getter
         private final int value;
