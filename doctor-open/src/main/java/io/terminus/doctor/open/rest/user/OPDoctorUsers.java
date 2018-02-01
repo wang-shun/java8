@@ -171,14 +171,15 @@ public class OPDoctorUsers {
                     innerDto.setReason(serviceStatus.getNeverestReason());
                     dto.setNeverest(innerDto);
                     break;
-                case PIG_TRADE:
-                    innerDto.setServiceStatus(serviceStatus.getPigtradeStatus());
-                    innerDto.setReason(serviceStatus.getPigtradeReason());
-                    dto.setPigTrade(innerDto);
-                    break;
+                // TODO: 18/2/1 暂时取消 
+//                case PIG_TRADE:
+//                    innerDto.setServiceStatus(serviceStatus.getPigtradeStatus());
+//                    innerDto.setReason(serviceStatus.getPigtradeReason());
+//                    dto.setPigTrade(innerDto);
+//                    break;
             }
         });
-        dto.setPigIot(getPigIot(baseUser));
+        dto.setPigTrade(getPigIot(baseUser));
         dto.setPigJxy(getPigJxy(baseUser));
         log.info("========userId:{}, dto:{}", baseUser.getId(), dto);
         return dto;
