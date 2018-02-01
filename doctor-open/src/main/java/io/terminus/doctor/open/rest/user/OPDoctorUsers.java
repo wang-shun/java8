@@ -90,6 +90,9 @@ public class OPDoctorUsers {
     @Value("${session.redis-prefix}")
     private String redisPrefix;
 
+    @Value("${service-domain.pigiot:m.xrnm.com}")
+    private String pigIotUrl;
+
 
     //猪场软件链接url
     private final String farmManageMultiple = "pigdoctor://company?homepage_type=1";;
@@ -315,6 +318,7 @@ public class OPDoctorUsers {
         ServiceReviewOpenDto openDto = new ServiceReviewOpenDto();
         openDto.setUserId(baseUser.getId());
         openDto.setType(DoctorServiceReview.Type.PIG_IOT.getValue());
+        openDto.setUrl(pigIotUrl);
         Response<DoctorUserDataPermission> permissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
         if (!permissionResponse.isSuccess() || isNull(permissionResponse.getResult())
                 || Arguments.isNullOrEmpty(permissionResponse.getResult().getFarmIdsList())) {
