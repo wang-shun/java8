@@ -88,4 +88,14 @@ public class IotUserRoleReadServiceImpl implements IotUserRoleReadService{
             return Response.fail("find.iot.user.role.by.id.failed");
         }
     }
+
+    @Override
+    public Response<IotUser> findIotUserByUserId(Long userId) {
+        try {
+            return Response.ok(iotUserDao.findByUserId(userId));
+        } catch (Exception e) {
+            log.error("find iot user by user id failed, userId:{}, cause:{}", userId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.iot.user.by.user.id.failed");
+        }
+    }
 }

@@ -44,4 +44,6 @@ public interface IotUserRoleReadService {
      */
     Response<IotUser> findIotUserRoleById(Long id);
 
+    Response<IotUser> findIotUserByUserId(Long userId);
+
 }
