@@ -12,6 +12,7 @@ import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
+import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -164,6 +165,9 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
                 .pregCheckResultCountChange(-1)
                 .build();
         doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig1, changeDto1));
+        //旧版
+        DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
+        oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto1));
 
 
         //更新配种、空怀、怀孕母猪数量
@@ -206,6 +210,9 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
                 .build();
         doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig2, changeDto2));
 
+        //旧版
+        DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
+        oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto2));
 
         //更新配种、空怀、怀孕母猪数量
         if (!PigType.MATING_TYPES.contains(newPigEvent.getBarnType())) {
@@ -242,6 +249,28 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
     @Override
     protected DoctorPigDaily buildDailyPig(DoctorPigDaily oldDailyPig, DoctorEventChangeDto changeDto) {
         oldDailyPig = super.buildDailyPig(oldDailyPig, changeDto);
+        PregCheckResult checkResult = PregCheckResult.from(changeDto.getPregCheckResult());
+        expectTrue(notNull(checkResult), "preg.check.result.error", changeDto.getPregCheckResult());
+        switch (checkResult) {
+            case YANG :
+                oldDailyPig.setPregPositive(EventUtil.plusInt(oldDailyPig.getPregPositive(), changeDto.getPregCheckResultCountChange()));
+                break;
+            case FANQING:
+                oldDailyPig.setPregFanqing(EventUtil.plusInt(oldDailyPig.getPregFanqing(), changeDto.getPregCheckResultCountChange()));
+                break;
+            case LIUCHAN:
+                oldDailyPig.setPregLiuchan(EventUtil.plusInt(oldDailyPig.getPregLiuchan(), changeDto.getPregCheckResultCountChange()));
+                break;
+            case YING:
+                oldDailyPig.setPregNegative(EventUtil.plusInt(oldDailyPig.getPregNegative(), changeDto.getPregCheckResultCountChange()));
+                break;
+            default:
+                throw new InvalidException("preg.check.result.error", checkResult.getKey());
+        }
+        return oldDailyPig;
+    }
+
+    protected DoctorDailyReport oldBuildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
         PregCheckResult checkResult = PregCheckResult.from(changeDto.getPregCheckResult());
         expectTrue(notNull(checkResult), "preg.check.result.error", changeDto.getPregCheckResult());
         switch (checkResult) {

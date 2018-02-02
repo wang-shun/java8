@@ -6,6 +6,7 @@ import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.model.DoctorDailyGroup;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -109,6 +110,11 @@ public class DoctorModifyGroupTransFarmEventHandler extends DoctorAbstractModify
         updateDailyGroupLiveStock(oldGroupEvent.getFarmId(), oldGroupEvent.getPigType(),
                 getAfterDay(oldGroupEvent.getEventAt()), -changeDto1.getQuantityChange());
 
+        //旧版
+        DoctorDailyGroup oldDaily = oldDailyReportManager.findByGroupIdAndSumAt(oldGroupEvent.getGroupId(), oldGroupEvent.getEventAt());
+        oldDailyReportManager.createOrUpdateDailyGroup(oldBuildDailyGroup(oldDaily, changeDto1));
+        updateDailyGroupLiveStock(oldGroupEvent.getFarmId(), oldGroupEvent.getPigType(), getAfterDay(oldGroupEvent.getEventAt()), changeDto1.getQuantityChange());
+
     }
 
     @Override
@@ -123,6 +129,12 @@ public class DoctorModifyGroupTransFarmEventHandler extends DoctorAbstractModify
         doctorDailyReportManager.createOrUpdateGroupDaily(buildDailyGroup(oldDailyGroup2, changeDto2));
         updateDailyGroupLiveStock(newGroupEvent.getFarmId(), newGroupEvent.getPigType(),
                 getAfterDay(eventAt), -changeDto2.getQuantityChange());
+
+        //旧版
+        DoctorDailyGroup oldDaily = oldDailyReportManager.findByGroupIdAndSumAt(newGroupEvent.getGroupId(), newGroupEvent.getEventAt());
+        oldDailyReportManager.createOrUpdateDailyGroup(oldBuildDailyGroup(oldDaily, changeDto2));
+        oldUpdateDailyGroupLiveStock(newGroupEvent.getGroupId(), getAfterDay(eventAt), -changeDto2.getQuantityChange());
+
     }
 
     @Override
@@ -131,6 +143,12 @@ public class DoctorModifyGroupTransFarmEventHandler extends DoctorAbstractModify
         oldDailyGroup.setChgFarm(EventUtil.plusInt(oldDailyGroup.getChgFarm(), changeDto.getQuantityChange()));
 //        oldDailyGroup.setChgFarmWeight(EventUtil.plusDouble(oldDailyGroup.getChgFarmWeight(), changeDto.getWeightChange()));
 //        oldDailyGroup.setTurnOutWeight(EventUtil.plusDouble(oldDailyGroup.getTurnOutWeight(), changeDto.getWeightChange()));
+        oldDailyGroup.setEnd(EventUtil.minusInt(oldDailyGroup.getEnd(), changeDto.getQuantityChange()));
+        return oldDailyGroup;
+    }
+
+    protected DoctorDailyGroup oldBuildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
+        oldDailyGroup.setChgFarm(EventUtil.plusInt(oldDailyGroup.getChgFarm(), changeDto.getQuantityChange()));
         oldDailyGroup.setEnd(EventUtil.minusInt(oldDailyGroup.getEnd(), changeDto.getQuantityChange()));
         return oldDailyGroup;
     }
