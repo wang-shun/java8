@@ -1571,16 +1571,14 @@
         FROM
         (
         SELECT
-        t1.pig_type AS pig_type,
-        ifnull(sum(t0.quantity), 0) AS result
-        FROM doctor_warehouse_material_apply AS t0
-        LEFT JOIN doctor_barns t1 ON t0.pig_barn_id = t1.id
-        LEFT JOIN doctor_warehouse_sku t2 on t0.material_id=t2.id
-        WHERE t2.type=1
-        <if test="farmId != null">AND t0.farm_id = #{farmId}</if>
-        <if test="startAt != null">AND t0.apply_date &gt;= #{startAt}</if>
-        <if test="endAt != null">AND t0.apply_date &lt;= #{endAt}</if>
-        GROUP BY t1.pig_type
+        pig_type AS pig_type,
+        ifnull(sum(quantity), 0) AS result
+        FROM doctor_warehouse_material_apply
+        WHERE type=1
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="startAt != null">AND apply_date &gt;= #{startAt}</if>
+        <if test="endAt != null">AND apply_date &lt;= #{endAt}</if>
+        GROUP BY pig_type
         ) AS a
     </select>
 
@@ -1627,13 +1625,12 @@
         sum(quantity) as quantity,
         sum(quantity * unit_price) AS amount,
         type
-        FROM doctor_warehouse_material_apply t0
-        LEFT JOIN doctor_barns t1 ON t0.pig_barn_id = t1.id
+        FROM doctor_warehouse_material_apply
         WHERE apply_type = 0
-        <if test="farmId != null">AND t0.farm_id = #{farmId}</if>
-        <if test="startAt != null">AND t0.apply_date &gt;= #{startAt}</if>
-        <if test="endAt != null">AND t0.apply_date &lt;= #{endAt}</if>
-        GROUP BY t1.pig_type, type
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="startAt != null">AND apply_date &gt;= #{startAt}</if>
+        <if test="endAt != null">AND apply_date &lt;= #{endAt}</if>
+        GROUP BY pig_type, type
         ) AS a
     </select>
 
@@ -1668,9 +1665,9 @@
         FROM
         (
         SELECT sum(quantity) AS quantity,sum(quantity * unit_price) AS amount,type
-        FROM doctor_warehouse_material_apply t0 LEFT JOIN doctor_barns t1 on t0.pig_barn_id=t1.id
-        WHERE apply_type=1 and (t1.pig_type=1 or t1.pig_type=7)
-        <if test="farmId != null">AND t0.farm_id = #{farmId}</if>
+        FROM doctor_warehouse_material_apply
+        WHERE apply_type=1 and (pig_type=1 or pig_type=7)
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
         <if test="startAt != null">AND apply_date &gt;= #{startAt}</if>
         <if test="endAt != null">AND apply_date &lt;= #{endAt}</if>
         GROUP BY type
@@ -1791,16 +1788,14 @@
         ifnull(max(CASE WHEN pig_type = 6 AND material_type = 5 THEN amount ELSE 0 END), 0) AS peiHuaiConsumerAmount
         from
         (
-            SELECT t1.pig_type,t2.type as material_type,ifnull(sum(t0.quantity * t0.unit_price), 0) AS amount
-                from doctor_warehouse_material_apply t0
-                LEFT JOIN doctor_barns t1 on t0.pig_barn_id=t1.id
-                LEFT JOIN doctor_warehouse_sku t2 on t0.material_id=t2.id
+            SELECT pig_type,type as material_type,ifnull(sum(quantity * unit_price), 0) AS amount
+                from doctor_warehouse_material_apply
                 <where>
-                    <if test="farmId !=null">AND t0.farm_id=#{farmId}</if>
-                    <if test="startAt != null">AND t0.apply_date &gt;= #{startAt}</if>
-                    <if test="endAt != null">AND t0.apply_date &lt;= #{endAt}</if>
+                    <if test="farmId !=null">AND farm_id=#{farmId}</if>
+                    <if test="startAt != null">AND apply_date &gt;= #{startAt}</if>
+                    <if test="endAt != null">AND apply_date &lt;= #{endAt}</if>
                 </where>
-                GROUP BY t1.pig_type,material_type
+                GROUP BY pig_type,material_type
         ) as res;
     </select>
 
