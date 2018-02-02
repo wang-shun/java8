@@ -111,7 +111,7 @@ public class DoctorModifyGroupTransFarmEventHandler extends DoctorAbstractModify
                 getAfterDay(oldGroupEvent.getEventAt()), -changeDto1.getQuantityChange());
 
         //旧版
-        DoctorDailyGroup oldDaily = oldDailyReportManager.findByGroupIdAndSumAt(oldGroupEvent.getFarmId(), oldGroupEvent.getEventAt());
+        DoctorDailyGroup oldDaily = oldDailyReportManager.findByGroupIdAndSumAt(oldGroupEvent.getGroupId(), oldGroupEvent.getEventAt());
         oldDailyReportManager.createOrUpdateDailyGroup(oldBuildDailyGroup(oldDaily, changeDto1));
         updateDailyGroupLiveStock(oldGroupEvent.getFarmId(), oldGroupEvent.getPigType(), getAfterDay(oldGroupEvent.getEventAt()), changeDto1.getQuantityChange());
 
@@ -131,7 +131,7 @@ public class DoctorModifyGroupTransFarmEventHandler extends DoctorAbstractModify
                 getAfterDay(eventAt), -changeDto2.getQuantityChange());
 
         //旧版
-        DoctorDailyGroup oldDaily = oldDailyReportManager.findByGroupIdAndSumAt(newGroupEvent.getFarmId(), newGroupEvent.getEventAt());
+        DoctorDailyGroup oldDaily = oldDailyReportManager.findByGroupIdAndSumAt(newGroupEvent.getGroupId(), newGroupEvent.getEventAt());
         oldDailyReportManager.createOrUpdateDailyGroup(oldBuildDailyGroup(oldDaily, changeDto2));
         oldUpdateDailyGroupLiveStock(newGroupEvent.getGroupId(), getAfterDay(eventAt), -changeDto2.getQuantityChange());
 
