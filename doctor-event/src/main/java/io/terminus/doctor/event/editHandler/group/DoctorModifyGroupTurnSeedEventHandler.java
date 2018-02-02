@@ -15,6 +15,7 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorDailyGroup;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -140,6 +141,11 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
         doctorGroupDailyDao.update(buildDailyGroup(oldDailyGroup1, changeDto1));
         updateDailyGroupLiveStock(oldGroupEvent.getFarmId(), oldGroupEvent.getPigType(),
                 getAfterDay(oldGroupEvent.getEventAt()), -changeDto1.getQuantityChange());
+
+        //旧版
+        DoctorDailyGroup oldDaily = oldDailyReportManager.findByGroupIdAndSumAt(oldGroupEvent.getFarmId(), oldGroupEvent.getEventAt());
+        oldDailyReportManager.createOrUpdateDailyGroup(oldBuildDailyGroup(oldDaily, changeDto1));
+        updateDailyGroupLiveStock(oldGroupEvent.getFarmId(), oldGroupEvent.getPigType(), getAfterDay(oldGroupEvent.getEventAt()), changeDto1.getQuantityChange());
     }
 
     @Override
@@ -152,6 +158,11 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
         doctorDailyReportManager.createOrUpdateGroupDaily(buildDailyGroup(oldDailyGroup2, changeDto2));
         updateDailyGroupLiveStock(newGroupEvent.getFarmId(), newGroupEvent.getPigType(),
                 getAfterDay(eventAt), -changeDto2.getQuantityChange());
+
+        //旧版
+        DoctorDailyGroup oldDaily = oldDailyReportManager.findByGroupIdAndSumAt(newGroupEvent.getFarmId(), newGroupEvent.getEventAt());
+        oldDailyReportManager.createOrUpdateDailyGroup(oldBuildDailyGroup(oldDaily, changeDto2));
+        oldUpdateDailyGroupLiveStock(newGroupEvent.getGroupId(), getAfterDay(eventAt), -changeDto2.getQuantityChange());
     }
 
     @Override
@@ -159,6 +170,12 @@ public class DoctorModifyGroupTurnSeedEventHandler extends DoctorAbstractModifyG
         oldDailyGroup = super.buildDailyGroup(oldDailyGroup, changeDto);
         oldDailyGroup.setTurnSeed(EventUtil.plusInt(oldDailyGroup.getTurnSeed(), changeDto.getQuantityChange()));
 //        oldDailyGroup.setTurnOutWeight(EventUtil.plusDouble(oldDailyGroup.getTurnOutWeight(), changeDto.getWeightChange()));
+        oldDailyGroup.setEnd(EventUtil.minusInt(oldDailyGroup.getEnd(), changeDto.getQuantityChange()));
+        return oldDailyGroup;
+    }
+
+    protected DoctorDailyGroup oldBuildDailyGroup(DoctorDailyGroup oldDailyGroup, DoctorEventChangeDto changeDto) {
+        oldDailyGroup.setTurnSeed(EventUtil.plusInt(oldDailyGroup.getTurnSeed(), changeDto.getQuantityChange()));
         oldDailyGroup.setEnd(EventUtil.minusInt(oldDailyGroup.getEnd(), changeDto.getQuantityChange()));
         return oldDailyGroup;
     }
