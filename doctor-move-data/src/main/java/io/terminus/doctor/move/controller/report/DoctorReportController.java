@@ -7,10 +7,13 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto;
 import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
+import io.terminus.doctor.event.enums.ReportTime;
 import io.terminus.doctor.event.service.DoctorDailyReportV2Service;
+import io.terminus.doctor.event.service.DoctorReportWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -41,11 +45,14 @@ public class DoctorReportController {
     private final DoctorDailyReportV2Service doctorDailyReportV2Service;
     private final DoctorFarmReadService doctorFarmReadService;
 
+    private final DoctorReportWriteService doctorReportWriteService;
+
 
     @Autowired
-    public DoctorReportController(DoctorDailyReportV2Service doctorDailyReportV2Service, DoctorFarmReadService doctorFarmReadService) {
+    public DoctorReportController(DoctorDailyReportV2Service doctorDailyReportV2Service, DoctorFarmReadService doctorFarmReadService, DoctorReportWriteService doctorReportWriteService) {
         this.doctorDailyReportV2Service = doctorDailyReportV2Service;
         this.doctorFarmReadService = doctorFarmReadService;
+        this.doctorReportWriteService = doctorReportWriteService;
     }
 
     /**
@@ -97,7 +104,7 @@ public class DoctorReportController {
         Stopwatch stopwatch = Stopwatch.createStarted();
         List<DoctorFarmEarlyEventAtDto> list = RespHelper.or500(doctorDailyReportV2Service.findEarLyAt());
         if (isNull(end)) {
-             end = DateUtil.toDateString(new Date());
+            end = DateUtil.toDateString(new Date());
         }
         String endAt = end;
         list.forEach(doctorFarmEarlyEventAtDto -> {
@@ -222,7 +229,7 @@ public class DoctorReportController {
      * 增量同步
      *
      * @param orzId 猪场id
-     * @param start  开始的同步日期 与日报中sumAt比较
+     * @param start 开始的同步日期 与日报中sumAt比较
      */
     @RequestMapping(value = "/synchronize/delta/bi/data/{orzId}", method = RequestMethod.GET)
     public Boolean synchronizeDeltaDayBiData(@PathVariable Long orzId,
@@ -235,12 +242,12 @@ public class DoctorReportController {
      * 增量同步一个公司以及公司下的所有猪场
      *
      * @param orzId 猪场id
-     * @param start  开始的同步日期 与日报中sumAt比较
+     * @param start 开始的同步日期 与日报中sumAt比较
      */
     @RequestMapping(value = "/synchronize/delta/{orzId}", method = RequestMethod.GET)
     public Boolean synchronizeDelta(@PathVariable Long orzId,
-                                             @RequestParam (required = false, defaultValue = "2")Integer orzType,
-                                             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start) {
+                                    @RequestParam(required = false, defaultValue = "2") Integer orzType,
+                                    @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start) {
         return RespHelper.or500(doctorDailyReportV2Service.synchronizeDelta(orzId, start, orzType));
     }
 
@@ -248,7 +255,7 @@ public class DoctorReportController {
     /**
      * 增量同步
      *
-     * @param start  开始的同步日期 与日报中sumAt比较
+     * @param start 开始的同步日期 与日报中sumAt比较
      */
     @RequestMapping(value = "/synchronize/all/bi/data", method = RequestMethod.GET)
     public Boolean synchronizeAllDayBiData(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start) {
@@ -265,22 +272,48 @@ public class DoctorReportController {
     }
 
     @RequestMapping(value = "/yesterday/and/today", method = RequestMethod.GET)
-    public Boolean yesterdayAndToday(@RequestParam String date){
+    public Boolean yesterdayAndToday(@RequestParam String date) {
         List<Long> farmList = RespHelper.orServEx(doctorFarmReadService.findAllFarms()).stream().map(DoctorFarm::getId).collect(Collectors.toList());
         doctorDailyReportV2Service.generateYesterdayAndToday(farmList, new DateTime(DateUtil.toDate(date)).withTimeAtStartOfDay().toDate());
         return Boolean.TRUE;
     }
 
     @RequestMapping(value = "/synchronize/yesterday/and/today", method = RequestMethod.GET)
-    public Boolean synchonizeYesterdayAndToday(@RequestParam String date){
+    public Boolean synchonizeYesterdayAndToday(@RequestParam String date) {
         List<Long> farmList = RespHelper.orServEx(doctorFarmReadService.findAllFarms()).stream().map(DoctorFarm::getId).collect(Collectors.toList());
         doctorDailyReportV2Service.synchronizeYesterdayAndToday(farmList, new DateTime(DateUtil.toDate(date)).withTimeAtStartOfDay().toDate());
         return Boolean.TRUE;
     }
 
-    @RequestMapping(method = RequestMethod.PUT, value = "/flush/npd")
-    public void flushNPD() {
-        //
-        Date start, end;
+    @RequestMapping(method = RequestMethod.GET, value = "/flush/npd/{farmId:\\d+}")
+    public void flushNPD(@PathVariable Long farmId,
+                         @RequestParam @DateTimeFormat(pattern = "yyyyMM") Date date,
+                         @RequestParam(required = false) String type) {
+
+        ReportTime reportTime = ReportTime.MONTH;
+        if (StringUtils.isNotBlank(type)) {
+            if ("season".equals(type)) {
+                reportTime = ReportTime.SEASON;
+            } else if ("year".equals(type))
+                reportTime = ReportTime.YEAR;
+        }
+        //刷新从任意一个时间，到月末，或季末，或年末
+        doctorReportWriteService.flushNPD(Collections.singletonList(farmId), date, reportTime);
     }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/flush/npd/{farmId}/all")
+    public void flushNPD(@PathVariable Long farmId,
+                         @RequestParam @DateTimeFormat(pattern = "yyyyMM") Date date) {
+
+        //刷新从任意一个开始时间到今天。可能横跨多个月，多个季，多个年
+        doctorReportWriteService.flushNPD(Collections.singletonList(farmId), date);
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "/flush/npd/all")
+    public void flushNPD(@RequestParam @DateTimeFormat(pattern = "yyyyMM") Date date) {
+        doctorReportWriteService.flushNPD(date);
+    }
+
+
 }
