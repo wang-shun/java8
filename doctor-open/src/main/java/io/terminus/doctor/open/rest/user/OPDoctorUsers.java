@@ -6,8 +6,8 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
-import io.terminus.common.utils.Arguments;
 import io.terminus.common.redis.utils.JedisTemplate;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.common.enums.UserType;
@@ -25,6 +25,8 @@ import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.model.IotUser;
+import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorMobileMenuReadService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
@@ -32,6 +34,7 @@ import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
 import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.user.service.IotUserRoleReadService;
 import io.terminus.doctor.user.service.PrimaryUserReadService;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.doctor.web.core.dto.ServiceBetaStatusToken;
@@ -57,8 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static io.terminus.common.utils.Arguments.isNull;
-import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.*;
 
 /**
  * Desc: 用户相关
@@ -84,6 +86,8 @@ public class OPDoctorUsers {
     private final ServiceBetaStatusHandler serviceBetaStatusHandler;
     @RpcConsumer
     private DoctorFarmReadService doctorFarmReadService;
+    @RpcConsumer
+    private IotUserRoleReadService iotUserRoleReadService;
 
     private final JedisTemplate jedisTemplate;
 
@@ -321,6 +325,22 @@ public class OPDoctorUsers {
         openDto.setUserId(baseUser.getId());
         openDto.setType(DoctorServiceReview.Type.PIG_IOT.getValue());
         openDto.setUrl(pigIotUrl);
+
+        //物联运营
+        IotUser iotUser = RespHelper.or500(iotUserRoleReadService.findIotUserByUserId(baseUser.getId()));
+        if (notNull(iotUser) && Objects.equals(iotUser.getType(), IotUser.TYPE.IOT_ADMIN.getValue())) {
+            openDto.setServiceStatus(DoctorServiceStatus.Status.OPENED.value());
+            openDto.setStatus(DoctorServiceReview.Status.OK.getValue());
+            return openDto;
+        }
+
+        if (notNull(iotUser) && Objects.equals(iotUser.getType(), IotUser.TYPE.IOT_OPERATOR.getValue())
+                && Objects.equals(iotUser.getStatus(), Sub.Status.ACTIVE.value())) {
+            openDto.setServiceStatus(DoctorServiceStatus.Status.OPENED.value());
+            openDto.setStatus(DoctorServiceReview.Status.OK.getValue());
+            return openDto;
+        }
+
         Response<DoctorUserDataPermission> permissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
         if (!permissionResponse.isSuccess() || isNull(permissionResponse.getResult())
                 || Arguments.isNullOrEmpty(permissionResponse.getResult().getFarmIdsList())) {
