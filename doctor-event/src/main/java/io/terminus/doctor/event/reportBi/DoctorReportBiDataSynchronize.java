@@ -439,7 +439,7 @@ public class DoctorReportBiDataSynchronize {
      * @param dimensionCriteria
      */
     private void synchronizeGroupBiData(DoctorGroupDailyExtend groupDaily, DoctorDimensionCriteria dimensionCriteria) {
-        log.info("dimension:orgId{}, farmId:{}, dimensionCriteria:{}", groupDaily.getOrgId(), groupDaily.getFarmId(), dimensionCriteria);
+        log.debug("dimension:orgId{}, farmId:{}, dimensionCriteria:{}", groupDaily.getOrgId(), groupDaily.getFarmId(), dimensionCriteria);
         PigType pigType = expectNotNull(PigType.from(groupDaily.getPigType()), "pigType.is.illegal");
         if (Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.ORG.getValue())) {
             dimensionCriteria.setOrzId(groupDaily.getOrgId());
@@ -489,7 +489,7 @@ public class DoctorReportBiDataSynchronize {
      * @param dimensionCriteria
      */
     private void synchronizePigBiData(DoctorPigDailyExtend dailyExtend, DoctorDimensionCriteria dimensionCriteria) {
-        log.info("dimension:orgId{}, farmId:{}, dimensionCriteria:{}", dailyExtend.getOrgId(), dailyExtend.getFarmId(), dimensionCriteria);
+        log.debug("dimension:orgId{}, farmId:{}, dimensionCriteria:{}", dailyExtend.getOrgId(), dailyExtend.getFarmId(), dimensionCriteria);
         if (Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.ORG.getValue())) {
             dimensionCriteria.setOrzId(dailyExtend.getOrgId());
         } else {
