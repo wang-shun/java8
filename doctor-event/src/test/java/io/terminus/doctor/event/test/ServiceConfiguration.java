@@ -2,6 +2,8 @@ package io.terminus.doctor.event.test;
 
 import com.google.common.collect.Maps;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
+import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.event.editHandler.DoctorModifyGroupEventHandler;
 import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
@@ -67,6 +69,14 @@ import io.terminus.doctor.event.handler.usual.DoctorDiseaseHandler;
 import io.terminus.doctor.event.handler.usual.DoctorEntryHandler;
 import io.terminus.doctor.event.handler.usual.DoctorRemovalHandler;
 import io.terminus.doctor.event.handler.usual.DoctorVaccinationHandler;
+import io.terminus.doctor.user.dto.DoctorDepartmentDto;
+import io.terminus.doctor.user.dto.DoctorDepartmentLinerDto;
+import io.terminus.doctor.user.dto.FarmCriteria;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorOrg;
+import io.terminus.doctor.user.service.DoctorDepartmentReadService;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.parana.msg.impl.MessageAutoConfig;
 import io.terminus.zookeeper.common.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
@@ -81,6 +91,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -108,7 +119,7 @@ public class ServiceConfiguration {
     /**
      * 对应event handler
      */
-//    @Bean
+    @Bean
     public DoctorPigEventHandlers doctorPigEventHandlers(
             DoctorEntryHandler doctorEntryHandler,
             DoctorSemenHandler doctorSemenHandler,
@@ -152,7 +163,7 @@ public class ServiceConfiguration {
         return doctorEventHandlers;
     }
 
-//    @Bean
+    @Bean
     public DoctorGroupEventHandlers doctorGroupEventHandlers(DoctorAntiepidemicGroupEventHandler doctorAntiepidemicGroupEventHandler,
                                                              DoctorChangeGroupEventHandler doctorChangeGroupEventHandler,
                                                              DoctorCloseGroupEventHandler doctorCloseGroupEventHandler,
@@ -181,7 +192,7 @@ public class ServiceConfiguration {
         return doctorGroupEventHandlers;
     }
 
-//    @Bean
+    @Bean
     public DoctorModifyPigEventHandlers doctorModifyPigEventHandlers(
             DoctorModifyPigChgFarmEventHandler modifyPigChgFarmEventHandler,
             DoctorModifyPigChgFarmInEventHandler modifyPigChgFarmInEventHandler,
@@ -223,7 +234,7 @@ public class ServiceConfiguration {
         return modifyPigEventHandlers;
     }
 
-//    @Bean
+    @Bean
     public DoctorModifyGroupEventHandlers doctorModifyGroupEventHandlers(
             DoctorModifyGroupAntiepidemicEventHandler modifyGroupAntiepidemicEventHandler,
             DoctorModifyGroupChangeEventHandler modifyGroupChangeEventHandler,
@@ -253,6 +264,7 @@ public class ServiceConfiguration {
         return modifyGroupEventHandlers;
     }
 
+
     @Configuration
     public static class ZookeeperConfiguration{
 
@@ -267,6 +279,121 @@ public class ServiceConfiguration {
                                             @Value("${zookeeper.zkTopic}") String zkTopic) throws Exception{
             return new Publisher(zkClientFactory, zkTopic);
         }
+    }
+
+    @Bean
+    public DoctorDepartmentReadService doctorDepartmentReadService(){
+        return new DoctorDepartmentReadService() {
+            @Override
+            public Response<List<DoctorFarm>> findAllFarmsByOrgId(Long orgId) {
+                return null;
+            }
+
+            @Override
+            public Response<DoctorDepartmentDto> findCliqueTree(Long orgId) {
+                return null;
+            }
+
+            @Override
+            public Response<List<DoctorDepartmentDto>> availableBindDepartment(Long orgId) {
+                return null;
+            }
+
+            @Override
+            public Response<Paging<DoctorDepartmentDto>> pagingCliqueTree(Map<String, Object> criteria, Integer pageSize, Integer pageNo) {
+                return null;
+            }
+
+            @Override
+            public Response<DoctorDepartmentDto> findClique(Long departmentId, Boolean isFarm) {
+                return null;
+            }
+
+            @Override
+            public Response<DoctorDepartmentLinerDto> findLinerBy(Long farmId) {
+                return null;
+            }
+        };
+    }
+
+    @Bean
+    public DoctorFarmReadService doctorFarmReadService() {
+        return new DoctorFarmReadService() {
+            @Override
+            public Response<DoctorFarm> findFarmById(Long farmId) {
+                return null;
+            }
+
+            @Override
+            public Response<List<DoctorFarm>> findFarmsByUserId(Long userId) {
+                return null;
+            }
+
+            @Override
+            public Response<List<Long>> findFarmIdsByUserId(Long userId) {
+                return null;
+            }
+
+            @Override
+            public Response<List<DoctorFarm>> findAllFarms() {
+                return null;
+            }
+
+            @Override
+            public Response<List<DoctorFarm>> findFarmsByOrgId(Long orgId) {
+                return null;
+            }
+
+            @Override
+            public Response<List<DoctorFarm>> findFarmsByIds(List<Long> ids) {
+                return null;
+            }
+
+            @Override
+            public Response<Paging<DoctorFarm>> pagingFarm(FarmCriteria farmCriteria, Integer pageNo, Integer pageSize) {
+                return null;
+            }
+        };
+    }
+
+    @Bean
+    public DoctorOrgReadService doctorOrgReadService() {
+        return new DoctorOrgReadService() {
+            @Override
+            public Response<DoctorOrg> findOrgById(Long orgId) {
+                return null;
+            }
+
+            @Override
+            public Response<List<DoctorOrg>> findOrgByIds(List<Long> orgIds) {
+                return null;
+            }
+
+            @Override
+            public Response<List<DoctorOrg>> findOrgsByUserId(Long userId) {
+                return null;
+            }
+
+            @Override
+            public Response<List<DoctorOrg>> findAllOrgs() {
+                return null;
+            }
+
+            @Override
+            public Response<List<DoctorOrg>> findOrgByParentId(Long parentId) {
+                return null;
+            }
+
+            @Override
+            public Response<List<DoctorOrg>> suggestOrg(String fuzzyName, Integer type) {
+                return null;
+            }
+
+            @Override
+            public Response<Paging<DoctorOrg>> paging(Map<String, Object> criteria, Integer pageSize, Integer pageNo) {
+                return null;
+            }
+        };
     }
 
 }

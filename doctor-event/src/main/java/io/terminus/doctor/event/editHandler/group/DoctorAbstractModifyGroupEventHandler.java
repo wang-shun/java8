@@ -26,6 +26,8 @@ import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.manager.DoctorDailyReportManager;
 import io.terminus.doctor.event.manager.DoctorDailyReportV2Manager;
+import io.terminus.doctor.event.helper.DoctorConcurrentControl;
+import io.terminus.doctor.event.manager.DoctorDailyReportManager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorDailyGroup;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
@@ -75,6 +77,9 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     protected DoctorDailyReportManager oldDailyReportManager;
 
     @Autowired
+    protected DoctorConcurrentControl doctorConcurrentControl;
+
+    @Autowired
     protected DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao;
 
     protected final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
@@ -92,6 +97,9 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     public void modifyHandle(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
         log.info("modify group event handler starting, oldGroupEvent:{}", oldGroupEvent);
         log.info("input:{}", input);
+        String key = "group" + oldGroupEvent.getGroupId().toString();
+        expectTrue(doctorConcurrentControl.setKey(key), "event.concurrent.error", oldGroupEvent.getGroupCode());
+
         //1.校验
         modifyHandleCheck(oldGroupEvent, input);
 
@@ -140,7 +148,10 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     
     @Override
     public void rollbackHandle(DoctorGroupEvent deleteGroupEvent, Long operatorId, String operatorName) {
+
         log.info("rollback handle starting, deleteGroupEvent:{}", deleteGroupEvent);
+        String key = "group" + deleteGroupEvent.getGroupId().toString();
+        expectTrue(doctorConcurrentControl.setKey(key), "event.concurrent.error", deleteGroupEvent.getGroupCode());
 
         //2.删除触发事件
         triggerEventRollbackHandle(deleteGroupEvent, operatorId, operatorName);
