@@ -2,6 +2,7 @@ package io.terminus.doctor.basic.manager;
 
 import io.terminus.doctor.basic.dao.DoctorWarehouseStockMonthlyDao;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockMonthly;
+import io.terminus.doctor.common.utils.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +34,7 @@ public class DoctorWarehouseStockMonthlyManager {
                     .materialId(materialId)
                     .handleYear(handleYear)
                     .handleMonth(handleMonth)
+                    .handleDate(DateUtil.toDate(handleYear + '-' + handleMonth + "-01"))
                     .balanceQuantity(add ? quantity : new BigDecimal(0).subtract(quantity))
                     .balacneAmount(add ? amount : 0 - amount)
                     .build());
