@@ -24,10 +24,9 @@ import io.terminus.doctor.event.editHandler.DoctorModifyGroupEventHandler;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
-import io.terminus.doctor.event.manager.DoctorDailyReportManager;
-import io.terminus.doctor.event.manager.DoctorDailyReportV2Manager;
 import io.terminus.doctor.event.helper.DoctorConcurrentControl;
 import io.terminus.doctor.event.manager.DoctorDailyReportManager;
+import io.terminus.doctor.event.manager.DoctorDailyReportV2Manager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorDailyGroup;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
@@ -477,7 +476,8 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
             }
         }
 
-        oldValidGroupLiveStockForDelete(groupId, sumAt, changeCount);
+        // TODO: 18/2/6 旧的报表不在校验
+//        oldValidGroupLiveStockForDelete(groupId, sumAt, changeCount);
 
         return true;
     }
@@ -519,7 +519,8 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
             }
         }
 
-        oldValidGroupLiveStock(groupId, groupCode, oldEventAt, newEventAt, oldQuantity, newQuantity, changeCount);
+        // TODO: 18/2/6 旧的报表不在校验
+//        oldValidGroupLiveStock(groupId, groupCode, oldEventAt, newEventAt, oldQuantity, newQuantity, changeCount);
 
     }
 
