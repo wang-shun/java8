@@ -509,7 +509,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
         for (DoctorGroupEvent groupEvent : groupEventList) {
             if (quantity < 0) {
-                throw new InvalidException("group.live.stock.lower.zero", groupCode, DateUtil.toDateString(groupEvent.getEventAt()));
+                throw new InvalidException("new.report.group.live.stock.lower.zero", groupCode, DateUtil.toDateString(groupEvent.getEventAt()));
             }
 
             if (Objects.equals(groupEvent.getType(), GroupEventType.MOVE_IN.getValue())) {
