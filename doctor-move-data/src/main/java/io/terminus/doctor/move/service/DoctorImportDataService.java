@@ -330,7 +330,7 @@ public class DoctorImportDataService {
                 if (notNull(subUser)) {
                     DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(subUser.getId());
                     if (notNull(permission)) {
-                        throw new JsonResponseException("用户已关联猪场, 用户手机号:" + subUser.getMobile());
+                        throw new JsonResponseException("用户已关联猪场, 用户名：" + loginName + "手机号:" + contact);
                     }
 
                     subUser.setName(loginName + "@" + farm.getFarmCode());
@@ -561,7 +561,7 @@ public class DoctorImportDataService {
             user = result.getResult();
             DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(user.getId());
             if (notNull(permission)) {
-                throw new JsonResponseException("用户已关联猪场, 手机号" + user.getMobile() + "用户名："+ user.getName());
+                throw new JsonResponseException("用户已关联猪场, 手机号:" + mobile + "用户名："+ loginName);
             }
             //更新用户信息
             user.setPassword(EncryptUtil.encrypt("123456"));
