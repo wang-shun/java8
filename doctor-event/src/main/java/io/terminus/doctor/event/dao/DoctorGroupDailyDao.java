@@ -104,4 +104,9 @@ public class DoctorGroupDailyDao extends MyBatisDao<DoctorGroupDaily> {
     public Date maxDate(DoctorDimensionCriteria dimensionCriteria) {
         return getSqlSession().selectOne(sqlId("maxDate"), dimensionCriteria);
     }
+
+    public Date minSumAtForUpdated(Long orzId, Integer orzType, Date updateAt){
+        return getSqlSession().selectOne(sqlId("minSumAtForUpdated"),
+                ImmutableMap.of("orzId", orzId, "orzType", orzType, "updateAt", updateAt));
+    }
 }

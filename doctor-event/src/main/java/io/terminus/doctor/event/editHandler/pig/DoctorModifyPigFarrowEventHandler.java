@@ -18,6 +18,7 @@ import io.terminus.doctor.event.enums.InType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
+import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigDaily;
@@ -191,6 +192,10 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
         changeDto.setFarrowNestChange(-1);
         oldDailyPig = buildDailyPig(oldDailyPig, changeDto);
         doctorDailyReportManager.createOrUpdatePigDaily(oldDailyPig);
+
+        //旧版
+        DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(deletePigEvent.getFarmId(), deletePigEvent.getEventAt());
+        oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto));
     }
 
     @Override
@@ -200,6 +205,10 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
         changeDto1.setFarrowNestChange(-1);
         DoctorPigDaily oldDailyPig1 = doctorDailyReportManager.findDoctorPigDaily(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
         doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig1, changeDto1));
+
+        //旧版
+        DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
+        oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto1));
     }
 
     @Override
@@ -209,6 +218,9 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
         changeDto2.setFarrowNestChange(1);
         DoctorPigDaily oldDailyPig2 = doctorDailyReportManager.findDoctorPigDaily(newPigEvent.getFarmId(), farrowingDto2.eventAt());
         doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig2, changeDto2));
+        //旧版
+        DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
+        oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto2));
     }
 
     @Override
@@ -223,6 +235,23 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
         oldDailyPig.setFarrowjmh(EventUtil.plusInt(oldDailyPig.getFarrowjmh(),
                 MoreObjects.firstNonNull(changeDto.getJxCountChange(),0) + MoreObjects.firstNonNull(changeDto.getMnyCountChange(),0))
                 + MoreObjects.firstNonNull(changeDto.getBlackCountChange(), 0));
+        return oldDailyPig;
+    }
+
+    protected DoctorDailyReport oldBuildDailyPig(DoctorDailyReport oldDailyPig, DoctorEventChangeDto changeDto) {
+        oldDailyPig.setFarrowNest(EventUtil.plusInt(oldDailyPig.getFarrowNest(), changeDto.getFarrowNestChange()));
+        oldDailyPig.setFarrowLive(EventUtil.plusInt(oldDailyPig.getFarrowLive(), changeDto.getLiveCountChange()));
+        oldDailyPig.setFarrowHealth(EventUtil.plusInt(oldDailyPig.getFarrowHealth(), changeDto.getHealthCountChange()));
+        oldDailyPig.setFarrowWeak(EventUtil.plusInt(oldDailyPig.getFarrowWeak(), changeDto.getWeakCountChange()));
+        oldDailyPig.setFarrowBlack(EventUtil.plusInt(oldDailyPig.getFarrowBlack(), changeDto.getBlackCountChange()));
+        oldDailyPig.setFarrowDead(EventUtil.plusInt(oldDailyPig.getFarrowDead(), changeDto.getDeadCountChange()));
+        oldDailyPig.setFarrowJx(EventUtil.plusInt(oldDailyPig.getFarrowJx(), changeDto.getJxCountChange()));
+        oldDailyPig.setFarrowMny(EventUtil.plusInt(oldDailyPig.getFarrowMny(), changeDto.getMnyCountChange()));
+        oldDailyPig.setFarrowWeight(EventUtil.plusDouble(oldDailyPig.getFarrowWeight(), changeDto.getFarrowWeightChange()));
+        oldDailyPig.setFarrowAvgWeight(EventUtil.getAvgWeight(oldDailyPig.getFarrowWeight(), oldDailyPig.getFarrowLive()));
+        oldDailyPig.setFarrowSjmh(oldDailyPig.getFarrowDead() + oldDailyPig.getFarrowBlack()
+                + oldDailyPig.getFarrowMny() + oldDailyPig.getFarrowJx());
+        oldDailyPig.setFarrowAll(oldDailyPig.getFarrowLive() + oldDailyPig.getFarrowSjmh());
         return oldDailyPig;
     }
 

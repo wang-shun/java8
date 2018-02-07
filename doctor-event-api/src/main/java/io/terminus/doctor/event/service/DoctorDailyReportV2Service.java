@@ -54,11 +54,17 @@ public interface DoctorDailyReportV2Service {
     Response<Boolean> flushPigDaily(Long farmId, String startAt, String endAt);
 
     /**
-     * 生成昨天和今天的报表
+     * 生成昨天和今天的报表包含同步数据
      *
      * @param farmIds 猪场ids
      */
-    Response<Boolean> generateYesterdayAndToday(List<Long> farmIds);
+    Response<Boolean> generateYesterdayAndToday(List<Long> farmIds, Date date);
+
+    /**
+     * 同步数据
+     * @param farmIds 猪场ids
+     */
+    Response<Boolean> synchronizeYesterdayAndToday(List<Long> farmIds, Date date);
 
     /**
      * 全量同步报表数据

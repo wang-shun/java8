@@ -727,6 +727,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         params.put("beginDate", start);
         params.put("endDate", end);
         params.put("farmIds", farmIds);
+        params.put("kind", 1);
 
         return this.sqlSession.selectList(this.sqlId("findPigAt"), params);
     }

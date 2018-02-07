@@ -5,6 +5,7 @@ import io.terminus.doctor.event.enums.ReportTime;
 import io.terminus.doctor.event.service.DoctorReportWriteService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,11 +40,17 @@ public class ReportFlushController {
 
     }
 
-    @RequestMapping("all/npd")
-    public void flushNPD(@RequestParam Long farmId,
+    @RequestMapping("all/{farmId}/npd")
+    public void flushNPD(@PathVariable Long farmId,
                          @RequestParam @DateTimeFormat(pattern = "yyyyMM") Date date) {
 
         doctorReportWriteService.flushNPD(Collections.singletonList(farmId), date);
+    }
+
+
+    @RequestMapping("all/npd")
+    public void flushNPD(@RequestParam @DateTimeFormat(pattern = "yyyyMM") Date date) {
+        doctorReportWriteService.flushNPD(date);
     }
 
 }

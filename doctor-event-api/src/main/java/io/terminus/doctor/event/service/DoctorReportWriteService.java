@@ -31,4 +31,6 @@ public interface DoctorReportWriteService {
      * @param start
      */
     void flushNPD(List<Long> farmIds, Date start);
+
+    void flushNPD(Date start);
 }

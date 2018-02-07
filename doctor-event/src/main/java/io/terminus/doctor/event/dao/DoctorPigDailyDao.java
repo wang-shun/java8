@@ -196,6 +196,11 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
         return getSqlSession().selectOne(sqlId("maxDate"), dimensionCriteria);
     }
 
+    public Date minSumAtForUpdated(Long orzId, Integer orzType, Date updateAt){
+        return getSqlSession().selectOne(sqlId("minSumAtForUpdated"),
+                ImmutableMap.of("orzId", orzId, "orzType", orzType, "updateAt", updateAt));
+    }
+
     public List<Map<String, Object>> orgMinDate(){
         return getSqlSession().selectList(sqlId("orgMinDate"));
     }

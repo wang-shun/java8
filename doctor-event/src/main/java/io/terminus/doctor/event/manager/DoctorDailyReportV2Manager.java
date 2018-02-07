@@ -2,6 +2,7 @@ package io.terminus.doctor.event.manager;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.enums.PigType;
@@ -17,6 +18,7 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigStatisticDao;
 import io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
+import io.terminus.doctor.event.enums.ReportTime;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
@@ -187,9 +189,9 @@ public class DoctorDailyReportV2Manager {
      *
      * @param farmIds 猪场ids
      */
-    public void generateYesterdayAndToday(List<Long> farmIds) {
+    public Map<Long, Date> generateYesterdayAndToday(List<Long> farmIds, Date yesterday) {
         Date today = Dates.startOfDay(new Date());
-        Date yesterday = new DateTime(today).minusDays(10).toDate();
+        Map<Long, Date> longDateMap = Maps.newHashMap();
         Map<Long, Date> farmToDate = queryFarmEarlyEventAtImpl(DateUtil.toDateString(yesterday));
         farmIds.parallelStream().forEach(farmId -> {
             try {
@@ -200,6 +202,7 @@ public class DoctorDailyReportV2Manager {
                 if (farmToDate.containsKey(farmId)) {
                     temp = farmToDate.get(farmId);
                 }
+                longDateMap.put(farmId, temp);
                 List<Date> list = DateUtil.getDates(temp, today);
                 list.parallelStream().forEach(date -> {
                     DoctorStatisticCriteria criteria1 = new DoctorStatisticCriteria();
@@ -212,20 +215,21 @@ public class DoctorDailyReportV2Manager {
             }
         });
 
-//        doctorReportWriteService.flushNPD(farmIds, today, ReportTime.MONTH);
-
+        doctorReportWriteService.flushNPD(farmIds, today, ReportTime.MONTH);
+        return longDateMap;
     }
 
     /**
      * 刷新猪场日报
      */
     public void flushFarmDaily(DoctorStatisticCriteria criteria) {
+        log.info("flush farmDaily starting farm:{}, sumAt:{}", criteria.getFarmId(), criteria.getSumAt());
         PigType.GROUP_TYPES.forEach(pigType -> {
             criteria.setPigType(pigType);
             flushGroupDaily(criteria);
         });
         flushPigDaily(criteria);
-
+        log.info("flush farmDaily end farm:{}, sumAt:{}", criteria.getFarmId(), criteria.getSumAt());
         // TODO: 17/12/21 效率指标 
     }
 
@@ -378,7 +382,7 @@ public class DoctorDailyReportV2Manager {
         doctorPigDaily.setBoarEnd(pigStatisticDao.boarLiveStock(criteria.getFarmId(), criteria.getSumAt()));
     }
 
-    private Map<Long, Date> queryFarmEarlyEventAtImpl(String startDate) {
+    public Map<Long, Date> queryFarmEarlyEventAtImpl(String startDate) {
         List<DoctorFarmEarlyEventAtDto> list1 = doctorPigEventDao.getFarmEarlyEventAt(startDate);
         List<DoctorFarmEarlyEventAtDto> list2 = doctorGroupEventDao.getFarmEarlyEventAt(startDate);
         list1.addAll(list2);

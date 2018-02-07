@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Created by xjn on 18/1/9.
@@ -22,8 +23,8 @@ public class DoctorReportBiManager {
         this.query = query;
     }
 
-    public void synchronizeDeltaDayBiData() {
-        synchronize.synchronizeDeltaDayBiData();
+    public void synchronizeDeltaDayBiData(Map<Long, Date> longDateMap) {
+        synchronize.synchronizeDeltaDayBiData(longDateMap);
     }
 
     public void synchronizeDeltaDayBiData(Long farmId, Date start, Integer orzType) {

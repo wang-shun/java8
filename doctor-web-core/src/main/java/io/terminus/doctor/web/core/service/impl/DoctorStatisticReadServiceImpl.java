@@ -158,7 +158,7 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
     private DoctorFarmBasicDto buildFarmBasic(Long farmId) {
         DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(farmId));
         //查询猪只统计, 按照类型拼下list
-        DoctorFarmLiveStockDto stat = RespHelper.orServEx(doctorCommonReportReadService.findFarmCurrentLiveStock(farmId));
+        DoctorFarmLiveStockDto stat = RespHelper.orServEx(doctorDailyReportV2Service.findFarmsLiveStock(Lists.newArrayList(farmId))).get(0);
         return new DoctorFarmBasicDto(farm, getStatistics(Lists.newArrayList(MoreObjects.firstNonNull(stat, new DoctorFarmLiveStockDto()))));
     }
 

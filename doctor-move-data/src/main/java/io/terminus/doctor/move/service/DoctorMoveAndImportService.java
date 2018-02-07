@@ -267,16 +267,21 @@ public class DoctorMoveAndImportService {
             DateTime end = DateTime.now().withTimeAtStartOfDay(); //昨天开始时间
             DateTime begin = end.minusYears(1);
             new Thread(() -> {
-//                doctorDailyReportWriteService.createDailyReports(farmId, begin.toDate(), end.toDate());
-//                doctorDailyGroupWriteService.createDailyGroupsByDateRange(farmId, begin.toDate(), end.toDate());
-//                doctorMoveReportService.moveDoctorRangeReport(farmId, 12);
+                //刷新报表
                 doctorDailyReportV2Service.flushFarmDaily(farmId, DateUtil.toDateString(begin.toDate()), DateUtil.toDateString(end.toDate()));
                 doctorReportWriteService.flushNPD(Collections.singletonList(farmId), begin.toDate());
                 doctorMoveReportService.moveParityMonthlyReport(farmId, 12);
                 doctorMoveReportService.moveBoarMonthlyReport(farmId, 12);
 
+                //数据同步
                 doctorDailyReportV2Service.synchronizeDelta(farmId, begin.toDate(), OrzDimension.FARM.getValue());
                 doctorDailyReportV2Service.syncEfficiency(farmId);
+
+                //旧报表刷新
+                doctorDailyReportWriteService.createDailyReports(farmId, begin.toDate(), end.toDate());
+                doctorDailyGroupWriteService.createDailyGroupsByDateRange(farmId, begin.toDate(), end.toDate());
+                doctorMoveReportService.moveDoctorRangeReport(farmId, 12);
+
             }).start();
         } catch (Exception e) {
             log.error("generate report error. farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));

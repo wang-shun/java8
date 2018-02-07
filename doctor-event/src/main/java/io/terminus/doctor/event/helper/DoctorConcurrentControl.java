@@ -70,6 +70,10 @@ public class DoctorConcurrentControl {
 //        }
 //    }
 
+    /**
+     * 删除指定key的锁
+     * @param key 存在redis中的key值
+     */
     public void delKey(String key) {
         Map<String, DoctorConcurrentDto> map = threadLocal.get();
         DoctorConcurrentDto doctorConcurrentDto = map.get(key);
@@ -92,6 +96,9 @@ public class DoctorConcurrentControl {
         }
     }
 
+    /**
+     * 删除当前线程拥有的所有锁
+     */
     public void delAll() {
         threadLocal.get().forEach((key, val) -> {
             String value = jedisTemplate.execute(jedis -> {
