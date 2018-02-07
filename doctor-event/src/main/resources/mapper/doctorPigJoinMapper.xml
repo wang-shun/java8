@@ -47,6 +47,7 @@
             </foreach>
         </if>
 
+        <if test="rfid != null">AND a.rfid = #{rfid}</if>
     </sql>
 
     <select id="count" parameterType="map" resultType="long" >
@@ -78,7 +79,9 @@
             b.weight AS weight,
             a.in_farm_day_age AS dayAge,
             b.current_parity AS currentParity,
-            a.boar_type as boarType
+            a.boar_type as boarType,
+            a.rfid as rfid,
+            b.weight as pigWeight
         FROM doctor_pigs a
         LEFT JOIN doctor_pig_tracks b
           ON a.id = b.pig_id
@@ -114,5 +117,20 @@
         WHERE farm_id = #{farmId}
         AND pig_type = 2
         AND is_removal = 0
+    </select>
+
+    <select id="suggestSowPig" parameterType="map" resultType="io.terminus.doctor.event.model.DoctorPig">
+        SELECT a.id, a.pig_code as pigCode
+        FROM doctor_pigs a left join doctor_pig_tracks b on a.id = b.pig_id
+        WHERE b.current_barn_id = #{barnId} AND a.is_removal = 0 AND a.pig_type = 1
+        <if test="name != null">AND `pig_code` like concat('%', #{name}, '%')</if>
+        ORDER BY instr(`pig_code`, #{name}) ASC, length(`pig_code`) ASC, `pig_code` ASC
+        limit #{count}
+    </select>
+
+    <select id="findUnRemovalPigsBy" parameterType="long" resultType="io.terminus.doctor.event.model.DoctorPig">
+        SELECT a.id, a.pig_code as pigCode, a.rfid
+        FROM doctor_pigs a left join doctor_pig_tracks b on a.id = b.pig_id
+        WHERE b.current_barn_id = #{barnId} AND a.is_removal = 0 and a.pig_type = 1
     </select>
 </mapper>

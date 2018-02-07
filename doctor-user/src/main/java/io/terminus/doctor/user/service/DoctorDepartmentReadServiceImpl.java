@@ -4,6 +4,9 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.enums.IsOrNot;
+import io.terminus.doctor.user.dao.DoctorFarmDao;
+import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.dto.DoctorDepartmentDto;
 import io.terminus.doctor.user.dto.DoctorDepartmentLinerDto;
 import io.terminus.doctor.user.manager.DoctorDepartmentManager;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by xjn on 17/7/19.
@@ -26,6 +30,10 @@ import java.util.Map;
 public class DoctorDepartmentReadServiceImpl implements DoctorDepartmentReadService{
     @Autowired
     private DoctorDepartmentManager doctorDepartmentManager;
+    @Autowired
+    private DoctorOrgDao doctorOrgDao;
+    @Autowired
+    private DoctorFarmDao doctorFarmDao;
 
     @Override
     public Response<List<DoctorFarm>> findAllFarmsByOrgId(@NotNull(message = "orgId.not.null") Long orgId) {
@@ -80,6 +88,23 @@ public class DoctorDepartmentReadServiceImpl implements DoctorDepartmentReadServ
     }
 
     @Override
+    public Response<List<DoctorDepartmentDto>> findCliqueTree() {
+        try {
+            List<DoctorFarm> allFarm = doctorFarmDao.findFarmsBy(null, IsOrNot.YES.getKey());
+            Map<Long, List<DoctorFarm>> map = allFarm.stream().collect(Collectors.groupingBy(DoctorFarm::getOrgId));
+            List<DoctorDepartmentDto> dtos = map.entrySet().stream().map(entry -> {
+                List<DoctorDepartmentDto> list = entry.getValue().stream().map(doctorFarm ->
+                        new DoctorDepartmentDto(doctorFarm.getId(), doctorFarm.getName(), null, null))
+                        .collect(Collectors.toList());
+                return new DoctorDepartmentDto(entry.getKey(), entry.getValue().get(0).getOrgName(), null, list);
+            }).collect(Collectors.toList());
+
+            return Response.ok(dtos);
+        } catch (Exception e) {
+            log.error("find clique tree failed,cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find.clique.tree.failed");
+        }
+    }
     public Response<DoctorDepartmentLinerDto> findLinerBy(Long farmId) {
         try {
             return Response.ok(doctorDepartmentManager.findLinerBy(farmId));

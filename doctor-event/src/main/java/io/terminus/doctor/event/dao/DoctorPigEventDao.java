@@ -681,6 +681,16 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
 
     /**
+     * 查询导致猪到达当前的状态事件的日期
+     * @param pigId 猪id
+     * @param status 猪状态
+     * @return 事件日期
+     */
+    public Date findEventAtLeadToStatus(Long pigId, Integer status) {
+        return getSqlSession().selectOne(sqlId("findEventAtLeadToStatus"),
+                ImmutableMap.of("pigId", pigId, "status", status));
+    }
+    /**
      * 修复窝号临时创建请勿使用
      *
      * @return

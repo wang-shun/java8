@@ -196,4 +196,14 @@ public class PrimaryUserReadServiceImpl implements PrimaryUserReadService {
             return Response.fail("find.farmId.to.user.name");
         }
     }
+
+    @Override
+    public Response<PrimaryUser> findByUserId(Long userId) {
+        try {
+            return Response.ok(primaryUserDao.findByUserId(userId));
+        } catch (Exception e) {
+            log.error("find by user id failed,cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find.by.user.id.failed");
+        }
+    }
 }

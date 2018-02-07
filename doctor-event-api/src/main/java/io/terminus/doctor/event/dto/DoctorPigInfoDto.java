@@ -89,6 +89,11 @@ public class DoctorPigInfoDto implements Serializable{
     private Integer unweanQty;
     private Integer weanQty;
 
+    /**
+     * 物联网使用
+     */
+    private String rfid;
+
     public static DoctorPigInfoDto buildDoctorPigInfoDto(DoctorPig doctorPig, DoctorPigTrack doctorPigTrack, List<DoctorPigEvent> doctorPigEvents) {
         checkState(!isNull(doctorPig), "build.doctorPig.empty");
         List<Integer> kongHuaiPregCheckResultList = Lists.newArrayList(KongHuaiPregCheckResult.FANQING.getKey(), KongHuaiPregCheckResult.LIUCHAN.getKey(), KongHuaiPregCheckResult.YING.getKey());
@@ -96,7 +101,7 @@ public class DoctorPigInfoDto implements Serializable{
                 .id(doctorPig.getId()).pigId(doctorPig.getId()).orgId(doctorPig.getOrgId()).orgName(doctorPig.getOrgName()).farmId(doctorPig.getFarmId()).farmName(doctorPig.getFarmName())
                 .pigType(doctorPig.getPigType()).pigCode(doctorPig.getPigCode()).birthDay(doctorPig.getBirthDate())
                 .inFarmDate(doctorPig.getInFarmDate()).dateAge(Days.daysBetween(new DateTime(doctorPig.getBirthDate()), DateTime.now()).getDays())
-                .creatorId(doctorPig.getCreatorId()).creatorName(doctorPig.getCreatorName());
+                .creatorId(doctorPig.getCreatorId()).creatorName(doctorPig.getCreatorName()).rfid(doctorPig.getRfid());
 
         if (!isNull(doctorPigTrack)) {
             PigStatus pigStatus = PigStatus.from(doctorPigTrack.getStatus());

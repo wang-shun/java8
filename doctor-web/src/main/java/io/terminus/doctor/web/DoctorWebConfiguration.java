@@ -4,6 +4,7 @@
 
 package io.terminus.doctor.web;
 
+import io.terminus.boot.swagger.autoconfigure.SwaggerAutoConfiguration;
 import io.terminus.doctor.user.service.SubRoleReadService;
 import io.terminus.doctor.web.core.DoctorCoreWebConfiguration;
 import io.terminus.doctor.web.core.advices.JsonExceptionResolver;
@@ -11,6 +12,8 @@ import io.terminus.doctor.web.core.msg.email.CommonEmailServiceConfig;
 import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
 import io.terminus.doctor.web.core.service.OtherSystemServiceConfig;
 import io.terminus.doctor.web.front.auth.DoctorCustomRoleLoaderConfigurer;
+import io.terminus.pampas.boot.autoconfigure.PampasAutoConfiguration;
+import io.terminus.pampas.boot.autoconfigure.PampasMVCAutoConfiguration;
 import io.terminus.parana.auth.role.CustomRoleLoaderConfigurer;
 import io.terminus.parana.auth.role.CustomRoleLoaderRegistry;
 import io.terminus.parana.auth.web.WebAuthenticationConfiguration;
@@ -24,6 +27,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import springfox.documentation.builders.ApiInfoBuilder;
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.service.ApiInfo;
+import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.plugins.Docket;
 
 /**
  * Author:  <a href="mailto:i@terminus.io">jlchen</a>
@@ -42,7 +50,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
         })
 })
 @EnableWebMvc
-@EnableAutoConfiguration
+@EnableAutoConfiguration(exclude = {PampasAutoConfiguration.class, PampasMVCAutoConfiguration.class})
 @Import({DoctorCoreWebConfiguration.class,
         OtherSystemServiceConfig.class,
         WebAuthenticationConfiguration.class,
@@ -61,12 +69,11 @@ public class DoctorWebConfiguration extends WebMvcConfigurerAdapter {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-
         registry.addResourceHandler("swagger-ui.html")
-                .addResourceLocations("classpath*:/META-INF/resources/");
+                .addResourceLocations("classpath:/META-INF/resources/");
 
         registry.addResourceHandler("/webjars/**")
-                .addResourceLocations("classpath*:/META-INF/resources/webjars/");
+                .addResourceLocations("classpath:/META-INF/resources/webjars/");
     }
 
 }

@@ -1479,6 +1479,35 @@ CREATE TABLE `doctor_warehouse_stock_monthly` (
 ALTER TABLE doctor_warehouse_material_apply MODIFY pig_group_name VARCHAR(512) COMMENT '领用猪群名称';
 ALTER TABLE doctor_warehouse_material_apply MODIFY apply_date DATE COMMENT '领用日期';
 
+-- 2017-10-11
+ALTER table doctor_pigs ADD column `rfid` VARCHAR(32) DEFAULT NULL COMMENT '猪rfid物联网使用' after pig_Code;
+-- 2017-10-11物联网角色表
+CREATE TABLE `iot_roles` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR (32) NOT NULL COMMENT '角色名',
+  `desc` VARCHAR (255) DEFAULT NULL COMMENT '角色描述',
+  `status` tinyint(2) NOT NULL COMMENT '角色状态',
+  `allow_json` text NOT NULL COMMENT '角色允许查看页面',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='物联网角色表';
+
+-- 2017-10-11用户与物联网关联表
+CREATE TABLE `iot_users` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL COMMENT '用户id',
+  `user_name` VARCHAR (32) NOT NULL COMMENT '用户名',
+  `user_real_name` VARCHAR (32) NOT NULL COMMENT '用户真实',
+  `mobile` VARCHAR (40) NOT NULL COMMENT '手机号',
+  `iot_role_id` bigint(20) DEFAULT NULL COMMENT '物联网角色id',
+  `iot_role_name` VARCHAR (32) DEFAULT NULL COMMENT '角色名',
+  `type` smallint(6) NOT NULL COMMENT '物联网用户类型,1->运营主账户，2->运营子账户',
+  `status` smallint(6) NOT NULL COMMENT '用户状态0->离职,1->正常,-1->删除',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='物联网运营用户表';
 ALTER TABLE `doctor_daily_reports`
 ADD COLUMN `version` INT NOT NULL DEFAULT 1 COMMENT '版本号' AFTER `sow_ph_chg_farm_in`;
 ALTER TABLE `doctor_daily_groups`
@@ -1589,6 +1618,10 @@ CREATE TABLE `doctor_warehouse_item_org` (
 ALTER TABLE doctor_warehouse_stock_handle ADD warehouse_type TINYINT(4) NULL COMMENT '仓库类型';
 ALTER TABLE doctor_warehouse_material_handle ADD before_inventory_quantity DECIMAL(23,2) NULL COMMENT '盘点前库存数量';
 
+-- doctorfarm 添加是否是智能猪舍标志
+ALTER TABLE doctor_farms ADD column is_intelligent  smallint(6) DEFAULT 0
+COMMENT '是否是智能猪舍（物联网使用默认是0）1->智能猪场 0不是猪场' after extra;
+
 -- 物料领用添加领用类型 2017-11-28
 ALTER TABLE `doctor_warehouse_material_apply`
 ADD COLUMN `apply_type` TINYINT(4) NOT NULL COMMENT '领用类型。0猪舍，1猪群，2母猪' AFTER `updated_at`;
@@ -1601,7 +1634,10 @@ ADD COLUMN `apply_staff_id` BIGINT(20) NULL COMMENT '领用人编号' AFTER `app
 ALTER TABLE `doctor_warehouse_stock_monthly`
 ADD COLUMN `handle_date` DATE NULL COMMENT '处理日期' AFTER `updated_at`;
 
-<<<<<<< HEAD
+-- 弱仔数是否作为活仔数 2017-12-26
+ALTER TABLE `doctor_farms`
+ADD COLUMN `is_weak` SMALLINT(6) DEFAULT 1 COMMENT '弱仔数是否作为活仔数, 1->作为活仔数 0不作为活仔数，默认为1' AFTER `is_intelligent`;
+
 -- 猪 猪群原值 2017-12-20
 ALTER TABLE `doctor_pig_events` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `remark`;
 ALTER TABLE `doctor_group_events` ADD COLUMN `origin` DOUBLE DEFAULT NULL COMMENT '原值' after `remark`;
@@ -2074,3 +2110,4 @@ ADD COLUMN `is_weak` SMALLINT(6) DEFAULT 1 COMMENT '弱仔数是否作为活仔�
 ALTER TABLE `doctor_pig_events` ADD COLUMN `origin` bigint(20) DEFAULT NULL COMMENT '原值' after `remark`;
 ALTER TABLE `doctor_group_events` ADD COLUMN `origin` bigint(20) DEFAULT NULL COMMENT '原值' after `remark`;
 ALTER TABLE `doctor_pigs` ADD COLUMN `origin` bigint(20) DEFAULT NULL COMMENT '原值' after `pig_code`;
+

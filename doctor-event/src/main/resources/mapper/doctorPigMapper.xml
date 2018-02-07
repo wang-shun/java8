@@ -16,6 +16,7 @@
         <result column="farm_name" property="farmName"/>
         <result column="out_id" property="outId"/>
         <result column="pig_code" property="pigCode"/>
+        <result column="rfid" property="rfid"/>
         <result column="origin" property="origin"/>
         <result column="pig_type" property="pigType"/>
         <result column="is_removal" property="isRemoval"/>
@@ -53,11 +54,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `org_id`,`org_name`,`farm_id`,`farm_name`,`out_id`,`pig_code`, origin, `pig_type`,`is_removal`,`pig_father_code`,`pig_mother_code`,`source`,`birth_date`,`birth_weight`,`in_farm_date`,`in_farm_day_age`,`init_barn_id`,`init_barn_name`,`breed_id`,`breed_name`,`genetic_id`,`genetic_name`,`boar_type`,`extra`,`remark`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
+        `org_id`,`org_name`,`farm_id`,`farm_name`,`out_id`,`pig_code`, rfid, origin, `pig_type`,`is_removal`,`pig_father_code`,`pig_mother_code`,`source`,`birth_date`,`birth_weight`,`in_farm_date`,`in_farm_day_age`,`init_barn_id`,`init_barn_name`,`breed_id`,`breed_name`,`genetic_id`,`genetic_name`,`boar_type`,`extra`,`remark`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
-        #{orgId},#{orgName},#{farmId},#{farmName},#{outId},#{pigCode},#{origin}, #{pigType},#{isRemoval},#{pigFatherCode},#{pigMotherCode},#{source},#{birthDate},#{birthWeight},#{inFarmDate},#{inFarmDayAge},#{initBarnId},#{initBarnName},#{breedId},#{breedName},#{geneticId},#{geneticName},#{boarType},#{extra},#{remark},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+        #{orgId},#{orgName},#{farmId},#{farmName},#{outId},#{pigCode}, #{rfid}, #{origin}, #{pigType},#{isRemoval},#{pigFatherCode},#{pigMotherCode},#{source},#{birthDate},#{birthWeight},#{inFarmDate},#{inFarmDayAge},#{initBarnId},#{initBarnName},#{breedId},#{breedName},#{geneticId},#{geneticName},#{boarType},#{extra},#{remark},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
     <sql id="criteria">
@@ -65,6 +66,7 @@
         <if test="farmId != null" > AND `farm_id` = #{farmId}</if>
         <if test="outId != null" > AND `out_id` = #{outId}</if>
         <if test="pigCode != null" > AND `pig_code` = #{pigCode}</if>
+        <if test="rfid != null" > AND `rfid` = #{rfid}</if>
         <if test="pigType != null" > AND `pig_type` = #{pigType}</if>
         <if test="isRemoval == null"> AND `is_removal` = 0 </if>
         <if test="isRemoval != null"> AND `is_removal` = #{isRemoval}</if>
@@ -193,6 +195,7 @@
             <if test="farmName != null" > ,`farm_name` = #{farmName}</if>
             <if test="outId != null" > ,`out_id` = #{outId}</if>
             <if test="pigCode != null" > ,`pig_code` = #{pigCode}</if>
+            <if test="rfid != null" > ,`rfid` = #{rfid}</if>
             <if test="origin != null" > ,`origin` = #{origin}</if>
             <if test="pigType != null" > ,`pig_type` = #{pigType}</if>
             <if test="isRemoval != null">, `is_removal` = #{isRemoval} </if>

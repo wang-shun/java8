@@ -20,6 +20,8 @@ public class DoctorEventDaoTest extends BaseDaoTest {
     private DoctorPigTrackDao doctorPigTrackDao;
     @Autowired
     private DoctorGroupTrackDao doctorGroupTrackDao;
+    @Autowired
+    private DoctorGroupJoinDao doctorGroupJoinDao;
     @Test
     public void findByIds(){
         List<DoctorPigEvent> doctorPigEvents = doctorPigEventDao.findByIds(Splitters.COMMA.splitToList(doctorPigTrackDao.findById(191).getRelEventIds()).stream().filter(id -> StringUtils.isNotBlank(id)).map(id -> Long.parseLong(id)).collect(Collectors.toList()));
@@ -29,5 +31,10 @@ public class DoctorEventDaoTest extends BaseDaoTest {
     @Test
     public void queryFattenOutBySumAt(){
         System.out.println(doctorGroupTrackDao.queryFattenOutBySumAt(ImmutableMap.of("avgDayAge", 180, "sumAt", "2016-12-26")));
+    }
+
+    @Test
+    public void dayAgeListForBarn() {
+        System.out.println(doctorGroupJoinDao.dayAgeListForBarn(164L));
     }
 }

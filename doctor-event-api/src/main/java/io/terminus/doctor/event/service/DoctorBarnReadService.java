@@ -4,6 +4,8 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorBarnCountForPigTypeDto;
 import io.terminus.doctor.event.dto.DoctorBarnDto;
+import io.terminus.doctor.event.dto.IotBarnInfo;
+import io.terminus.doctor.event.dto.IotBarnWithStorage;
 import io.terminus.doctor.event.model.DoctorBarn;
 
 import javax.validation.constraints.NotNull;
@@ -32,6 +34,13 @@ public interface DoctorBarnReadService {
      * @return 猪舍表
      */
     Response<List<DoctorBarn>> findBarnsByFarmId(@NotNull(message = "farmId.not.null") Long farmId);
+
+    /**
+     * 查询猪舍和
+     * @param farmId
+     * @return
+     */
+    Response<List<IotBarnWithStorage>> findIotBarnWithStorage(@NotNull(message = "farmId.not.null") Long farmId);
 
     /**
      * 根据farmIds查询猪舍表
@@ -95,4 +104,19 @@ public interface DoctorBarnReadService {
      */
     Response<DoctorBarn> findBarnByFarmAndBarnName(@NotNull(message = "farmId.can.not.be.null") Long farmId,
                                                    @NotNull(message = "barn.name.not.empty") String barnName);
+
+    /**
+     * 模糊搜索有效猪舍
+     * @param name 模糊关键字
+     * @param count 返回的个数
+     * @return 返回满足条件的前count个
+     */
+    Response<List<DoctorBarn>> selectBarns(Long orgId, Long farmId, String name, Integer count);
+
+    /**
+     * 获取物联网猪舍信息，包含其下的猪数量
+     * @param barnId 猪舍id
+     * @return 猪舍信息
+     */
+    Response<IotBarnInfo> findIotBarnInfo(Long barnId);
 }

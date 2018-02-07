@@ -131,6 +131,17 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
     }
 
     @Override
+    public Response<List<DoctorFarm>> findFarmsBy(Long orgId, Integer isIntelligent) {
+        try {
+            return Response.ok(doctorFarmDao.findFarmsBy(orgId, isIntelligent));
+        } catch (Exception e) {
+            log.error("find farms by failed, orgId:{}, isIntelligent:{}, cause:{}",
+                    orgId, isIntelligent, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.farms.by.failed");
+        }
+    }
+
+    @Override
     public Response<Paging<DoctorFarm>> pagingFarm(FarmCriteria farmCriteria, Integer pageNo, Integer pageSize) {
         try {
             PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
@@ -141,5 +152,4 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
             return Response.fail("paging.farm.failed");
         }
     }
-
 }

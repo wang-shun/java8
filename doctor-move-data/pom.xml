@@ -98,10 +98,6 @@
             <version>2.3.BUILD-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>io.terminus.zookeeper</groupId>
-            <artifactId>leader</artifactId>
-        </dependency>
-        <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
         </dependency>

@@ -52,7 +52,7 @@ import static io.terminus.common.utils.Arguments.notNull;
 /**
  * Created by chenzenghui on 16/7/15.
  */
-
+//@Api(tags = "运营猪场接口")
 @Slf4j
 @RestController
 @RequestMapping("/api/admin/farm")
@@ -188,6 +188,12 @@ public class FarmController {
             farmCriteria.setFuzzyName(fuzzyName);
         }
         return RespHelper.or500(doctorFarmReadService.pagingFarm(farmCriteria, pageNo, pageSize));
+    }
+
+    @ApiOperation("切换智能猪场, isIntelligent: 1-》智能猪场，0-》非智能猪场")
+    @RequestMapping(value = "/switch/isIntelligent", method = RequestMethod.PUT)
+    public Boolean switchIsIntelligent(@RequestParam @ApiParam("猪场id") Long farmId) {
+        return RespHelper.or500(doctorFarmWriteService.switchIsIntelligent(farmId));
     }
 
     @ApiOperation("是否计算弱仔, isWeak: 1-》计算弱仔，0-》不计算弱仔")

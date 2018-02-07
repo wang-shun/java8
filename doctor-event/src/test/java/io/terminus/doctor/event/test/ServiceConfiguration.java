@@ -93,7 +93,7 @@ import java.util.Map;
 @Configuration
 @EnableAutoConfiguration(exclude = {DubboBaseAutoConfiguration.class})
 @Import({MessageAutoConfig.class, DoctorCommonConfiguration.class})
-@ComponentScan(basePackages = {"io.terminus.doctor.event.dao.*"})
+@ComponentScan({"io.terminus.doctor.event.*"})
 @AutoConfigureAfter(MybatisAutoConfiguration.class)
 public class ServiceConfiguration {
     @Bean

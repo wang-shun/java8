@@ -71,6 +71,14 @@ public class DoctorGroupTrackDao extends MyBatisDao<DoctorGroupTrack> {
     }
 
     /**
+     * 查询猪群关联的track列表
+     * @param list 猪群ids
+     * @return
+     */
+    public List<DoctorGroupTrack> findsByGroups(List<Long> list) {
+        return getSqlSession().selectList(sqlId("findsByGroups"), list);
+    }
+    /**
      * 统计指定猪群的存栏之和
      * @param list
      * @return

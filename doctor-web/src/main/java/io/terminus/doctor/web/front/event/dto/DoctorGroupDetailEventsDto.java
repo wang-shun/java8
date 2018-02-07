@@ -36,4 +36,9 @@ public class DoctorGroupDetailEventsDto implements Serializable {
      * 猪群事件s
      */
     private List<DoctorGroupEvent> groupEvents;
+
+    /**
+     * 平均重量
+     */
+    private Double avgWeight;
 }
