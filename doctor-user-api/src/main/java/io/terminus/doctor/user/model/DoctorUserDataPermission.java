@@ -102,6 +102,12 @@ public class DoctorUserDataPermission implements Serializable {
     @Getter
     private List<Long> farmIdsList;
 
+    /**
+     * 是否被删除
+     * @see io.terminus.doctor.common.enums.IsOrNot
+     */
+    private Integer frozen;
+
     public void setFarmIds(String farmIds){
         this.farmIds = farmIds;
         if (StringUtils.isNotBlank(farmIds)) {

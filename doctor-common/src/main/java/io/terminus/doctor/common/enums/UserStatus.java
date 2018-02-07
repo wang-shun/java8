@@ -6,6 +6,11 @@ package io.terminus.doctor.common.enums;
 public enum UserStatus {
 
     /**
+     * 删除猪场后，用户状态
+     */
+    FARM_FROZEN(-4),
+
+    /**
      * 已删除
      */
     DELETED(-3),

@@ -57,4 +57,9 @@ public class DoctorUserDataPermissionDao extends MyBatisDao<DoctorUserDataPermis
     public List<DoctorUserDataPermission> findByFarmAndPrimary(Long farmId, List<Long> userIds) {
         return getSqlSession().selectList(sqlId("findByFarmAndPrimary"), ImmutableMap.of("farmId", farmId, "userIds", userIds));
     }
+
+    public Boolean freeze(Long userId) {
+        return getSqlSession().update(sqlId("freeze"), userId) == 1;
+    }
+
 }

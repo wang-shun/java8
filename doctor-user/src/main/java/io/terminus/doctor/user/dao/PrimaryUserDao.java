@@ -37,4 +37,8 @@ public class PrimaryUserDao extends MyBatisDao<PrimaryUser> {
     public List<PrimaryUser> findAllRelFarmId() {
         return getSqlSession().selectList(sqlId("findAllRelFarmId"));
     }
+
+    public Boolean freeze(Long id) {
+        return getSqlSession().update(sqlId("freeze"), id) == 1;
+    }
 }

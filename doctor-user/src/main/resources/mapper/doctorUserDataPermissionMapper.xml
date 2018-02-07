@@ -126,4 +126,11 @@
             #{userId}
         </foreach>
     </select>
+
+    <update id="freeze" parameterType="long" >
+        UPDATE
+        <include refid="tb"/>
+        set frozen = 1
+        where id = #{id}
+    </update>
 </mapper>

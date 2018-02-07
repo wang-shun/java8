@@ -186,4 +186,11 @@
         <if test="orgId != null">AND org_id = #{orgId}</if>
         <if test="isIntelligent != null">AND is_intelligent = #{isIntelligent} </if>
     </select>
+
+    <update id="freeze" parameterType="long" >
+        UPDATE
+        <include refid="tb"/>
+        set frozen = 1
+        where id = #{id}
+    </update>
 </mapper>
