@@ -33,4 +33,6 @@ public interface DoctorFarmWriteService {
     Response<Boolean> switchIsIntelligent(Long farmId);
 
     Response<Boolean> switchIsWeak(Long farmId);
+
+    Response<Boolean> freezeFarm(Long farmId);
 }

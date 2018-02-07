@@ -93,4 +93,15 @@ public class DoctorFarmWriteServiceImpl implements DoctorFarmWriteService{
             return Response.fail("switch.is.weak.failed");
         }
     }
+
+    @Override
+    public Response<Boolean> freezeFarm(Long farmId) {
+        try {
+            doctorFarmManager.freezeFarm(farmId);
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("freeze farm failed, farmId:{},cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("freeze.farm.failed");
+        }
+    }
 }

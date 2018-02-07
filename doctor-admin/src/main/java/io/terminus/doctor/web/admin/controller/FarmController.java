@@ -202,6 +202,12 @@ public class FarmController {
         return RespHelper.or500(doctorFarmWriteService.switchIsWeak(farmId));
     }
 
+    @ApiOperation("冻结猪场")
+    @RequestMapping(value = "/freeze/farm")
+    public Boolean freezeFarm(@RequestParam @ApiParam("猪场id") Long farmId) {
+        return RespHelper.or500(doctorFarmWriteService.freezeFarm(farmId));
+    }
+
     /**
      * 获取猪场员工
      * @param farmId 猪场id
