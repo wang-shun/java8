@@ -9,7 +9,7 @@ import lombok.Data;
  */
 @Data
 public class FarmCriteria extends DoctorFarm{
-    private static final long serialVersionUID = -9062330244575417545L;
+    private static final long serialVersionUID = -2970210857976615145L;
 
     private String fuzzyName;
 }

@@ -103,6 +103,21 @@ public class SearchedPig implements Serializable {
     private Integer boarType;
 
     /**
+     * 猪rfid
+     */
+    private String rfid;
+
+    /**
+     * 状态天数,母猪出于当前状态的天数
+     */
+    private Integer statusDay;
+
+    /**
+     * 母猪体重
+     */
+    private Double pigWeight;
+
+    /**
      * 扩展字段:
      *      1. Date checkDate : 妊娠检查的时间
      */

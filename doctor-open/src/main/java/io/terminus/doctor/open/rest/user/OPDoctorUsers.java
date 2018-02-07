@@ -2,11 +2,14 @@ package io.terminus.doctor.open.rest.user;
 
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
 import io.terminus.common.redis.utils.JedisTemplate;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -17,16 +20,21 @@ import io.terminus.doctor.open.util.OPRespHelper;
 import io.terminus.doctor.user.dto.DoctorMenuDto;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
+import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.model.IotUser;
+import io.terminus.doctor.user.model.Sub;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorMobileMenuReadService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
 import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.user.service.IotUserRoleReadService;
 import io.terminus.doctor.user.service.PrimaryUserReadService;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.doctor.web.core.dto.ServiceBetaStatusToken;
@@ -52,8 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static io.terminus.common.utils.Arguments.isNull;
-import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.*;
 
 /**
  * Desc: 用户相关
@@ -77,11 +84,18 @@ public class OPDoctorUsers {
     private final DoctorServiceStatusReadService doctorServiceStatusReadService;
     private final PrimaryUserReadService primaryUserReadService;
     private final ServiceBetaStatusHandler serviceBetaStatusHandler;
+    @RpcConsumer
+    private DoctorFarmReadService doctorFarmReadService;
+    @RpcConsumer
+    private IotUserRoleReadService iotUserRoleReadService;
 
     private final JedisTemplate jedisTemplate;
 
     @Value("${session.redis-prefix}")
     private String redisPrefix;
+
+    @Value("${service-domain.pigiot:m.xrnm.com}")
+    private String pigIotUrl;
 
 
     //猪场软件链接url
@@ -161,15 +175,17 @@ public class OPDoctorUsers {
                     innerDto.setReason(serviceStatus.getNeverestReason());
                     dto.setNeverest(innerDto);
                     break;
-                case PIG_TRADE:
-                    innerDto.setServiceStatus(serviceStatus.getPigtradeStatus());
-                    innerDto.setReason(serviceStatus.getPigtradeReason());
-                    dto.setPigTrade(innerDto);
-                    break;
+                // TODO: 18/2/1 暂时取消 
+//                case PIG_TRADE:
+//                    innerDto.setServiceStatus(serviceStatus.getPigtradeStatus());
+//                    innerDto.setReason(serviceStatus.getPigtradeReason());
+//                    dto.setPigTrade(innerDto);
+//                    break;
             }
         });
-
+        dto.setPigTrade(getPigIot(baseUser));
         dto.setPigJxy(getPigJxy(baseUser));
+        log.info("========userId:{}, dto:{}", baseUser.getId(), dto);
         return dto;
     }
 
@@ -301,6 +317,56 @@ public class OPDoctorUsers {
         openDto.setType(DoctorServiceReview.Type.PIG_JXY.getValue());
         openDto.setStatus(DoctorServiceReview.Status.OK.getValue());
         openDto.setUrl("http://39.108.236.233/app");
+        return openDto;
+    }
+
+    private ServiceReviewOpenDto getPigIot(BaseUser baseUser) {
+        ServiceReviewOpenDto openDto = new ServiceReviewOpenDto();
+        openDto.setUserId(baseUser.getId());
+        openDto.setType(DoctorServiceReview.Type.PIG_IOT.getValue());
+        openDto.setUrl(pigIotUrl);
+
+        //物联运营
+        IotUser iotUser = RespHelper.or500(iotUserRoleReadService.findIotUserByUserId(baseUser.getId()));
+        if (notNull(iotUser) && Objects.equals(iotUser.getType(), IotUser.TYPE.IOT_ADMIN.getValue())) {
+            openDto.setServiceStatus(DoctorServiceStatus.Status.OPENED.value());
+            openDto.setStatus(DoctorServiceReview.Status.OK.getValue());
+            return openDto;
+        }
+
+        if (notNull(iotUser) && Objects.equals(iotUser.getType(), IotUser.TYPE.IOT_OPERATOR.getValue())
+                && Objects.equals(iotUser.getStatus(), Sub.Status.ACTIVE.value())) {
+            openDto.setServiceStatus(DoctorServiceStatus.Status.OPENED.value());
+            openDto.setStatus(DoctorServiceReview.Status.OK.getValue());
+            return openDto;
+        }
+
+        Response<DoctorUserDataPermission> permissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
+        if (!permissionResponse.isSuccess() || isNull(permissionResponse.getResult())
+                || Arguments.isNullOrEmpty(permissionResponse.getResult().getFarmIdsList())) {
+            openDto.setServiceStatus(DoctorServiceStatus.Status.CLOSED.value());
+            openDto.setStatus(DoctorServiceReview.Status.NOT_OK.getValue());
+            return openDto;
+        }
+
+        DoctorUserDataPermission permission = permissionResponse.getResult();
+        List<DoctorFarm> farmList = RespHelper.orServEx(doctorFarmReadService.findFarmsByIds(permission.getFarmIdsList()));
+        Boolean isIntelligent = false;
+        for (DoctorFarm doctorFarm: farmList) {
+            if (Objects.equals(doctorFarm.getIsIntelligent(), IsOrNot.YES.getKey())){
+                isIntelligent = true;
+                break;
+            }
+        }
+
+        if (isIntelligent) {
+            openDto.setServiceStatus(DoctorServiceStatus.Status.OPENED.value());
+            openDto.setStatus(DoctorServiceReview.Status.OK.getValue());
+            return openDto;
+        }
+
+        openDto.setServiceStatus(DoctorServiceStatus.Status.CLOSED.value());
+        openDto.setStatus(DoctorServiceReview.Status.NOT_OK.getValue());
         return openDto;
     }
 }

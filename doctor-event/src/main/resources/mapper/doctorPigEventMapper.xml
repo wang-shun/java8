@@ -1644,4 +1644,14 @@
         from <include refid="tb"/>
         group by farm_id
     </select>
+
+    <select id="findEventAtLeadToStatus" parameterType="map" resultType="date">
+        SELECT event_at as eventAt
+        FROM <include refid="tb"/>
+        WHERE pig_id = #{pigId}
+        and pig_status_before != #{status}
+        and pig_status_after = #{status}
+        order by id DESC
+        limit 1
+    </select>
 </mapper>

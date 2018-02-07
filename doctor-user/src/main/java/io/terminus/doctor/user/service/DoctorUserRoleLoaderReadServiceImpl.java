@@ -4,18 +4,36 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.user.dao.*;
-import io.terminus.doctor.user.model.*;
+import io.terminus.doctor.user.dao.IotRoleDao;
+import io.terminus.doctor.user.dao.IotUserDao;
+import io.terminus.doctor.user.dao.OperatorDao;
+import io.terminus.doctor.user.dao.OperatorRoleDao;
+import io.terminus.doctor.user.dao.PigScoreApplyDao;
+import io.terminus.doctor.user.dao.SellerDao;
+import io.terminus.doctor.user.dao.SubDao;
+import io.terminus.doctor.user.dao.SubRoleDao;
+import io.terminus.doctor.user.model.DoctorRole;
+import io.terminus.doctor.user.model.DoctorRoleContent;
+import io.terminus.doctor.user.model.IotRole;
+import io.terminus.doctor.user.model.IotUser;
+import io.terminus.doctor.user.model.Operator;
+import io.terminus.doctor.user.model.OperatorRole;
+import io.terminus.doctor.user.model.PigScoreApply;
+import io.terminus.doctor.user.model.Seller;
+import io.terminus.doctor.user.model.Sub;
+import io.terminus.doctor.user.model.SubRole;
 import io.terminus.parana.user.impl.dao.UserDao;
 import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import static io.terminus.doctor.common.utils.UserRoleUtil.*;
-import static io.terminus.doctor.common.utils.UserRoleUtil.isNormal;
+import static java.util.Objects.isNull;
 
 /**
  * Created by yudi on 2016/12/7.
@@ -36,8 +54,12 @@ public class DoctorUserRoleLoaderReadServiceImpl implements DoctorUserRoleLoader
     private final SubRoleDao subRoleDao;
     private final OperatorRoleDao operatorRoleDao;
     private final PigScoreApplyDao pigScoreApplyDao;
+    private final IotUserDao iotUserDao;
+    private final IotRoleDao iotRoleDao;
     @Autowired
-    public DoctorUserRoleLoaderReadServiceImpl(UserDao userDao, SellerDao sellerDao,  OperatorDao operatorDao, SubDao subDao, SubRoleDao subRoleDao, OperatorRoleDao operatorRoleDao, PigScoreApplyDao pigScoreApplyDa) {
+    public DoctorUserRoleLoaderReadServiceImpl(UserDao userDao, SellerDao sellerDao, OperatorDao operatorDao,
+                                               SubDao subDao, SubRoleDao subRoleDao, OperatorRoleDao operatorRoleDao,
+                                               PigScoreApplyDao pigScoreApplyDa, IotUserDao iotUserDao, IotRoleDao iotRoleDao) {
         this.userDao = userDao;
         this.sellerDao = sellerDao;
         this.operatorDao = operatorDao;
@@ -45,6 +67,8 @@ public class DoctorUserRoleLoaderReadServiceImpl implements DoctorUserRoleLoader
         this.subRoleDao = subRoleDao;
         this.operatorRoleDao = operatorRoleDao;
         this.pigScoreApplyDao = pigScoreApplyDa;
+        this.iotUserDao = iotUserDao;
+        this.iotRoleDao = iotRoleDao;
     }
 
     @Override
@@ -67,11 +91,33 @@ public class DoctorUserRoleLoaderReadServiceImpl implements DoctorUserRoleLoader
             forSub(user, roleContent);
             forPigScore(user, roleContent);
             forSubNoRole(roleContent);
+            forIot(user, roleContent);
             return Response.ok(roleContent);
         } catch (Exception e) {
             log.error("hard load roles failed, userId={}, cause:{}", userId, Throwables.getStackTraceAsString(e));
             return Response.fail("user.role.load.fail");
         }
+    }
+
+    private void forIot(User user,  DoctorRoleContent roleContent) {
+            Long userId = user.getId();
+            IotUser iotUser = iotUserDao.findByUserId(userId);
+            if (isNull(iotUser)) {
+                return;
+            }
+            if (Objects.equals(iotUser.getType(), IotUser.TYPE.IOT_ADMIN.getValue())) {
+                List<DoctorRole> roles = roleContent.getRoles();
+                DoctorRole iotRole = DoctorRole.createStatic("IOT_ADMIN");
+                if (isNull(roles)) {
+                    roleContent.setRoles(Lists.newArrayList(iotRole));
+                } else {
+                    roles.add(iotRole);
+                }
+            } else if (Objects.equals(iotUser.getType(), IotUser.TYPE.IOT_OPERATOR.getValue())) {
+                IotRole iotRole = iotRoleDao.findById(iotUser.getIotRoleId());
+                roleContent.setDynamicRoles(Lists.newArrayList(DoctorRole.createDynamic("IOT_OPERATOR",
+                        iotRole.getAllow(), Lists.newArrayList(iotRole.getName()))));
+            }
     }
 
     /**

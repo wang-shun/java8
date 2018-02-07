@@ -2,6 +2,7 @@ package io.terminus.doctor.event.dao;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.Iters;
@@ -101,5 +102,20 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
      */
     public DoctorBarn getDefaultPregBarn(Long farmId) {
         return getSqlSession().selectOne(sqlId("getDefaultPregBarn"), farmId);
+    }
+
+    /**
+     * 模糊搜索有效猪舍
+     * @param name 模糊关键字
+     * @param count 返回的个数
+     * @return 返回满足条件的前count个
+     */
+    public List<DoctorBarn> selectBarns(Long orgId, Long farmId, String name, Integer count) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("name", name);
+        map.put("count", count);
+        map.put("orgId", orgId);
+        map.put("farmId", farmId);
+        return getSqlSession().selectList(sqlId("selectBarns"), map);
     }
 }

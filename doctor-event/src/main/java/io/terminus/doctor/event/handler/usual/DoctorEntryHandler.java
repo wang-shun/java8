@@ -125,6 +125,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
                 .orgId(basic.getOrgId())
                 .orgName(basic.getOrgName())
                 .pigCode(dto.getPigCode())
+                .rfid(dto.getRfid())
                 .origin(dto.getOrigin())
                 .pigType(dto.getPigType())
                 .isRemoval(IsOrNot.NO.getValue())

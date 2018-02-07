@@ -512,4 +512,15 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             return Response.fail("get farrow event by pigId fail");
         }
     }
+
+    @Override
+    public Response<Date> findEventAtLeadToStatus(Long pigId, Integer status) {
+        try {
+            return Response.ok(doctorPigEventDao.findEventAtLeadToStatus(pigId, status));
+        } catch (Exception e) {
+            log.error("find event at lead to status failed ,pigId:{}, status:{}, cause:{}",
+                    pigId, status, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.eventAt.lead.to.status.failed");
+        }
+    }
 }

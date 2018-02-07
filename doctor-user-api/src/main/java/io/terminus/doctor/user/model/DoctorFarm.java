@@ -68,12 +68,18 @@ public class DoctorFarm implements Serializable {
     private String extra;
 
     /**
+     *
+     * 是否是智能猪舍（物联网使用默认是0）
+     * 1->智能猪场 0不是猪场
+     * @see io.terminus.doctor.common.enums.IsOrNot
+     */
+    private Integer isIntelligent;
+
+    /**
      * 弱仔数是否作为活仔数
      * @see io.terminus.doctor.common.enums.IsOrNot
      */
     private Integer isWeak;
-
-    
     /**
      * 创建时间
      */

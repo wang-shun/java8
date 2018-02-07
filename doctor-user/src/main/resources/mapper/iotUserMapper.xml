@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (c) 2016. 杭州端点网络科技有限公司.  All rights reserved.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="IotUser">
+
+    <resultMap id="IotUserMap" type="IotUser">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="user_real_name" property="userRealName"/>
+        <result column="mobile" property="mobile"/>
+        <result column="iot_role_id" property="iotRoleId"/>
+        <result column="iot_role_name" property="iotRoleName"/>
+        <result column="type" property="type"/>
+        <result column="status" property="status"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <sql id="tb">
+        iot_users
+    </sql>
+
+    <sql id="cols_all">
+        id,
+        <include refid="cols_exclude_id"/>
+    </sql>
+
+    <sql id="cols_exclude_id">
+        `user_id`, user_name, user_real_name, mobile, `iot_role_id`, iot_role_name, `type`, status, created_at, updated_at
+    </sql>
+
+    <sql id="vals">
+        #{userId}, #{userName}, #{userRealName}, #{mobile}, #{iotRoleId}, #{iotRoleName}, #{type}, #{status}, now(), now()
+    </sql>
+
+    <insert id="create" parameterType="IotUser" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO
+        <include refid="tb"/>
+        (<include refid="cols_exclude_id"/>)
+        VALUES
+        (<include refid="vals"/>)
+    </insert>
+
+    <select id="findById" parameterType="long" resultMap="IotUserMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByIds" parameterType="list" resultMap="IotUserMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <update id="update" parameterType="IotUser">
+        update
+        <include refid="tb"/>
+        <set>
+            <if test="iotRoleId!=null">`iot_role_id` = #{iotRoleId},</if>
+            <if test="iotRoleName!=null">`iot_role_name` = #{iotRoleName},</if>
+            <if test="userRealName!=null">`user_real_name` = #{userRealName},</if>
+            <if test="mobile!=null">`mobile` = #{mobile},</if>
+            <if test="status!=null">`status` = #{status},</if>
+            updated_at = now()
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="long">
+        delete from
+        <include refid="tb"/>
+        where id = #{id}
+    </delete>
+
+    <sql id="criteria">
+        <if test="iotRoleName != null">AND `iot_role_name` like CONCAT('%', #{iotRoleName}, '%')</if>
+        <if test="userRealName != null">AND `user_real_name` like CONCAT('%', #{userRealName}, '%')</if>
+        <if test="type != null">AND `type` = #{type}</if>
+        <if test="status != null">AND `status` = #{status}</if>
+        <if test="statuses!=null &amp;&amp; statuses.size()>0">
+            AND `status` IN
+            <foreach collection="statuses" item="status" open="(" separator="," close=")" >
+                #{status}
+            </foreach>
+        </if>
+    </sql>
+
+
+    <select id="paging" parameterType="map" resultMap="IotUserMap">
+        select id,
+        <include refid="cols_exclude_id"/>
+        from
+        <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        order by `id` desc
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="count" parameterType="map" resultType="long">
+        select count(1) from
+        <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
+    <update id="updateIotRoleName" parameterType="map">
+        UPDATE <include refid="tb"/>
+        set iot_role_name = #{iotRoleName}
+        where iot_role_id = #{iotRoleId}
+    </update>
+
+    <select id="findByUserId" parameterType="long" resultMap="IotUserMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE user_id = #{userId}
+    </select>
+</mapper>

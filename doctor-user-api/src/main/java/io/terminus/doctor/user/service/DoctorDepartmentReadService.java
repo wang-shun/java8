@@ -55,6 +55,11 @@ public interface DoctorDepartmentReadService {
     Response<DoctorDepartmentDto> findClique(Long departmentId, Boolean isFarm);
 
     /**
+     * 获取从公司开始的机构树
+     * @return
+     */
+    Response<List<DoctorDepartmentDto>> findCliqueTree();
+    /**
      * 获取猪场所属组织的线性结构
      * @param farmId 猪场id
      * @return

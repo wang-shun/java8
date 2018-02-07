@@ -117,4 +117,6 @@ public interface PrimaryUserReadService {
      */
     Response<Map<Long, String>> findFarmIdToUserName();
 
+    Response<PrimaryUser> findByUserId(@NotNull(message = "user.id.not.null") Long userId);
+
 }

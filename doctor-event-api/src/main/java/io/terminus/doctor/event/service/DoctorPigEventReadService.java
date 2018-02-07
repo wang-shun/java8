@@ -283,5 +283,12 @@ public interface DoctorPigEventReadService {
 
     Response<DoctorPigEvent> getFarrowEventByParity(Long pigId, Integer parity);
 
+    /**
+     * 查询导致猪到达当前的状态事件的日期
+     * @param pigId 猪id
+     * @param status 猪状态
+     * @return 事件日期
+     */
+    Response<Date> findEventAtLeadToStatus(Long pigId, Integer status);
 
 }

@@ -103,7 +103,7 @@ import java.util.Map;
 @Configuration
 @EnableAutoConfiguration
 @Import({MessageAutoConfig.class, DoctorCommonConfiguration.class})
-@ComponentScan(basePackages = {"io.terminus.doctor.event.*"})
+@ComponentScan({"io.terminus.doctor.event.*"})
 @AutoConfigureAfter(MybatisAutoConfiguration.class)
 public class ServiceConfiguration {
     @Bean

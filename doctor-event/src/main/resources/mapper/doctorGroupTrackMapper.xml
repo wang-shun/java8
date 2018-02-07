@@ -237,6 +237,17 @@
         GROUP BY g.farm_id
     </select>
 
+    <select id="findsByGroups" parameterType="long" resultMap="DoctorGroupTrackMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE
+        group_id IN
+        <foreach collection="list" item="groupId" open="(" separator="," close=")">
+            #{groupId}
+        </foreach>
+    </select>
     <select id="sumPigletCount" parameterType="int" resultType="int" >
         SELECT sum(quantity) as quantity
         FROM <include refid="tb"/>
