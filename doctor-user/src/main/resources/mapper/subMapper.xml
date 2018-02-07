@@ -54,6 +54,11 @@
         <if test="contact != null">AND contact = #{contact}</if>
     </sql>
 
+    <sql id="frozen">
+        <if test="frozen != null">AND `frozen`=#{frozen}</if>
+        <if test="frozen == null">AND `frozen`!=1 OR `frozen` IS NULL</if>
+    </sql>
+
     <insert id="create" parameterType="Sub" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
         <include refid="tb"/>
@@ -87,6 +92,7 @@
         FROM
         <include refid="tb"/>
         WHERE id = #{id}
+        <include refid="frozen"/>
     </select>
 
     <select id="findByParentUserId" parameterType="long" resultMap="SubMap">
@@ -95,6 +101,7 @@
         FROM
         <include refid="tb"/>
         WHERE parent_user_id = #{parentUserId}
+        <include refid="frozen"/>
     </select>
 
     <select id="findByIds" parameterType="list" resultMap="SubMap">
@@ -103,9 +110,11 @@
         FROM
         <include refid="tb"/>
         WHERE
+        id IN
         <foreach collection="list" open="(" separator="," close=")" item="id">
             #{id}
         </foreach>
+        <include refid="frozen"/>
     </select>
 
     <select id="count" parameterType="map" resultType="long">
@@ -114,6 +123,7 @@
         <include refid="tb"/>
         <where>
             <include refid="criteria"/>
+            <include refid="frozen"/>
         </where>
     </select>
 
@@ -124,6 +134,7 @@
         <include refid="tb"/>
         <where>
             <include refid="criteria"/>
+            <include refid="frozen"/>
         </where>
         order by status desc
         LIMIT #{offset}, #{limit}
@@ -135,6 +146,7 @@
         FROM
         <include refid="tb"/>
         WHERE `user_id` = #{userId}
+        <include refid="frozen"/>
     </select>
 
     <select id="findByParentUserIdAndUserId" parameterType="long" resultMap="SubMap">
@@ -143,12 +155,14 @@
         FROM
         <include refid="tb"/>
         WHERE `user_id` = #{userId} and `parent_user_id` = #{parentUserId}
+        <include refid="frozen"/>
     </select>
 
     <select id="findAllActiveSubs" resultMap="SubMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         WHERE `status` = 1
+        <include refid="frozen"/>
     </select>
 
     <select id="findByConditions" parameterType="map" resultMap="SubMap">
@@ -156,6 +170,7 @@
         FROM <include refid="tb"/>
         <where>
             <include refid="criteria"/>
+            <include refid="frozen"/>
         </where>
         <if test="limit != null">
             LIMIT #{limit}
@@ -167,6 +182,7 @@
         FROM <include refid="tb"/>
         <where>
             farm_id = #{farmId}
+            <include refid="frozen"/>
         </where>
     </select>
 
@@ -196,6 +212,7 @@
         <where>
             farm_id = #{farmId}
             AND status = #{status}
+            <include refid="frozen"/>
         </where>
     </select>
 

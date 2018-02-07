@@ -42,6 +42,11 @@
         <if test="status != null">AND status = #{status}</if>
     </sql>
 
+    <sql id="frozen">
+        <if test="frozen != null">AND `frozen`=#{frozen}</if>
+        <if test="frozen == null">AND `frozen`!=1 OR `frozen` IS NULL</if>
+    </sql>
+
     <insert id="create" parameterType="PrimaryUser" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
         <include refid="tb"/>
@@ -70,6 +75,7 @@
         FROM
         <include refid="tb"/>
         WHERE id = #{id}
+        <include refid="frozen"/>
     </select>
 
     <select id="findByIds" parameterType="list" resultMap="PrimaryUserMap">
@@ -78,9 +84,11 @@
         FROM
         <include refid="tb"/>
         WHERE
+        id IN
         <foreach collection="list" open="(" separator="," close=")" item="id">
             #{id}
         </foreach>
+        <include refid="frozen"/>
     </select>
 
     <select id="count" parameterType="map" resultType="long">
@@ -89,6 +97,7 @@
         <include refid="tb"/>
         <where>
             <include refid="criteria"/>
+            <include refid="frozen"/>
         </where>
     </select>
 
@@ -99,6 +108,7 @@
         <include refid="tb"/>
         <where>
             <include refid="criteria"/>
+            <include refid="frozen"/>
         </where>
         LIMIT #{offset}, #{limit}
     </select>
@@ -109,6 +119,7 @@
         FROM
         <include refid="tb"/>
         WHERE `user_id` = #{userId}
+        <include refid="frozen"/>
     </select>
 
     <select id="list" parameterType="map" resultMap="PrimaryUserMap">
@@ -118,6 +129,7 @@
         <include refid="tb"/>
         <where>
             <include refid="criteria"/>
+            <include refid="frozen"/>
         </where>
     </select>
 
@@ -128,6 +140,7 @@
         <include refid="tb"/>
         <where>
             rel_farm_id = #{farmId}
+            <include refid="frozen"/>
         </where>
     </select>
 
@@ -139,6 +152,7 @@
         <where>
             rel_farm_id = #{farmId}
             AND status = #{status}
+            <include refid="frozen"/>
         </where>
     </select>
 
@@ -155,6 +169,7 @@
         FROM
         <include refid="tb"/>
         WHERE rel_farm_id is not null
+        <include refid="frozen"/>
     </select>
 
     <update id="freeze" parameterType="long" >
