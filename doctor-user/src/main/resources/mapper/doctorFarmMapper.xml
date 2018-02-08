@@ -210,7 +210,8 @@
     <update id="freeze" parameterType="long" >
         UPDATE
         <include refid="tb"/>
-        set frozen = 1
+        set `name` = unix_timestamp(now()),
+        frozen = 1
         where id = #{id}
     </update>
 </mapper>
