@@ -102,6 +102,7 @@ public class DoctorFarmManager {
 
     /**
      * 冻结猪场
+     *
      * @param farmId 猪场id
      */
     @Transactional
@@ -109,22 +110,36 @@ public class DoctorFarmManager {
         //冻结猪场
         doctorFarmDao.freeze(farmId);
 
-        //冻结猪场下的主用户
-        PrimaryUser primaryUser = primaryUserDao.findPrimaryByFarmId(farmId);
-        if (notNull(primaryUser)) {
-            freezeUser(primaryUser.getUserId());
-            primaryUserDao.freeze(primaryUser.getId());
-            doctorUserDataPermissionDao.freeze(primaryUser.getUserId());
-        }
+//        //冻结猪场下的主用户
+//        PrimaryUser primaryUser = primaryUserDao.findPrimaryByFarmId(farmId);
+//        if (notNull(primaryUser)) {
+//            freezeUser(primaryUser.getUserId());
+//            primaryUserDao.freeze(primaryUser.getId());
+//            doctorUserDataPermissionDao.freeze(primaryUser.getUserId());
+//        }
+//
+//        //冻结猪场下子账户
+//        List<Sub> subList = subDao.findSubsByFarmId(farmId);
+//        subList.forEach(sub -> {
+//            freezeUser(sub.getUserId());
+//            subDao.freeze(sub.getId());
+//            doctorUserDataPermissionDao.freeze(sub.getUserId());
+//        });
 
-        //冻结猪场下子账户
-        List<Sub> subList = subDao.findSubsByFarmId(farmId);
-        subList.forEach(sub -> {
-            freezeUser(sub.getUserId());
-            subDao.freeze(sub.getId());
-            doctorUserDataPermissionDao.freeze(sub.getUserId());
+        List<DoctorUserDataPermission> permissions = doctorUserDataPermissionDao.findByFarmId(farmId);
+        permissions.forEach(permission -> {
+            permission.getFarmIdsList().remove(farmId);
+            if (permission.getFarmIdsList().isEmpty()) {
+                doctorUserDataPermissionDao.freezeByUser(permission.getUserId());
+                User user = userDaoExt.findById(permission.getUserId());
+                freezeUser(user);
+                if (Objects.equals(user.getType(), UserType.FARM_ADMIN_PRIMARY.value())) {
+                    primaryUserDao.freezeByUser(user.getId());
+                } else {
+                    subDao.freezeByUser(user.getId());
+                }
+            }
         });
-
 
     }
 
@@ -179,8 +194,28 @@ public class DoctorFarmManager {
         }
     }
 
-    private void freezeUser(Long userId) {
+    //(解冻时直接删除除user表以外的其他信息)
+    @Transactional
+    public void unfreezeUser(Long userId) {
+        //解冻user表
         User user = userDaoExt.findById(userId);
+        if (notNull(user)) {
+            Map<String, String> extraMap = user.getExtra();
+            if (isNull(extraMap)) {
+                extraMap = new HashMap<>();
+            }
+            extraMap.put("frozen", IsOrNot.NO.getKey().toString());
+            user.setExtra(user.getExtra());
+            userDaoExt.update(user);
+        }
+
+        PrimaryUser primaryUser = primaryUserDao.findByUserId(userId);
+        if (notNull(primaryUser)) {
+
+        }
+    }
+
+    private void freezeUser(User user) {
         if (notNull(user)) {
             Map<String, String> extraMap = user.getExtra();
             if (isNull(extraMap)) {

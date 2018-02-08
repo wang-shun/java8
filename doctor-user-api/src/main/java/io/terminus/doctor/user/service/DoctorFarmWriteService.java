@@ -35,4 +35,10 @@ public interface DoctorFarmWriteService {
     Response<Boolean> switchIsWeak(Long farmId);
 
     Response<Boolean> freezeFarm(Long farmId);
+
+    /**
+     * 解冻由于删除猪场而冻结的用户
+     * @return
+     */
+    Response<Boolean> unfreezeUser(Long userId);
 }

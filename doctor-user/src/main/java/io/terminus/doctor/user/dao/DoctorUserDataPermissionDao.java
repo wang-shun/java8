@@ -62,8 +62,8 @@ public class DoctorUserDataPermissionDao extends MyBatisDao<DoctorUserDataPermis
         return getSqlSession().selectList(sqlId("findByFarmAndPrimary"), ImmutableMap.of("farmId", farmId, "userIds", userIds));
     }
 
-    public Boolean freeze(Long userId) {
-        return getSqlSession().update(sqlId("freeze"), userId) == 1;
+    public Boolean freezeByUser(Long userId) {
+        return getSqlSession().update(sqlId("freezeByUser"), userId) == 1;
     }
 
 }

@@ -42,7 +42,7 @@ public class PrimaryUserDao extends MyBatisDao<PrimaryUser> {
         return getSqlSession().selectList(sqlId("findAllRelFarmId"));
     }
 
-    public Boolean freeze(Long id) {
-        return getSqlSession().update(sqlId("freeze"), id) == 1;
+    public Boolean freezeByUser(Long userId) {
+        return getSqlSession().update(sqlId("freezeByUser"), userId) == 1;
     }
 }

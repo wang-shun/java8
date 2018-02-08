@@ -4,7 +4,9 @@ import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
 import io.terminus.parana.user.model.UserProfile;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -13,6 +15,8 @@ import java.io.Serializable;
  * email:xiaojiannan@terminus.io
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class DoctorUserUnfreezeDto implements Serializable{
     private static final long serialVersionUID = -7062559291837285740L;
 
@@ -43,5 +47,7 @@ public class DoctorUserUnfreezeDto implements Serializable{
     private DoctorUserDataPermission permission;
 
     private UserProfile userProfile;
+
+
 
 }

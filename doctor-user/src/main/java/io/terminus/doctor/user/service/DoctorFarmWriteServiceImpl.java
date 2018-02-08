@@ -104,4 +104,15 @@ public class DoctorFarmWriteServiceImpl implements DoctorFarmWriteService{
             return Response.fail("freeze.farm.failed");
         }
     }
+
+    @Override
+    public Response<Boolean> unfreezeUser(Long userId) {
+        try {
+            doctorFarmManager.unfreezeUser(userId);
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("unfreeze user failed, userId:{}, userType:{}, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("unfreeze user failed");
+        }
+    }
 }

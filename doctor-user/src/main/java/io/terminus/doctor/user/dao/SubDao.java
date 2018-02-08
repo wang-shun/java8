@@ -84,7 +84,7 @@ public class SubDao extends MyBatisDao<Sub> {
         getSqlSession().delete(sqlId("deleteByFarmId"), farmId);
     }
 
-    public Boolean freeze(Long id) {
-        return getSqlSession().update(sqlId("freeze"), id) == 1;
+    public Boolean freezeByUser(Long userId) {
+        return getSqlSession().update(sqlId("freezeByUser"), userId) == 1;
     }
 }

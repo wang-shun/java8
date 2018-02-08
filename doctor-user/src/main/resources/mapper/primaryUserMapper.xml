@@ -187,10 +187,10 @@
         <include refid="singleFrozen"/>
     </select>
 
-    <update id="freeze" parameterType="long" >
+    <update id="freezeByUser" parameterType="long" >
         UPDATE
         <include refid="tb"/>
         set frozen = 1
-        where id = #{id}
+        where user_id = #{userId}
     </update>
 </mapper>
