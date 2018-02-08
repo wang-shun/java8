@@ -333,6 +333,7 @@ public class DoctorImportDataService {
                 Long subUserId;
                 if (notNull(subUser)) {
 
+
                     subUser.setName(loginName + "@" + farm.getFarmCode());
                     subUser.setMobile(contact);
                     subUser.setPassword(EncryptUtil.encrypt("123456"));
