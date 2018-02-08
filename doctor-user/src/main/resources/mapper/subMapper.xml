@@ -22,6 +22,7 @@
         <result column="extra_json" property="extraJson"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
+        <result column="frozen" property="frozen"/>
     </resultMap>
 
     <sql id="tb">
@@ -34,11 +35,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-      user_id, user_name, real_name, parent_user_id, parent_user_name, farm_id, role_id, role_name, contact, status, extra_json, created_at, updated_at
+      user_id, user_name, real_name, parent_user_id, parent_user_name, farm_id, role_id, role_name, contact, status, extra_json, created_at, updated_at, frozen
     </sql>
 
     <sql id="vals">
-        #{userId}, #{userName}, #{realName}, #{parentUserId}, #{parentUserName}, #{farmId}, #{roleId}, #{roleName}, #{contact}, #{status}, #{extraJson}, now(), now()
+        #{userId}, #{userName}, #{realName}, #{parentUserId}, #{parentUserName}, #{farmId}, #{roleId}, #{roleName}, #{contact}, #{status}, #{extraJson}, now(), now(), frozen
     </sql>
 
     <sql id="criteria">
@@ -56,7 +57,11 @@
 
     <sql id="frozen">
         <if test="frozen != null">AND `frozen`=#{frozen}</if>
-        <if test="frozen == null">AND `frozen`!=1 OR `frozen` IS NULL</if>
+        <if test="frozen == null">AND (`frozen`!=1 OR `frozen` IS NULL)</if>
+    </sql>
+
+    <sql id="singleFrozen">
+        AND (`frozen`!=1 OR `frozen` IS NULL)
     </sql>
 
     <insert id="create" parameterType="Sub" keyProperty="id" useGeneratedKeys="true">
@@ -82,6 +87,7 @@
         <if test="contact != null">contact = #{contact},</if>
         <if test="status != null">status = #{status},</if>
         <if test="extraJson != null">extra_json = #{extraJson},</if>
+        <if test="frozen != null">frozen = #{frozen},</if>
         updated_at = now()
         WHERE id = #{id}
     </update>
@@ -92,7 +98,7 @@
         FROM
         <include refid="tb"/>
         WHERE id = #{id}
-        <include refid="frozen"/>
+        <include refid="singleFrozen"/>
     </select>
 
     <select id="findByParentUserId" parameterType="long" resultMap="SubMap">
@@ -101,7 +107,7 @@
         FROM
         <include refid="tb"/>
         WHERE parent_user_id = #{parentUserId}
-        <include refid="frozen"/>
+        <include refid="singleFrozen"/>
     </select>
 
     <select id="findByIds" parameterType="list" resultMap="SubMap">
@@ -114,7 +120,7 @@
         <foreach collection="list" open="(" separator="," close=")" item="id">
             #{id}
         </foreach>
-        <include refid="frozen"/>
+        <include refid="singleFrozen"/>
     </select>
 
     <select id="count" parameterType="map" resultType="long">
@@ -146,7 +152,16 @@
         FROM
         <include refid="tb"/>
         WHERE `user_id` = #{userId}
-        <include refid="frozen"/>
+        <include refid="singleFrozen"/>
+    </select>
+
+    <select id="findFrozenByUserId" parameterType="long" resultMap="SubMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE user_id = #{userId}
+        and frozen = 1
     </select>
 
     <select id="findByParentUserIdAndUserId" parameterType="long" resultMap="SubMap">
@@ -155,14 +170,14 @@
         FROM
         <include refid="tb"/>
         WHERE `user_id` = #{userId} and `parent_user_id` = #{parentUserId}
-        <include refid="frozen"/>
+        <include refid="singleFrozen"/>
     </select>
 
     <select id="findAllActiveSubs" resultMap="SubMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         WHERE `status` = 1
-        <include refid="frozen"/>
+        <include refid="singleFrozen"/>
     </select>
 
     <select id="findByConditions" parameterType="map" resultMap="SubMap">
@@ -182,7 +197,7 @@
         FROM <include refid="tb"/>
         <where>
             farm_id = #{farmId}
-            <include refid="frozen"/>
+            <include refid="singleFrozen"/>
         </where>
     </select>
 

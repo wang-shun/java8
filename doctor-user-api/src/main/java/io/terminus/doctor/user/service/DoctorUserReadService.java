@@ -2,6 +2,7 @@ package io.terminus.doctor.user.service;
 
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
+import io.terminus.doctor.user.dto.DoctorUserUnfreezeDto;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
 
@@ -45,4 +46,11 @@ public interface DoctorUserReadService extends UserReadService<User>{
      * @return
      */
     Response<List<User>> listCreatedUserSince(Date since);
+
+    /**
+     * 解冻由于删除猪场导致的用户的冻结
+     * @param doctorUserUnfreezeDto
+     * @return
+     */
+    Response<Boolean> unfreeze(DoctorUserUnfreezeDto doctorUserUnfreezeDto);
 }

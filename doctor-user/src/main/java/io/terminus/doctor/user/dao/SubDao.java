@@ -23,6 +23,10 @@ public class SubDao extends MyBatisDao<Sub> {
         return getSqlSession().selectList(sqlId("findByParentUserId"), parentUserId);
     }
 
+    public Sub findFrozenByUserId(Long userId){
+        return sqlSession.selectOne(sqlId("findFrozenByUserId"), userId);
+    }
+
     public Sub findByParentUserIdAndUserId(Long parentUserId, Long userId) {
         return getSqlSession().selectOne(sqlId("findByParentUserIdAndUserId"), ImmutableMap.of("parentUserId", parentUserId, "userId", userId));
     }

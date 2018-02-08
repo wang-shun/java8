@@ -9,6 +9,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.dao.UserDaoExt;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
+import io.terminus.doctor.user.dto.DoctorUserUnfreezeDto;
 import io.terminus.doctor.user.enums.RoleType;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.model.Sub;
@@ -208,5 +209,15 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
             log.error("list created user since {} failed, cause : {}", since, Throwables.getStackTraceAsString(e));
             return Response.fail("list.created.user.failed");
         }
+    }
+
+    @Override
+    public Response<Boolean> unfreeze(DoctorUserUnfreezeDto doctorUserUnfreezeDto) {
+        try {
+
+        } catch (Exception e) {
+            log.error(",cause:{}", Throwables.getStackTraceAsString(e));
+        }
+        return null;
     }
 }

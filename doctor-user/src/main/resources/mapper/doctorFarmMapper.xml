@@ -74,7 +74,7 @@
 
     <sql id="frozen">
         <if test="frozen != null">AND `frozen`=#{frozen}</if>
-        <if test="frozen == null">AND `frozen`!=1 OR `frozen` IS NULL</if>
+        <if test="frozen == null">AND (`frozen`!=1 OR `frozen` IS NULL)</if>
     </sql>
 
     <select id="findById" parameterType="long" resultMap="DoctorFarmMap" >

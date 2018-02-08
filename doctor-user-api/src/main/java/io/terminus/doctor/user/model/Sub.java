@@ -112,6 +112,12 @@ public class Sub implements Serializable {
      */
     private Date updatedAt;
 
+    /**
+     * 是否被冻结
+     * @see io.terminus.doctor.common.enums.IsOrNot
+     */
+    private Integer frozen;
+
     @SneakyThrows
     public void setExtra(Map<String, String> extra) {
         this.extra = extra;

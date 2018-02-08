@@ -3,11 +3,13 @@ package io.terminus.doctor.user.manager;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import io.terminus.doctor.common.enums.IsOrNot;
+import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.dao.UserDaoExt;
+import io.terminus.doctor.user.dto.DoctorUserUnfreezeDto;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
@@ -17,15 +19,19 @@ import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
 import io.terminus.parana.common.utils.RespHelper;
 import io.terminus.parana.user.address.service.AddressReadService;
+import io.terminus.parana.user.impl.dao.UserProfileDao;
 import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.model.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
 
 /**
@@ -43,13 +49,14 @@ public class DoctorFarmManager {
     private final UserDaoExt userDaoExt;
     private final PrimaryUserDao primaryUserDao;
     private final SubDao subDao;
-    
+    private final UserProfileDao userProfileDao;
+
     @Autowired
     public DoctorFarmManager(DoctorFarmDao doctorFarmDao,
                              DoctorUserDataPermissionDao doctorUserDataPermissionDao,
                              DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService,
                              AddressReadService addressReadService,
-                             DoctorOrgReadService doctorOrgReadService, UserDaoExt userDaoExt, PrimaryUserDao primaryUserDao, SubDao subDao){
+                             DoctorOrgReadService doctorOrgReadService, UserDaoExt userDaoExt, PrimaryUserDao primaryUserDao, SubDao subDao, UserProfileDao userProfileDao){
         this.doctorFarmDao = doctorFarmDao;
         this.doctorUserDataPermissionDao = doctorUserDataPermissionDao;
         this.doctorUserDataPermissionWriteService = doctorUserDataPermissionWriteService;
@@ -58,6 +65,7 @@ public class DoctorFarmManager {
         this.userDaoExt = userDaoExt;
         this.primaryUserDao = primaryUserDao;
         this.subDao = subDao;
+        this.userProfileDao = userProfileDao;
     }
 
     /**
@@ -114,6 +122,55 @@ public class DoctorFarmManager {
             subDao.freeze(sub.getId());
             doctorUserDataPermissionDao.freeze(sub.getUserId());
         });
+
+
+    }
+
+    @Transactional
+    public void unfreezeUser(DoctorUserUnfreezeDto doctorUserUnfreezeDto) {
+        //解冻user表
+        User user = userDaoExt.findById(doctorUserUnfreezeDto.getUserId());
+        if (notNull(user)) {
+            user.getExtra().put("frozen", IsOrNot.NO.getKey().toString());
+            user.setExtra(user.getExtra());
+            userDaoExt.update(user);
+        }
+
+        //解冻猪场主/子用户
+        if (Objects.equals(doctorUserUnfreezeDto.getUserType(), UserType.FARM_ADMIN_PRIMARY.value())) {
+            PrimaryUser primaryUser = doctorUserUnfreezeDto.getPrimaryUser();
+            if (isNull(primaryUser.getId())) {
+                primaryUserDao.create(primaryUser);
+            } else {
+                primaryUser.setFrozen(IsOrNot.NO.getKey());
+                primaryUserDao.update(primaryUser);
+            }
+        } else {
+            Sub sub = doctorUserUnfreezeDto.getSub();
+            if (isNull(sub.getId())) {
+                subDao.create(sub);
+            } else {
+                sub.setFrozen(IsOrNot.NO.getKey());
+                subDao.update(sub);
+            }
+        }
+
+        //解冻用户权限
+        DoctorUserDataPermission permission = doctorUserUnfreezeDto.getPermission();
+        if (isNull(permission.getId())) {
+            doctorUserDataPermissionDao.create(permission);
+        } else {
+            permission.setFrozen(IsOrNot.NO.getKey());
+            doctorUserDataPermissionDao.update(permission);
+        }
+
+        //更新用户个人
+        UserProfile userProfile = doctorUserUnfreezeDto.getUserProfile();
+        if (isNull(userProfile.getId())) {
+            userProfileDao.create(userProfile);
+        } else {
+            userProfileDao.update(userProfile);
+        }
     }
 
     private void freezeUser(Long userId) {
