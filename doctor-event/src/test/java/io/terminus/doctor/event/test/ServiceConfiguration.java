@@ -310,6 +310,11 @@ public class ServiceConfiguration {
             }
 
             @Override
+            public Response<List<DoctorDepartmentDto>> findCliqueTree() {
+                return null;
+            }
+
+            @Override
             public Response<DoctorDepartmentLinerDto> findLinerBy(Long farmId) {
                 return null;
             }
@@ -341,6 +346,11 @@ public class ServiceConfiguration {
 
             @Override
             public Response<List<DoctorFarm>> findFarmsByOrgId(Long orgId) {
+                return null;
+            }
+
+            @Override
+            public Response<List<DoctorFarm>> findFarmsBy(Long orgId, Integer isIntelligent) {
                 return null;
             }
 
