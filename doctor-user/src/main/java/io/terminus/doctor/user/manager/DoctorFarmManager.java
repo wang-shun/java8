@@ -27,7 +27,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -131,7 +133,11 @@ public class DoctorFarmManager {
         //解冻user表
         User user = userDaoExt.findById(doctorUserUnfreezeDto.getUserId());
         if (notNull(user)) {
-            user.getExtra().put("frozen", IsOrNot.NO.getKey().toString());
+            Map<String, String> extraMap = user.getExtra();
+            if (isNull(extraMap)) {
+                extraMap = new HashMap<>();
+            }
+            extraMap.put("frozen", IsOrNot.NO.getKey().toString());
             user.setExtra(user.getExtra());
             userDaoExt.update(user);
         }
@@ -176,7 +182,11 @@ public class DoctorFarmManager {
     private void freezeUser(Long userId) {
         User user = userDaoExt.findById(userId);
         if (notNull(user)) {
-            user.getExtra().put("frozen", IsOrNot.YES.getKey().toString());
+            Map<String, String> extraMap = user.getExtra();
+            if (isNull(extraMap)) {
+                extraMap = new HashMap<>();
+            }
+            extraMap.put("frozen", IsOrNot.YES.getKey().toString());
             user.setExtra(user.getExtra());
             userDaoExt.update(user);
         }
