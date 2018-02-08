@@ -227,7 +227,7 @@ public class DoctorImportDataService {
     @Transactional
     public DoctorFarm importAll(DoctorImportSheet shit) {
         DoctorFarm farm = null;
-        try{
+        try {
             // 猪场和员工
             Object[] result = this.importOrgFarmUser(shit.getFarm(), shit.getStaff());
             User primaryUser = (User) result[0];
@@ -259,7 +259,7 @@ public class DoctorImportDataService {
             //猪场基础数据
             importFarmBasics(farm.getId());
             return farm;
-        } catch(Exception e) {
+        } catch (Exception e) {
             // 导入猪场失败，需要删除一些数据
             deleteUser(farm);
             throw e;
@@ -286,8 +286,8 @@ public class DoctorImportDataService {
         doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PigSex.SOW.getKey());
     }
 
-    public void deleteUser(DoctorFarm farm){
-        if(farm != null && farm.getOrgId() != null){
+    public void deleteUser(DoctorFarm farm) {
+        if (farm != null && farm.getOrgId() != null) {
             List<DoctorUserDataPermission> permissions = doctorUserDataPermissionDao.findByOrgId(farm.getOrgId());
             permissions.forEach(permission -> {
                 // 向用户中心专用 zk 发送删除用户的消息
@@ -313,15 +313,15 @@ public class DoctorImportDataService {
     private void importStaff(Sheet staffShit, User primaryUser, DoctorFarm farm) {
         final String appKey = "MOBILE";
         List<SubRole> existRoles = subRoleDao.findByFarmIdAndStatus(appKey, farm.getId(), 1);
-        if(existRoles.isEmpty()){
+        if (existRoles.isEmpty()) {
             RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, primaryUser.getId(), farm.getId()));
             existRoles = subRoleDao.findByFarmIdAndStatus(appKey, farm.getId(), 1);
         }
         // key = roleName, value = roleId
         Map<String, Long> existRole = existRoles.stream().collect(Collectors.toMap(SubRole::getName, SubRole::getId));
 
-        for(Row row : staffShit){
-            if(canImport(row)){
+        for (Row row : staffShit) {
+            if (canImport(row)) {
                 String realName = ImportExcelUtils.getStringOrThrow(row, 0);
                 String loginName = ImportExcelUtils.getStringOrThrow(row, 1);
                 String contact = ImportExcelUtils.getStringOrThrow(row, 2);
@@ -332,6 +332,13 @@ public class DoctorImportDataService {
                 User subUser = userDaoExt.findByMobile(contact);
                 Long subUserId;
                 if (notNull(subUser)) {
+<<<<<<< 8d2ff2ecf98e8854f6227d7228b1fdcdc14a46eb
+=======
+                    DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(subUser.getId());
+                    if (notNull(permission)) {
+                        throw new JsonResponseException("用户已关联猪场, 用户手机号:" + subUser.getMobile());
+                    }
+>>>>>>> 导入时创建猪舍时添加对重名的判断
 
                     subUser.setName(loginName + "@" + farm.getFarmCode());
                     subUser.setMobile(contact);
@@ -439,10 +446,11 @@ public class DoctorImportDataService {
 
     /**
      * 公司、猪场、主账号
+     *
      * @return 主账号的 user
      */
     @Transactional
-    private Object[] importOrgFarm(Sheet farmShit){
+    private Object[] importOrgFarm(Sheet farmShit) {
         Row row1 = farmShit.getRow(1);
         String orgName = ImportExcelUtils.getStringOrThrow(row1, 0);
         String farmName = ImportExcelUtils.getStringOrThrow(row1, 1).replaceAll(" ", "");
@@ -457,20 +465,20 @@ public class DoctorImportDataService {
 
         // 公司
         DoctorOrg org = doctorOrgDao.findByName(orgName);
-        if(org == null){
+        if (org == null) {
             org = new DoctorOrg();
             org.setName(orgName);
             org.setMobile(mobile);
             org.setParentId(0L);
             org.setType(DoctorOrg.Type.CLIQUE.getValue());
             doctorOrgDao.create(org);
-        }else{
+        } else {
             log.warn("org {} has existed, id = {}", orgName, org.getId());
         }
 
         // 猪场
         DoctorFarm farm = doctorFarmDao.findByOrgId(org.getId()).stream().filter(f -> farmName.equals(f.getName())).findFirst().orElse(null);
-        if(farm == null){
+        if (farm == null) {
             farm = new DoctorFarm();
             farm.setOrgId(org.getId());
             farm.setOrgName(org.getName());
@@ -486,7 +494,7 @@ public class DoctorImportDataService {
             farm.setSource(SourceType.IMPORT.getValue());
             doctorFarmDao.create(farm);
             RespHelper.or500(doctorMessageRuleWriteService.initTemplate(farm.getId()));
-        }else{
+        } else {
             log.warn("farm {} has existed, id = {}", farmName, farm.getId());
             throw new JsonResponseException("farm.has.been.existed");
         }
@@ -508,14 +516,14 @@ public class DoctorImportDataService {
         primaryUserDao.update(updatePrimary);
 
         DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(userId);
-        if(permission == null){
+        if (permission == null) {
             //创建数据权限
             permission = new DoctorUserDataPermission();
             permission.setUserId(userId);
             permission.setFarmIds(farm.getId().toString());
             permission.setOrgIdsList(Lists.newArrayList(org.getId()));
             doctorUserDataPermissionDao.create(permission);
-        }else if(permission.getFarmIdsList() == null || !permission.getFarmIdsList().contains(farm.getId())){
+        } else if (permission.getFarmIdsList() == null || !permission.getFarmIdsList().contains(farm.getId())) {
             permission.setFarmIds(permission.getFarmIds() + "," + farm.getId());
             doctorUserDataPermissionDao.update(permission);
         }
@@ -527,20 +535,20 @@ public class DoctorImportDataService {
         createOrUpdateMultiPermission(companyMobile, org.getId(), farm.getId());
 
         DoctorServiceStatus serviceStatus = doctorServiceStatusDao.findByUserId(userId);
-        if(serviceStatus == null){
+        if (serviceStatus == null) {
             //初始化服务状态
             userInitService.initDefaultServiceStatus(userId);
-        }else{
+        } else {
             serviceStatus.setPigdoctorStatus(DoctorServiceStatus.Status.OPENED.value());
             serviceStatus.setPigdoctorReviewStatus(DoctorServiceReview.Status.OK.getValue());
             doctorServiceStatusDao.update(serviceStatus);
         }
 
         DoctorServiceReview review = doctorServiceReviewDao.findByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR);
-        if(review == null){
+        if (review == null) {
             //初始化服务的申请审批状态
             userInitService.initServiceReview(userId, mobile, user.getName());
-        }else{
+        } else {
             review.setStatus(DoctorServiceReview.Status.OK.getValue());
             doctorServiceReviewDao.update(review);
         }
@@ -582,7 +590,7 @@ public class DoctorImportDataService {
                 primaryUserDao.create(primaryUser);
             }
 
-        }else{
+        } else {
             user = new User();
             user.setMobile(mobile);
             user.setPassword("123456");
@@ -655,12 +663,18 @@ public class DoctorImportDataService {
      */
     @Transactional
     public void importBarn(DoctorFarm farm, Map<String, Long> userMap, Sheet shit) {
-        List<DoctorBarn> barns = Lists.newArrayList();
+        Map<String/*barnName*/, DoctorBarn> barns = new HashMap<>();//重名检测
         shit.forEach(row -> {
             //第一行是表头，跳过
             if (canImport(row)) {
+
+                String barnName = ImportExcelUtils.getString(row, 0);
+                if (barns.containsKey(barnName))
+                    throw new JsonResponseException("页名: " + row.getSheet().getSheetName() +
+                            ",猪舍名称【" + barnName + "】重复");
+
                 DoctorBarn barn = new DoctorBarn();
-                barn.setName(ImportExcelUtils.getString(row, 0));
+                barn.setName(barnName);
                 barn.setOrgId(farm.getOrgId());
                 barn.setOrgName(farm.getOrgName());
                 barn.setFarmId(farm.getId());
@@ -682,14 +696,15 @@ public class DoctorImportDataService {
                 barn.setStaffName(ImportExcelUtils.getString(row, 3));
                 barn.setStaffId(userMap.get(barn.getStaffName()));
                 barn.setExtra(ImportExcelUtils.getString(row, 4));
-                barns.add(barn);
+                barns.put(barnName, barn);
             }
         });
-        doctorBarnDao.creates(barns);
+        if (!barns.isEmpty())
+            doctorBarnDao.creates(barns.values().stream().collect(Collectors.toList()));
     }
 
     @Transactional
-     void importBreed(Sheet shit) {
+    void importBreed(Sheet shit) {
         List<String> breeds = doctorBasicDao.findByType(DoctorBasic.Type.BREED.getValue()).stream()
                 .map(DoctorBasic::getName).collect(Collectors.toList());
         shit.forEach(row -> {
@@ -746,9 +761,9 @@ public class DoctorImportDataService {
                 boar.setInitBarnId(barn.getId());
             }
             boar.setBreedName(ImportExcelUtils.getString(row, 6));
-            if(!StringUtils.isBlank(boar.getBreedName())){
+            if (!StringUtils.isBlank(boar.getBreedName())) {
                 boar.setBreedId(breedMap.get(boar.getBreedName()));
-                if(boar.getBreedId() == null){
+                if (boar.getBreedId() == null) {
                     throw new JsonResponseException("公猪品种错误：" + boar.getBreedName() + "，row " + (row.getRowNum() + 1) + "column" + 7);
                 }
             }
@@ -848,9 +863,9 @@ public class DoctorImportDataService {
             group.setFarmName(farm.getName());
             String code = ImportExcelUtils.getString(row, 0);
             group.setGroupCode(code);
-            if(existGroupCode.contains(code)){
+            if (existGroupCode.contains(code)) {
                 throw new JsonResponseException("猪群号（" + code + "）重复");
-            }else{
+            } else {
                 existGroupCode.add(code);
             }
 
@@ -869,7 +884,7 @@ public class DoctorImportDataService {
                 group.setPigType(barn.getPigType());
                 group.setStaffId(barn.getStaffId());
                 group.setStaffName(barn.getStaffName());
-            }else{
+            } else {
                 throw new JsonResponseException("找不到猪群（" + group.getGroupCode() + "）所属的猪舍（" + group.getInitBarnName() + "）");
             }
             group.setCurrentBarnId(group.getInitBarnId());
@@ -957,9 +972,10 @@ public class DoctorImportDataService {
 
     /**
      * 导入产房仔猪群
+     *
      * @param feedSowLast 所有哺乳母猪各自的最后一条数据
      */
-    private void importFarrowPiglet(List<DoctorPigTrack> feedSowTrack, List<DoctorImportSow> feedSowLast, Map<String, DoctorBarn> barnMap, DoctorFarm farm){
+    private void importFarrowPiglet(List<DoctorPigTrack> feedSowTrack, List<DoctorImportSow> feedSowLast, Map<String, DoctorBarn> barnMap, DoctorFarm farm) {
         Map<Long, List<DoctorPigTrack>> feedMap = feedSowTrack.stream().collect(Collectors.groupingBy(DoctorPigTrack::getCurrentBarnId));
 
         // 先按所在猪舍分组
@@ -1142,7 +1158,7 @@ public class DoctorImportDataService {
 
                     // 如果妊娠检查为阳性并且猪舍为产房， 则转入分娩舍
                     DoctorPigEvent toFarrowEvent = new DoctorPigEvent();
-                    if(last.getStatus().equals(PigStatus.Pregnancy.getKey()) && barnMap.get(last.getBarnName()).getPigType().equals(PigType.DELIVER_SOW.getValue())){
+                    if (last.getStatus().equals(PigStatus.Pregnancy.getKey()) && barnMap.get(last.getBarnName()).getPigType().equals(PigType.DELIVER_SOW.getValue())) {
                         toFarrowEvent = createToFarrowEvent(is, sow, pregYang);
                     }
 
@@ -1219,16 +1235,15 @@ public class DoctorImportDataService {
         //设置进场日期
         if (notNull(first.getInFarmDate())) {
             sow.setInFarmDate(first.getInFarmDate());
-        }
-        else if (first.getMateDate() != null) {
+        } else if (first.getMateDate() != null) {
             sow.setInFarmDate(new DateTime(first.getMateDate()).plusDays(-1).toDate()); //进场时间取第一次配种时间减一天
         } else {
             throw new JsonResponseException("母猪:" + sow.getPigCode() + "进场日期为空");
         }
-        
+
         sow.setInitBarnName(last.getBarnName());
         sow.setPigType(DoctorPig.PigSex.SOW.getKey());   //猪类
-        if(last.getBirthDate() != null){
+        if (last.getBirthDate() != null) {
             sow.setBirthDate(last.getBirthDate());
             sow.setInFarmDayAge(DateUtil.getDeltaDaysAbs(sow.getInFarmDate(), sow.getBirthDate()));
         }
@@ -1237,11 +1252,11 @@ public class DoctorImportDataService {
         if (barn != null) {
             sow.setInitBarnId(barn.getId());
         }
-        if(StringUtils.isNotBlank(last.getBreed())){
+        if (StringUtils.isNotBlank(last.getBreed())) {
             sow.setBreedName(last.getBreed());
             sow.setBreedId(breedMap.get(last.getBreed()));
-            if(sow.getBreedId() == null){
-                throw new JsonResponseException("母猪号:"+ sow.getPigCode() +" 母猪品种错误:" + sow.getBreedName());
+            if (sow.getBreedId() == null) {
+                throw new JsonResponseException("母猪号:" + sow.getPigCode() + " 母猪品种错误:" + sow.getBreedName());
             }
         }
         doctorPigDao.create(sow);
@@ -1256,9 +1271,9 @@ public class DoctorImportDataService {
         sowTrack.setPigType(sow.getPigType());
 
         // 如果妊娠检查为阳性并且猪舍为产房， 则置状态为 待分娩
-        if(last.getStatus().equals(PigStatus.Pregnancy.getKey()) && barn.getPigType().equals(PigType.DELIVER_SOW.getValue())){
+        if (last.getStatus().equals(PigStatus.Pregnancy.getKey()) && barn.getPigType().equals(PigType.DELIVER_SOW.getValue())) {
             sowTrack.setStatus(PigStatus.Farrow.getKey());
-        }else{
+        } else {
             sowTrack.setStatus(last.getStatus());
         }
         sowTrack.setIsRemoval(sow.getIsRemoval());
@@ -1288,10 +1303,10 @@ public class DoctorImportDataService {
         }
 
         Map<String, Object> extra = new HashMap<>();
-        if(last.getPrePregDate() != null){
+        if (last.getPrePregDate() != null) {
             extra.put("judgePregDate", last.getPrePregDate());
         }
-        if(!extra.isEmpty()){
+        if (!extra.isEmpty()) {
             sowTrack.setExtraMap(extra);
         }
         DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(sow.getId());
@@ -1364,10 +1379,10 @@ public class DoctorImportDataService {
         event.setDesc(getEventDesc(entry.descMap()));
         event.setEventSource(SourceType.IMPORT.getValue());
         event.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(entry));
-        if(event.getEventAt() == null){
+        if (event.getEventAt() == null) {
             throw new JsonResponseException("猪号：" + event.getPigCode() + "，无法获取进场事件时间，请检查数据");
         }
-        if(event.getEventAt().after(new Date())){
+        if (event.getEventAt().after(new Date())) {
             event.setEventAt(DateTime.now().minusDays(1).toDate());
         }
         doctorPigEventDao.create(event);
@@ -1375,7 +1390,7 @@ public class DoctorImportDataService {
     }
 
     // 转入分娩舍事件
-    private DoctorPigEvent createToFarrowEvent(DoctorImportSow info, DoctorPig sow, DoctorPigEvent beforeEvent){
+    private DoctorPigEvent createToFarrowEvent(DoctorImportSow info, DoctorPig sow, DoctorPigEvent beforeEvent) {
         DoctorPigEvent event = createSowEvent(info, sow);
         event.setEventAt(new DateTime(info.getPrePregDate()).minusDays(7).toDate());
         event.setType(PigEvent.TO_FARROWING.getKey());
@@ -1391,10 +1406,10 @@ public class DoctorImportDataService {
         event.setEventSource(SourceType.IMPORT.getValue());
         event.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(extra));
         event.setDesc(getEventDesc(extra.descMap()));
-        if(event.getEventAt() == null){
+        if (event.getEventAt() == null) {
             throw new JsonResponseException("猪号：" + event.getPigCode() + "，无法获取去分娩舍事件时间，请检查数据");
         }
-        if(event.getEventAt().after(new Date())){
+        if (event.getEventAt().after(new Date())) {
             event.setEventAt(DateTime.now().minusDays(1).toDate());
         }
         doctorPigEventDao.create(event);
@@ -1425,10 +1440,10 @@ public class DoctorImportDataService {
         event.setJudgePregDate(mate.getJudgePregDate());
         event.setDesc(getEventDesc(mate.descMap()));
         event.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(mate));
-        if(event.getEventAt() == null){
+        if (event.getEventAt() == null) {
             throw new JsonResponseException("猪号：" + event.getPigCode() + "，无法获取配种事件时间，请检查数据");
         }
-        if(event.getEventAt().after(new Date())){
+        if (event.getEventAt().after(new Date())) {
             event.setEventAt(DateTime.now().minusDays(1).toDate());
         }
         doctorPigEventDao.create(event);
@@ -1464,10 +1479,10 @@ public class DoctorImportDataService {
 
         event.setDesc(getEventDesc(result.descMap()));
         event.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(result));
-        if(event.getEventAt() == null){
+        if (event.getEventAt() == null) {
             throw new JsonResponseException("猪号：" + event.getPigCode() + "，无法获取妊娠检查事件时间，请检查数据");
         }
-        if(event.getEventAt().after(new Date())){
+        if (event.getEventAt().after(new Date())) {
             event.setEventAt(DateTime.now().minusDays(1).toDate());
         }
         doctorPigEventDao.create(event);
@@ -1522,10 +1537,10 @@ public class DoctorImportDataService {
 
         event.setDesc(generateEventDescFromExtra(farrow));
         event.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(farrow));
-        if(event.getEventAt() == null){
+        if (event.getEventAt() == null) {
             throw new JsonResponseException("猪号：" + event.getPigCode() + "，无法获取分娩事件时间，请检查数据");
         }
-        if(event.getEventAt().after(new Date())){
+        if (event.getEventAt().after(new Date())) {
             event.setEventAt(DateTime.now().minusDays(1).toDate());
         }
         doctorPigEventDao.create(event);
@@ -1562,10 +1577,10 @@ public class DoctorImportDataService {
 
         event.setDesc(getEventDesc(wean.descMap()));
         event.setExtra(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(wean));
-        if(event.getEventAt() == null){
+        if (event.getEventAt() == null) {
             throw new JsonResponseException("猪号：" + event.getPigCode() + "，无法获取断奶事件时间，请检查数据");
         }
-        if(event.getEventAt().after(new Date())){
+        if (event.getEventAt().after(new Date())) {
             event.setEventAt(DateTime.now().minusDays(1).toDate());
         }
         doctorPigEventDao.create(event);
@@ -1597,7 +1612,7 @@ public class DoctorImportDataService {
                 sow.setBoarCode(ImportExcelUtils.getString(row, 5));                                    //公猪耳号
                 sow.setMateStaffName(ImportExcelUtils.getString(row, 6));                               //配种员
                 sow.setPrePregDate(ImportExcelUtils.getDate(row, 7));     //预产日期
-                if(sow.getPrePregDate() == null){
+                if (sow.getPrePregDate() == null) {
                     sow.setPrePregDate(new DateTime(sow.getMateDate()).plusDays(114).toDate());
                 }
                 sow.setPregDate(ImportExcelUtils.getDate(row, 8));        //实产日期
@@ -1632,7 +1647,7 @@ public class DoctorImportDataService {
         }
         return sows;
     }
-    
+
     private static PigStatus getPigStatus(String status) {
         if (Strings.isNullOrEmpty(status)) {
             log.error("what the fuck!!! the status is fucking null!");
@@ -1674,7 +1689,7 @@ public class DoctorImportDataService {
                 int line = row.getRowNum() + 1;
                 String warehouseName = ImportExcelUtils.getStringOrThrow(row, 0);
                 WareHouseType wareHouseType = WareHouseType.from(ImportExcelUtils.getStringOrThrow(row, 1));
-                if(wareHouseType == null){
+                if (wareHouseType == null) {
                     throw new JsonResponseException("仓库类型错误，仓库名称：" + warehouseName + "，row " + line + "column" + 2);
                 }
                 DoctorWareHouse wareHouse = DoctorWareHouse.builder()
@@ -1683,16 +1698,16 @@ public class DoctorImportDataService {
                         .creatorId(user.getId()).creatorName(userProfile.getRealName())
                         .build();
                 String manager = ImportExcelUtils.getString(row, 2);
-                if(StringUtils.isNotBlank(manager) && userMap.get(manager) != null){
+                if (StringUtils.isNotBlank(manager) && userMap.get(manager) != null) {
                     wareHouse.setManagerId(userMap.get(manager));
                     wareHouse.setManagerName(manager);
-                }else{
+                } else {
                     wareHouse.setManagerId(user.getId());
                     wareHouse.setManagerName(userProfile.getRealName());
                 }
-                if(warehouseMap.containsKey(warehouseName)){
+                if (warehouseMap.containsKey(warehouseName)) {
                     throw new JsonResponseException("仓库名称重复：" + warehouseName + "，row " + line + "column" + 1);
-                }else{
+                } else {
                     warehouseMap.put(warehouseName, RespHelper.or500(doctorWareHouseWriteService.createWareHouse(wareHouse)));
                 }
             }
@@ -1714,32 +1729,32 @@ public class DoctorImportDataService {
                 String warehouseName = ImportExcelUtils.getStringOrThrow(row, 0);
                 String materialName = ImportExcelUtils.getStringOrThrow(row, 1);
                 Double stock = ImportExcelUtils.getDouble(row, 2);
-                if(stock == null || stock < 0D){
+                if (stock == null || stock < 0D) {
                     throw new JsonResponseException("库存数量错误，sheet:" + shitName + "，row " + line + "column " + 3);
                 }
                 String unitName;
                 Double unitPrice;
-                if(materialType == WareHouseType.FEED || materialType == WareHouseType.MATERIAL){
+                if (materialType == WareHouseType.FEED || materialType == WareHouseType.MATERIAL) {
                     unitPrice = ImportExcelUtils.getDouble(row, 3);
                     unitName = "千克";
-                }else{
+                } else {
                     unitName = ImportExcelUtils.getStringOrThrow(row, 3);
-                    if(StringUtils.isBlank(unitName)){
+                    if (StringUtils.isBlank(unitName)) {
                         throw new JsonResponseException("单位错误，sheet:" + shitName + "，row " + line);
                     }
                     unitPrice = ImportExcelUtils.getDouble(row, 4);
                 }
-                if(unitPrice == null || unitPrice <= 0){
+                if (unitPrice == null || unitPrice <= 0) {
                     throw new JsonResponseException("单价错误，sheet:" + shitName + "，row " + line);
-                }else{
+                } else {
                     unitPrice = unitPrice * 100D;
                 }
                 Long wareHouseId = warehouseMap.get(warehouseName);
-                if(wareHouseId == null){
+                if (wareHouseId == null) {
                     throw new JsonResponseException("仓库名称错误，sheet:" + shitName + "，row " + line);
                 }
                 DoctorBasicMaterial basicMaterial = basicMaterialDao.findByTypeAndName(materialType, materialName);
-                if(basicMaterial == null){
+                if (basicMaterial == null) {
                     throw new JsonResponseException("基础物料不存在：" + materialName + "，sheet:" + shitName + "，row " + line);
                 }
 
@@ -1857,8 +1872,7 @@ public class DoctorImportDataService {
         for (DoctorPigEvent event : events) {
             if (Objects.equals(event.getType(), PigEvent.FARROWING.getKey())) {
                 group = getHistoryFarrowGroup(event);
-            }
-            else if (Objects.equals(event.getType(), PigEvent.WEAN.getKey())) {
+            } else if (Objects.equals(event.getType(), PigEvent.WEAN.getKey())) {
                 group = group == null ? getHistoryWeanGroup(event) : group;
             }
             updateEventGroupId(event.getId(), group);
@@ -1903,6 +1917,7 @@ public class DoctorImportDataService {
 
     /**
      * 刷新公猪类型
+     *
      * @see BoarEntryType
      */
     @Transactional
@@ -1932,6 +1947,7 @@ public class DoctorImportDataService {
 
     /**
      * 生成镜像
+     *
      * @param groupId
      */
     private void createNotGroupSnapshot(Long groupId) {
@@ -1947,6 +1963,7 @@ public class DoctorImportDataService {
 
     /**
      * 创建导入记录
+     *
      * @param farmExport 导入记录
      */
     public void createFarmExport(DoctorFarmExport farmExport) {
@@ -1955,6 +1972,7 @@ public class DoctorImportDataService {
 
     /**
      * 更新导入记录
+     *
      * @param farmExport 导入记录
      */
     public void updateFarmExport(DoctorFarmExport farmExport) {
@@ -1963,7 +1981,8 @@ public class DoctorImportDataService {
 
     /**
      * 更新猪场姓名
-     * @param farmId 猪场id
+     *
+     * @param farmId  猪场id
      * @param newName 新主场名
      */
     @Transactional
