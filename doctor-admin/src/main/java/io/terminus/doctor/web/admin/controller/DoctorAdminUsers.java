@@ -32,6 +32,7 @@ import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.web.admin.dto.DoctorGroupUserWithOrgAndFarm;
+import io.terminus.parana.common.utils.EncryptUtil;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserWriteService;
@@ -165,9 +166,13 @@ public class DoctorAdminUsers {
 
         RespHelper.or500(doctorUserReadService.checkExist(mobile, name));
         User user;
+        password = StringUtils.hasText(password) ? password : mobile;
         Response<User> mobileResponse = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
         if (mobileResponse.isSuccess() && notNull(mobileResponse.getResult())) {
             user = mobileResponse.getResult();
+            if (StringUtils.hasText(password)) {  //对密码加盐加密
+                password = EncryptUtil.encrypt(password);
+            }
         } else {
             user = new User();
         }
@@ -177,7 +182,7 @@ public class DoctorAdminUsers {
         extra.put("realName", realName);
 
         //密码默认为手机号
-        user.setPassword(StringUtils.hasText(password) ? password : mobile);
+        user.setPassword(password);
         user.setType(UserType.FARM_ADMIN_PRIMARY.value());
         user.setStatus(UserStatus.NORMAL.value());
         user.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));

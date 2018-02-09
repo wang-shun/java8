@@ -21,11 +21,11 @@ import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.enums.SmsCodeType;
 import io.terminus.doctor.user.service.DoctorUserReadService;
-import io.terminus.doctor.web.core.util.DoctorUserMaker;
 import io.terminus.doctor.web.core.component.CaptchaGenerator;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.doctor.web.core.enums.MobileDeviceType;
 import io.terminus.doctor.web.core.events.user.RegisterEvent;
+import io.terminus.doctor.web.core.util.DoctorUserMaker;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.EncryptUtil;
 import io.terminus.parana.user.model.LoginType;
@@ -44,6 +44,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Base64Utils;
+import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 import java.net.InetAddress;
@@ -560,6 +561,9 @@ public class DoctorCommonSessionBean {
         User user;
         if (result.isSuccess() && notNull(result.getResult())) {
             user = result.getResult();
+            if (StringUtils.hasText(password)) {  //对密码加盐加密
+                password = EncryptUtil.encrypt(password);
+            }
         } else {
             user = new User();
         }

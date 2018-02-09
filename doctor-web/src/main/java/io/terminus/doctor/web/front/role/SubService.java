@@ -259,9 +259,13 @@ public class SubService {
             RespHelper.or500(doctorUserReadService.checkExist(sub.getContact(), sub.getUsername()));
 
             User subUser;
+            String password = sub.getPassword();
             Response<User> userResponse = doctorUserReadService.findBy(sub.getContact(), LoginType.MOBILE);
             if (userResponse.isSuccess() && notNull(userResponse.getResult())) {
                 subUser = userResponse.getResult();
+                if (org.springframework.util.StringUtils.hasText(sub.getPassword())) {  //对密码加盐加密
+                    password = EncryptUtil.encrypt(sub.getPassword());
+                }
             } else {
                 subUser = new User();
             }
@@ -271,7 +275,7 @@ public class SubService {
 //            checkSubUserAccount(userName);
             subUser.setName(userName);
             subUser.setMobile(sub.getContact());
-            subUser.setPassword(sub.getPassword());
+            subUser.setPassword(password);
             subUser.setType(UserType.FARM_SUB.value());
             subUser.setStatus(UserStatus.NORMAL.value());
             // TODO: 自定义角色冗余进 user 表
