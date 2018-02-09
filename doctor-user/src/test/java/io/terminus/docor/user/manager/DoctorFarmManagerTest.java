@@ -81,4 +81,9 @@ public class DoctorFarmManagerTest extends BaseManagerTest{
     public void findFrozenByUserId() {
         System.out.println(subDao.findIncludeFrozenByUserId(12L));
     }
+
+    @Test
+    public void freezeFarmTest() {
+        doctorFarmManager.freezeFarm(855L);
+    }
 }

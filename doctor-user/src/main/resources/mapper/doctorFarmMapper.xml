@@ -193,11 +193,13 @@
     <select id="paging" parameterType="map" resultMap="DoctorFarmMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE <include refid="criteria"/>
+        <where>
+            <include refid="criteria"/>
+            <include refid="frozen"/>
+        </where>
         <if test="fuzzyName != null">
             ORDER BY instr(`name`, #{fuzzyName}) ASC, LENGTH (`name`) ASC
         </if>
-        <include refid="frozen"/>
         limit #{offset}, #{limit}
     </select>
 
