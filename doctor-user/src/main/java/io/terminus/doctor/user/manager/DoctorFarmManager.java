@@ -2,6 +2,7 @@ package io.terminus.doctor.user.manager;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import io.terminus.common.utils.Joiners;
 import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
@@ -138,6 +139,9 @@ public class DoctorFarmManager {
                 } else {
                     subDao.freezeByUser(user.getId());
                 }
+            } else {
+                permission.setFarmIds(Joiners.COMMA.join(permission.getFarmIdsList()));
+                doctorUserDataPermissionDao.update(permission);
             }
         });
 
