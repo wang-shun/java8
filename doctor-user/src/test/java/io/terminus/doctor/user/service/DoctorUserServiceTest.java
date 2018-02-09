@@ -16,7 +16,7 @@ import java.util.Map;
  * Created by xjn on 18/2/9.
  * email:xiaojiannan@terminus.io
  */
-public class DoctorUserService extends BaseManagerTest {
+public class DoctorUserServiceTest extends BaseManagerTest {
     @Autowired
     private UserWriteService userWriteService;
     @Autowired
@@ -38,7 +38,7 @@ public class DoctorUserService extends BaseManagerTest {
 
     @Test
     public void checkExist() {
-//        userManager.checkExist("15838037509", "adc");
+        userManager.checkExist("15838037509", "adc");
         System.out.println("===");
 //        userManager.checkExist("15838037500", "syzz2");
         System.out.println("===");

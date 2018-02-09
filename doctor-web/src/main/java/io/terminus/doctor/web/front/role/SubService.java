@@ -256,7 +256,7 @@ public class SubService {
                 }
             }
 
-            doctorUserReadService.checkExist(sub.getContact(), user.getName());
+            doctorUserReadService.checkExist(sub.getContact(), sub.getUsername());
 
             User subUser;
             Response<User> userResponse = doctorUserReadService.findBy(sub.getContact(), LoginType.MOBILE);

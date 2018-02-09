@@ -284,13 +284,13 @@ public class DoctorUserManager {
 
         User userByName = userDao.findByName(name);
         if (notNull(userByName) && !Objects.equals(userByName.getMobile(), mobile)) {
-            throw new JsonResponseException("用户名已存在" + name);
+            throw new JsonResponseException("用户名已存在:" + name);
         }
 
         User userByMobile = userDao.findByMobile(mobile);
         if (!(notNull(userByMobile.getExtra()) && userByMobile.getExtra().containsKey("frozen")
                 && userByMobile.getExtra().get("frozen").equals(IsOrNot.YES.getKey().toString()))) {
-            throw new JsonResponseException("手机号已存在" + mobile);
+            throw new JsonResponseException("手机号已存在:" + mobile);
         }
     }
 }
