@@ -227,12 +227,11 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
     @Override
     public Response<Boolean> checkExist(String mobile, String name) {
         try {
-            log.info("check exist mobile:{}, name:{}", mobile, name);
             doctorUserManager.checkExist(mobile, name);
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("check exist failed, mobile:{}, name:{},cause:{}", mobile, name, Throwables.getStackTraceAsString(e));
-            return Response.fail("check.exist.failed");
+            return Response.fail(e.getMessage());
         }
     }
 }
