@@ -214,7 +214,7 @@
     <update id="freeze" parameterType="long" >
         UPDATE
         <include refid="tb"/>
-        set `name` = unix_timestamp(now()),
+        set `name` = concat(`name`, unix_timestamp(now())),
         frozen = 1
         where id = #{id}
     </update>
