@@ -10,6 +10,7 @@ import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
+import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.event.model.DoctorBarn;
@@ -92,6 +93,7 @@ public class FarmController {
      */
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     public Boolean addFarm(@RequestBody UserApplyServiceDetailDto dto){
+
         //先检查下参数
         if(dto.getUserId() == null){
             throw new JsonResponseException(500, "user.id.invalid");
@@ -105,6 +107,12 @@ public class FarmController {
 
         //检查参数中的用户是否为主账号
         User primaryUser = RespHelper.or500(doctorUserReadService.findById(dto.getUserId()));
+
+        if (notNull(primaryUser)&&notNull(primaryUser.getExtra()) && primaryUser.getExtra().containsKey("frozen")
+                && primaryUser.getExtra().get("frozen").equals(IsOrNot.YES.getKey().toString())) {
+            throw new JsonResponseException("user.is.frozen");
+        }
+
         if(!Objects.equals(primaryUser.getType(), UserType.FARM_ADMIN_PRIMARY.value())){
             throw new JsonResponseException("user.not.primary"); // 该用户不是猪场主账号
         }
