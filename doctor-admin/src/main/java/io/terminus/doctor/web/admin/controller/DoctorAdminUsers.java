@@ -163,7 +163,7 @@ public class DoctorAdminUsers {
 //            throw new JsonResponseException("duplicated.name");
 //        }
 
-        doctorUserReadService.checkExist(mobile, name);
+        RespHelper.or500(doctorUserReadService.checkExist(mobile, name));
         User user;
         Response<User> mobileResponse = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
         if (mobileResponse.isSuccess() && notNull(mobileResponse.getResult())) {

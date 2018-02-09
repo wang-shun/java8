@@ -549,7 +549,7 @@ public class DoctorCommonSessionBean {
      * @return 注册成功之后的用户
      */
     private User registerByMobile(String mobile, String password, String userName) {
-        doctorUserReadService.checkExist(mobile, userName);
+        RespHelper.or500(doctorUserReadService.checkExist(mobile, userName));
         Response<User> result = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
 //        // 检测手机号是否已存在
 //        if(result.isSuccess() && result.getResult() != null){
