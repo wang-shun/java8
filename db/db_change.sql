@@ -2116,5 +2116,4 @@ ALTER TABLE `doctor_pigs` ADD COLUMN `origin` bigint(20) DEFAULT NULL COMMENT '�
 ALTER TABLE `doctor_farms` ADD COLUMN `frozen` tinyint(4) DEFAULT NULL COMMENT '是否已冻结' after `updated_at`;
 ALTER TABLE `doctor_user_primarys` ADD COLUMN `frozen` tinyint(4) DEFAULT NULL COMMENT '是否已冻结' after `updated_at`;
 ALTER TABLE `doctor_user_subs` ADD COLUMN `frozen` tinyint(4) DEFAULT NULL COMMENT '是否已冻结' after `updated_at`;
-ALTER TABLE `doctor_user_data_permissions` ADD COLUMN `frozen` tinyint(4) DEFAULT NULL COMMENT '是否已冻结' after `updated_at`;
 
