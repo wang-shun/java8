@@ -549,13 +549,20 @@ public class DoctorCommonSessionBean {
      * @return 注册成功之后的用户
      */
     private User registerByMobile(String mobile, String password, String userName) {
+        doctorUserReadService.checkExist(mobile, userName);
         Response<User> result = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
-        // 检测手机号是否已存在
-        if(result.isSuccess() && result.getResult() != null){
-            throw new JsonResponseException(500, "user.register.mobile.has.been.used");
-        }
+//        // 检测手机号是否已存在
+//        if(result.isSuccess() && result.getResult() != null){
+//            throw new JsonResponseException(500, "user.register.mobile.has.been.used");
+//        }
+
         // 设置用户信息
-        User user = new User();
+        User user;
+        if (result.isSuccess() && notNull(result.getResult())) {
+            user = result.getResult();
+        } else {
+            user = new User();
+        }
         user.setMobile(mobile);
         user.setPassword(password);
         user.setName(userName);
@@ -568,11 +575,21 @@ public class DoctorCommonSessionBean {
         // 注册用户默认成为猪场管理员
         user.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));
 
-        Response<Long> resp = userWriteService.create(user);
-        if(!resp.isSuccess()){
-            throw new JsonResponseException(500, resp.getError());
+        Long userId;
+        if (notNull(user.getId())) {
+            Response<Long> resp = userWriteService.create(user);
+            if (!resp.isSuccess()) {
+                throw new JsonResponseException(500, resp.getError());
+            }
+            userId = resp.getResult();
+        } else {
+            Response<Boolean> resp = userWriteService.update(user);
+            if (!resp.isSuccess()) {
+                throw new JsonResponseException(500, resp.getError());
+            }
+            userId = user.getId();
         }
-        user.setId(resp.getResult());
+        user.setId(userId);
         return user;
     }
 

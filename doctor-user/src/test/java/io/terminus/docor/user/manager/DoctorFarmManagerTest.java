@@ -42,7 +42,7 @@ public class DoctorFarmManagerTest extends BaseManagerTest{
         DoctorUserUnfreezeDto doctorUserUnfreezeDto = new DoctorUserUnfreezeDto();
         doctorUserUnfreezeDto.setUserId(userId);
         doctorUserUnfreezeDto.setUserType(UserType.FARM_ADMIN_PRIMARY.value());
-        doctorUserUnfreezeDto.setPrimaryUser(primaryUserDao.findFrozenByUserId(userId));
+        doctorUserUnfreezeDto.setPrimaryUser(primaryUserDao.findIncludeFrozenByUserId(userId));
         doctorUserUnfreezeDto.setPermission(doctorUserDataPermissionDao.findFrozenByUserId(userId));
         doctorUserUnfreezeDto.setUserProfile(userProfileDao.findByUserId(userId));
         doctorFarmManager.unfreezeUser(doctorUserUnfreezeDto);
@@ -68,7 +68,7 @@ public class DoctorFarmManagerTest extends BaseManagerTest{
 
     @Test
     public void findPrimaryByUserIdTest() {
-        System.out.println(primaryUserDao.findFrozenByUserId(10L));
+        System.out.println(primaryUserDao.findIncludeFrozenByUserId(10L));
     }
 
     @Test

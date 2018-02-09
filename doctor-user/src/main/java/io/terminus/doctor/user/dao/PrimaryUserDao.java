@@ -17,7 +17,7 @@ public class PrimaryUserDao extends MyBatisDao<PrimaryUser> {
         return getSqlSession().selectOne(sqlId("findByUserId"), userId);
     }
 
-    public PrimaryUser findFrozenByUserId(Long userId){
+    public PrimaryUser findIncludeFrozenByUserId(Long userId){
         return sqlSession.selectOne(sqlId("findIncludeFrozenByUserId"), userId);
     }
 

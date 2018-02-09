@@ -13,6 +13,7 @@ import io.terminus.doctor.user.dao.IotUserDao;
 import io.terminus.doctor.user.dao.OperatorDao;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
+import io.terminus.doctor.user.dao.UserDaoExt;
 import io.terminus.doctor.user.dto.IotUserDto;
 import io.terminus.doctor.user.model.IotUser;
 import io.terminus.doctor.user.model.Operator;
@@ -21,7 +22,6 @@ import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.model.SubRole;
 import io.terminus.doctor.user.service.SubRoleReadService;
 import io.terminus.parana.common.utils.Iters;
-import io.terminus.parana.user.impl.dao.UserDao;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
@@ -45,7 +45,7 @@ import static io.terminus.common.utils.Arguments.notNull;
 @Slf4j
 @Component
 public class DoctorUserManager {
-    private final UserDao userDao;
+    private final UserDaoExt userDao;
 
     private final UserProfileDao userProfileDao;
 
@@ -62,7 +62,7 @@ public class DoctorUserManager {
     private final DoctorUserDataPermissionDao doctorUserDataPermissionDao;
 
     @Autowired
-    public DoctorUserManager(UserDao userDao,
+    public DoctorUserManager(UserDaoExt userDao,
                              UserProfileDao userProfileDao,
                              OperatorDao operatorDao,
                              PrimaryUserDao primaryUserDao,
@@ -160,11 +160,11 @@ public class DoctorUserManager {
         }
         extraMap.put("frozen", IsOrNot.NO.getKey().toString());
         user.setExtra(user.getExtra());
-        userDao.update(user);
+        userDao.updateAll(user);
 
         if (Objects.equals(user.getType(), UserType.FARM_SUB.value())){
             Sub sub = subDao.findIncludeFrozenByUserId(user.getId());
-            if (isNull(sub.getId())) {
+            if (isNull(sub)) {
                 createSub(user);
             } else {
                 //猪场子账号
@@ -189,11 +189,27 @@ public class DoctorUserManager {
             UserProfile userProfile = userProfileDao.findByUserId(user.getId());
             userProfile.setRealName(Params.get(user.getExtra(), "realName"));
             userProfileDao.update(userProfile);
+        } else if (Objects.equals(user.getType(), UserType.FARM_ADMIN_PRIMARY.value())) {
+            PrimaryUser primaryUser = primaryUserDao.findIncludeFrozenByUserId(user.getId());
+            if (isNull(primaryUser)) {
+                createPrimaryUser(user);
+            } else {
+                primaryUser.setFrozen(IsOrNot.NO.getKey());
+                primaryUser.setRelFarmId(null);
+                primaryUser.setUserName(user.getMobile());
+                String realName = user.getName();
+                if (notNull(user.getExtra()) && user.getExtra().containsKey("realName")) {
+                    realName = Params.get(user.getExtra(), "realName");
+                }
+                primaryUser.setRealName(realName);
+                primaryUser.setStatus(UserStatus.NORMAL.value());
+                primaryUserDao.update(primaryUser);
+            }
         }
         return true;
     }
 
-    public void createSub(User user) {
+    private void createSub(User user) {
         //猪场子账号
         Long roleId = null;// TODO: read roleId from user.getRoles()
         for (String role : Iters.nullToEmpty(user.getRoles())) {
@@ -214,6 +230,21 @@ public class DoctorUserManager {
         sub.setContact(Params.get(user.getExtra(), "contact"));
         sub.setStatus(UserStatus.NORMAL.value());
         subDao.create(sub);
+    }
+
+    private void createPrimaryUser(User user) {
+        //猪场管理员
+        PrimaryUser primaryUser = new PrimaryUser();
+        primaryUser.setUserId(user.getId());
+        //暂时暂定手机号
+        primaryUser.setUserName(user.getMobile());
+        String realName = user.getName();
+        if (notNull(user.getExtra()) && user.getExtra().containsKey("realName")) {
+            realName = Params.get(user.getExtra(), "realName");
+        }
+        primaryUser.setRealName(realName);
+        primaryUser.setStatus(UserStatus.NORMAL.value());
+        primaryUserDao.create(primaryUser);
     }
 
     @Transactional
