@@ -42,6 +42,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isNull;
+import static io.terminus.common.utils.Arguments.notNull;
+
 /**
  * Desc: 子账号相关服务
  * Mail: houly@terminus.io
@@ -253,21 +256,26 @@ public class SubService {
                 }
             }
 
-            User subUser = new User();
+            RespHelper.or500(doctorUserReadService.checkExist(sub.getContact(), sub.getUsername()));
+
+            User subUser;
+            String password = sub.getPassword();
+            Response<User> userResponse = doctorUserReadService.findBy(sub.getContact(), LoginType.MOBILE);
+            if (userResponse.isSuccess() && notNull(userResponse.getResult())) {
+                subUser = userResponse.getResult();
+                if (org.springframework.util.StringUtils.hasText(sub.getPassword())) {  //对密码加盐加密
+                    password = EncryptUtil.encrypt(sub.getPassword());
+                }
+            } else {
+                subUser = new User();
+            }
 
             //子账号@主账号
             String userName = subAccount(sub, user);
 //            checkSubUserAccount(userName);
             subUser.setName(userName);
-
-            if(StringUtils.isNotBlank(sub.getContact())){
-                Response<User> mobileRes = doctorUserReadService.findBy(sub.getContact(), LoginType.MOBILE);
-                if(mobileRes.isSuccess() && mobileRes.getResult() != null){
-                    throw new JsonResponseException("user.register.mobile.has.been.used");
-                }
-                subUser.setMobile(sub.getContact());
-            }
-            subUser.setPassword(sub.getPassword());
+            subUser.setMobile(sub.getContact());
+            subUser.setPassword(password);
             subUser.setType(UserType.FARM_SUB.value());
             subUser.setStatus(UserStatus.NORMAL.value());
             // TODO: 自定义角色冗余进 user 表
@@ -281,7 +289,13 @@ public class SubService {
                     .put("contact", sub.getContact())
                     .put("realName", sub.getRealName())
                     .map());
-            Long subUserId = RespHelper.orServEx(userWriteService.create(subUser));
+            Long subUserId;
+            if (isNull(subUser.getId())) {
+                 subUserId = RespHelper.orServEx(userWriteService.create(subUser));
+            } else {
+                RespHelper.orServEx(userWriteService.update(subUser));
+                subUserId = subUser.getId();
+            }
             //设置子账号关联猪场
             io.terminus.doctor.user.model.Sub sub1 = RespHelper.orServEx(primaryUserReadService.findSubByUserId(subUserId));
             io.terminus.doctor.user.model.Sub updateSub = new io.terminus.doctor.user.model.Sub();

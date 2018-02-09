@@ -21,6 +21,10 @@ public class DoctorUserDataPermissionDao extends MyBatisDao<DoctorUserDataPermis
         return sqlSession.selectOne(sqlId("findByUserId"), userId);
     }
 
+    public DoctorUserDataPermission findFrozenByUserId(Long userId){
+        return sqlSession.selectOne(sqlId("findIncludeFrozenByUserId"), userId);
+    }
+
     public List<DoctorUserDataPermission> findByUserIds(List<Long> userIds){
         if(userIds == null || userIds.isEmpty()){
             return Collections.emptyList();
@@ -57,4 +61,5 @@ public class DoctorUserDataPermissionDao extends MyBatisDao<DoctorUserDataPermis
     public List<DoctorUserDataPermission> findByFarmAndPrimary(Long farmId, List<Long> userIds) {
         return getSqlSession().selectList(sqlId("findByFarmAndPrimary"), ImmutableMap.of("farmId", farmId, "userIds", userIds));
     }
+
 }

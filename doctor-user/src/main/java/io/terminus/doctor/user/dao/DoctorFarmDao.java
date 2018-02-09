@@ -49,4 +49,8 @@ public class DoctorFarmDao extends MyBatisDao<DoctorFarm> {
         map.put("isIntelligent", isIntelligent);
         return getSqlSession().selectList(sqlId("findFarmsBy"), map);
     }
+
+    public Boolean freeze(Long id) {
+        return getSqlSession().update(sqlId("freeze"), id) == 1;
+    }
 }

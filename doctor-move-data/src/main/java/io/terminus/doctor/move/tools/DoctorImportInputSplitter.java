@@ -153,7 +153,7 @@ public class DoctorImportInputSplitter {
         return map;
     }
 
-    private List<PigEvent> getExecuteSowEvents(String currentStatus,  Integer parityStage) {
+    private List<PigEvent> getExecuteSowEvents(String currentStatus, Integer parityStage) {
         List<PigEvent> executeEvents = statusToEventMap.get(currentStatus);
         expectTrue(!Arguments.isNullOrEmpty(executeEvents), "not.have.execute.event", currentStatus);
         if (DoctorImportSow.ParityStage.firsts.contains(parityStage)) {
@@ -198,7 +198,8 @@ public class DoctorImportInputSplitter {
                 barnName = importSow.getFarrowBarnName();
                 importPigEvent.setWeanToBarn(importSow.getWeanToBarn());
                 break;
-            default: new Date();
+            default:
+                new Date();
         }
         importPigEvent.setEventAt(eventAt);
         importPigEvent.setBarnName(barnName);
@@ -211,36 +212,36 @@ public class DoctorImportInputSplitter {
                 .entrySet()
                 .parallelStream()
                 .forEach(entry -> {
-            List<DoctorImportSow> values = entry.getValue();
-            Integer maxParity = values.stream().mapToInt(DoctorImportSow::getParity).max().getAsInt();
-            for (int i = 0; i < values.size(); i++) {
-                DoctorImportSow importSow = values.get(i);
-                Integer parityStage;
-                if (i == 0) {
-                    if (Objects.equals(importSow.getParity(), maxParity) && i == values.size() - 1) {
-                        parityStage = DoctorImportSow.ParityStage.FIRST_CURRENT_LAST.getValue();
-                    } else if (Objects.equals(importSow.getParity(), maxParity) ) {
-                        parityStage = DoctorImportSow.ParityStage.FIRST_CURRENT.getValue();
-                    } else if (Objects.equals(importSow.getParity(), maxParity - 1)) {
-                        parityStage = DoctorImportSow.ParityStage.FIRST_PRE.getValue();
-                    } else {
-                        parityStage = DoctorImportSow.ParityStage.FIRST.getValue();
+                    List<DoctorImportSow> values = entry.getValue();
+                    Integer maxParity = values.stream().mapToInt(DoctorImportSow::getParity).max().getAsInt();
+                    for (int i = 0; i < values.size(); i++) {
+                        DoctorImportSow importSow = values.get(i);
+                        Integer parityStage;
+                        if (i == 0) {
+                            if (Objects.equals(importSow.getParity(), maxParity) && i == values.size() - 1) {
+                                parityStage = DoctorImportSow.ParityStage.FIRST_CURRENT_LAST.getValue();
+                            } else if (Objects.equals(importSow.getParity(), maxParity)) {
+                                parityStage = DoctorImportSow.ParityStage.FIRST_CURRENT.getValue();
+                            } else if (Objects.equals(importSow.getParity(), maxParity - 1)) {
+                                parityStage = DoctorImportSow.ParityStage.FIRST_PRE.getValue();
+                            } else {
+                                parityStage = DoctorImportSow.ParityStage.FIRST.getValue();
+                            }
+                        } else if (Objects.equals(importSow.getParity(), maxParity)) {
+                            if (i == values.size() - 1) {
+                                parityStage = DoctorImportSow.ParityStage.CURRENT_LAST.getValue();
+                            } else {
+                                parityStage = DoctorImportSow.ParityStage.CURRENT.getValue();
+                            }
+                        } else if (Objects.equals(importSow.getParity(), maxParity - 1)) {
+                            parityStage = DoctorImportSow.ParityStage.MIDDLE_PRE.getValue();
+                        } else {
+                            parityStage = DoctorImportSow.ParityStage.MIDDLE.getValue();
+                        }
+                        importSow.setParityStage(parityStage);
+                        setDefaultValue(importSow, importBasicData);
                     }
-                } else if (Objects.equals(importSow.getParity(), maxParity)) {
-                    if (i == values.size() - 1) {
-                        parityStage = DoctorImportSow.ParityStage.CURRENT_LAST.getValue();
-                    } else {
-                        parityStage = DoctorImportSow.ParityStage.CURRENT.getValue();
-                    }
-                } else if (Objects.equals(importSow.getParity(), maxParity - 1 )) {
-                    parityStage = DoctorImportSow.ParityStage.MIDDLE_PRE.getValue();
-                } else {
-                    parityStage = DoctorImportSow.ParityStage.MIDDLE.getValue();
-                }
-                importSow.setParityStage(parityStage);
-                setDefaultValue(importSow, importBasicData);
-            }
-        });
+                });
     }
 
     private void setDefaultValue(DoctorImportSow importSow, DoctorImportBasicData importBasicData) {
@@ -277,20 +278,26 @@ public class DoctorImportInputSplitter {
                 if (!Objects.equals(importSow.getCurrentStatus(), PigStatus.Pregnancy.getDesc())) {
                     importSow.setCurrentStatus(PigStatus.KongHuai.getDesc());
                     importSow.setPregCheckDate(getCheckDateByRemark(importSow));
-                } else if (Objects.equals(importBasicData.getBarnMap().get(importSow.getBarnName()).getPigType()
-                        , PigType.DELIVER_SOW.getValue())){
+                } else if (importBasicData != null &&
+                        importBasicData.getBarnMap() != null &&
+                        importBasicData.getBarnMap().containsKey(importSow.getBarnName()) &&
+                        Objects.equals(importBasicData.getBarnMap().get(importSow.getBarnName()).getPigType()
+                                , PigType.DELIVER_SOW.getValue())) {
                     importSow.setPregBarn(importBasicData.getDefaultPregBarn().getName());
                     importSow.setCurrentStatus(PigStatus.Farrow.getDesc());
                     importSow.setFarrowBarnName(importSow.getBarnName());
                 }
             }
-        } else if (Objects.equals(importSow.getParityStage(), DoctorImportSow.ParityStage.CURRENT.getValue())){
+        } else if (Objects.equals(importSow.getParityStage(), DoctorImportSow.ParityStage.CURRENT.getValue())) {
             importSow.setCurrentStatus(PigStatus.KongHuai.getDesc());
             importSow.setPregCheckResult(getCheckResultByRemark(importSow).getDesc());
             importSow.setPregCheckDate(getCheckDateByRemark(importSow));
             importSow.setPregBarn(importSow.getBarnName());
-            if (Objects.equals(importBasicData.getBarnMap().get(importSow.getBarnName()).getPigType()
-                    , PigType.DELIVER_SOW.getValue())){
+            if (importBasicData != null &&
+                    importBasicData.getBarnMap() != null &&
+                    importBasicData.getBarnMap().containsKey(importSow.getBarnName()) &&
+                    Objects.equals(importBasicData.getBarnMap().get(importSow.getBarnName()).getPigType()
+                            , PigType.DELIVER_SOW.getValue())) {
                 importSow.setPregBarn(importBasicData.getDefaultPregBarn().getName());
             }
         } else {
@@ -303,10 +310,13 @@ public class DoctorImportInputSplitter {
                 importSow.setPregCheckResult(PregCheckResult.YANG.getDesc());
                 importSow.setWeanToBarn(importBasicData.getDefaultPregBarn().getName());
                 importSow.setFarrowBarnName(importBasicData.getDefaultFarrowBarn().getName());
-                if (DoctorImportSow.ParityStage.pres.contains(importSow.getParityStage())
-                        && PigType.MATING_TYPES.contains(importBasicData.getBarnMap().get(importSow.getBarnName()).getPigType())
-                            && !Objects.equals(importSow.getCurrentStatus(), PigStatus.Wean.getDesc())) {
-                        importSow.setWeanToBarn(importSow.getBarnName());
+                if (DoctorImportSow.ParityStage.pres.contains(importSow.getParityStage()) &&
+                        importBasicData != null &&
+                        importBasicData.getBarnMap() != null &&
+                        importBasicData.getBarnMap().containsKey(importSow.getBarnName()) &&
+                        PigType.MATING_TYPES.contains(importBasicData.getBarnMap().get(importSow.getBarnName()).getPigType())
+                        && !Objects.equals(importSow.getCurrentStatus(), PigStatus.Wean.getDesc())) {
+                    importSow.setWeanToBarn(importSow.getBarnName());
                 }
                 importSow.setCurrentStatus(PigStatus.Wean.getDesc());
             }
@@ -318,11 +328,11 @@ public class DoctorImportInputSplitter {
     }
 
     private Integer nullToZero(Integer value) {
-        return isNull(value)? 0 : value;
+        return isNull(value) ? 0 : value;
     }
 
     private Double nullToZero(Double value) {
-        return isNull(value)? 0.0D : value;
+        return isNull(value) ? 0.0D : value;
     }
 
     private String firstNonEmpty(String first, String second) {

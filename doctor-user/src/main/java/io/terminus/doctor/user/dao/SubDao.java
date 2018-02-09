@@ -23,6 +23,10 @@ public class SubDao extends MyBatisDao<Sub> {
         return getSqlSession().selectList(sqlId("findByParentUserId"), parentUserId);
     }
 
+    public Sub findIncludeFrozenByUserId(Long userId){
+        return sqlSession.selectOne(sqlId("findIncludeFrozenByUserId"), userId);
+    }
+
     public Sub findByParentUserIdAndUserId(Long parentUserId, Long userId) {
         return getSqlSession().selectOne(sqlId("findByParentUserIdAndUserId"), ImmutableMap.of("parentUserId", parentUserId, "userId", userId));
     }
@@ -78,5 +82,9 @@ public class SubDao extends MyBatisDao<Sub> {
      */
     public void deleteByFarmId(Long farmId) {
         getSqlSession().delete(sqlId("deleteByFarmId"), farmId);
+    }
+
+    public Boolean freezeByUser(Long userId) {
+        return getSqlSession().update(sqlId("freezeByUser"), userId) == 1;
     }
 }

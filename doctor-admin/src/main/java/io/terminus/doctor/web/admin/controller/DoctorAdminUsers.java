@@ -11,6 +11,7 @@ import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Joiners;
 import io.terminus.common.utils.Splitters;
+import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -21,8 +22,17 @@ import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
-import io.terminus.doctor.user.service.*;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
+import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
+import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
+import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
+import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
+import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
+import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
+import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.web.admin.dto.DoctorGroupUserWithOrgAndFarm;
+import io.terminus.parana.common.utils.EncryptUtil;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserWriteService;
@@ -39,7 +49,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc: admin分配权限的api
@@ -88,7 +100,14 @@ public class DoctorAdminUsers {
                              @RequestParam(required = false) String realName,
                              @RequestParam(required = false) String password) {
         User user = checkGroupUser(mobile, name, realName, password);
-        Long userId = RespHelper.or500(userUserWriteService.create(user));
+
+        Long userId;
+        if (isNull(user.getId())) {
+            userId = RespHelper.or500(userUserWriteService.create(user));
+        } else {
+            RespHelper.or500(userUserWriteService.update(user));
+            userId = user.getId();
+        }
         initDefaultServiceStatus(userId, user.getMobile(), user.getName());
         return userId;
     }
@@ -134,25 +153,36 @@ public class DoctorAdminUsers {
 
     //拼接集团用户数据
     private User checkGroupUser(String mobile, String name, String realName, String password) {
-        Response<Boolean> mobileResponse = doctorUserReadService.checkExist(mobile, LoginType.MOBILE);
-        if(mobileResponse.isSuccess() && mobileResponse.getResult()){
-            log.error("user existed, user:{}", mobileResponse.getResult());
-            throw new JsonResponseException("duplicated.mobile");
-        }
-        Response<Boolean> nameResponse = doctorUserReadService.checkExist(name, LoginType.NAME);
-        if(nameResponse.isSuccess() && nameResponse.getResult()){
-            log.error("user existed, user:{}", nameResponse.getResult());
-            throw new JsonResponseException("duplicated.name");
-        }
+//        Response<Boolean> mobileResponse = doctorUserReadService.checkExist(mobile, LoginType.MOBILE);
+//        if(mobileResponse.isSuccess() && mobileResponse.getResult()){
+//            log.error("user existed, user:{}", mobileResponse.getResult());
+//            throw new JsonResponseException("duplicated.mobile");
+//        }
+//        Response<Boolean> nameResponse = doctorUserReadService.checkExist(name, LoginType.NAME);
+//        if(nameResponse.isSuccess() && nameResponse.getResult()){
+//            log.error("user existed, user:{}", nameResponse.getResult());
+//            throw new JsonResponseException("duplicated.name");
+//        }
 
-        User user = new User();
+        RespHelper.or500(doctorUserReadService.checkExist(mobile, name));
+        User user;
+        password = StringUtils.hasText(password) ? password : mobile;
+        Response<User> mobileResponse = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
+        if (mobileResponse.isSuccess() && notNull(mobileResponse.getResult())) {
+            user = mobileResponse.getResult();
+            if (StringUtils.hasText(password)) {  //对密码加盐加密
+                password = EncryptUtil.encrypt(password);
+            }
+        } else {
+            user = new User();
+        }
         user.setMobile(mobile);
         user.setName(name);
         Map<String, String> extra = MoreObjects.firstNonNull(user.getExtra(), Maps.newHashMap());
         extra.put("realName", realName);
 
         //密码默认为手机号
-        user.setPassword(StringUtils.hasText(password) ? password : mobile);
+        user.setPassword(password);
         user.setType(UserType.FARM_ADMIN_PRIMARY.value());
         user.setStatus(UserStatus.NORMAL.value());
         user.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));
@@ -167,6 +197,11 @@ public class DoctorAdminUsers {
                                  @RequestParam String orgIds,
                                  @RequestParam(required = false) String farmIds) {
         User user = RespHelper.or500(doctorUserReadService.findById(userId));
+        if (notNull(user)&&notNull(user.getExtra()) && user.getExtra().containsKey("frozen")
+                && user.getExtra().get("frozen").equals(IsOrNot.YES.getKey().toString())) {
+            log.error("admin add user auth, userId:({}) user is frozen", userId);
+            throw new JsonResponseException("user.is.frozen");
+        }
         if (user == null) {
             log.error("admin add user auth, userId:({}) not found", userId);
             throw new JsonResponseException("user.not.found");

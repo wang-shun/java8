@@ -17,6 +17,10 @@ public class PrimaryUserDao extends MyBatisDao<PrimaryUser> {
         return getSqlSession().selectOne(sqlId("findByUserId"), userId);
     }
 
+    public PrimaryUser findIncludeFrozenByUserId(Long userId){
+        return sqlSession.selectOne(sqlId("findIncludeFrozenByUserId"), userId);
+    }
+
     /**
      * 获取关联猪场主账号列表
      * @param farmId 猪场id
@@ -36,5 +40,9 @@ public class PrimaryUserDao extends MyBatisDao<PrimaryUser> {
      */
     public List<PrimaryUser> findAllRelFarmId() {
         return getSqlSession().selectList(sqlId("findAllRelFarmId"));
+    }
+
+    public Boolean freezeByUser(Long userId) {
+        return getSqlSession().update(sqlId("freezeByUser"), userId) == 1;
     }
 }

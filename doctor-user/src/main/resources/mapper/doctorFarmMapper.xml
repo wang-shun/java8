@@ -72,16 +72,27 @@
         </foreach>
     </insert>
 
+    <sql id="frozen">
+        <if test="frozen != null">AND `frozen`=#{frozen}</if>
+        <if test="frozen == null">AND (`frozen`!=1 OR `frozen` IS NULL)</if>
+    </sql>
+
+    <sql id="singleFrozen">
+        AND (`frozen`!=1 OR `frozen` IS NULL)
+    </sql>
+
     <select id="findById" parameterType="long" resultMap="DoctorFarmMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE id = #{id}
+        <include refid="singleFrozen"/>
     </select>
 
     <select id="findByOutId" parameterType="string" resultMap="DoctorFarmMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE out_id = #{outId}
+        <include refid="singleFrozen"/>
     </select>
 
     <select id="findByIds" parameterType="list" resultMap="DoctorFarmMap" >
@@ -91,12 +102,14 @@
         <foreach collection="list" open="(" separator="," close=")" item="id">
             #{id}
         </foreach>
+        <include refid="singleFrozen"/>
     </select>
 
     <select id="findByOrgId" parameterType="long" resultMap="DoctorFarmMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE org_id = #{orgId}
+        <include refid="singleFrozen"/>
     </select>
 
     <select id="findByOrgIds" parameterType="list" resultMap="DoctorFarmMap" >
@@ -106,6 +119,7 @@
         <foreach collection="orgIds" item="orgId" open="(" separator="," close=")" >
             #{orgId}
         </foreach>
+        <include refid="singleFrozen"/>
     </select>
 
     <update id="update" parameterType="DoctorFarm">
@@ -141,6 +155,10 @@
     <select id="findAll" resultMap="DoctorFarmMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
+        <where>
+            1=1
+            <include refid="singleFrozen"/>
+        </where>
     </select>
 
     <select id="findByParams" parameterType="map" resultMap="DoctorFarmMap">
@@ -148,6 +166,7 @@
         FROM <include refid="tb" />
         <where>
             <include refid="criteria" />
+            <include refid="frozen"/>
         </where>
     </select>
 
@@ -159,19 +178,25 @@
             <foreach collection="list" item="id" open="(" separator="," close=")" >
                 #{id}
             </foreach>
+            <include refid="singleFrozen"/>
         </where>
     </select>
 
     <select id="count" parameterType="map" resultType="long">
         SELECT count(*)
         FROM <include refid="tb"/>
-        WHERE <include refid="criteria"/>
+        WHERE
+        <include refid="criteria"/>
+        <include refid="frozen"/>
     </select>
 
     <select id="paging" parameterType="map" resultMap="DoctorFarmMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE <include refid="criteria"/>
+        <where>
+            <include refid="criteria"/>
+            <include refid="frozen"/>
+        </where>
         <if test="fuzzyName != null">
             ORDER BY instr(`name`, #{fuzzyName}) ASC, LENGTH (`name`) ASC
         </if>
@@ -185,5 +210,14 @@
         1=1
         <if test="orgId != null">AND org_id = #{orgId}</if>
         <if test="isIntelligent != null">AND is_intelligent = #{isIntelligent} </if>
+        <include refid="frozen"/>
     </select>
+
+    <update id="freeze" parameterType="long" >
+        UPDATE
+        <include refid="tb"/>
+        set `name` = concat(`name`, unix_timestamp(now())),
+        frozen = 1
+        where id = #{id}
+    </update>
 </mapper>

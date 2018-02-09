@@ -1,15 +1,19 @@
 package io.terminus.doctor.user.manager;
 
+import io.terminus.common.exception.JsonResponseException;
+import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.common.enums.UserRole;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.UserRoleUtil;
+import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
 import io.terminus.doctor.user.dao.IotUserDao;
 import io.terminus.doctor.user.dao.OperatorDao;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
+import io.terminus.doctor.user.dao.UserDaoExt;
 import io.terminus.doctor.user.dto.IotUserDto;
 import io.terminus.doctor.user.model.IotUser;
 import io.terminus.doctor.user.model.Operator;
@@ -18,7 +22,6 @@ import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.model.SubRole;
 import io.terminus.doctor.user.service.SubRoleReadService;
 import io.terminus.parana.common.utils.Iters;
-import io.terminus.parana.user.impl.dao.UserDao;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
@@ -27,10 +30,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
 
 /**
@@ -39,7 +45,7 @@ import static io.terminus.common.utils.Arguments.notNull;
 @Slf4j
 @Component
 public class DoctorUserManager {
-    private final UserDao userDao;
+    private final UserDaoExt userDao;
 
     private final UserProfileDao userProfileDao;
 
@@ -53,13 +59,15 @@ public class DoctorUserManager {
 
     private final IotUserDao iotUserDao;
 
+    private final DoctorUserDataPermissionDao doctorUserDataPermissionDao;
+
     @Autowired
-    public DoctorUserManager(UserDao userDao,
+    public DoctorUserManager(UserDaoExt userDao,
                              UserProfileDao userProfileDao,
                              OperatorDao operatorDao,
                              PrimaryUserDao primaryUserDao,
                              SubDao subDao,
-                             SubRoleReadService subRoleReadService, IotUserDao iotUserDao) {
+                             SubRoleReadService subRoleReadService, IotUserDao iotUserDao, DoctorUserDataPermissionDao doctorUserDataPermissionDao) {
         this.userDao = userDao;
         this.userProfileDao = userProfileDao;
         this.operatorDao = operatorDao;
@@ -67,6 +75,7 @@ public class DoctorUserManager {
         this.subDao = subDao;
         this.subRoleReadService = subRoleReadService;
         this.iotUserDao = iotUserDao;
+        this.doctorUserDataPermissionDao = doctorUserDataPermissionDao;
     }
 
     @Transactional
@@ -145,32 +154,97 @@ public class DoctorUserManager {
 
     @Transactional
     public Boolean update(User user) {
-        userDao.update(user);
+        Map<String, String> extraMap = user.getExtra();
+        if (isNull(extraMap)) {
+            extraMap = new HashMap<>();
+        }
+        extraMap.put("frozen", IsOrNot.NO.getKey().toString());
+        user.setExtra(user.getExtra());
+        userDao.updateAll(user);
 
         if (Objects.equals(user.getType(), UserType.FARM_SUB.value())){
-            //猪场子账号
-            Long roleId = null;
-            for (String role : Iters.nullToEmpty(user.getRoles())) {
-                List<String> richRole = UserRoleUtil.roleConsFrom(role);
-                if (richRole.get(0).equalsIgnoreCase("SUB") && richRole.size() > 1) {
-                    roleId = Long.parseLong(UserRoleUtil.roleConsFrom(richRole.get(1)).get(1));
+            Sub sub = subDao.findIncludeFrozenByUserId(user.getId());
+            if (isNull(sub)) {
+                createSub(user);
+            } else {
+                //猪场子账号
+                Long roleId = null;
+                for (String role : Iters.nullToEmpty(user.getRoles())) {
+                    List<String> richRole = UserRoleUtil.roleConsFrom(role);
+                    if (richRole.get(0).equalsIgnoreCase("SUB") && richRole.size() > 1) {
+                        roleId = Long.parseLong(UserRoleUtil.roleConsFrom(richRole.get(1)).get(1));
+                    }
                 }
-            }
-            SubRole subRole = RespHelper.orServEx(subRoleReadService.findById(roleId));
+                SubRole subRole = RespHelper.orServEx(subRoleReadService.findById(roleId));
 
-            Sub sub = subDao.findByUserId(user.getId());
-            sub.setUserName(user.getName());
-            sub.setRealName(Params.get(user.getExtra(), "realName"));
-            sub.setRoleId(roleId);
-            sub.setRoleName(subRole.getName());
-            sub.setContact(Params.get(user.getExtra(), "contact"));
-            subDao.update(sub);
+                sub.setUserName(user.getName());
+                sub.setRealName(Params.get(user.getExtra(), "realName"));
+                sub.setRoleId(roleId);
+                sub.setRoleName(subRole.getName());
+                sub.setContact(Params.get(user.getExtra(), "contact"));
+                sub.setFrozen(IsOrNot.NO.getKey());
+                subDao.update(sub);
+            }
 
             UserProfile userProfile = userProfileDao.findByUserId(user.getId());
             userProfile.setRealName(Params.get(user.getExtra(), "realName"));
             userProfileDao.update(userProfile);
+        } else if (Objects.equals(user.getType(), UserType.FARM_ADMIN_PRIMARY.value())) {
+            PrimaryUser primaryUser = primaryUserDao.findIncludeFrozenByUserId(user.getId());
+            if (isNull(primaryUser)) {
+                createPrimaryUser(user);
+            } else {
+                primaryUser.setFrozen(IsOrNot.NO.getKey());
+                primaryUser.setRelFarmId(null);
+                primaryUser.setUserName(user.getMobile());
+                String realName = user.getName();
+                if (notNull(user.getExtra()) && user.getExtra().containsKey("realName")) {
+                    realName = Params.get(user.getExtra(), "realName");
+                }
+                primaryUser.setRealName(realName);
+                primaryUser.setStatus(UserStatus.NORMAL.value());
+                primaryUserDao.update(primaryUser);
+            }
         }
         return true;
+    }
+
+    private void createSub(User user) {
+        //猪场子账号
+        Long roleId = null;// TODO: read roleId from user.getRoles()
+        for (String role : Iters.nullToEmpty(user.getRoles())) {
+            List<String> richRole = UserRoleUtil.roleConsFrom(role);
+            if (richRole.get(0).equalsIgnoreCase("SUB") && richRole.size() > 1) {
+                roleId = Long.parseLong(UserRoleUtil.roleConsFrom(richRole.get(1)).get(1));
+            }
+        }
+        SubRole subRole = RespHelper.orServEx(subRoleReadService.findById(roleId));
+
+        Sub sub = new Sub();
+        sub.setUserId(user.getId());
+        sub.setUserName(user.getName());
+        sub.setRealName(Params.get(user.getExtra(), "realName"));
+        sub.setRoleId(roleId);
+        sub.setRoleName(subRole.getName());
+        sub.setParentUserId(Long.valueOf(Params.get(user.getExtra(), "pid")));
+        sub.setContact(Params.get(user.getExtra(), "contact"));
+        sub.setStatus(UserStatus.NORMAL.value());
+        subDao.create(sub);
+    }
+
+    private void createPrimaryUser(User user) {
+        //猪场管理员
+        PrimaryUser primaryUser = new PrimaryUser();
+        primaryUser.setUserId(user.getId());
+        //暂时暂定手机号
+        primaryUser.setUserName(user.getMobile());
+        String realName = user.getName();
+        if (notNull(user.getExtra()) && user.getExtra().containsKey("realName")) {
+            realName = Params.get(user.getExtra(), "realName");
+        }
+        primaryUser.setRealName(realName);
+        primaryUser.setStatus(UserStatus.NORMAL.value());
+        primaryUserDao.create(primaryUser);
     }
 
     @Transactional
@@ -204,5 +278,23 @@ public class DoctorUserManager {
         userProfileDao.update(updateUser);
 
         iotUserDao.update(iotUserDto);
+    }
+
+    public void checkExist(String mobile, String name) {
+
+        User userByName = userDao.findByName(name);
+        if (notNull(userByName) && !Objects.equals(userByName.getMobile(), mobile)) {
+            throw new JsonResponseException("用户名已存在:" + name);
+        }
+
+        User userByMobile = userDao.findByMobile(mobile);
+        if (isNull(userByMobile)){
+            return;
+        }
+
+        if (!(notNull(userByMobile.getExtra()) && userByMobile.getExtra().containsKey("frozen")
+                && userByMobile.getExtra().get("frozen").equals(IsOrNot.YES.getKey().toString()))) {
+            throw new JsonResponseException("手机号已存在:" + mobile);
+        }
     }
 }
