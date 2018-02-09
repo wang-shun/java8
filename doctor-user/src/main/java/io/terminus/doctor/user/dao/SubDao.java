@@ -23,8 +23,8 @@ public class SubDao extends MyBatisDao<Sub> {
         return getSqlSession().selectList(sqlId("findByParentUserId"), parentUserId);
     }
 
-    public Sub findFrozenByUserId(Long userId){
-        return sqlSession.selectOne(sqlId("findFrozenByUserId"), userId);
+    public Sub findIncludeFrozenByUserId(Long userId){
+        return sqlSession.selectOne(sqlId("findIncludeFrozenByUserId"), userId);
     }
 
     public Sub findByParentUserIdAndUserId(Long parentUserId, Long userId) {

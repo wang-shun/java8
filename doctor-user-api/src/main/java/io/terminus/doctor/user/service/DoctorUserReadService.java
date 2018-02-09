@@ -53,4 +53,12 @@ public interface DoctorUserReadService extends UserReadService<User>{
      * @return
      */
     Response<Boolean> unfreeze(DoctorUserUnfreezeDto doctorUserUnfreezeDto);
+
+    /**
+     * 校验手机号和用户是否已存在
+     * @param mobile
+     * @param name
+     * @return
+     */
+    Response<Boolean> checkExist(String mobile, String name);
 }

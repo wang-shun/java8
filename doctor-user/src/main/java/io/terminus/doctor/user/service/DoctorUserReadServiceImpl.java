@@ -11,6 +11,7 @@ import io.terminus.doctor.user.dao.UserDaoExt;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
 import io.terminus.doctor.user.dto.DoctorUserUnfreezeDto;
 import io.terminus.doctor.user.enums.RoleType;
+import io.terminus.doctor.user.manager.DoctorUserManager;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.model.Sub;
 import io.terminus.parana.user.impl.dao.UserDao;
@@ -49,18 +50,20 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
     private final UserProfileReadService userProfileReadService;
     @Autowired
     private SubDao subDao;
+    private final DoctorUserManager doctorUserManager;
 
     @Autowired
     public DoctorUserReadServiceImpl(UserDao userDao, DoctorStaffReadService doctorStaffReadService,
                                      DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
                                      UserProfileReadService userProfileReadService,
-                                     UserDaoExt userDaoExt) {
+                                     UserDaoExt userDaoExt, DoctorUserManager doctorUserManager) {
         super(userDao);
         this.userDao = userDao;
         this.doctorStaffReadService = doctorStaffReadService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
         this.userProfileReadService = userProfileReadService;
         this.userDaoExt = userDaoExt;
+        this.doctorUserManager = doctorUserManager;
     }
 
     /**
@@ -219,5 +222,16 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
             log.error(",cause:{}", Throwables.getStackTraceAsString(e));
         }
         return null;
+    }
+
+    @Override
+    public Response<Boolean> checkExist(String mobile, String name) {
+        try {
+            doctorUserManager.checkExist(mobile, name);
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("check exist failed, mobile:{}, name:{},cause:{}", mobile, name, Throwables.getStackTraceAsString(e));
+            return Response.fail("check.exist.failed");
+        }
     }
 }

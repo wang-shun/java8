@@ -2,7 +2,6 @@ package io.terminus.docor.user.manager;
 
 import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.common.enums.UserType;
-import io.terminus.doctor.user.dao.BaseDaoTest;
 import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
@@ -58,7 +57,7 @@ public class DoctorFarmManagerTest extends BaseManagerTest{
         DoctorUserUnfreezeDto doctorUserUnfreezeDto = new DoctorUserUnfreezeDto();
         doctorUserUnfreezeDto.setUserId(userId);
         doctorUserUnfreezeDto.setUserType(UserType.FARM_SUB.value());
-        doctorUserUnfreezeDto.setSub(subDao.findFrozenByUserId(userId));
+        doctorUserUnfreezeDto.setSub(subDao.findIncludeFrozenByUserId(userId));
         doctorUserUnfreezeDto.setPermission(doctorUserDataPermissionDao.findFrozenByUserId(userId));
         doctorUserUnfreezeDto.setUserProfile(userProfileDao.findByUserId(userId));
         doctorFarmManager.unfreezeUser(doctorUserUnfreezeDto);
@@ -80,6 +79,6 @@ public class DoctorFarmManagerTest extends BaseManagerTest{
 
     @Test
     public void findFrozenByUserId() {
-        System.out.println(subDao.findFrozenByUserId(12L));
+        System.out.println(subDao.findIncludeFrozenByUserId(12L));
     }
 }

@@ -163,7 +163,7 @@ public class DoctorUserManager {
         userDao.update(user);
 
         if (Objects.equals(user.getType(), UserType.FARM_SUB.value())){
-            Sub sub = subDao.findByUserId(user.getId());
+            Sub sub = subDao.findIncludeFrozenByUserId(user.getId());
             if (isNull(sub.getId())) {
                 createSub(user);
             } else {

@@ -84,13 +84,12 @@
         <include refid="singleFrozen"/>
     </select>
 
-    <select id="findFrozenByUserId" parameterType="long" resultMap="PrimaryUserMap">
+    <select id="findIncludeFrozenByUserId" parameterType="long" resultMap="PrimaryUserMap">
         SELECT
         <include refid="cols_all"/>
         FROM
         <include refid="tb"/>
         WHERE user_id = #{userId}
-        and frozen = 1
     </select>
 
     <select id="findByIds" parameterType="list" resultMap="PrimaryUserMap">

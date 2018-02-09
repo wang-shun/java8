@@ -22,7 +22,7 @@ public class DoctorUserDataPermissionDao extends MyBatisDao<DoctorUserDataPermis
     }
 
     public DoctorUserDataPermission findFrozenByUserId(Long userId){
-        return sqlSession.selectOne(sqlId("findFrozenByUserId"), userId);
+        return sqlSession.selectOne(sqlId("findIncludeFrozenByUserId"), userId);
     }
 
     public List<DoctorUserDataPermission> findByUserIds(List<Long> userIds){
@@ -60,10 +60,6 @@ public class DoctorUserDataPermissionDao extends MyBatisDao<DoctorUserDataPermis
      */
     public List<DoctorUserDataPermission> findByFarmAndPrimary(Long farmId, List<Long> userIds) {
         return getSqlSession().selectList(sqlId("findByFarmAndPrimary"), ImmutableMap.of("farmId", farmId, "userIds", userIds));
-    }
-
-    public Boolean freezeByUser(Long userId) {
-        return getSqlSession().update(sqlId("freezeByUser"), userId) == 1;
     }
 
 }
