@@ -288,6 +288,10 @@ public class DoctorUserManager {
         }
 
         User userByMobile = userDao.findByMobile(mobile);
+        if (isNull(userByMobile)){
+            return;
+        }
+
         if (!(notNull(userByMobile.getExtra()) && userByMobile.getExtra().containsKey("frozen")
                 && userByMobile.getExtra().get("frozen").equals(IsOrNot.YES.getKey().toString()))) {
             throw new JsonResponseException("手机号已存在:" + mobile);
