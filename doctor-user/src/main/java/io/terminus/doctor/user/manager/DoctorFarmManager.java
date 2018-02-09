@@ -130,7 +130,7 @@ public class DoctorFarmManager {
         permissions.forEach(permission -> {
             permission.getFarmIdsList().remove(farmId);
             if (permission.getFarmIdsList().isEmpty()) {
-                doctorUserDataPermissionDao.freezeByUser(permission.getUserId());
+                doctorUserDataPermissionDao.delete(permission.getId());
                 User user = userDaoExt.findById(permission.getUserId());
                 freezeUser(user);
                 if (Objects.equals(user.getType(), UserType.FARM_ADMIN_PRIMARY.value())) {

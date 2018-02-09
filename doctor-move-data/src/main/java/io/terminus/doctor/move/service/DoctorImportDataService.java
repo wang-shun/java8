@@ -87,6 +87,7 @@ import io.terminus.doctor.user.dao.UserDaoExt;
 import io.terminus.doctor.user.interfaces.event.DoctorSystemCode;
 import io.terminus.doctor.user.interfaces.event.EventType;
 import io.terminus.doctor.user.interfaces.model.UserDto;
+import io.terminus.doctor.user.manager.DoctorUserManager;
 import io.terminus.doctor.user.manager.UserInterfaceManager;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorFarmExport;
@@ -218,7 +219,8 @@ public class DoctorImportDataService {
     private DoctorMoveDataService doctorMoveDataService;
     @Autowired
     private DoctorFarmExportDao doctorFarmExportDao;
-
+    @Autowired
+    private DoctorUserManager doctorUserManager;
     /**
      * 根据shit导入所有的猪场数据
      */
@@ -325,13 +327,11 @@ public class DoctorImportDataService {
                 String contact = ImportExcelUtils.getStringOrThrow(row, 2);
                 String roleName = ImportExcelUtils.getStringOrThrow(row, 3);
 
+                doctorUserManager.checkExist(contact, loginName);
+
                 User subUser = userDaoExt.findByMobile(contact);
                 Long subUserId;
                 if (notNull(subUser)) {
-                    DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(subUser.getId());
-                    if (notNull(permission)) {
-                        throw new JsonResponseException("用户已关联猪场, 用户名：" + loginName + "手机号:" + contact);
-                    }
 
                     subUser.setName(loginName + "@" + farm.getFarmCode());
                     subUser.setMobile(contact);
@@ -552,17 +552,11 @@ public class DoctorImportDataService {
     private User getUser(String mobile, String loginName, String realName) {
         User user;
         Long userId;
+        doctorUserManager.checkExist(mobile, loginName);
         Response<User> result = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
-        if (!result.isSuccess() || isNull(result.getResult())) {
-            result = doctorUserReadService.findBy(loginName, LoginType.NAME);
-        }
         if(result.isSuccess() && result.getResult() != null){
             log.warn("primary user has existed, mobile={}", mobile);
             user = result.getResult();
-            DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(user.getId());
-            if (notNull(permission)) {
-                throw new JsonResponseException("用户已关联猪场, 手机号:" + mobile + "用户名："+ loginName);
-            }
             //更新用户信息
             user.setPassword(EncryptUtil.encrypt("123456"));
             user.setName(loginName);
@@ -586,12 +580,6 @@ public class DoctorImportDataService {
                 primaryUser.setRealName(realName);
                 primaryUser.setStatus(UserStatus.NORMAL.value());
                 primaryUserDao.create(primaryUser);
-            }
-
-            //如果原始子账号删除
-            Sub sub = subDao.findByUserId(userId);
-            if (notNull(sub)) {
-                subDao.delete(sub.getId());
             }
 
         }else{
