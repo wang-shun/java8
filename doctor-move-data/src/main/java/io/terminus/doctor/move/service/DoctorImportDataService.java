@@ -558,7 +558,6 @@ public class DoctorImportDataService {
         if(result.isSuccess() && result.getResult() != null){
             log.warn("primary user has existed, mobile={}", mobile);
             user = result.getResult();
-
             //更新用户信息
             user.setPassword(EncryptUtil.encrypt("123456"));
             user.setName(loginName);

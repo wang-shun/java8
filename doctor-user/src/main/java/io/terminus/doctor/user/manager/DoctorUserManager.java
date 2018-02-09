@@ -165,6 +165,7 @@ public class DoctorUserManager {
         if (Objects.equals(user.getType(), UserType.FARM_SUB.value())){
             Sub sub = subDao.findIncludeFrozenByUserId(user.getId());
             if (isNull(sub)) {
+
                 createSub(user);
             } else {
                 //猪场子账号
