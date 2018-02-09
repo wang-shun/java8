@@ -19,7 +19,6 @@
         <result column="updator_name" property="updatorName"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
-        <result column="frozen" property="frozen"/>
     </resultMap>
 
     <sql id="tb">
@@ -31,11 +30,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        user_id, farm_ids, barn_ids,org_ids, ware_house_types, extra, creator_id, creator_name, updator_id, updator_name, created_at, updated_at, frozen
+        user_id, farm_ids, barn_ids,org_ids, ware_house_types, extra, creator_id, creator_name, updator_id, updator_name, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{userId}, #{farmIds}, #{barnIds},#{orgIds}, #{wareHouseTypes}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now(), frozen
+        #{userId}, #{farmIds}, #{barnIds},#{orgIds}, #{wareHouseTypes}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorUserDataPermission" keyProperty="id" useGeneratedKeys="true">
@@ -46,20 +45,10 @@
         (<include refid="vals" />)
     </insert>
 
-    <sql id="frozen">
-        <if test="frozen != null">AND `frozen`=#{frozen}</if>
-        <if test="frozen == null">AND (`frozen`!=1 OR `frozen` IS NULL)</if>
-    </sql>
-
-    <sql id="singleFrozen">
-        AND (`frozen`!=1 OR `frozen` IS NULL)
-    </sql>
-
     <select id="findById" parameterType="long" resultMap="DoctorUserDataPermissionMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE id = #{id}
-        <include refid="singleFrozen"/>
     </select>
 
     <select id="findByUserIds" parameterType="long" resultMap="DoctorUserDataPermissionMap" >
@@ -69,23 +58,12 @@
         <foreach collection="list" open="(" separator="," close=")" item="id">
             #{id}
         </foreach>
-        <include refid="singleFrozen"/>
     </select>
 
     <select id="findByUserId" parameterType="long" resultMap="DoctorUserDataPermissionMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE user_id = #{userId}
-        <include refid="singleFrozen"/>
-    </select>
-
-    <select id="findFrozenByUserId" parameterType="long" resultMap="DoctorUserDataPermissionMap">
-        SELECT
-        <include refid="cols_all"/>
-        FROM
-        <include refid="tb"/>
-        WHERE user_id = #{userId}
-        and frozen = 1
     </select>
 
     <update id="update" parameterType="DoctorUserDataPermission">
@@ -102,7 +80,6 @@
             <if test="creatorName != null">creator_name = #{creatorName},</if>
             <if test="updatorId != null">updator_id = #{updatorId},</if>
             <if test="updatorName != null">updator_name = #{updatorName},</if>
-            <if test="frozen != null">frozen = #{frozen},</if>
             updated_at=now()
         </set>
         WHERE id = #{id}
@@ -117,23 +94,17 @@
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE find_in_set(#{orgId}, org_ids)
-        <include refid="singleFrozen"/>
     </select>
 
     <select id="findByFarmId" parameterType="long" resultMap="DoctorUserDataPermissionMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE find_in_set(#{farmId}, farm_ids)
-        <include refid="singleFrozen"/>
     </select>
 
     <select id="findAll" resultMap="DoctorUserDataPermissionMap">
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        <where>
-            1=1
-            <include refid="singleFrozen"/>
-        </where>
     </select>
 
     <delete id="deletesByUserIds" parameterType="long" >
@@ -153,7 +124,6 @@
         <foreach collection="userIds" item="userId" open="(" separator="," close=")">
             #{userId}
         </foreach>
-        <include refid="frozen"/>
     </select>
 
     <update id="freezeByUser" parameterType="long" >

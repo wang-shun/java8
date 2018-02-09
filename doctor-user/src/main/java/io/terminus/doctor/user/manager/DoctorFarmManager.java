@@ -176,15 +176,6 @@ public class DoctorFarmManager {
             }
         }
 
-        //解冻用户权限
-        DoctorUserDataPermission permission = doctorUserUnfreezeDto.getPermission();
-        if (isNull(permission.getId())) {
-            doctorUserDataPermissionDao.create(permission);
-        } else {
-            permission.setFrozen(IsOrNot.NO.getKey());
-            doctorUserDataPermissionDao.update(permission);
-        }
-
         //更新用户个人
         UserProfile userProfile = doctorUserUnfreezeDto.getUserProfile();
         if (isNull(userProfile.getId())) {
