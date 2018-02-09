@@ -84,6 +84,6 @@ public class DoctorFarmManagerTest extends BaseManagerTest{
 
     @Test
     public void freezeFarmTest() {
-        doctorFarmManager.freezeFarm(855L);
+        doctorFarmManager.freezeFarm(1L);
     }
 }

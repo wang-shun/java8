@@ -214,8 +214,8 @@ public class DoctorFarmManager {
                 extraMap = new HashMap<>();
             }
             extraMap.put("frozen", IsOrNot.YES.getKey().toString());
-            user.setExtra(user.getExtra());
-            userDaoExt.update(user);
+            user.setExtra(extraMap);
+            userDaoExt.updateAll(user);
         }
     }
 }
