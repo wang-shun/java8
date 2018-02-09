@@ -44,7 +44,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Base64Utils;
-import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 import java.net.InetAddress;
@@ -550,23 +549,13 @@ public class DoctorCommonSessionBean {
      * @return 注册成功之后的用户
      */
     private User registerByMobile(String mobile, String password, String userName) {
-        RespHelper.or500(doctorUserReadService.checkExist(mobile, userName));
         Response<User> result = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
-//        // 检测手机号是否已存在
-//        if(result.isSuccess() && result.getResult() != null){
-//            throw new JsonResponseException(500, "user.register.mobile.has.been.used");
-//        }
-
-        // 设置用户信息
-        User user;
-        if (result.isSuccess() && notNull(result.getResult())) {
-            user = result.getResult();
-            if (StringUtils.hasText(password)) {  //对密码加盐加密
-                password = EncryptUtil.encrypt(password);
-            }
-        } else {
-            user = new User();
+        // 检测手机号是否已存在
+        if(result.isSuccess() && result.getResult() != null){
+            throw new JsonResponseException(500, "user.register.mobile.has.been.used");
         }
+        // 设置用户信息
+        User user = new User();
         user.setMobile(mobile);
         user.setPassword(password);
         user.setName(userName);
@@ -579,21 +568,11 @@ public class DoctorCommonSessionBean {
         // 注册用户默认成为猪场管理员
         user.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));
 
-        Long userId;
-        if (notNull(user.getId())) {
-            Response<Long> resp = userWriteService.create(user);
-            if (!resp.isSuccess()) {
-                throw new JsonResponseException(500, resp.getError());
-            }
-            userId = resp.getResult();
-        } else {
-            Response<Boolean> resp = userWriteService.update(user);
-            if (!resp.isSuccess()) {
-                throw new JsonResponseException(500, resp.getError());
-            }
-            userId = user.getId();
+        Response<Long> resp = userWriteService.create(user);
+        if (!resp.isSuccess()) {
+            throw new JsonResponseException(500, resp.getError());
         }
-        user.setId(userId);
+        user.setId(resp.getResult());
         return user;
     }
 
