@@ -200,10 +200,7 @@ public class DoctorFarmManager {
             userDaoExt.update(user);
         }
 
-        PrimaryUser primaryUser = primaryUserDao.findByUserId(userId);
-        if (notNull(primaryUser)) {
-
-        }
+        // TODO: 18/2/9 暂时没有解冻操作 
     }
 
     private void freezeUser(User user) {
