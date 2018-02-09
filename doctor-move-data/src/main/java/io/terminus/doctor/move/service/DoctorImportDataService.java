@@ -332,17 +332,7 @@ public class DoctorImportDataService {
                 User subUser = userDaoExt.findByMobile(contact);
                 Long subUserId;
                 if (notNull(subUser)) {
-<<<<<<< 3dd660ee06095cc2541d787a00645ede7664d61b
-<<<<<<< 8d2ff2ecf98e8854f6227d7228b1fdcdc14a46eb
-=======
-                    DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(subUser.getId());
-                    if (notNull(permission)) {
-                        throw new JsonResponseException("用户已关联猪场, 用户手机号:" + subUser.getMobile());
-                    }
->>>>>>> 导入时创建猪舍时添加对重名的判断
 
-=======
->>>>>>> import freeze user
                     subUser.setName(loginName + "@" + farm.getFarmCode());
                     subUser.setMobile(contact);
                     subUser.setPassword(EncryptUtil.encrypt("123456"));
@@ -592,12 +582,7 @@ public class DoctorImportDataService {
                 primaryUser.setStatus(UserStatus.NORMAL.value());
                 primaryUserDao.create(primaryUser);
             }
-<<<<<<< 3dd660ee06095cc2541d787a00645ede7664d61b
-
-        } else {
-=======
         }else{
->>>>>>> import freeze user
             user = new User();
             user.setMobile(mobile);
             user.setPassword("123456");
