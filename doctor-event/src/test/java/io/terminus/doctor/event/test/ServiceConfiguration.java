@@ -313,7 +313,6 @@ public class ServiceConfiguration {
             public Response<List<DoctorDepartmentDto>> findCliqueTree() {
                 return null;
             }
-
             @Override
             public Response<DoctorDepartmentLinerDto> findLinerBy(Long farmId) {
                 return null;

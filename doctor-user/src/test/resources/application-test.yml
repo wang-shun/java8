@@ -1,7 +1,34 @@
+#datasource:
+#  driver-class-name: org.h2.Driver
+#  url: jdbc:h2:mem:test;MODE=MySQL
+
 datasource:
-  driver-class-name: org.h2.Driver
-  url: jdbc:h2:mem:test;MODE=MySQL
+  url: jdbc:mysql://127.0.0.1:3306/pig_doctor1?useUnicode=true&characterEncoding=UTF8
+#  url: jdbc:mysql://101.201.44.35:3306/pig_doctor_v2?useUnicode=true&characterEncoding=UTF8
+  username: root
+  password: anywhere
 
 mybatis:
   mapperLocations:  classpath*:mapper/*Mapper.xml
   typeAliasesPackage: io.terminus.parana.(user|file|article|user.address).model,io.terminus.doctor.user.model
+
+# Dubbo
+rpc.dubbo:
+    registryAddress: 127.0.0.1:2181
+    check: false   # 默认是true, 检查provider
+
+redis:
+  host: 127.0.0.1
+  port: 8888
+
+logging:
+  file: ${user.home}/logs/doctor/user.log
+  level.*: DEBUG
+
+# zookeeper
+# 用户中心的 zk topic，每个子系统保持一致
+user.center.topic: user-center-topic
+zookeeper:
+  host: 101.201.44.35
+  port: 2181
+  cacheTopic: pig.user.topic

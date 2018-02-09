@@ -2111,3 +2111,9 @@ ALTER TABLE `doctor_pig_events` ADD COLUMN `origin` bigint(20) DEFAULT NULL COMM
 ALTER TABLE `doctor_group_events` ADD COLUMN `origin` bigint(20) DEFAULT NULL COMMENT '原值' after `remark`;
 ALTER TABLE `doctor_pigs` ADD COLUMN `origin` bigint(20) DEFAULT NULL COMMENT '原值' after `pig_code`;
 
+
+-- 添加冻结标志字段
+ALTER TABLE `doctor_farms` ADD COLUMN `frozen` tinyint(4) DEFAULT NULL COMMENT '是否已冻结' after `updated_at`;
+ALTER TABLE `doctor_user_primarys` ADD COLUMN `frozen` tinyint(4) DEFAULT NULL COMMENT '是否已冻结' after `updated_at`;
+ALTER TABLE `doctor_user_subs` ADD COLUMN `frozen` tinyint(4) DEFAULT NULL COMMENT '是否已冻结' after `updated_at`;
+

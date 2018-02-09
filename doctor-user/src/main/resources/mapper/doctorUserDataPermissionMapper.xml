@@ -19,7 +19,6 @@
         <result column="updator_name" property="updatorName"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
-        
     </resultMap>
 
     <sql id="tb">
@@ -126,4 +125,11 @@
             #{userId}
         </foreach>
     </select>
+
+    <update id="freezeByUser" parameterType="long" >
+        UPDATE
+        <include refid="tb"/>
+        set frozen = 1
+        where user_id = #{userId}
+    </update>
 </mapper>

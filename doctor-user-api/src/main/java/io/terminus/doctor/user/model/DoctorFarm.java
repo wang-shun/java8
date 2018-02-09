@@ -89,4 +89,10 @@ public class DoctorFarm implements Serializable {
      * 修改时间
      */
     private Date updatedAt;
+
+    /**
+     * 是否被冻结
+     * @see io.terminus.doctor.common.enums.IsOrNot
+     */
+    private Integer frozen;
 }

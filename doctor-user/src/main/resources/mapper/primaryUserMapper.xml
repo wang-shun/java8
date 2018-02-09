@@ -17,6 +17,7 @@
         <result column="extra_json" property="extraJson"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
+        <result column="frozen" property="frozen"/>
     </resultMap>
 
     <sql id="tb">
@@ -29,17 +30,26 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        user_id, `user_name`, real_name, rel_farm_id, status, extra_json, created_at, updated_at
+        user_id, `user_name`, real_name, rel_farm_id, status, extra_json, created_at, updated_at, frozen
     </sql>
 
     <sql id="vals">
-        #{userId}, #{userName}, #{realName}, #{relFarmId}, #{status}, #{extraJson}, now(), now()
+        #{userId}, #{userName}, #{realName}, #{relFarmId}, #{status}, #{extraJson}, now(), now(), frozen
     </sql>
 
     <sql id="criteria">
         <if test="userId != null">AND user_id = #{userId}</if>
         <if test="relFarmId != null">AND rel_farm_id = #{relFarmId}</if>
         <if test="status != null">AND status = #{status}</if>
+    </sql>
+
+    <sql id="frozen">
+        <if test="frozen != null">AND `frozen`=#{frozen}</if>
+        <if test="frozen == null">AND (`frozen`!=1 OR `frozen` IS NULL)</if>
+    </sql>
+
+    <sql id="singleFrozen">
+        AND (`frozen`!=1 OR `frozen` IS NULL)
     </sql>
 
     <insert id="create" parameterType="PrimaryUser" keyProperty="id" useGeneratedKeys="true">
@@ -60,6 +70,7 @@
         <if test="relFarmId != null">rel_farm_id = #{relFarmId},</if>
         <if test="status != null">status = #{status},</if>
         <if test="extraJson != null">extra_json = #{extraJson},</if>
+        <if test="frozen != null">frozen = #{frozen},</if>
         updated_at = now()
         WHERE id = #{id}
     </update>
@@ -70,6 +81,15 @@
         FROM
         <include refid="tb"/>
         WHERE id = #{id}
+        <include refid="singleFrozen"/>
+    </select>
+
+    <select id="findIncludeFrozenByUserId" parameterType="long" resultMap="PrimaryUserMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE user_id = #{userId}
     </select>
 
     <select id="findByIds" parameterType="list" resultMap="PrimaryUserMap">
@@ -78,9 +98,11 @@
         FROM
         <include refid="tb"/>
         WHERE
+        id IN
         <foreach collection="list" open="(" separator="," close=")" item="id">
             #{id}
         </foreach>
+        <include refid="singleFrozen"/>
     </select>
 
     <select id="count" parameterType="map" resultType="long">
@@ -89,6 +111,7 @@
         <include refid="tb"/>
         <where>
             <include refid="criteria"/>
+            <include refid="frozen"/>
         </where>
     </select>
 
@@ -99,6 +122,7 @@
         <include refid="tb"/>
         <where>
             <include refid="criteria"/>
+            <include refid="frozen"/>
         </where>
         LIMIT #{offset}, #{limit}
     </select>
@@ -109,6 +133,7 @@
         FROM
         <include refid="tb"/>
         WHERE `user_id` = #{userId}
+        <include refid="singleFrozen"/>
     </select>
 
     <select id="list" parameterType="map" resultMap="PrimaryUserMap">
@@ -118,6 +143,7 @@
         <include refid="tb"/>
         <where>
             <include refid="criteria"/>
+            <include refid="frozen"/>
         </where>
     </select>
 
@@ -128,6 +154,7 @@
         <include refid="tb"/>
         <where>
             rel_farm_id = #{farmId}
+            <include refid="singleFrozen"/>
         </where>
     </select>
 
@@ -139,6 +166,7 @@
         <where>
             rel_farm_id = #{farmId}
             AND status = #{status}
+            <include refid="frozen"/>
         </where>
     </select>
 
@@ -155,5 +183,13 @@
         FROM
         <include refid="tb"/>
         WHERE rel_farm_id is not null
+        <include refid="singleFrozen"/>
     </select>
+
+    <update id="freeze" parameterType="long" >
+        UPDATE
+        <include refid="tb"/>
+        set frozen = 1
+        where id = #{id}
+    </update>
 </mapper>
