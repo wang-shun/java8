@@ -242,9 +242,9 @@ public class FarmController {
 
         DoctorFarm doctorFarm = RespHelper.or500(doctorFarmReadService.findByNumber(number));
         if (isNull(doctorFarm)) {
-            return Boolean.TRUE;
+            return Boolean.FALSE;
         }
-        return Boolean.FALSE;
+        return Boolean.TRUE;
     }
 
     /**
