@@ -146,6 +146,13 @@ public class OPDoctorUsers {
             //当前用户是子账号, 找他的主账号
             primaryUserId = OPRespHelper.orOPEx(primaryUserReadService.findSubByUserId(baseUser.getId())).getParentUserId();
         }else{
+            IotUser iotUser = OPRespHelper.orOPEx(iotUserRoleReadService.findIotUserByUserId(baseUser.getId()));
+            if (notNull(iotUser)) {
+                DoctorServiceReviewDto dto = new DoctorServiceReviewDto();
+                dto.setPigTrade(getPigIot(baseUser));
+                return dto;
+            }
+
             throw new OPClientException("authorize.fail");
         }
         DoctorServiceReviewDto dto = new DoctorServiceReviewDto();
