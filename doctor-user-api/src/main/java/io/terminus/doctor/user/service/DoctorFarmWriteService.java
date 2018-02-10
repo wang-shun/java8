@@ -41,4 +41,12 @@ public interface DoctorFarmWriteService {
      * @return
      */
     Response<Boolean> unfreezeUser(Long userId);
+
+    /**
+     * 编辑猪场名称
+     * @param farmId 猪场id
+     * @param newName 猪场新名称
+     * @return
+     */
+    Response<Boolean> updateFarmOptions(Long farmId, String newName, String number, Integer isWeek, Integer isIntelligent);
 }

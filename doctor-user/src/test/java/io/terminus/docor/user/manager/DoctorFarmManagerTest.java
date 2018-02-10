@@ -2,12 +2,14 @@ package io.terminus.docor.user.manager;
 
 import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.dao.UserDaoExt;
 import io.terminus.doctor.user.dto.DoctorUserUnfreezeDto;
 import io.terminus.doctor.user.manager.DoctorFarmManager;
+import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
 import org.junit.Assert;
 import org.junit.Test;
@@ -30,6 +32,8 @@ public class DoctorFarmManagerTest extends BaseManagerTest{
     private UserProfileDao userProfileDao;
     @Autowired
     private DoctorUserDataPermissionDao doctorUserDataPermissionDao;
+    @Autowired
+    private DoctorFarmDao doctorFarmDao;
 
     @Test
     public void freezeTest() {
@@ -85,5 +89,22 @@ public class DoctorFarmManagerTest extends BaseManagerTest{
     @Test
     public void freezeFarmTest() {
         doctorFarmManager.freezeFarm(1L);
+    }
+
+    @Test
+    public void updateFarmNameTest() {
+        doctorFarmManager.updateFarmName(1L, "小");
+    }
+
+    @Test
+    public void updateFarmOptionsTest() {
+        doctorFarmManager.updateFarmOptions(1L, "小", "11", 1, 1);
+        DoctorFarm doctorFarm = doctorFarmDao.findById(1L);
+
+        Assert.assertEquals(doctorFarm.getName(), "小");
+        Assert.assertEquals(doctorFarm.getNumber(), "11");
+        Assert.assertEquals(doctorFarm.getIsWeak().toString(), "1");
+        Assert.assertEquals(doctorFarm.getIsIntelligent().toString(), "1");
+
     }
 }

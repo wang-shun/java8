@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  ~ Copyright (c) 2016. 杭州端点网络科技有限公司.  All rights reserved.
+  -->
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="UpdateFarm">
+    <update id="updateFarmName" parameterType="map" >
+        UPDATE doctor_farms set `name` = #{name} where id = #{farmId}
+    </update>
+
+    <update id="updateBarnFarmName" parameterType="map" >
+        UPDATE doctor_barns set `farm_name` = #{name} where farm_id = #{farmId}
+    </update>
+
+    <update id="updatePigFarmName" parameterType="map" >
+        UPDATE doctor_pigs set `farm_name` = #{name} where farm_id = #{farmId}
+    </update>
+
+    <update id="updateGroupFarmName" parameterType="map" >
+        UPDATE doctor_groups set `farm_name` = #{name} where farm_id = #{farmId}
+    </update>
+
+    <update id="updateWareHouseFarmName" parameterType="map" >
+        UPDATE doctor_ware_houses set `farm_name` = #{name} where farm_id = #{farmId}
+    </update>
+
+    <update id="updateFeedFormulaFarmName" parameterType="map" >
+        UPDATE doctor_feed_formulas set `farm_name` = #{name} where farm_id = #{farmId}
+    </update>
+</mapper>

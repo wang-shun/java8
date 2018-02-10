@@ -6,6 +6,7 @@ import io.terminus.common.utils.Joiners;
 import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
+import io.terminus.doctor.user.dao.DoctorUpdateFarmDao;
 import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
@@ -53,13 +54,14 @@ public class DoctorFarmManager {
     private final PrimaryUserDao primaryUserDao;
     private final SubDao subDao;
     private final UserProfileDao userProfileDao;
+    private final DoctorUpdateFarmDao doctorUpdateFarmDao;
 
     @Autowired
     public DoctorFarmManager(DoctorFarmDao doctorFarmDao,
                              DoctorUserDataPermissionDao doctorUserDataPermissionDao,
                              DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService,
                              AddressReadService addressReadService,
-                             DoctorOrgReadService doctorOrgReadService, UserDaoExt userDaoExt, PrimaryUserDao primaryUserDao, SubDao subDao, UserProfileDao userProfileDao){
+                             DoctorOrgReadService doctorOrgReadService, UserDaoExt userDaoExt, PrimaryUserDao primaryUserDao, SubDao subDao, UserProfileDao userProfileDao, DoctorUpdateFarmDao doctorUpdateFarmDao){
         this.doctorFarmDao = doctorFarmDao;
         this.doctorUserDataPermissionDao = doctorUserDataPermissionDao;
         this.doctorUserDataPermissionWriteService = doctorUserDataPermissionWriteService;
@@ -69,6 +71,7 @@ public class DoctorFarmManager {
         this.primaryUserDao = primaryUserDao;
         this.subDao = subDao;
         this.userProfileDao = userProfileDao;
+        this.doctorUpdateFarmDao = doctorUpdateFarmDao;
     }
 
     /**
@@ -205,6 +208,64 @@ public class DoctorFarmManager {
         }
 
         // TODO: 18/2/9 暂时没有解冻操作 
+    }
+
+    @Transactional
+    public void updateFarmOptions(Long farmId, String newName, String number, Integer isWeek, Integer isIntelligent) {
+        DoctorFarm doctorFarm = doctorFarmDao.findById(farmId);
+        if (!Objects.equals(newName, doctorFarm.getName())) {
+            updateFarmName(farmId, newName);
+        }
+
+        if (!Objects.equals(isWeek, doctorFarm.getIsWeak())) {
+            switchIsWeak(farmId);
+        }
+
+        if (!Objects.equals(isIntelligent, doctorFarm.getIsIntelligent())) {
+            switchIsIntelligent(farmId);
+        }
+
+        if (!Objects.equals(number, doctorFarm.getNumber())) {
+            DoctorFarm updateFarm = new DoctorFarm();
+            updateFarm.setId(farmId);
+            updateFarm.setNumber(number);
+            doctorFarmDao.update(updateFarm);
+        }
+    }
+
+    public void updateFarmName(Long farmId, String name) {
+        doctorUpdateFarmDao.updateFarmName(farmId, name);
+        doctorUpdateFarmDao.updateBarnFarmName(farmId, name);
+        doctorUpdateFarmDao.updatePigFarmName(farmId, name);
+        doctorUpdateFarmDao.updateGroupFarmName(farmId, name);
+        doctorUpdateFarmDao.updateWareHouseFarmName(farmId, name);
+        doctorUpdateFarmDao.updateFeedFormulaFarmName(farmId, name);
+    }
+
+
+
+    public Boolean switchIsIntelligent(Long farmId) {
+        DoctorFarm doctorFarm = doctorFarmDao.findById(farmId);
+        DoctorFarm updateFarm = new DoctorFarm();
+        updateFarm.setId(farmId);
+        if (Objects.equals(doctorFarm.getIsIntelligent(), IsOrNot.YES.getKey())) {
+            updateFarm.setIsIntelligent(IsOrNot.NO.getKey());
+        } else {
+            updateFarm.setIsIntelligent(IsOrNot.YES.getKey());
+        }
+        return doctorFarmDao.update(updateFarm);
+    }
+
+    public Boolean switchIsWeak(Long farmId) {
+        DoctorFarm doctorFarm = doctorFarmDao.findById(farmId);
+        DoctorFarm updateFarm = new DoctorFarm();
+        updateFarm.setId(farmId);
+        if (Objects.equals(doctorFarm.getIsWeak(), IsOrNot.YES.getKey())) {
+            updateFarm.setIsWeak(IsOrNot.NO.getKey());
+        } else {
+            updateFarm.setIsWeak(IsOrNot.YES.getKey());
+        }
+        return doctorFarmDao.update(updateFarm);
     }
 
     private void freezeUser(User user) {

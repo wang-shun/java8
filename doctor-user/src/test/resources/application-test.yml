@@ -29,6 +29,4 @@ logging:
 # 用户中心的 zk topic，每个子系统保持一致
 user.center.topic: user-center-topic
 zookeeper:
-  host: 101.201.44.35
-  port: 2181
   cacheTopic: pig.user.topic
