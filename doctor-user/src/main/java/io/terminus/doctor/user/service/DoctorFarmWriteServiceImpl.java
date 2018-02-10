@@ -99,13 +99,13 @@ public class DoctorFarmWriteServiceImpl implements DoctorFarmWriteService{
     }
 
     @Override
-    public Response<Boolean> updateFarmOptions(Long farmId, String newName, String number, Integer isWeek, Integer isIntelligent) {
+    public Response<Boolean> updateFarmOptions(Long farmId, String newName, String number, Integer isWeak, Integer isIntelligent) {
         try {
-            doctorFarmManager.updateFarmOptions(farmId, newName, number, isWeek, isIntelligent);
+            doctorFarmManager.updateFarmOptions(farmId, newName, number, isWeak, isIntelligent);
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
-            log.error("update.farm.name.failed, farmId:{}, newName:{}, numberL{}, isWeak:{}, isIntelligent:{}, cause:{}",
-                    farmId, newName, number, isWeek, isIntelligent, Throwables.getStackTraceAsString(e));
+            log.error("update.farm.name.failed, farmId:{}, newName:{}, number{}, isWeak:{}, isIntelligent:{}, cause:{}",
+                    farmId, newName, number, isWeak, isIntelligent, Throwables.getStackTraceAsString(e));
             return Response.fail("update.farm.name.failed");
         }
     }
