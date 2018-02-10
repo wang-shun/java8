@@ -71,4 +71,11 @@ public interface DoctorFarmReadService {
      * @return
      */
     Response<Paging<DoctorFarm>> pagingFarm(FarmCriteria farmCriteria, Integer pageNo, Integer pageSize);
+
+    /**
+     * 根据猪场编号查询猪场
+     * @param number 猪场编号
+     * @return
+     */
+    Response<DoctorFarm> findByNumber(String number);
 }

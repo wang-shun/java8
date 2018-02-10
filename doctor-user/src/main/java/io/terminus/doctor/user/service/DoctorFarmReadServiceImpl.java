@@ -152,4 +152,14 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
             return Response.fail("paging.farm.failed");
         }
     }
+
+    @Override
+    public Response<DoctorFarm> findByNumber(String number) {
+        try {
+            return Response.ok(doctorFarmDao.findByNumber(number));
+        } catch (Exception e) {
+            log.error("find by number failed, number:{},cause:{}", number, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.by.number.failed");
+        }
+    }
 }

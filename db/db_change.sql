@@ -2117,3 +2117,6 @@ ALTER TABLE `doctor_farms` ADD COLUMN `frozen` tinyint(4) DEFAULT NULL COMMENT '
 ALTER TABLE `doctor_user_primarys` ADD COLUMN `frozen` tinyint(4) DEFAULT NULL COMMENT '是否已冻结' after `updated_at`;
 ALTER TABLE `doctor_user_subs` ADD COLUMN `frozen` tinyint(4) DEFAULT NULL COMMENT '是否已冻结' after `updated_at`;
 
+ALTER TABLE `doctor_farms` ADD COLUMN `number` VARCHAR (64) DEFAULT NULL COMMENT '猪场编号' after `farm_code`;
+
+
