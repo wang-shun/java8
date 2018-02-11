@@ -30,9 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -154,12 +152,6 @@ public class DoctorUserManager {
 
     @Transactional
     public Boolean update(User user) {
-        Map<String, String> extraMap = user.getExtra();
-        if (isNull(extraMap)) {
-            extraMap = new HashMap<>();
-        }
-        extraMap.put("frozen", IsOrNot.NO.getKey().toString());
-        user.setExtra(user.getExtra());
         userDao.updateAll(user);
 
         if (Objects.equals(user.getType(), UserType.FARM_SUB.value())){
