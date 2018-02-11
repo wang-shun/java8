@@ -2,6 +2,7 @@ package io.terminus.doctor.user.manager;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.terminus.common.utils.Joiners;
 import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.common.enums.UserType;
@@ -211,7 +212,7 @@ public class DoctorFarmManager {
         if (notNull(user)) {
             Map<String, String> extraMap = user.getExtra();
             if (isNull(extraMap)) {
-                extraMap = new HashMap<>();
+                extraMap = Maps.newHashMap();
             }
             extraMap.put("frozen", IsOrNot.YES.getKey().toString());
             user.setExtra(extraMap);
