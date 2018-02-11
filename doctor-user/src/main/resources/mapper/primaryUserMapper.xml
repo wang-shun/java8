@@ -192,4 +192,11 @@
         set frozen = 1
         where id = #{id}
     </update>
+
+    <update id="freezeByUser" parameterType="long" >
+        UPDATE
+        <include refid="tb"/>
+        set frozen = 1
+        where user_id = #{userId}
+    </update>
 </mapper>
