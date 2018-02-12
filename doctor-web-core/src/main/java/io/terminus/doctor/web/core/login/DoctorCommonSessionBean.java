@@ -14,6 +14,7 @@ import io.terminus.boot.session.properties.SessionProperties;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Splitters;
+import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
@@ -586,6 +587,14 @@ public class DoctorCommonSessionBean {
         } else {
             loginType = LoginType.NAME;
         }
+        Response<User> loginUser = doctorUserReadService.findBy(name, loginType);
+        if (loginUser.isSuccess() && notNull(loginUser.getResult())
+                && notNull(loginUser.getResult().getExtra())
+                && loginUser.getResult().getExtra().containsKey("frozen")
+                && loginUser.getResult().getExtra().get("frozen").equals(IsOrNot.YES.getKey().toString())) {
+            throw new JsonResponseException(500, "user.is.frozen");
+        }
+
         Response<User> result = doctorUserReadService.login(name, password, loginType);
         if (!result.isSuccess()) {
             plusErrorCount(sessionId);
