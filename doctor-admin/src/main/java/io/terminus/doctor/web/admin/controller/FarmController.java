@@ -48,6 +48,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
 
 /**
@@ -214,6 +215,36 @@ public class FarmController {
     @RequestMapping(value = "/freeze/farm")
     public Boolean freezeFarm(@RequestParam @ApiParam("猪场id") Long farmId) {
         return RespHelper.or500(doctorFarmWriteService.freezeFarm(farmId));
+    }
+
+
+    @ApiOperation("设置猪场配置")
+    @RequestMapping(value = "/update/{farmId}/options", method = RequestMethod.PUT)
+    public Boolean updateFarmOptions(@PathVariable @ApiParam("猪场id") Long farmId,
+                                  @RequestParam @ApiParam("猪场新名称") String newName,
+                                  @RequestParam @ApiParam("猪场编号") String number,
+                                  @RequestParam @ApiParam("是否弱仔") Integer isWeak,
+                                  @RequestParam @ApiParam("是否智能猪场") Integer isIntelligent) {
+        DoctorFarm doctorFarm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+        if (isNull(doctorFarm)) {
+            throw  new JsonResponseException("farm.not.found");
+        }
+
+        return RespHelper.or500(doctorFarmWriteService.updateFarmOptions(farmId, newName, number, isWeak, isIntelligent));
+    }
+
+    @ApiOperation("校验猪场编号是否已存在")
+    @RequestMapping(value = "/check/exist/number", method = RequestMethod.GET)
+    public Boolean checkExistNumber(@RequestParam @ApiParam("猪场编号") String number) {
+        if (Strings.isNullOrEmpty(number)) {
+            throw new JsonResponseException("farm.number.is.illegal");
+        }
+
+        DoctorFarm doctorFarm = RespHelper.or500(doctorFarmReadService.findByNumber(number));
+        if (isNull(doctorFarm)) {
+            return Boolean.FALSE;
+        }
+        return Boolean.TRUE;
     }
 
     /**

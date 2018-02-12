@@ -3,7 +3,6 @@ package io.terminus.doctor.user.service;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.manager.DoctorFarmManager;
 import io.terminus.doctor.user.model.DoctorFarm;
@@ -12,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Desc:
@@ -61,15 +59,7 @@ public class DoctorFarmWriteServiceImpl implements DoctorFarmWriteService{
     @Override
     public Response<Boolean> switchIsIntelligent(Long farmId) {
         try {
-            DoctorFarm doctorFarm = doctorFarmDao.findById(farmId);
-            DoctorFarm updateFarm = new DoctorFarm();
-            updateFarm.setId(farmId);
-            if (Objects.equals(doctorFarm.getIsIntelligent(), IsOrNot.YES.getKey())) {
-                updateFarm.setIsIntelligent(IsOrNot.NO.getKey());
-            } else {
-                updateFarm.setIsIntelligent(IsOrNot.YES.getKey());
-            }
-            return Response.ok(doctorFarmDao.update(updateFarm));
+            return Response.ok(doctorFarmManager.switchIsIntelligent(farmId));
         } catch (Exception e) {
             log.error("switch.is.intelligent.failed,farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("switch.is.intelligent.failed");
@@ -79,15 +69,7 @@ public class DoctorFarmWriteServiceImpl implements DoctorFarmWriteService{
     @Override
     public Response<Boolean> switchIsWeak(Long farmId) {
         try {
-            DoctorFarm doctorFarm = doctorFarmDao.findById(farmId);
-            DoctorFarm updateFarm = new DoctorFarm();
-            updateFarm.setId(farmId);
-            if (Objects.equals(doctorFarm.getIsWeak(), IsOrNot.YES.getKey())) {
-                updateFarm.setIsWeak(IsOrNot.NO.getKey());
-            } else {
-                updateFarm.setIsWeak(IsOrNot.YES.getKey());
-            }
-            return Response.ok(doctorFarmDao.update(updateFarm));
+            return Response.ok(doctorFarmManager.switchIsWeak(farmId));
         } catch (Exception e) {
             log.error("switch.is.weak.failed,farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("switch.is.weak.failed");
@@ -113,6 +95,18 @@ public class DoctorFarmWriteServiceImpl implements DoctorFarmWriteService{
         } catch (Exception e) {
             log.error("unfreeze user failed, userId:{}, userType:{}, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("unfreeze user failed");
+        }
+    }
+
+    @Override
+    public Response<Boolean> updateFarmOptions(Long farmId, String newName, String number, Integer isWeak, Integer isIntelligent) {
+        try {
+            doctorFarmManager.updateFarmOptions(farmId, newName, number, isWeak, isIntelligent);
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("update.farm.name.failed, farmId:{}, newName:{}, number{}, isWeak:{}, isIntelligent:{}, cause:{}",
+                    farmId, newName, number, isWeak, isIntelligent, Throwables.getStackTraceAsString(e));
+            return Response.fail("update.farm.name.failed");
         }
     }
 }

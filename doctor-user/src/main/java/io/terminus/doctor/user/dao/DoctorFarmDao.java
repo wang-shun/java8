@@ -53,4 +53,9 @@ public class DoctorFarmDao extends MyBatisDao<DoctorFarm> {
     public Boolean freeze(Long id) {
         return getSqlSession().update(sqlId("freeze"), id) == 1;
     }
+
+
+    public DoctorFarm findByNumber(String number) {
+        return getSqlSession().selectOne(sqlId("findByNumber"), number);
+    }
 }
