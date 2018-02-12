@@ -214,19 +214,19 @@ public class DoctorFarmManager {
     @Transactional
     public void updateFarmOptions(Long farmId, String newName, String number, Integer isWeak, Integer isIntelligent) {
         DoctorFarm doctorFarm = doctorFarmDao.findById(farmId);
-        if (!Objects.equals(newName, doctorFarm.getName())) {
+        if (notNull(newName) && !Objects.equals(newName, doctorFarm.getName())) {
             updateFarmName(farmId, newName);
         }
 
-        if (!Objects.equals(isWeak, doctorFarm.getIsWeak())) {
+        if (notNull(isWeak) && !Objects.equals(isWeak, doctorFarm.getIsWeak())) {
             switchIsWeak(farmId);
         }
 
-        if (!Objects.equals(isIntelligent, doctorFarm.getIsIntelligent())) {
+        if (notNull(isIntelligent) && !Objects.equals(isIntelligent, doctorFarm.getIsIntelligent())) {
             switchIsIntelligent(farmId);
         }
 
-        if (!Objects.equals(number, doctorFarm.getNumber())) {
+        if (notNull(number) && !Objects.equals(number, doctorFarm.getNumber())) {
             DoctorFarm updateFarm = new DoctorFarm();
             updateFarm.setId(farmId);
             updateFarm.setNumber(number);
