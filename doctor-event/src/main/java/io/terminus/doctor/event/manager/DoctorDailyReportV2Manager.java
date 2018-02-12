@@ -191,6 +191,7 @@ public class DoctorDailyReportV2Manager {
      */
     public Map<Long, Date> generateYesterdayAndToday(List<Long> farmIds, Date yesterday) {
         Date today = Dates.startOfDay(new Date());
+        Date oneYearDate = DateTime.now().minusYears(1).toDate();
         Map<Long, Date> longDateMap = Maps.newHashMap();
         Map<Long, Date> farmToDate = queryFarmEarlyEventAtImpl(DateUtil.toDateString(yesterday));
         farmIds.parallelStream().forEach(farmId -> {
@@ -201,6 +202,9 @@ public class DoctorDailyReportV2Manager {
                 Date temp = yesterday;
                 if (farmToDate.containsKey(farmId)) {
                     temp = farmToDate.get(farmId);
+                    if (temp.before(oneYearDate)) {
+                        temp = oneYearDate;
+                    }
                 }
                 longDateMap.put(farmId, temp);
                 List<Date> list = DateUtil.getDates(temp, today);
