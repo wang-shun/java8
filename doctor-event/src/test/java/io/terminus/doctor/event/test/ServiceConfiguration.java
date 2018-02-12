@@ -362,6 +362,11 @@ public class ServiceConfiguration {
             public Response<Paging<DoctorFarm>> pagingFarm(FarmCriteria farmCriteria, Integer pageNo, Integer pageSize) {
                 return null;
             }
+
+            @Override
+            public Response<DoctorFarm> findByNumber(String number) {
+                return null;
+            }
         };
     }
 
