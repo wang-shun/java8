@@ -221,10 +221,10 @@ public class FarmController {
     @ApiOperation("设置猪场配置")
     @RequestMapping(value = "/update/{farmId}/options", method = RequestMethod.PUT)
     public Boolean updateFarmOptions(@PathVariable @ApiParam("猪场id") Long farmId,
-                                  @RequestParam @ApiParam("猪场新名称") String newName,
-                                  @RequestParam @ApiParam("猪场编号") String number,
-                                  @RequestParam @ApiParam("是否弱仔") Integer isWeak,
-                                  @RequestParam @ApiParam("是否智能猪场") Integer isIntelligent) {
+                                  @RequestParam(required = false) @ApiParam("猪场新名称") String newName,
+                                  @RequestParam(required = false) @ApiParam("猪场编号") String number,
+                                  @RequestParam(required = false) @ApiParam("是否弱仔") Integer isWeak,
+                                  @RequestParam(required = false) @ApiParam("是否智能猪场") Integer isIntelligent) {
         DoctorFarm doctorFarm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
         if (isNull(doctorFarm)) {
             throw  new JsonResponseException("farm.not.found");
