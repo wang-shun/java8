@@ -35,6 +35,10 @@ public class DoctorModifyPigFosterEventHandler extends DoctorAbstractModifyPigEv
         expectTrue(Objects.equals(fostersDto.getFostersCount(), oldPigEvent.getQuantity())
                         || isNull(doctorPigEventDao.getWeanEventByParity(oldPigEvent.getPigId(), oldPigEvent.getParity()))
                 , "current.parity.has.wean");
+
+        //被拼窝事件与拼窝事件发生在不同猪舍,不能编辑
+        DoctorPigEvent fosterByEvent = doctorPigEventDao.findByRelPigEventId(oldPigEvent.getId());
+        expectTrue(Objects.equals(oldPigEvent.getBarnId(), fosterByEvent.getBarnId()), "modify.not.same.barn");
     }
 
     @Override
