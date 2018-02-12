@@ -277,6 +277,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         return sqlSession.selectList(sqlId("findByPigId"), pigId);
     }
 
+
     /**
      * 事件列表(修复断奶事件暂时)
      *
@@ -682,7 +683,8 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 查询导致猪到达当前的状态事件的日期
-     * @param pigId 猪id
+     *
+     * @param pigId  猪id
      * @param status 猪状态
      * @return 事件日期
      */
@@ -690,6 +692,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         return getSqlSession().selectOne(sqlId("findEventAtLeadToStatus"),
                 ImmutableMap.of("pigId", pigId, "status", status));
     }
+
     /**
      * 修复窝号临时创建请勿使用
      *
@@ -717,6 +720,26 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
 
     /**
+     * 获取需要参与计算NPD的事件
+     * 过滤公猪事件
+     * 过滤母猪事件中，防疫，疾病，体况，拼窝，被拼窝，转舍，仔猪变动类型的事件
+     * 只查询farmId，pigId，type，preCheckResult，eventAt字段
+     *
+     * @param farmId
+     * @param start
+     * @param end
+     * @return
+     */
+    public List<DoctorPigEvent> findForNPD(Long farmId, Date start, Date end) {
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("beginDate", start);
+        params.put("endDate", end);
+        params.put("farmId", farmId);
+        return sqlSession.selectList(sqlId("findForNPD"), params);
+    }
+
+    /**
      * 查询在指定时间段内有事件发生的猪
      *
      * @return
@@ -732,7 +755,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         return this.sqlSession.selectList(this.sqlId("findPigAt"), params);
     }
 
-    public List<DoctorFarmEarlyEventAtDto> findEarLyAt(){
+    public List<DoctorFarmEarlyEventAtDto> findEarLyAt() {
         return sqlSession.selectList(sqlId("findEarLyAt"));
     }
 }

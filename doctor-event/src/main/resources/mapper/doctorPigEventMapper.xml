@@ -1639,6 +1639,37 @@
     </select>
 
 
+    <select id="findForNPD" parameterType="map" resultMap="DoctorPigEventMap">
+
+        SELECT farm_id,t1.pig_id,type,preg_check_result,event_at,id,t1.current_mating_count
+        FROM <include refid="tb"/> t1
+        JOIN
+        (SELECT pig_id
+        FROM <include refid="tb"/> where
+        farm_id=#{farmId}
+        and kind=1
+        <if test="beginDate !=null">
+            AND <![CDATA[ event_at >= #{beginDate} ]]>
+        </if>
+        <if test="endDate !=null">
+            AND <![CDATA[ event_at <= #{endDate} ]]>
+        </if>
+        GROUP BY pig_id
+        ) t2
+        on t1.pig_id=t2.pig_id where
+        type!=3
+        and type!=4
+        and type!=5
+        and type!=17
+        and type!=18
+        and type!=19
+        and type!=1
+        and type!=10
+        and type!=12
+        and type!=14
+    </select>
+
+
     <select id="findEarLyAt" resultType="io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto">
         select farm_id as farmId, min(event_at) as eventAt
         from <include refid="tb"/>
