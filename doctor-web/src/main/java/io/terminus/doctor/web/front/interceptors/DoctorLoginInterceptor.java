@@ -47,6 +47,9 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
     private AFSessionManager sessionManager;
     @RpcConsumer
     private UserWriteService<User> userWriteService;
+
+    @RpcConsumer
+    private UserReadService userReadService;
     
     @Autowired
     public DoctorLoginInterceptor(final UserReadService<User> userReadService, DoctorUserMaker doctorUserMaker) {
@@ -69,7 +72,8 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
             if (userIdInSession != null) {
 
                 final Long userId = Long.valueOf(userIdInSession.toString());
-                Response<? extends User> result = userCache.getUnchecked(userId);
+
+                Response<? extends User> result = userReadService.findById(userId);
                 if (!result.isSuccess()) {
                     userCache.invalidate(userId);
                     log.warn("failed to find user where id={},error code:{}", userId, result.getError());
