@@ -3,6 +3,7 @@ package io.terminus.doctor.user.dao;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.user.model.DoctorOrg;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,16 +17,17 @@ import java.util.List;
 @Repository
 public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
 
-    public DoctorOrg findByName(String orgName){
+    public DoctorOrg findByName(String orgName) {
         return sqlSession.selectOne(sqlId("findByName"), orgName);
     }
 
-    public List<DoctorOrg> findAll(){
+    public List<DoctorOrg> findAll() {
         return sqlSession.selectList(sqlId("findAll"));
     }
 
     /**
      * 获取父公司下的子公司(直接关联)
+     *
      * @param parentId 父公司id
      * @return 子公司列表
      */
@@ -35,8 +37,9 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
 
     /**
      * 根据公司名字模糊搜索公司
+     *
      * @param fuzzyName 模糊搜索
-     * @param type 公司类型
+     * @param type      公司类型
      * @return 公司列表
      */
     public List<DoctorOrg> findByFuzzyName(String fuzzyName, Integer type) {
@@ -45,7 +48,8 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
 
     /**
      * 绑定部门关系
-     * @param orgIds 子部门id
+     *
+     * @param orgIds   子部门id
      * @param parentId 父id
      * @return 是否成功
      */
@@ -55,6 +59,7 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
 
     /**
      * 解绑部门关系
+     *
      * @param orgIds 子部门id
      * @return 是否成功
      */
@@ -64,6 +69,7 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
 
     /**
      * 查询排除这些id的公司
+     *
      * @param orgIds 排除的id
      * @return 公司类别
      */
@@ -73,10 +79,25 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
 
     /**
      * 获取某种类型的公司
+     *
      * @param type 公司类型
      * @return
      */
     public List<DoctorOrg> findByType(Integer type) {
         return getSqlSession().selectList(sqlId("findByType"), type);
+    }
+
+    /**
+     * 根据手机号查找公司
+     *
+     * @param mobile
+     * @return DoctorOrg
+     */
+    public DoctorOrg findByMobile(String mobile) {
+
+        if (StringUtils.isBlank(mobile))
+            return null;
+
+        return sqlSession.selectOne(sqlId("findByMobile"), mobile);
     }
 }

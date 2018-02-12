@@ -120,6 +120,7 @@ public class Users {
 
     /**
      * 用户
+     *
      * @return
      */
     @RequestMapping("")
@@ -138,10 +139,11 @@ public class Users {
             throw new JsonResponseException("auth.permission.find.fail");
         }
     }
-    @RequestMapping(value = "/getUserById/{id}",method = RequestMethod.GET,produces = MediaType.APPLICATION_JSON_VALUE)
+
+    @RequestMapping(value = "/getUserById/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public UserWithServiceStatus getUserById(@PathVariable(value = "id") Long id) {
-        Response<User> userResponse=doctorUserReadService.findById(id);
-        if (!userResponse.isSuccess()){
+        Response<User> userResponse = doctorUserReadService.findById(id);
+        if (!userResponse.isSuccess()) {
             throw new JsonResponseException(userResponse.getError());
         }
         UserWithServiceStatus uss = BeanMapper.map(userResponse.getResult(), UserWithServiceStatus.class);
@@ -169,6 +171,7 @@ public class Users {
     public Response<DoctorRoleContent> getUserRolesByUserId(@PathVariable Long userId) {
         return doctorUserRoleLoader.hardLoadRoles(userId);
     }
+
     /**
      * 生成sessionId
      */
@@ -180,21 +183,21 @@ public class Users {
     /**
      * 用户注册
      *
-     * @param password   密码
-     * @param mobile     手机号
-     * @param code       手机验证码
+     * @param password 密码
+     * @param mobile   手机号
+     * @param code     手机验证码
      * @return 注册成功之后的用户ID
      */
     @RequestMapping(value = "/register", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Long register(@RequestParam("password") String password,
                          @RequestParam("mobile") String mobile,
-                         @RequestParam("code") String code, HttpServletRequest request){
+                         @RequestParam("code") String code, HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session == null) {
             throw new JsonResponseException(500, "session.expired");
         }
-        Cookie cookie=WebUtil.findCookie(request,"msid");
-        if (cookie==null){
+        Cookie cookie = WebUtil.findCookie(request, "msid");
+        if (cookie == null) {
             throw new JsonResponseException(500, "session.expired");
         }
         Object sessionId = cookie.getValue();
@@ -293,7 +296,7 @@ public class Users {
     /**
      * 发送短信验证码
      *
-     * @param mobile 手机号
+     * @param mobile      手机号
      * @param smsCodeType 短信模板ID
      * @return 短信发送结果
      */
@@ -305,8 +308,8 @@ public class Users {
         if (session == null) {
             return false;
         }
-        Cookie cookie=WebUtil.findCookie(request,"msid");
-        if (cookie==null){
+        Cookie cookie = WebUtil.findCookie(request, "msid");
+        if (cookie == null) {
             return false;
         }
         Object sessionId = cookie.getValue();
@@ -316,9 +319,10 @@ public class Users {
 
     /**
      * 修改密码
-     * @param oldPassword  旧密码
-     * @param newPassword  新密码
-     * @param sessionId    会话session
+     *
+     * @param oldPassword 旧密码
+     * @param newPassword 新密码
+     * @param sessionId   会话session
      * @return 是否成功
      */
     @RequestMapping(value = "/changePassword", method = RequestMethod.POST)
@@ -343,18 +347,18 @@ public class Users {
                                   @RequestParam("code") String code,
                                   @RequestParam("newPassword") String newPassword,
                                   HttpServletRequest request) {
-        Cookie cookie=WebUtil.findCookie(request,"msid");
-        if (cookie==null){
+        Cookie cookie = WebUtil.findCookie(request, "msid");
+        if (cookie == null) {
             throw new JsonResponseException("miss.msid");
         }
         Object sessionId = cookie.getValue();
-        return  doctorCommonSessionBean.forgetPassword(mobile, code, newPassword, String.valueOf(sessionId));
+        return doctorCommonSessionBean.forgetPassword(mobile, code, newPassword, String.valueOf(sessionId));
     }
 
     @RequestMapping(value = "changeMobile", method = RequestMethod.POST)
-    public Boolean changeMobile(@RequestParam("mobile") String mobile){
+    public Boolean changeMobile(@RequestParam("mobile") String mobile) {
         BaseUser baseUser = UserUtil.getCurrentUser();
-        if(baseUser == null){
+        if (baseUser == null) {
             throw new JsonResponseException("user.not.login");
         }
         if (!mobilePattern.getPattern().matcher(mobile).matches()) {
@@ -366,10 +370,14 @@ public class Users {
 
         //更新user
         User user = RespHelper.or500(doctorUserReadService.findById(baseUser.getId()));
-        user.setMobile(mobile);
+
         Map<String, String> extraMap = user.getExtra() == null ? new HashMap<>() : user.getExtra();
         extraMap.put("contact", mobile);
+        extraMap.put("oldMobile", user.getMobile());
         user.setExtra(extraMap);
+
+        user.setMobile(mobile);
+
         return RespHelper.or500(userWriteService.update(user));
     }
 
@@ -404,16 +412,16 @@ public class Users {
     @ResponseBody
     public List<DoctorOrg> orgList() {
         BaseUser baseUser = UserUtil.getCurrentUser();
-        if(baseUser == null){
+        if (baseUser == null) {
             throw new JsonResponseException("user.not.login");
         }
-        Response<DoctorUserDataPermission> dataPermissionResponse=doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
-        if (!dataPermissionResponse.isSuccess()){
+        Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
+        if (!dataPermissionResponse.isSuccess()) {
             throw new JsonResponseException("user.not.permission");
         }
-        List<Long> orgIds=dataPermissionResponse.getResult().getOrgIdsList();
-        Response<List<DoctorOrg>> result=doctorOrgReadService.findOrgByIds(orgIds);
-        if (!result.isSuccess()){
+        List<Long> orgIds = dataPermissionResponse.getResult().getOrgIdsList();
+        Response<List<DoctorOrg>> result = doctorOrgReadService.findOrgByIds(orgIds);
+        if (!result.isSuccess()) {
             throw new JsonResponseException(result.getError());
         }
         return result.getResult();
@@ -424,6 +432,7 @@ public class Users {
         private static final long serialVersionUID = -4515482071656393479L;
         /**
          * 猪场软件服务的审核状态
+         *
          * @see DoctorServiceReview.Status
          */
         private Integer reviewStatusDoctor;

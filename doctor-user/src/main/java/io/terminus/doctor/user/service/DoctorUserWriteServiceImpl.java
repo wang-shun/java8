@@ -65,4 +65,6 @@ public class DoctorUserWriteServiceImpl implements UserWriteService<User> {
             return Response.fail("user.update.fail");
         }
     }
+
+
 }

@@ -8,18 +8,9 @@ import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.UserRoleUtil;
-import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
-import io.terminus.doctor.user.dao.IotUserDao;
-import io.terminus.doctor.user.dao.OperatorDao;
-import io.terminus.doctor.user.dao.PrimaryUserDao;
-import io.terminus.doctor.user.dao.SubDao;
-import io.terminus.doctor.user.dao.UserDaoExt;
+import io.terminus.doctor.user.dao.*;
 import io.terminus.doctor.user.dto.IotUserDto;
-import io.terminus.doctor.user.model.IotUser;
-import io.terminus.doctor.user.model.Operator;
-import io.terminus.doctor.user.model.PrimaryUser;
-import io.terminus.doctor.user.model.Sub;
-import io.terminus.doctor.user.model.SubRole;
+import io.terminus.doctor.user.model.*;
 import io.terminus.doctor.user.service.SubRoleReadService;
 import io.terminus.parana.common.utils.Iters;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
@@ -57,6 +48,8 @@ public class DoctorUserManager {
 
     private final IotUserDao iotUserDao;
 
+    private final DoctorOrgDao orgDao;
+
     private final DoctorUserDataPermissionDao doctorUserDataPermissionDao;
 
     @Autowired
@@ -65,7 +58,7 @@ public class DoctorUserManager {
                              OperatorDao operatorDao,
                              PrimaryUserDao primaryUserDao,
                              SubDao subDao,
-                             SubRoleReadService subRoleReadService, IotUserDao iotUserDao, DoctorUserDataPermissionDao doctorUserDataPermissionDao) {
+                             SubRoleReadService subRoleReadService, IotUserDao iotUserDao, DoctorOrgDao orgDao, DoctorUserDataPermissionDao doctorUserDataPermissionDao) {
         this.userDao = userDao;
         this.userProfileDao = userProfileDao;
         this.operatorDao = operatorDao;
@@ -73,6 +66,7 @@ public class DoctorUserManager {
         this.subDao = subDao;
         this.subRoleReadService = subRoleReadService;
         this.iotUserDao = iotUserDao;
+        this.orgDao = orgDao;
         this.doctorUserDataPermissionDao = doctorUserDataPermissionDao;
     }
 
@@ -102,7 +96,7 @@ public class DoctorUserManager {
             if (user.getRoles().contains(UserRole.SELLER.name())) {
                 // 卖家
             }
-        } else if (Objects.equals(user.getType(), UserType.FARM_ADMIN_PRIMARY.value())){
+        } else if (Objects.equals(user.getType(), UserType.FARM_ADMIN_PRIMARY.value())) {
             //猪场管理员
             PrimaryUser primaryUser = new PrimaryUser();
             primaryUser.setUserId(userId);
@@ -120,7 +114,7 @@ public class DoctorUserManager {
             UserProfile userProfile = new UserProfile();
             userProfile.setUserId(userId);
             userProfileDao.create(userProfile);
-        } else if (Objects.equals(user.getType(), UserType.FARM_SUB.value())){
+        } else if (Objects.equals(user.getType(), UserType.FARM_SUB.value())) {
             //猪场子账号
             Long roleId = null;// TODO: read roleId from user.getRoles()
             for (String role : Iters.nullToEmpty(user.getRoles())) {
@@ -154,7 +148,7 @@ public class DoctorUserManager {
     public Boolean update(User user) {
         userDao.updateAll(user);
 
-        if (Objects.equals(user.getType(), UserType.FARM_SUB.value())){
+        if (Objects.equals(user.getType(), UserType.FARM_SUB.value())) {
             Sub sub = subDao.findIncludeFrozenByUserId(user.getId());
             if (isNull(sub)) {
 
@@ -197,6 +191,18 @@ public class DoctorUserManager {
                 primaryUser.setRealName(realName);
                 primaryUser.setStatus(UserStatus.NORMAL.value());
                 primaryUserDao.update(primaryUser);
+            }
+
+
+            //如果管理员账户用户更改了手机号，需要更新对应公司的手机号
+            if (user.getExtra() != null && user.getExtra().containsKey("oldMobile")) {
+                DoctorOrg org = orgDao.findByMobile(user.getExtra().get("oldMobile"));//修改之前的手机号
+                if (null == org) {
+                    log.warn("can not find org for update mobile to {}", user.getExtra().get("oldMobile"));
+                } else {
+                    org.setMobile(user.getMobile());
+                    orgDao.update(org);
+                }
             }
         }
         return true;
@@ -281,7 +287,7 @@ public class DoctorUserManager {
         }
 
         User userByMobile = userDao.findByMobile(mobile);
-        if (isNull(userByMobile)){
+        if (isNull(userByMobile)) {
             return;
         }
 

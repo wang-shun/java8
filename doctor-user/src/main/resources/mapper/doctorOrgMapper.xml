@@ -172,4 +172,11 @@
         WHERE
         `type` = #{type}
     </select>
+
+    <select id="findByMobile" parameterType="string" resultMap="DoctorOrgMap">
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb"/>
+        WHERE
+        `mobile` = #{mobile}
+    </select>
 </mapper>
