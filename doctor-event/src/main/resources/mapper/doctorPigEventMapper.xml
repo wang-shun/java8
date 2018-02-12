@@ -1641,7 +1641,7 @@
 
     <select id="findForNPD" parameterType="map" resultMap="DoctorPigEventMap">
 
-        SELECT farm_id,t1.pig_id,type,preg_check_result,event_at,id
+        SELECT farm_id,t1.pig_id,type,preg_check_result,event_at,id,t1.current_mating_count
         FROM <include refid="tb"/> t1
         JOIN
         (SELECT pig_id
