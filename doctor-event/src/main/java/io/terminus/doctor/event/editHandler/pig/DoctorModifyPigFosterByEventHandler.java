@@ -47,7 +47,7 @@ public class DoctorModifyPigFosterByEventHandler extends DoctorAbstractModifyPig
     @Override
     public DoctorPigTrack buildNewTrack(DoctorPigTrack oldPigTrack, DoctorEventChangeDto changeDto) {
         if (Objects.equals(oldPigTrack.getStatus(), PigStatus.FEED.getKey())) {
-            oldPigTrack.setUnweanQty(EventUtil.minusInt(oldPigTrack.getUnweanQty(), changeDto.getQuantityChange()));
+            oldPigTrack.setUnweanQty(EventUtil.plusInt(oldPigTrack.getUnweanQty(), changeDto.getQuantityChange()));
         }
         return oldPigTrack;
     }
