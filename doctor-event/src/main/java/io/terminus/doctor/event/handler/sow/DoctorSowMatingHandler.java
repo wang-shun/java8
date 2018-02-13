@@ -166,12 +166,19 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
         DoctorMatingType mateType = getPigMateType(events, doctorPigEvent.getEventAt());
 
         //计算胎次
-        //当前配种事件之前分娩事件的个数
-        Long farrowingEventCount = events.parallelStream()
+        //当前配种事件之前断奶事件的个数
+        Long weanEventCount = events.parallelStream()
                 .filter(e -> e.getType().equals(PigEvent.WEAN.getKey()))
                 .filter(e -> e.getEventAt().compareTo(doctorPigEvent.getEventAt()) <= 0)
                 .count();
-        doctorPigEvent.setParity(farrowingEventCount.intValue() + 1);
+
+        //进场基准胎次
+        int basicParity = events.parallelStream()
+                .filter(e -> e.getType().equals(PigEvent.ENTRY.getKey()))
+                .map(DoctorPigEvent::getParity)
+                .findFirst().orElse(0);
+
+        doctorPigEvent.setParity(basicParity + weanEventCount.intValue());
 
         doctorPigEvent.setDoctorMateType(mateType.getKey());
         return doctorPigEvent;
