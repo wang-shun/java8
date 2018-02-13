@@ -246,10 +246,13 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
      * @param executeEvent 需要执行的事件
      */
     private void checkEventAt(DoctorPigEvent executeEvent, DoctorPigEvent lastEvent) {
+        Date eventAt = executeEvent.getEventAt();
         if (Objects.equals(executeEvent.getType(), PigEvent.ENTRY.getKey())) {
+            if (Dates.startOfDay(eventAt).after(Dates.startOfDay(new Date()))){
+                throw new InvalidException("event.at.range.error", DateUtil.toDateString(lastEvent.getEventAt()), DateUtil.toDateString(new Date()), DateUtil.toDateString(eventAt));
+            }
             return;
         }
-        Date eventAt = executeEvent.getEventAt();
         if (notNull(lastEvent) && (Dates.startOfDay(eventAt).before(Dates.startOfDay(lastEvent.getEventAt())) || Dates.startOfDay(eventAt).after(Dates.startOfDay(new Date())))) {
             throw new InvalidException("event.at.range.error", DateUtil.toDateString(lastEvent.getEventAt()), DateUtil.toDateString(new Date()), DateUtil.toDateString(eventAt));
         }
