@@ -2,6 +2,7 @@ package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.manager.DoctorFarmManager;
@@ -103,6 +104,8 @@ public class DoctorFarmWriteServiceImpl implements DoctorFarmWriteService{
         try {
             doctorFarmManager.updateFarmOptions(farmId, newName, number, isWeak, isIntelligent);
             return Response.ok(Boolean.TRUE);
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("update.farm.name.failed, farmId:{}, newName:{}, number{}, isWeak:{}, isIntelligent:{}, cause:{}",
                     farmId, newName, number, isWeak, isIntelligent, Throwables.getStackTraceAsString(e));

@@ -100,10 +100,10 @@ public class DoctorFarmManagerTest extends BaseManagerTest{
 
     @Test
     public void updateFarmOptionsTest() {
-        doctorFarmManager.updateFarmOptions(1L, "小", "11", 1, 1);
+        doctorFarmManager.updateFarmOptions(577L, "内蒙古雏鹰第一采精", "11", 1, 1);
         DoctorFarm doctorFarm = doctorFarmDao.findById(1L);
 
-        Assert.assertEquals(doctorFarm.getName(), "小");
+        Assert.assertEquals(doctorFarm.getName(), "内蒙古雏鹰第一采精站");
         Assert.assertEquals(doctorFarm.getNumber(), "11");
         Assert.assertEquals(doctorFarm.getIsWeak().toString(), "1");
         Assert.assertEquals(doctorFarm.getIsIntelligent().toString(), "1");

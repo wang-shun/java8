@@ -3,7 +3,7 @@ package io.terminus.doctor.user.manager;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import io.terminus.common.utils.Arguments;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Joiners;
 import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.common.enums.UserType;
@@ -216,10 +216,11 @@ public class DoctorFarmManager {
     public void updateFarmOptions(Long farmId, String newName, String number, Integer isWeak, Integer isIntelligent) {
         DoctorFarm doctorFarm = doctorFarmDao.findById(farmId);
         if (notNull(newName) && !Objects.equals(newName, doctorFarm.getName())) {
-            List<DoctorFarm> farmList = doctorFarmDao.findByName(newName);
-            if (Arguments.isNullOrEmpty(farmList)) {
-                updateFarmName(farmId, newName);
+            DoctorFarm farm = doctorFarmDao.findByOrgId(doctorFarm.getOrgId()).stream().filter(f -> newName.equals(f.getName())).findFirst().orElse(null);
+            if (notNull(farm)) {
+                throw new ServiceException("farm.name.not.same.in.one.org");
             }
+            updateFarmName(farmId, newName);
         }
 
         if (notNull(isWeak) && !Objects.equals(isWeak, doctorFarm.getIsWeak())) {
