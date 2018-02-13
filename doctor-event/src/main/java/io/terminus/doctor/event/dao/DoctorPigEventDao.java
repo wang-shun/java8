@@ -806,6 +806,6 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         params.put("pigId", pigId);
         params.put("type", eventType.getKey());
 
-        return this.sqlSession.selectOne(this.sqlId("findByPigAndType"), params);
+        return this.sqlSession.selectList(this.sqlId("findByPigAndType"), params);
     }
 }
