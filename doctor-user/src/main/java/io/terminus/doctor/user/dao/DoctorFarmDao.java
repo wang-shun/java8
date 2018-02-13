@@ -58,4 +58,8 @@ public class DoctorFarmDao extends MyBatisDao<DoctorFarm> {
     public DoctorFarm findByNumber(String number) {
         return getSqlSession().selectOne(sqlId("findByNumber"), number);
     }
+
+    public List<DoctorFarm> findByName(String name) {
+        return getSqlSession().selectList(sqlId("findByName"), name);
+    }
 }

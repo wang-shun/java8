@@ -3,6 +3,7 @@ package io.terminus.doctor.user.manager;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.Joiners;
 import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.common.enums.UserType;
@@ -215,7 +216,10 @@ public class DoctorFarmManager {
     public void updateFarmOptions(Long farmId, String newName, String number, Integer isWeak, Integer isIntelligent) {
         DoctorFarm doctorFarm = doctorFarmDao.findById(farmId);
         if (notNull(newName) && !Objects.equals(newName, doctorFarm.getName())) {
-            updateFarmName(farmId, newName);
+            List<DoctorFarm> farmList = doctorFarmDao.findByName(newName);
+            if (Arguments.isNullOrEmpty(farmList)) {
+                updateFarmName(farmId, newName);
+            }
         }
 
         if (notNull(isWeak) && !Objects.equals(isWeak, doctorFarm.getIsWeak())) {

@@ -15,6 +15,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
+
 /**
  * Created by xjn on 18/2/7.
  * email:xiaojiannan@terminus.io
@@ -106,5 +108,11 @@ public class DoctorFarmManagerTest extends BaseManagerTest{
         Assert.assertEquals(doctorFarm.getIsWeak().toString(), "1");
         Assert.assertEquals(doctorFarm.getIsIntelligent().toString(), "1");
 
+    }
+
+    @Test
+    public void findByNameTest() {
+        List<DoctorFarm> doctorFarmList = doctorFarmDao.findByName("小");
+        Assert.assertEquals(doctorFarmList.size(), 1);
     }
 }
