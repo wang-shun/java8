@@ -51,10 +51,10 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         super.handleCheck(executeEvent, fromTrack);
         expectTrue(Objects.equals(fromTrack.getStatus(), PigStatus.Entry.getKey())
-                || Objects.equals(fromTrack.getStatus(), PigStatus.KongHuai.getKey())
-                || Objects.equals(fromTrack.getStatus(), PigStatus.Wean.getKey())
-                || Objects.equals(fromTrack.getStatus(), PigStatus.Mate.getKey())
-                ,"pig.status.failed", PigEvent.from(executeEvent.getType()).getName()
+                        || Objects.equals(fromTrack.getStatus(), PigStatus.KongHuai.getKey())
+                        || Objects.equals(fromTrack.getStatus(), PigStatus.Wean.getKey())
+                        || Objects.equals(fromTrack.getStatus(), PigStatus.Mate.getKey())
+                , "pig.status.failed", PigEvent.from(executeEvent.getType()).getName()
                 , PigStatus.from(fromTrack.getStatus()).getName());
         expectTrue(PigType.MATING_TYPES.contains(fromTrack.getCurrentBarnType())
                 , "current.barn.type.not.mate", PigType.from(fromTrack.getCurrentBarnType()).getDesc());
@@ -128,7 +128,7 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
                 trackExtraMap.containsKey("hasWeanToMating")
                 && Boolean.valueOf(trackExtraMap.get("hasWeanToMating").toString())) {
 
-            doctorPigEvent.setParity(doctorPigEventDao.findLastParity(doctorPigTrack.getPigId()) + 1);
+//            doctorPigEvent.setParity(doctorPigEventDao.findLastParity(doctorPigTrack.getPigId()) + 1);
 
             //这里说明是断奶后的第一次配种,这个地方统计 dpNPD （断奶到配种的非生产天数）
             DateTime partWeanDate = new DateTime(doctorPigEvent.getMattingDate());
@@ -162,7 +162,17 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
 
         //设置配种类型
         List<DoctorPigEvent> events = doctorPigEventDao.queryAllEventsByPigId(doctorPigTrack.getPigId());
+
         DoctorMatingType mateType = getPigMateType(events, doctorPigEvent.getEventAt());
+
+        //计算胎次
+        //当前配种事件之前分娩事件的个数
+        Long farrowingEventCount = events.parallelStream()
+                .filter(e -> e.getType().equals(PigEvent.FARROWING.getKey()))
+                .filter(e -> e.getEventAt().compareTo(doctorPigEvent.getEventAt()) <= 0)
+                .count();
+        doctorPigEvent.setParity(farrowingEventCount.intValue() + 1);
+
         doctorPigEvent.setDoctorMateType(mateType.getKey());
         return doctorPigEvent;
     }
@@ -201,7 +211,8 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
 
     /**
      * 获取最新胎次下预产期
-     * @param pigId 猪id
+     *
+     * @param pigId      猪id
      * @param matingDate 配种日期
      * @return 预产期
      */
