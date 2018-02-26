@@ -6,6 +6,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.event.Event;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto;
 import io.terminus.doctor.event.dto.DoctorNpdExportDto;
@@ -16,11 +17,7 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by yaoqijun.
@@ -499,7 +496,20 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      * @return 分娩事件
      */
     public DoctorPigEvent getFarrowEventByParity(Long pigId, Integer parity) {
-        return getSqlSession().selectOne(sqlId("getFarrowEventByParity"), ImmutableMap.of("pigId", pigId, "parity", parity));
+        //之前的一个bug导致会出现同一个猪有相同胎次的分娩事件
+        //在计算胎次部分已做了调整，但之前还留有一部分的历史数据是错误的
+        //先让这部分错误的数据查询出来，后续计算胎次时会更新成正确的胎次
+        List<DoctorPigEvent> events = getSqlSession().selectList(sqlId("getFarrowEventByParity"), ImmutableMap.of("pigId", pigId, "parity", parity));
+
+        return events.stream()
+                .sorted((p1, p2) -> {
+                    int result = p2.getEventAt().compareTo(p1.getEventAt());
+                    if (result == 0)
+                        return p2.getId().compareTo(p1.getId());
+                    else return result;
+                })
+                .findFirst()
+                .orElse(null);
     }
 
     /**
