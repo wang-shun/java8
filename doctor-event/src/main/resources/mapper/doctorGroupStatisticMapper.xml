@@ -21,7 +21,7 @@
         (
         select ifnull(sum(quantity), 0)
         from doctor_group_tracks a left join doctor_groups b on a.group_id = b.id
-        WHERE b.farm_id = #{farmId} and b.pig_type = #{pigType}
+        WHERE b.farm_id = #{farmId} and b.pig_type = #{pigType} and b.status = 1
         )
         -
         (
