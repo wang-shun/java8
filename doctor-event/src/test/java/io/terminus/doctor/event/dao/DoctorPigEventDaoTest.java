@@ -43,4 +43,12 @@ public class DoctorPigEventDaoTest extends BaseDaoTest {
         Assert.assertEquals(0L, count.longValue());
     }
 
+
+    @Test
+    public void testGetFarrowEventByParity() {
+        DoctorPigEvent event = doctorPigEventDao.getFarrowEventByParity(395635L, 1);
+
+        Assert.assertEquals(4973190L, event.getId().longValue());
+    }
+
 }
