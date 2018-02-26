@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.common.event.Event;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto;
 import io.terminus.doctor.event.dto.DoctorNpdExportDto;
@@ -757,5 +758,54 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     public List<DoctorFarmEarlyEventAtDto> findEarLyAt() {
         return sqlSession.selectList(sqlId("findEarLyAt"));
+    }
+
+    /**
+     * 计算某次配种的胎次
+     *
+     * @param pigId
+     * @param matingEventAt
+     * @return
+     */
+    public Integer countParity(Long pigId, Date matingEventAt) {
+
+        int basicParity = 0;
+
+        List<DoctorPigEvent> entryEvents = findByPigAndType(pigId, PigEvent.ENTRY);
+        if (!entryEvents.isEmpty() && null != entryEvents.get(0).getParity()) {
+            basicParity = entryEvents.get(0).getParity();
+        }
+
+        return basicParity + countEvent(pigId, matingEventAt, PigEvent.WEAN);
+    }
+
+    /**
+     * 计算某一个时间点之前的某中类型事件发生的次数
+     *
+     * @param pigId
+     * @param eventAt
+     * @return
+     */
+    public Integer countEvent(Long pigId, Date eventAt, PigEvent eventType) {
+
+        if (null == pigId || null == eventAt || null == eventAt)
+            return 0;
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("beforeAt", eventAt);
+        params.put("pigId", pigId);
+        params.put("type", eventType.getKey());
+
+        return this.sqlSession.selectOne(this.sqlId("countEvent"), params);
+    }
+
+
+    public List<DoctorPigEvent> findByPigAndType(Long pigId, PigEvent eventType) {
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("pigId", pigId);
+        params.put("type", eventType.getKey());
+
+        return this.sqlSession.selectList(this.sqlId("findByPigAndType"), params);
     }
 }

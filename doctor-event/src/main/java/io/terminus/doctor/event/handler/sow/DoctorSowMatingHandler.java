@@ -82,8 +82,11 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
                 extra.containsKey("hasWeanToMating")
                 && Boolean.valueOf(extra.get("hasWeanToMating").toString())) {
             extra.put("hasWeanToMating", false);
-            toTrack.setCurrentParity(toTrack.getCurrentParity() + 1);
+//            toTrack.setCurrentParity(toTrack.getCurrentParity() + 1);
         }
+
+        toTrack.setCurrentParity(doctorPigEventDao.countParity(executeEvent.getPigId(), executeEvent.getEventAt()));
+
         if (!isNull(extra) &&
                 extra.containsKey("enterToMate")
                 && Boolean.valueOf(extra.get("enterToMate").toString())) {
