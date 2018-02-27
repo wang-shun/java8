@@ -55,7 +55,7 @@ import static io.terminus.doctor.common.utils.Checks.expectTrue;
  * 猪群编辑抽象实现
  */
 @Slf4j
-public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorModifyGroupEventHandler{
+public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorModifyGroupEventHandler {
     @Autowired
     protected DoctorGroupDao doctorGroupDao;
     @Autowired
@@ -137,14 +137,14 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
         log.info("modify group event handler ending");
     }
-    
+
     @Override
     public Boolean canRollback(DoctorGroupEvent deleteGroupEvent) {
         return Objects.equals(deleteGroupEvent.getIsAuto(), IsOrNot.NO.getValue())
                 && rollbackHandleCheck(deleteGroupEvent)
                 && !UN_MODIFY.contains(deleteGroupEvent.getEventSource());
     }
-    
+
     @Override
     public void rollbackHandle(DoctorGroupEvent deleteGroupEvent, Long operatorId, String operatorName) {
 
@@ -194,8 +194,9 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     /**
      * 编辑校验的具体事件
+     *
      * @param oldGroupEvent 原事件
-     * @param input 输入
+     * @param input         输入
      */
     protected void modifyHandleCheck(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
         if (!Objects.equals(oldGroupEvent.getType(), GroupEventType.NEW.getValue())) {
@@ -234,20 +235,27 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     /**
      * 更新日记录表
+     *
      * @param oldGroupEvent 原事件
-     * @param input 新输入
-     * @param changeDto 变化
+     * @param input         新输入
+     * @param changeDto     变化
      */
-    protected void updateDailyForModify(DoctorGroupEvent oldGroupEvent, BaseGroupInput input, DoctorEventChangeDto changeDto){};
+    protected void updateDailyForModify(DoctorGroupEvent oldGroupEvent, BaseGroupInput input, DoctorEventChangeDto changeDto) {
+    }
+
+    ;
 
     /**
      * 触发事件的编辑处理(编辑)
+     *
      * @param newEvent 修改后事件
      */
-    protected void triggerEventModifyHandle(DoctorGroupEvent newEvent) {}
+    protected void triggerEventModifyHandle(DoctorGroupEvent newEvent) {
+    }
 
     /**
      * 编辑后自动关闭开启猪群
+     *
      * @param groupTrack 猪群track
      */
     protected void autoCloseOrOpen(DoctorGroupTrack groupTrack) {
@@ -297,6 +305,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     /**
      * 删除事件校验的具体实现(删除)
+     *
      * @param deleteGroupEvent 删除事件
      */
     public Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
@@ -305,48 +314,64 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     /**
      * 触发事件的删除处理(删除)
+     *
      * @param deleteGroupEvent 删除事件
      */
-    protected void triggerEventRollbackHandle(DoctorGroupEvent deleteGroupEvent, Long operatorId, String operatorName) {}
+    protected void triggerEventRollbackHandle(DoctorGroupEvent deleteGroupEvent, Long operatorId, String operatorName) {
+    }
 
     /**
      * 构建猪群信息(删除)
+     *
      * @param deleteGroupEvent 删除事件
-     * @param oldGroup 原猪群信息
+     * @param oldGroup         原猪群信息
      * @return 新猪群信息
      */
-    protected DoctorGroup buildNewGroupForRollback(DoctorGroupEvent deleteGroupEvent, DoctorGroup oldGroup){return oldGroup;}
+    protected DoctorGroup buildNewGroupForRollback(DoctorGroupEvent deleteGroupEvent, DoctorGroup oldGroup) {
+        return oldGroup;
+    }
 
     /**
      * 构建track(删除)
+     *
      * @param deleteGroupEvent 删除事件
-     * @param oldGroupTrack 原track
+     * @param oldGroupTrack    原track
      * @return 新 track
      */
-    protected DoctorGroupTrack buildNewTrackForRollback(DoctorGroupEvent deleteGroupEvent, DoctorGroupTrack oldGroupTrack) {return oldGroupTrack;}
+    protected DoctorGroupTrack buildNewTrackForRollback(DoctorGroupEvent deleteGroupEvent, DoctorGroupTrack oldGroupTrack) {
+        return oldGroupTrack;
+    }
+
     /**
      * 更新日记录(删除)
+     *
      * @param deleteGroupEvent 删除事件
      */
-    protected void updateDailyForDelete(DoctorGroupEvent deleteGroupEvent) {}
+    protected void updateDailyForDelete(DoctorGroupEvent deleteGroupEvent) {
+    }
 
     /**
      * 删除事件更新日记录
+     *
      * @param oldGroupEvent 被删除事件
      */
-    public void updateDailyOfDelete(DoctorGroupEvent oldGroupEvent) {}
+    public void updateDailyOfDelete(DoctorGroupEvent oldGroupEvent) {
+    }
 
     /**
      * 新建事件更新日记录
+     *
      * @param newGroupEvent 新建事件
-     * @param input 新输入
+     * @param input         新输入
      */
-    public void updateDailyOfNew(DoctorGroupEvent newGroupEvent, BaseGroupInput input) {}
+    public void updateDailyOfNew(DoctorGroupEvent newGroupEvent, BaseGroupInput input) {
+    }
 
     /**
      * 构建猪群日记录
+     *
      * @param oldDailyGroup 原记录
-     * @param changeDto 变化量
+     * @param changeDto     变化量
      * @return 新猪群记录
      */
     protected DoctorGroupDaily buildDailyGroup(DoctorGroupDaily oldDailyGroup, DoctorEventChangeDto changeDto) {
@@ -355,6 +380,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     /**
      * 是否需要更新猪群(编辑)
+     *
      * @param changeDto 变化记录
      * @return
      */
@@ -365,36 +391,40 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     /**
      * 是否需要更新猪群(删除)
+     *
      * @param eventType 事件类型
      * @return
      */
-    private boolean isUpdateGroup(Integer eventType){
+    private boolean isUpdateGroup(Integer eventType) {
         //// TODO: 17/4/13 是否需要更新
         return true;
     }
-    
+
     /**
      * 是否需要更新track
+     *
      * @param changeDto 变化记录
      * @return
      */
-    private boolean isUpdateTrack(DoctorEventChangeDto changeDto){
+    private boolean isUpdateTrack(DoctorEventChangeDto changeDto) {
         // TODO: 17/4/13 是否需要跟新
         return true;
     }
 
     /**
      * 是否需要更新track(删除)
+     *
      * @param eventType 事件类型
      * @return
      */
-    private boolean isUpdateTrack(Integer eventType){
+    private boolean isUpdateTrack(Integer eventType) {
         // TODO: 17/4/13 是否需要跟新
         return true;
     }
 
     /**
      * 创建编辑记录
+     *
      * @param oldEvent 原事件
      * @param newEvent 新事件
      */
@@ -412,6 +442,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     /**
      * 创建删除记录
+     *
      * @param deleteEvent 删除事件
      */
     private void createModifyLog(DoctorGroupEvent deleteEvent) {
@@ -427,8 +458,9 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     /**
      * 更新猪群某天及某天之后的存栏数量
-     * @param farmId 猪场id
-     * @param sumAt 统计时间
+     *
+     * @param farmId      猪场id
+     * @param sumAt       统计时间
      * @param changeCount 存栏变化量
      */
     protected void updateDailyGroupLiveStock(Long farmId, Integer pigType, Date sumAt, Integer changeCount) {
@@ -444,8 +476,9 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     /**
      * 更新猪群某天及某天之后的存栏数量
-     * @param groupId 猪群id
-     * @param sumAt 统计时间
+     *
+     * @param groupId     猪群id
+     * @param sumAt       统计时间
      * @param changeCount 存栏变化量
      */
     protected void oldUpdateDailyGroupLiveStock(Long groupId, Date sumAt, Integer changeCount) {
@@ -454,20 +487,27 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     /**
      * 校验猪群之后存栏数量(不小于零)
-     * @param groupId 猪群id
-     * @param sumAt 统计时间(包括)
-     * @param changeCount 变化数量
+     *
+     * @param groupId       猪群id
+     * @param deleteEventId 被删除事件ID
+     * @param sumAt         统计时间(包括)
+     * @param changeCount   变化数量
      */
-    public boolean validGroupLiveStockForDelete(Long groupId, Date sumAt, Integer changeCount) {
+    public boolean validGroupLiveStockForDelete(Long groupId, Long deleteEventId, Date sumAt, Integer changeCount) {
         List<Integer> includeTypes = Lists.newArrayList(GroupEventType.CHANGE.getValue(), GroupEventType.MOVE_IN.getValue(),
                 GroupEventType.TRANS_FARM.getValue(), GroupEventType.TRANS_GROUP.getValue());
         List<DoctorGroupEvent> groupEventList = doctorGroupEventDao.findEventIncludeTypesForDesc(groupId, includeTypes, DateUtil.toDateString(sumAt));
         DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(groupId);
         int quantity = EventUtil.plusInt(groupTrack.getQuantity(), changeCount);
-        for (DoctorGroupEvent groupEvent: groupEventList) {
+        for (DoctorGroupEvent groupEvent : groupEventList) {
+
             if (quantity < 0) {
                 return false;
             }
+
+            //被删除事件之前发生的事件肯定都是正数，不需要再校验
+            if (groupEvent.getId().equals(deleteEventId))
+                break;
 
             if (Objects.equals(groupEvent.getType(), GroupEventType.MOVE_IN.getValue())) {
                 quantity = EventUtil.minusInt(quantity, groupEvent.getQuantity());
@@ -488,14 +528,15 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     /**
      * 猪群存栏校验
-     * @param groupId 猪群id
-     * @param oldEventAt 原时间
-     * @param newEventAt 新时间
+     *
+     * @param groupId     猪群id
+     * @param oldEventAt  原时间
+     * @param newEventAt  新时间
      * @param oldQuantity 原数量
      * @param newQuantity 新数量
      */
     protected void validGroupLiveStock(Long groupId, String groupCode, Date oldEventAt, Date newEventAt, Integer oldQuantity,
-                                       Integer newQuantity,  Integer changeCount){
+                                       Integer newQuantity, Integer changeCount) {
         oldEventAt = new DateTime(oldEventAt).withTimeAtStartOfDay().toDate();
         newEventAt = new DateTime(newEventAt).withTimeAtStartOfDay().toDate();
         Date sumAt = oldEventAt.before(newEventAt) ? oldEventAt : newEventAt;
@@ -527,13 +568,14 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     /**
      * 校验猪群之后存栏数量(不小于零)
-     * @param groupId 猪群id
-     * @param sumAt 统计时间(包括)
+     *
+     * @param groupId     猪群id
+     * @param sumAt       统计时间(包括)
      * @param changeCount 变化数量
      */
     public boolean oldValidGroupLiveStockForDelete(Long groupId, Date sumAt, Integer changeCount) {
         List<DoctorDailyGroup> dailyGroupList = oldDailyGroupDao.findAfterSumAt(groupId, DateUtil.toDateString(sumAt));
-        for(DoctorDailyGroup dailyGroup : dailyGroupList){
+        for (DoctorDailyGroup dailyGroup : dailyGroupList) {
             if (EventUtil.plusInt(dailyGroup.getEnd(), changeCount) < 0) {
                 return false;
             }
@@ -543,13 +585,14 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     /**
      * 猪群存栏校验
-     * @param groupId 猪群id
-     * @param oldEventAt 原时间
-     * @param newEventAt 新时间
+     *
+     * @param groupId     猪群id
+     * @param oldEventAt  原时间
+     * @param newEventAt  新时间
      * @param oldQuantity 原数量
      * @param newQuantity 新数量
      */
-    protected void oldValidGroupLiveStock(Long groupId, String groupCode, Date oldEventAt, Date newEventAt, Integer oldQuantity, Integer newQuantity,  Integer changeCount){
+    protected void oldValidGroupLiveStock(Long groupId, String groupCode, Date oldEventAt, Date newEventAt, Integer oldQuantity, Integer newQuantity, Integer changeCount) {
         Date sumAt = oldEventAt.before(newEventAt) ? oldEventAt : newEventAt;
         List<DoctorDailyGroup> dailyGroupList = oldDailyGroupDao.findAfterSumAt(groupId, DateUtil.toDateString(sumAt));
 
@@ -579,6 +622,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     /**
      * 获取日期下一天
+     *
      * @param date 日期
      * @return 下一天
      */
@@ -588,9 +632,10 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     /**
      * 事件时间校验, 不小于下限时间, 不大与上限时间
-     * @param eventAt 事件时间
+     *
+     * @param eventAt     事件时间
      * @param downEventAt 下限时间
-     * @param upEventAt 上限时间
+     * @param upEventAt   上限时间
      */
     public static void validEventAt(Date eventAt, Date downEventAt, Date upEventAt) {
         if ((notNull(downEventAt)
@@ -602,6 +647,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     /**
      * 猪群触发关闭事件
+     *
      * @param groupEvent 原事件
      * @return 关闭输入
      */

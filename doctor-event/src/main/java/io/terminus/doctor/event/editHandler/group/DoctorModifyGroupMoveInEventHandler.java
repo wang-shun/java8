@@ -130,7 +130,7 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
 
     @Override
     public Boolean rollbackHandleCheck(DoctorGroupEvent deleteGroupEvent) {
-        return validGroupLiveStockForDelete(deleteGroupEvent.getGroupId(), deleteGroupEvent.getEventAt(), -deleteGroupEvent.getQuantity());
+        return validGroupLiveStockForDelete(deleteGroupEvent.getGroupId(), deleteGroupEvent.getId(), deleteGroupEvent.getEventAt(), -deleteGroupEvent.getQuantity());
     }
 
     @Override
@@ -246,6 +246,7 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
 
     /**
      * 获取转移类型
+     *
      * @param moveInEvent 转入事件
      * @return 转入类型
      */
@@ -256,6 +257,7 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
 
     /**
      * 获取猪群的初始日期用于计算日龄
+     *
      * @param groupId 猪群id
      * @return 日龄
      */
