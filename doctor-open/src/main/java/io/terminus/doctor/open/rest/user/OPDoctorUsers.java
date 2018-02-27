@@ -99,7 +99,8 @@ public class OPDoctorUsers {
 
 
     //猪场软件链接url
-    private final String farmManageMultiple = "pigdoctor://company?homepage_type=1";;
+    private final String farmManageMultiple = "pigdoctor://company?homepage_type=1";
+    ;
 
     @Autowired
     public OPDoctorUsers(DoctorServiceReviewReadService doctorServiceReviewReadService,
@@ -132,6 +133,7 @@ public class OPDoctorUsers {
 
     /**
      * 根据用户id查询 用户服务开通情况
+     *
      * @return 服务开通情况
      */
     @OpenMethod(key = "get.user.service.status")
@@ -139,13 +141,13 @@ public class OPDoctorUsers {
         BaseUser baseUser = UserUtil.getCurrentUser();
         Long primaryUserId; //主账号id
 
-        if(Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), baseUser.getType())){
+        if (Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), baseUser.getType())) {
             //当前用户是主账号,则直接查询
             primaryUserId = baseUser.getId();
-        }else if(Objects.equals(UserType.FARM_SUB.value(), baseUser.getType())){
+        } else if (Objects.equals(UserType.FARM_SUB.value(), baseUser.getType())) {
             //当前用户是子账号, 找他的主账号
             primaryUserId = OPRespHelper.orOPEx(primaryUserReadService.findSubByUserId(baseUser.getId())).getParentUserId();
-        }else{
+        } else {
             IotUser iotUser = OPRespHelper.orOPEx(iotUserRoleReadService.findIotUserByUserId(baseUser.getId()));
             if (notNull(iotUser)) {
                 DoctorServiceReviewDto dto = new DoctorServiceReviewDto();
@@ -163,7 +165,7 @@ public class OPDoctorUsers {
             switch (DoctorServiceReview.Type.from(review.getType())) {
                 case PIG_DOCTOR:
                     innerDto.setServiceStatus(serviceStatus.getPigdoctorStatus());
-                    if(Objects.equals(serviceStatus.getPigdoctorStatus(), DoctorServiceStatus.Status.OPENED.value())){
+                    if (Objects.equals(serviceStatus.getPigdoctorStatus(), DoctorServiceStatus.Status.OPENED.value())) {
                         innerDto.setUrl(this.getPigdoctorUrl(baseUser.getId()));
                     }
                     innerDto.setReason(serviceStatus.getPigdoctorReason());
@@ -172,7 +174,7 @@ public class OPDoctorUsers {
                 case PIGMALL:
                     innerDto.setServiceStatus(serviceStatus.getPigmallStatus());
                     innerDto.setReason(serviceStatus.getPigmallReason());
-                    if(Objects.equals(serviceStatus.getPigmallStatus(), DoctorServiceStatus.Status.OPENED.value())) {
+                    if (Objects.equals(serviceStatus.getPigmallStatus(), DoctorServiceStatus.Status.OPENED.value())) {
                         innerDto.setUrl(pigmallURL);
                     }
                     dto.setPigmall(innerDto);
@@ -198,30 +200,31 @@ public class OPDoctorUsers {
 
     /**
      * 申请开通服务, 首次申请和驳回后再次申请都可以用这个
+     *
      * @param serviceApplyDto 申请信息
      * @return 申请是否成功
      */
     @OpenMethod(key = "apply.open.service", paramNames = "serviceApplyDto")
     public Boolean applyOpenService(@Valid DoctorServiceApplyDto serviceApplyDto) {
         BaseUser baseUser = UserUtil.getCurrentUser();
-        if(!Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), baseUser.getType())){
+        if (!Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), baseUser.getType())) {
             //只有主账号(猪场管理员)才能申请开通服务
             throw new OPClientException("authorize.fail");
         }
         ServiceBetaStatusToken token = serviceBetaStatusHandler.getServiceBetaStatusToken();
-        if(token.inBeta(DoctorServiceReview.Type.from(serviceApplyDto.getType()))){
+        if (token.inBeta(DoctorServiceReview.Type.from(serviceApplyDto.getType()))) {
             throw new OPClientException("service.in.beta");
         }
-        if(serviceApplyDto.getOrg() == null){
+        if (serviceApplyDto.getOrg() == null) {
             throw new OPClientException("required.org.info.missing");
         }
-        if(StringUtils.isBlank(serviceApplyDto.getOrg().getName())){
+        if (StringUtils.isBlank(serviceApplyDto.getOrg().getName())) {
             throw new OPClientException("org.name.not.null");
         }
-        if(StringUtils.isBlank(serviceApplyDto.getOrg().getLicense())){
+        if (StringUtils.isBlank(serviceApplyDto.getOrg().getLicense())) {
             throw new OPClientException("org.license.not.null");
         }
-        if(StringUtils.isBlank(serviceApplyDto.getOrg().getMobile())){
+        if (StringUtils.isBlank(serviceApplyDto.getOrg().getMobile())) {
             throw new OPClientException("org.mobile.not.null");
         }
         return OPRespHelper.orOPEx(doctorServiceReviewService.applyOpenService(baseUser, serviceApplyDto));
@@ -229,6 +232,7 @@ public class OPDoctorUsers {
 
     /**
      * 获取用户角色类型
+     *
      * @return 角色类型
      * @see io.terminus.doctor.user.enums.RoleType
      */
@@ -239,13 +243,14 @@ public class OPDoctorUsers {
 
     /**
      * 获取用户基本信息
+     *
      * @return 用户基本信息
      */
     @OpenMethod(key = "get.user.basic.info")
     public DoctorUserInfoDto getUserBasicInfo() {
         DoctorUserInfoDto doctorUserInfoDto = OPRespHelper.orOPEx(doctorUserReadService.findUserInfoByUserId(UserUtil.getUserId()));
         // 对于子账号, 设置下手机号
-        if(Objects.equals(UserType.FARM_SUB.value(), doctorUserInfoDto.getUser().getType()) && doctorUserInfoDto.getUser().getMobile() == null){
+        if (Objects.equals(UserType.FARM_SUB.value(), doctorUserInfoDto.getUser().getType()) && doctorUserInfoDto.getUser().getMobile() == null) {
             doctorUserInfoDto.getUser().setMobile(doctorUserInfoDto.getUser().getExtra().get("contact"));
         }
         try {
@@ -264,6 +269,7 @@ public class OPDoctorUsers {
 
     /**
      * 查询用户所在的公司的信息
+     *
      * @return 公司id, 公司名称, 营业执照url, 公司手机号
      */
     @OpenMethod(key = "get.org.info")
@@ -275,6 +281,7 @@ public class OPDoctorUsers {
 
     /**
      * 查询一级菜单
+     *
      * @return
      */
     @OpenMethod(key = "get.user.level.one.menu")
@@ -283,7 +290,7 @@ public class OPDoctorUsers {
     }
 
     @OpenMethod(key = "get.user.by.sessionId", httpMethods = RequestMethod.GET, paramNames = {"sessionId"})
-    public User getUserBySessionId(String sessionId){
+    public User getUserBySessionId(String sessionId) {
         String userInfo = jedisTemplate.execute(jedis -> {
             return jedis.get(redisPrefix + ":" + sessionId);
         });
@@ -292,7 +299,7 @@ public class OPDoctorUsers {
         }
 
         Map<String, Object> map = JsonMapperUtil.nonEmptyMapper().fromJson(userInfo, Map.class);
-        Integer userId = (Integer)map.get("userId");
+        Integer userId = (Integer) map.get("userId");
         Response<User> userResponse = doctorUserReadService.findById(userId.longValue());
         if (!userResponse.isSuccess() || isNull(userResponse.getResult())) {
             throw new OPClientException("user.not.found");
@@ -301,16 +308,16 @@ public class OPDoctorUsers {
         return userResponse.getResult();
     }
 
-    private String getPigdoctorUrl(Long userId){
+    private String getPigdoctorUrl(Long userId) {
         //查询关联猪场
         DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
-        if(permission != null && permission.getFarmIdsList() != null){
+        if (permission != null && permission.getFarmIdsList() != null) {
             //只有一个猪场
-            if(permission.getFarmIdsList().size() == 1){
+            if (permission.getFarmIdsList().size() == 1) {
                 return "pigdoctor://pigfarm?homepage_type=2&pig_farm_id=" + permission.getFarmIdsList().get(0);
             }
             //有多个猪场
-            if(permission.getFarmIdsList().size() > 1){
+            if (permission.getFarmIdsList().size() > 1) {
                 return farmManageMultiple;
             }
         }
@@ -359,8 +366,8 @@ public class OPDoctorUsers {
         DoctorUserDataPermission permission = permissionResponse.getResult();
         List<DoctorFarm> farmList = RespHelper.orServEx(doctorFarmReadService.findFarmsByIds(permission.getFarmIdsList()));
         Boolean isIntelligent = false;
-        for (DoctorFarm doctorFarm: farmList) {
-            if (Objects.equals(doctorFarm.getIsIntelligent(), IsOrNot.YES.getKey())){
+        for (DoctorFarm doctorFarm : farmList) {
+            if (Objects.equals(doctorFarm.getIsIntelligent(), IsOrNot.YES.getKey())) {
                 isIntelligent = true;
                 break;
             }
@@ -373,6 +380,7 @@ public class OPDoctorUsers {
         }
 
         openDto.setServiceStatus(DoctorServiceStatus.Status.CLOSED.value());
+        openDto.setReason("功能未开通");
         openDto.setStatus(DoctorServiceReview.Status.NOT_OK.getValue());
         return openDto;
     }
