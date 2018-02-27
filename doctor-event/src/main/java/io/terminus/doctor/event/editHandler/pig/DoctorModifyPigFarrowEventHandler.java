@@ -120,6 +120,10 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
         if (DateUtils.isSameDay(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
             DoctorPigDaily oldDailyPig = doctorDailyReportManager.findDoctorPigDaily(changeDto.getFarmId(), changeDto.getNewEventAt());
             doctorDailyPigDao.update(buildDailyPig(oldDailyPig, changeDto));
+
+            //旧版
+            DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getNewEventAt());
+            oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto));
         } else {
             updateDailyOfDelete(oldEvent);
             updateDailyOfNew(oldEvent, inputDto);

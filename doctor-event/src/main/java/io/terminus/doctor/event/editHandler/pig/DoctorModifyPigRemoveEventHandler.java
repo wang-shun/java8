@@ -117,6 +117,12 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
                     .barnType(changeDto.getBarnType())
                     .build();
             doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig, changeDto2));
+
+            //旧版
+            DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getOldEventAt());
+            oldBuildDailyPig(oldDailyReport, changeDto1);
+            oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto2));
+
             return;
         }
         updateDailyOfDelete(oldPigEvent);
