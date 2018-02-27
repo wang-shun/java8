@@ -122,6 +122,13 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
             buildDailyGroup(oldDailyGroup, changeDto);
             doctorGroupDailyDao.update(oldDailyGroup);
             updateDailyGroupLiveStock(changeDto.getFarmId(), changeDto.getPigType(), getAfterDay(changeDto.getOldEventAt()), changeDto.getQuantityChange());
+
+            //旧版
+            DoctorDailyGroup oldDaily = oldDailyReportManager.findByGroupIdAndSumAt(oldGroupEvent.getGroupId(), changeDto.getOldEventAt());
+            oldDailyReportManager.createOrUpdateDailyGroup(oldBuildDailyGroup(oldDaily, changeDto));
+            oldUpdateDailyGroupLiveStock(oldGroupEvent.getGroupId(),
+                    getAfterDay(oldGroupEvent.getEventAt()), changeDto.getQuantityChange());
+
             return;
         }
         updateDailyOfDelete(oldGroupEvent);
