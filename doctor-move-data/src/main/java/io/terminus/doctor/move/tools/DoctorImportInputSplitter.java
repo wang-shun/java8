@@ -258,6 +258,7 @@ public class DoctorImportInputSplitter {
             importSow.setInFarmDate(new DateTime(importSow.getMateDate()).minusDays(7).toDate());
         }
 
+        //当前导入行的母猪处于当前胎次的最后一行
         if (DoctorImportSow.ParityStage.currentLasts.contains(importSow.getParityStage())) {
             importSow.setPregBarn(importSow.getBarnName());
             importSow.setPregCheckResult(PregCheckResult.YANG.getDesc());
@@ -288,7 +289,8 @@ public class DoctorImportInputSplitter {
                     importSow.setFarrowBarnName(importSow.getBarnName());
                 }
             }
-        } else if (Objects.equals(importSow.getParityStage(), DoctorImportSow.ParityStage.CURRENT.getValue())) {
+          //处于当前胎次并不是最后一行
+        } else if (DoctorImportSow.ParityStage.currentNotLasts.contains(importSow.getParityStage())) {
             importSow.setCurrentStatus(PigStatus.KongHuai.getDesc());
             importSow.setPregCheckResult(getCheckResultByRemark(importSow).getDesc());
             importSow.setPregCheckDate(getCheckDateByRemark(importSow));
@@ -300,6 +302,7 @@ public class DoctorImportInputSplitter {
                             , PigType.DELIVER_SOW.getValue())) {
                 importSow.setPregBarn(importBasicData.getDefaultPregBarn().getName());
             }
+            //其他情况
         } else {
             importSow.setPregBarn(importBasicData.getDefaultPregBarn().getName());
             if (isNull(importSow.getPregDate())) {
@@ -311,7 +314,6 @@ public class DoctorImportInputSplitter {
                 importSow.setWeanToBarn(importBasicData.getDefaultPregBarn().getName());
                 importSow.setFarrowBarnName(importBasicData.getDefaultFarrowBarn().getName());
                 if (DoctorImportSow.ParityStage.pres.contains(importSow.getParityStage()) &&
-                        importBasicData != null &&
                         importBasicData.getBarnMap() != null &&
                         importBasicData.getBarnMap().containsKey(importSow.getBarnName()) &&
                         PigType.MATING_TYPES.contains(importBasicData.getBarnMap().get(importSow.getBarnName()).getPigType())
