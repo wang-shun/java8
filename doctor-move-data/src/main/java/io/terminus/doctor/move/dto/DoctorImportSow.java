@@ -87,6 +87,8 @@ public class DoctorImportSow implements Serializable {
         public static List<Integer> firsts = Lists.newArrayList(FIRST.getValue(), FIRST_PRE.getValue(),
                 FIRST_CURRENT.getValue(), FIRST_CURRENT_LAST.getValue());
         public static List<Integer> currentLasts = Lists.newArrayList(FIRST_CURRENT_LAST.getValue(), CURRENT_LAST.getValue());
+
+        public static List<Integer> currentNotLasts = Lists.newArrayList(FIRST_CURRENT.getValue(), CURRENT.getValue());
         public static List<Integer> pres = Lists.newArrayList(FIRST_PRE.getValue(), MIDDLE_PRE.getValue());
 
     }
