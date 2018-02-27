@@ -88,8 +88,11 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
     @Override
     protected void updateDailyForModify(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto, DoctorEventChangeDto changeDto) {
         if (DateUtils.isSameDay(changeDto.getNewEventAt(), changeDto.getOldEventAt())) {
-            DoctorPigDaily oldDailyPig = doctorDailyReportManager.findDoctorPigDaily(changeDto.getFarmId(), changeDto.getOldEventAt());
+            if (Objects.equals(changeDto.getOldPregCheckResult(), changeDto.getNewPregCheckResult())) {
+                return;
+            }
 
+            DoctorPigDaily oldDailyPig = doctorDailyReportManager.findDoctorPigDaily(changeDto.getFarmId(), changeDto.getOldEventAt());
             //1.原妊娠检查结果
             DoctorEventChangeDto changeDto1 = DoctorEventChangeDto.builder()
                     .pregCheckResult(changeDto.getOldPregCheckResult())
