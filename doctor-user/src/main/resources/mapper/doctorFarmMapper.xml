@@ -41,7 +41,7 @@
     </sql>
 
     <sql id="vals">
-        #{name}, #{farmCode}, #{number}, #{orgId}, #{orgName}, #{provinceId}, #{provinceName}, #{cityId}, #{cityName}, #{districtId}, #{districtName}, #{detailAddress}, #{outId}, #{source}, #{extra}, #{isIntelligent}, #{isWeak}, now(), now()
+        #{name}, #{farmCode}, #{number}, #{orgId}, #{orgName}, #{provinceId}, #{provinceName}, #{cityId}, #{cityName}, #{districtId}, #{districtName}, #{detailAddress}, #{outId}, #{source}, #{extra}, 0, 1, now(), now()
     </sql>
 
     <sql id="criteria">
