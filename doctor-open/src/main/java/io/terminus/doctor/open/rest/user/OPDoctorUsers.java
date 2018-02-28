@@ -379,7 +379,7 @@ public class OPDoctorUsers {
             return openDto;
         }
 
-        openDto.setServiceStatus(DoctorServiceStatus.Status.CLOSED.value());
+        openDto.setServiceStatus(DoctorServiceStatus.Status.BETA.value());//为了让app显示reason，物联网不需要审核
         openDto.setReason("功能未开通");
         openDto.setStatus(DoctorServiceReview.Status.NOT_OK.getValue());
         return openDto;
