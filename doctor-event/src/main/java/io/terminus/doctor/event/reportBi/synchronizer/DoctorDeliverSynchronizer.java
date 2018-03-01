@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.reportBi.synchronizer;
 
 import io.terminus.doctor.common.enums.IsOrNot;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportDeliverDao;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.reportBi.DoctorFiledUrlCriteria;
@@ -11,6 +12,7 @@ import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.model.DoctorReportDeliver;
 import io.terminus.doctor.event.reportBi.helper.FieldHelper;
 import io.terminus.doctor.event.util.EventUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +26,7 @@ import static java.util.Objects.isNull;
  * Created by xjn on 18/1/13.
  * email:xiaojiannan@terminus.io
  */
+@Slf4j
 @Component
 public class DoctorDeliverSynchronizer {
     private final DoctorReportDeliverDao doctorReportDeliverDao;
@@ -36,10 +39,10 @@ public class DoctorDeliverSynchronizer {
     }
 
     public void synchronize(DoctorPigDailyExtend pigDaily,
-                            DoctorDimensionCriteria dimensionCriteria){
+                            DoctorDimensionCriteria dimensionCriteria) {
         DoctorReportDeliver reportBI;
         if (isNull(dimensionCriteria.getSumAt()) || isNull(reportBI = doctorReportDeliverDao.findByDimension(dimensionCriteria))) {
-            reportBI= new DoctorReportDeliver();
+            reportBI = new DoctorReportDeliver();
             reportBI.setOrzType(dimensionCriteria.getOrzType());
             reportBI.setDateType(dimensionCriteria.getDateType());
         }
@@ -47,17 +50,24 @@ public class DoctorDeliverSynchronizer {
     }
 
     public void synchronize(DoctorGroupDailyExtend groupDaily,
-                            DoctorDimensionCriteria dimensionCriteria){
+                            DoctorDimensionCriteria dimensionCriteria) {
         DoctorReportDeliver reportBI;
         if (isNull(dimensionCriteria.getSumAt()) || isNull(reportBI = doctorReportDeliverDao.findByDimension(dimensionCriteria))) {
-            reportBI= new DoctorReportDeliver();
+
+            log.info("deliver report not found,create it.sum at[{}],orz id[{}], orz type[{}],date type[{}]",
+                    DateUtil.toDateString(dimensionCriteria.getSumAt()),
+                    dimensionCriteria.getOrzId(),
+                    dimensionCriteria.getOrzType(),
+                    dimensionCriteria.getDateType());
+
+            reportBI = new DoctorReportDeliver();
             reportBI.setOrzType(dimensionCriteria.getOrzType());
             reportBI.setDateType(dimensionCriteria.getDateType());
         }
         insertOrUpdate(build(groupDaily, reportBI, dimensionCriteria.getIsRealTime()));
     }
 
-    private void insertOrUpdate(DoctorReportDeliver reportBi){
+    private void insertOrUpdate(DoctorReportDeliver reportBi) {
         if (isNull(reportBi.getId())) {
             doctorReportDeliverDao.create(reportBi);
             return;
@@ -129,7 +139,8 @@ public class DoctorDeliverSynchronizer {
         reportBi.setWeanNest(fieldHelper.filedUrl(filedUrlCriteria, pigDaily.getWeanNest(), "weanNest"));
         reportBi.setWeanCount(pigDaily.getWeanCount());
         reportBi.setWeanQualifiedCount(pigDaily.getWeanQualifiedCount());
-        reportBi.setWeanCountPerFarrow(fieldHelper.get(pigDaily.getWeanCount(), pigDaily.getWeanNest()));    }
+        reportBi.setWeanCountPerFarrow(fieldHelper.get(pigDaily.getWeanCount(), pigDaily.getWeanNest()));
+    }
 
     private void buildDelay(DoctorPigDailyExtend pigDaily, DoctorReportDeliver reportBi) {
         reportBi.setPigletWeakCountPerFarrow(fieldHelper.get(reportBi.getFarrowWeak(), pigDaily.getFarrowNest()));
@@ -190,6 +201,7 @@ public class DoctorDeliverSynchronizer {
         }
         return otherIn;
     }
+
     private Double outAvgWeight28(DoctorReportDeliver deliver) {
         Integer STANDARD_AGE = 28;
         return (EventUtil.getAvgWeight(deliver.getWeanWeightPerFarrow(), deliver.getWeanDayAge()))

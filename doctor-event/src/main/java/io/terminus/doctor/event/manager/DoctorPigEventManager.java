@@ -52,6 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
@@ -192,7 +193,7 @@ public class DoctorPigEventManager {
                 //处理事件
                 handler.handle(eventInfos, executeEvent, fromTrack);
             } catch (InvalidException e) {
-               throw new InvalidException(true, e.getError(), inputDto.getPigCode(), e.getParams());
+                throw new InvalidException(true, e.getError(), inputDto.getPigCode(), e.getParams());
             }
         });
         log.info("batch pig event handle ending, event type:{}", eventInputs.get(0).getEventType());
@@ -235,7 +236,8 @@ public class DoctorPigEventManager {
         try {
             if (notEmpty(dtos)) {
                 //checkFarmIdAndEventAt(dtos);
-                coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(dtos.get(0).getOrgId()));
+                String messageId = UUID.randomUUID().toString().replace("-", "");
+                coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(dtos.get(0).getOrgId(), messageId));
                 publishPigEvent(dtos, coreEventDispatcher, publisher);
             }
         } catch (Exception e) {
