@@ -1,5 +1,6 @@
 package io.terminus.doctor.move.tools;
 
+import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.doctor.common.exception.InvalidException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,12 @@ public class DoctorMessageConverter {
         if (e instanceof InvalidException) {
             return convert((InvalidException) e);
         }
-        String errorMessage = messageSource.getMessage(e.getMessage(), new Object[]{}, Locale.CHINA);
+        String errorMessage;
+        if (isNull(e.getMessage())) {
+            errorMessage = Throwables.getStackTraceAsString(e);
+        } else {
+            errorMessage = messageSource.getMessage(e.getMessage(), new Object[]{}, Locale.CHINA);
+        }
         return new JsonResponseException(errorMessage);
     }
 

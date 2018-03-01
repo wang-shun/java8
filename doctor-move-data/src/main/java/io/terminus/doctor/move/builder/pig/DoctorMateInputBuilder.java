@@ -20,6 +20,7 @@ import java.util.Map;
 
 import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
@@ -84,7 +85,7 @@ public class DoctorMateInputBuilder implements DoctorPigEventInputBuilder {
         Long mateBoarId;
         String mateBoarCode;
         if (Strings.isNullOrEmpty(importPigEvent.getMateBoarCode())) {
-            DoctorPig mateBoar = importBasicData.getDefaultMateBoar();
+            DoctorPig mateBoar = expectNotNull(importBasicData.getDefaultMateBoar(), "not.has.mate.boar");
             mateBoarId = mateBoar.getId();
             mateBoarCode = mateBoar.getPigCode();
         } else {
