@@ -106,6 +106,8 @@ public class SowPregCheckProducer extends AbstractJobProducer {
                                 .businessType(DoctorMessage.BUSINESS_TYPE.PIG.getValue())
                                 .status(pigDto.getStatus())
                                 .statusName(pigDto.getStatusName())
+                                .operatorId(matingPigEvent.getOperatorId())
+                                .operatorName(matingPigEvent.getOperatorName())
                                 .build();
                         createMessage(sUsers, ruleRole, messageInfo);
                     }
