@@ -33,9 +33,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sun.misc.UUDecoder;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Desc:
@@ -80,10 +82,11 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         try {
             DoctorGroupEvent groupEvent = doctorGroupEventDao.findById(eventId);
             if (groupEvent == null) {
-                throw  new InvalidException("group.event.not.found", eventId);
+                throw new InvalidException("group.event.not.found", eventId);
             }
             doctorRollbackManager.rollbackGroup(groupEvent, operatorId, operatorName);
-            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(groupEvent.getOrgId()));
+            String messageId = UUID.randomUUID().toString().replace("-", "");
+            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(groupEvent.getOrgId(), messageId));
             return RespWithEx.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             return RespWithEx.fail(e.getMessage());
@@ -103,7 +106,8 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                 throw new InvalidException("pig.event.not.found", eventId);
             }
             doctorRollbackManager.rollbackPig(pigEvent, operatorId, operatorName);
-            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(pigEvent.getOrgId()));
+            String messageId = UUID.randomUUID().toString().replace("-", "");
+            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(pigEvent.getOrgId(), messageId));
             return RespWithEx.ok(Boolean.TRUE);
         } catch (InvalidException e) {
             return RespWithEx.exception(e);
@@ -213,7 +217,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             liveStock.setBoar(doctorKpiDao.realTimeLiveStockBoar(farmId, startAt));            //公猪
 
             DoctorDailyReportDto everyRedis = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
-            if (everyRedis == null ) {
+            if (everyRedis == null) {
                 continue;
             }
 //            everyRedis.setLiveStock(liveStock);

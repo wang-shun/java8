@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.UUID;
 
 import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
 
@@ -59,7 +60,8 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
     public RespWithEx<Boolean> modifyPigEvent(BasePigEventInputDto inputDto, Long eventId, Integer eventType) {
         try {
             pigEventManager.modifyPigEventHandle(inputDto, eventId, eventType);
-            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(doctorPigEventDao.findEventById(eventId).getOrgId()));
+            String messageId = UUID.randomUUID().toString().replace("-", "");
+            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(doctorPigEventDao.findEventById(eventId).getOrgId(), messageId));
             return RespWithEx.ok(true);
         } catch (InvalidException e) {
             log.error("modify pig event failed , inputDto:{}, cuase:{}", inputDto, Throwables.getStackTraceAsString(e));
@@ -74,7 +76,8 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
     public RespWithEx<Boolean> modifyGroupEvent(BaseGroupInput inputDto, Long eventId, Integer eventType) {
         try {
             groupEventManager.modifyGroupEventHandle(inputDto, eventId, eventType);
-            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(doctorGroupEventDao.findEventById(eventId).getOrgId()));
+            String messageId = UUID.randomUUID().toString().replace("-", "");
+            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(doctorGroupEventDao.findEventById(eventId).getOrgId(), messageId));
             return RespWithEx.ok(true);
         } catch (InvalidException e) {
             log.error("modify pig event failed , inputDto:{}, cuase:{}", inputDto, Throwables.getStackTraceAsString(e));
@@ -90,7 +93,8 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
     public RespWithEx<Boolean> modifyPigEvent(String oldPigEvent, DoctorPigEvent pigEvent) {
         try {
             doctorPigEventManager.modifyPigEvent(pigEvent, oldPigEvent);
-            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(pigEvent.getOrgId()));
+            String messageId = UUID.randomUUID().toString().replace("-", "");
+            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(pigEvent.getOrgId(), messageId));
             return RespWithEx.ok(true);
         } catch (Exception e) {
             log.error("modify pig event failed , inputDto:{}, cause:{}", oldPigEvent, Throwables.getStackTraceAsString(e));

@@ -13,16 +13,24 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DoctorReportBiReaTimeEvent {
+
+
+    /**
+     * 消息ID，用于链路跟踪
+     */
+    private String messageId;
+
     private Long orzId;
 
     /**
      * 组织类型
+     *
      * @see io.terminus.doctor.event.enums.OrzDimension
      */
     private Integer orzType;
 
-    public DoctorReportBiReaTimeEvent(Long orzId) {
-        this(orzId, OrzDimension.ORG.getValue());
+    public DoctorReportBiReaTimeEvent(Long orzId, String messageId) {
+        this(messageId, orzId, OrzDimension.ORG.getValue());
     }
 
 }
