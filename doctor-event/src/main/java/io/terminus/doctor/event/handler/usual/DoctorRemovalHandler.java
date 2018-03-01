@@ -41,6 +41,8 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
         if (!Objects.equals(executeEvent.getEventSource(),SourceType.MOVE.getValue())){
             expectTrue(!Objects.equals(fromTrack.getStatus(), PigStatus.FEED.getKey()), "removal.status.not.feed");
         }
+        expectTrue(!Objects.equals(fromTrack.getStatus(), PigStatus.Removal.getKey()), "pig.has.removed");
+        expectTrue(!Objects.equals(fromTrack.getStatus(), PigStatus.BOAR_LEAVE.getKey()), "pig.has.removed");
     }
 
     @Override
