@@ -365,19 +365,19 @@ public class DoctorImportDataService {
                             .put("realName", realName)
                             .map());
 
-                    Sub sub = new Sub();
-                    sub.setUserId(subUser.getId());
-                    sub.setUserName(subUser.getName());
-                    sub.setRealName(Params.get(subUser.getExtra(), "realName"));
-                    sub.setRoleId(subRole.getId());
-                    sub.setRoleName(subRole.getName());
-                    sub.setParentUserId(Long.valueOf(Params.get(subUser.getExtra(), "pid")));
-                    sub.setContact(Params.get(subUser.getExtra(), "contact"));
-                    sub.setStatus(UserStatus.NORMAL.value());
-                    subDao.create(sub);
+//                    Sub sub = new Sub();
+//                    sub.setUserId(subUser.getId());
+//                    sub.setUserName(subUser.getName());
+//                    sub.setRealName(Params.get(subUser.getExtra(), "realName"));
+//                    sub.setRoleId(subRole.getId());
+//                    sub.setRoleName(subRole.getName());
+//                    sub.setParentUserId(Long.valueOf(Params.get(subUser.getExtra(), "pid")));
+//                    sub.setContact(Params.get(subUser.getExtra(), "contact"));
+//                    sub.setStatus(UserStatus.NORMAL.value());
+//                    subDao.create(sub);
 
                     userWriteService.update(subUser);
-                    userDaoExt.updateAll(subUser);
+//                    userDaoExt.updateAll(subUser);
                     subUserId = subUser.getId();
                 } else {
                     subUser = new User();
