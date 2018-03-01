@@ -2120,3 +2120,9 @@ ALTER TABLE `doctor_user_subs` ADD COLUMN `frozen` tinyint(4) DEFAULT NULL COMME
 ALTER TABLE `doctor_farms` ADD COLUMN `number` VARCHAR (64) DEFAULT NULL COMMENT '猪场编号' after `farm_code`;
 
 
+-- deliver——report添加创建日期和更新日期 2018-03-01
+ALTER TABLE `pig_doctor_online`.`doctor_report_delivers`
+ADD COLUMN `created_at` DATETIME NULL AFTER `piglet_end`,
+ADD COLUMN `updated_at` DATETIME NULL AFTER `created_at`;
+
+
