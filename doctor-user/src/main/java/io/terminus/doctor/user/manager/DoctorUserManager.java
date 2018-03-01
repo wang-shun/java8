@@ -169,7 +169,12 @@ public class DoctorUserManager {
                 sub.setRoleId(roleId);
                 sub.setRoleName(subRole.getName());
                 sub.setContact(Params.get(user.getExtra(), "contact"));
-                sub.setFrozen(IsOrNot.NO.getKey());
+                if (notNull(user.getExtra()) && user.getExtra().containsKey("frozen")
+                        && Objects.equals(user.getExtra().get("frozen"), IsOrNot.YES.getKey().toString())) {
+                    sub.setFrozen(IsOrNot.YES.getKey());
+                } else {
+                    sub.setFrozen(IsOrNot.NO.getKey());
+                }
                 subDao.update(sub);
             }
 
@@ -181,7 +186,6 @@ public class DoctorUserManager {
             if (isNull(primaryUser)) {
                 createPrimaryUser(user);
             } else {
-                primaryUser.setFrozen(IsOrNot.NO.getKey());
                 primaryUser.setRelFarmId(null);
                 primaryUser.setUserName(user.getMobile());
                 String realName = user.getName();
@@ -190,6 +194,12 @@ public class DoctorUserManager {
                 }
                 primaryUser.setRealName(realName);
                 primaryUser.setStatus(UserStatus.NORMAL.value());
+                if (notNull(user.getExtra()) && user.getExtra().containsKey("frozen")
+                        && Objects.equals(user.getExtra().get("frozen"), IsOrNot.YES.getKey().toString())) {
+                    primaryUser.setFrozen(IsOrNot.YES.getKey());
+                } else {
+                    primaryUser.setFrozen(IsOrNot.NO.getKey());
+                }
                 primaryUserDao.update(primaryUser);
             }
 
