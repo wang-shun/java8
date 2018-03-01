@@ -2120,17 +2120,19 @@ ALTER TABLE `doctor_user_subs` ADD COLUMN `frozen` tinyint(4) DEFAULT NULL COMME
 ALTER TABLE `doctor_farms` ADD COLUMN `number` VARCHAR (64) DEFAULT NULL COMMENT '猪场编号' after `farm_code`;
 
 
-CREATE TABLE `doctor_track_histories` (
+CREATE TABLE `doctor_track_snapshots` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `farm_id` bigint(20) NOT NULL COMMENT '猪场id',
+  `farm_name` VARCHAR(64) NOT NULL COMMENT '猪场名称',
   `business_id` bigint(20) NOT NULL COMMENT '猪或者猪群id',
+  `business_code` VARCHAR(64) NOT NULL COMMENT '猪或者猪群Code',
   `business_type` tinyint(4) NOT NULL COMMENT '类型，1-》猪，2-》猪群',
   `event_id` bigint(20) NOT NULL COMMENT '前置事件或者编辑记录id',
   `track_json` VARCHAR (1024) NOT NULL COMMENT 'track json',
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `index_farm_id` (`farm_id`)
+  KEY `index_farm_id` (`farm_id`),
   KEY `index_business_id` (`business_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='猪或者猪群历史记录表';
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='猪或者猪群快照表';
 
