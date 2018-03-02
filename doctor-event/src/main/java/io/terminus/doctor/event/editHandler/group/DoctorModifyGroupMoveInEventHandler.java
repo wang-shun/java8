@@ -39,7 +39,7 @@ public class DoctorModifyGroupMoveInEventHandler extends DoctorAbstractModifyGro
     protected void modifyHandleCheck(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
         super.modifyHandleCheck(oldGroupEvent, input);
         DoctorMoveInGroupInput newInput = (DoctorMoveInGroupInput) input;
-        validGroupLiveStock(oldGroupEvent.getGroupId(), oldGroupEvent.getGroupCode(),
+        validGroupLiveStock(oldGroupEvent.getGroupId(), oldGroupEvent.getGroupCode(), oldGroupEvent.getId(),
                 oldGroupEvent.getEventAt(), DateUtil.toDate(newInput.getEventAt()),
                 -oldGroupEvent.getQuantity(), newInput.getQuantity(),
                 EventUtil.minusInt(newInput.getQuantity(), oldGroupEvent.getQuantity()));
