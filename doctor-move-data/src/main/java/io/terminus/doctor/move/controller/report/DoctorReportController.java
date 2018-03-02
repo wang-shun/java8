@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -261,11 +262,11 @@ public class DoctorReportController {
     public Boolean synchronizeAllDayBiData(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start) {
 
         List<DoctorFarm> doctorFarms = RespHelper.orServEx(doctorFarmReadService.findAllFarms());
-        List<Long> orzList = doctorFarms.stream().map(DoctorFarm::getId).collect(Collectors.toList());
+        Set<Long> orzList = doctorFarms.stream().map(DoctorFarm::getId).collect(Collectors.toSet());
         orzList.parallelStream().forEach(orzId ->
                 doctorDailyReportV2Service.synchronizeDeltaDayBiData(orzId, start, OrzDimension.FARM.getValue()));
 
-        orzList = doctorFarms.stream().map(DoctorFarm::getOrgId).collect(Collectors.toList());
+        orzList = doctorFarms.stream().map(DoctorFarm::getOrgId).collect(Collectors.toSet());
         orzList.parallelStream().forEach(orzId ->
                 doctorDailyReportV2Service.synchronizeDeltaDayBiData(orzId, start, OrzDimension.ORG.getValue()));
         return Boolean.TRUE;
