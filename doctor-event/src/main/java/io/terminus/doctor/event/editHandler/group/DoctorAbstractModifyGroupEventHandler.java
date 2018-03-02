@@ -64,21 +64,21 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     protected DoctorGroupTrackDao doctorGroupTrackDao;
     @Autowired
     protected DoctorGroupDailyDao doctorGroupDailyDao;
-//    @Autowired
+    @Autowired
     private DoctorEventModifyLogDao doctorEventModifyLogDao;
-//    @Autowired
+    @Autowired
     protected DoctorDailyReportV2Manager doctorDailyReportManager;
     @Autowired
     protected DoctorBarnDao doctorBarnDao;
     @Autowired
     protected DoctorDailyGroupDao oldDailyGroupDao;
-//    @Autowired
+    @Autowired
     protected DoctorDailyReportManager oldDailyReportManager;
 
-//    @Autowired
+    @Autowired
     protected DoctorConcurrentControl doctorConcurrentControl;
 
-//    @Autowired
+    @Autowired
     protected DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao;
 
     protected final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
