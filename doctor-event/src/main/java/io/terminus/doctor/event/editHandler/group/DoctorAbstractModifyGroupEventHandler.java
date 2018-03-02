@@ -64,21 +64,21 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     protected DoctorGroupTrackDao doctorGroupTrackDao;
     @Autowired
     protected DoctorGroupDailyDao doctorGroupDailyDao;
-    @Autowired
+//    @Autowired
     private DoctorEventModifyLogDao doctorEventModifyLogDao;
-    @Autowired
+//    @Autowired
     protected DoctorDailyReportV2Manager doctorDailyReportManager;
     @Autowired
     protected DoctorBarnDao doctorBarnDao;
     @Autowired
     protected DoctorDailyGroupDao oldDailyGroupDao;
-    @Autowired
+//    @Autowired
     protected DoctorDailyReportManager oldDailyReportManager;
 
-    @Autowired
+//    @Autowired
     protected DoctorConcurrentControl doctorConcurrentControl;
 
-    @Autowired
+//    @Autowired
     protected DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao;
 
     protected final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
@@ -522,33 +522,28 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         return true;
     }
 
-    public void validGroupLiveStock(Long groupId, String groupCode, Date sumAt, Integer changeCount) {
-        validGroupLiveStock(groupId, groupCode, sumAt, sumAt, null, null, changeCount);
-    }
 
     /**
-     * 猪群存栏校验
-     *
-     * @param groupId     猪群id
-     * @param oldEventAt  原时间
-     * @param newEventAt  新时间
-     * @param oldQuantity 原数量
-     * @param newQuantity 新数量
+     * 新增事件时，校验猪群时间之后的猪群存栏不小于零
+     * @param groupId 猪群id
+     * @param groupCode 猪群code
+     * @param eventAt 时间时间
+     * @param changeCount 变化数量
      */
-    protected void validGroupLiveStock(Long groupId, String groupCode, Date oldEventAt, Date newEventAt, Integer oldQuantity,
-                                       Integer newQuantity, Integer changeCount) {
-        oldEventAt = new DateTime(oldEventAt).withTimeAtStartOfDay().toDate();
-        newEventAt = new DateTime(newEventAt).withTimeAtStartOfDay().toDate();
-        Date sumAt = oldEventAt.before(newEventAt) ? oldEventAt : newEventAt;
+    public void validGroupLiveStock(Long groupId, String groupCode, Date eventAt, Integer changeCount) {
         List<Integer> includeTypes = Lists.newArrayList(GroupEventType.CHANGE.getValue(), GroupEventType.MOVE_IN.getValue(),
                 GroupEventType.TRANS_FARM.getValue(), GroupEventType.TRANS_GROUP.getValue());
-        List<DoctorGroupEvent> groupEventList = doctorGroupEventDao.findEventIncludeTypesForDesc(groupId, includeTypes, DateUtil.toDateString(sumAt));
+        Date dayAfterEventAt = new DateTime(eventAt).plusDays(1).toDate();
+        List<DoctorGroupEvent> groupEventList = doctorGroupEventDao.findEventIncludeTypesForDesc(groupId, includeTypes, DateUtil.toDateString(dayAfterEventAt));
         DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(groupId);
-        int quantity = oldEventAt.equals(newEventAt)
-                ? EventUtil.plusInt(groupTrack.getQuantity(), changeCount)
-                : groupTrack.getQuantity() + newQuantity - oldQuantity;
+        int quantity = EventUtil.plusInt(groupTrack.getQuantity(), changeCount);
+
+        if (quantity < 0) {
+            throw new InvalidException("new.report.group.live.stock.lower.zero", groupCode, DateUtil.toDateString(new Date()));
+        }
 
         for (DoctorGroupEvent groupEvent : groupEventList) {
+
             if (quantity < 0) {
                 throw new InvalidException("new.report.group.live.stock.lower.zero", groupCode, DateUtil.toDateString(groupEvent.getEventAt()));
             }
@@ -557,6 +552,77 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
                 quantity = EventUtil.minusInt(quantity, groupEvent.getQuantity());
             } else {
                 quantity = EventUtil.plusInt(quantity, groupEvent.getQuantity());
+            }
+        }
+    }
+
+    /**
+     * 编辑猪群事件时猪群存栏校验
+     *
+     * @param groupId     猪群id
+     * @param oldEventAt  原时间
+     * @param newEventAt  新时间
+     * @param oldQuantity 原数量
+     * @param newQuantity 新数量
+     */
+    public void validGroupLiveStock(Long groupId, String groupCode, Long eventId, Date oldEventAt, Date newEventAt, Integer oldQuantity,
+                                       Integer newQuantity, Integer changeCount) {
+        oldEventAt = new DateTime(oldEventAt).withTimeAtStartOfDay().toDate();
+        newEventAt = new DateTime(newEventAt).withTimeAtStartOfDay().toDate();
+        Date sumAt = oldEventAt.before(newEventAt) ? oldEventAt : newEventAt;
+        List<Integer> includeTypes = Lists.newArrayList(GroupEventType.CHANGE.getValue(), GroupEventType.MOVE_IN.getValue(),
+                GroupEventType.TRANS_FARM.getValue(), GroupEventType.TRANS_GROUP.getValue());
+        List<DoctorGroupEvent> groupEventList = doctorGroupEventDao.findEventIncludeTypesForDesc(groupId, includeTypes, DateUtil.toDateString(sumAt));
+        DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(groupId);
+
+        int quantity;
+
+        //事件日期没有被编辑
+        if (oldEventAt.equals(newEventAt)) {
+            quantity = EventUtil.plusInt(groupTrack.getQuantity(), changeCount);
+
+            for (DoctorGroupEvent groupEvent : groupEventList) {
+                if (quantity < 0) {
+                    throw new InvalidException("new.report.group.live.stock.lower.zero", groupCode, DateUtil.toDateString(groupEvent.getEventAt()));
+                }
+
+                //编辑事件之前发生的事件肯定都是正数，不需要再校验
+                if (groupEvent.getId().equals(eventId)) {
+                    break;
+                }
+
+                if (Objects.equals(groupEvent.getType(), GroupEventType.MOVE_IN.getValue())) {
+                    quantity = EventUtil.minusInt(quantity, groupEvent.getQuantity());
+                } else {
+                    quantity = EventUtil.plusInt(quantity, groupEvent.getQuantity());
+                }
+            }
+        } else {
+
+            //事件日期被编辑
+            quantity = groupTrack.getQuantity();
+
+            for (DoctorGroupEvent groupEvent : groupEventList) {
+
+                int sameDayLiveStock = quantity;
+
+                if (!groupEvent.getEventAt().before(oldEventAt)) {
+                    sameDayLiveStock += oldQuantity;
+                }
+
+                if (!groupEvent.getEventAt().before(newEventAt)) {
+                    sameDayLiveStock += newQuantity;
+                }
+
+                if (sameDayLiveStock < 0) {
+                    throw new InvalidException("new.report.group.live.stock.lower.zero", groupCode, DateUtil.toDateString(groupEvent.getEventAt()));
+                }
+
+                if (Objects.equals(groupEvent.getType(), GroupEventType.MOVE_IN.getValue())) {
+                    quantity = EventUtil.minusInt(quantity, groupEvent.getQuantity());
+                } else {
+                    quantity = EventUtil.plusInt(quantity, groupEvent.getQuantity());
+                }
             }
         }
 
