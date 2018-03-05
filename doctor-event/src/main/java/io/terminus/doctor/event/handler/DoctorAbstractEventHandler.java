@@ -7,11 +7,13 @@ import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
+import io.terminus.doctor.event.dao.DoctorTrackSnapshotDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
@@ -21,9 +23,11 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.helper.DoctorConcurrentControl;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.model.DoctorTrackSnapshot;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -32,9 +36,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import static io.terminus.common.utils.Arguments.isNull;
-import static io.terminus.common.utils.Arguments.notEmpty;
-import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.common.utils.Arguments.*;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 import static io.terminus.doctor.event.dto.DoctorBasicInputInfoDto.generateEventDescFromExtra;
 
@@ -57,8 +59,11 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
     protected DoctorBarnDao doctorBarnDao;
     @Autowired
     protected DoctorConcurrentControl doctorConcurrentControl;
+    @Autowired
+    protected DoctorTrackSnapshotDao doctorTrackSnapshotDao;
 
     protected static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_EMPTY_MAPPER;
+    protected static final ToJsonMapper TO_JSON_MAPPER = ToJsonMapper.JSON_NON_EMPTY_MAPPER;
 
     public static final List<Integer> IGNORE_EVENT = Lists.newArrayList(PigEvent.CONDITION.getKey(),
             PigEvent.VACCINATION.getKey(), PigEvent.DISEASE.getKey(), PigEvent.SEMEN.getKey());
@@ -117,6 +122,8 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .build();
         doctorEventInfoList.add(doctorEventInfo);
 
+        //新增事件后记录track snapshot
+        createTrackSnapshot(executeEvent);
 
         if (isNull(executeEvent.getEventSource()) || Objects.equals(executeEvent.getEventSource(), SourceType.INPUT.getValue())) {
             //7.更新日记录
@@ -225,6 +232,24 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         toInputDto.setEventType(pigEvent.getKey());
         toInputDto.setEventDesc(pigEvent.getDesc());
         toInputDto.setEventSource(fromInputDto.getEventSource());
+    }
+
+    /**
+     * 新增事件后记录track snapshot
+     * @param newEvent 新增事件
+     */
+    protected void createTrackSnapshot(DoctorPigEvent newEvent) {
+        DoctorPigTrack currentTrack = doctorPigTrackDao.findByPigId(newEvent.getPigId());
+        DoctorTrackSnapshot snapshot = DoctorTrackSnapshot.builder()
+                .farmId(newEvent.getFarmId())
+                .farmName(newEvent.getFarmName())
+                .businessId(newEvent.getPigId())
+                .businessCode(newEvent.getPigCode())
+                .businessType(DoctorEventModifyRequest.TYPE.PIG.getValue())
+                .eventId(newEvent.getId())
+                .trackJson(TO_JSON_MAPPER.toJson(currentTrack))
+                .build();
+        doctorTrackSnapshotDao.create(snapshot);
     }
 
     protected Date generateEventAt(Date eventAt){
