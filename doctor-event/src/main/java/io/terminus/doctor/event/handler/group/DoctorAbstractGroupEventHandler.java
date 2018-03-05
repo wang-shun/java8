@@ -7,10 +7,12 @@ import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dao.DoctorTrackSnapshotDao;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
@@ -23,9 +25,11 @@ import io.terminus.doctor.event.event.DoctorGroupPublishDto;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
 import io.terminus.doctor.event.helper.DoctorConcurrentControl;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.DoctorTrackSnapshot;
 import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +39,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import static io.terminus.common.utils.Arguments.isNull;
-import static io.terminus.common.utils.Arguments.notEmpty;
-import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.common.utils.Arguments.*;
 import static io.terminus.doctor.common.enums.PigType.*;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
@@ -65,6 +67,11 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     private DoctorGroupEventListener doctorGroupEventListener;
     @Autowired
     private DoctorConcurrentControl doctorConcurrentControl;
+    @Autowired
+    private DoctorTrackSnapshotDao doctorTrackSnapshotDao;
+
+    protected static final ToJsonMapper TO_JSON_MAPPER = ToJsonMapper.JSON_NON_EMPTY_MAPPER;
+
 
     @Autowired
     public DoctorAbstractGroupEventHandler(DoctorGroupTrackDao doctorGroupTrackDao,
@@ -99,6 +106,24 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
                 .pigType(group.getPigType())
                 .build();
         eventInfoList.add(eventInfo);
+    }
+
+    /**
+     * 新增事件后记录track snapshot
+     * @param newEvent 新增事件
+     */
+    protected void createTrackSnapshot(DoctorGroupEvent newEvent) {
+        DoctorGroupTrack currentTrack = doctorGroupTrackDao.findByGroupId(newEvent.getGroupId());
+        DoctorTrackSnapshot snapshot = DoctorTrackSnapshot.builder()
+                .farmId(newEvent.getFarmId())
+                .farmName(newEvent.getFarmName())
+                .businessId(newEvent.getGroupId())
+                .businessCode(newEvent.getGroupCode())
+                .businessType(DoctorEventModifyRequest.TYPE.GROUP.getValue())
+                .eventId(newEvent.getId())
+                .trackJson(TO_JSON_MAPPER.toJson(currentTrack))
+                .build();
+        doctorTrackSnapshotDao.create(snapshot);
     }
 
     @Override
