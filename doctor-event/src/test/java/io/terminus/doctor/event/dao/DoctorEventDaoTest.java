@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -36,5 +37,11 @@ public class DoctorEventDaoTest extends BaseDaoTest {
     @Test
     public void dayAgeListForBarn() {
         System.out.println(doctorGroupJoinDao.dayAgeListForBarn(164L));
+    }
+
+    @Test
+    public void findUnWeanCountByParity() {
+        Integer unWeanCount = doctorPigEventDao.findUnWeanCountByParity(498954L, 1);
+        Assert.assertEquals(2L, unWeanCount.longValue());
     }
 }
