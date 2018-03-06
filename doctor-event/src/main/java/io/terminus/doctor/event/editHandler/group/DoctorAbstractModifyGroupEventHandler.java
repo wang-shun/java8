@@ -115,7 +115,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         doctorGroupEventDao.updateIncludeNull(newEvent);
 
         //4.创建事件完成后创建编辑记录
-        createModifyLog(oldGroupEvent, newEvent);
+        Long modifyLogId = createModifyLog(oldGroupEvent, newEvent);
 
         //5.更新猪群
         if (isUpdateGroup(changeDto)) {
@@ -129,6 +129,8 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
             DoctorGroupTrack oldTrack = doctorGroupTrackDao.findByGroupId(oldGroupEvent.getGroupId());
             DoctorGroupTrack newTrack = buildNewTrack(oldTrack, changeDto);
             doctorGroupTrackDao.update(newTrack);
+
+            createTrackSnapshotFroModify(newEvent, modifyLogId);
 
             //自动关闭或开启猪群
             autoCloseOrOpen(newTrack);
@@ -164,7 +166,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         doctorGroupEventDao.delete(deleteGroupEvent.getId());
 
         //4.删除记录
-        createModifyLog(deleteGroupEvent);
+        Long modifyLogId = createModifyLog(deleteGroupEvent);
 
         //5.更新猪
         if (isUpdateGroup(deleteGroupEvent.getType())) {
@@ -188,6 +190,8 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
                 //自动关闭或开启猪群
                 autoCloseOrOpen(newTrack);
+
+                createTrackSnapshotFroDelete(deleteGroupEvent, modifyLogId);
             }
         }
 
@@ -427,13 +431,44 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         return true;
     }
 
+    private void createTrackSnapshotFroDelete(DoctorGroupEvent deleteEvent, Long modifyLogId) {
+        //删除后记录track
+        DoctorGroupTrack currentTrack = doctorGroupTrackDao.findByGroupId(deleteEvent.getGroupId());
+        DoctorTrackSnapshot snapshot = DoctorTrackSnapshot.builder()
+                .farmId(deleteEvent.getFarmId())
+                .farmName(deleteEvent.getFarmName())
+                .businessId(deleteEvent.getGroupId())
+                .businessCode(deleteEvent.getGroupCode())
+                .businessType(DoctorEventModifyRequest.TYPE.GROUP.getValue())
+                .eventId(modifyLogId)
+                .eventSource(DoctorTrackSnapshot.EventSource.MODIFY.getValue())
+                .trackJson(TO_JSON_MAPPER.toJson(currentTrack))
+                .build();
+        doctorTrackSnapshotDao.create(snapshot);
+    }
+
+    private void createTrackSnapshotFroModify(DoctorGroupEvent newEvent, Long modifyLogId) {
+        //编辑后记录track
+        DoctorGroupTrack currentTrack = doctorGroupTrackDao.findByGroupId(newEvent.getGroupId());
+        DoctorTrackSnapshot snapshot = DoctorTrackSnapshot.builder()
+                .farmId(newEvent.getFarmId())
+                .farmName(newEvent.getFarmName())
+                .businessId(newEvent.getGroupId())
+                .businessCode(newEvent.getGroupCode())
+                .businessType(DoctorEventModifyRequest.TYPE.GROUP.getValue())
+                .eventId(modifyLogId)
+                .eventSource(DoctorTrackSnapshot.EventSource.MODIFY.getValue())
+                .trackJson(TO_JSON_MAPPER.toJson(currentTrack))
+                .build();
+        doctorTrackSnapshotDao.create(snapshot);
+    }
     /**
      * 创建编辑记录
      *
      * @param oldEvent 原事件
      * @param newEvent 新事件
      */
-    private void createModifyLog(DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent) {
+    private Long createModifyLog(DoctorGroupEvent oldEvent, DoctorGroupEvent newEvent) {
         DoctorEventModifyLog modifyLog = DoctorEventModifyLog.builder()
                 .businessId(newEvent.getGroupId())
                 .businessCode(newEvent.getGroupCode())
@@ -443,20 +478,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
                 .type(DoctorEventModifyRequest.TYPE.GROUP.getValue())
                 .build();
         doctorEventModifyLogDao.create(modifyLog);
-
-        //编辑后记录track
-        DoctorGroupTrack currentTrack = doctorGroupTrackDao.findByGroupId(newEvent.getGroupId());
-        DoctorTrackSnapshot snapshot = DoctorTrackSnapshot.builder()
-                .farmId(newEvent.getFarmId())
-                .farmName(newEvent.getFarmName())
-                .businessId(newEvent.getGroupId())
-                .businessCode(newEvent.getGroupCode())
-                .businessType(DoctorEventModifyRequest.TYPE.GROUP.getValue())
-                .eventId(modifyLog.getId())
-                .eventSource(DoctorTrackSnapshot.EventSource.MODIFY.getValue())
-                .trackJson(TO_JSON_MAPPER.toJson(currentTrack))
-                .build();
-        doctorTrackSnapshotDao.create(snapshot);
+        return modifyLog.getId();
     }
 
     /**
@@ -464,7 +486,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      *
      * @param deleteEvent 删除事件
      */
-    private void createModifyLog(DoctorGroupEvent deleteEvent) {
+    private Long createModifyLog(DoctorGroupEvent deleteEvent) {
         DoctorEventModifyLog modifyLog = DoctorEventModifyLog.builder()
                 .businessId(deleteEvent.getGroupId())
                 .businessCode(deleteEvent.getGroupCode())
@@ -474,19 +496,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
                 .build();
         doctorEventModifyLogDao.create(modifyLog);
 
-        //删除后记录track
-        DoctorGroupTrack currentTrack = doctorGroupTrackDao.findByGroupId(deleteEvent.getGroupId());
-        DoctorTrackSnapshot snapshot = DoctorTrackSnapshot.builder()
-                .farmId(deleteEvent.getFarmId())
-                .farmName(deleteEvent.getFarmName())
-                .businessId(deleteEvent.getGroupId())
-                .businessCode(deleteEvent.getGroupCode())
-                .businessType(DoctorEventModifyRequest.TYPE.GROUP.getValue())
-                .eventId(modifyLog.getId())
-                .eventSource(DoctorTrackSnapshot.EventSource.MODIFY.getValue())
-                .trackJson(TO_JSON_MAPPER.toJson(currentTrack))
-                .build();
-        doctorTrackSnapshotDao.create(snapshot);
+        return modifyLog.getId();
     }
 
     /**

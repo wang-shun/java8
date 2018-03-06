@@ -76,9 +76,6 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
 
         doctorGroupEventDao.create(event);
 
-        //新增事件后记录track snapshot
-        createTrackSnapshot(event);
-
         //3.推演track
 
 
