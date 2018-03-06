@@ -64,6 +64,9 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         }
         doctorGroupEventDao.create(event);
 
+        //新增事件后记录track snapshot
+        createTrackSnapshot(event);
+
         input.setEventType(GroupEventType.MOVE_IN.getValue());
         DoctorMoveInGroupInput moveIn = (DoctorMoveInGroupInput) input;
 

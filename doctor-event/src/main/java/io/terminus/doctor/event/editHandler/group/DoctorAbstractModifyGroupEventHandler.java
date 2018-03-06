@@ -17,6 +17,7 @@ import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dao.DoctorTrackSnapshotDao;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
@@ -35,6 +36,7 @@ import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.DoctorTrackSnapshot;
 import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -80,6 +82,9 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
 
     @Autowired
     protected DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao;
+
+    @Autowired
+    protected DoctorTrackSnapshotDao doctorTrackSnapshotDao;
 
     protected final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
@@ -438,6 +443,20 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
                 .type(DoctorEventModifyRequest.TYPE.GROUP.getValue())
                 .build();
         doctorEventModifyLogDao.create(modifyLog);
+
+        //编辑后记录track
+        DoctorGroupTrack currentTrack = doctorGroupTrackDao.findByGroupId(newEvent.getGroupId());
+        DoctorTrackSnapshot snapshot = DoctorTrackSnapshot.builder()
+                .farmId(newEvent.getFarmId())
+                .farmName(newEvent.getFarmName())
+                .businessId(newEvent.getGroupId())
+                .businessCode(newEvent.getGroupCode())
+                .businessType(DoctorEventModifyRequest.TYPE.GROUP.getValue())
+                .eventId(modifyLog.getId())
+                .eventSource(DoctorTrackSnapshot.EventSource.MODIFY.getValue())
+                .trackJson(TO_JSON_MAPPER.toJson(currentTrack))
+                .build();
+        doctorTrackSnapshotDao.create(snapshot);
     }
 
     /**
@@ -454,6 +473,20 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
                 .type(DoctorEventModifyRequest.TYPE.GROUP.getValue())
                 .build();
         doctorEventModifyLogDao.create(modifyLog);
+
+        //删除后记录track
+        DoctorGroupTrack currentTrack = doctorGroupTrackDao.findByGroupId(deleteEvent.getGroupId());
+        DoctorTrackSnapshot snapshot = DoctorTrackSnapshot.builder()
+                .farmId(deleteEvent.getFarmId())
+                .farmName(deleteEvent.getFarmName())
+                .businessId(deleteEvent.getGroupId())
+                .businessCode(deleteEvent.getGroupCode())
+                .businessType(DoctorEventModifyRequest.TYPE.GROUP.getValue())
+                .eventId(modifyLog.getId())
+                .eventSource(DoctorTrackSnapshot.EventSource.MODIFY.getValue())
+                .trackJson(TO_JSON_MAPPER.toJson(currentTrack))
+                .build();
+        doctorTrackSnapshotDao.create(snapshot);
     }
 
     /**

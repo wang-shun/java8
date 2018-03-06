@@ -11,7 +11,14 @@ import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.dao.*;
+import io.terminus.doctor.common.utils.ToJsonMapper;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.dao.DoctorDailyGroupDao;
+import io.terminus.doctor.event.dao.DoctorGroupDao;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
+import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dao.DoctorKpiDao;
+import io.terminus.doctor.event.dao.DoctorTrackSnapshotDao;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInputInfo;
@@ -22,9 +29,11 @@ import io.terminus.doctor.event.event.ListenedGroupEvent;
 import io.terminus.doctor.event.helper.DoctorConcurrentControl;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorDailyGroup;
+import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.DoctorTrackSnapshot;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -37,9 +46,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static io.terminus.common.utils.Arguments.isNull;
-import static io.terminus.common.utils.Arguments.notEmpty;
-import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.common.utils.Arguments.*;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
@@ -64,13 +71,17 @@ public class DoctorGroupManager {
     private final DoctorDailyGroupDao doctorDailyGroupDao;
     private final DoctorConcurrentControl doctorConcurrentControl;
 
+    private final DoctorTrackSnapshotDao doctorTrackSnapshotDao;
+
+    private static final ToJsonMapper TO_JSON_MAPPER = ToJsonMapper.JSON_NON_EMPTY_MAPPER;
+
     @Autowired
     public DoctorGroupManager(DoctorGroupDao doctorGroupDao,
                               DoctorGroupEventDao doctorGroupEventDao,
                               DoctorGroupTrackDao doctorGroupTrackDao,
                               DoctorGroupReadService doctorGroupReadService,
                               CoreEventDispatcher coreEventDispatcher,
-                              DoctorBarnDao doctorBarnDao, DoctorKpiDao doctorKpiDao, DoctorDailyGroupDao doctorDailyGroupDao, DoctorConcurrentControl doctorConcurrentControl) {
+                              DoctorBarnDao doctorBarnDao, DoctorKpiDao doctorKpiDao, DoctorDailyGroupDao doctorDailyGroupDao, DoctorConcurrentControl doctorConcurrentControl, DoctorTrackSnapshotDao doctorTrackSnapshotDao) {
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
@@ -80,6 +91,7 @@ public class DoctorGroupManager {
         this.doctorKpiDao = doctorKpiDao;
         this.doctorDailyGroupDao = doctorDailyGroupDao;
         this.doctorConcurrentControl = doctorConcurrentControl;
+        this.doctorTrackSnapshotDao = doctorTrackSnapshotDao;
     }
 
     /**
@@ -151,10 +163,30 @@ public class DoctorGroupManager {
                 .build();
         eventInfoList.add(eventInfo);
 
+        createTrackSnapshot(groupEvent);
+
         autoDailyGroup(groupEvent.getFarmId(), groupEvent.getGroupId(), group.getPigType(), groupEvent.getEventAt());
         return groupId;
     }
 
+    /**
+     * 新增事件后记录track snapshot
+     * @param newEvent 新增事件
+     */
+    private void createTrackSnapshot(DoctorGroupEvent newEvent) {
+        DoctorGroupTrack currentTrack = doctorGroupTrackDao.findByGroupId(newEvent.getGroupId());
+        DoctorTrackSnapshot snapshot = DoctorTrackSnapshot.builder()
+                .farmId(newEvent.getFarmId())
+                .farmName(newEvent.getFarmName())
+                .businessId(newEvent.getGroupId())
+                .businessCode(newEvent.getGroupCode())
+                .businessType(DoctorEventModifyRequest.TYPE.GROUP.getValue())
+                .eventId(newEvent.getId())
+                .eventSource(DoctorTrackSnapshot.EventSource.EVENT.getValue())
+                .trackJson(TO_JSON_MAPPER.toJson(currentTrack))
+                .build();
+        doctorTrackSnapshotDao.create(snapshot);
+    }
     /**
      * 批量新建猪群
      *
