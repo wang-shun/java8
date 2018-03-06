@@ -2142,3 +2142,4 @@ CREATE TABLE `doctor_track_snapshots` (
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='猪或者猪群快照表';
 ALTER TABLE `doctor_track_snapshots` ADD COLUMN `event_source` tinyint (4) DEFAULT NULL COMMENT '前置事件来源' after `event_id`;
 
+create index doctor_event_modify_logs_business_id on doctor_event_modify_logs(business_id);
