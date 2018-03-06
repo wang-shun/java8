@@ -161,7 +161,7 @@ public class DoctorGroupTrack implements Serializable {
         } else if (notNull(birthDate)) {
             avgDayAge = DateUtil.getDeltaDays(birthDate, new Date());
         }
-        return avgDayAge < 0 ? 0 : avgDayAge;
+        return avgDayAge == null || avgDayAge < 0 ? 0 : avgDayAge;
     }
 
     public enum Sex {

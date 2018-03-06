@@ -109,6 +109,9 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
                 .eventType(executeEvent.getType())
                 .build();
         doctorEventInfoList.add(doctorEventInfo);
+
+        //新增事件后记录track snapshot
+        createTrackSnapshot(executeEvent);
     }
 
     /**

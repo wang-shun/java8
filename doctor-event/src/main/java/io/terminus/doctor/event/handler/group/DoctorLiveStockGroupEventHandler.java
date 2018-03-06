@@ -78,5 +78,7 @@ public class DoctorLiveStockGroupEventHandler extends DoctorAbstractGroupEventHa
         event.setExtraMap(liveStock);
         doctorGroupEventDao.create(event);
 
+        //新增事件后记录track snapshot
+        createTrackSnapshot(event);
      }
 }

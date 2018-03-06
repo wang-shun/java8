@@ -14,23 +14,23 @@ import io.terminus.doctor.event.dao.DoctorPigDailyDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dao.DoctorTrackSnapshotDao;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.manager.DoctorDailyReportManager;
-import io.terminus.doctor.event.manager.DoctorDailyReportV2Manager;
 import io.terminus.doctor.event.helper.DoctorConcurrentControl;
 import io.terminus.doctor.event.manager.DoctorDailyReportManager;
-import io.terminus.doctor.event.model.DoctorDailyReport;
+import io.terminus.doctor.event.manager.DoctorDailyReportV2Manager;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.model.DoctorTrackSnapshot;
 import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,6 +78,9 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     @Autowired
     protected DoctorConcurrentControl doctorConcurrentControl;
+
+    @Autowired
+    protected DoctorTrackSnapshotDao doctorTrackSnapshotDao;
 
     protected final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
@@ -396,6 +399,20 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
                 .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
                 .build();
         doctorEventModifyLogDao.create(modifyLog);
+
+        //编辑后记录track
+        DoctorPigTrack currentTrack = doctorPigTrackDao.findByPigId(newEvent.getPigId());
+        DoctorTrackSnapshot snapshot = DoctorTrackSnapshot.builder()
+                .farmId(newEvent.getFarmId())
+                .farmName(newEvent.getFarmName())
+                .businessId(newEvent.getPigId())
+                .businessCode(newEvent.getPigCode())
+                .businessType(DoctorEventModifyRequest.TYPE.PIG.getValue())
+                .eventId(modifyLog.getId())
+                .eventSource(DoctorTrackSnapshot.EventSource.MODIFY.getValue())
+                .trackJson(TO_JSON_MAPPER.toJson(currentTrack))
+                .build();
+        doctorTrackSnapshotDao.create(snapshot);
     }
 
     /**
@@ -412,6 +429,20 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
                 .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
                 .build();
         doctorEventModifyLogDao.create(modifyLog);
+
+        //删除后记录track
+        DoctorPigTrack currentTrack = doctorPigTrackDao.findByPigId(deleteEvent.getPigId());
+        DoctorTrackSnapshot snapshot = DoctorTrackSnapshot.builder()
+                .farmId(deleteEvent.getFarmId())
+                .farmName(deleteEvent.getFarmName())
+                .businessId(deleteEvent.getPigId())
+                .businessCode(deleteEvent.getPigCode())
+                .businessType(DoctorEventModifyRequest.TYPE.PIG.getValue())
+                .eventId(modifyLog.getId())
+                .eventSource(DoctorTrackSnapshot.EventSource.MODIFY.getValue())
+                .trackJson(TO_JSON_MAPPER.toJson(currentTrack))
+                .build();
+        doctorTrackSnapshotDao.create(snapshot);
     }
 
     /**

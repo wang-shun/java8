@@ -144,6 +144,10 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         event.setOtherBarnType(toBarn.getPigType());   //目标猪舍类型
         event.setExtraMap(transFarm);
         doctorGroupEventDao.create(event);
+
+        //新增事件后记录track snapshot
+        createTrackSnapshot(event);
+
         transFarm.setRelGroupEventId(event.getId());
 
         Integer oldQuantity = groupTrack.getQuantity();

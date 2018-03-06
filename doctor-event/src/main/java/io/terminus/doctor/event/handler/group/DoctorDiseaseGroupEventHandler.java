@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.handler.group;
 
-import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -79,6 +78,9 @@ public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHand
         event.setQuantity(disease.getQuantity());
         event.setExtraMap(disease);
         doctorGroupEventDao.create(event);
+
+        //新增事件后记录track snapshot
+        createTrackSnapshot(event);
 
     }
 }

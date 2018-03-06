@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+ ~ Desc:
+ ~ Mail: [ your email ]
+ ~ Date: 2018-03-01 17:01:25
+ ~ Created by [ your name ]
+-->
+
+<mapper namespace="DoctorTrackSnapshot">
+    <resultMap id="DoctorTrackSnapshotMap" type="DoctorTrackSnapshot">
+        <id property="id" column="id"/>
+        <result property="farmId" column="farm_id"/>
+        <result property="farmName" column="farm_name"/>
+        <result property="businessId" column="business_id"/>
+        <result property="businessCode" column="business_code"/>
+        <result property="businessType" column="business_type"/>
+        <result property="eventId" column="event_id"/>
+        <result property="eventSource" column="event_source"/>
+        <result property="trackJson" column="track_json"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <sql id="tb">
+        doctor_track_snapshots
+    </sql>
+
+    <sql id="cols_all">
+        id,
+        <include refid="cols_exclude_id"/>
+    </sql>
+
+    <sql id="cols_exclude_id">
+        `farm_id`, `farm_name`, `business_id`, `business_code`, `business_type`, `event_id`, `event_source`, `track_json`,
+        created_at, updated_at
+    </sql>
+
+    <sql id="vals">
+        #{farmId}, #{farmName}, #{businessId}, #{businessCode}, #{businessType}, #{eventId}, #{eventSource}, #{trackJson},
+        now(), now()
+    </sql>
+
+    <sql id="criteria">
+        <where>
+            <if test="farmId != null">AND `farm_id` = #{farmId}</if>
+            <if test="farmName != null">AND `farm_name` = #{farmName}</if>
+            <if test="businessId != null">AND `business_id` = #{businessId}</if>
+            <if test="businessCode != null">AND `business_code` = #{businessCode}</if>
+            <if test="businessType != null">AND `business_type` = #{businessType}</if>
+            <if test="eventId != null">AND `event_id` = #{eventId}</if>
+            <if test="eventSource != null">AND `event_source` = #{eventSource}</if>
+            <if test="trackJson != null">AND `track_json` = #{trackJson}</if>
+            <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
+            <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
+        </where>
+    </sql>
+
+    <insert id="create" parameterType="DoctorTrackSnapshot" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO
+        <include refid="tb"/>
+        (<include refid="cols_exclude_id"/>)
+        VALUES
+        (<include refid="vals"/>)
+    </insert>
+
+    <select id="findById" parameterType="long" resultMap="DoctorTrackSnapshotMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE id = #{id} LIMIT 1
+    </select>
+
+    <select id="findByIds" parameterType="list" resultMap="DoctorTrackSnapshotMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <update id="update" parameterType="DoctorTrackSnapshot">
+        UPDATE
+        <include refid="tb"/>
+        <set>
+            <if test="farmId != null">`farm_id` = #{farmId},</if>
+            <if test="farmName != null">`farm_name` = #{farmName},</if>
+            <if test="businessId != null">`business_id` = #{businessId},</if>
+            <if test="businessCode != null">`business_code` = #{businessCode},</if>
+            <if test="businessType != null">`business_type` = #{businessType},</if>
+            <if test="eventId != null">`event_id` = #{eventId},</if>
+            <if test="eventSource != null">`event_source` = #{eventSource},</if>
+            <if test="trackJson != null">`track_json` = #{trackJson},</if>
+            updated_at = now()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="long">
+        DELETE FROM <include refid="tb"/>
+        WHERE id = #{id}
+    </delete>
+    
+    <select id="count" parameterType="map" resultType="long">
+        SELECT COUNT(1)
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+    </select>
+
+    <select id="paging" parameterType="map" resultMap="DoctorTrackSnapshotMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+        ORDER BY `id` DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="list" parameterType="map" resultMap="DoctorTrackSnapshotMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+        ORDER BY `id` DESC
+    </select>
+
+</mapper>
