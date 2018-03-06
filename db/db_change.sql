@@ -2140,4 +2140,5 @@ CREATE TABLE `doctor_track_snapshots` (
   KEY `index_farm_id` (`farm_id`),
   KEY `index_business_id` (`business_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='猪或者猪群快照表';
+ALTER TABLE `doctor_track_snapshots` ADD COLUMN `event_source` tinyint (4) DEFAULT NULL COMMENT '前置事件来源' after `event_id`;
 
