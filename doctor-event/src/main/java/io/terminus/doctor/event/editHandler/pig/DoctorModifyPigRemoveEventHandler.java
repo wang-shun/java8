@@ -54,6 +54,7 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
     static {
         EVENT_TO_STATUS.put(PigEvent.MATING.getKey(), PigStatus.Mate.getKey());
         EVENT_TO_STATUS.put(PigEvent.TO_FARROWING.getKey(), PigStatus.Farrow.getKey());
+        EVENT_TO_STATUS.put(PigEvent.CHG_FARM_IN.getKey(), PigStatus.Farrow.getKey());
         EVENT_TO_STATUS.put(PigEvent.FARROWING.getKey(), PigStatus.FEED.getKey());
         EVENT_TO_STATUS.put(PigEvent.WEAN.getKey(), PigStatus.Wean.getKey());
     }
