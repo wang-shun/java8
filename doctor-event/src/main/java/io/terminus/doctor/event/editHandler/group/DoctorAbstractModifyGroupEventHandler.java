@@ -453,6 +453,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
                 .businessCode(newEvent.getGroupCode())
                 .businessType(DoctorEventModifyRequest.TYPE.GROUP.getValue())
                 .eventId(modifyLog.getId())
+                .eventSource(DoctorTrackSnapshot.EventSource.MODIFY.getValue())
                 .trackJson(TO_JSON_MAPPER.toJson(currentTrack))
                 .build();
         doctorTrackSnapshotDao.create(snapshot);
@@ -482,6 +483,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
                 .businessCode(deleteEvent.getGroupCode())
                 .businessType(DoctorEventModifyRequest.TYPE.GROUP.getValue())
                 .eventId(modifyLog.getId())
+                .eventSource(DoctorTrackSnapshot.EventSource.MODIFY.getValue())
                 .trackJson(TO_JSON_MAPPER.toJson(currentTrack))
                 .build();
         doctorTrackSnapshotDao.create(snapshot);

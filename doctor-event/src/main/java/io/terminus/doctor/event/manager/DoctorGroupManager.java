@@ -182,6 +182,7 @@ public class DoctorGroupManager {
                 .businessCode(newEvent.getGroupCode())
                 .businessType(DoctorEventModifyRequest.TYPE.GROUP.getValue())
                 .eventId(newEvent.getId())
+                .eventSource(DoctorTrackSnapshot.EventSource.EVENT.getValue())
                 .trackJson(TO_JSON_MAPPER.toJson(currentTrack))
                 .build();
         doctorTrackSnapshotDao.create(snapshot);

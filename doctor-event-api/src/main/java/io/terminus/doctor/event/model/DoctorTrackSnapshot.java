@@ -2,6 +2,7 @@ package io.terminus.doctor.event.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
@@ -49,6 +50,7 @@ public class DoctorTrackSnapshot implements Serializable {
     
     /**
      * 类型，1-》猪，2-》猪群
+     * @see io.terminus.doctor.event.model.DoctorEventModifyRequest.TYPE
      */
     private Integer businessType;
     
@@ -56,7 +58,13 @@ public class DoctorTrackSnapshot implements Serializable {
      * 前置事件或者编辑记录id
      */
     private Long eventId;
-    
+
+    /**
+     * 来源，用于区分eventId是事件id还是编辑记录id
+     * @see EventSource
+     */
+    private Integer eventSource;
+
     /**
      * track json
      */
@@ -71,5 +79,21 @@ public class DoctorTrackSnapshot implements Serializable {
      * 更新时间
      */
     private Date updatedAt;
+
+
+    public enum EventSource{
+        EVENT(1, "事件表"),
+        MODIFY(2, "编辑记录表");
+
+        EventSource(Integer value, String name) {
+            this.value = value;
+            this.name = name;
+        }
+
+        @Getter
+        private Integer value;
+        @Getter
+        private String name;
+    }
 
 }

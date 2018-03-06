@@ -16,6 +16,7 @@
         <result property="businessCode" column="business_code"/>
         <result property="businessType" column="business_type"/>
         <result property="eventId" column="event_id"/>
+        <result property="eventSource" column="event_source"/>
         <result property="trackJson" column="track_json"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
@@ -31,12 +32,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`, `farm_name`, `business_id`, `business_code`, `business_type`, `event_id`, `track_json`, 
+        `farm_id`, `farm_name`, `business_id`, `business_code`, `business_type`, `event_id`, `event_source`, `track_json`,
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{farmName}, #{businessId}, #{businessCode}, #{businessType}, #{eventId}, #{trackJson}, 
+        #{farmId}, #{farmName}, #{businessId}, #{businessCode}, #{businessType}, #{eventId}, #{eventSource}, #{trackJson},
         now(), now()
     </sql>
 
@@ -48,6 +49,7 @@
             <if test="businessCode != null">AND `business_code` = #{businessCode}</if>
             <if test="businessType != null">AND `business_type` = #{businessType}</if>
             <if test="eventId != null">AND `event_id` = #{eventId}</if>
+            <if test="eventSource != null">AND `event_source` = #{eventSource}</if>
             <if test="trackJson != null">AND `track_json` = #{trackJson}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
@@ -91,6 +93,7 @@
             <if test="businessCode != null">`business_code` = #{businessCode},</if>
             <if test="businessType != null">`business_type` = #{businessType},</if>
             <if test="eventId != null">`event_id` = #{eventId},</if>
+            <if test="eventSource != null">`event_source` = #{eventSource},</if>
             <if test="trackJson != null">`track_json` = #{trackJson},</if>
             updated_at = now()
         </set>

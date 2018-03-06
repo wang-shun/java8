@@ -409,6 +409,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
                 .businessCode(newEvent.getPigCode())
                 .businessType(DoctorEventModifyRequest.TYPE.PIG.getValue())
                 .eventId(modifyLog.getId())
+                .eventSource(DoctorTrackSnapshot.EventSource.MODIFY.getValue())
                 .trackJson(TO_JSON_MAPPER.toJson(currentTrack))
                 .build();
         doctorTrackSnapshotDao.create(snapshot);
@@ -438,6 +439,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
                 .businessCode(deleteEvent.getPigCode())
                 .businessType(DoctorEventModifyRequest.TYPE.PIG.getValue())
                 .eventId(modifyLog.getId())
+                .eventSource(DoctorTrackSnapshot.EventSource.MODIFY.getValue())
                 .trackJson(TO_JSON_MAPPER.toJson(currentTrack))
                 .build();
         doctorTrackSnapshotDao.create(snapshot);
