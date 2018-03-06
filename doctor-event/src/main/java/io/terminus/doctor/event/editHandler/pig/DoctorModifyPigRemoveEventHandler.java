@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.editHandler.pig;
 
-import com.google.common.collect.Maps;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
@@ -8,9 +7,6 @@ import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.enums.IsOrNot;
-import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -23,7 +19,6 @@ import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
 import java.util.Objects;
 
 import static io.terminus.doctor.event.editHandler.group.DoctorAbstractModifyGroupEventHandler.getAfterDay;
@@ -34,7 +29,6 @@ import static io.terminus.doctor.event.editHandler.group.DoctorAbstractModifyGro
  */
 @Component
 public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEventHandler {
-    private static final Map<Integer, Integer> EVENT_TO_STATUS = Maps.newHashMap();
 
     /**
      * 销售
@@ -50,14 +44,6 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
      * 淘汰
      */
     public static final Long WEED = 111L;
-
-    static {
-        EVENT_TO_STATUS.put(PigEvent.MATING.getKey(), PigStatus.Mate.getKey());
-        EVENT_TO_STATUS.put(PigEvent.TO_FARROWING.getKey(), PigStatus.Farrow.getKey());
-        EVENT_TO_STATUS.put(PigEvent.CHG_FARM_IN.getKey(), PigStatus.Farrow.getKey());
-        EVENT_TO_STATUS.put(PigEvent.FARROWING.getKey(), PigStatus.FEED.getKey());
-        EVENT_TO_STATUS.put(PigEvent.WEAN.getKey(), PigStatus.Wean.getKey());
-    }
 
     @Override
     protected boolean rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
@@ -139,8 +125,7 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
 
     @Override
     protected DoctorPigTrack buildNewTrackForRollback(DoctorPigEvent deletePigEvent, DoctorPigTrack oldPigTrack) {
-        DoctorPigEvent beforeStatusEvent = doctorPigEventDao.getLastStatusEventBeforeEventAt(deletePigEvent.getPigId(), deletePigEvent.getEventAt());
-        oldPigTrack.setStatus(getStatus(beforeStatusEvent));
+        oldPigTrack.setStatus(doctorEventBaseHelper.getStatusBeforeEventAt(deletePigEvent.getPigId(), deletePigEvent.getEventAt()));
         oldPigTrack.setIsRemoval(IsOrNot.NO.getValue());
         return oldPigTrack;
     }
@@ -356,28 +341,5 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
             removalEvent.setPtnpd(removalEvent.getPtnpd() + npd);
             removalEvent.setNpd(removalEvent.getNpd() + npd);
         }
-    }
-
-    /**
-     * 根据删除事件前的状态事件获取删除前的状态
-     * @param pigEvent 状态事件
-     * @return 删除前状态
-     */
-    public static Integer getStatus(DoctorPigEvent pigEvent) {
-        //1.进场
-        if (Objects.equals(pigEvent.getType(), PigEvent.ENTRY.getKey())) {
-            return Objects.equals(pigEvent.getKind(), DoctorPig.PigSex.SOW.getKey()) ?
-                    PigStatus.Entry.getKey() :
-                    PigStatus.BOAR_ENTRY.getKey();
-        }
-
-        //2.妊娠检查
-        if (Objects.equals(pigEvent.getType(), PigEvent.PREG_CHECK.getKey())) {
-            return Objects.equals(pigEvent.getPregCheckResult(), PregCheckResult.YANG.getKey())
-                    ? PigStatus.Pregnancy.getKey() : PigStatus.KongHuai.getKey();
-        }
-
-        //3.其他事件
-        return EVENT_TO_STATUS.get(pigEvent.getType());
     }
 }

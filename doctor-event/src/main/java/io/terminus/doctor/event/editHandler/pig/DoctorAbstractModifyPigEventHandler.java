@@ -22,6 +22,7 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.helper.DoctorConcurrentControl;
+import io.terminus.doctor.event.helper.DoctorEventBaseHelper;
 import io.terminus.doctor.event.manager.DoctorDailyReportManager;
 import io.terminus.doctor.event.manager.DoctorDailyReportV2Manager;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
@@ -82,6 +83,9 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     @Autowired
     protected DoctorTrackSnapshotDao doctorTrackSnapshotDao;
 
+    @Autowired
+    protected DoctorEventBaseHelper doctorEventBaseHelper;
+
     protected final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
     protected final ToJsonMapper TO_JSON_MAPPER = ToJsonMapper.JSON_NON_DEFAULT_MAPPER;
@@ -91,7 +95,6 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      */
     public static final List<Integer> EFFECT_PIG_EVENTS = Lists.newArrayList(PigEvent.ENTRY.getKey(),
             PigEvent.CHG_FARM.getKey(), PigEvent.CHG_FARM_IN.getKey(), PigEvent.REMOVAL.getKey());
-
 
     @Override
     public final Boolean canModify(DoctorPigEvent oldPigEvent) {
@@ -580,5 +583,10 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
             pigDaily.setBoarEnd(pigDaily.getBoarEnd() + changeCount);
             doctorDailyPigDao.update(pigDaily);
         });
+    }
+
+    private void validTrackAfterUpdate(DoctorPigTrack newTrack) {
+        Integer pigStatus = doctorEventBaseHelper.getCurrentStatus(newTrack.getPigId());
+        expectTrue(Objects.equals(newTrack.getStatus(), pigStatus), "pig.status.error.after.update");
     }
 }
