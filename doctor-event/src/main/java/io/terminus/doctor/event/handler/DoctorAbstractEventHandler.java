@@ -122,8 +122,10 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .build();
         doctorEventInfoList.add(doctorEventInfo);
 
-        //新增事件后记录track snapshot
-        createTrackSnapshot(executeEvent);
+        if (!IGNORE_EVENT.contains(executeEvent.getType()) || executeEvent.getType() == PigEvent.CONDITION.getKey()) {
+            //新增事件后记录track snapshot
+            createTrackSnapshot(executeEvent);
+        }
 
         if (isNull(executeEvent.getEventSource()) || Objects.equals(executeEvent.getEventSource(), SourceType.INPUT.getValue())) {
             //7.更新日记录

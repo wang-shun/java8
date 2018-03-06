@@ -118,7 +118,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
         doctorPigEventDao.updateIncludeNull(newEvent);
 
         //4.创建事件完成后创建编辑记录
-        createModifyLog(oldPigEvent, newEvent);
+        Long modifyLogId = createModifyLog(oldPigEvent, newEvent);
 
         //5.更新猪信息
         if (isUpdatePig(changeDto)) {
@@ -127,11 +127,13 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
             doctorPigDao.update(newPig);
         }
 
-        //6.更新track
+        //6.更新track同是保存更新记录
         if (isUpdateTrack(changeDto)) {
             DoctorPigTrack oldPigTrack = doctorPigTrackDao.findByPigId(oldPigEvent.getPigId());
             DoctorPigTrack newTrack = buildNewTrack(oldPigTrack, changeDto);
             doctorPigTrackDao.update(newTrack);
+
+            createTrackSnapshotFroModify(newEvent, modifyLogId);
         }
 
         //7.更新每日数据记录
@@ -163,7 +165,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
         doctorPigEventDao.delete(deletePigEvent.getId());
 
         //3.删除记录
-        createModifyLog(deletePigEvent);
+        Long modifyLogId = createModifyLog(deletePigEvent);
 
         //4.更新猪
         if (isUpdatePig(deletePigEvent.getType())) {
@@ -176,7 +178,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
             }
         }
 
-        //5.更新track
+        //5.更新track同是保存更新track记录
         if (isUpdateTrack(deletePigEvent.getType())) {
             DoctorPigTrack oldTrack = doctorPigTrackDao.findByPigId(deletePigEvent.getPigId());
             if (Objects.equals(deletePigEvent.getType(), PigEvent.ENTRY.getKey())) {
@@ -184,6 +186,8 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
             } else {
                 DoctorPigTrack newTrack = buildNewTrackForRollback(deletePigEvent, oldTrack);
                 doctorPigTrackDao.update(newTrack);
+
+                createTrackSnapshotFroDelete(deletePigEvent, modifyLogId);
             }
         }
 
@@ -383,13 +387,45 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
         return !IGNORE_EVENT.contains(eventType);
     }
 
+    private void createTrackSnapshotFroDelete(DoctorPigEvent deleteEvent, Long modifyLogId) {
+        //删除后记录track
+        DoctorPigTrack currentTrack = doctorPigTrackDao.findByPigId(deleteEvent.getPigId());
+        DoctorTrackSnapshot snapshot = DoctorTrackSnapshot.builder()
+                .farmId(deleteEvent.getFarmId())
+                .farmName(deleteEvent.getFarmName())
+                .businessId(deleteEvent.getPigId())
+                .businessCode(deleteEvent.getPigCode())
+                .businessType(DoctorEventModifyRequest.TYPE.PIG.getValue())
+                .eventId(modifyLogId)
+                .eventSource(DoctorTrackSnapshot.EventSource.MODIFY.getValue())
+                .trackJson(TO_JSON_MAPPER.toJson(currentTrack))
+                .build();
+        doctorTrackSnapshotDao.create(snapshot);
+    }
+
+    private void createTrackSnapshotFroModify(DoctorPigEvent newEvent, Long modifyLogId) {
+        //编辑后记录track
+        DoctorPigTrack currentTrack = doctorPigTrackDao.findByPigId(newEvent.getPigId());
+        DoctorTrackSnapshot snapshot = DoctorTrackSnapshot.builder()
+                .farmId(newEvent.getFarmId())
+                .farmName(newEvent.getFarmName())
+                .businessId(newEvent.getPigId())
+                .businessCode(newEvent.getPigCode())
+                .businessType(DoctorEventModifyRequest.TYPE.PIG.getValue())
+                .eventId(modifyLogId)
+                .eventSource(DoctorTrackSnapshot.EventSource.MODIFY.getValue())
+                .trackJson(TO_JSON_MAPPER.toJson(currentTrack))
+                .build();
+        doctorTrackSnapshotDao.create(snapshot);
+    }
+
     /**
      * 创建编辑记录
      *
      * @param oldEvent 原事件
      * @param newEvent 新事件
      */
-    private void createModifyLog(DoctorPigEvent oldEvent, DoctorPigEvent newEvent) {
+    private Long createModifyLog(DoctorPigEvent oldEvent, DoctorPigEvent newEvent) {
         DoctorEventModifyLog modifyLog = DoctorEventModifyLog.builder()
                 .businessId(newEvent.getPigId())
                 .businessCode(newEvent.getPigCode())
@@ -399,20 +435,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
                 .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
                 .build();
         doctorEventModifyLogDao.create(modifyLog);
-
-        //编辑后记录track
-        DoctorPigTrack currentTrack = doctorPigTrackDao.findByPigId(newEvent.getPigId());
-        DoctorTrackSnapshot snapshot = DoctorTrackSnapshot.builder()
-                .farmId(newEvent.getFarmId())
-                .farmName(newEvent.getFarmName())
-                .businessId(newEvent.getPigId())
-                .businessCode(newEvent.getPigCode())
-                .businessType(DoctorEventModifyRequest.TYPE.PIG.getValue())
-                .eventId(modifyLog.getId())
-                .eventSource(DoctorTrackSnapshot.EventSource.MODIFY.getValue())
-                .trackJson(TO_JSON_MAPPER.toJson(currentTrack))
-                .build();
-        doctorTrackSnapshotDao.create(snapshot);
+        return modifyLog.getId();
     }
 
     /**
@@ -420,7 +443,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      *
      * @param deleteEvent 删除事件
      */
-    private void createModifyLog(DoctorPigEvent deleteEvent) {
+    private Long createModifyLog(DoctorPigEvent deleteEvent) {
         DoctorEventModifyLog modifyLog = DoctorEventModifyLog.builder()
                 .businessId(deleteEvent.getPigId())
                 .businessCode(deleteEvent.getPigCode())
@@ -429,20 +452,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
                 .type(DoctorEventModifyRequest.TYPE.PIG.getValue())
                 .build();
         doctorEventModifyLogDao.create(modifyLog);
-
-        //删除后记录track
-        DoctorPigTrack currentTrack = doctorPigTrackDao.findByPigId(deleteEvent.getPigId());
-        DoctorTrackSnapshot snapshot = DoctorTrackSnapshot.builder()
-                .farmId(deleteEvent.getFarmId())
-                .farmName(deleteEvent.getFarmName())
-                .businessId(deleteEvent.getPigId())
-                .businessCode(deleteEvent.getPigCode())
-                .businessType(DoctorEventModifyRequest.TYPE.PIG.getValue())
-                .eventId(modifyLog.getId())
-                .eventSource(DoctorTrackSnapshot.EventSource.MODIFY.getValue())
-                .trackJson(TO_JSON_MAPPER.toJson(currentTrack))
-                .build();
-        doctorTrackSnapshotDao.create(snapshot);
+        return modifyLog.getId();
     }
 
     /**

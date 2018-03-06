@@ -79,8 +79,5 @@ public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHand
         event.setExtraMap(disease);
         doctorGroupEventDao.create(event);
 
-        //新增事件后记录track snapshot
-        createTrackSnapshot(event);
-
     }
 }
