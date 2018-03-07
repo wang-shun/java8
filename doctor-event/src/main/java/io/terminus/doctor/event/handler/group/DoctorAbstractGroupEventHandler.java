@@ -115,8 +115,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
      * 新增事件后记录track snapshot
      * @param newEvent 新增事件
      */
-    protected void createTrackSnapshot(DoctorGroupEvent newEvent) {
-        DoctorGroupTrack currentTrack = doctorGroupTrackDao.findByGroupId(newEvent.getGroupId());
+    protected void createTrackSnapshot(DoctorGroupEvent newEvent, DoctorGroupTrack currentTrack) {
         DoctorTrackSnapshot snapshot = DoctorTrackSnapshot.builder()
                 .farmId(newEvent.getFarmId())
                 .farmName(newEvent.getFarmName())
@@ -210,7 +209,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         doctorGroupTrackDao.update(groupTrack);
 
         //保存更新track记录
-        createTrackSnapshot(event);
+        createTrackSnapshot(event, groupTrack);
     }
 
     //校验数量
