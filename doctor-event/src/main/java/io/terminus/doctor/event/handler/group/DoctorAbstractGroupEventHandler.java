@@ -24,6 +24,7 @@ import io.terminus.doctor.event.event.DoctorGroupEventListener;
 import io.terminus.doctor.event.event.DoctorGroupPublishDto;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
 import io.terminus.doctor.event.helper.DoctorConcurrentControl;
+import io.terminus.doctor.event.helper.DoctorEventBaseHelper;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -69,6 +70,8 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     private DoctorConcurrentControl doctorConcurrentControl;
     @Autowired
     private DoctorTrackSnapshotDao doctorTrackSnapshotDao;
+    @Autowired
+    private DoctorEventBaseHelper doctorEventBaseHelper;
 
     protected static final ToJsonMapper TO_JSON_MAPPER = ToJsonMapper.JSON_NON_EMPTY_MAPPER;
 
@@ -199,6 +202,10 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         groupTrack.setUpdatorId(event.getCreatorId());
         groupTrack.setUpdatorName(event.getCreatorName());
         groupTrack.setSex(DoctorGroupTrack.Sex.MIX.getValue());
+
+        //校验track
+        doctorEventBaseHelper.validTrackAfterUpdate(groupTrack);
+
         doctorGroupTrackDao.update(groupTrack);
     }
 

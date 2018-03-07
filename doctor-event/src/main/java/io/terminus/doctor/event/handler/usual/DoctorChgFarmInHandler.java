@@ -23,7 +23,7 @@ import java.util.Objects;
 import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.doctor.common.enums.PigType.PREG_SOW;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
-import static io.terminus.doctor.event.editHandler.pig.DoctorModifyPigRemoveEventHandler.getStatus;
+import static io.terminus.doctor.event.helper.DoctorEventBaseHelper.getStatus;
 
 /**
  * Created by xjn on 17/4/27.
@@ -97,6 +97,9 @@ public class DoctorChgFarmInHandler extends DoctorAbstractEventHandler {
         newTrack.setCurrentBarnId(toBarn.getId());
         newTrack.setCurrentBarnName(toBarn.getName());
         newTrack.setCurrentBarnType(toBarn.getPigType());
+
+        //校验track
+        doctorEventBaseHelper.validTrackAfterUpdate(newTrack);
         doctorPigTrackDao.create(newTrack);
 
         chgFarmIn.setPigStatusAfter(newTrack.getStatus());

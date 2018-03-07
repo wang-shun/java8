@@ -23,7 +23,7 @@ public class DoctorAbstractModifyGroupEventTest extends BaseDaoTest{
 
     @Test
     public void validGroupLiveStockForNew() {
-        handler.validGroupLiveStock(28882L, "", DateUtil.toDate("2018-02-28"), -4);
+        handler.validGroupLiveStock(17316L, "", DateUtil.toDate("2018-02-28"), 0);
     }
 
     @Test

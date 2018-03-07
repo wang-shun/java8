@@ -26,6 +26,7 @@ import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.helper.DoctorConcurrentControl;
+import io.terminus.doctor.event.helper.DoctorEventBaseHelper;
 import io.terminus.doctor.event.manager.DoctorDailyReportManager;
 import io.terminus.doctor.event.manager.DoctorDailyReportV2Manager;
 import io.terminus.doctor.event.model.DoctorBarn;
@@ -86,6 +87,9 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     @Autowired
     protected DoctorTrackSnapshotDao doctorTrackSnapshotDao;
 
+    @Autowired
+    protected DoctorEventBaseHelper doctorEventBaseHelper;
+
     protected final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
     protected final ToJsonMapper TO_JSON_MAPPER = ToJsonMapper.JSON_NON_DEFAULT_MAPPER;
@@ -128,12 +132,18 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         if (isUpdateTrack(changeDto)) {
             DoctorGroupTrack oldTrack = doctorGroupTrackDao.findByGroupId(oldGroupEvent.getGroupId());
             DoctorGroupTrack newTrack = buildNewTrack(oldTrack, changeDto);
-            doctorGroupTrackDao.update(newTrack);
 
-            createTrackSnapshotFroModify(newEvent, modifyLogId);
+            //校验track
+            doctorEventBaseHelper.validTrackAfterUpdate(newTrack);
+
+            //更新track
+            doctorGroupTrackDao.update(newTrack);
 
             //自动关闭或开启猪群
             autoCloseOrOpen(newTrack);
+
+            //保存更改记录
+            createTrackSnapshotFroModify(newEvent, modifyLogId);
         }
 
         //7.更新每日数据记录
@@ -186,11 +196,17 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
                 doctorGroupTrackDao.delete(oldTrack.getId());
             } else {
                 DoctorGroupTrack newTrack = buildNewTrackForRollback(deleteGroupEvent, oldTrack);
+
+                //校验track
+                doctorEventBaseHelper.validTrackAfterUpdate(newTrack);
+
+                //更新track
                 doctorGroupTrackDao.update(newTrack);
 
                 //自动关闭或开启猪群
                 autoCloseOrOpen(newTrack);
 
+                //保存更改记录
                 createTrackSnapshotFroDelete(deleteGroupEvent, modifyLogId);
             }
         }
@@ -795,4 +811,5 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         event.setEventSource(SourceType.INPUT.getValue());
         return event;
     }
+
 }

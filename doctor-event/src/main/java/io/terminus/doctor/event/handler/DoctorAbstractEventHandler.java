@@ -22,6 +22,7 @@ import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.helper.DoctorConcurrentControl;
+import io.terminus.doctor.event.helper.DoctorEventBaseHelper;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -61,6 +62,8 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
     protected DoctorConcurrentControl doctorConcurrentControl;
     @Autowired
     protected DoctorTrackSnapshotDao doctorTrackSnapshotDao;
+    @Autowired
+    protected DoctorEventBaseHelper doctorEventBaseHelper;
 
     protected static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_EMPTY_MAPPER;
     protected static final ToJsonMapper TO_JSON_MAPPER = ToJsonMapper.JSON_NON_EMPTY_MAPPER;
@@ -93,6 +96,10 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         //4。事件是否需要更新track和生成镜像
         DoctorPigTrack toTrack = buildPigTrack(executeEvent, fromTrack);
         if (!IGNORE_EVENT.contains(executeEvent.getType()) || executeEvent.getType() == PigEvent.CONDITION.getKey()) {
+
+            //校验track
+            doctorEventBaseHelper.validTrackAfterUpdate(toTrack);
+
             //2.更新track
             doctorPigTrackDao.update(toTrack);
         }
