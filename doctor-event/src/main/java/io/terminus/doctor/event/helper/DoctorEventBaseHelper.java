@@ -6,14 +6,18 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
+
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Created by xjn on 18/3/6.
@@ -113,5 +117,34 @@ public class DoctorEventBaseHelper {
      */
     public Integer getGroupQuantity(Long groupId) {
         return doctorGroupEventDao.getEventCount(groupId);
+    }
+
+    /**
+     * 校验猪track变化后，track的数据与事件推导出的数据是否一致
+     * @param newTrack
+     */
+    public void validTrackAfterUpdate(DoctorPigTrack newTrack) {
+        //校验状态
+        expectTrue(Objects.equals(newTrack.getStatus(), getCurrentStatus(newTrack.getPigId())),
+                "pig.status.error.after.update");
+
+        //校验胎次
+        expectTrue(Objects.equals(newTrack.getCurrentParity(), getCurrentParity(newTrack.getPigId())),
+                "pig.parity.error.after.update");
+
+        //如果是猪状态为哺乳校验未断奶数
+        if (Objects.equals(newTrack.getStatus(), PigStatus.FEED.getKey())) {
+            expectTrue(Objects.equals(newTrack.getUnweanQty(), getSowUnWeanCount(newTrack.getPigId(), newTrack.getCurrentParity())),
+                    "pig.unwean.count.error.after.update");
+        }
+    }
+
+    /**
+     * 校验猪群track更新后，猪群track的数据与事件推导出的数据是否一致
+     * @param newTrack
+     */
+    public void validTrackAfterUpdate(DoctorGroupTrack newTrack) {
+        expectTrue(Objects.equals(newTrack.getQuantity(), getGroupQuantity(newTrack.getGroupId())),
+                "group.quantity.error.after.update");
     }
 }

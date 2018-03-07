@@ -137,7 +137,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
             //自动关闭或开启猪群
             autoCloseOrOpen(newTrack);
 
-            validTrackAfterUpdate(newTrack);
+            doctorEventBaseHelper.validTrackAfterUpdate(newTrack);
             createTrackSnapshotFroModify(newEvent, modifyLogId);
         }
 
@@ -196,7 +196,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
                 //自动关闭或开启猪群
                 autoCloseOrOpen(newTrack);
 
-                validTrackAfterUpdate(newTrack);
+                doctorEventBaseHelper.validTrackAfterUpdate(newTrack);
                 createTrackSnapshotFroDelete(deleteGroupEvent, modifyLogId);
             }
         }
@@ -800,11 +800,6 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         event.setStatus(EventStatus.VALID.getValue());
         event.setEventSource(SourceType.INPUT.getValue());
         return event;
-    }
-
-    private void validTrackAfterUpdate(DoctorGroupTrack newTrack) {
-        expectTrue(Objects.equals(newTrack.getQuantity(), doctorEventBaseHelper.getGroupQuantity(newTrack.getGroupId())),
-                "group.quantity.error.after.update");
     }
 
 }
