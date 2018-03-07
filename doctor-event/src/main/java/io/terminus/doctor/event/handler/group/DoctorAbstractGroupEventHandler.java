@@ -206,7 +206,11 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         //校验track
         doctorEventBaseHelper.validTrackAfterUpdate(groupTrack);
 
+        //更新track
         doctorGroupTrackDao.update(groupTrack);
+
+        //保存更新track记录
+        createTrackSnapshot(event);
     }
 
     //校验数量

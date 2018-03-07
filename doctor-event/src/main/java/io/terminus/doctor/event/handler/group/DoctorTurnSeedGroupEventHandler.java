@@ -125,9 +125,6 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         event.setOtherBarnType(toBarn.getPigType());   //目标猪舍类型
         doctorGroupEventDao.create(event);
 
-        //新增事件后记录track snapshot
-        createTrackSnapshot(event);
-
         turnSeed.setRelGroupEventId(event.getId());
 
         //获取本次转种猪的性别

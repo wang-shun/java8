@@ -77,8 +77,5 @@ public class DoctorLiveStockGroupEventHandler extends DoctorAbstractGroupEventHa
         event.setWeight(event.getQuantity() * event.getAvgWeight()); // 总活体重 = 数量 * 均重
         event.setExtraMap(liveStock);
         doctorGroupEventDao.create(event);
-
-        //新增事件后记录track snapshot
-        createTrackSnapshot(event);
      }
 }
