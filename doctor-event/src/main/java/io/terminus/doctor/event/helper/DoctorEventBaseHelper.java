@@ -59,6 +59,27 @@ public class DoctorEventBaseHelper {
     }
 
     /**
+     * 获取当前胎次
+     * @param pigId 猪id
+     * @return 当前胎次
+     */
+    public Integer getCurrentParity(Long pigId) {
+        DoctorPigEvent entryEvent = doctorPigEventDao.queryLastEnter(pigId);
+        Integer matingCount = doctorPigEventDao.findWeanToMatingCount(pigId);
+        return entryEvent.getParity() + matingCount;
+    }
+
+    /**
+     * 获取哺乳母猪未断奶数量
+     * @param pigId 猪id
+     * @param currentParity 当前胎次
+     * @return 未断奶数
+     */
+    public Integer getSowUnWeanCount(Long pigId, Integer currentParity) {
+        return doctorPigEventDao.findUnWeanCountByParity(pigId, currentParity);
+    }
+
+    /**
      * 根据事件获取猪状态
      * @param pigEvent 状态事件
      * @return 猪状态

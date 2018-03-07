@@ -19,4 +19,10 @@ public class DoctorEventBaseHelperTest extends BaseDaoTest {
         Integer status =  doctorEventBaseHelper.getCurrentStatus(705035L);
         Assert.assertEquals(PigStatus.Farrow.getKey(), status);
     }
+
+    @Test
+    public void getCurrentParity() {
+        Integer status = doctorEventBaseHelper.getCurrentParity(705033L);
+        Assert.assertEquals(2, status.longValue());
+    }
 }

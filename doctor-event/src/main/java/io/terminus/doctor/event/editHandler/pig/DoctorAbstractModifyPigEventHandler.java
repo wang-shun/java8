@@ -586,7 +586,16 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
     }
 
     private void validTrackAfterUpdate(DoctorPigTrack newTrack) {
-        Integer pigStatus = doctorEventBaseHelper.getCurrentStatus(newTrack.getPigId());
-        expectTrue(Objects.equals(newTrack.getStatus(), pigStatus), "pig.status.error.after.update");
+        //校验状态
+        expectTrue(Objects.equals(newTrack.getStatus(), doctorEventBaseHelper.getCurrentStatus(newTrack.getPigId())),
+                "pig.status.error.after.update");
+
+        //校验胎次
+        expectTrue(Objects.equals(newTrack.getCurrentParity(), doctorEventBaseHelper.getCurrentParity(newTrack.getPigId())),
+                "pig.parity.error.after.update");
+
+        //如果是猪状态为哺乳校验未断奶数
+        expectTrue(Objects.equals(newTrack.getUnweanQty(), doctorEventBaseHelper.getSowUnWeanCount(newTrack.getPigId(), newTrack.getCurrentParity())),
+                "pig.unwean.count.error.after.update");
     }
 }

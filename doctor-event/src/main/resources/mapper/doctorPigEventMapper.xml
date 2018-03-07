@@ -1782,4 +1782,15 @@
         AND status=1
         order by event_at
     </select>
+
+    <select id="findWeanToMatingCount" parameterType="long" resultType="int" >
+        SELECT count(1)
+        FROM
+        <include refid="tb"/>
+        WHERE pig_id = #{pigId}
+        AND `type` = 9
+        AND pig_status_before = 9
+        AND pig_status_after = 3
+        AND status = 1
+    </select>
 </mapper>
