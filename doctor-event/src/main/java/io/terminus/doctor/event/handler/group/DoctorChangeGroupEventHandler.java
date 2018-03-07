@@ -94,10 +94,6 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         event.setExtraMap(change);
         doctorGroupEventDao.create(event);
 
-        //新增事件后记录track snapshot
-        createTrackSnapshot(event);
-
-
         change.setRelGroupEventId(event.getId());   //记录关联猪群事件id
 
         Integer oldQuantity = groupTrack.getQuantity();

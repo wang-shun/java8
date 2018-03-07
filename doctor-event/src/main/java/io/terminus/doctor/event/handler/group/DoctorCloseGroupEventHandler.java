@@ -69,9 +69,6 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         event.setExtraMap(close);
         doctorGroupEventDao.create(event);
 
-        //新增事件后记录track snapshot
-        createTrackSnapshot(event);
-
         //创建关联关系
         //createEventRelation(event);
 

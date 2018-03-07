@@ -163,7 +163,7 @@ public class DoctorGroupManager {
                 .build();
         eventInfoList.add(eventInfo);
 
-        createTrackSnapshot(groupEvent);
+        createTrackSnapshot(groupEvent, groupTrack);
 
         autoDailyGroup(groupEvent.getFarmId(), groupEvent.getGroupId(), group.getPigType(), groupEvent.getEventAt());
         return groupId;
@@ -173,8 +173,7 @@ public class DoctorGroupManager {
      * 新增事件后记录track snapshot
      * @param newEvent 新增事件
      */
-    private void createTrackSnapshot(DoctorGroupEvent newEvent) {
-        DoctorGroupTrack currentTrack = doctorGroupTrackDao.findByGroupId(newEvent.getGroupId());
+    private void createTrackSnapshot(DoctorGroupEvent newEvent, DoctorGroupTrack currentTrack) {
         DoctorTrackSnapshot snapshot = DoctorTrackSnapshot.builder()
                 .farmId(newEvent.getFarmId())
                 .farmName(newEvent.getFarmName())
