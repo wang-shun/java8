@@ -1364,7 +1364,7 @@
         status = 1
         AND pig_id = #{pigId}
         AND event_at &lt;= date_format(#{eventAt}, '%Y-%m-%d')
-        AND (type in (6, 7, 9, 11, 14, 15, 16) or (type = 20 and pig_status_before != pig_status_after))
+        AND (type in (2, 6, 7, 9, 11, 14, 15, 16) or (type = 20 and pig_status_before != pig_status_after))
         ORDER BY event_at desc , id DESC
         limit 1
     </select>
@@ -1649,6 +1649,7 @@
         from
         <include refid="tb"/>
         where pig_id = #{pigId}
+        and status = 1
         and type in (15, 16, 17,18,19)
     </select>
 
@@ -1781,5 +1782,16 @@
         AND type=#{type}
         AND status=1
         order by event_at
+    </select>
+
+    <select id="findWeanToMatingCount" parameterType="long" resultType="int" >
+        SELECT count(1)
+        FROM
+        <include refid="tb"/>
+        WHERE pig_id = #{pigId}
+        AND `type` = 9
+        AND pig_status_before = 9
+        AND pig_status_after = 3
+        AND status = 1
     </select>
 </mapper>

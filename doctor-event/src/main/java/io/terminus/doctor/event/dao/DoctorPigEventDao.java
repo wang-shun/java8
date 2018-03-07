@@ -5,8 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
-import io.terminus.doctor.common.event.Event;
-import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto;
 import io.terminus.doctor.event.dto.DoctorNpdExportDto;
@@ -17,7 +15,11 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Repository;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -817,5 +819,14 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         params.put("type", eventType.getKey());
 
         return this.sqlSession.selectList(this.sqlId("findByPigAndType"), params);
+    }
+
+    /**
+     * 断奶到配种事件的数量
+     * @param pigId 猪id
+     * @return 事件数量
+     */
+    public Integer findWeanToMatingCount(Long pigId) {
+        return getSqlSession().selectOne(sqlId("findWeanToMatingCount"), pigId);
     }
 }
