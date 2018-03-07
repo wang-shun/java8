@@ -96,6 +96,10 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         //4。事件是否需要更新track和生成镜像
         DoctorPigTrack toTrack = buildPigTrack(executeEvent, fromTrack);
         if (!IGNORE_EVENT.contains(executeEvent.getType()) || executeEvent.getType() == PigEvent.CONDITION.getKey()) {
+
+            //校验track
+            doctorEventBaseHelper.validTrackAfterUpdate(toTrack);
+
             //2.更新track
             doctorPigTrackDao.update(toTrack);
         }

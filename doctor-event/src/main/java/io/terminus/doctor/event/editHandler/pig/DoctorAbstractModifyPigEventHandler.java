@@ -134,10 +134,15 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
         if (isUpdateTrack(changeDto)) {
             DoctorPigTrack oldPigTrack = doctorPigTrackDao.findByPigId(oldPigEvent.getPigId());
             DoctorPigTrack newTrack = buildNewTrack(oldPigTrack, changeDto);
+
+            //校验track
+            doctorEventBaseHelper.validTrackAfterUpdate(newTrack);
+
+            //更新track
             doctorPigTrackDao.update(newTrack);
 
+            //保存更改记录
             createTrackSnapshotFroModify(newEvent, modifyLogId);
-            doctorEventBaseHelper.validTrackAfterUpdate(newTrack);
         }
 
         //7.更新每日数据记录
@@ -189,10 +194,15 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
                 doctorPigTrackDao.delete(oldTrack.getId());
             } else {
                 DoctorPigTrack newTrack = buildNewTrackForRollback(deletePigEvent, oldTrack);
+
+                //校验track
+                doctorEventBaseHelper.validTrackAfterUpdate(newTrack);
+
+                //更新track
                 doctorPigTrackDao.update(newTrack);
 
+                //保存track更改记录
                 createTrackSnapshotFroDelete(deletePigEvent, modifyLogId);
-                doctorEventBaseHelper.validTrackAfterUpdate(newTrack);
             }
         }
 

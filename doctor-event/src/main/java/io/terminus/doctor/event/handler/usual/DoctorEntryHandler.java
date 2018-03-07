@@ -78,6 +78,10 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
 
         //2.创建或更新track
         DoctorPigTrack toTrack = buildPigTrack(executeEvent, fromTrack);
+
+        //校验track
+        doctorEventBaseHelper.validTrackAfterUpdate(toTrack);
+
         if (Objects.equals(executeEvent.getIsModify(), IsOrNot.YES.getValue())) {
             toTrack.setId(fromTrack.getId());
             doctorPigTrackDao.update(toTrack);

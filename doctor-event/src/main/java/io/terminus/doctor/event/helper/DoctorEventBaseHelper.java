@@ -125,17 +125,21 @@ public class DoctorEventBaseHelper {
      */
     public void validTrackAfterUpdate(DoctorPigTrack newTrack) {
         //校验状态
-        expectTrue(Objects.equals(newTrack.getStatus(), getCurrentStatus(newTrack.getPigId())),
-                "pig.status.error.after.update");
+        Integer pigStatus = getCurrentStatus(newTrack.getPigId());
+        expectTrue(Objects.equals(newTrack.getStatus(), pigStatus),
+                "pig.status.error.after.update",
+                PigStatus.from(pigStatus).getName(), PigStatus.from(newTrack.getStatus()).getName());
 
         //校验胎次
-        expectTrue(Objects.equals(newTrack.getCurrentParity(), getCurrentParity(newTrack.getPigId())),
-                "pig.parity.error.after.update");
+        Integer parity = getCurrentParity(newTrack.getPigId());
+        expectTrue(Objects.equals(newTrack.getCurrentParity(), parity),
+                "pig.parity.error.after.update", parity, newTrack.getCurrentParity());
 
         //如果是猪状态为哺乳校验未断奶数
         if (Objects.equals(newTrack.getStatus(), PigStatus.FEED.getKey())) {
-            expectTrue(Objects.equals(newTrack.getUnweanQty(), getSowUnWeanCount(newTrack.getPigId(), newTrack.getCurrentParity())),
-                    "pig.unwean.count.error.after.update");
+            Integer unwean = getSowUnWeanCount(newTrack.getPigId(), newTrack.getCurrentParity());
+            expectTrue(Objects.equals(newTrack.getUnweanQty(), unwean),
+                    "pig.unwean.count.error.after.update", unwean, newTrack.getUnweanQty());
         }
     }
 
@@ -144,7 +148,8 @@ public class DoctorEventBaseHelper {
      * @param newTrack
      */
     public void validTrackAfterUpdate(DoctorGroupTrack newTrack) {
-        expectTrue(Objects.equals(newTrack.getQuantity(), getGroupQuantity(newTrack.getGroupId())),
-                "group.quantity.error.after.update");
+        Integer quantity = getGroupQuantity(newTrack.getGroupId());
+        expectTrue(Objects.equals(newTrack.getQuantity(), quantity),
+                "group.quantity.error.after.update", quantity, newTrack.getQuantity());
     }
 }

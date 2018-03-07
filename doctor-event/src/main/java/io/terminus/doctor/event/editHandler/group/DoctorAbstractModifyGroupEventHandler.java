@@ -132,12 +132,17 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         if (isUpdateTrack(changeDto)) {
             DoctorGroupTrack oldTrack = doctorGroupTrackDao.findByGroupId(oldGroupEvent.getGroupId());
             DoctorGroupTrack newTrack = buildNewTrack(oldTrack, changeDto);
+
+            //校验track
+            doctorEventBaseHelper.validTrackAfterUpdate(newTrack);
+
+            //更新track
             doctorGroupTrackDao.update(newTrack);
 
             //自动关闭或开启猪群
             autoCloseOrOpen(newTrack);
 
-            doctorEventBaseHelper.validTrackAfterUpdate(newTrack);
+            //保存更改记录
             createTrackSnapshotFroModify(newEvent, modifyLogId);
         }
 
@@ -191,12 +196,17 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
                 doctorGroupTrackDao.delete(oldTrack.getId());
             } else {
                 DoctorGroupTrack newTrack = buildNewTrackForRollback(deleteGroupEvent, oldTrack);
+
+                //校验track
+                doctorEventBaseHelper.validTrackAfterUpdate(newTrack);
+
+                //更新track
                 doctorGroupTrackDao.update(newTrack);
 
                 //自动关闭或开启猪群
                 autoCloseOrOpen(newTrack);
 
-                doctorEventBaseHelper.validTrackAfterUpdate(newTrack);
+                //保存更改记录
                 createTrackSnapshotFroDelete(deleteGroupEvent, modifyLogId);
             }
         }
