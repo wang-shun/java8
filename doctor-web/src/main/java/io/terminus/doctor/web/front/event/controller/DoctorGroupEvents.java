@@ -39,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -210,6 +211,21 @@ public class DoctorGroupEvents {
             return pigTrack.getCurrentBarnName() + "(" + eventAt + ")";
         }
         return groupList.get(0).getGroupCode();
+    }
+
+    /**
+     * 猪所在猪舍是否有猪群
+     * @param pigId 猪id
+     * @return
+     */
+    @RequestMapping(value = "/has/group/{pigId}", method = RequestMethod.GET)
+    public Boolean hasGroup(@PathVariable Long pigId) {
+        DoctorPigTrack pigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
+        List<DoctorGroup> groupList = RespHelper.or500(doctorGroupReadService.findGroupByCurrentBarnId(pigTrack.getCurrentBarnId()));
+        if (Arguments.isNullOrEmpty(groupList)) {
+            return Boolean.FALSE;
+        }
+        return Boolean.TRUE;
     }
 
     /**
