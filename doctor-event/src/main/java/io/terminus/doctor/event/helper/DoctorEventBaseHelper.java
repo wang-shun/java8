@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.helper;
 
 import com.google.common.collect.Maps;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -17,11 +18,13 @@ import java.util.Objects;
 /**
  * Created by xjn on 18/3/6.
  * email:xiaojiannan@terminus.io
+ * 依据事件获取猪群当前信息
  */
 @Component
 public class DoctorEventBaseHelper {
 
     private final DoctorPigEventDao doctorPigEventDao;
+    private final DoctorGroupEventDao doctorGroupEventDao;
 
     private static  final Map<Integer, Integer> EVENT_TO_STATUS = Maps.newHashMap();
 
@@ -34,8 +37,9 @@ public class DoctorEventBaseHelper {
     }
 
     @Autowired
-    public DoctorEventBaseHelper(DoctorPigEventDao doctorPigEventDao) {
+    public DoctorEventBaseHelper(DoctorPigEventDao doctorPigEventDao, DoctorGroupEventDao doctorGroupEventDao) {
         this.doctorPigEventDao = doctorPigEventDao;
+        this.doctorGroupEventDao = doctorGroupEventDao;
     }
 
     /**
@@ -100,5 +104,14 @@ public class DoctorEventBaseHelper {
 
         //3.其他事件
         return EVENT_TO_STATUS.get(pigEvent.getType());
+    }
+
+    /**
+     * 获取猪群仔猪数量
+     * @param groupId 猪群id
+     * @return 仔猪数量
+     */
+    public Integer getGroupQuantity(Long groupId) {
+        return doctorGroupEventDao.getEventCount(groupId);
     }
 }

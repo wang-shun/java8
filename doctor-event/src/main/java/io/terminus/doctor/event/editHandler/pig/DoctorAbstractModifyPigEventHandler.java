@@ -137,6 +137,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
             doctorPigTrackDao.update(newTrack);
 
             createTrackSnapshotFroModify(newEvent, modifyLogId);
+            validTrackAfterUpdate(newTrack);
         }
 
         //7.更新每日数据记录
@@ -191,6 +192,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
                 doctorPigTrackDao.update(newTrack);
 
                 createTrackSnapshotFroDelete(deletePigEvent, modifyLogId);
+                validTrackAfterUpdate(newTrack);
             }
         }
 
@@ -595,7 +597,9 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
                 "pig.parity.error.after.update");
 
         //如果是猪状态为哺乳校验未断奶数
-        expectTrue(Objects.equals(newTrack.getUnweanQty(), doctorEventBaseHelper.getSowUnWeanCount(newTrack.getPigId(), newTrack.getCurrentParity())),
-                "pig.unwean.count.error.after.update");
+        if (Objects.equals(newTrack.getStatus(), PigStatus.FEED.getKey())) {
+            expectTrue(Objects.equals(newTrack.getUnweanQty(), doctorEventBaseHelper.getSowUnWeanCount(newTrack.getPigId(), newTrack.getCurrentParity())),
+                    "pig.unwean.count.error.after.update");
+        }
     }
 }

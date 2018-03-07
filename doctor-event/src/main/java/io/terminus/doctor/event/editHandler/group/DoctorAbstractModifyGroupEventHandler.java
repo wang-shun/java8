@@ -26,6 +26,7 @@ import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.helper.DoctorConcurrentControl;
+import io.terminus.doctor.event.helper.DoctorEventBaseHelper;
 import io.terminus.doctor.event.manager.DoctorDailyReportManager;
 import io.terminus.doctor.event.manager.DoctorDailyReportV2Manager;
 import io.terminus.doctor.event.model.DoctorBarn;
@@ -86,6 +87,9 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
     @Autowired
     protected DoctorTrackSnapshotDao doctorTrackSnapshotDao;
 
+    @Autowired
+    protected DoctorEventBaseHelper doctorEventBaseHelper;
+
     protected final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
     protected final ToJsonMapper TO_JSON_MAPPER = ToJsonMapper.JSON_NON_DEFAULT_MAPPER;
@@ -130,10 +134,11 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
             DoctorGroupTrack newTrack = buildNewTrack(oldTrack, changeDto);
             doctorGroupTrackDao.update(newTrack);
 
-            createTrackSnapshotFroModify(newEvent, modifyLogId);
-
             //自动关闭或开启猪群
             autoCloseOrOpen(newTrack);
+
+            validTrackAfterUpdate(newTrack);
+            createTrackSnapshotFroModify(newEvent, modifyLogId);
         }
 
         //7.更新每日数据记录
@@ -191,6 +196,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
                 //自动关闭或开启猪群
                 autoCloseOrOpen(newTrack);
 
+                validTrackAfterUpdate(newTrack);
                 createTrackSnapshotFroDelete(deleteGroupEvent, modifyLogId);
             }
         }
@@ -795,4 +801,10 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
         event.setEventSource(SourceType.INPUT.getValue());
         return event;
     }
+
+    private void validTrackAfterUpdate(DoctorGroupTrack newTrack) {
+        expectTrue(Objects.equals(newTrack.getQuantity(), doctorEventBaseHelper.getGroupQuantity(newTrack.getGroupId())),
+                "group.quantity.error.after.update");
+    }
+
 }

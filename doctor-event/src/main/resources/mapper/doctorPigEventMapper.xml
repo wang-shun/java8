@@ -1649,6 +1649,7 @@
         from
         <include refid="tb"/>
         where pig_id = #{pigId}
+        and status = 1
         and type in (15, 16, 17,18,19)
     </select>
 
