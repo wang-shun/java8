@@ -2973,8 +2973,7 @@ public class DoctorMoveDataService {
      * 刷新胎次
      */
     public void flushSowParity() {
-        List<Long> pigIds = Lists.newArrayList(10715L, 12708L);
-//                doctorPigDao.findAllPigIds();
+        List<Long> pigIds = doctorPigDao.findAllPigIds();
         pigIds.forEach(this::flushSowParityImpl);
     }
 
