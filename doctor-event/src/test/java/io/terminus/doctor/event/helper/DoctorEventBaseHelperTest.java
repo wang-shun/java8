@@ -2,6 +2,7 @@ package io.terminus.doctor.event.helper;
 
 import io.terminus.doctor.event.dao.BaseDaoTest;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -21,6 +22,8 @@ public class DoctorEventBaseHelperTest extends BaseDaoTest {
     private DoctorPigTrackDao doctorPigTrackDao;
     @Autowired
     private DoctorGroupTrackDao doctorGroupTrackDao;
+    @Autowired
+    private DoctorPigEventDao doctorPigEventDao;
 
     @Test
     public void getCurrentStatus() {
@@ -30,8 +33,9 @@ public class DoctorEventBaseHelperTest extends BaseDaoTest {
 
     @Test
     public void getCurrentParity() {
-        Integer status = doctorEventBaseHelper.getCurrentParity(705033L);
-        Assert.assertEquals(2, status.longValue());
+        doctorPigEventDao.create(doctorPigEventDao.findEventById(5401872L));
+        Integer status = doctorEventBaseHelper.getCurrentParity(489082L);
+        Assert.assertEquals(3, status.longValue());
     }
 
     @Test
