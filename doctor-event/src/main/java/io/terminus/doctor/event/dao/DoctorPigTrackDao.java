@@ -187,4 +187,8 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
     public List<DoctorPigTrack> findByBarnIdAndStatus(Long barnId, Integer status) {
         return getSqlSession().selectList(sqlId("findByBarnIdAndStatus"), ImmutableMap.of("barnId", barnId, "status", status));
     }
+
+    public Boolean flushCurrentParity(Long pigId, Integer parity) {
+        return getSqlSession().update(sqlId("flushCurrentParity"), ImmutableMap.of("pigId", pigId, "parity", parity)) == 1;
+    }
 }

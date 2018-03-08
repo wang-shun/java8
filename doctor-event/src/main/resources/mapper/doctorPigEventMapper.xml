@@ -1793,4 +1793,16 @@
         AND pig_status_before = 9
         AND status = 1
     </select>
+
+    <update id="flushParityAndBeforeStatusAndAfterStatus" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update
+            <include refid="tb"/>
+            SET
+            parity = #{item.parity},
+            pig_status_before = #{item.pigStatusBefore},
+            pig_status_after = #{item.pigStatusAfter}
+            WHERE id = #{item.id}
+        </foreach>
+    </update>
 </mapper>

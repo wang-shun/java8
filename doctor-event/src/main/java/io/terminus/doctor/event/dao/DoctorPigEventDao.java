@@ -829,4 +829,8 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public Integer findWeanToMatingCount(Long pigId) {
         return getSqlSession().selectOne(sqlId("findWeanToMatingCount"), pigId);
     }
+
+    public Boolean flushParityAndBeforeStatusAndAfterStatus(List<DoctorPigEvent> list){
+        return getSqlSession().update(sqlId("flushParityAndBeforeStatusAndAfterStatus"), list) == 1;
+    }
 }

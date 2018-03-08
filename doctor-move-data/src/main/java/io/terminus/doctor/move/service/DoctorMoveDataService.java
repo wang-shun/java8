@@ -2973,7 +2973,8 @@ public class DoctorMoveDataService {
      * 刷新胎次
      */
     public void flushSowParity() {
-        List<Long> pigIds = doctorPigDao.findAllPigIds();
+        List<Long> pigIds = Lists.newArrayList(10715L, 12708L);
+//                doctorPigDao.findAllPigIds();
         pigIds.forEach(this::flushSowParityImpl);
     }
 
@@ -3006,12 +3007,9 @@ public class DoctorMoveDataService {
             pigEvent.setParity(parity);
         }
 
-        DoctorPigTrack updateTrack = new DoctorPigTrack();
-        updateTrack.setId(pigTrack.getId());
-        updateTrack.setCurrentParity(parity);
-        doctorPigTrackDao.update(updateTrack);
+        doctorPigTrackDao.flushCurrentParity(pigTrack.getPigId(), parity);
 
-        doctorPigEventDao.updates(list);
+        doctorPigEventDao.flushParityAndBeforeStatusAndAfterStatus(list);
     }
 
     public void flushNestCode() {
