@@ -2999,6 +2999,8 @@ public class DoctorMoveDataService {
                     && weanToMating) {
                 parity++;
                 weanToMating = false;
+                pigEvent.setPigStatusBefore(PigStatus.Wean.getKey());
+                pigEvent.setPigStatusAfter(PigStatus.Mate.getKey());
             }
 
             pigEvent.setParity(parity);
