@@ -98,12 +98,12 @@ public class DoctorChgFarmInHandler extends DoctorAbstractEventHandler {
         newTrack.setCurrentBarnName(toBarn.getName());
         newTrack.setCurrentBarnType(toBarn.getPigType());
 
+        chgFarmIn.setPigStatusAfter(newTrack.getStatus());
+        doctorPigEventDao.update(chgFarmIn);
+
         //校验track
         doctorEventBaseHelper.validTrackAfterUpdate(newTrack);
         doctorPigTrackDao.create(newTrack);
-
-        chgFarmIn.setPigStatusAfter(newTrack.getStatus());
-        doctorPigEventDao.update(chgFarmIn);
 
         //新增事件后记录track snapshot
         createTrackSnapshot(chgFarmIn);
