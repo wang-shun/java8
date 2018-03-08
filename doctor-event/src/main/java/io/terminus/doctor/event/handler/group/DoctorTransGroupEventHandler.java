@@ -3,6 +3,7 @@ package io.terminus.doctor.event.handler.group;
 import com.google.common.base.MoreObjects;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -158,7 +159,11 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         if (transGroup.isSowEvent()) {
             checkQuantity(MoreObjects.firstNonNull(groupTrack.getUnweanQty(), 0), transGroup.getQuantity());
         } else {
-            checkQuantity(groupTrack.getQuantity() - MoreObjects.firstNonNull(groupTrack.getUnweanQty(), 0), transGroup.getQuantity());
+            if (Objects.equals(group.getPigType(), PigType.DELIVER_SOW.getValue())) {
+                checkWeanQuantity(groupTrack.getQuantity() - MoreObjects.firstNonNull(groupTrack.getUnweanQty(), 0), transGroup.getQuantity());
+            } else {
+                checkQuantity(groupTrack.getQuantity(), transGroup.getQuantity());
+            }
         }
 
         Double avgWeight = EventUtil.getAvgWeight(transGroup.getWeight(), transGroup.getQuantity());   //后台计算的总重
