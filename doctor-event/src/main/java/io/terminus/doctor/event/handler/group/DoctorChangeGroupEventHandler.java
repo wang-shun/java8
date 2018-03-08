@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.group;
 
+import com.google.common.base.MoreObjects;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
@@ -67,6 +68,16 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         //非母猪触发事件
         if (!input.isSowEvent()) {
             checkUnweanTrans(group.getPigType(), null, groupTrack, change.getQuantity());
+        }
+
+        if (change.isSowEvent()) {
+            checkQuantity(MoreObjects.firstNonNull(groupTrack.getUnweanQty(), 0), change.getQuantity());
+        } else {
+            if (Objects.equals(group.getPigType(), PigType.DELIVER_SOW.getValue())) {
+                checkWeanQuantity(groupTrack.getQuantity() - MoreObjects.firstNonNull(groupTrack.getUnweanQty(), 0), change.getQuantity());
+            } else {
+                checkQuantity(groupTrack.getQuantity(), change.getQuantity());
+            }
         }
 
         if(Objects.equals(group.getPigType(), PigType.NURSERY_PIGLET.getValue())){

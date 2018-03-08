@@ -220,6 +220,18 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         }
     }
 
+    /**
+     * 校验变动数量不大于已断奶数量
+     * @param weanQuantity
+     * @param changeQuantity
+     */
+    protected static void checkWeanQuantity(Integer weanQuantity, Integer changeQuantity) {
+
+        if (changeQuantity > weanQuantity) {
+            throw new InvalidException("quantity.over.wean", changeQuantity, weanQuantity);
+        }
+    }
+
     //校验 公 + 母 = 总和
     protected static void checkQuantityEqual(Integer all, Integer boar, Integer sow) {
         if (EventUtil.plusInt(boar, sow) > all) {
