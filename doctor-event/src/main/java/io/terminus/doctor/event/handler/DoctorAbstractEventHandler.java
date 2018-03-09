@@ -175,7 +175,9 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
                 .build();
         doctorPigEvent.setRemark(inputDto.changeRemark());
         doctorPigEvent.setExtraMap(inputDto.toMap());
-        doctorPigEvent.setParity(doctorPigEventDao.findLastParity(inputDto.getPigId()));
+        if (!Objects.equals(inputDto.getEventType(), PigEvent.ENTRY.getKey())) {
+            doctorPigEvent.setParity(doctorEventBaseHelper.getCurrentParity(inputDto.getPigId()));
+        }
 
         if (Objects.equals(doctorPigEvent.getKind(), DoctorPig.PigSex.BOAR.getKey())) {
             DoctorPig boarPig = doctorPigDao.findById(inputDto.getPigId());
