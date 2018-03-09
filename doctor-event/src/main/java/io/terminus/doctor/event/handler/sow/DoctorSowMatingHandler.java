@@ -85,7 +85,7 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
 //            toTrack.setCurrentParity(toTrack.getCurrentParity() + 1);
         }
 
-        toTrack.setCurrentParity(doctorPigEventDao.countParity(executeEvent.getPigId(), executeEvent.getEventAt()));
+        toTrack.setCurrentParity(doctorEventBaseHelper.getCurrentParity(fromTrack.getPigId()));
 
         if (!isNull(extra) &&
                 extra.containsKey("enterToMate")
@@ -126,15 +126,10 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
         doctorPigEvent.setMateType(matingDto.getMatingType());
         doctorPigEvent.setBoarCode(matingDto.getMatingBoarPigCode());
         //  校验断奶后, 第一次配种, 增加胎次
-        Map<String, Object> trackExtraMap = doctorPigTrack.getExtraMap();
-        if (!isNull(trackExtraMap) &&
-                trackExtraMap.containsKey("hasWeanToMating")
-                && Boolean.valueOf(trackExtraMap.get("hasWeanToMating").toString())) {
-
-//            doctorPigEvent.setParity(doctorPigEventDao.findLastParity(doctorPigTrack.getPigId()) + 1);
+        if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey())) {
 
             //这里说明是断奶后的第一次配种,这个地方统计 dpNPD （断奶到配种的非生产天数）
-            DateTime partWeanDate = new DateTime(doctorPigEvent.getMattingDate());
+            DateTime partWeanDate;
 
             //查询最近一次导致断奶的事件
             DoctorPigEvent lastWean = doctorPigEventDao.queryLastWean(doctorPigTrack.getPigId());
@@ -145,12 +140,13 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
             doctorPigEvent.setDpnpd(doctorPigEvent.getDpnpd() + dpNPD);
             doctorPigEvent.setNpd(doctorPigEvent.getNpd() + dpNPD);
 
+            //断奶到配种胎次加1
+            doctorPigEvent.setParity(doctorPigEvent.getParity() + 1);
+
         }
 
         //判断是否是进场到第一次配种事件
-        if (!isNull(trackExtraMap) &&
-                trackExtraMap.containsKey("enterToMate")
-                && Boolean.valueOf(trackExtraMap.get("enterToMate").toString())) {
+        if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Entry.getKey())) {
 
             //这里说明是进场后的第一次配种,这个地方统计 jpNPD （进场到配种非生产天数）
             //查询最近一次进场事件
@@ -165,24 +161,7 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventHandler {
 
         //设置配种类型
         List<DoctorPigEvent> events = doctorPigEventDao.queryAllEventsByPigId(doctorPigTrack.getPigId());
-
         DoctorMatingType mateType = getPigMateType(events, doctorPigEvent.getEventAt());
-
-        //计算胎次
-        //当前配种事件之前断奶事件的个数
-        Long weanEventCount = events.parallelStream()
-                .filter(e -> e.getType().equals(PigEvent.WEAN.getKey()))
-                .filter(e -> e.getEventAt().compareTo(doctorPigEvent.getEventAt()) <= 0)
-                .count();
-
-        //进场基准胎次
-        int basicParity = events.parallelStream()
-                .filter(e -> e.getType().equals(PigEvent.ENTRY.getKey()))
-                .map(DoctorPigEvent::getParity)
-                .findFirst().orElse(0);
-
-        doctorPigEvent.setParity(basicParity + weanEventCount.intValue());
-
         doctorPigEvent.setDoctorMateType(mateType.getKey());
         return doctorPigEvent;
     }
