@@ -132,6 +132,12 @@ public class DoctorEventBaseHelper {
      * @param newTrack
      */
     public void validTrackAfterUpdate(DoctorPigTrack newTrack) {
+
+        //公猪不用校验
+        if (Objects.equals(newTrack.getPigType(), DoctorPig.PigSex.BOAR.getKey())) {
+            return;
+        }
+
         //校验状态
         Integer pigStatus = getCurrentStatus(newTrack.getPigId());
         expectTrue(Objects.equals(newTrack.getStatus(), pigStatus),
