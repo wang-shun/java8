@@ -61,4 +61,10 @@ public interface DoctorOrgReadService {
      */
     Response<Paging<DoctorOrg>> paging(Map<String, Object> criteria, Integer pageSize, Integer pageNo);
 
+    /**
+     * 根据公司名称查询公司
+     * @param name
+     * @return
+     */
+    Response<DoctorOrg> findByName(String name);
 }

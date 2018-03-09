@@ -3,6 +3,7 @@ package io.terminus.doctor.web.front.user.controller;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.dto.DoctorMenuDto;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
@@ -118,6 +119,12 @@ public class ServiceReviews {
         if(StringUtils.isBlank(serviceApplyDto.getOrg().getName())){
             throw new JsonResponseException("org.name.not.null");
         }
+
+        Response<DoctorOrg> orgResponse = doctorOrgReadService.findByName(serviceApplyDto.getOrg().getName());
+        if (orgResponse.isSuccess() && orgResponse.getResult() != null) {
+            throw new JsonResponseException("org.name.has.existed");
+        }
+
         if(StringUtils.isBlank(serviceApplyDto.getOrg().getLicense())){
             throw new JsonResponseException("org.license.not.null");
         }

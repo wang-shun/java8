@@ -221,6 +221,12 @@ public class OPDoctorUsers {
         if (StringUtils.isBlank(serviceApplyDto.getOrg().getName())) {
             throw new OPClientException("org.name.not.null");
         }
+
+        Response<DoctorOrg> orgResponse = doctorOrgReadService.findByName(serviceApplyDto.getOrg().getName());
+        if (orgResponse.isSuccess() && orgResponse.getResult() != null) {
+           throw new OPClientException("org.name.has.existed");
+        }
+
         if (StringUtils.isBlank(serviceApplyDto.getOrg().getLicense())) {
             throw new OPClientException("org.license.not.null");
         }
