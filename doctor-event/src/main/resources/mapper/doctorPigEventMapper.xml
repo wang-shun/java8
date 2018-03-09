@@ -1364,7 +1364,12 @@
         status = 1
         AND pig_id = #{pigId}
         AND event_at &lt;= date_format(#{eventAt}, '%Y-%m-%d')
-        AND (type in (2, 6, 7, 9, 11, 14, 15, 16) or (type = 20 and pig_status_before != pig_status_after))
+        AND (
+        type in (2, 6, 7, 9, 11, 14, 15, 16)
+        OR (type = 20 AND pig_status_before != pig_status_after)
+        OR (type = 19 AND pig_status_before = 9)
+        )
+
         ORDER BY event_at desc , id DESC
         limit 1
     </select>

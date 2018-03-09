@@ -373,6 +373,7 @@ public class ServiceConfiguration {
     @Bean
     public DoctorOrgReadService doctorOrgReadService() {
         return new DoctorOrgReadService() {
+
             @Override
             public Response<DoctorOrg> findOrgById(Long orgId) {
                 return null;
@@ -405,6 +406,11 @@ public class ServiceConfiguration {
 
             @Override
             public Response<Paging<DoctorOrg>> paging(Map<String, Object> criteria, Integer pageSize, Integer pageNo) {
+                return null;
+            }
+
+            @Override
+            public Response<DoctorOrg> findByName(String name) {
                 return null;
             }
         };
