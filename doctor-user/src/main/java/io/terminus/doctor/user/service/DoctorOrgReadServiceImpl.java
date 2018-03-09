@@ -112,4 +112,14 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
             return Response.fail("paging.org.failed");
         }
     }
+
+    @Override
+    public Response<DoctorOrg> findByName(String name) {
+        try {
+            return Response.ok(doctorOrgDao.findByName(name));
+        } catch (Exception e) {
+            log.error("find by name failed, name:{}, cause:{}", name, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.by.name.failed");
+        }
+    }
 }
