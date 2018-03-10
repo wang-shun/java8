@@ -144,10 +144,10 @@ public class DoctorEventBaseHelper {
                 "pig.status.error.after.update",
                 PigStatus.from(pigStatus).getName(), PigStatus.from(newTrack.getStatus()).getName());
 
-        //校验胎次
-        Integer parity = getCurrentParity(newTrack.getPigId());
-        expectTrue(Objects.equals(newTrack.getCurrentParity(), parity),
-                "pig.parity.error.after.update", parity, newTrack.getCurrentParity());
+//        //校验胎次
+//        Integer parity = getCurrentParity(newTrack.getPigId());
+//        expectTrue(Objects.equals(newTrack.getCurrentParity(), parity),
+//                "pig.parity.error.after.update", parity, newTrack.getCurrentParity());
 
         //如果是猪状态为哺乳校验未断奶数
         if (Objects.equals(newTrack.getStatus(), PigStatus.FEED.getKey())) {
