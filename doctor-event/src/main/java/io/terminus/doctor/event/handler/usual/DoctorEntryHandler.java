@@ -72,6 +72,9 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
             expectTrue(doctorConcurrentControl.setKey(key), "event.concurrent.error", executeEvent.getPigCode());
         }
 
+        //校验
+        handleCheck(executeEvent, fromTrack);
+
         Long oldEventId = executeEvent.getId();
         //1.创建事件
         doctorPigEventDao.create(executeEvent);

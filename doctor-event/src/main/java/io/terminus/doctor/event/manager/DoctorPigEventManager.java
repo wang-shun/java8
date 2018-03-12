@@ -40,8 +40,6 @@ import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.handler.admin.SmartPigEventHandler;
-import io.terminus.doctor.event.model.*;
 import io.terminus.doctor.event.reportBi.listener.DoctorReportBiReaTimeEvent;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
@@ -101,8 +99,10 @@ public class DoctorPigEventManager {
         DoctorPigEvent executeEvent = handler.buildPigEvent(basic, inputDto);
         //事件执行前的状态
         DoctorPigTrack fromTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
-        //数据校验
-        handler.handleCheck(executeEvent, fromTrack);
+
+        // TODO: 18/3/12 移动到handle方法中校验
+//        //数据校验
+//        handler.handleCheck(executeEvent, fromTrack);
         //处理事件
         handler.handle(doctorEventInfoList, executeEvent, fromTrack);
         log.info("pig event handle ending, inputDto:{}, basic:{}", inputDto, basic);
@@ -188,8 +188,10 @@ public class DoctorPigEventManager {
                 DoctorPigEvent executeEvent = handler.buildPigEvent(basic, inputDto);
                 //事件执行前的状态
                 DoctorPigTrack fromTrack = doctorPigTrackDao.findByPigId(inputDto.getPigId());
-                //数据校验
-                handler.handleCheck(executeEvent, fromTrack);
+
+                // TODO: 18/3/12 移动到handle方法中校验
+//                //数据校验
+//                handler.handleCheck(executeEvent, fromTrack);
                 //处理事件
                 handler.handle(eventInfos, executeEvent, fromTrack);
             } catch (InvalidException e) {

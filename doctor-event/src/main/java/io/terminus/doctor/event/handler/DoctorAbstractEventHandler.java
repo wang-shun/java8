@@ -84,6 +84,9 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
             expectTrue(doctorConcurrentControl.setKey(key), "event.concurrent.error", executeEvent.getPigCode());
         }
 
+        //校验
+        handleCheck(executeEvent, fromTrack);
+
         //上一个事件
         Long currentEventId = fromTrack.getCurrentEventId();
         //原事件id,编辑可用
