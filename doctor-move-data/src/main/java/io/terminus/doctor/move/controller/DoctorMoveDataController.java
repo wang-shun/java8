@@ -1403,7 +1403,7 @@ public class DoctorMoveDataController {
     public Boolean flushChgLocation() {
         log.info("flush chg location starting");
         doctorMoveDataService.flushChgLocation();
-        log.info("flush chg location starting");
+        log.info("flush chg location end");
         return Boolean.TRUE;
     }
 }
