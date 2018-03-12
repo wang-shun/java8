@@ -158,7 +158,7 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
                     .chgLocationToBarnId(partWeanDto.getChgLocationToBarnId())
                     .chgLocationToBarnName(doctorBarn.getName())
                     .build();
-            buildAutoEventCommonInfo(partWeanDto, chgLocationDto, PigEvent.TO_MATING, doctorPigEvent.getId());
+            buildAutoEventCommonInfo(partWeanDto, chgLocationDto, PigEvent.CHG_LOCATION, doctorPigEvent.getId());
             //构建basic
             DoctorBasicInputInfoDto basic = DoctorBasicInputInfoDto.builder()
                     .orgId(doctorPigEvent.getOrgId())

@@ -81,6 +81,9 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         } else if (Objects.equals(fromBarn.getPigType(), PigType.DELIVER_SOW.getValue()) && MATING_TYPES.contains(toBarn.getPigType())) {
             doctorPigEvent.setType(PigEvent.TO_MATING.getKey());
             doctorPigEvent.setName(PigEvent.TO_MATING.getName());
+        } else {
+            doctorPigEvent.setType(PigEvent.CHG_LOCATION.getKey());
+            doctorPigEvent.setName(PigEvent.CHG_LOCATION.getName());
         }
         DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
         doctorPigEvent.setGroupId(pigTrack.getGroupId());
