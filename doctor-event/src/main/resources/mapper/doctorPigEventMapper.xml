@@ -1810,4 +1810,15 @@
             WHERE id = #{item.id}
         </foreach>
     </update>
+
+
+    <select id="queryToMatingForTime" parameterType="long" resultMap="DoctorPigEventMap">
+        SELECT id, extra
+        FROM <include refid="tb"/>
+        <where>
+            farm_id= #{farmId}
+            AND type = 12
+            AND created_at &gt; '2017-03-09'
+        </where>
+    </select>
 </mapper>

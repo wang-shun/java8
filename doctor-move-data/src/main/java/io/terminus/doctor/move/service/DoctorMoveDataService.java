@@ -160,7 +160,6 @@ public class DoctorMoveDataService {
     private final DoctorMoveBasicService doctorMoveBasicService;
     private final DoctorPigReadService doctorPigReadService;
     private final DoctorGroupReportManager doctorGroupReportManager;
-    private final DoctorBarnDao doctorBarnDao;
     private final DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService;
     private final DoctorGroupBatchSummaryWriteService doctorGroupBatchSummaryWriteService;
     private final DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
@@ -184,6 +183,8 @@ public class DoctorMoveDataService {
     private DoctorPigTypeStatisticDao doctorPigTypeStatisticDao;
     @Autowired
     private DoctorGroupBatchSummaryManager groupBatchSummaryManager;
+    @Autowired
+    private DoctorBarnDao doctorBarnDao;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
@@ -212,7 +213,6 @@ public class DoctorMoveDataService {
         this.doctorMoveBasicService = doctorMoveBasicService;
         this.doctorPigReadService = doctorPigReadService;
         this.doctorGroupReportManager = doctorGroupReportManager;
-        this.doctorBarnDao = doctorBarnDao;
         this.doctorGroupBatchSummaryReadService = doctorGroupBatchSummaryReadService;
         this.doctorGroupBatchSummaryWriteService = doctorGroupBatchSummaryWriteService;
         this.doctorMaterialConsumeProviderReadService = doctorMaterialConsumeProviderReadService;
@@ -3075,5 +3075,30 @@ public class DoctorMoveDataService {
             }
         });
 
+    }
+
+    public void flushChgLocation() {
+        List<Long> farmIds = doctorFarmDao.findAll().stream().map(DoctorFarm::getId).collect(Collectors.toList());
+        farmIds.parallelStream().forEach(farmId -> {
+            DoctorPigEvent updateEvent = new DoctorPigEvent();
+            List<DoctorPigEvent> pigEvents = doctorPigEventDao.queryToMatingForTime(farmId);
+            pigEvents.forEach(doctorPigEvent -> flushChgLocation(doctorPigEvent, updateEvent));
+        });
+
+    }
+
+    private void flushChgLocation(DoctorPigEvent doctorPigEvent, DoctorPigEvent updateEvent) {
+        try {
+            DoctorChgLocationDto dto = JSON_MAPPER.fromJson(doctorPigEvent.getExtra(), DoctorChgLocationDto.class);
+            DoctorBarn doctorBarn = doctorBarnDao.findById(dto.getChgLocationToBarnId());
+            if (Objects.equals(doctorBarn.getPigType(), PigType.DELIVER_SOW.getValue())) {
+                updateEvent.setId(doctorPigEvent.getId());
+                updateEvent.setType(PigEvent.CHG_LOCATION.getKey());
+                doctorPigEventDao.update(updateEvent);
+                log.info("========flush event type chg location, event id:{}", doctorPigEvent.getId());
+            }
+        } catch (Exception e) {
+            log.error("flush to mating error, event id:{}", doctorPigEvent.getId());
+        }
     }
 }

@@ -1398,4 +1398,12 @@ public class DoctorMoveDataController {
         log.info("flush Group sale event avg day age end");
         return Boolean.TRUE;
     }
+
+    @RequestMapping(value = "/flush/chg/location", method = RequestMethod.GET)
+    public Boolean flushChgLocation() {
+        log.info("flush chg location starting");
+        doctorMoveDataService.flushChgLocation();
+        log.info("flush chg location starting");
+        return Boolean.TRUE;
+    }
 }

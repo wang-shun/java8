@@ -833,4 +833,14 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public Boolean flushParityAndBeforeStatusAndAfterStatus(List<DoctorPigEvent> list){
         return getSqlSession().update(sqlId("flushParityAndBeforeStatusAndAfterStatus"), list) == 1;
     }
+
+    /**
+     * 查询错误数据（修复数据临时使用）
+     * @param farmId
+     * @return
+     */
+    @Deprecated
+    public List<DoctorPigEvent> queryToMatingForTime(Long farmId) {
+        return getSqlSession().selectList(sqlId("queryToMatingForTime"), farmId);
+    }
 }
