@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.helper;
 
 import com.google.common.collect.Maps;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -17,6 +18,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
@@ -29,6 +31,7 @@ public class DoctorEventBaseHelper {
 
     private final DoctorPigEventDao doctorPigEventDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
+    private final Date START_DATE = DateUtil.toDate("2018-03-13");
 
     private static  final Map<Integer, Integer> EVENT_TO_STATUS = Maps.newHashMap();
 
@@ -133,6 +136,11 @@ public class DoctorEventBaseHelper {
      */
     public void validTrackAfterUpdate(DoctorPigTrack newTrack) {
 
+        //指定时间之前的数据不再校验
+        if (notNull(newTrack.getCreatedAt()) && newTrack.getCreatedAt().before(START_DATE)) {
+            return;
+        }
+
         //公猪不用校验
         if (Objects.equals(newTrack.getPigType(), DoctorPig.PigSex.BOAR.getKey())) {
             return;
@@ -144,10 +152,10 @@ public class DoctorEventBaseHelper {
                 "pig.status.error.after.update",
                 PigStatus.from(pigStatus).getName(), PigStatus.from(newTrack.getStatus()).getName());
 
-//        //校验胎次
-//        Integer parity = getCurrentParity(newTrack.getPigId());
-//        expectTrue(Objects.equals(newTrack.getCurrentParity(), parity),
-//                "pig.parity.error.after.update", parity, newTrack.getCurrentParity());
+        //校验胎次
+        Integer parity = getCurrentParity(newTrack.getPigId());
+        expectTrue(Objects.equals(newTrack.getCurrentParity(), parity),
+                "pig.parity.error.after.update", parity, newTrack.getCurrentParity());
 
         //如果是猪状态为哺乳校验未断奶数
         if (Objects.equals(newTrack.getStatus(), PigStatus.FEED.getKey())) {
@@ -162,6 +170,11 @@ public class DoctorEventBaseHelper {
      * @param newTrack
      */
     public void validTrackAfterUpdate(DoctorGroupTrack newTrack) {
+        //指定时间之前的数据不再校验
+        if (notNull(newTrack.getCreatedAt()) && newTrack.getCreatedAt().before(START_DATE)) {
+            return;
+        }
+
         Integer quantity = getGroupQuantity(newTrack.getGroupId());
         expectTrue(Objects.equals(newTrack.getQuantity(), quantity),
                 "group.quantity.error.after.update", quantity, newTrack.getQuantity());
