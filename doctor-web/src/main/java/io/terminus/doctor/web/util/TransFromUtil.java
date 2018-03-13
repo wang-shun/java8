@@ -15,6 +15,7 @@ import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.enums.VaccinResult;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -32,9 +33,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import static io.terminus.common.utils.Arguments.isNull;
-import static io.terminus.common.utils.Arguments.notEmpty;
-import static io.terminus.common.utils.Arguments.notNull;
+
+import static io.terminus.common.utils.Arguments.*;
 
 /**
  * Created by highway on 16/8/11.
@@ -124,6 +124,13 @@ public class TransFromUtil {
                 && notNull(display.getExtraMap())
                 && display.getExtraMap().containsKey("boarType")) {
             extraMap.put("boarTypeName", BoarEntryType.from(Integer.valueOf(extraMap.get("boarType").toString())).getDesc());
+        }
+
+        if (Objects.equals(display.getType(), PigEvent.WEAN.getKey())
+                && notNull(display.getExtraMap())
+                && display.getExtraMap().containsKey("chgLocationToBarnId")) {
+            DoctorBarn chgToBarn = RespHelper.or500(doctorBarnReadService.findBarnById(toLong(display.getExtraMap().get("chgLocationToBarnId"))));
+            extraMap.put("chgLocationToBarnName", chgToBarn.getName());
         }
     }
 
