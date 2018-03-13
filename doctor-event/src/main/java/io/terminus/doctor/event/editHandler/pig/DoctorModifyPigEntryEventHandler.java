@@ -73,7 +73,6 @@ public class DoctorModifyPigEntryEventHandler extends DoctorAbstractModifyPigEve
 
     @Override
     public DoctorPigTrack buildNewTrack(DoctorPigTrack oldPigTrack, DoctorEventChangeDto changeDto) {
-        oldPigTrack.setCurrentParity(changeDto.getPigParity());
         return oldPigTrack;
     }
 
