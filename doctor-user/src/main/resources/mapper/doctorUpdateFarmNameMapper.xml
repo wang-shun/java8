@@ -29,4 +29,49 @@
     <update id="updateFeedFormulaFarmName" parameterType="map" >
         UPDATE doctor_feed_formulas set `farm_name` = #{name} where farm_id = #{farmId}
     </update>
+
+    <update id="updatePigDailyFarmName" parameterType="map" >
+        UPDATE doctor_pig_dailies set `farm_name` = #{name} where farm_id = #{farmId}
+    </update>
+
+    <update id="updateGroupDailyFarmName" parameterType="map" >
+        UPDATE doctor_group_dailies set `farm_name` = #{name} where farm_id = #{farmId}
+    </update>
+
+    <update id="updateReportBoarFarmName" parameterType="map" >
+        UPDATE doctor_report_boars set `orz_name` = #{name} where orz_id = #{farmId} and orz_type = 3
+    </update>
+
+    <update id="updateReportDeliverFarmName" parameterType="map" >
+        UPDATE doctor_report_delivers set `orz_name` = #{name} where orz_id = #{farmId} and orz_type = 3
+    </update>
+
+    <update id="updateReportEfficiencyFarmName" parameterType="map" >
+        UPDATE doctor_report_efficiencies set `orz_name` = #{name} where orz_id = #{farmId} and orz_type = 3
+    </update>
+
+    <update id="updateReportFattenFarmName" parameterType="map" >
+        UPDATE doctor_report_fattens set `orz_name` = #{name} where orz_id = #{farmId} and orz_type = 3
+    </update>
+
+    <update id="updateReportMaterialFarmName" parameterType="map" >
+        UPDATE doctor_report_materials set `orz_name` = #{name} where orz_id = #{farmId} and orz_type = 3
+    </update>
+
+    <update id="updateReportMatingFarmName" parameterType="map" >
+        UPDATE doctor_report_matings set `orz_name` = #{name} where orz_id = #{farmId} and orz_type = 3
+    </update>
+
+    <update id="updateReportNurseryFarmName" parameterType="map" >
+        UPDATE doctor_report_nurseries set `orz_name` = #{name} where orz_id = #{farmId} and orz_type = 3
+    </update>
+
+    <update id="updateReportReseverFarmName" parameterType="map" >
+        UPDATE doctor_report_resevers set `orz_name` = #{name} where orz_id = #{farmId} and orz_type = 3
+    </update>
+
+    <update id="updateReportSowFarmName" parameterType="map" >
+        UPDATE doctor_report_sows set `orz_name` = #{name} where orz_id = #{farmId} and orz_type = 3
+    </update>
+
 </mapper>
