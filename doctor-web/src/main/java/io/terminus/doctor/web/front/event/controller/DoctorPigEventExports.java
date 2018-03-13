@@ -42,6 +42,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.MatingType;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
@@ -49,6 +50,7 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
@@ -142,15 +144,23 @@ public class DoctorPigEventExports {
         List<DoctorPigBoarInFarmExportDto> list = pigEventPaging.getData().stream().map(doctorPigEventDetail -> {
             try {
 
-                DoctorPigBoarInFarmExportDto dto;
-                DoctorFarmEntryDto farmEntryDto = JSON_MAPPER.fromJson(doctorPigEventDetail.getExtra(), DoctorFarmEntryDto.class);
-                dto = OBJECT_MAPPER.convertValue(farmEntryDto, DoctorPigBoarInFarmExportDto.class);
-                if (doctorPigEventDetail.getExtra() == null) {
-                    dto  = new DoctorPigBoarInFarmExportDto();
+                DoctorPigBoarInFarmExportDto dto = new DoctorPigBoarInFarmExportDto();
+
+                if (Objects.equals(doctorPigEventDetail.getType(), PigEvent.ENTRY.getKey())) {
+                    DoctorFarmEntryDto farmEntryDto = JSON_MAPPER.fromJson(doctorPigEventDetail.getExtra(), DoctorFarmEntryDto.class);
+                    dto = OBJECT_MAPPER.convertValue(farmEntryDto, DoctorPigBoarInFarmExportDto.class);
+                    if (doctorPigEventDetail.getExtra() != null && doctorPigEventDetail.getExtraMap().containsKey("source")) {
+                        dto.setSourceName(PigSource.from(dto.getSource()).getDesc());
+                    }
+                } else {
+                    DoctorPig pig = RespHelper.or500(doctorPigReadService.findPigById(doctorPigEventDetail.getPigId()));
+                    dto.setBreedName(pig.getBreedName());
+                    dto.setBreedTypeName(pig.getGeneticName());
+                    dto.setInFarmDate(pig.getInFarmDate());
+                    dto.setBirthday(pig.getBirthDate());
+                    dto.setSourceName(PigSource.from(pig.getSource()).getDesc());
                 }
-                if (doctorPigEventDetail.getExtra() != null && doctorPigEventDetail.getExtraMap().containsKey("source")) {
-                    dto.setSourceName(PigSource.from(dto.getSource()).getDesc());
-                }
+
                 dto.setPigCode(doctorPigEventDetail.getPigCode());
                 dto.setParity(doctorPigEventDetail.getParity());
                 dto.setInitBarnName(doctorPigEventDetail.getBarnName());
