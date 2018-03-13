@@ -246,6 +246,19 @@ public class DoctorFarmManager {
         doctorUpdateFarmDao.updateGroupFarmName(farmId, name);
         doctorUpdateFarmDao.updateWareHouseFarmName(farmId, name);
         doctorUpdateFarmDao.updateFeedFormulaFarmName(farmId, name);
+
+        //报表
+        doctorUpdateFarmDao.updatePigDailyFarmName(farmId, name);
+        doctorUpdateFarmDao.updateGroupDailyFarmName(farmId, name);
+        doctorUpdateFarmDao.updateReportBoarFarmName(farmId, name);
+        doctorUpdateFarmDao.updateReportDeliverFarmName(farmId, name);
+        doctorUpdateFarmDao.updateReportEfficiencyFarmName(farmId, name);
+        doctorUpdateFarmDao.updateReportFattenFarmName(farmId, name);
+        doctorUpdateFarmDao.updateReportMaterialFarmName(farmId, name);
+        doctorUpdateFarmDao.updateReportMatingFarmName(farmId, name);
+        doctorUpdateFarmDao.updateReportNurseryFarmName(farmId, name);
+        doctorUpdateFarmDao.updateReportReseverFarmName(farmId, name);
+        doctorUpdateFarmDao.updateReportSowFarmName(farmId, name);
     }
 
 
