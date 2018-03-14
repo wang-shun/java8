@@ -52,7 +52,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
-import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 import static java.util.Objects.isNull;
 
@@ -438,7 +437,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     public Response<Long> getPigCountByBarnPigTypes(Long farmId, List<Integer> pigTypes) {
         try {
             List<DoctorBarn> barns = doctorBarnDao.findByEnums(farmId, pigTypes, null, null, null);
-            if (!notEmpty(barns)) {
+            if (Arguments.isNullOrEmpty(barns)) {
                 return Response.ok(0L);
             }
             return Response.ok(doctorPigTrackDao.countByBarnIds(barns.stream().map(DoctorBarn::getId).collect(Collectors.toList())));
