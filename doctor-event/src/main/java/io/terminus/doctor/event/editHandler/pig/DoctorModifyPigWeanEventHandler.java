@@ -21,8 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 
 /**
@@ -35,6 +37,15 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
     private DoctorModifyGroupWeanEventHandler modifyGroupWeanEventHandler;
     @Autowired
     private DoctorModifyPigChgLocationEventHandler modifyPigChgLocationEventHandler;
+
+    @Override
+    protected void modifyHandleCheck(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
+        super.modifyHandleCheck(oldPigEvent, inputDto);
+        DoctorWeanDto oldInput = JSON_MAPPER.fromJson(oldPigEvent.getExtra(), DoctorWeanDto.class);
+        DoctorWeanDto newInput = (DoctorWeanDto) inputDto;
+        expectTrue(Objects.equals(oldInput.getPartWeanPigletsCount(), newInput.getPartWeanPigletsCount()),
+                "wean.count.not.modify");
+    }
 
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
