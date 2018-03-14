@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.collect.Lists;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.dto.report.daily.DoctorFarmLiveStockDto;
 import io.terminus.doctor.event.test.BaseServiceTest;
 import org.junit.Assert;
 import org.junit.Test;
@@ -49,4 +50,10 @@ public class DoctorDailyReportV2ServiceTest extends BaseServiceTest {
 //        Assert.assertTrue(response.getResult());
 //
 //    }
+
+    @Test
+    public void findFarmsLiveStock() {
+        Response<List<DoctorFarmLiveStockDto>> dtoResponse = doctorDailyReportV2Service.findFarmsLiveStock(Lists.newArrayList(1L));
+        System.out.println(dtoResponse);
+    }
 }

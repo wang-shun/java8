@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.notNull;
+
 
 /**
  * Created by xjn on 17/12/12.
@@ -322,14 +324,14 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
                 DoctorDimensionReport report = doctorReportBiManager.dimensionReport(dimensionCriteria);
                 return DoctorFarmLiveStockDto.builder()
                         .farmId(farmId)
-                        .boar(report.getReportBoar().getEnd())
-                        .farrow(report.getReportDeliver().getPigletEnd())
-                        .deliverSow(report.getReportDeliver().getEnd())
-                        .sow(report.getReportSow().getEnd())
-                        .houbei(report.getReportReserve().getEnd())
-                        .peihuai(report.getReportMating().getEnd())
-                        .nursery(report.getReportNursery().getEnd())
-                        .fatten(report.getReportFatten().getEnd())
+                        .boar(notNull(report.getReportBoar()) ? report.getReportBoar().getEnd(): 0)
+                        .farrow(notNull(report.getReportDeliver()) ? report.getReportDeliver().getPigletEnd() : 0)
+                        .deliverSow(notNull(report.getReportDeliver()) ? report.getReportDeliver().getEnd() : 0)
+                        .sow(notNull(report.getReportSow()) ? report.getReportSow().getEnd() : 0)
+                        .houbei(notNull(report.getReportReserve()) ? report.getReportReserve().getEnd() : 0)
+                        .peihuai(notNull(report.getReportMating()) ? report.getReportMating().getEnd() : 0)
+                        .nursery(notNull(report.getReportNursery()) ? report.getReportNursery().getEnd() : 0)
+                        .fatten(notNull(report.getReportFatten()) ? report.getReportFatten().getEnd() : 0)
                         .build();
 
             }).collect(Collectors.toList());
