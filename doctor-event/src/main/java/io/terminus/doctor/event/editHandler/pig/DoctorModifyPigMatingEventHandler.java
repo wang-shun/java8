@@ -155,8 +155,10 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
         //更新配种母猪数与空怀母猪数
         Integer sowPhKonghuaiChangeCount = 0;
         if (Objects.equals(oldPigEvent.getPigStatusBefore(), PigStatus.KongHuai.getKey())
-                || Objects.equals(oldPigEvent.getPigStatusBefore(), PigStatus.Entry.getKey())) {
-            sowPhKonghuaiChangeCount = 1;
+                || Objects.equals(oldPigEvent.getPigStatusBefore(), PigStatus.Entry.getKey())
+                || Objects.equals(oldPigEvent.getPigStatusBefore(), PigStatus.Wean.getKey())) {
+
+                sowPhKonghuaiChangeCount = 1;
         }
         updateDailyPhStatusLiveStock(oldPigEvent.getFarmId(), oldPigEvent.getEventAt()
                 , -1, sowPhKonghuaiChangeCount , 0);
@@ -181,7 +183,8 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
         //更新配种母猪数与空怀母猪数
         Integer sowPhKonghuaiChangeCount = 0;
         if (Objects.equals(newPigEvent.getPigStatusBefore(), PigStatus.KongHuai.getKey())
-                || Objects.equals(newPigEvent.getPigStatusBefore(), PigStatus.Entry.getKey())) {
+                || Objects.equals(newPigEvent.getPigStatusBefore(), PigStatus.Entry.getKey())
+                || Objects.equals(newPigEvent.getPigStatusBefore(), PigStatus.Wean.getKey())) {
             sowPhKonghuaiChangeCount = -1;
         }
         updateDailyPhStatusLiveStock(newPigEvent.getFarmId(), inputDto.eventAt()
