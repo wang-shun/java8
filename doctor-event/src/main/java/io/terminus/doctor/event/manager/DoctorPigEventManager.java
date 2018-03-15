@@ -92,7 +92,7 @@ public class DoctorPigEventManager {
      */
     @Transactional
     public List<DoctorEventInfo> eventHandle(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
-        log.info("pig event handle starting, inputDto:{}, basic:{}", inputDto, basic);
+        log.info("pig event handle starting, pigCode:{}, farmId:{}", inputDto.getPigCode(), basic.getFarmId());
         final List<DoctorEventInfo> doctorEventInfoList = Lists.newArrayList();
         DoctorPigEventHandler handler = pigEventHandlers.getEventHandlerMap().get(inputDto.getEventType());
         //获取需要执行的事件
@@ -105,7 +105,7 @@ public class DoctorPigEventManager {
 //        handler.handleCheck(executeEvent, fromTrack);
         //处理事件
         handler.handle(doctorEventInfoList, executeEvent, fromTrack);
-        log.info("pig event handle ending, inputDto:{}, basic:{}", inputDto, basic);
+        log.info("pig event handle ending,  pigCode:{}, farmId:{}", inputDto.getPigCode(), basic.getFarmId());
         return doctorEventInfoList;
     }
 
