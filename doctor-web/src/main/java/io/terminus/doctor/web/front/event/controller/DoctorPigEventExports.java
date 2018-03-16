@@ -156,11 +156,11 @@ public class DoctorPigEventExports {
                     DoctorPig pig = RespHelper.or500(doctorPigReadService.findPigById(doctorPigEventDetail.getPigId()));
                     dto.setBreedName(pig.getBreedName());
                     dto.setBreedTypeName(pig.getGeneticName());
-                    dto.setInFarmDate(pig.getInFarmDate());
                     dto.setBirthday(pig.getBirthDate());
                     dto.setSourceName(PigSource.from(pig.getSource()).getDesc());
                 }
 
+                dto.setInFarmDate(doctorPigEventDetail.getEventAt());
                 dto.setPigCode(doctorPigEventDetail.getPigCode());
                 dto.setParity(doctorPigEventDetail.getParity());
                 dto.setInitBarnName(doctorPigEventDetail.getBarnName());
