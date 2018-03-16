@@ -52,6 +52,9 @@ public class DoctorChgFarmInHandler extends DoctorAbstractEventHandler {
         newPig.setFarmId(chgFarmDto.getToFarmId());
         newPig.setFarmName(chgFarmDto.getToFarmName());
         newPig.setIsRemoval(IsOrNot.NO.getValue());
+        newPig.setInFarmDate(chgFarmDto.getChgFarmDate());
+        newPig.setInitBarnId(chgFarmDto.getToBarnId());
+        newPig.setInitBarnName(chgFarmDto.getToBarnName());
         doctorPigDao.create(newPig);
 
         //3.复制之前事件
