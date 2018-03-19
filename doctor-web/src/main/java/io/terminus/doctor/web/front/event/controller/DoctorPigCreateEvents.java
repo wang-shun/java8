@@ -17,9 +17,11 @@ import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuReadService;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
@@ -140,6 +142,9 @@ public class DoctorPigCreateEvents {
     private static JsonMapper jsonMapper = JSON_NON_DEFAULT_MAPPER;
     @RpcConsumer
     private DoctorEventModifyLogReadService doctorEventModifyLogReadService;
+
+    @RpcConsumer
+    private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
 
     @Autowired
     public DoctorPigCreateEvents(DoctorPigEventWriteService doctorPigEventWriteService,
@@ -707,7 +712,7 @@ public class DoctorPigCreateEvents {
             case VACCINATION:
                 DoctorVaccinationDto vaccinationDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorVaccinationDto.class);
                 vaccinationDto = doctorValidService.valid(vaccinationDto, vaccinationDto.getPigCode());
-                DoctorBasic vaccinationItem = RespHelper.or500(doctorBasicReadService.findBasicById(vaccinationDto.getVaccinationItemId()));
+                DoctorWarehouseSku vaccinationItem = RespHelper.or500(doctorWarehouseSkuReadService.findById(vaccinationDto.getVaccinationItemId()));
                 expectTrue(notNull(vaccinationItem), "basic.not.null", vaccinationDto.getVaccinationItemId());
                 vaccinationDto.setVaccinationItemName(vaccinationItem.getName());
                 DoctorBasicMaterial vaccination = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(vaccinationDto.getVaccinationId()));

@@ -13,10 +13,12 @@ import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuReadService;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -97,6 +99,9 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     private final DoctorValidService doctorValidService;
 
     @RpcConsumer
+    private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
+
+    @RpcConsumer
     private DoctorBasicMaterialReadService doctorBasicMaterialReadService;
     @RpcConsumer
     private DoctorUserProfileReadService doctorUserProfileReadService;
@@ -163,7 +168,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                 return RespWithEx.fail("batch.event.input.empty");
             }
             List<DoctorNewGroupInputInfo> newGroupInputInfoList = batchNewGroupEventDto.getNewGroupInputList().stream()
-                    .map(doctorNewGroupInput ->{
+                    .map(doctorNewGroupInput -> {
                         expectTrue(notEmpty(doctorNewGroupInput.getGroupCode()), "groupCode.not.empty");
                         try {
                             doctorNewGroupInput = doctorValidService.valid(doctorNewGroupInput, doctorNewGroupInput.getGroupCode());
@@ -171,7 +176,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                         } catch (InvalidException e) {
                             throw new InvalidException(true, e.getError(), doctorNewGroupInput.getGroupCode(), e.getParams());
                         } catch (ServiceException e) {
-                            throw new InvalidException(true, e.getMessage(),doctorNewGroupInput.getGroupCode());
+                            throw new InvalidException(true, e.getMessage(), doctorNewGroupInput.getGroupCode());
                         }
                     }).collect(Collectors.toList());
             return doctorGroupWriteService.batchNewGroupEventHandle(newGroupInputInfoList);
@@ -384,9 +389,10 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
     /**
      * 构建猪群事件信息
-     * @param groupId 猪群id
+     *
+     * @param groupId   猪群id
      * @param eventType 事件类型
-     * @param data 输入数据
+     * @param data      输入数据
      * @return 猪群事件信息封装
      */
     private DoctorGroupInputInfo buildGroupEventInputInfo(Long groupId, Integer eventType, String data) {
@@ -406,7 +412,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         return buildGroupEventInfo(eventType, groupDetail, params);
     }
 
-    private DoctorGroupInputInfo buildGroupEventInfo(Integer eventType, DoctorGroupDetail groupDetail, Map<String, Object> params){
+    private DoctorGroupInputInfo buildGroupEventInfo(Integer eventType, DoctorGroupDetail groupDetail, Map<String, Object> params) {
         Long groupId = groupDetail.getGroup().getId();
         GroupEventType groupEventType = checkNotNull(GroupEventType.from(eventType));
         params.put("eventType", eventType);
@@ -479,12 +485,13 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                 throw new InvalidException("event.type.illegal", groupEventType, groupDetail.getGroup().getGroupCode());
         }
     }
+
     @Override
     public Response<String> generateGroupCode(String barnName) {
         if (isEmpty(barnName)) {
             return Response.ok();
         }
-        return Response.ok(barnName + "(" +DateUtil.toDateString(new Date()) + ")");
+        return Response.ok(barnName + "(" + DateUtil.toDateString(new Date()) + ")");
     }
 
     @Override
@@ -545,7 +552,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
     //获取疫苗名称
     private String getVaccinName(Long vaccinId) {
-        return vaccinId == null ? null : expectNotNull(RespHelper.or(doctorBasicMaterialReadService.findBasicMaterialById(vaccinId), new DoctorBasicMaterial()), "basic.material.not.null", vaccinId).getName();
+        return vaccinId == null ? null : expectNotNull(RespHelper.or(doctorWarehouseSkuReadService.findById(vaccinId), new DoctorWarehouseSku()), "basic.material.not.null", vaccinId).getName();
     }
 
     //获取变动原因
@@ -557,7 +564,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     public Response<String> findRealName(Long userId) {
         if (userId != null) {
             UserProfile profile = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserId(userId));
-            if(profile != null){
+            if (profile != null) {
                 return Response.ok(profile.getRealName());
             }
         }
@@ -636,6 +643,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
     /**
      * 猪群事件时间限制
+     *
      * @param eventAt
      * @return
      */
