@@ -311,7 +311,9 @@ public class DoctorCommonGroupEventHandler {
             return;
         }
 
-        List<DoctorPigTrack> pigTrackList = doctorPigTrackDao.findFeedSowTrackByGroupId(group.getId());
-        expectTrue(pigTrackList.isEmpty(), "group.has.burusow.not.allow.close", group.getId());
+        if (Objects.equals(group.getPigType(), PigType.DELIVER_SOW.getValue())) {
+            List<DoctorPigTrack> pigTrackList = doctorPigTrackDao.findFeedSowTrackByGroupId(group.getFarmId(), group.getId());
+            expectTrue(pigTrackList.isEmpty(), "group.has.burusow.not.allow.close", group.getId());
+        }
     }
 }

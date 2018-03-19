@@ -3,12 +3,14 @@ package io.terminus.doctor.event.handler.group;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.doctor.common.enums.DataEventType;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
@@ -18,12 +20,16 @@ import io.terminus.doctor.event.event.MsgListenedGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
+
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
  * Desc: 关闭猪群事件处理器
@@ -38,6 +44,7 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
 
     private final DoctorGroupDao doctorGroupDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
+    private final DoctorPigTrackDao doctorPigTrackDao;
     @Autowired
     private Publisher publisher;
 
@@ -45,10 +52,11 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
     public DoctorCloseGroupEventHandler(DoctorGroupTrackDao doctorGroupTrackDao,
                                         DoctorGroupDao doctorGroupDao,
                                         DoctorGroupEventDao doctorGroupEventDao,
-                                        DoctorBarnDao doctorBarnDao) {
+                                        DoctorBarnDao doctorBarnDao, DoctorPigTrackDao doctorPigTrackDao) {
         super(doctorGroupTrackDao, doctorGroupEventDao, doctorBarnDao);
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
+        this.doctorPigTrackDao = doctorPigTrackDao;
     }
 
 
@@ -57,7 +65,7 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         input.setEventType(GroupEventType.CLOSE.getValue());
 
         //校验能否关闭
-        checkCanClose(groupTrack);
+        checkCanClose(group, groupTrack);
 
         DoctorCloseGroupInput close = (DoctorCloseGroupInput) input;
 
@@ -111,9 +119,14 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
 
 
     //猪群里还有猪不可关闭!
-    private void checkCanClose(DoctorGroupTrack groupTrack) {
+    private void checkCanClose(DoctorGroup group, DoctorGroupTrack groupTrack) {
         if (groupTrack.getQuantity() > 0) {
             throw new InvalidException("group.not.empty.cannot.close");
+        }
+
+        if (Objects.equals(group.getPigType(), PigType.DELIVER_SOW.getValue())) {
+            List<DoctorPigTrack> pigTrackList = doctorPigTrackDao.findFeedSowTrackByGroupId(group.getFarmId(), group.getId());
+            expectTrue(pigTrackList.isEmpty(), "group.has.burusow.not.allow.close", group.getId());
         }
     }
 }
