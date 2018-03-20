@@ -7,6 +7,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -49,6 +50,12 @@ public class DoctorPigEventDaoTest extends BaseDaoTest {
         DoctorPigEvent event = doctorPigEventDao.getFarrowEventByParity(395635L, 1);
 
         Assert.assertEquals(4973190L, event.getId().longValue());
+    }
+
+    @Test
+    public void testGetLastStatusEventBeforeEventAt() {
+        DoctorPigEvent event = doctorPigEventDao.getLastStatusEventBeforeEventAt(453480L, new Date());
+        Assert.assertEquals(event.getId().longValue(), 5402988L);
     }
 
 }

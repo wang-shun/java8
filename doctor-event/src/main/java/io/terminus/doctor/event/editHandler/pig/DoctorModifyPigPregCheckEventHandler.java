@@ -45,12 +45,9 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
     @Override
     protected void modifyHandleCheck(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
         super.modifyHandleCheck(oldPigEvent, inputDto);
-        DoctorPregChkResultDto pregChkResultDto = (DoctorPregChkResultDto) inputDto;
-        if (!Objects.equals(oldPigEvent.getPregCheckResult(), pregChkResultDto.getCheckResult())) {
-            DoctorPigEvent lastStatusEvent = doctorPigEventDao.getLastStatusEventBeforeEventAt(oldPigEvent.getPigId(), new Date());
-            if (!Objects.equals(lastStatusEvent.getId(), oldPigEvent.getId())) {
-                throw new InvalidException("not.last.pregCheck.event");
-            }
+        DoctorPigEvent lastStatusEvent = doctorPigEventDao.getLastStatusEventBeforeEventAt(oldPigEvent.getPigId(), new Date());
+        if (!Objects.equals(lastStatusEvent.getId(), oldPigEvent.getId())) {
+            throw new InvalidException("not.last.pregCheck.event");
         }
     }
 
@@ -78,7 +75,7 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
 
     @Override
     public DoctorPigTrack buildNewTrack(DoctorPigTrack oldPigTrack, DoctorEventChangeDto changeDto) {
-        oldPigTrack.setStatus(getStatus(changeDto.getNewPregCheckResult()));
+        oldPigTrack.setStatus(doctorEventBaseHelper.getCurrentStatus(oldPigTrack.getPigId()));
         Map<String, Object> extra = MoreObjects.firstNonNull(oldPigTrack.getExtraMap(), Maps.newHashMap());
         extra.put("pregCheckResult", PREG_CHECK_RESULT.get(changeDto.getNewPregCheckResult()));
         oldPigTrack.setExtraMap(extra);
