@@ -9,9 +9,9 @@ import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
-import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
+import io.terminus.doctor.event.helper.DoctorEventBaseHelper;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -133,7 +133,7 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
     @Override
     protected DoctorPigTrack buildNewTrackForRollback(DoctorPigEvent deletePigEvent, DoctorPigTrack oldPigTrack) {
         DoctorPigEvent beforeStatusEvent = doctorPigEventDao.getLastStatusEventBeforeEventAt(deletePigEvent.getPigId(), deletePigEvent.getEventAt());
-        Integer beforeStatus = getStatus(beforeStatusEvent);
+        Integer beforeStatus = DoctorEventBaseHelper.getStatus(beforeStatusEvent);
         oldPigTrack.setStatus(beforeStatus);
         if (Objects.equals(beforeStatus, PigStatus.Mate.getKey())) {
             oldPigTrack.setCurrentMatingCount(beforeStatusEvent.getCurrentMatingCount());
@@ -184,7 +184,7 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
         Integer phPregnantChangeCount = 0;
         Integer afterStatus = getStatus(oldPigEvent.getPregCheckResult());
         DoctorPigEvent beforeStatusEvent = doctorPigEventDao.getLastStatusEventBeforeEventAt(oldPigEvent.getPigId(), oldPigEvent.getEventAt());
-        Integer beforeStatus = getStatus(beforeStatusEvent);
+        Integer beforeStatus = DoctorEventBaseHelper.getStatus(beforeStatusEvent);
         if (Objects.equals(beforeStatus, afterStatus)) {
             return;
         }
@@ -299,15 +299,6 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
 
     private Integer getStatus(Integer pregCheckResult) {
         return Objects.equals(pregCheckResult, PregCheckResult.YANG.getKey())
-                ? PigStatus.Pregnancy.getKey() : PigStatus.KongHuai.getKey();
-    }
-
-    private Integer getStatus(DoctorPigEvent beforeStatusEvent) {
-        if (Objects.equals(beforeStatusEvent.getType(), PigEvent.MATING.getKey())) {
-            return PigStatus.Mate.getKey();
-        }
-
-        return Objects.equals(beforeStatusEvent.getPregCheckResult(), PregCheckResult.YANG.getKey())
                 ? PigStatus.Pregnancy.getKey() : PigStatus.KongHuai.getKey();
     }
 
