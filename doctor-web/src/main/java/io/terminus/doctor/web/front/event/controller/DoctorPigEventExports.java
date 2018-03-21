@@ -150,14 +150,20 @@ public class DoctorPigEventExports {
                     DoctorFarmEntryDto farmEntryDto = JSON_MAPPER.fromJson(doctorPigEventDetail.getExtra(), DoctorFarmEntryDto.class);
                     dto = OBJECT_MAPPER.convertValue(farmEntryDto, DoctorPigBoarInFarmExportDto.class);
                     if (doctorPigEventDetail.getExtra() != null && doctorPigEventDetail.getExtraMap().containsKey("source")) {
-                        dto.setSourceName(PigSource.from(dto.getSource()).getDesc());
+                        PigSource pigSource = PigSource.from(dto.getSource());
+                        if (notNull(pigSource)) {
+                            dto.setSourceName(pigSource.getDesc());
+                        }
                     }
                 } else {
                     DoctorPig pig = RespHelper.or500(doctorPigReadService.findPigById(doctorPigEventDetail.getPigId()));
                     dto.setBreedName(pig.getBreedName());
                     dto.setBreedTypeName(pig.getGeneticName());
                     dto.setBirthday(pig.getBirthDate());
-                    dto.setSourceName(PigSource.from(pig.getSource()).getDesc());
+                    PigSource pigSource = PigSource.from(pig.getSource());
+                    if (notNull(pigSource)) {
+                        dto.setSourceName(pigSource.getDesc());
+                    }
                 }
 
                 dto.setInFarmDate(doctorPigEventDetail.getEventAt());
