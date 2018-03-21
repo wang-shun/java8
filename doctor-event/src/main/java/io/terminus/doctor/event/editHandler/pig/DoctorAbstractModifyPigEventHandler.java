@@ -40,6 +40,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.enums.SourceType.UN_MODIFY;
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
@@ -156,7 +157,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     @Override
     public Boolean canRollback(DoctorPigEvent deletePigEvent) {
-        return isLastManualEvent(deletePigEvent)
+        return isLastEvent(deletePigEvent)
                 && rollbackHandleCheck(deletePigEvent)
                 && !UN_MODIFY.contains(deletePigEvent.getEventSource());
     }
@@ -495,12 +496,14 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      *
      * @param pigEvent 猪事件
      */
-    private boolean isLastManualEvent(DoctorPigEvent pigEvent) {
+    private boolean isLastEvent(DoctorPigEvent pigEvent) {
         if (IGNORE_EVENT.contains(pigEvent.getType())) {
             return true;
         }
-        DoctorPigEvent lastEvent = doctorPigEventDao.findLastManualEventExcludeTypes(pigEvent.getPigId(), IGNORE_EVENT);
-        return notNull(lastEvent) && Objects.equals(pigEvent.getId(), lastEvent.getId());
+        DoctorPigEvent lastEvent = doctorPigEventDao.findLastEventExcludeTypes(pigEvent.getPigId(), IGNORE_EVENT);
+        return notNull(lastEvent)
+                && Objects.equals(pigEvent.getId(), lastEvent.getId())
+                && (isNull(pigEvent.getIsAuto()) || pigEvent.getIsAuto() == IsOrNot.NO.getValue());
     }
 
     /**
