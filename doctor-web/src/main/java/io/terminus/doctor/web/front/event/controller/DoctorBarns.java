@@ -581,7 +581,7 @@ public class DoctorBarns {
         if (barnType.isEmpty()) {
             return Collections.emptyList();
         }
-        return RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, barnType, null, null, null));
+        return RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, barnType, null, DoctorBarn.Status.USING.getValue(), null));
     }
 
     /**
@@ -593,7 +593,7 @@ public class DoctorBarns {
     @RequestMapping(value = "/selectChgBarnFromWean", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<DoctorBarn> selectChgBarnFromWean(@RequestParam Long farmId) {
         List<Integer> barnType = Lists.newArrayList(PigType.MATING_FARROW_TYPES);
-        return RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, barnType, null, null, null));
+        return RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, barnType, null, DoctorBarn.Status.USING.getValue(), null));
     }
 
     /**
