@@ -607,7 +607,8 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
                 break;
             }
 
-            expectTrue(!Objects.equals(doctorPigEvent.getType(), PigEvent.WEAN.getKey()), "after.event.has.not.wean");
+            expectTrue(!Objects.equals(doctorPigEvent.getType(), PigEvent.WEAN.getKey()),
+                    "after.event.has.not.wean", PigEvent.from(pigEvent.getType()).getName());
         }
     }
 }
