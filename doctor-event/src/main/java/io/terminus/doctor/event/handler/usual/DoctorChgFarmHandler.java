@@ -80,6 +80,7 @@ public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
 
     @Override
     protected void specialHandle(DoctorPigEvent executeEvent, DoctorPigTrack toTrack) {
+        super.specialHandle(executeEvent, toTrack);
         DoctorPig oldPig = doctorPigDao.findById(executeEvent.getPigId());
         oldPig.setIsRemoval(IsOrNot.YES.getValue());
         doctorPigDao.update(oldPig);
