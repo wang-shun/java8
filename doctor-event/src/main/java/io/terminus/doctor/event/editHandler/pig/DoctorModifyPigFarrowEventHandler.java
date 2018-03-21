@@ -32,7 +32,6 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.Objects;
 
-import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
@@ -54,10 +53,16 @@ public class DoctorModifyPigFarrowEventHandler extends DoctorAbstractModifyPigEv
         super.modifyHandleCheck(oldPigEvent, inputDto);
         DoctorFarrowingDto farrowingDto = (DoctorFarrowingDto) inputDto;
 
-        //当前胎次下有断奶事件,不允许编辑分娩的活仔数
-        expectTrue(Objects.equals(farrowingDto.getFarrowingLiveCount(), oldPigEvent.getLiveCount())
-                        || isNull(doctorPigEventDao.getWeanEventByParity(oldPigEvent.getPigId(), oldPigEvent.getParity()))
-                , "current.parity.has.wean");
+        if (!Objects.equals(farrowingDto.getFarrowingLiveCount(), oldPigEvent.getLiveCount())) {
+            //当前胎次下有断奶事件,不允许编辑分娩的活仔数
+            notHasWean(oldPigEvent);
+
+            //校验哺乳数量不小于零
+            DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(oldPigEvent.getPigId());
+            Integer unweanQty = EventUtil.plusInt(pigTrack.getUnweanQty(),
+                    EventUtil.minusInt(farrowingDto.getFarrowingLiveCount(), oldPigEvent.getLiveCount()));
+            expectTrue(unweanQty >= 0, "modify.count.lead.to.unwean.lower.zero");
+        }
     }
 
     @Override

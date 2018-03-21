@@ -596,4 +596,15 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
             doctorDailyPigDao.update(pigDaily);
         });
     }
+
+    protected void notHasWean(DoctorPigEvent pigEvent) {
+        List<DoctorPigEvent> pigEvents = doctorPigEventDao.queryEventsForDescBy(pigEvent.getPigId(), pigEvent.getParity());
+        for (DoctorPigEvent doctorPigEvent : pigEvents) {
+            if (Objects.equals(pigEvent.getId(), doctorPigEvent.getId())) {
+                break;
+            }
+
+            expectTrue(!Objects.equals(doctorPigEvent.getType(), PigEvent.WEAN.getKey()), "after.event.has.not.wean");
+        }
+    }
 }

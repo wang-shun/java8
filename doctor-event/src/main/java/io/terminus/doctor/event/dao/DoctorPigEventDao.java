@@ -843,4 +843,9 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public List<DoctorPigEvent> queryToMatingForTime(Long farmId) {
         return getSqlSession().selectList(sqlId("queryToMatingForTime"), farmId);
     }
+
+    public List<DoctorPigEvent> queryEventsForDescBy(Long pigId, Integer parity) {
+        return getSqlSession().selectList(sqlId("queryEventsForDescBy"),
+                ImmutableMap.of("pigId", pigId, "parity", parity));
+    }
 }
