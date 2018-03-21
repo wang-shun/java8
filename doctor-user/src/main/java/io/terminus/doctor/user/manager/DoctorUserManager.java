@@ -1,6 +1,7 @@
 package io.terminus.doctor.user.manager;
 
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.common.enums.UserRole;
 import io.terminus.doctor.common.enums.UserStatus;
@@ -8,9 +9,22 @@ import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.UserRoleUtil;
-import io.terminus.doctor.user.dao.*;
+import io.terminus.doctor.user.dao.DoctorOrgDao;
+import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
+import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
+import io.terminus.doctor.user.dao.IotUserDao;
+import io.terminus.doctor.user.dao.OperatorDao;
+import io.terminus.doctor.user.dao.PrimaryUserDao;
+import io.terminus.doctor.user.dao.SubDao;
+import io.terminus.doctor.user.dao.UserDaoExt;
 import io.terminus.doctor.user.dto.IotUserDto;
-import io.terminus.doctor.user.model.*;
+import io.terminus.doctor.user.model.DoctorOrg;
+import io.terminus.doctor.user.model.DoctorServiceReview;
+import io.terminus.doctor.user.model.IotUser;
+import io.terminus.doctor.user.model.Operator;
+import io.terminus.doctor.user.model.PrimaryUser;
+import io.terminus.doctor.user.model.Sub;
+import io.terminus.doctor.user.model.SubRole;
 import io.terminus.doctor.user.service.SubRoleReadService;
 import io.terminus.parana.common.utils.Iters;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
@@ -52,13 +66,15 @@ public class DoctorUserManager {
 
     private final DoctorUserDataPermissionDao doctorUserDataPermissionDao;
 
+    private final DoctorServiceReviewDao doctorServiceReviewDao;
+
     @Autowired
     public DoctorUserManager(UserDaoExt userDao,
                              UserProfileDao userProfileDao,
                              OperatorDao operatorDao,
                              PrimaryUserDao primaryUserDao,
                              SubDao subDao,
-                             SubRoleReadService subRoleReadService, IotUserDao iotUserDao, DoctorOrgDao orgDao, DoctorUserDataPermissionDao doctorUserDataPermissionDao) {
+                             SubRoleReadService subRoleReadService, IotUserDao iotUserDao, DoctorOrgDao orgDao, DoctorUserDataPermissionDao doctorUserDataPermissionDao, DoctorServiceReviewDao doctorServiceReviewDao) {
         this.userDao = userDao;
         this.userProfileDao = userProfileDao;
         this.operatorDao = operatorDao;
@@ -68,6 +84,7 @@ public class DoctorUserManager {
         this.iotUserDao = iotUserDao;
         this.orgDao = orgDao;
         this.doctorUserDataPermissionDao = doctorUserDataPermissionDao;
+        this.doctorServiceReviewDao = doctorServiceReviewDao;
     }
 
     @Transactional
@@ -212,6 +229,17 @@ public class DoctorUserManager {
                 } else {
                     org.setMobile(user.getMobile());
                     orgDao.update(org);
+                }
+
+                //更新用户申请服务中绑定的手机号
+                List<DoctorServiceReview> doctorServiceReviews = doctorServiceReviewDao.findByUserId(user.getId());
+                if(!Arguments.isNullOrEmpty(doctorServiceReviews)) {
+                    DoctorServiceReview updateReview = new DoctorServiceReview();
+                    doctorServiceReviews.forEach(doctorServiceReview -> {
+                        updateReview.setId(doctorServiceReview.getId());
+                        updateReview.setUserMobile(user.getMobile());
+                        doctorServiceReviewDao.update(updateReview);
+                    });
                 }
             }
         }
