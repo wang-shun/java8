@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
-import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
@@ -31,10 +30,16 @@ public class DoctorModifyPigFosterEventHandler extends DoctorAbstractModifyPigEv
     protected void modifyHandleCheck(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
         super.modifyHandleCheck(oldPigEvent, inputDto);
         DoctorFostersDto fostersDto = (DoctorFostersDto) inputDto;
-        //当前胎次下有断奶事件,不允许编辑分娩的活仔数
-        expectTrue(Objects.equals(fostersDto.getFostersCount(), oldPigEvent.getQuantity())
-                        || isNull(doctorPigEventDao.getWeanEventByParity(oldPigEvent.getPigId(), oldPigEvent.getParity()))
-                , "current.parity.has.wean");
+        //拼窝事件后有断奶事件,不允许编辑的拼窝数量
+        if (!Objects.equals(fostersDto.getFostersCount(), oldPigEvent.getQuantity())) {
+            notHasWean(oldPigEvent);
+
+            //校验哺乳数量不小于零
+            DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(oldPigEvent.getPigId());
+            Integer unweanQty = EventUtil.minusInt(pigTrack.getUnweanQty(),
+                    EventUtil.minusInt(fostersDto.getFostersCount(), oldPigEvent.getQuantity()));
+            expectTrue(unweanQty >= 0, "modify.count.lead.to.unwean.lower.zero");
+        }
 
         //被拼窝事件与拼窝事件发生在不同猪舍,不能编辑
         DoctorPigEvent fosterByEvent = doctorPigEventDao.findByRelPigEventId(oldPigEvent.getId());

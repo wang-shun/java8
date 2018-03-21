@@ -11,12 +11,31 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
+
 /**
  * Created by xjn on 17/4/19.
  * 被拼窝
  */
 @Component
 public class DoctorModifyPigFosterByEventHandler extends DoctorAbstractModifyPigEventHandler {
+    @Override
+    protected void modifyHandleCheck(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
+        super.modifyHandleCheck(oldPigEvent, inputDto);
+
+        DoctorFosterByDto fosterByDto = (DoctorFosterByDto) inputDto;
+        //被拼窝后有断奶事件,不允许编辑被拼窝的活仔数
+        if (!Objects.equals(fosterByDto.getFosterByCount(), oldPigEvent.getQuantity())) {
+            notHasWean(oldPigEvent);
+
+            //校验哺乳数量不小于零
+            DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(oldPigEvent.getPigId());
+            Integer unweanQty = EventUtil.plusInt(pigTrack.getUnweanQty(),
+                    EventUtil.minusInt(fosterByDto.getFosterByCount(), oldPigEvent.getQuantity()));
+            expectTrue(unweanQty >= 0, "modify.count.lead.to.unwean.lower.zero");
+        }
+    }
+
     @Override
     protected boolean rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
         return false;

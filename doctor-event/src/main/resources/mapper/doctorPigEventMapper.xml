@@ -1821,4 +1821,18 @@
             AND created_at &gt; '2017-03-09'
         </where>
     </select>
+
+    <select id="queryEventsForDescBy" parameterType="map" resultMap="DoctorPigEventMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        <where>
+            pig_id = #{pigId}
+            AND parity = #{parity}
+            AND status = 1
+            AND event_source != 5
+            order by event_at desc, id desc
+        </where>
+    </select>
 </mapper>
