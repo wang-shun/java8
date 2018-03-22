@@ -212,11 +212,11 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
 
                 //(1).产房
                 if (Objects.equals(changeDto.getChangeTypeId(), SALE)) {
-                    oldDailyPig.setSowCfSale(EventUtil.plusInt(oldDailyPig.getSowPhSale(), changeDto.getRemoveCountChange()));
+                    oldDailyPig.setSowCfSale(EventUtil.plusInt(oldDailyPig.getSowCfSale(), changeDto.getRemoveCountChange()));
                 } else if (Objects.equals(changeDto.getChangeTypeId(), DEAD)){
-                    oldDailyPig.setSowCfDead(EventUtil.plusInt(oldDailyPig.getSowPhDead(), changeDto.getRemoveCountChange()));
+                    oldDailyPig.setSowCfDead(EventUtil.plusInt(oldDailyPig.getSowCfDead(), changeDto.getRemoveCountChange()));
                 } else if (Objects.equals(changeDto.getChangeTypeId(), WEED)) {
-                    oldDailyPig.setSowCfWeedOut(EventUtil.plusInt(oldDailyPig.getSowPhWeedOut(), changeDto.getRemoveCountChange()));
+                    oldDailyPig.setSowCfWeedOut(EventUtil.plusInt(oldDailyPig.getSowCfWeedOut(), changeDto.getRemoveCountChange()));
                 } else {
                     oldDailyPig.setSowCfOtherOut(EventUtil.plusInt(oldDailyPig.getSowCfOtherOut(), changeDto.getRemoveCountChange()));
                 }
@@ -271,11 +271,11 @@ public class DoctorModifyPigRemoveEventHandler extends DoctorAbstractModifyPigEv
 
                 //(1).产房
                 if (Objects.equals(changeDto.getChangeTypeId(), SALE)) {
-                    oldDailyPig.setSowCfSale(EventUtil.plusInt(oldDailyPig.getSowPhSale(), changeDto.getRemoveCountChange()));
+                    oldDailyPig.setSowCfSale(EventUtil.plusInt(oldDailyPig.getSowCfSale(), changeDto.getRemoveCountChange()));
                 } else if (Objects.equals(changeDto.getChangeTypeId(), DEAD)){
-                    oldDailyPig.setSowCfDead(EventUtil.plusInt(oldDailyPig.getSowPhDead(), changeDto.getRemoveCountChange()));
+                    oldDailyPig.setSowCfDead(EventUtil.plusInt(oldDailyPig.getSowCfDead(), changeDto.getRemoveCountChange()));
                 } else if (Objects.equals(changeDto.getChangeTypeId(), WEED)) {
-                    oldDailyPig.setSowCfWeedOut(EventUtil.plusInt(oldDailyPig.getSowPhWeedOut(), changeDto.getRemoveCountChange()));
+                    oldDailyPig.setSowCfWeedOut(EventUtil.plusInt(oldDailyPig.getSowCfWeedOut(), changeDto.getRemoveCountChange()));
                 } else {
                     oldDailyPig.setSowCfOtherOut(EventUtil.plusInt(oldDailyPig.getSowCfOtherOut(), changeDto.getRemoveCountChange()));
                 }

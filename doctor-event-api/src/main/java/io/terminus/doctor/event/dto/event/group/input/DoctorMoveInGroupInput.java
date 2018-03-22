@@ -156,6 +156,10 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
         if(breedName != null){
             map.put("品种", breedName);
         }
+        if (fromFarmName != null) {
+            map.put("来源猪场", fromFarmName);
+        }
+
         if(fromBarnName != null){
             map.put("来源猪舍", fromBarnName);
         }
