@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.SourceType;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmInEventHandler;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -35,7 +36,7 @@ public class DoctorChgFarmInHandler extends DoctorAbstractEventHandler {
     @Autowired
     private DoctorModifyPigChgFarmInEventHandler modifyPigChgFarmInEventHandler;
 
-    public void handle(DoctorPigEvent executeEvent, DoctorPigTrack oldTrack, DoctorPig oldPig) {
+    public void handle(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent executeEvent, DoctorPigTrack oldTrack, DoctorPig oldPig) {
         if (isNull(executeEvent.getEventSource())
                 || Objects.equals(executeEvent.getEventSource(), SourceType.INPUT.getValue())) {
             String key = executeEvent.getFarmId().toString() + executeEvent.getKind().toString() + executeEvent.getPigCode();
@@ -107,6 +108,27 @@ public class DoctorChgFarmInHandler extends DoctorAbstractEventHandler {
         //校验track
         doctorEventBaseHelper.validTrackAfterUpdate(newTrack);
         doctorPigTrackDao.create(newTrack);
+
+        //记录发生的事件信息
+        DoctorBarn doctorBarn = doctorBarnDao.findById(newTrack.getCurrentBarnId());
+        DoctorEventInfo doctorEventInfo = DoctorEventInfo.builder()
+                .orgId(chgFarmIn.getOrgId())
+                .farmId(chgFarmIn.getFarmId())
+                .eventId(chgFarmIn.getId())
+                .isAuto(chgFarmIn.getIsAuto())
+                .eventAt(chgFarmIn.getEventAt())
+                .kind(chgFarmIn.getKind())
+                .mateType(chgFarmIn.getDoctorMateType())
+                .pregCheckResult(chgFarmIn.getPregCheckResult())
+                .businessId(chgFarmIn.getPigId())
+                .code(chgFarmIn.getPigCode())
+                .status(newTrack.getStatus())
+                .preStatus(chgFarmIn.getPigStatusBefore())
+                .businessType(DoctorEventInfo.Business_Type.PIG.getValue())
+                .eventType(chgFarmIn.getType())
+                .pigType(doctorBarn.getPigType())
+                .build();
+        doctorEventInfoList.add(doctorEventInfo);
 
         //新增事件后记录track snapshot
         createTrackSnapshot(chgFarmIn);

@@ -95,7 +95,7 @@ public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
     @Override
     protected void triggerEvent(List<DoctorEventInfo> doctorEventInfoList, DoctorPigEvent executeEvent, DoctorPigTrack toTrack) {
         DoctorPig doctorPig = doctorPigDao.findById(toTrack.getPigId());
-        doctorChgFarmInHandler.handle(executeEvent, toTrack, doctorPig);
+        doctorChgFarmInHandler.handle(doctorEventInfoList, executeEvent, toTrack, doctorPig);
     }
 
     /**

@@ -22,6 +22,7 @@ import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEventHandlers;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.event.MsgGroupPublishDto;
@@ -238,8 +239,11 @@ public class DoctorPigEventManager {
         try {
             if (notEmpty(dtos)) {
                 //checkFarmIdAndEventAt(dtos);
-                String messageId = UUID.randomUUID().toString().replace("-", "");
-                coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(dtos.get(0).getOrgId(), messageId));
+                Map<Long, List<DoctorEventInfo>> farmIdToMap = dtos.stream().collect(Collectors.groupingBy(DoctorEventInfo::getFarmId));
+                farmIdToMap.keySet().forEach(farmId -> {
+                    String messageId = UUID.randomUUID().toString().replace("-", "");
+                    coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(messageId, farmId, OrzDimension.FARM.getValue()));
+                });
                 publishPigEvent(dtos, coreEventDispatcher, publisher);
             }
         } catch (Exception e) {
