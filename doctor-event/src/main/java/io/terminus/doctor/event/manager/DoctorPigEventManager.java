@@ -22,6 +22,7 @@ import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEventHandlers;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.event.MsgGroupPublishDto;
@@ -34,6 +35,7 @@ import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
 import io.terminus.doctor.event.handler.DoctorPigsByEventSelector;
 import io.terminus.doctor.event.handler.admin.SmartPigEventHandler;
 import io.terminus.doctor.event.helper.DoctorConcurrentControl;
+import io.terminus.doctor.event.helper.DoctorEventBaseHelper;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -83,6 +85,8 @@ public class DoctorPigEventManager {
     private DoctorGroupEventDao doctorGroupEventDao;
     @Autowired
     private SmartPigEventHandler pigEventHandler;
+    @Autowired
+    private DoctorEventBaseHelper doctorEventBaseHelper;
 
     /**
      * 事件处理
@@ -238,8 +242,11 @@ public class DoctorPigEventManager {
         try {
             if (notEmpty(dtos)) {
                 //checkFarmIdAndEventAt(dtos);
-                String messageId = UUID.randomUUID().toString().replace("-", "");
-                coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(dtos.get(0).getOrgId(), messageId));
+                Map<Long, List<DoctorEventInfo>> farmIdToMap = dtos.stream().collect(Collectors.groupingBy(DoctorEventInfo::getFarmId));
+                farmIdToMap.keySet().forEach(farmId -> {
+                    String messageId = UUID.randomUUID().toString().replace("-", "");
+                    coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(messageId, farmId, OrzDimension.FARM.getValue()));
+                });
                 publishPigEvent(dtos, coreEventDispatcher, publisher);
             }
         } catch (Exception e) {

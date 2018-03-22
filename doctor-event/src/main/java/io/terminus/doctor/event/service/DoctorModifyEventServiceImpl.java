@@ -1,16 +1,22 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
+import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
+import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.helper.DoctorEventBaseHelper;
 import io.terminus.doctor.event.manager.DoctorGroupEventManager;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -20,10 +26,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
-
-import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
 
 
 /**
@@ -36,7 +42,7 @@ import static io.terminus.common.utils.JsonMapper.JSON_NON_DEFAULT_MAPPER;
 public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
 
     protected final ToJsonMapper TO_JSON_MAPPER = ToJsonMapper.JSON_NON_DEFAULT_MAPPER;
-    private static JsonMapper jsonMapper = JSON_NON_DEFAULT_MAPPER;
+    private static JsonMapperUtil jsonMapper = JsonMapperUtil.nonEmptyMapper();
 
     @Autowired
     private DoctorPigEventDao doctorPigEventDao;
@@ -48,7 +54,8 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
     private DoctorGroupEventManager groupEventManager;
     @Autowired
     private DoctorPigEventManager doctorPigEventManager;
-
+    @Autowired
+    private DoctorEventBaseHelper doctorEventBaseHelper;
     private final CoreEventDispatcher coreEventDispatcher;
 
     @Autowired
@@ -60,8 +67,15 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
     public RespWithEx<Boolean> modifyPigEvent(BasePigEventInputDto inputDto, Long eventId, Integer eventType) {
         try {
             pigEventManager.modifyPigEventHandle(inputDto, eventId, eventType);
-            String messageId = UUID.randomUUID().toString().replace("-", "");
-            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(doctorPigEventDao.findEventById(eventId).getOrgId(), messageId));
+
+            DoctorPigEvent pigEvent = doctorPigEventDao.findEventById(eventId);
+            List<Long> farmIds = Lists.newArrayList(pigEvent.getFarmId());
+            if (Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM.getKey())) {
+                DoctorChgFarmDto doctorChgFarmDto = jsonMapper.fromJson(pigEvent.getExtra(), DoctorChgFarmDto.class);
+                farmIds.add(doctorChgFarmDto.getToFarmId());
+            }
+            doctorEventBaseHelper.synchronizeReportPublish(farmIds);
+
             return RespWithEx.ok(true);
         } catch (InvalidException e) {
             log.error("modify pig event failed , inputDto:{}, cuase:{}", inputDto, Throwables.getStackTraceAsString(e));
@@ -76,8 +90,14 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
     public RespWithEx<Boolean> modifyGroupEvent(BaseGroupInput inputDto, Long eventId, Integer eventType) {
         try {
             groupEventManager.modifyGroupEventHandle(inputDto, eventId, eventType);
-            String messageId = UUID.randomUUID().toString().replace("-", "");
-            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(doctorGroupEventDao.findEventById(eventId).getOrgId(), messageId));
+
+            DoctorGroupEvent groupEvent = doctorGroupEventDao.findEventById(eventId);
+            List<Long> farmIds = Lists.newArrayList(groupEvent.getFarmId());
+            if (Objects.equals(groupEvent.getType(), GroupEventType.TRANS_FARM.getValue())) {
+                DoctorTransFarmGroupInput groupInput = jsonMapper.fromJson(groupEvent.getExtra(), DoctorTransFarmGroupInput.class);
+                farmIds.add(groupInput.getToFarmId());
+            }
+            doctorEventBaseHelper.synchronizeReportPublish(farmIds);
             return RespWithEx.ok(true);
         } catch (InvalidException e) {
             log.error("modify pig event failed , inputDto:{}, cuase:{}", inputDto, Throwables.getStackTraceAsString(e));
