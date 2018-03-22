@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
@@ -8,6 +9,7 @@ import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.cache.DoctorDailyReportCache;
 import io.terminus.doctor.event.dao.DoctorGroupBatchSummaryDao;
@@ -15,6 +17,8 @@ import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
+import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
+import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorCheckPregDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDeadDailyReport;
@@ -23,21 +27,22 @@ import io.terminus.doctor.event.dto.report.daily.DoctorLiveStockDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorMatingDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorSaleDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorWeanDailyReport;
+import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.RollbackType;
+import io.terminus.doctor.event.helper.DoctorEventBaseHelper;
 import io.terminus.doctor.event.manager.DoctorRollbackManager;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.reportBi.listener.DoctorReportBiReaTimeEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sun.misc.UUDecoder;
 
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
+import java.util.Objects;
 
 /**
  * Desc:
@@ -58,6 +63,8 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
     private final DoctorRollbackManager doctorRollbackManager;
     private final DoctorDailyReportCache doctorDailyReportCache;
     private final CoreEventDispatcher coreEventDispatcher;
+    private final DoctorEventBaseHelper doctorEventBaseHelper;
+    private static JsonMapperUtil jsonMapper = JsonMapperUtil.nonEmptyMapper();
 
     @Autowired
     public DoctorRollbackServiceImpl(DoctorGroupEventDao doctorGroupEventDao,
@@ -66,7 +73,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                                      DoctorKpiDao doctorKpiDao,
                                      DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService,
                                      DoctorRollbackManager doctorRollbackManager,
-                                     DoctorDailyReportCache doctorDailyReportCache, CoreEventDispatcher coreEventDispatcher) {
+                                     DoctorDailyReportCache doctorDailyReportCache, CoreEventDispatcher coreEventDispatcher, DoctorEventBaseHelper doctorEventBaseHelper) {
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorGroupBatchSummaryDao = doctorGroupBatchSummaryDao;
@@ -75,6 +82,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         this.doctorRollbackManager = doctorRollbackManager;
         this.doctorDailyReportCache = doctorDailyReportCache;
         this.coreEventDispatcher = coreEventDispatcher;
+        this.doctorEventBaseHelper = doctorEventBaseHelper;
     }
 
     @Override
@@ -85,8 +93,13 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                 throw new InvalidException("group.event.not.found", eventId);
             }
             doctorRollbackManager.rollbackGroup(groupEvent, operatorId, operatorName);
-            String messageId = UUID.randomUUID().toString().replace("-", "");
-            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(groupEvent.getOrgId(), messageId));
+
+            List<Long> farmIds = Lists.newArrayList(groupEvent.getFarmId());
+            if (Objects.equals(groupEvent.getType(), GroupEventType.TRANS_FARM.getValue())) {
+                DoctorTransFarmGroupInput groupInput = jsonMapper.fromJson(groupEvent.getExtra(), DoctorTransFarmGroupInput.class);
+                farmIds.add(groupInput.getToFarmId());
+            }
+            doctorEventBaseHelper.synchronizeReportPublish(farmIds);
             return RespWithEx.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             return RespWithEx.fail(e.getMessage());
@@ -106,8 +119,13 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                 throw new InvalidException("pig.event.not.found", eventId);
             }
             doctorRollbackManager.rollbackPig(pigEvent, operatorId, operatorName);
-            String messageId = UUID.randomUUID().toString().replace("-", "");
-            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(pigEvent.getOrgId(), messageId));
+
+            List<Long> farmIds = Lists.newArrayList(pigEvent.getFarmId());
+            if (Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM.getKey())) {
+                DoctorChgFarmDto doctorChgFarmDto = jsonMapper.fromJson(pigEvent.getExtra(), DoctorChgFarmDto.class);
+                farmIds.add(doctorChgFarmDto.getToFarmId());
+            }
+            doctorEventBaseHelper.synchronizeReportPublish(farmIds);
             return RespWithEx.ok(Boolean.TRUE);
         } catch (InvalidException e) {
             return RespWithEx.exception(e);

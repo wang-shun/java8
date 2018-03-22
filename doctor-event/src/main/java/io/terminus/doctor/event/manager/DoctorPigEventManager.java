@@ -35,6 +35,7 @@ import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
 import io.terminus.doctor.event.handler.DoctorPigsByEventSelector;
 import io.terminus.doctor.event.handler.admin.SmartPigEventHandler;
 import io.terminus.doctor.event.helper.DoctorConcurrentControl;
+import io.terminus.doctor.event.helper.DoctorEventBaseHelper;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -84,6 +85,8 @@ public class DoctorPigEventManager {
     private DoctorGroupEventDao doctorGroupEventDao;
     @Autowired
     private SmartPigEventHandler pigEventHandler;
+    @Autowired
+    private DoctorEventBaseHelper doctorEventBaseHelper;
 
     /**
      * 事件处理

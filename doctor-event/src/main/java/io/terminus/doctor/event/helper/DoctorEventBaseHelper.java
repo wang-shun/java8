@@ -1,9 +1,11 @@
 package io.terminus.doctor.event.helper;
 
 import com.google.common.collect.Maps;
+import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
+import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
@@ -11,12 +13,15 @@ import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.reportBi.listener.DoctorReportBiReaTimeEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
@@ -32,6 +37,7 @@ public class DoctorEventBaseHelper {
     private final DoctorPigEventDao doctorPigEventDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final Date START_DATE = DateUtil.toDate("2018-03-13");
+    private final CoreEventDispatcher coreEventDispatcher;
 
     private static  final Map<Integer, Integer> EVENT_TO_STATUS = Maps.newHashMap();
 
@@ -45,9 +51,10 @@ public class DoctorEventBaseHelper {
     }
 
     @Autowired
-    public DoctorEventBaseHelper(DoctorPigEventDao doctorPigEventDao, DoctorGroupEventDao doctorGroupEventDao) {
+    public DoctorEventBaseHelper(DoctorPigEventDao doctorPigEventDao, DoctorGroupEventDao doctorGroupEventDao, CoreEventDispatcher coreEventDispatcher) {
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
+        this.coreEventDispatcher = coreEventDispatcher;
     }
 
     /**
@@ -178,5 +185,16 @@ public class DoctorEventBaseHelper {
         Integer quantity = getGroupQuantity(newTrack.getGroupId());
         expectTrue(Objects.equals(newTrack.getQuantity(), quantity),
                 "group.quantity.error.after.update", quantity, newTrack.getQuantity());
+    }
+
+    /**
+     * 事件增删改后发送同步数据事件
+     * @param farmIds 需要同步猪场id列表
+     */
+    public void synchronizeReportPublish(List<Long> farmIds) {
+        farmIds.forEach(farmId -> {
+            String messageId = UUID.randomUUID().toString().replace("-", "");
+            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(messageId, farmId, OrzDimension.FARM.getValue()));
+        });
     }
 }
