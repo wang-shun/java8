@@ -165,22 +165,22 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
     //通过猪类统计表计算出统计结果
     private List<DoctorStatisticDto> getStatistics(List<DoctorFarmLiveStockDto> stats) {
         return Lists.newArrayList(
-                new DoctorStatisticDto(DoctorStatisticDto.PigType.SOW.getCutDesc(),
-                        (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getSow(), 0))),          //母猪
+                new DoctorStatisticDto(DoctorStatisticDto.PigType.HOUBEI.getCutDesc(),
+                        (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getHoubei(), 0))),        //后备猪
                 new DoctorStatisticDto(DoctorStatisticDto.PigType.BOAR.getCutDesc(),
                         (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getBoar(), 0))),          //公猪
+                new DoctorStatisticDto(DoctorStatisticDto.PigType.SOW.getCutDesc(),
+                        (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getSow(), 0))),          //母猪
+                new DoctorStatisticDto(DoctorStatisticDto.PigType.PEIHUAI.getCutDesc(),
+                        (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getPeihuai(), 0))),        //配怀猪
+                new DoctorStatisticDto(DoctorStatisticDto.PigType.DELIVER_SOW.getCutDesc(),
+                        (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getDeliverSow(), 0))),        //产房母猪
                 new DoctorStatisticDto(DoctorStatisticDto.PigType.FARROW_PIGLET.getCutDesc(),
                         (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getFarrow(), 0))),       //产房仔猪
                 new DoctorStatisticDto(DoctorStatisticDto.PigType.NURSERY_PIGLET.getCutDesc(),
                         (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getNursery(), 0))),      //保育猪
                 new DoctorStatisticDto(DoctorStatisticDto.PigType.FATTEN_PIG.getCutDesc(),
-                        (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getFatten(), 0))),       //育肥猪
-                new DoctorStatisticDto(DoctorStatisticDto.PigType.HOUBEI.getCutDesc(),
-                        (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getHoubei(), 0))),        //后备猪
-                new DoctorStatisticDto(DoctorStatisticDto.PigType.DELIVER_SOW.getCutDesc(),
-                        (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getDeliverSow(), 0))),        //后备猪
-                new DoctorStatisticDto(DoctorStatisticDto.PigType.PEIHUAI.getCutDesc(),
-                        (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getPeihuai(), 0)))        //配怀猪
+                        (int) CountUtil.sumInt(stats, stat -> MoreObjects.firstNonNull(stat.getFatten(), 0)))       //育肥猪
 
         );
     }
