@@ -69,6 +69,12 @@ public class DoctorPigInfoDto implements Serializable{
     private String barnName;
 
     /**
+     * 公猪类型
+     * @see io.terminus.doctor.event.enums.BoarEntryType
+     */
+    private Integer boarType;
+
+    /**
      * 猪舍类型
      * @see io.terminus.doctor.common.enums.PigType
      */
@@ -101,7 +107,7 @@ public class DoctorPigInfoDto implements Serializable{
                 .id(doctorPig.getId()).pigId(doctorPig.getId()).orgId(doctorPig.getOrgId()).orgName(doctorPig.getOrgName()).farmId(doctorPig.getFarmId()).farmName(doctorPig.getFarmName())
                 .pigType(doctorPig.getPigType()).pigCode(doctorPig.getPigCode()).birthDay(doctorPig.getBirthDate())
                 .inFarmDate(doctorPig.getInFarmDate()).dateAge(Days.daysBetween(new DateTime(doctorPig.getBirthDate()), DateTime.now()).getDays())
-                .creatorId(doctorPig.getCreatorId()).creatorName(doctorPig.getCreatorName()).rfid(doctorPig.getRfid());
+                .creatorId(doctorPig.getCreatorId()).creatorName(doctorPig.getCreatorName()).rfid(doctorPig.getRfid()).boarType(doctorPig.getBoarType());
 
         if (!isNull(doctorPigTrack)) {
             PigStatus pigStatus = PigStatus.from(doctorPigTrack.getStatus());
