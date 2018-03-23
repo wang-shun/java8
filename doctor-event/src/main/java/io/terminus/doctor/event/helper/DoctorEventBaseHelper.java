@@ -1,10 +1,12 @@
 package io.terminus.doctor.event.helper;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -13,15 +15,17 @@ import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.reportBi.listener.DoctorReportBiReaTimeEvent;
+import io.terminus.doctor.event.reportBi.DoctorReportBiDataSynchronize;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
@@ -29,8 +33,9 @@ import static io.terminus.doctor.common.utils.Checks.expectTrue;
 /**
  * Created by xjn on 18/3/6.
  * email:xiaojiannan@terminus.io
- * 依据事件获取猪群当前信息
+ * 事件相关处理方法
  */
+@Slf4j
 @Component
 public class DoctorEventBaseHelper {
 
@@ -38,6 +43,8 @@ public class DoctorEventBaseHelper {
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final Date START_DATE = DateUtil.toDate("2018-03-13");
     private final CoreEventDispatcher coreEventDispatcher;
+    private final DoctorReportBiDataSynchronize synchronize;
+
 
     private static  final Map<Integer, Integer> EVENT_TO_STATUS = Maps.newHashMap();
 
@@ -51,10 +58,11 @@ public class DoctorEventBaseHelper {
     }
 
     @Autowired
-    public DoctorEventBaseHelper(DoctorPigEventDao doctorPigEventDao, DoctorGroupEventDao doctorGroupEventDao, CoreEventDispatcher coreEventDispatcher) {
+    public DoctorEventBaseHelper(DoctorPigEventDao doctorPigEventDao, DoctorGroupEventDao doctorGroupEventDao, CoreEventDispatcher coreEventDispatcher, DoctorReportBiDataSynchronize synchronize) {
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.coreEventDispatcher = coreEventDispatcher;
+        this.synchronize = synchronize;
     }
 
     /**
@@ -188,13 +196,30 @@ public class DoctorEventBaseHelper {
     }
 
     /**
-     * 事件增删改后发送同步数据事件
+     * 事件删改后发送同步数据事件
      * @param farmIds 需要同步猪场id列表
      */
-    public void synchronizeReportPublish(List<Long> farmIds) {
+    public void synchronizeReportPublish(Collection<Long> farmIds) {
+        log.info("synchronize report data, farmIds:{}", farmIds);
         farmIds.forEach(farmId -> {
-            String messageId = UUID.randomUUID().toString().replace("-", "");
-            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(messageId, farmId, OrzDimension.FARM.getValue()));
+            //异步改为同步调用
+//            String messageId = UUID.randomUUID().toString().replace("-", "");
+//            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(messageId, farmId, OrzDimension.FARM.getValue()));
+            try {
+                synchronize.synchronizeRealTimeBiData(farmId, OrzDimension.FARM.getValue());
+            } catch (Exception e) {
+                log.error("synchronize real time bi data error, farmId:{}, date:{}, cause:{}",
+                        farmId, new Date(), Throwables.getStackTraceAsString(e));
+            }
         });
+    }
+
+    /**
+     * 新建事件同步数据
+     * @param infos
+     */
+    public void synchronizeReportPublishForCreate(List<DoctorEventInfo> infos){
+        Map<Long, List<DoctorEventInfo>> farmIdToMap = infos.stream().collect(Collectors.groupingBy(DoctorEventInfo::getFarmId));
+        synchronizeReportPublish(farmIdToMap.keySet());
     }
 }

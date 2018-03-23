@@ -21,7 +21,6 @@ import io.terminus.doctor.event.manager.DoctorGroupEventManager;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.reportBi.listener.DoctorReportBiReaTimeEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +28,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
+
+import static io.terminus.doctor.event.enums.GroupEventType.REPORT_GROUP_EVENT;
+import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.IGNORE_EVENT;
 
 
 /**
@@ -68,13 +69,16 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
         try {
             pigEventManager.modifyPigEventHandle(inputDto, eventId, eventType);
 
-            DoctorPigEvent pigEvent = doctorPigEventDao.findEventById(eventId);
-            List<Long> farmIds = Lists.newArrayList(pigEvent.getFarmId());
-            if (Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM.getKey())) {
-                DoctorChgFarmDto doctorChgFarmDto = jsonMapper.fromJson(pigEvent.getExtra(), DoctorChgFarmDto.class);
-                farmIds.add(doctorChgFarmDto.getToFarmId());
+            //同步报表数据
+            if (!IGNORE_EVENT.contains(eventType)) {
+                DoctorPigEvent pigEvent = doctorPigEventDao.findEventById(eventId);
+                List<Long> farmIds = Lists.newArrayList(pigEvent.getFarmId());
+                if (Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM.getKey())) {
+                    DoctorChgFarmDto doctorChgFarmDto = jsonMapper.fromJson(pigEvent.getExtra(), DoctorChgFarmDto.class);
+                    farmIds.add(doctorChgFarmDto.getToFarmId());
+                }
+                doctorEventBaseHelper.synchronizeReportPublish(farmIds);
             }
-            doctorEventBaseHelper.synchronizeReportPublish(farmIds);
 
             return RespWithEx.ok(true);
         } catch (InvalidException e) {
@@ -91,13 +95,16 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
         try {
             groupEventManager.modifyGroupEventHandle(inputDto, eventId, eventType);
 
-            DoctorGroupEvent groupEvent = doctorGroupEventDao.findEventById(eventId);
-            List<Long> farmIds = Lists.newArrayList(groupEvent.getFarmId());
-            if (Objects.equals(groupEvent.getType(), GroupEventType.TRANS_FARM.getValue())) {
-                DoctorTransFarmGroupInput groupInput = jsonMapper.fromJson(groupEvent.getExtra(), DoctorTransFarmGroupInput.class);
-                farmIds.add(groupInput.getToFarmId());
+            //同步报表数据
+            if (REPORT_GROUP_EVENT.contains(eventType)) {
+                DoctorGroupEvent groupEvent = doctorGroupEventDao.findEventById(eventId);
+                List<Long> farmIds = Lists.newArrayList(groupEvent.getFarmId());
+                if (Objects.equals(groupEvent.getType(), GroupEventType.TRANS_FARM.getValue())) {
+                    DoctorTransFarmGroupInput groupInput = jsonMapper.fromJson(groupEvent.getExtra(), DoctorTransFarmGroupInput.class);
+                    farmIds.add(groupInput.getToFarmId());
+                }
+                doctorEventBaseHelper.synchronizeReportPublish(farmIds);
             }
-            doctorEventBaseHelper.synchronizeReportPublish(farmIds);
             return RespWithEx.ok(true);
         } catch (InvalidException e) {
             log.error("modify pig event failed , inputDto:{}, cuase:{}", inputDto, Throwables.getStackTraceAsString(e));
@@ -113,8 +120,6 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
     public RespWithEx<Boolean> modifyPigEvent(String oldPigEvent, DoctorPigEvent pigEvent) {
         try {
             doctorPigEventManager.modifyPigEvent(pigEvent, oldPigEvent);
-            String messageId = UUID.randomUUID().toString().replace("-", "");
-            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(pigEvent.getOrgId(), messageId));
             return RespWithEx.ok(true);
         } catch (Exception e) {
             log.error("modify pig event failed , inputDto:{}, cause:{}", oldPigEvent, Throwables.getStackTraceAsString(e));

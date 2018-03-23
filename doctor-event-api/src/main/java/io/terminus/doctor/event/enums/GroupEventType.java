@@ -67,4 +67,11 @@ public enum GroupEventType {
     );
 
     public static final List<Integer> NOTICE_MESSAGE_GROUP_EVENT = Lists.newArrayList(CLOSE.getValue());
+
+    /**
+     * 影响报表的事件
+     */
+    public static List<Integer> REPORT_GROUP_EVENT = Lists.newArrayList(MOVE_IN.getValue(), CHANGE.getValue(),
+            TRANS_FARM.getValue(), TRANS_GROUP.getValue(), TURN_SEED.getValue());
+
 }
