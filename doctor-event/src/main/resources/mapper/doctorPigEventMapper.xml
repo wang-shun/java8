@@ -1307,13 +1307,14 @@
 
     <select id="findSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
         SELECT
+        pig_code AS batch,
         barn_name AS barnName,
         event_at AS salesDate,
         count(1) AS pigNumber,
         '种猪' AS pigTypeName,
-        sum(weight) AS pigWeight,
-        sum(amount)/count(1) AS pigPrice,
-        sum(amount) AS pigAmount,
+        ifnull(sum(weight), 0) AS pigWeight,
+        ifnull(sum(amount)/count(1),0) AS pigPrice,
+        ifnull(sum(amount), 0) AS pigAmount,
         customer_name AS client
         FROM
         <include refid="tb"/>
@@ -1321,6 +1322,7 @@
         `type` = 6
         and change_type_id = 109
         <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="batch != null">AND pig_code = #{batch}</if>
         <if test="barnId != null">AND barn_id = #{barnId}</if>
         <if test="barnName != null">AND barn_name = #{barnName}</if>
         <if test="client != null">AND customer_id = #{client}</if>
