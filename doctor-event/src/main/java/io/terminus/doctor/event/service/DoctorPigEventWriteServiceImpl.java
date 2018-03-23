@@ -11,7 +11,7 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
-import io.terminus.doctor.event.helper.DoctorConcurrentControl;
+import io.terminus.doctor.event.helper.DoctorEventBaseHelper;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.zookeeper.pubsub.Publisher;
@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.IGNORE_EVENT;
 import static io.terminus.doctor.event.manager.DoctorPigEventManager.checkAndPublishEvent;
 
 /**
@@ -43,13 +44,18 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     @Autowired
     private Publisher publisher;
     @Autowired
-    private DoctorConcurrentControl doctorConcurrentControl;
+    private DoctorEventBaseHelper doctorEventBaseHelper;
 
     @Override
     public RespWithEx<Boolean> pigEventHandle(BasePigEventInputDto inputDto, DoctorBasicInputInfoDto basic) {
         try {
             List<DoctorEventInfo> eventInfoList = doctorPigEventManager.eventHandle(inputDto, basic);
             checkAndPublishEvent(eventInfoList, coreEventDispatcher, publisher);
+
+            //同步报表数据
+            if (!IGNORE_EVENT.contains(inputDto.getEventType())) {
+                doctorEventBaseHelper.synchronizeReportPublishForCreate(eventInfoList);
+            }
             return RespWithEx.ok(Boolean.TRUE);
         } catch (ServiceException | IllegalStateException e) {
             log.error("pig.event.handle.failed, input:{}, basic:{}, cause by :{}", inputDto, basic, Throwables.getStackTraceAsString(e));
@@ -68,6 +74,11 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
         try {
             List<DoctorEventInfo> eventInfoList = doctorPigEventManager.batchEventsHandle(inputDtos, basic);
             checkAndPublishEvent(eventInfoList, coreEventDispatcher, publisher);
+
+            //同步数据
+            if (!IGNORE_EVENT.contains(inputDtos.get(0).getEventType())) {
+                doctorEventBaseHelper.synchronizeReportPublishForCreate(eventInfoList);
+            }
             return RespWithEx.ok(Boolean.TRUE);
         } catch (ServiceException | IllegalStateException e) {
             log.error("batch.pig.event.handle.failed, input:{}, basic:{}, cause by :{}", inputDtos, basic, Throwables.getStackTraceAsString(e));

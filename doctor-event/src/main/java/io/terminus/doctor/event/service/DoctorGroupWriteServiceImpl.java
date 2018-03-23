@@ -35,7 +35,7 @@ import io.terminus.doctor.event.handler.group.DoctorMoveInGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorTransFarmGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorTransGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorTurnSeedGroupEventHandler;
-import io.terminus.doctor.event.helper.DoctorConcurrentControl;
+import io.terminus.doctor.event.helper.DoctorEventBaseHelper;
 import io.terminus.doctor.event.manager.DoctorGroupEventManager;
 import io.terminus.doctor.event.manager.DoctorGroupManager;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
@@ -53,6 +53,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.doctor.event.enums.GroupEventType.REPORT_GROUP_EVENT;
 
 /**
  * Desc: 猪群卡片表写服务实现类
@@ -80,7 +81,7 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     @Autowired(required = false)
     private Publisher publisher;
     @Autowired
-    private DoctorConcurrentControl doctorConcurrentControl;
+    private DoctorEventBaseHelper doctorEventBaseHelper;
 
     @Override
     public RespWithEx<Long> createNewGroup(DoctorGroup group, @Valid DoctorNewGroupInput newGroupInput) {
@@ -125,7 +126,7 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         try {
             List<DoctorEventInfo> eventInfoList = doctorGroupEventManager.handleEvent(groupDetail, change, DoctorChangeGroupEventHandler.class);
             DoctorPigEventManager.checkAndPublishEvent(eventInfoList, coreEventDispatcher, publisher);
-
+            doctorEventBaseHelper.synchronizeReportPublishForCreate(eventInfoList);
             return RespWithEx.ok(Boolean.TRUE);
         } catch (InvalidException e) {
             log.error("groupEventChange failed, groupDetail:{}, change:{}, cause:{}", groupDetail, change, Throwables.getStackTraceAsString(e));
@@ -201,6 +202,7 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         try {
             List<DoctorEventInfo> eventInfoList = doctorGroupEventManager.handleEvent(groupDetail, moveIn, DoctorMoveInGroupEventHandler.class);
             DoctorPigEventManager.checkAndPublishEvent(eventInfoList, coreEventDispatcher, publisher);
+            doctorEventBaseHelper.synchronizeReportPublishForCreate(eventInfoList);
 
             return RespWithEx.ok(Boolean.TRUE);
         } catch (InvalidException e) {
@@ -220,6 +222,7 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         try {
             List<DoctorEventInfo> eventInfoList = doctorGroupEventManager.handleEvent(groupDetail, transFarm, DoctorTransFarmGroupEventHandler.class);
             DoctorPigEventManager.checkAndPublishEvent(eventInfoList, coreEventDispatcher, publisher);
+            doctorEventBaseHelper.synchronizeReportPublishForCreate(eventInfoList);
 
             return RespWithEx.ok(Boolean.TRUE);
         } catch (InvalidException e) {
@@ -239,6 +242,7 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         try {
             List<DoctorEventInfo> eventInfoList = doctorGroupEventManager.handleEvent(groupDetail, transGroup, DoctorTransGroupEventHandler.class);
             DoctorPigEventManager.checkAndPublishEvent(eventInfoList, coreEventDispatcher, publisher);
+            doctorEventBaseHelper.synchronizeReportPublishForCreate(eventInfoList);
 
             if (Objects.equals(transGroup.getIsCreateGroup(), IsOrNot.YES.getValue())) {
                 DoctorGroup toGroup = doctorGroupDao.findByFarmIdAndGroupCode(groupDetail.getGroup().getFarmId(), transGroup.getToGroupCode());
@@ -262,6 +266,7 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         try {
             List<DoctorEventInfo> eventInfoList = doctorGroupEventManager.handleEvent(groupDetail, turnSeed, DoctorTurnSeedGroupEventHandler.class);
             DoctorPigEventManager.checkAndPublishEvent(eventInfoList, coreEventDispatcher, publisher);
+            doctorEventBaseHelper.synchronizeReportPublishForCreate(eventInfoList);
 
             return RespWithEx.ok(Boolean.TRUE);
         } catch (InvalidException e) {
@@ -303,6 +308,11 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         try {
             List<DoctorEventInfo> eventInfoList = doctorGroupEventManager.batchHandleEvent(inputInfoList, eventType);
             DoctorPigEventManager.checkAndPublishEvent(eventInfoList, coreEventDispatcher, publisher);
+
+            if (REPORT_GROUP_EVENT.contains(eventType)) {
+                doctorEventBaseHelper.synchronizeReportPublishForCreate(eventInfoList);
+            }
+
             return RespWithEx.ok(Boolean.TRUE);
         } catch (InvalidException e) {
             log.error("batch.new.group.event.failed, inputInfoList:{}, eventType:{}, cause:{}", inputInfoList, eventType, Throwables.getStackTraceAsString(e));
