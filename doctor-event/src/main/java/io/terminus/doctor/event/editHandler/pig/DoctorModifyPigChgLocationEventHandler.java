@@ -2,7 +2,6 @@ package io.terminus.doctor.event.editHandler.pig;
 
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
-import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
@@ -12,7 +11,6 @@ import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTransGroupEve
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigDaily;
@@ -37,8 +35,6 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
 
     @Autowired
     private DoctorModifyGroupTransGroupEventHandler doctorModifyGroupTransGroupEventHandler;
-    @Autowired
-    private DoctorBarnDao doctorBarnDao;
     @Override
     public DoctorEventChangeDto buildEventChange(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
         DoctorChgLocationDto newDto = (DoctorChgLocationDto) inputDto;
@@ -54,10 +50,6 @@ public class DoctorModifyPigChgLocationEventHandler extends DoctorAbstractModify
 
     @Override
     public DoctorPigTrack buildNewTrack(DoctorPigTrack oldPigTrack, DoctorEventChangeDto changeDto) {
-        DoctorBarn doctorBarn = doctorBarnDao.findById(changeDto.getToBarnId());
-        oldPigTrack.setCurrentBarnId(doctorBarn.getId());
-        oldPigTrack.setCurrentBarnName(doctorBarn.getName());
-        oldPigTrack.setCurrentBarnType(doctorBarn.getPigType());
         return oldPigTrack;
     }
 
