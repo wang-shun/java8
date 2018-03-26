@@ -31,6 +31,7 @@ import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.user.service.PrimaryUserReadService;
 import io.terminus.doctor.web.admin.dto.DoctorGroupUserWithOrgAndFarm;
 import io.terminus.parana.common.utils.EncryptUtil;
 import io.terminus.parana.user.model.LoginType;
@@ -86,6 +87,8 @@ public class DoctorAdminUsers {
     private DoctorOrgReadService doctorOrgReadService;
     @RpcConsumer
     private DoctorBarnReadService doctorBarnReadService;
+    @RpcConsumer
+    private PrimaryUserReadService primaryUserReadService;
 
     /**
      * 新增集团用户
@@ -266,7 +269,7 @@ public class DoctorAdminUsers {
                                                                  @RequestParam(required = false) Integer type,
                                                                  @RequestParam(required = false) Integer pageNo,
                                                                  @RequestParam(required = false) Integer pageSize) {
-        Paging<User> userPaging = RespHelper.or500(doctorUserReadService.paging(id, name, email, mobile, status, type, pageNo, pageSize));
+        Paging<User> userPaging = RespHelper.or500(primaryUserReadService.pagingOpenDoctorServiceUser(id, name, email, mobile, status, type, pageNo, pageSize));
         if (userPaging.getTotal() == 0L) {
             return new Paging<>(0L, Collections.emptyList());
         }
