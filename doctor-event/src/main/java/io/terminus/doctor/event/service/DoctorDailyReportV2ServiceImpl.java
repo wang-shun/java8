@@ -181,7 +181,7 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
     }
 
     @Override
-    public Response<Boolean> synchronizeYesterdayAndToday(List<Long> farmIds, Date date) {
+    public Response<Boolean> synchronize(List<Long> farmIds, Date date) {
         try {
             log.info("synchronize yesterday and today starting");
             Stopwatch stopWatch = Stopwatch.createStarted();
@@ -196,6 +196,7 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
     }
 
     @Override
+    @Deprecated
     public Response<Boolean> synchronizeFullBiData() {
         try {
             doctorReportBiManager.synchronizeFullData();
