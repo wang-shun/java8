@@ -6,11 +6,16 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
+import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.user.dao.DoctorServiceStatusDao;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
+import io.terminus.doctor.user.dao.UserDaoExt;
+import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
-import io.terminus.parana.user.impl.dao.UserDao;
+import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,13 +38,16 @@ public class PrimaryUserReadServiceImpl implements PrimaryUserReadService {
 
     private final SubDao subDao;
 
-    private final UserDao userDao;
+    private final UserDaoExt userDao;
+
+    private final DoctorServiceStatusDao doctorServiceStatusDao;
 
     @Autowired
-    public PrimaryUserReadServiceImpl(PrimaryUserDao primaryUserDao, SubDao subDao, UserDao userDao) {
+    public PrimaryUserReadServiceImpl(PrimaryUserDao primaryUserDao, SubDao subDao, UserDaoExt userDao, DoctorServiceStatusDao doctorServiceStatusDao) {
         this.primaryUserDao = primaryUserDao;
         this.subDao = subDao;
         this.userDao = userDao;
+        this.doctorServiceStatusDao = doctorServiceStatusDao;
     }
 
     @Override
@@ -204,6 +212,24 @@ public class PrimaryUserReadServiceImpl implements PrimaryUserReadService {
         } catch (Exception e) {
             log.error("find by user id failed,cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("find.by.user.id.failed");
+        }
+    }
+
+    @Override
+    public Response<Paging<User>> pagingOpenDoctorServiceUser(Long id, String name, String email, String mobile, Integer status, Integer type, Integer pageNo, Integer pageSize) {
+        try {
+            List<DoctorServiceStatus> doctorServiceStatuses = doctorServiceStatusDao.listAllOpenDoctorService();
+            if (Arguments.isNullOrEmpty(doctorServiceStatuses)) {
+                return Response.ok(Paging.empty());
+            }
+
+            List<Long> userIds = doctorServiceStatuses.stream().map(DoctorServiceStatus::getUserId).collect(Collectors.toList());
+            PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
+            return Response.ok(userDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), MapBuilder.<String, Object>of().put("id", id)
+                    .put("name", name).put("email", email).put( "mobile", mobile).put( "status", status).put( "type", type).put( "ids", userIds).map()));
+        } catch (Exception e) {
+            log.error("paging open doctor service user failed,cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("paging.open.doctor.service.user.failed");
         }
     }
 }

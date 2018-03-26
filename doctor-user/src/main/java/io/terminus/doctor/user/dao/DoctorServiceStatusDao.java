@@ -40,4 +40,8 @@ public class DoctorServiceStatusDao extends MyBatisDao<DoctorServiceStatus> {
         List<DoctorServiceReviewExt> datas = sqlSession.selectList(sqlId(PAGING), criteria);
         return new Paging<>(total, datas);
     }
+
+    public List<DoctorServiceStatus> listAllOpenDoctorService(){
+        return getSqlSession().selectList("listAllOpenDoctorService");
+    }
 }
