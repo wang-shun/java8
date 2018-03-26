@@ -2,11 +2,11 @@ package io.terminus.doctor.event.helper;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
-import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -27,8 +27,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
+import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.IGNORE_EVENT;
 
 /**
  * Created by xjn on 18/3/6.
@@ -42,7 +44,6 @@ public class DoctorEventBaseHelper {
     private final DoctorPigEventDao doctorPigEventDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final Date START_DATE = DateUtil.toDate("2018-03-13");
-    private final CoreEventDispatcher coreEventDispatcher;
     private final DoctorReportBiDataSynchronize synchronize;
 
 
@@ -58,10 +59,9 @@ public class DoctorEventBaseHelper {
     }
 
     @Autowired
-    public DoctorEventBaseHelper(DoctorPigEventDao doctorPigEventDao, DoctorGroupEventDao doctorGroupEventDao, CoreEventDispatcher coreEventDispatcher, DoctorReportBiDataSynchronize synchronize) {
+    public DoctorEventBaseHelper(DoctorPigEventDao doctorPigEventDao, DoctorGroupEventDao doctorGroupEventDao,  DoctorReportBiDataSynchronize synchronize) {
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
-        this.coreEventDispatcher = coreEventDispatcher;
         this.synchronize = synchronize;
     }
 
@@ -221,5 +221,56 @@ public class DoctorEventBaseHelper {
     public void synchronizeReportPublishForCreate(List<DoctorEventInfo> infos){
         Map<Long, List<DoctorEventInfo>> farmIdToMap = infos.stream().collect(Collectors.groupingBy(DoctorEventInfo::getFarmId));
         synchronizeReportPublish(farmIdToMap.keySet());
+    }
+
+    /**
+     * 是否是最新事件
+     *
+     * @param pigEvent 猪事件
+     */
+    public boolean isLastPigManualEvent(DoctorPigEvent pigEvent) {
+        if (IGNORE_EVENT.contains(pigEvent.getType())) {
+            return true;
+        }
+
+        if (Objects.equals(pigEvent.getIsAuto(), IsOrNot.YES.getValue())) {
+            return false;
+        }
+
+        DoctorPigEvent lastEvent = doctorPigEventDao.findLastEventExcludeTypes(pigEvent.getPigId(), IGNORE_EVENT);
+
+        if (isNull(lastEvent)) {
+            return false;
+        }
+
+        //手动事件，比较是否是最新事件
+        if (!Objects.equals(lastEvent.getIsAuto(), IsOrNot.YES.getValue())) {
+            return Objects.equals(lastEvent.getId(), pigEvent.getId());
+        }
+
+        //自动事件
+        return lastManual(lastEvent, pigEvent.getId());
+    }
+
+    /**
+     * 当最新事件是自动事件时，则向上追溯到上一个手动事件，在与原事件id比较
+     * @param autoEvent 自动事件
+     * @param eventId 原事件id
+     * @return
+     */
+    private Boolean lastManual(DoctorPigEvent autoEvent, Long eventId) {
+        if (isNull(autoEvent.getRelPigEventId())) {
+            return false;
+        }
+
+        DoctorPigEvent preEvent = doctorPigEventDao.findById(autoEvent.getRelPigEventId());
+        if (isNull(preEvent)) {
+            return false;
+        }
+
+        if (!Objects.equals(preEvent.getIsAuto(), IsOrNot.YES.getValue())) {
+            return Objects.equals(preEvent.getId(), eventId);
+        }
+        return lastManual(preEvent, eventId);
     }
 }
