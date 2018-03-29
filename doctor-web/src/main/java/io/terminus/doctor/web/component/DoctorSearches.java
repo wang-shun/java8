@@ -80,7 +80,8 @@ import static io.terminus.common.utils.Arguments.notEmpty;
 @RequestMapping("/api/doctor/search")
 public class DoctorSearches {
 
-    private final DoctorBarnReadService doctorBarnReadService;
+    @RpcConsumer
+    private DoctorBarnReadService doctorBarnReadService;
 
     private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
 
@@ -102,12 +103,11 @@ public class DoctorSearches {
     private static final List<PigType> JUST_PIGS = Lists.newArrayList(PigType.MATE_SOW, PigType.PREG_SOW, PigType.BOAR);
 
     @Autowired
-    public DoctorSearches(DoctorBarnReadService doctorBarnReadService,
-                          DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
+    public DoctorSearches(
+            DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
                           DoctorGroupReadService doctorGroupReadService,
                           DoctorMessageUserReadService doctorMessageUserReadService,
                           DoctorPigReadService doctorPigReadService) {
-        this.doctorBarnReadService = doctorBarnReadService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorMessageUserReadService = doctorMessageUserReadService;
