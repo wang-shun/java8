@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Created by xjn on 18/3/29.
  * email:xiaojiannan@terminus.io
@@ -29,5 +32,10 @@ public class DoctorDemos {
     @RequestMapping(value = "", method = RequestMethod.POST)
     public Boolean createDemo(@RequestBody DoctorDemo doctorDemo) {
         return RespHelper.or500(doctorDemoReadService.createDemo(doctorDemo));
+    }
+
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    public List<DoctorDemo> list(@RequestParam Map<String, Object> params){
+        return RespHelper.or500(doctorDemoReadService.list(params));
     }
 }
