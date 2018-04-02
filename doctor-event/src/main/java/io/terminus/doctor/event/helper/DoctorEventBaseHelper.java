@@ -1,7 +1,8 @@
 package io.terminus.doctor.event.helper;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
+import io.terminus.common.utils.Arguments;
+import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
@@ -16,6 +17,7 @@ import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.reportBi.DoctorReportBiDataSynchronize;
+import io.terminus.doctor.event.reportBi.listener.DoctorReportBiReaTimeEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,6 +27,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.isNull;
@@ -45,6 +48,7 @@ public class DoctorEventBaseHelper {
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final Date START_DATE = DateUtil.toDate("2018-03-13");
     private final DoctorReportBiDataSynchronize synchronize;
+    private final CoreEventDispatcher coreEventDispatcher;
 
 
     private static  final Map<Integer, Integer> EVENT_TO_STATUS = Maps.newHashMap();
@@ -59,10 +63,11 @@ public class DoctorEventBaseHelper {
     }
 
     @Autowired
-    public DoctorEventBaseHelper(DoctorPigEventDao doctorPigEventDao, DoctorGroupEventDao doctorGroupEventDao,  DoctorReportBiDataSynchronize synchronize) {
+    public DoctorEventBaseHelper(DoctorPigEventDao doctorPigEventDao, DoctorGroupEventDao doctorGroupEventDao, DoctorReportBiDataSynchronize synchronize, CoreEventDispatcher coreEventDispatcher) {
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.synchronize = synchronize;
+        this.coreEventDispatcher = coreEventDispatcher;
     }
 
     /**
@@ -202,15 +207,17 @@ public class DoctorEventBaseHelper {
     public void synchronizeReportPublish(Collection<Long> farmIds) {
         log.info("synchronize report data, farmIds:{}", farmIds);
         farmIds.forEach(farmId -> {
-            //异步改为同步调用
-//            String messageId = UUID.randomUUID().toString().replace("-", "");
-//            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(messageId, farmId, OrzDimension.FARM.getValue()));
-            try {
-                synchronize.synchronizeRealTimeBiData(farmId, OrzDimension.FARM.getValue());
-            } catch (Exception e) {
-                log.error("synchronize real time bi data error, farmId:{}, date:{}, cause:{}",
-                        farmId, new Date(), Throwables.getStackTraceAsString(e));
-            }
+            //异步
+            String messageId = UUID.randomUUID().toString().replace("-", "");
+            coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(messageId, farmId, OrzDimension.FARM.getValue()));
+
+            //同步
+//            try {
+//                synchronize.synchronizeRealTimeBiData(farmId, OrzDimension.FARM.getValue());
+//            } catch (Exception e) {
+//                log.error("synchronize real time bi data error, farmId:{}, date:{}, cause:{}",
+//                        farmId, new Date(), Throwables.getStackTraceAsString(e));
+//            }
         });
     }
 
@@ -219,6 +226,9 @@ public class DoctorEventBaseHelper {
      * @param infos
      */
     public void synchronizeReportPublishForCreate(List<DoctorEventInfo> infos){
+        if (Arguments.isNullOrEmpty(infos)) {
+            return;
+        }
         Map<Long, List<DoctorEventInfo>> farmIdToMap = infos.stream().collect(Collectors.groupingBy(DoctorEventInfo::getFarmId));
         synchronizeReportPublish(farmIdToMap.keySet());
     }
