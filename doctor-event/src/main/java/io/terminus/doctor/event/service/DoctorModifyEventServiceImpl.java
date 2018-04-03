@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.event.enums.GroupEventType.REPORT_GROUP_EVENT;
 import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.IGNORE_EVENT;
 
@@ -75,7 +76,9 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
                 List<Long> farmIds = Lists.newArrayList(pigEvent.getFarmId());
                 if (Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM.getKey())) {
                     DoctorChgFarmDto doctorChgFarmDto = jsonMapper.fromJson(pigEvent.getExtra(), DoctorChgFarmDto.class);
-                    farmIds.add(doctorChgFarmDto.getToFarmId());
+                    if (notNull(doctorChgFarmDto) && notNull(doctorChgFarmDto.getToFarmId())) {
+                        farmIds.add(doctorChgFarmDto.getToFarmId());
+                    }
                 }
                 doctorEventBaseHelper.synchronizeReportPublish(farmIds);
             }
@@ -101,7 +104,9 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
                 List<Long> farmIds = Lists.newArrayList(groupEvent.getFarmId());
                 if (Objects.equals(groupEvent.getType(), GroupEventType.TRANS_FARM.getValue())) {
                     DoctorTransFarmGroupInput groupInput = jsonMapper.fromJson(groupEvent.getExtra(), DoctorTransFarmGroupInput.class);
-                    farmIds.add(groupInput.getToFarmId());
+                    if (notNull(groupInput) && notNull(groupInput.getToFarmId())) {
+                        farmIds.add(groupInput.getToFarmId());
+                    }
                 }
                 doctorEventBaseHelper.synchronizeReportPublish(farmIds);
             }

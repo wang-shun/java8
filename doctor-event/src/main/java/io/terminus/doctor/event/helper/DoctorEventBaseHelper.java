@@ -226,11 +226,15 @@ public class DoctorEventBaseHelper {
      * @param infos
      */
     public void synchronizeReportPublishForCreate(List<DoctorEventInfo> infos){
-        if (Arguments.isNullOrEmpty(infos)) {
-            return;
+        try {
+            if (Arguments.isNullOrEmpty(infos)) {
+                return;
+            }
+            Map<Long, List<DoctorEventInfo>> farmIdToMap = infos.stream().collect(Collectors.groupingBy(DoctorEventInfo::getFarmId));
+            synchronizeReportPublish(farmIdToMap.keySet());
+        } catch (Exception e) {
+            log.info("synchronize report publish for create error");
         }
-        Map<Long, List<DoctorEventInfo>> farmIdToMap = infos.stream().collect(Collectors.groupingBy(DoctorEventInfo::getFarmId));
-        synchronizeReportPublish(farmIdToMap.keySet());
     }
 
     /**
