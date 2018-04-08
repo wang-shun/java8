@@ -11,7 +11,9 @@ import io.terminus.doctor.event.enums.ReportTime;
 import io.terminus.doctor.event.service.DoctorDailyReportV2Service;
 import io.terminus.doctor.event.service.DoctorReportWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -47,13 +50,15 @@ public class DoctorReportController {
     private final DoctorFarmReadService doctorFarmReadService;
 
     private final DoctorReportWriteService doctorReportWriteService;
+    private final DoctorOrgReadService doctorOrgReadService;
 
 
     @Autowired
-    public DoctorReportController(DoctorDailyReportV2Service doctorDailyReportV2Service, DoctorFarmReadService doctorFarmReadService, DoctorReportWriteService doctorReportWriteService) {
+    public DoctorReportController(DoctorDailyReportV2Service doctorDailyReportV2Service, DoctorFarmReadService doctorFarmReadService, DoctorReportWriteService doctorReportWriteService, DoctorOrgReadService doctorOrgReadService) {
         this.doctorDailyReportV2Service = doctorDailyReportV2Service;
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorReportWriteService = doctorReportWriteService;
+        this.doctorOrgReadService = doctorOrgReadService;
     }
 
     /**
@@ -212,6 +217,28 @@ public class DoctorReportController {
                                              @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start) {
         return RespHelper.or500(doctorDailyReportV2Service.synchronizeDeltaDayBiData(orzId, start, orzType));
     }
+
+    /**
+     * 同步某维度，指定时间之后的数据
+     * @param orzType
+     * @param start 同步时间
+     * @return
+     */
+    @RequestMapping(value = "/synchronize/delta/all/bi/data", method = RequestMethod.GET)
+    public Boolean synchronizeDeltaDayAllBiData(@RequestParam Integer orzType,
+                                                @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start) {
+        if (Objects.equals(orzType, OrzDimension.FARM.getValue())) {
+            List<Long> farmList = RespHelper.or500(doctorFarmReadService.findAllFarms())
+                    .parallelStream().map(DoctorFarm::getId).collect(Collectors.toList());
+            farmList.forEach(farmId -> doctorDailyReportV2Service.synchronizeDeltaDayBiData(farmId, start, orzType));
+        } else if (Objects.equals(orzType, OrzDimension.ORG.getValue())) {
+            List<Long> orgList = RespHelper.or500(doctorOrgReadService.findAllOrgs())
+                    .parallelStream().map(DoctorOrg::getId).collect(Collectors.toList());
+            orgList.forEach(orgId -> doctorDailyReportV2Service.synchronizeDeltaDayBiData(orgId, start, orzType));
+        }
+        return Boolean.TRUE;
+    }
+
 
     /**
      * 增量同步某组织维度下从指定时间开始数据
