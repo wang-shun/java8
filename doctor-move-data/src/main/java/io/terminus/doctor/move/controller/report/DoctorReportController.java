@@ -229,12 +229,12 @@ public class DoctorReportController {
                                                 @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start) {
         if (Objects.equals(orzType, OrzDimension.FARM.getValue())) {
             List<Long> farmList = RespHelper.or500(doctorFarmReadService.findAllFarms())
-                    .parallelStream().map(DoctorFarm::getId).collect(Collectors.toList());
-            farmList.forEach(farmId -> doctorDailyReportV2Service.synchronizeDeltaDayBiData(farmId, start, orzType));
+                    .stream().map(DoctorFarm::getId).collect(Collectors.toList());
+            farmList.parallelStream().forEach(farmId -> doctorDailyReportV2Service.synchronizeDeltaDayBiData(farmId, start, orzType));
         } else if (Objects.equals(orzType, OrzDimension.ORG.getValue())) {
             List<Long> orgList = RespHelper.or500(doctorOrgReadService.findAllOrgs())
-                    .parallelStream().map(DoctorOrg::getId).collect(Collectors.toList());
-            orgList.forEach(orgId -> doctorDailyReportV2Service.synchronizeDeltaDayBiData(orgId, start, orzType));
+                    .stream().map(DoctorOrg::getId).collect(Collectors.toList());
+            orgList.parallelStream().forEach(orgId -> doctorDailyReportV2Service.synchronizeDeltaDayBiData(orgId, start, orzType));
         }
         return Boolean.TRUE;
     }
