@@ -376,6 +376,7 @@
         FROM <include refid="tb"/>
         WHERE
         org_id = #{orgId}
+        AND pig_type = #{pigType}
         AND sum_at = date_format(#{sumAt}, '%Y-%m-%d')
     </select>
 

@@ -89,8 +89,9 @@ public class DoctorGroupDailyDao extends MyBatisDao<DoctorGroupDaily> {
         return getSqlSession().selectOne(sqlId("farmEnd"), dimensionCriteria);
     }
 
-    public Integer orgDayStock(Long orgId, Date sumAt){
-        return getSqlSession().selectOne(sqlId("orgDayStock"), ImmutableMap.of("orgId", orgId, "sumAt", sumAt));
+    public Integer orgDayStock(Long orgId, Date sumAt, Integer pigType){
+        return getSqlSession().selectOne(sqlId("orgDayStock"),
+                ImmutableMap.of("orgId", orgId, "sumAt", sumAt, "pigType", pigType));
     }
 
     public Integer orgDayAvgLiveStock(DoctorDimensionCriteria dimensionCriteria){
