@@ -22,18 +22,6 @@ public abstract class AbstractStockManager {
     @Autowired
     protected DoctorWarehouseMaterialHandleDao doctorWarehouseMaterialHandleDao;
 
-
-    public void lock(Long warehouseId) {
-
-        lockRegistry.obtain(warehouseId.toString()).lock();
-    }
-
-    public void unlock(Long warehouseId) {
-
-        lockRegistry.obtain(warehouseId.toString()).unlock();
-    }
-
-
     /**
      * 重算
      *
@@ -42,38 +30,26 @@ public abstract class AbstractStockManager {
      */
     protected void recalculate(DoctorWarehouseMaterialHandle materialHandle, BigDecimal newQuantity) {
 
-        //lock
-        Lock lock = lockRegistry.obtain(materialHandle.getWarehouseId().toString());
-
-        if (!lock.tryLock())
+        if (materialHandle.getBeforeStockQuantity().compareTo(newQuantity) < 0)
             throw new ServiceException("");
 
-        try {
-            if (materialHandle.getBeforeStockQuantity().compareTo(newQuantity) < 0)
+        BigDecimal newStockQuantity = materialHandle.getBeforeStockQuantity().subtract(newQuantity);
+
+        List<DoctorWarehouseMaterialHandle> needToRecalculate = getMaterialHandleAfter(materialHandle.getWarehouseId(), materialHandle.getId(), materialHandle.getHandleDate());
+        for (DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle : needToRecalculate) {
+            if (newStockQuantity.compareTo(doctorWarehouseMaterialHandle.getQuantity()) < 0)
                 throw new ServiceException("");
 
-            BigDecimal newStockQuantity = materialHandle.getBeforeStockQuantity().subtract(newQuantity);
-
-            List<DoctorWarehouseMaterialHandle> needToRecalculate = getMaterialHandleAfter(materialHandle.getWarehouseId(), materialHandle.getId(), materialHandle.getHandleDate());
-            for (DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle : needToRecalculate) {
-                if (newStockQuantity.compareTo(doctorWarehouseMaterialHandle.getQuantity()) < 0)
-                    throw new ServiceException("");
-
-                doctorWarehouseMaterialHandle.setBeforeStockQuantity(newStockQuantity);
-                newStockQuantity = newStockQuantity.subtract(doctorWarehouseMaterialHandle.getQuantity());
-            }
-
-            needToRecalculate.forEach(
-                    m -> {
-                        doctorWarehouseMaterialHandleDao.update(m);
-                    }
-            );
-
-
-        } catch (Exception e) {
-            lock.unlock();
-            throw e;
+            doctorWarehouseMaterialHandle.setBeforeStockQuantity(newStockQuantity);
+            newStockQuantity = newStockQuantity.subtract(doctorWarehouseMaterialHandle.getQuantity());
         }
+
+        needToRecalculate.forEach(
+                m -> {
+                    doctorWarehouseMaterialHandleDao.update(m);
+                }
+        );
+
     }
 
 
