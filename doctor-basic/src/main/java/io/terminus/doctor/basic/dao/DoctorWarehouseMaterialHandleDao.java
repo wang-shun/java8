@@ -9,6 +9,7 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -64,6 +65,16 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
                 .deleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue())
                 .stockHandleId(stockHandleId)
                 .build());
+    }
+
+
+    public List<DoctorWarehouseMaterialHandle> findAfter(Long warehouseId, Long materialHandleId, Date handleDate) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("materialHandleId", materialHandleId);
+        criteria.put("handleDate", handleDate);
+
+        return this.sqlSession.selectList(this.sqlId("findAfter"), criteria);
     }
 
 }

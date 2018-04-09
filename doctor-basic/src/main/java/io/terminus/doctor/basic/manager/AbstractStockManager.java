@@ -9,6 +9,7 @@ import org.springframework.integration.support.locks.LockRegistry;
 
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 
@@ -43,7 +44,7 @@ public abstract class AbstractStockManager {
 
             BigDecimal newStock = materialHandle.getBeforeInventoryQuantity().subtract(newQuantity);
 
-            List<DoctorWarehouseMaterialHandle> needToRecalculate = getMaterialHandleAfter(materialHandle.getWarehouseId(), materialHandle.getId(), WarehouseMaterialHandleType.fromValue(materialHandle.getType()));
+            List<DoctorWarehouseMaterialHandle> needToRecalculate = getMaterialHandleAfter(materialHandle.getWarehouseId(), materialHandle.getId(), materialHandle.getHandleDate());
             for (DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle : needToRecalculate) {
                 if (newStock.compareTo(doctorWarehouseMaterialHandle.getQuantity()) < 0)
                     throw new ServiceException("");
@@ -63,7 +64,8 @@ public abstract class AbstractStockManager {
      * @param materialHandleId
      * @return
      */
-    protected List<DoctorWarehouseMaterialHandle> getMaterialHandleAfter(Long warehouseId, Long materialHandleId, WarehouseMaterialHandleType handleType) {
-        return Collections.emptyList();
+    protected List<DoctorWarehouseMaterialHandle> getMaterialHandleAfter(Long warehouseId, Long materialHandleId, Date handleDate) {
+
+        return doctorWarehouseMaterialHandleDao.findAfter(warehouseId, materialHandleId, handleDate);
     }
 }
