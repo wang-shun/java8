@@ -228,9 +228,9 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                             if (!source.getMaterialId().equals(target.getMaterialId()))
                                 return false;
                             if (target.getType().intValue() == WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue())
-                                return source.getQuantity().compareTo(target.getBeforeInventoryQuantity().subtract(target.getQuantity())) == 0;
+                                return source.getQuantity().compareTo(target.getBeforeStockQuantity().subtract(target.getQuantity())) == 0;
                             else
-                                return source.getQuantity().compareTo(target.getBeforeInventoryQuantity().add(target.getQuantity())) == 0;
+                                return source.getQuantity().compareTo(target.getBeforeStockQuantity().add(target.getQuantity())) == 0;
                         }
 
                         @Override
@@ -295,7 +295,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             DoctorBasic unit = doctorBasicDao.findById(Long.parseLong(sku.getUnit()));
             if (null != unit)
                 materialHandle.setUnit(unit.getName());
-            materialHandle.setBeforeInventoryQuantity(stock.getQuantity());
+            materialHandle.setBeforeStockQuantity(stock.getQuantity());
             materialHandle.setOperatorId(stockInventory.getOperatorId());
             materialHandle.setOperatorName(stockInventory.getOperatorName());
             materialHandle.setRemark(detail.getRemark());
@@ -464,7 +464,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             outHandle.setRemark(detail.getRemark());
             if (null != unit)
                 outHandle.setUnit(unit.getName());
-            outHandle.setBeforeInventoryQuantity(stock.getQuantity());
+            outHandle.setBeforeStockQuantity(stock.getQuantity());
             stock.setQuantity(stock.getQuantity().subtract(detail.getQuantity()));
             doctorWarehouseHandlerManager.outStock(stock, purchaseHandleContext, outHandle);
             doctorWarehouseStockMonthlyManager.count(stock.getWarehouseId(),
@@ -496,7 +496,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             if (null != unit)
                 inHandle.setUnit(unit.getName());
             inHandle.setRemark(detail.getRemark());
-            inHandle.setBeforeInventoryQuantity(stock.getQuantity());
+            inHandle.setBeforeStockQuantity(stock.getQuantity());
             inHandle.setOtherTransferHandleId(outHandle.getId());
             List<DoctorWarehousePurchase> transferInPurchase = new ArrayList<>();
             for (DoctorWarehousePurchase purchase : purchaseHandleContext.getPurchaseQuantity().keySet()) {

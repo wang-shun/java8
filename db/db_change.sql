@@ -2143,3 +2143,7 @@ CREATE TABLE `doctor_track_snapshots` (
 ALTER TABLE `doctor_track_snapshots` ADD COLUMN `event_source` tinyint (4) DEFAULT NULL COMMENT '前置事件来源' after `event_id`;
 
 create index doctor_event_modify_logs_business_id on doctor_event_modify_logs(business_id);
+
+
+-- 修改单据明细中的盘点之前库存数量字段 2018-04-09
+ALTER TABLE doctor_warehouse_material_handle CHANGE before_inventory_quantity before_stock_quantity DECIMAL(23,2) COMMENT '之前库存数量';

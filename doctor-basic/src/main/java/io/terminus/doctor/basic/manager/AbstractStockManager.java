@@ -2,13 +2,11 @@ package io.terminus.doctor.basic.manager;
 
 import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
-import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.support.locks.LockRegistry;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -51,20 +49,20 @@ public abstract class AbstractStockManager {
             throw new ServiceException("");
 
         try {
-            if (materialHandle.getBeforeInventoryQuantity().compareTo(newQuantity) < 0)
+            if (materialHandle.getBeforeStockQuantity().compareTo(newQuantity) < 0)
                 throw new ServiceException("");
 
-            BigDecimal newStockQuantity = materialHandle.getBeforeInventoryQuantity().subtract(newQuantity);
+            BigDecimal newStockQuantity = materialHandle.getBeforeStockQuantity().subtract(newQuantity);
 
             List<DoctorWarehouseMaterialHandle> needToRecalculate = getMaterialHandleAfter(materialHandle.getWarehouseId(), materialHandle.getId(), materialHandle.getHandleDate());
             for (DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle : needToRecalculate) {
                 if (newStockQuantity.compareTo(doctorWarehouseMaterialHandle.getQuantity()) < 0)
                     throw new ServiceException("");
 
-                doctorWarehouseMaterialHandle.setBeforeInventoryQuantity(newStockQuantity);
+                doctorWarehouseMaterialHandle.setBeforeStockQuantity(newStockQuantity);
                 newStockQuantity = newStockQuantity.subtract(doctorWarehouseMaterialHandle.getQuantity());
             }
-            
+
             needToRecalculate.forEach(
                     m -> {
                         doctorWarehouseMaterialHandleDao.update(m);
