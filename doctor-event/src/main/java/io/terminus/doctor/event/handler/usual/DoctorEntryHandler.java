@@ -50,6 +50,7 @@ public class DoctorEntryHandler extends DoctorAbstractEventHandler{
 
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        super.handleCheck(executeEvent, fromTrack);
         expectTrue((Objects.equals(executeEvent.getKind(), DoctorPig.PigSex.SOW.getKey())
                         && PigType.MATING_TYPES.contains(executeEvent.getBarnType()))
                 || (Objects.equals(executeEvent.getKind(), DoctorPig.PigSex.BOAR.getKey())
