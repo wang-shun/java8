@@ -290,7 +290,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorPigEventHandle
         Date eventAt = executeEvent.getEventAt();
         if (Objects.equals(executeEvent.getType(), PigEvent.ENTRY.getKey())) {
             if (Dates.startOfDay(eventAt).after(Dates.startOfDay(new Date()))){
-                throw new InvalidException("event.at.range.error", DateUtil.toDateString(lastEvent.getEventAt()), DateUtil.toDateString(new Date()), DateUtil.toDateString(eventAt));
+                throw new InvalidException("entry.event.at.after.now", DateUtil.toDateString(eventAt), DateUtil.toDateString(new Date()));
             }
             return;
         }
