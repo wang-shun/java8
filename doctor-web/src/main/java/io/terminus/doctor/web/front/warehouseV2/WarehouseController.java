@@ -162,7 +162,7 @@ public class WarehouseController {
      * @param warehouseDto
      * @param errors
      */
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(value="/update",method = RequestMethod.POST)
     public boolean update(@RequestBody @Valid WarehouseDto warehouseDto, Errors errors) {
 
         if (errors.hasErrors())
