@@ -3,8 +3,7 @@ server:
   port: 8081
 
 pampas:
-  #rootPath: /home/admin/assets
-  rootPath: D:\my_project\project\scy\pidgey
+  rootPath: /home/admin/assets
   apps:
     - key: MOBILE
       assetsHome: public
