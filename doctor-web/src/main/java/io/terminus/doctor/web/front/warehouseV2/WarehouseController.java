@@ -162,37 +162,41 @@ public class WarehouseController {
      * @param warehouseDto
      * @param errors
      */
-    @RequestMapping(method = RequestMethod.PUT)
+    @RequestMapping(value="/update",method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
     public boolean update(@RequestBody @Valid WarehouseDto warehouseDto, Errors errors) {
 
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
-        //判断是否有猪场ID
+        // 判断是否有猪场ID
         Response<DoctorFarm> farmResponse = doctorFarmReadService.findFarmById(warehouseDto.getFarmId());
         checkState(farmResponse.isSuccess(), "read.farmInfo.fail");
-        //得到farmName
+        // 得到farmName
         DoctorFarm doctorFarm = farmResponse.getResult();
 
         if (doctorFarm == null)
             throw new JsonResponseException("farm.not.found");
 
-        //得到managerName
+        // 得到managerName
         UserProfile userProfile = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserId(warehouseDto.getManagerId()));
 
         Response<User> currentUserResponse = userReadService.findById(UserUtil.getUserId());
-        //得到creatorId,creatorName
+        // 得到creatorId,creatorName
         User currentUser = currentUserResponse.getResult();
         if (null == currentUser)
             throw new JsonResponseException("user.not.login");
 
-        //warehouse 信息, 修改ManagerId, ManagerName, address 地址信息， WareHouseName 仓库名称
+        // warehouse 信息, 修改ManagerId, ManagerName, address 地址信息， WareHouseName 仓库名称
         DoctorWareHouse doctorWareHouse = DoctorWareHouse.builder()
+                .id(warehouseDto.getId())
+                .type(warehouseDto.getType())
+                .farmId(warehouseDto.getFarmId())
                 .wareHouseName(warehouseDto.getName())
                 .managerId(warehouseDto.getManagerId()).managerName(userProfile.getRealName())
-                .address(warehouseDto.getAddress()).type(warehouseDto.getType())
+                .address(warehouseDto.getAddress())
                 .updatorId(currentUser.getId()).updatorName(currentUser.getName())
                 .build();
+
         //调修改仓库的方法
         return RespHelper.or500(doctorWareHouseWriteService.updateWareHouse(doctorWareHouse));
     }
@@ -204,16 +208,41 @@ public class WarehouseController {
      * @param warehouseDto
      * @param errors
      */
-    @RequestMapping(method = RequestMethod.DELETE)
+    @RequestMapping(value = "/delete", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public boolean delete(@RequestBody @Valid WarehouseDto warehouseDto, Errors errors) {
 
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
+        // 判断是否有猪场ID
+        Response<DoctorFarm> farmResponse = doctorFarmReadService.findFarmById(warehouseDto.getFarmId());
+        checkState(farmResponse.isSuccess(), "read.farmInfo.fail");
+        // 得到farmName
+        DoctorFarm doctorFarm = farmResponse.getResult();
+
+        if (doctorFarm == null)
+            throw new JsonResponseException("farm.not.found");
+
+        // 得到managerName
+        UserProfile userProfile = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserId(warehouseDto.getManagerId()));
+
+        Response<User> currentUserResponse = userReadService.findById(UserUtil.getUserId());
+        // 得到creatorId,creatorName
+        User currentUser = currentUserResponse.getResult();
+        if (null == currentUser)
+            throw new JsonResponseException("user.not.login");
+
         DoctorWareHouse doctorWareHouse = DoctorWareHouse.builder()
                 .id(warehouseDto.getId())
+                .type(warehouseDto.getType())
+                .farmId(warehouseDto.getFarmId())
+                .wareHouseName(warehouseDto.getName())
+                .managerId(warehouseDto.getManagerId()).managerName(userProfile.getRealName())
+                .address(warehouseDto.getAddress())
+                .updatorId(currentUser.getId()).updatorName(currentUser.getName())
                 .build();
-        //调删除仓库的方法
+
+        // 调删除仓库的方法
         return RespHelper.or500(doctorWareHouseWriteService.deleteWareHouse(doctorWareHouse));
     }
 
