@@ -18,7 +18,6 @@ import org.springframework.core.io.ClassPathResource;
  * Date: 2016-02-01
  */
 @SpringBootApplication
-@EnableAutoConfiguration(exclude = {PampasAutoConfiguration.class, PampasMVCAutoConfiguration.class})
 public class DoctorWebApplication {
     public static void main(String[] args) {
         SpringApplication application = new SpringApplication(DoctorWebApplication.class,

@@ -51,6 +51,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
         LuoSiMaoSmsServiceConfig.class,
         CommonEmailServiceConfig.class,
 })
+@EnableAutoConfiguration(exclude = {PampasAutoConfiguration.class, PampasMVCAutoConfiguration.class})
 public class DoctorWebConfiguration extends WebMvcConfigurerAdapter {
 
     @Bean
