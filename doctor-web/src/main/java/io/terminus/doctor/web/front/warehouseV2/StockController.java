@@ -75,6 +75,13 @@ public class StockController {
     @RpcConsumer
     private DoctorOrgReadService doctorOrgReadService;
 
+    /**
+     * 采购入库
+     *
+     * @param stockIn
+     * @param errors
+     * @return
+     */
     @RequestMapping(method = RequestMethod.PUT, value = "in")
     public Long in(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockInDto stockIn, Errors errors) {
         if (errors.hasErrors())
@@ -94,6 +101,13 @@ public class StockController {
         return response.getResult();
     }
 
+    /**
+     * 生产领料出库
+     *
+     * @param stockOut
+     * @param errors
+     * @return
+     */
     @RequestMapping(method = RequestMethod.PUT, value = "out")
     public Long out(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockOutDto stockOut, Errors errors) {
         if (errors.hasErrors())
@@ -131,6 +145,13 @@ public class StockController {
         return response.getResult();
     }
 
+    /**
+     * 盘点
+     *
+     * @param stockInventory
+     * @param errors
+     * @return
+     */
     @RequestMapping(method = RequestMethod.PUT, value = "inventory")
     public Long inventory(@RequestBody @Validated(AbstractWarehouseStockDetail.StockInventoryValid.class) WarehouseStockInventoryDto stockInventory,
                           Errors errors) {
@@ -168,6 +189,13 @@ public class StockController {
         return response.getResult();
     }
 
+    /**
+     * 调拨
+     *
+     * @param stockTransfer
+     * @param errors
+     * @return
+     */
     @RequestMapping(method = RequestMethod.PUT, value = "transfer")
     public Long transfer(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockTransferDto stockTransfer, Errors errors) {
         if (errors.hasErrors())
@@ -204,6 +232,12 @@ public class StockController {
         return response.getResult();
     }
 
+    /**
+     * 删除库存明细
+     *
+     * @param id
+     * @return
+     */
     @RequestMapping(method = RequestMethod.DELETE, value = "{id}")
     public boolean delete(@PathVariable Long id) {
         Response<Boolean> response = doctorWarehouseStockWriteService.delete(id);
@@ -213,6 +247,16 @@ public class StockController {
     }
 
 
+    /**
+     * 查询库存明细
+     *
+     * @param warehouseId
+     * @param orgId
+     * @param materialName
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
     @RequestMapping(method = RequestMethod.GET)
     public Paging<WarehouseStockStatisticsVo> paging(@RequestParam Long warehouseId,
                                                      @RequestParam(required = false) Long orgId,
