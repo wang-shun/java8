@@ -14,7 +14,11 @@ public class DoctorGroupDailyDaoTest extends BaseDaoTest {
 
     @Test
     public void orgDayStockTest() {
-        Integer count = doctorGroupDailyDao.orgDayStock(1L, DateUtil.toDate("2018-03-01"), 4);
-        System.out.println(count);
+        Integer startStock = doctorGroupDailyDao.orgDayStartStock(1L, DateUtil.toDate("2018-03-01"), 4);
+        System.out.println(startStock);
+
+        Integer endStock = doctorGroupDailyDao.orgDayEndStock(1L, DateUtil.toDate("2018-03-01"), 4);
+        System.out.println(endStock);
+
     }
 }
