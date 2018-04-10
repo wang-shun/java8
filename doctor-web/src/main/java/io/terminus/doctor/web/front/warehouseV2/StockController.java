@@ -28,6 +28,8 @@ import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseStockStatisticsVo;
 import io.terminus.parana.user.model.UserProfile;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -74,6 +76,10 @@ public class StockController {
     private DoctorBarnReadService doctorBarnReadService;
     @RpcConsumer
     private DoctorOrgReadService doctorOrgReadService;
+
+
+    @Autowired
+    private LockRegistry lockRegistry;
 
     /**
      * 采购入库

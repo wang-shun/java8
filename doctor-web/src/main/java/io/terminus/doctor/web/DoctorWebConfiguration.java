@@ -4,7 +4,6 @@
 
 package io.terminus.doctor.web;
 
-import io.terminus.boot.swagger.autoconfigure.SwaggerAutoConfiguration;
 import io.terminus.doctor.user.service.SubRoleReadService;
 import io.terminus.doctor.web.core.DoctorCoreWebConfiguration;
 import io.terminus.doctor.web.core.advices.JsonExceptionResolver;
@@ -18,20 +17,15 @@ import io.terminus.parana.auth.role.CustomRoleLoaderConfigurer;
 import io.terminus.parana.auth.role.CustomRoleLoaderRegistry;
 import io.terminus.parana.auth.web.WebAuthenticationConfiguration;
 import io.terminus.parana.web.msg.config.MsgWebConfig;
+import io.terminus.zookeeper.common.ZKClientFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.FilterType;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.*;
+import org.springframework.integration.support.locks.LockRegistry;
+import org.springframework.integration.zookeeper.lock.ZookeeperLockRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
 
 /**
  * Author:  <a href="mailto:i@terminus.io">jlchen</a>
@@ -74,6 +68,14 @@ public class DoctorWebConfiguration extends WebMvcConfigurerAdapter {
 
         registry.addResourceHandler("/webjars/**")
                 .addResourceLocations("classpath:/META-INF/resources/webjars/");
+    }
+
+
+    @Bean
+    @Autowired
+    public LockRegistry zookeeperLockRegistry(ZKClientFactory zkClientFactory) {
+
+        return new ZookeeperLockRegistry(zkClientFactory.getClient(), "/lock");
     }
 
 }
