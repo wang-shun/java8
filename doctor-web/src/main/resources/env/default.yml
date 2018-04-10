@@ -3,10 +3,11 @@ server:
   port: 8081
 
 pampas:
-  rootPath: /home/admin/assets
+  #rootPath: /home/admin/assets
+  rootPath: D:\my_project\project\scy\pidgey
   apps:
     - key: MOBILE
-      assetsHome: pidgey
+      assetsHome: public
   devMode: false
   locale: zh_CN
   mvc:
@@ -20,7 +21,7 @@ pampas:
     host: 101.201.44.35
     port: 6379
   design:
-    enable: true
+    enable: false
 
 session:
   cookie-context-path: /
@@ -29,7 +30,7 @@ session:
   cookie-name: msid
   source: redis
   serialize-type: json
-  redis-host: 101.201.44.35
+  redis-host: 127.0.0.1
   redis-port: 6379
   redis-index: 1
   redis-cluster: false

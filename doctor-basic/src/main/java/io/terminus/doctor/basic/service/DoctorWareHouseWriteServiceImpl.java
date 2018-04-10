@@ -4,11 +4,15 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorWareHouseDao;
+import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
 import io.terminus.doctor.basic.manager.DoctorWareHouseManager;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
@@ -27,6 +31,9 @@ public class DoctorWareHouseWriteServiceImpl implements DoctorWareHouseWriteServ
     private final DoctorWareHouseDao doctorWareHouseDao;
 
     private final DoctorWareHouseManager doctorWareHouseManager;
+
+    @Autowired
+    private DoctorWarehouseMaterialHandleDao doctorWarehouseMaterialHandleDao;
 
     @Autowired
     public DoctorWareHouseWriteServiceImpl(DoctorWareHouseDao doctorWareHouseDao,
@@ -50,7 +57,6 @@ public class DoctorWareHouseWriteServiceImpl implements DoctorWareHouseWriteServ
             if(isNull(doctorWareHouse.getType())){
                 return Response.fail("input.wareHouseType.empty");
             }
-
             checkState(doctorWareHouseManager.createWareHouseInfo(doctorWareHouse), "warehouse.create.fail");
             return Response.ok(doctorWareHouse.getId());
         }catch (Exception e){
@@ -61,7 +67,19 @@ public class DoctorWareHouseWriteServiceImpl implements DoctorWareHouseWriteServ
 
     @Override
     public Response<Boolean> updateWareHouse(DoctorWareHouse wareHouse) {
-        try{
+        try {
+            DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle = new DoctorWarehouseMaterialHandle();
+            doctorWarehouseMaterialHandle.setWarehouseId(wareHouse.getId());
+            doctorWarehouseMaterialHandle.setType(1); //入库
+            List<DoctorWarehouseMaterialHandle> lists =  doctorWarehouseMaterialHandleDao.list(doctorWarehouseMaterialHandle);
+            if(lists.size() > 0) {
+                return Response.fail("warehouse.handle.not.allow.delete.type.one");
+            }
+            doctorWarehouseMaterialHandle.setType(2); //出库
+            lists =  doctorWarehouseMaterialHandleDao.list(doctorWarehouseMaterialHandle);
+            if(lists.size() > 0) {
+                return Response.fail("warehouse.handle.not.allow.delete.type.two");
+            }
         	return Response.ok(this.doctorWareHouseManager.updateWareHouseInfo(wareHouse));
         }catch (IllegalStateException se){
             log.warn("update warehouse illegal state fail, warehouse:{}, cause:{}",wareHouse,  Throwables.getStackTraceAsString(se));
@@ -69,6 +87,36 @@ public class DoctorWareHouseWriteServiceImpl implements DoctorWareHouseWriteServ
         }catch (Exception e){
             log.error("update warehouse info fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("update.warehouseInfo.fail");
+        }
+    }
+
+    /**
+     * 删除出入库数据
+     * @param wareHouse
+     * @return
+     */
+    @Override
+    public Response<Boolean> deleteWareHouse(DoctorWareHouse wareHouse) {
+        try{
+            DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle = new DoctorWarehouseMaterialHandle();
+            doctorWarehouseMaterialHandle.setWarehouseId(wareHouse.getId());
+            doctorWarehouseMaterialHandle.setType(1); //入库
+            List<DoctorWarehouseMaterialHandle> lists =  doctorWarehouseMaterialHandleDao.list(doctorWarehouseMaterialHandle);
+            if(lists.size() > 0) {
+                return Response.fail("warehouse.handle.not.allow.delete.type.one");
+            }
+            doctorWarehouseMaterialHandle.setType(2); //出库
+            lists =  doctorWarehouseMaterialHandleDao.list(doctorWarehouseMaterialHandle);
+            if(lists.size() > 0) {
+                return Response.fail("warehouse.handle.not.allow.delete.type.two");
+            }
+            return Response.ok(this.doctorWareHouseManager.deleteWareHouseInfo(wareHouse));
+        }catch (IllegalStateException se){
+            log.warn("delete warehouse illegal state fail, warehouse:{}, cause:{}",wareHouse,  Throwables.getStackTraceAsString(se));
+            return Response.fail(se.getMessage());
+        }catch (Exception e){
+            log.error("delete warehouse info fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("delete.warehouseInfo.fail");
         }
     }
 }
