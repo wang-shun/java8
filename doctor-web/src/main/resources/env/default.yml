@@ -6,7 +6,7 @@ pampas:
   rootPath: /home/admin/assets
   apps:
     - key: MOBILE
-      assetsHome: public
+      assetsHome: pidgey
   devMode: false
   locale: zh_CN
   mvc:
@@ -20,7 +20,7 @@ pampas:
     host: 101.201.44.35
     port: 6379
   design:
-    enable: false
+    enable: true
 
 session:
   cookie-context-path: /
