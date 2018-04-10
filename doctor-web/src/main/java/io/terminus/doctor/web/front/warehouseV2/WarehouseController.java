@@ -162,7 +162,7 @@ public class WarehouseController {
      * @param warehouseDto
      * @param errors
      */
-    @RequestMapping(value="/update",method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.PUT)
     public boolean update(@RequestBody @Valid WarehouseDto warehouseDto, Errors errors) {
 
         if (errors.hasErrors())
@@ -204,7 +204,7 @@ public class WarehouseController {
      * @param warehouseDto
      * @param errors
      */
-    @RequestMapping(value = "/deleteWareHouse", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(method = RequestMethod.DELETE)
     public boolean delete(@RequestBody @Valid WarehouseDto warehouseDto, Errors errors) {
 
         if (errors.hasErrors())
