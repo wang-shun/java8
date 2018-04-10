@@ -480,8 +480,8 @@ public class DoctorReportBiDataSynchronize {
             } else {
                 Date minDate = doctorGroupDailyDao.minDate(dimensionCriteria);
                 Date maxDate = doctorGroupDailyDao.maxDate(dimensionCriteria);
-                start = doctorGroupDailyDao.orgDayStock(dimensionCriteria.getOrzId(), minDate, dimensionCriteria.getPigType());
-                end = doctorGroupDailyDao.orgDayStock(dimensionCriteria.getOrzId(), maxDate, dimensionCriteria.getPigType());
+                start = doctorGroupDailyDao.orgDayStartStock(dimensionCriteria.getOrzId(), minDate, dimensionCriteria.getPigType());
+                end = doctorGroupDailyDao.orgDayEndStock(dimensionCriteria.getOrzId(), maxDate, dimensionCriteria.getPigType());
                 groupDaily.setDailyLivestockOnHand(FieldHelper.getInteger(doctorGroupDailyDao.orgDayAvgLiveStock(dimensionCriteria), DateUtil.getDeltaDaysAbs(maxDate, minDate)));
             }
             groupDaily.setStart(start);
