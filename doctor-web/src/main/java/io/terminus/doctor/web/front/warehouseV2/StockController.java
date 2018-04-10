@@ -38,6 +38,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * 库存
  * Created by sunbo@terminus.io on 2017/8/20.
  */
 @RestController
