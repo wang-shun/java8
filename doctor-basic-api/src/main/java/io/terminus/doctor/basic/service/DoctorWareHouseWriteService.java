@@ -27,10 +27,12 @@ public interface DoctorWareHouseWriteService {
      */
     Response<Boolean> updateWareHouse(@NotNull(message = "input.warehouse.empty") DoctorWareHouse wareHouse);
 
+
     /**
      * 删除WareHouse
      * @param doctorWareHouse
      * @return
      */
     Response<Boolean> deleteWareHouse(@NotNull(message = "input.wareHouse.empty") DoctorWareHouse doctorWareHouse);
+
 }
