@@ -34,6 +34,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
@@ -203,7 +204,7 @@ public class WarehouseController {
      * @param warehouseDto
      * @param errors
      */
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(value = "/deleteWareHouse", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
     public boolean delete(@RequestBody @Valid WarehouseDto warehouseDto, Errors errors) {
 
         if (errors.hasErrors())
