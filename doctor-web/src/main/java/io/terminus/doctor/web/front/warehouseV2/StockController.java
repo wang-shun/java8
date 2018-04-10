@@ -151,6 +151,18 @@ public class StockController {
         return response.getResult();
     }
 
+
+    /**
+     * 退料入库
+     *
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.PUT, value = "refund")
+    public Long refund() {
+        //TODO 领料入库
+        return 0L;
+    }
+
     /**
      * 盘点
      *
