@@ -239,4 +239,9 @@
         ORDER BY handleDate ASC,id DESC
     </select>
 
+    <select id="getWarehouseMaterialHandleCount" resultType="int">
+         select count(1) as count from  doctor_warehouse_material_handle
+            where  warehouse_id = #{id}
+    </select>
+
 </mapper>

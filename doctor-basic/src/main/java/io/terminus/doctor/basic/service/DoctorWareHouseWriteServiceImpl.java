@@ -68,17 +68,9 @@ public class DoctorWareHouseWriteServiceImpl implements DoctorWareHouseWriteServ
     @Override
     public Response<Boolean> updateWareHouse(DoctorWareHouse wareHouse) {
         try {
-            DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle = new DoctorWarehouseMaterialHandle();
-            doctorWarehouseMaterialHandle.setWarehouseId(wareHouse.getId());
-            doctorWarehouseMaterialHandle.setType(1); //入库
-            List<DoctorWarehouseMaterialHandle> lists =  doctorWarehouseMaterialHandleDao.list(doctorWarehouseMaterialHandle);
-            if(lists.size() > 0) {
-                return Response.fail("warehouse.handle.not.allow.updateOrDelete.type.one");
-            }
-            doctorWarehouseMaterialHandle.setType(2); //出库
-            lists =  doctorWarehouseMaterialHandleDao.list(doctorWarehouseMaterialHandle);
-            if(lists.size() > 0) {
-                return Response.fail("warehouse.handle.not.allow.updateOrDelete.type.two");
+            Integer count =  doctorWarehouseMaterialHandleDao.getWarehouseMaterialHandleCount(wareHouse.getId());
+            if(count > 0) {
+                return Response.fail("warehouse.handle.not.allow.updateOrDelete.type");
             }
         	return Response.ok(this.doctorWareHouseManager.updateWareHouseInfo(wareHouse));
         }catch (IllegalStateException se){
@@ -98,17 +90,9 @@ public class DoctorWareHouseWriteServiceImpl implements DoctorWareHouseWriteServ
     @Override
     public Response<Boolean> deleteWareHouse(DoctorWareHouse wareHouse) {
         try{
-            DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle = new DoctorWarehouseMaterialHandle();
-            doctorWarehouseMaterialHandle.setWarehouseId(wareHouse.getId());
-            doctorWarehouseMaterialHandle.setType(1); //入库
-            List<DoctorWarehouseMaterialHandle> lists =  doctorWarehouseMaterialHandleDao.list(doctorWarehouseMaterialHandle);
-            if(lists.size() > 0) {
-                return Response.fail("warehouse.handle.not.allow.updateOrDelete.type.one");
-            }
-            doctorWarehouseMaterialHandle.setType(2); //出库
-            lists =  doctorWarehouseMaterialHandleDao.list(doctorWarehouseMaterialHandle);
-            if(lists.size() > 0) {
-                return Response.fail("warehouse.handle.not.allow.updateOrDelete.type.two");
+            Integer count =  doctorWarehouseMaterialHandleDao.getWarehouseMaterialHandleCount(wareHouse.getId());
+            if(count > 0) {
+                return Response.fail("warehouse.handle.not.allow.updateOrDelete.type");
             }
             return Response.ok(this.doctorWareHouseManager.deleteWareHouseInfo(wareHouse));
         }catch (IllegalStateException se){

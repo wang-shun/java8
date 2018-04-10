@@ -6,12 +6,10 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Desc:
@@ -76,5 +74,13 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
 
         return this.sqlSession.selectList(this.sqlId("findAfter"), criteria);
     }
+
+    public Integer getWarehouseMaterialHandleCount(Long warehouseId) {
+        Map<String,String> m = new HashMap<>();
+        m.put("id",warehouseId.toString());
+        Integer count = this.sqlSession.selectOne(this.sqlId("getWarehouseMaterialHandleCount"), warehouseId);
+        return count;
+    }
+
 
 }
