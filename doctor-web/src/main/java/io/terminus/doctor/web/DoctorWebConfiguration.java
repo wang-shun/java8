@@ -44,7 +44,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
         })
 })
 @EnableWebMvc
-@EnableAutoConfiguration(exclude = {PampasAutoConfiguration.class, PampasMVCAutoConfiguration.class})
 @Import({DoctorCoreWebConfiguration.class,
         OtherSystemServiceConfig.class,
         WebAuthenticationConfiguration.class,
