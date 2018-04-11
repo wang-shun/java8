@@ -7,6 +7,7 @@ import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
 /**
@@ -36,10 +37,6 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 
     @Override
     public void settlement(Long orgId, Date settlementDate) {
-
-        if (isUnderSettlement(orgId))
-            throw new ServiceException("under.settlement");
-
 
     }
 

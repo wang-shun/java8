@@ -5,6 +5,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSettlementService;
 import javafx.geometry.Pos;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -35,7 +36,9 @@ public class SettlementController {
      * @param settlementDate 需要结算的会计年月
      */
     @RequestMapping(method = RequestMethod.POST)
-    public Response<Boolean> settlement(@RequestParam Long orgId, @RequestParam Date settlementDate) {
+    public Response<Boolean> settlement(@RequestParam Long orgId,
+                                        @DateTimeFormat(pattern = "yyyy-MM-dd")
+                                        @RequestParam Date settlementDate) {
 
         Lock lock = lockRegistry.obtain("settlement/" + orgId);
 

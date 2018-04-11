@@ -57,7 +57,7 @@
         <hibernate-validator.version>5.0.1.Final</hibernate-validator.version>
         <simple.mail.version>2.1</simple.mail.version>
         <spring-platform.version>2.0.2.RELEASE</spring-platform.version>
-        <spring-integration.version>4.3.15.RELEASE</spring-integration.version>
+        <spring-integration.version>4.2.6.RELEASE</spring-integration.version>
         <guava.version>19.0</guava.version>
         <terminus.boot.rpc.version>1.0.RELEASE</terminus.boot.rpc.version>
         <terminus-zookeeper.version>2.3.BUILD-SNAPSHOT</terminus-zookeeper.version>
