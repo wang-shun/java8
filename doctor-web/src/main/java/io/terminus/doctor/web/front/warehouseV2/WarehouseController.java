@@ -55,6 +55,7 @@ public class WarehouseController {
 
     @Autowired
     private DoctorFarmReadService doctorFarmReadService;
+
     @RpcConsumer
     private DoctorWareHouseReadService doctorWareHouseReadService;
 
@@ -66,12 +67,10 @@ public class WarehouseController {
     @Autowired
     private DoctorWareHouseWriteService doctorWareHouseWriteService;
 
-
     @Autowired
     private DoctorUserProfileReadService doctorUserProfileReadService;
     @RpcConsumer
     private NewDoctorWarehouseReaderService doctorWarehouseReaderService;
-
 
     @RpcConsumer
     private DoctorWarehouseMaterialHandleReadService doctorWarehouseMaterialHandleReadService;
@@ -106,7 +105,6 @@ public class WarehouseController {
     private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
     @RpcConsumer
     private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
-
 
     @Autowired
     private MessageSource messageSource;
