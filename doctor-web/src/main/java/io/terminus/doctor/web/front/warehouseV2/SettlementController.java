@@ -2,12 +2,14 @@ package io.terminus.doctor.web.front.warehouseV2;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSettlementService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import javafx.geometry.Pos;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.integration.support.locks.LockRegistry;
@@ -46,21 +48,15 @@ public class SettlementController {
      */
     @RequestMapping(method = RequestMethod.POST)
     public void settlement(@RequestParam Long orgId,
-                           @DateTimeFormat(pattern = "yyyy-MM-dd")
-                           @RequestParam LocalDate settlementDate) {
+                           @DateTimeFormat(pattern = "yyyy-MM")
+                           @RequestParam DateTime settlementDate) {
 
-        Lock lock = lockRegistry.obtain("settlement/" + orgId);
+        if (doctorWarehouseSettlementService.isSettled(orgId, settlementDate.toDate()))
+            throw new ServiceException("");
 
-        if (!lock.tryLock())
-            throw new JsonResponseException("under.settlement");
-
-
-        //TODO 上个结算周日是否已经结算
-
-        doctorWarehouseSettlementService.settlement(RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orgId)).stream().map(DoctorFarm::getId).collect(Collectors.toList()),
+        doctorWarehouseSettlementService.settlement(orgId, RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orgId)).stream().map(DoctorFarm::getId).collect(Collectors.toList()),
                 settlementDate);
 
-        lock.unlock();
     }
 
 

@@ -1,5 +1,7 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
+import org.joda.time.DateTime;
+
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
@@ -32,10 +34,10 @@ public interface DoctorWarehouseSettlementService {
     /**
      * 结算
      *
-     * @param farmIds        公司id
+     * @param orgId          公司id
      * @param settlementDate 会计年月
      */
-    public void settlement(List<Long> farmIds, LocalDate settlementDate);
+    public void settlement(Long orgId, List<Long> farmIds, DateTime settlementDate);
 
 
     /**

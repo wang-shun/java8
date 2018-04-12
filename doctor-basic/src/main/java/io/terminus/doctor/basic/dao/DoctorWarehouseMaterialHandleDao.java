@@ -6,10 +6,11 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 
 import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -88,13 +89,42 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     }
 
 
-    public AmountAndQuantityDto findBalanceByAccountingDate(Long warehouseId, Integer year, Integer month) {
+    /**
+     * 获取本会计年月之前的库存量和金额
+     *
+     * @param warehouseId
+     * @param settlementDate
+     * @return
+     */
+    public AmountAndQuantityDto findBalanceByAccountingDate(Long warehouseId, Date settlementDate) {
         Map<String, Object> criteria = Maps.newHashMap();
         criteria.put("warehouseId", warehouseId);
-        criteria.put("year", year);
-        criteria.put("month", month);
+        criteria.put("settlementDate", settlementDate);
 
         return this.sqlSession.selectOne(this.sqlId("findBalanceByAccountingDate"), criteria);
+    }
+
+
+    /**
+     * 获取指定明细获取上一笔明细
+     *
+     * @param materialHandle
+     * @return
+     */
+    public DoctorWarehouseMaterialHandle findPrevious(DoctorWarehouseMaterialHandle materialHandle, WarehouseMaterialHandleType handleType) {
+
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", materialHandle.getWarehouseId());
+        criteria.put("materialHandleId", materialHandle.getId());
+        criteria.put("handleDate", materialHandle.getHandleDate());
+        if (null != handleType)
+            criteria.put("type", handleType.getValue());
+
+        List<DoctorWarehouseMaterialHandle> materialHandles = this.sqlSession.selectList(this.sqlId("findPrevious"), criteria);
+        if (materialHandles.isEmpty())
+            return null;
+
+        return materialHandles.get(0);
     }
 
     public Integer getWarehouseMaterialHandleCount(Long warehouseId) {

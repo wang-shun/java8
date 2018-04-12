@@ -558,7 +558,7 @@ public class StockController {
         return true;
     }
 
-    @Autowired
+    @RpcConsumer
     private DoctorWarehouseMaterialApplyReadService doctorWarehouseMaterialApplyReadService;
 
     /**

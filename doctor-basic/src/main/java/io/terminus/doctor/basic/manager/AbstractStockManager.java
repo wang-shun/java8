@@ -9,7 +9,6 @@ import org.springframework.integration.support.locks.LockRegistry;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
 
 /**
  * Created by sunbo@terminus.io on 2018/4/8.

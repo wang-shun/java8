@@ -9,12 +9,9 @@ import io.terminus.doctor.basic.dao.DoctorWareHouseDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
 import io.terminus.doctor.basic.manager.DoctorWareHouseManager;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
