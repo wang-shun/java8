@@ -421,11 +421,11 @@ public class StockController {
         }
 
         StockDto stockDto = stockDtoList.get(0);
-        Response<User> currentUserResponse = userReadService.findById(stockDto.getOperatorId());
-        // 得到creatorId,creatorName
-        User currentUser = currentUserResponse.getResult();
-        if (null == currentUser)
-            throw new JsonResponseException("stock.operator.not.exist");
+//        Response<User> currentUserResponse = userReadService.findById(stockDto.getOperatorId());
+//        // 得到creatorId,creatorName
+//        User currentUser = currentUserResponse.getResult();
+//        if (null == currentUser)
+//            throw new JsonResponseException("stock.operator.not.exist");
 
         //生成流水号(日期格式的时间戳,精确到毫秒)
         String seq = DateUtil.formatDateStringForTimeorder(new Date());
@@ -443,8 +443,8 @@ public class StockController {
                                                 .handleDate(stockDto.getHandleDate()) //处理日期
                                                 .handleSubType(handleSubType) //事件子类型
                                                 .handleType(stockDto.getHandleType()) //事件类型
-                                                .operatorName(currentUser.getName()) //创建人名
-                                                .operatorId(currentUser.getId()) //创建人id
+                                                //.operatorName(currentUser.getName()) //创建人名
+                                                //.operatorId(currentUser.getId()) //创建人id
                                                 .warehouseType(stockDto.getWarehouseType()) //仓库类型
                                                 .build();
 
@@ -476,8 +476,8 @@ public class StockController {
                             .handleDate(handlerDate) //处理日期
                             .handleYear(DateUtil.getYearForDate(handlerDate))
                             .handleMonth(DateUtil.getMonthForDate(handlerDate))
-                            .operatorId(currentUser.getId()) //创建人id
-                            .operatorName(currentUser.getName()) //创建人名
+                            //.operatorId(currentUser.getId()) //创建人id
+                            //.operatorName(currentUser.getName()) //创建人名
                             .remark(sd.getRemark())
                             .build();
             doctorWarehouseMaterialHandleList.add(doctorWarehouseMaterialHandle);
@@ -506,8 +506,8 @@ public class StockController {
                                 .handleDate(handlerDate) //处理日期
                                 .handleYear(DateUtil.getYearForDate(handlerDate))
                                 .handleMonth(DateUtil.getMonthForDate(handlerDate))
-                                .operatorId(currentUser.getId()) //创建人id
-                                .operatorName(currentUser.getName()) //创建人名
+                                //.operatorId(currentUser.getId()) //创建人id
+                                //.operatorName(currentUser.getName()) //创建人名
                                 .remark(sd.getRemark())
                                 .build();
                 doctorDBRKWarehouseMaterialHandleList.add(doctorDBRKWarehouseMaterialHandle);

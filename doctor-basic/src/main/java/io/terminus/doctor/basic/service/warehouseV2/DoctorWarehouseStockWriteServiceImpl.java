@@ -7,7 +7,6 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.*;
-import io.terminus.doctor.basic.dto.DoctorWarehouseStockHandleDto;
 import io.terminus.doctor.basic.dto.warehouseV2.*;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
@@ -1137,32 +1136,32 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
     /**
      * 出库、入库单据主表、明细表新增,物料领用新增
-     * @param doctorWarehouseStock
+     * @param doctorWarehouseStockHandle
      * @param list
      * @param doctorWarehouseMaterialApplies
      * @return
      */
     @Override
     @Transactional
-    public Response<Long> create(DoctorWarehouseStockHandle doctorWarehouseStock,
+    public Response<Long> create(DoctorWarehouseStockHandle doctorWarehouseStockHandle,
                                  List<DoctorWarehouseMaterialHandle> list,
                                  List<DoctorWarehouseMaterialHandle> dblist,
                                  List<DoctorWarehouseMaterialApply> doctorWarehouseMaterialApplies) {
         int count = 1;
         try {
             //先新增主表数据,会自动填充主键id值
-            doctorWarehouseStockHandleDao.create(doctorWarehouseStock);
+            doctorWarehouseStockHandleDao.create(doctorWarehouseStockHandle);
 
             //填充list集合id值,填充主键关联Id值
             for (DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle : list) {
-                doctorWarehouseMaterialHandle.setStockHandleId(doctorWarehouseStock.getId());
+                doctorWarehouseMaterialHandle.setStockHandleId(doctorWarehouseStockHandle.getId());
             }
            int step = doctorWarehouseMaterialHandleDao.creates(list);
             count += step;
 
             if (!CollectionUtils.isEmpty(dblist)) {
                 for (DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle : dblist) {
-                    doctorWarehouseMaterialHandle.setStockHandleId(doctorWarehouseStock.getId());
+                    doctorWarehouseMaterialHandle.setStockHandleId(doctorWarehouseStockHandle.getId());
                 }
                 step = doctorWarehouseMaterialHandleDao.creates(dblist);
                 count += step;
@@ -1185,14 +1184,14 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
     @Override
     @Transactional
-    public Response<Long> update(DoctorWarehouseStockHandle doctorWarehouseStock,
+    public Response<Long> update(DoctorWarehouseStockHandle doctorWarehouseStockHandle,
                                  List<DoctorWarehouseMaterialHandle> list,
                                  List<DoctorWarehouseMaterialHandle> dblist,
                                  List<DoctorWarehouseMaterialApply> doctorWarehouseMaterialApplies) {
         int count = 1;
         try {
             //先新增主表数据,会自动填充主键id值
-            doctorWarehouseStockHandleDao.update(doctorWarehouseStock);
+            doctorWarehouseStockHandleDao.update(doctorWarehouseStockHandle);
 
             //填充list集合id值,填充主键关联Id值
             for (DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle : list) {
