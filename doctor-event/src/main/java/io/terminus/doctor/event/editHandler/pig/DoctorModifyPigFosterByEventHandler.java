@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
+import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.IGNORE_EVENT;
 
 /**
  * Created by xjn on 17/4/19.
@@ -38,7 +39,8 @@ public class DoctorModifyPigFosterByEventHandler extends DoctorAbstractModifyPig
 
     @Override
     protected boolean rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
-        return false;
+        DoctorPigEvent lastEvent = doctorPigEventDao.findLastEventExcludeTypes(deletePigEvent.getPigId(), IGNORE_EVENT);
+        return Objects.equals(deletePigEvent.getId(), lastEvent.getId());
     }
 
     @Override
@@ -71,4 +73,16 @@ public class DoctorModifyPigFosterByEventHandler extends DoctorAbstractModifyPig
         return oldPigTrack;
     }
 
+    @Override
+    protected DoctorPigTrack buildNewTrackForRollback(DoctorPigEvent deletePigEvent, DoctorPigTrack oldPigTrack) {
+        oldPigTrack.setStatus(deletePigEvent.getPigStatusBefore());
+        oldPigTrack.setUnweanQty(EventUtil.minusInt(oldPigTrack.getUnweanQty(), deletePigEvent.getQuantity()));
+        if (Objects.equals(oldPigTrack.getStatus(), PigStatus.Wean.getKey())) {
+            oldPigTrack.setGroupId(-1L);  //groupId = -1 置成 NULL
+            oldPigTrack.setFarrowAvgWeight(0D);
+            oldPigTrack.setFarrowQty(0);  //分娩数 0
+            oldPigTrack.setWeanAvgWeight(0D);
+        }
+        return oldPigTrack;
+    }
 }
