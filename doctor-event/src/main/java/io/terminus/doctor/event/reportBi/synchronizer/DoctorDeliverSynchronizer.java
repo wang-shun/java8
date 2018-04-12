@@ -179,7 +179,7 @@ public class DoctorDeliverSynchronizer {
         reportBi.setToNurseryAvgWeight(EventUtil.getAvgWeight(groupDaily.getToNurseryWeight(), groupDaily.getToNursery()));
         if (DateDimension.YEARLY.contains(reportBi.getDateType())) {
             reportBi.setPigletDeadWeedOutRate(fieldHelper.deadWeedOutRate(groupDaily, reportBi.getOrzType()));
-            reportBi.setPigletLivingRate(1 - FieldHelper.get(EventUtil.plusInt(reportBi.getPigletDead(), reportBi.getPigletWeedOut()), reportBi.getFarrowHealth()));
+            reportBi.setPigletLivingRate(1 - reportBi.getPigletDeadWeedOutRate());
         }
         reportBi.setTurnOutAvgWeight(EventUtil.getAvgWeight(EventUtil.plusDouble(groupDaily.getToNurseryWeight(), groupDaily.getSaleWeight()),
                 EventUtil.plusInt(groupDaily.getToNursery(), groupDaily.getSale())));
