@@ -613,6 +613,10 @@ public class WarehouseController {
         vo.setType(wareHouseResponse.getResult().getType());
         vo.setManagerId(wareHouseResponse.getResult().getManagerId());
         vo.setManagerName(wareHouseResponse.getResult().getManagerName());
+        vo.setFarmId(wareHouseResponse.getResult().getFarmId());
+        vo.setFarmName(wareHouseResponse.getResult().getFarmName());
+        vo.setAddress(wareHouseResponse.getResult().getAddress());
+
 
         if (null != applyResponse && !applyResponse.getResult().isEmpty())
             vo.setLastApplyDate(applyResponse.getResult().get(0).getApplyDate());
