@@ -1763,7 +1763,7 @@
         FROM
         <include refid="tb"/>
         WHERE pig_id = #{pigId}
-        and pig_status_before != #{status}
+        and (pig_status_before != #{status} OR pig_status_before is NULL)
         and pig_status_after = #{status}
         order by id DESC
         limit 1
