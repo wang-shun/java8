@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 
+import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import org.apache.ibatis.annotations.Param;
@@ -75,9 +76,30 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectList(this.sqlId("findAfter"), criteria);
     }
 
+
+    public List<DoctorWarehouseMaterialHandle> findByAccountingDate(Long warehouseId, Integer year, Integer month) {
+
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("year", year);
+        criteria.put("month", month);
+
+        return this.sqlSession.selectList(this.sqlId("findByAccountingDate"), criteria);
+    }
+
+
+    public AmountAndQuantityDto findBalanceByAccountingDate(Long warehouseId, Integer year, Integer month) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("year", year);
+        criteria.put("month", month);
+
+        return this.sqlSession.selectOne(this.sqlId("findBalanceByAccountingDate"), criteria);
+    }
+
     public Integer getWarehouseMaterialHandleCount(Long warehouseId) {
-        Map<String,String> m = new HashMap<>();
-        m.put("id",warehouseId.toString());
+        Map<String, String> m = new HashMap<>();
+        m.put("id", warehouseId.toString());
         Integer count = this.sqlSession.selectOne(this.sqlId("getWarehouseMaterialHandleCount"), warehouseId);
         return count;
     }

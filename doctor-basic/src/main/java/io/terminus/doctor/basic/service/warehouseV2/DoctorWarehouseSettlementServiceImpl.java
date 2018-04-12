@@ -1,13 +1,20 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
-import io.terminus.common.exception.ServiceException;
+import io.terminus.doctor.basic.dao.DoctorWareHouseDao;
+import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
+import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
+import io.terminus.doctor.basic.manager.WarehouseReturnManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 
 /**
@@ -21,6 +28,12 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 
     @Autowired
     private LockRegistry lockRegistry;
+
+    @Autowired
+    private DoctorWarehouseMaterialHandleDao doctorWarehouseMaterialHandleDao;
+
+    @Autowired
+    private DoctorWareHouseDao doctorWareHouseDao;
 
 
     @Override
@@ -36,7 +49,25 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
     }
 
     @Override
-    public void settlement(Long orgId, Date settlementDate) {
+    public boolean isSettled(Long orgId, Date settlementDate) {
+        return false;
+    }
+
+    @Override
+    public void settlement(List<Long> farmIds, LocalDate settlementDate) {
+        farmIds.forEach(f -> {
+            doctorWareHouseDao.findByFarmId(f).forEach(w -> {
+
+                AmountAndQuantityDto amountAndQuantityDto = doctorWarehouseMaterialHandleDao.findBalanceByAccountingDate(w.getId(), settlementDate.getYear(), settlementDate.getMonthValue());
+
+                //获取本仓库改月
+                doctorWarehouseMaterialHandleDao.findByAccountingDate(w.getId(), settlementDate.getYear(), settlementDate.getMonthValue()).forEach(
+                        m -> {
+
+                        }
+                );
+            });
+        });
 
     }
 
