@@ -1,6 +1,8 @@
 package io.terminus.doctor.basic.model.warehouseV2;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
@@ -14,6 +16,8 @@ import java.util.Date;
  */
 @Builder
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class DoctorWarehouseStockHandle implements Serializable {
 
     private static final long serialVersionUID = -298699325365035201L;
