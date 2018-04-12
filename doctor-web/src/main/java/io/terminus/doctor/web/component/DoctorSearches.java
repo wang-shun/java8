@@ -226,6 +226,10 @@ public class DoctorSearches {
             if (result != null) {
                 status = PigStatus.KongHuai.getKey();
             }
+
+            if (Objects.equals(status, PigStatus.Pregnancy.getKey())) {
+                status = PigStatus.Mate.getKey();
+            }
             Date eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(searchedPig.getId()
                     , status));
             Integer statusDay = DateUtil.getDeltaDays(eventAt, new Date());
