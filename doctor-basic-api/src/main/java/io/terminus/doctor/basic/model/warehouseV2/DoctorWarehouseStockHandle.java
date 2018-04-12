@@ -1,6 +1,7 @@
 package io.terminus.doctor.basic.model.warehouseV2;
 
 import lombok.Data;
+import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -11,6 +12,7 @@ import java.util.Date;
  * Date: 2017-11-06 15:19:42
  * Created by [ your name ]
  */
+@Builder
 @Data
 public class DoctorWarehouseStockHandle implements Serializable {
 

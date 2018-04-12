@@ -199,7 +199,6 @@ public class WarehouseController {
         return RespHelper.or500(doctorWareHouseWriteService.updateWareHouse(doctorWareHouse));
     }
 
-
     /**
      * 删除仓库
      *

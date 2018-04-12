@@ -34,6 +34,8 @@ import org.jboss.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -49,7 +51,6 @@ import java.util.stream.Collectors;
 @Service
 @RpcProvider
 public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStockWriteService {
-
 
     @Autowired
     private DoctorWarehouseStockDao doctorWarehouseStockDao;
@@ -93,6 +94,9 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
     @Autowired
     private DoctorBasicDao doctorBasicDao;
+
+    @Autowired
+    private DoctorWarehouseStockHandleDao doctorWarehouseStockHandleDao;
 
     @Override
     public Response<Long> create(DoctorWarehouseStock doctorWarehouseStock) {
@@ -1130,4 +1134,91 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
         private List<DoctorWarehouseStock> stocks;
         private List<AbstractWarehouseStockDetail> details;
     }
+
+    /**
+     * 出库、入库单据主表、明细表新增,物料领用新增
+     * @param doctorWarehouseStock
+     * @param list
+     * @param doctorWarehouseMaterialApplies
+     * @return
+     */
+    @Override
+    @Transactional
+    public Response<Long> create(DoctorWarehouseStockHandle doctorWarehouseStock,
+                                 List<DoctorWarehouseMaterialHandle> list,
+                                 List<DoctorWarehouseMaterialHandle> dblist,
+                                 List<DoctorWarehouseMaterialApply> doctorWarehouseMaterialApplies) {
+        int count = 1;
+        try {
+            //先新增主表数据,会自动填充主键id值
+            doctorWarehouseStockHandleDao.create(doctorWarehouseStock);
+
+            //填充list集合id值,填充主键关联Id值
+            for (DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle : list) {
+                doctorWarehouseMaterialHandle.setStockHandleId(doctorWarehouseStock.getId());
+            }
+           int step = doctorWarehouseMaterialHandleDao.creates(list);
+            count += step;
+
+            if (!CollectionUtils.isEmpty(dblist)) {
+                for (DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle : dblist) {
+                    doctorWarehouseMaterialHandle.setStockHandleId(doctorWarehouseStock.getId());
+                }
+                step = doctorWarehouseMaterialHandleDao.creates(dblist);
+                count += step;
+            }
+
+            if (!CollectionUtils.isEmpty(doctorWarehouseMaterialApplies)) {
+                for(int i = 0; i < list.size();i++) {
+                    doctorWarehouseMaterialApplies.get(i).setMaterialHandleId(list.get(i).getId());
+                }
+                step = doctorWarehouseMaterialApplyDao.creates(doctorWarehouseMaterialApplies);
+                count += step;
+            }
+        }
+        catch (Exception e){
+            log.error("create warehouseStock failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("warehouseStock.create.fail");
+        }
+        return Response.ok(new Long(count));
+    }
+
+    @Override
+    @Transactional
+    public Response<Long> update(DoctorWarehouseStockHandle doctorWarehouseStock,
+                                 List<DoctorWarehouseMaterialHandle> list,
+                                 List<DoctorWarehouseMaterialHandle> dblist,
+                                 List<DoctorWarehouseMaterialApply> doctorWarehouseMaterialApplies) {
+        int count = 1;
+        try {
+            //先新增主表数据,会自动填充主键id值
+            doctorWarehouseStockHandleDao.update(doctorWarehouseStock);
+
+            //填充list集合id值,填充主键关联Id值
+            for (DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle : list) {
+                doctorWarehouseMaterialHandleDao.update(doctorWarehouseMaterialHandle);
+                count++;
+            }
+
+            if (!CollectionUtils.isEmpty(dblist)) {
+                for (DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle : dblist) {
+                    doctorWarehouseMaterialHandleDao.update(doctorWarehouseMaterialHandle);
+                    count++;
+                }
+            }
+
+            if (!CollectionUtils.isEmpty(doctorWarehouseMaterialApplies)) {
+                for(DoctorWarehouseMaterialApply doctorWarehouseMaterialApply:doctorWarehouseMaterialApplies) {
+                    doctorWarehouseMaterialApplyDao.update(doctorWarehouseMaterialApply);
+                    count++;
+                }
+            }
+        }
+        catch (Exception e){
+            log.error("update warehouseStock failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("warehouseStock.update.fail");
+        }
+        return Response.ok(new Long(count));
+    }
+
 }

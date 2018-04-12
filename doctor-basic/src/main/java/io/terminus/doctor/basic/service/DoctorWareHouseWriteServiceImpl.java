@@ -2,6 +2,8 @@ package io.terminus.doctor.basic.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorWareHouseDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
@@ -70,7 +72,7 @@ public class DoctorWareHouseWriteServiceImpl implements DoctorWareHouseWriteServ
         try {
             Integer count =  doctorWarehouseMaterialHandleDao.getWarehouseMaterialHandleCount(wareHouse.getId());
             if(count > 0) {
-                return Response.fail("warehouse.handle.not.allow.updateOrDelete.type");
+                throw new JsonResponseException("warehouse.handle.not.allow.updateOrDelete.type");
             }
         	return Response.ok(this.doctorWareHouseManager.updateWareHouseInfo(wareHouse));
         }catch (IllegalStateException se){
@@ -92,7 +94,7 @@ public class DoctorWareHouseWriteServiceImpl implements DoctorWareHouseWriteServ
         try{
             Integer count =  doctorWarehouseMaterialHandleDao.getWarehouseMaterialHandleCount(wareHouse.getId());
             if(count > 0) {
-                return Response.fail("warehouse.handle.not.allow.updateOrDelete.type");
+                throw new JsonResponseException("warehouse.handle.not.allow.updateOrDelete.type");
             }
             return Response.ok(this.doctorWareHouseManager.deleteWareHouseInfo(wareHouse));
         }catch (IllegalStateException se){
