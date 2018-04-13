@@ -58,4 +58,11 @@ public class DoctorPigEventDaoTest extends BaseDaoTest {
         Assert.assertEquals(event.getId().longValue(), 5402988L);
     }
 
+
+    @Test
+    public void testFindEventAtLeadToStatus() {
+        Date entryDate  = doctorPigEventDao.findEventAtLeadToStatus(717201L, 1);
+        Assert.assertEquals(DateUtil.toDateString(entryDate), "2018-04-09");
+    }
+
 }
