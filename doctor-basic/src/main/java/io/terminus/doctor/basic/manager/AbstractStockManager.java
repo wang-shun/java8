@@ -30,14 +30,14 @@ public abstract class AbstractStockManager {
     protected void recalculate(DoctorWarehouseMaterialHandle materialHandle, BigDecimal newQuantity) {
 
         if (materialHandle.getBeforeStockQuantity().compareTo(newQuantity) < 0)
-            throw new ServiceException("");
+            throw new ServiceException("warehouse.stock.not.enough");
 
         BigDecimal newStockQuantity = materialHandle.getBeforeStockQuantity().subtract(newQuantity);
 
         List<DoctorWarehouseMaterialHandle> needToRecalculate = getMaterialHandleAfter(materialHandle.getWarehouseId(), materialHandle.getId(), materialHandle.getHandleDate());
         for (DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle : needToRecalculate) {
             if (newStockQuantity.compareTo(doctorWarehouseMaterialHandle.getQuantity()) < 0)
-                throw new ServiceException("");
+                throw new ServiceException("warehouse.stock.not.enough");
 
             doctorWarehouseMaterialHandle.setBeforeStockQuantity(newStockQuantity);
             newStockQuantity = newStockQuantity.subtract(doctorWarehouseMaterialHandle.getQuantity());
