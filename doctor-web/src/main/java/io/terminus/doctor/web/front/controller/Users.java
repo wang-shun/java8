@@ -77,7 +77,7 @@ import java.util.Map;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/user")
+    @RequestMapping("/api/user")
 public class Users {
 
     private final UserWriteService<User> userWriteService;

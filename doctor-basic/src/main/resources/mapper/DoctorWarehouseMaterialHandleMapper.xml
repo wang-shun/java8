@@ -45,12 +45,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `stock_handle_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `other_transfer_handle_id`, `vendor_name`, `material_id`, `material_name`, `type`, `unit_price`, `unit`, `delete_flag`, `before_stock_quantity`, `quantity`, `handle_date`, `handle_year`, `handle_month`, `operator_id`, `operator_name`, `remark`, 
+        `stock_handle_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `other_transfer_handle_id`, `vendor_name`, `material_id`, `material_name`, `type`, `unit_price`, `unit`, `delete_flag`, `before_stock_quantity`, `quantity`, `handle_date`, `handle_year`, `handle_month`, `operator_id`, `operator_name`, `remark`,
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{stockHandleId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{otherTransferHandleId}, #{vendorName}, #{materialId}, #{materialName}, #{type}, #{unitPrice}, #{unit}, #{deleteFlag}, #{beforeStockQuantity}, #{quantity}, #{handleDate}, #{handleYear}, #{handleMonth}, #{operatorId}, #{operatorName}, #{remark}, 
+        #{stockHandleId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{otherTransferHandleId}, #{vendorName}, #{materialId}, #{materialName}, #{type}, #{unitPrice}, #{unit}, #{deleteFlag}, #{beforeStockQuantity}, #{quantity}, #{handleDate}, #{handleYear}, #{handleMonth}, #{operatorId}, #{operatorName}, #{remark},
         now(), now()
     </sql>
 
@@ -188,7 +188,7 @@
         DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
-    
+
     <select id="count" parameterType="map" resultType="long">
         SELECT COUNT(1)
         FROM <include refid="tb"/>
@@ -237,6 +237,20 @@
         WHERE warehouse_id=#{warehouseId} AND <![CDATA[ handleDate >= #{handleDate}]]>
         AND <![CDATA[ id < #{materialHandleId}]]>
         ORDER BY handleDate ASC,id DESC
+    </select>
+
+    <select id="findByAccountingDate" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE warehouse_id=#{warehouseId} AND handleYear = #{year} AND handleMonth=#{month}
+        ORDER BY handleDate ASC,id DESC
+    </select>
+
+    <select id="findBalanceByAccountingDate" parameterType="map" resultMap="">
+        SELECT sum(quantity),sum(unit_price)
+        FROM <include refid="tb"/>
+        WHERE warehouse_id=#{warehouseId} AND <![CDATA[ handleYear >= #{handleDate}]]> AND <![CDATA[ handleDate >= #{handleDate}]]>
+
     </select>
 
     <select id="getWarehouseMaterialHandleCount" resultType="int">
