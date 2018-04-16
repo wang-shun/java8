@@ -88,6 +88,15 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectList(this.sqlId("findByAccountingDate"), criteria);
     }
 
+    public void reverseSettlement(Long farmId, Integer year, Integer month) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("farmId", farmId);
+        criteria.put("year", year);
+        criteria.put("month", month);
+
+        this.sqlSession.update(this.sqlId("reverseSettlement"), criteria);
+    }
+
 
     /**
      * 获取本会计年月之前的库存量和金额

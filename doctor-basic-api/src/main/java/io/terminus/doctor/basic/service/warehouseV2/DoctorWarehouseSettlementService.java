@@ -35,6 +35,7 @@ public interface DoctorWarehouseSettlementService {
      * 结算
      *
      * @param orgId          公司id
+     * @param farmIds        公司下猪场id列表
      * @param settlementDate 会计年月
      */
     public void settlement(Long orgId, List<Long> farmIds, DateTime settlementDate);
@@ -44,7 +45,8 @@ public interface DoctorWarehouseSettlementService {
      * 反结算
      *
      * @param orgId          公司id
+     * @param farmIds        公司下猪场id列表
      * @param settlementDate 会计年月
      */
-    public void antiSettlement(Long orgId, Date settlementDate);
+    public void antiSettlement(Long orgId, List<Long> farmIds, DateTime settlementDate);
 }

@@ -1,14 +1,11 @@
 package io.terminus.doctor.web.front.warehouseV2;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
-import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
-import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSettlementService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
-import javafx.geometry.Pos;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -18,9 +15,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
-import java.util.Date;
-import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
 /**
@@ -51,14 +45,15 @@ public class SettlementController {
                            @DateTimeFormat(pattern = "yyyy-MM")
                            @RequestParam DateTime settlementDate) {
 
+        if (doctorWarehouseSettlementService.isUnderSettlement(orgId))
+            throw new ServiceException("under.settlement");
         if (doctorWarehouseSettlementService.isSettled(orgId, settlementDate.toDate()))
-            throw new ServiceException("");
+            throw new ServiceException("already.settlement");
 
         doctorWarehouseSettlementService.settlement(orgId, RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orgId)).stream().map(DoctorFarm::getId).collect(Collectors.toList()),
                 settlementDate);
 
     }
-
 
     /**
      * 反结算
@@ -67,15 +62,13 @@ public class SettlementController {
      * @param settlementDate 需要反结算的会计年月
      */
     @RequestMapping(method = RequestMethod.POST, value = "anti")
-    public void AntiSettlement(@RequestParam Long orgId, @RequestParam Date settlementDate) {
+    public void AntiSettlement(@RequestParam Long orgId,
+                               @DateTimeFormat(pattern = "yyyy-MM")
+                               @RequestParam DateTime settlementDate) {
 
-        Lock lock = lockRegistry.obtain("settlement/" + orgId);
+        if (doctorWarehouseSettlementService.isUnderSettlement(orgId))
+            throw new ServiceException("under.settlement");
 
-        if (!lock.tryLock())
-            throw new JsonResponseException("under.settlement");
-
-        doctorWarehouseSettlementService.antiSettlement(orgId, settlementDate);
-
-        lock.unlock();
+        doctorWarehouseSettlementService.antiSettlement(orgId, RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orgId)).stream().map(DoctorFarm::getId).collect(Collectors.toList()), settlementDate);
     }
 }

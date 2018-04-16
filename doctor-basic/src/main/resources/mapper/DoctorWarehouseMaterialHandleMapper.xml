@@ -237,31 +237,63 @@
     <select id="findAfter" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
-        WHERE warehouse_id=#{warehouseId} AND <![CDATA[ handleDate >= #{handleDate}]]>
+        WHERE warehouse_id=#{warehouseId}
+        AND <![CDATA[ handleDate >= #{handleDate}]]>
         AND <![CDATA[ id < #{materialHandleId}]]>
+        AND delete_flag=1
         ORDER BY handleDate ASC,id DESC
     </select>
 
     <select id="findByAccountingDate" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
-        WHERE warehouse_id=#{warehouseId} AND handleYear = #{year} AND handleMonth=#{month}
+        WHERE warehouse_id=#{warehouseId}
+        AND handleYear = #{year} AND handleMonth=#{month}
+        AND delete_flag=1
         ORDER BY handleDate ASC,id DESC
     </select>
 
     <select id="findBalanceByAccountingDate" parameterType="map" resultType="io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto">
-        SELECT sum(quantity) as quantity,sum(unit_price)*sum(quantity) as amount
+        SELECT
+        sum(quantity) as quantity,
+        sum(
+        case type
+            when '1' then unit_price*quantity
+            when '2' then -unit_price*quantity
+            when '7' then unit_price*quantity
+            when '8' then -unit_price*quantity
+            when '9' then unit_price*quantity
+            when '10' then -unit_price*quantity
+            when '11' then unit_price*quantity
+            when '12' then -unit_price*quantity
+            when '13' then unit_price*quantity
+        ) as amount
         FROM <include refid="tb"/>
-        WHERE warehouse_id=#{warehouseId} AND <![CDATA[ settlement_date < #{settlementDate}]]>
+        WHERE warehouse_id=#{warehouseId}
+        AND <![CDATA[ settlement_date < #{settlementDate}]]>
+        AND delete_flag=1
     </select>
 
     <select id="findPrevious" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
-        WHERE warehouse_id=#{warehouseId} AND type=#{type} AND <![CDATA[ handle_date <= #{handleDate}]]>
+        WHERE warehouse_id=#{warehouseId}
+        AND type=#{type}
+        AND <![CDATA[ handle_date <= #{handleDate}]]>
+        AND delete_flag=1
         ORDER BY handleDate DESC,id DESC
         LIMIT 1
     </select>
+
+    <update id="reverseSettlement" parameterType="map">
+        UPDATE
+        <include refid="tb"/>
+        SET unit_price=0
+        WHERE farm_id=#{farmId}
+        AND (type=2 or type=8 or type=9 or type=10 or type=11 or type=12 or type=13)
+        AND handleYear = #{year} AND handleMonth=#{month}
+        AND delete_flag=1
+    </update>
 
     <select id="getWarehouseMaterialHandleCount" resultType="int">
         select count(1) as count from  doctor_warehouse_material_handle
