@@ -2147,3 +2147,14 @@ create index doctor_event_modify_logs_business_id on doctor_event_modify_logs(bu
 
 -- 修改单据明细中的盘点之前库存数量字段 2018-04-09
 ALTER TABLE doctor_warehouse_material_handle CHANGE before_inventory_quantity before_stock_quantity DECIMAL(23,2) COMMENT '之前库存数量';
+
+
+--添加公司结算记录表 2018-04-16
+CREATE TABLE `doctor_warehouse_org_settlement` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司id',
+  `last_settlement_date` datetime DEFAULT NULL COMMENT '上一次结算的会计年月',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='公司结算记录表';
