@@ -1,7 +1,6 @@
 package io.terminus.doctor.basic.dao;
 
 import io.terminus.common.mysql.dao.MyBatisDao;
-
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import org.springframework.stereotype.Repository;
 
