@@ -151,7 +151,6 @@ public class DoctorDeliverSynchronizer {
         if (DateDimension.YEARLY.contains(reportBi.getDateType())) {
             reportBi.setEarlyNestRate(fieldHelper.get(pigDaily.getFarrowNest(), pigDaily.getEarlyMating()));
             reportBi.setLaterNestRate(fieldHelper.get(pigDaily.getLaterNest(), pigDaily.getMatingCount()));
-            reportBi.setPigletLivingRate(1 - FieldHelper.get(EventUtil.plusInt(reportBi.getPigletDead(), reportBi.getPigletWeedOut()), reportBi.getFarrowHealth()));
         }
         reportBi.setEarlyMating(pigDaily.getEarlyMating());
         reportBi.setEarlyNest(pigDaily.getEarlyFarrowNest());
