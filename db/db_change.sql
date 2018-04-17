@@ -2161,3 +2161,8 @@ CREATE TABLE `doctor_warehouse_org_settlement` (
 
 --单据表添加关联单据id字段 2018-04-16
 ALTER TABLE doctor_warehouse_stock_handle ADD rel_stock_handle_id BIGINT NULL COMMENT '关联单据id';
+
+--单据明细表添加公司ID 2018-04-17
+ALTER TABLE doctor_warehouse_material_handle ADD org_id BIGINT NULL COMMENT '公司id';
+ALTER TABLE doctor_warehouse_material_handle
+  MODIFY COLUMN org_id BIGINT COMMENT '公司id' AFTER stock_handle_id;

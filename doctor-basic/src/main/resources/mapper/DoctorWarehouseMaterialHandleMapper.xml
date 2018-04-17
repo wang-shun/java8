@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2018-04-12 14:34:37
+ ~ Date: 2018-04-17 10:54:56
  ~ Created by [ your name ]
 -->
 
@@ -11,6 +11,7 @@
     <resultMap id="DoctorWarehouseMaterialHandleMap" type="DoctorWarehouseMaterialHandle">
         <id property="id" column="id"/>
         <result property="stockHandleId" column="stock_handle_id"/>
+        <result property="orgId" column="org_id"/>
         <result property="farmId" column="farm_id"/>
         <result property="warehouseId" column="warehouse_id"/>
         <result property="warehouseType" column="warehouse_type"/>
@@ -46,18 +47,19 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `stock_handle_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `other_transfer_handle_id`, `vendor_name`, `material_id`, `material_name`, `type`, `unit_price`, `unit`, `delete_flag`, `before_stock_quantity`, `quantity`, `handle_date`, `handle_year`, `handle_month`, `operator_id`, `operator_name`, `remark`, `settlement_date`, 
+        `stock_handle_id`, `org_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `other_transfer_handle_id`, `vendor_name`, `material_id`, `material_name`, `type`, `unit_price`, `unit`, `delete_flag`, `before_stock_quantity`, `quantity`, `handle_date`, `handle_year`, `handle_month`, `operator_id`, `operator_name`, `remark`, `settlement_date`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{stockHandleId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{otherTransferHandleId}, #{vendorName}, #{materialId}, #{materialName}, #{type}, #{unitPrice}, #{unit}, #{deleteFlag}, #{beforeStockQuantity}, #{quantity}, #{handleDate}, #{handleYear}, #{handleMonth}, #{operatorId}, #{operatorName}, #{remark}, #{settlementDate}, 
+        #{stockHandleId}, #{orgId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{otherTransferHandleId}, #{vendorName}, #{materialId}, #{materialName}, #{type}, #{unitPrice}, #{unit}, #{deleteFlag}, #{beforeStockQuantity}, #{quantity}, #{handleDate}, #{handleYear}, #{handleMonth}, #{operatorId}, #{operatorName}, #{remark}, #{settlementDate}, 
         now(), now()
     </sql>
 
     <sql id="criteria">
         <where>
             <if test="stockHandleId != null">AND `stock_handle_id` = #{stockHandleId}</if>
+            <if test="orgId != null">AND `org_id` = #{orgId}</if>
             <if test="farmId != null">AND `farm_id` = #{farmId}</if>
             <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
             <if test="warehouseType != null">AND `warehouse_type` = #{warehouseType}</if>
@@ -87,6 +89,7 @@
     <sql id="adv_criteria">
         <where>
             <if test="stockHandleId != null">AND `stock_handle_id` = #{stockHandleId}</if>
+            <if test="orgId != null">AND `org_id` = #{orgId}</if>
             <if test="farmId != null">AND `farm_id` = #{farmId}</if>
             <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
             <if test="warehouseType != null">AND `warehouse_type` = #{warehouseType}</if>
@@ -161,6 +164,7 @@
         <include refid="tb"/>
         <set>
             <if test="stockHandleId != null">`stock_handle_id` = #{stockHandleId},</if>
+            <if test="orgId != null">`org_id` = #{orgId},</if>
             <if test="farmId != null">`farm_id` = #{farmId},</if>
             <if test="warehouseId != null">`warehouse_id` = #{warehouseId},</if>
             <if test="warehouseType != null">`warehouse_type` = #{warehouseType},</if>
@@ -238,40 +242,93 @@
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         WHERE warehouse_id=#{warehouseId}
-        AND <![CDATA[ handleDate >= #{handleDate}]]>
+        AND <![CDATA[ handle_date >= #{handleDate}]]>
         AND <![CDATA[ id < #{materialHandleId}]]>
         AND delete_flag=1
-        ORDER BY handleDate ASC,id DESC
+        ORDER BY handle_date ASC,id DESC
     </select>
 
     <select id="findByAccountingDate" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         WHERE warehouse_id=#{warehouseId}
-        AND handleYear = #{year} AND handleMonth=#{month}
+        AND handle_year = #{year} AND handle_month=#{month}
         AND delete_flag=1
-        ORDER BY handleDate ASC,id DESC
+        ORDER BY handle_date ASC,id DESC
     </select>
 
-    <select id="findBalanceByAccountingDate" parameterType="map" resultType="io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto">
+    <select id="findByOrgAndSettlementDate" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE org_id=#{orgId}
+        AND settlement_date=#{settlementDate}
+        AND delete_flag=1
+        ORDER BY handle_date ASC,id DESC
+    </select>
+
+    <select id="findBalanceByAccountingDate" parameterType="map" resultType="map">
         SELECT
-        sum(quantity) as quantity,
-        sum(
+        ifnull(sum(
         case type
-            when '1' then unit_price*quantity
-            when '2' then -unit_price*quantity
-            when '7' then unit_price*quantity
-            when '8' then -unit_price*quantity
-            when '9' then unit_price*quantity
-            when '10' then -unit_price*quantity
-            when '11' then unit_price*quantity
-            when '12' then -unit_price*quantity
-            when '13' then unit_price*quantity
-        ) as amount
+        when '1' then quantity
+        when '2' then -quantity
+        when '7' then quantity
+        when '8' then -quantity
+        when '9' then quantity
+        when '10' then -quantity
+        when '11' then quantity
+        when '12' then -quantity
+        when '13' then quantity end
+        ),0) as quantity,
+        ifnull(sum(
+        case type
+        when '1' then unit_price*quantity
+        when '2' then -unit_price*quantity
+        when '7' then unit_price*quantity
+        when '8' then -unit_price*quantity
+        when '9' then unit_price*quantity
+        when '10' then -unit_price*quantity
+        when '11' then unit_price*quantity
+        when '12' then -unit_price*quantity
+        when '13' then unit_price*quantity end
+        ),0) as amount
         FROM <include refid="tb"/>
         WHERE warehouse_id=#{warehouseId}
         AND <![CDATA[ settlement_date < #{settlementDate}]]>
         AND delete_flag=1
+    </select>
+
+    <select id="findEachWarehouseBalanceByAccountingDate" parameterType="map" resultType="map">
+        SELECT
+        ifnull(sum(
+        case type
+        when '1' then quantity
+        when '2' then -quantity
+        when '7' then quantity
+        when '8' then -quantity
+        when '9' then quantity
+        when '10' then -quantity
+        when '11' then quantity
+        when '12' then -quantity
+        when '13' then quantity end
+        ),0) as quantity,
+        ifnull(sum(
+        case type
+        when '1' then unit_price*quantity
+        when '2' then -unit_price*quantity
+        when '7' then unit_price*quantity
+        when '8' then -unit_price*quantity
+        when '9' then unit_price*quantity
+        when '10' then -unit_price*quantity
+        when '11' then unit_price*quantity
+        when '12' then -unit_price*quantity
+        when '13' then unit_price*quantity end
+        ),0) as amount,warehouse_id as warehouseId
+        FROM <include refid="tb"/>
+        WHERE org_id=#{orgId}
+        AND <![CDATA[ settlement_date < #{settlementDate}]]>
+        AND delete_flag=1
+        group by warehouse_id
     </select>
 
     <select id="findPrevious" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
@@ -281,7 +338,7 @@
         AND type=#{type}
         AND <![CDATA[ handle_date <= #{handleDate}]]>
         AND delete_flag=1
-        ORDER BY handleDate DESC,id DESC
+        ORDER BY handle_date DESC,id DESC
         LIMIT 1
     </select>
 
@@ -291,7 +348,7 @@
         SET unit_price=0
         WHERE farm_id=#{farmId}
         AND (type=2 or type=8 or type=9 or type=10 or type=11 or type=12 or type=13)
-        AND handleYear = #{year} AND handleMonth=#{month}
+        AND handle_year = #{year} AND handle_month=#{month}
         AND delete_flag=1
     </update>
 
@@ -299,6 +356,5 @@
         select count(1) as count from  doctor_warehouse_material_handle
         where  warehouse_id = #{id}
     </select>
-
 
 </mapper>

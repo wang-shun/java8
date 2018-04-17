@@ -10,7 +10,7 @@ import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -88,6 +88,15 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectList(this.sqlId("findByAccountingDate"), criteria);
     }
 
+    public List<DoctorWarehouseMaterialHandle> findByOrgAndSettlementDate(Long orgId, Date settlementDate) {
+
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("orgId", orgId);
+        criteria.put("settlementDate", settlementDate);
+
+        return this.sqlSession.selectList(this.sqlId("findByOrgAndSettlementDate"), criteria);
+    }
+
     public void reverseSettlement(Long farmId, Integer year, Integer month) {
         Map<String, Object> criteria = Maps.newHashMap();
         criteria.put("farmId", farmId);
@@ -110,9 +119,34 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         criteria.put("warehouseId", warehouseId);
         criteria.put("settlementDate", settlementDate);
 
-        return this.sqlSession.selectOne(this.sqlId("findBalanceByAccountingDate"), criteria);
+        Map<String, Object> result = this.sqlSession.selectOne(this.sqlId("findBalanceByAccountingDate"), criteria);
+        return new AmountAndQuantityDto(((BigDecimal) result.get("amount")).longValue(), (BigDecimal) result.get("quantity"));
     }
 
+
+    /**
+     * 获取公司下各个仓库在该会计年月之前的库存余量余额
+     *
+     * @param orgId
+     * @param settlementDate
+     * @return
+     */
+    public Map<Long, AmountAndQuantityDto> findEachWarehouseBalanceBySettlementDate(Long orgId, Date settlementDate) {
+
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("orgId", orgId);
+        criteria.put("settlementDate", settlementDate);
+
+        List<Map<String, Object>> results = this.sqlSession.selectList(this.sqlId("findEachWarehouseBalanceByAccountingDate"), criteria);
+
+        Map<Long/*warehouseId*/, AmountAndQuantityDto> balances = new HashMap<>();
+
+        results.forEach(m -> {
+            balances.put((Long) m.get("warehouseId"), new AmountAndQuantityDto(((BigDecimal) m.get("amount")).longValue(), (BigDecimal) m.get("quantity")));
+        });
+
+        return balances;
+    }
 
     /**
      * 获取指定明细获取上一笔明细

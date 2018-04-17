@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,6 +28,23 @@ public class DoctorWarehouseOrgSettlementDao extends MyBatisDao<DoctorWarehouseO
 
         long count = this.sqlSession.selectOne(this.sqlId("countBySettlementDate"), params);
         return count > 0;
+    }
+
+    public DoctorWarehouseOrgSettlement findByOrg(Long orgId) {
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("orgId", orgId);
+
+        List<DoctorWarehouseOrgSettlement> results = this.list(params);
+        if (results.isEmpty())
+            return null;
+
+        return results.get(0);
+    }
+
+
+    public void deleteByOrg(Long orgId) {
+        this.sqlSession.delete(this.sqlId("deleteByOrg"), orgId);
     }
 
 }

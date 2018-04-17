@@ -111,7 +111,12 @@
     <select id="countBySettlementDate" parameterType="map" resultType="long">
         SELECT COUNT(1)
         FROM <include refid="tb"/>
-        WHERE org_id=#{orgId} AND <![CDATA[last_settlement_date <= #{settlementDate}]]>
+        WHERE org_id=#{orgId} AND <![CDATA[last_settlement_date >= #{settlementDate}]]>
     </select>
+
+    <delete id="deleteByOrg" parameterType="long">
+        DELETE FROM <include refid="tb"/>
+        WHERE org_id = #{orgId}
+    </delete>
 
 </mapper>

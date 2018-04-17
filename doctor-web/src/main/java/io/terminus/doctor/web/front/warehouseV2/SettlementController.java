@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
+import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -43,15 +46,17 @@ public class SettlementController {
     @RequestMapping(method = RequestMethod.POST)
     public void settlement(@RequestParam Long orgId,
                            @DateTimeFormat(pattern = "yyyy-MM")
-                           @RequestParam DateTime settlementDate) {
+                           @RequestParam Date settlementDate) {
 
         if (doctorWarehouseSettlementService.isUnderSettlement(orgId))
             throw new ServiceException("under.settlement");
-        if (doctorWarehouseSettlementService.isSettled(orgId, settlementDate.toDate()))
+        if (doctorWarehouseSettlementService.isSettled(orgId, settlementDate))
             throw new ServiceException("already.settlement");
 
-        doctorWarehouseSettlementService.settlement(orgId, RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orgId)).stream().map(DoctorFarm::getId).collect(Collectors.toList()),
-                settlementDate);
+        List<Long> farmIds = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orgId)).stream().map(DoctorFarm::getId).collect(Collectors.toList());
+
+        RespHelper.orServEx(doctorWarehouseSettlementService.settlement(orgId, farmIds,
+                settlementDate));
 
     }
 
@@ -64,11 +69,11 @@ public class SettlementController {
     @RequestMapping(method = RequestMethod.POST, value = "anti")
     public void AntiSettlement(@RequestParam Long orgId,
                                @DateTimeFormat(pattern = "yyyy-MM")
-                               @RequestParam DateTime settlementDate) {
+                               @RequestParam Date settlementDate) {
 
         if (doctorWarehouseSettlementService.isUnderSettlement(orgId))
             throw new ServiceException("under.settlement");
 
-        doctorWarehouseSettlementService.antiSettlement(orgId, RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orgId)).stream().map(DoctorFarm::getId).collect(Collectors.toList()), settlementDate);
+        RespHelper.orServEx(doctorWarehouseSettlementService.antiSettlement(orgId, RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orgId)).stream().map(DoctorFarm::getId).collect(Collectors.toList()), settlementDate));
     }
 }

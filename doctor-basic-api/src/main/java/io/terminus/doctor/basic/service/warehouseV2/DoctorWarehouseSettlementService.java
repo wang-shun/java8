@@ -1,5 +1,7 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
+import io.terminus.common.model.Response;
 import org.joda.time.DateTime;
 
 import java.time.LocalDate;
@@ -38,7 +40,7 @@ public interface DoctorWarehouseSettlementService {
      * @param farmIds        公司下猪场id列表
      * @param settlementDate 会计年月
      */
-    public void settlement(Long orgId, List<Long> farmIds, DateTime settlementDate);
+    public Response<Boolean> settlement(Long orgId, List<Long> farmIds, Date settlementDate);
 
 
     /**
@@ -48,5 +50,5 @@ public interface DoctorWarehouseSettlementService {
      * @param farmIds        公司下猪场id列表
      * @param settlementDate 会计年月
      */
-    public void antiSettlement(Long orgId, List<Long> farmIds, DateTime settlementDate);
+    public Response<Boolean> antiSettlement(Long orgId, List<Long> farmIds, Date settlementDate);
 }
