@@ -2158,3 +2158,6 @@ CREATE TABLE `doctor_warehouse_org_settlement` (
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='公司结算记录表';
+
+--单据表添加关联单据id字段 2018-04-16
+ALTER TABLE doctor_warehouse_stock_handle ADD rel_stock_handle_id BIGINT NULL COMMENT '关联单据id';
