@@ -51,5 +51,6 @@ public interface NewDoctorWarehouseReaderService {
      */
     Response<AmountAndQuantityDto> countWarehouseBalance(Long warehouseId);
 
+    Response<List<DoctorWareHouse>> getWarehouseByType(DoctorWareHouse criteria,Integer pageCurrent);
 
 }

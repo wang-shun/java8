@@ -139,4 +139,14 @@
         </where>
         ORDER BY `id` DESC
     </select>
+
+    <select id="getWarehouseByType" parameterType="Map" resultMap="DoctorWareHouseMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        ORDER BY `created_at`
+        limit #{pageNum},#{pageSize}
+    </select>
 </mapper>
