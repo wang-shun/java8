@@ -149,4 +149,97 @@
         ORDER BY `created_at`
         limit #{pageNum},#{pageSize}
     </select>
+
+    <!--  按照仓库类型进行tab分页筛选，仓库按照创建时间进行排列 -->
+    <select id="listTypeMap" parameterType="Map" resultType="map">
+        select a.id,a.ware_house_name,a.type,
+        a.manager_id,a.manager_name,
+        (
+        ifnull(
+        (select sum(b.amount)
+        from doctor_warehouse_material_handle b
+        where b.warehouse_id=a.id and b.delete_flag=1
+        and b.type in (1,2,3,4,5)
+        and b.farm_id=#{farmId}
+        and date_format(b.handle_date,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
+        ),0)
+        -
+        ifnull(
+        (select sum(b.amount)
+        from doctor_warehouse_material_handle b
+        where b.warehouse_id=a.id and b.delete_flag=1
+        and b.type in (6,7,8,9)
+        and b.farm_id=#{farmId}
+        and date_format(b.handle_date,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
+        ),0)) as lastmonth_sum_amount,
+        (ifnull((select sum(b.quantity)
+        from doctor_warehouse_material_handle b
+        where b.warehouse_id=a.id and b.delete_flag=1
+        and b.type in (1,2,3,4,5)
+        and b.farm_id=#{farmId}
+        and date_format(b.handle_date,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
+        ),0)
+        -
+        ifnull((select sum(b.quantity)
+        from doctor_warehouse_material_handle b
+        where b.warehouse_id=a.id and b.delete_flag=1
+        and b.type in (6,7,8,9)
+        and b.farm_id=#{farmId}
+        and date_format(b.handle_date,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
+        ),0)) as lastmonth_sum_quantity,
+        ifnull((select sum(b.quantity)
+        from doctor_warehouse_material_handle b
+        where b.warehouse_id=a.id and b.delete_flag=1 and b.farm_id=#{farmId}
+        and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
+        and b.type in (1,2,3,4,5)
+        ),0) as thismonth_sum_rk_quantity,
+        ifnull((select sum(b.quantity)
+        from doctor_warehouse_material_handle b
+        where b.warehouse_id=a.id and b.delete_flag=1 and b.farm_id=#{farmId}
+        and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
+        and b.type in (6,7,8,9)
+        ),0) as thismonth_sum_ck_quantity,
+        (ifnull((select sum(b.quantity)
+        from doctor_warehouse_material_handle b
+        where b.warehouse_id=a.id and b.type in (1,2,3,4,5) and b.delete_flag=1 and b.farm_id=#{farmId}
+        ),0)
+        -
+        ifnull((select sum(b.quantity)
+        from doctor_warehouse_material_handle b
+        where b.warehouse_id=a.id and b.type in (6,7,8,9) and b.delete_flag=1 and b.farm_id=#{farmId}
+        ),0)
+        ) as now_sum_quantity
+        from doctor_ware_houses a
+        where a.farm_id=#{farmId}
+        <if test="type != null" > and a.type=#{type}</if>
+        group by a.type
+        order by a.type,a.created_at;
+    </select>
+
+    <!--  按照仓库类型进行tab分页筛选，仓库按照创建时间进行排列 -->
+    <select id="listDetailTypeMap" parameterType="Map" resultType="map">
+     select a.type,
+	 (ifnull((select sum(quantity) from doctor_warehouse_material_handle b
+	 where b.id=a.material_handle_id
+	 and b.farm_id=#{farmId}
+	 and b.warehouse_id=#{wareHouseId}
+	 and b.delete_flag=1 and b.type in (1,2,3,4,5)),0)
+	 -
+	 ifnull((select sum(quantity) from doctor_warehouse_material_handle b
+	 where b.id=a.material_handle_id  and b.farm_id=#{farmId}
+	 and b.warehouse_id=#{wareHouseId}  and b.delete_flag=1 and b.type in (6,7,8,9)),0) ) as wl_jc_sl,
+	 (ifnull((select sum(amount) from doctor_warehouse_material_handle b
+	 where b.id=a.material_handle_id and b.farm_id=#{farmId}
+	 and b.warehouse_id=#{wareHouseId}   and b.delete_flag=1 and b.type in (1,2,3,4,5)),0)
+	 -
+	 ifnull((select sum(amount) from doctor_warehouse_material_handle b
+	 where b.id=a.material_handle_id and b.farm_id=#{farmId}
+	 and b.warehouse_id=#{wareHouseId}   and b.delete_flag=1 and b.type in (6,7,8,9)),0) ) as wl_jc_je
+   from doctor_warehouse_material_apply a
+	 where a.farm_id=#{farmId}
+	 and a.warehouse_id=#{wareHouseId}
+	 group by a.type
+	 order by a.type
+    </select>
+
 </mapper>

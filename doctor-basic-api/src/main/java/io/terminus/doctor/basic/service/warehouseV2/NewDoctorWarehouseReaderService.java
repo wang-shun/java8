@@ -7,6 +7,7 @@ import io.terminus.doctor.basic.dto.DoctorWareHouseCriteria;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -53,7 +54,14 @@ public interface NewDoctorWarehouseReaderService {
 
     Response<List<DoctorWareHouse>> getWarehouseByType(DoctorWareHouse criteria,Integer pageCurrent);
 
+    /**
+     * 按照仓库类型进行tab分页筛选，仓库按照创建时间进行排列
+     */
+    Response<List<Map<String,Object>>> listTypeMap(Long farmId,Integer type);
 
-
+    /**
+     * 展示该仓库所有物料结存数量和结存金额明细
+     */
+    Response<List<Map<String,Object>>> listDetailTypeMap(Long farmId,Long wareHouseId);
 
 }

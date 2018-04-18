@@ -139,4 +139,20 @@ public class NewDoctorWarehouseReadServiceImpl implements NewDoctorWarehouseRead
             return Response.fail("doctor.warehouseV2.list.fail");
         }
     }
+
+    /**
+     * 按照仓库类型进行tab分页筛选，仓库按照创建时间进行排列
+     * @param farmId
+     * @param type
+     * @return
+     */
+    @Override
+    public Response<List<Map<String, Object>>> listTypeMap(Long farmId, Integer type) {
+        return Response.ok(doctorWareHouseDao.listTypeMap(farmId,type));
+    }
+
+    @Override
+    public Response<List<Map<String, Object>>> listDetailTypeMap(Long farmId, Long wareHouseId) {
+        return Response.ok(doctorWareHouseDao.listDetailTypeMap(farmId,wareHouseId));
+    }
 }

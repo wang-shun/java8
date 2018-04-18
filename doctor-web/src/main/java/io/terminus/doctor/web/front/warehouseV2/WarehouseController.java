@@ -290,34 +290,33 @@ public class WarehouseController {
 
     /*************************     2018/04/18  start       ******************************/
     /**
-     * 猪厂下同类型的仓库列表
+     * 按照仓库类型进行tab分页筛选，仓库按照创建时间进行排列
      *
      * @param farmId
      * @return
      */
-    @RequestMapping(method = RequestMethod.GET, value = "type/")
-    public List<WarehouseVo> sameTypeWarehouse(Integer type,Long farmId) {
+    @RequestMapping(method = RequestMethod.GET, value = "/sameTypeWarehouse")
+    public Response<List<Map<String,Object>>> sameTypeWarehouse(Integer type,Long farmId) {
         if (null == farmId)
             throw new JsonResponseException("missing parameter,farmId must pick one");
+        return doctorWarehouseReaderService.listTypeMap(farmId,type);
+    }
 
-        List<DoctorWareHouse> wareHouses;
-        DoctorWareHouse criteria = new DoctorWareHouse();
-        if(null != type){ //全部仓库数据
-            criteria.setType(type);
-        }
-        criteria.setFarmId(farmId);
-        wareHouses = RespHelper.or500(doctorWarehouseReaderService.list(criteria));
-
-
-
-
-
-
-
-
-        return null;
+    /**
+     * 展示该仓库所有物料结存数量和结存金额明细
+     *
+     * @param farmId
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/sameDetailTypeWarehouse")
+    public Response<List<Map<String,Object>>> sameDetailTypeWarehouse(Long wareHouseId,Long farmId) {
+        if (null == farmId)
+            throw new JsonResponseException("missing parameter,farmId must pick one");
+        return doctorWarehouseReaderService.listDetailTypeMap(farmId,wareHouseId);
     }
     /*************************    2018/04/18  end         ******************************/
+
+
 
     @RequestMapping(method = RequestMethod.GET, value = "type/statistics")
     @JsonView(WarehouseVo.WarehouseStatisticsView.class)
