@@ -33,6 +33,15 @@ public interface DoctorWarehouseSettlementService {
      */
     public boolean isSettled(Long orgId, Date settlementDate);
 
+
+    /**
+     * 获取指定日期的会计年月
+     *
+     * @param date
+     * @return
+     */
+    public Date getSettlementDate(Date date);
+
     /**
      * 结算
      *

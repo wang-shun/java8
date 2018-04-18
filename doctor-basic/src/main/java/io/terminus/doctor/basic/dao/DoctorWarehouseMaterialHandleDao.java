@@ -77,6 +77,14 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectList(this.sqlId("findAfter"), criteria);
     }
 
+    public List<DoctorWarehouseMaterialHandle> findAfter(Long warehouseId, Date handleDate) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("handleDate", handleDate);
+
+        return this.sqlSession.selectList(this.sqlId("findAfterByDate"), criteria);
+    }
+
 
     public List<DoctorWarehouseMaterialHandle> findByAccountingDate(Long warehouseId, Integer year, Integer month) {
 

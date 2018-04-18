@@ -1,6 +1,7 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorWareHouseDao;
@@ -68,6 +69,15 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
     @Override
     public boolean isSettled(Long orgId, Date settlementDate) {
         return doctorWarehouseOrgSettlementDao.isSettled(orgId, settlementDate);
+    }
+
+    @Override
+    public Date getSettlementDate(Date date) {
+
+        Date settlementDate = new Date();
+        if (null == settlementDate)
+            throw new ServiceException("get.settlement.date.fail");
+        return settlementDate;
     }
 
     @Override

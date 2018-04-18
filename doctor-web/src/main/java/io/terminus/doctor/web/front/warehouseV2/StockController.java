@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
 /**
@@ -91,6 +92,9 @@ public class StockController {
     @Autowired
     private LockRegistry lockRegistry;
 
+    @RpcConsumer
+    private DoctorWarehouseSettlementService doctorWarehouseSettlementService;
+
     /**
      * 采购入库
      *
@@ -102,6 +106,18 @@ public class StockController {
     public Long in(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockInDto stockIn, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
+
+        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(stockIn.getFarmId()));
+
+        //是否该公司正在结算中
+        if (doctorWarehouseSettlementService.isUnderSettlement(farm.getOrgId()))
+            throw new JsonResponseException("under.settlement");
+
+        //会计年月
+        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(stockIn.getHandleDate().getTime());
+        //会计年月已经结算后，不允许新增或编辑单据
+        if (doctorWarehouseSettlementService.isSettled(farm.getOrgId(), settlementDate))
+            throw new JsonResponseException("already.settlement");
 
         setOperatorName(stockIn);
 
@@ -234,7 +250,6 @@ public class StockController {
             throw new JsonResponseException("farm.not.found");
         stockOutDto.setOrgId(farm.getOrgId());
     }
-
 
     /**
      * 删除库存明细
