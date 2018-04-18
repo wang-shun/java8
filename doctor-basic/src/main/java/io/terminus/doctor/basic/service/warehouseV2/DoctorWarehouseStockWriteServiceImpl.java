@@ -145,8 +145,10 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
         List<Lock> locks = lockedIfNecessary(stockIn);
 
         DoctorWareHouse wareHouse = doctorWareHouseDao.findById(stockIn.getWarehouseId());
+        if(null==wareHouse)
+            throw new ServiceException("warehouse.not.found");
 
-        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.handle(stockIn, wareHouse, WarehouseMaterialHandleType.INVENTORY);
+        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.handle(stockIn, wareHouse, WarehouseMaterialHandleType.IN);
 
         if (null == stockIn.getStockHandleId()) {
             stockIn.getDetails().forEach(detail -> {
@@ -158,12 +160,15 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
         } else {
             List<DoctorWarehouseMaterialHandle> oldMaterialHandle = doctorWarehouseMaterialHandleDao.findByStockHandle(stockIn.getStockHandleId());
 
-            warehouseInManager.getNew(oldMaterialHandle).forEach(detail -> {
+            warehouseInManager.getNew(oldMaterialHandle, stockIn.getDetails()).forEach(detail -> {
                 warehouseInManager.create(detail, stockIn, stockHandle, wareHouse);
+                //增加库存
+                doctorWarehouseStockManager.in(detail, wareHouse);
             });
-            warehouseInManager.getDelete(oldMaterialHandle).forEach(materialHandle -> {
+            warehouseInManager.getDelete(oldMaterialHandle, stockIn.getDetails()).forEach(materialHandle -> {
                 warehouseInManager.delete(materialHandle, stockIn.getHandleDate().getTime());
             });
+
 
         }
 

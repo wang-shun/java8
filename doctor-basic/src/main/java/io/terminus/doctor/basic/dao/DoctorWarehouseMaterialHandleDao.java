@@ -85,6 +85,21 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectList(this.sqlId("findAfterByDate"), criteria);
     }
 
+    /**
+     * 根据单据明细统计历史某一个节点的库存量
+     *
+     * @return
+     */
+    public BigDecimal getHistoryStock(Long warehouseId, Long skuId, Date handleDate) {
+
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("skuId", skuId);
+        criteria.put("handleDate", handleDate);
+
+        return this.sqlSession.selectOne(this.sqlId("countHistoryStock"), criteria);
+    }
+
 
     public List<DoctorWarehouseMaterialHandle> findByAccountingDate(Long warehouseId, Integer year, Integer month) {
 

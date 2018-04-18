@@ -107,16 +107,16 @@ public class StockController {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
-        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(stockIn.getFarmId()));
+        setOrgId(stockIn);
 
         //是否该公司正在结算中
-        if (doctorWarehouseSettlementService.isUnderSettlement(farm.getOrgId()))
+        if (doctorWarehouseSettlementService.isUnderSettlement(stockIn.getOrgId()))
             throw new JsonResponseException("under.settlement");
 
         //会计年月
         Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(stockIn.getHandleDate().getTime());
         //会计年月已经结算后，不允许新增或编辑单据
-        if (doctorWarehouseSettlementService.isSettled(farm.getOrgId(), settlementDate))
+        if (doctorWarehouseSettlementService.isSettled(stockIn.getOrgId(), settlementDate))
             throw new JsonResponseException("already.settlement");
 
         setOperatorName(stockIn);
@@ -244,11 +244,11 @@ public class StockController {
         stockDto.setOperatorName(user.getRealName());
     }
 
-    private void setOrgId(WarehouseStockOutDto stockOutDto) {
-        DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(stockOutDto.getFarmId()));
+    private void setOrgId(AbstractWarehouseStockDto stockDto) {
+        DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(stockDto.getFarmId()));
         if (null == farm)
             throw new JsonResponseException("farm.not.found");
-        stockOutDto.setOrgId(farm.getOrgId());
+        stockDto.setOrgId(farm.getOrgId());
     }
 
     /**
