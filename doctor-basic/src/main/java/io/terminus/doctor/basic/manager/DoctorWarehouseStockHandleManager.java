@@ -62,6 +62,15 @@ public class DoctorWarehouseStockHandleManager {
             return create(stockDto, wareHouse, handleType);
     }
 
+    public void update(AbstractWarehouseStockDto stockDto, DoctorWarehouseStockHandle stockHandle) {
+
+        stockHandle.setHandleDate(stockDto.getHandleDate().getTime());
+
+        stockHandle.setOperatorId(stockDto.getOperatorId());
+        stockHandle.setOperatorName(stockDto.getOperatorName());
+        doctorWarehouseStockHandleDao.update(stockHandle);
+    }
+
 
     public DoctorWarehouseStockHandle create(AbstractWarehouseStockDto stockDto, DoctorWareHouse wareHouse, WarehouseMaterialHandleType handleType) {
         String serialNo;

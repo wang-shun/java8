@@ -2169,3 +2169,6 @@ ALTER TABLE doctor_warehouse_material_handle
 
 -- 单据明细添加金额 2018-04-18
 ALTER TABLE doctor_warehouse_material_handle ADD amount decimal(23,2) NULL COMMENT '金额';
+
+-- 单据添加会计年月 2018-04-18
+ALTER TABLE doctor_warehouse_stock_handle ADD settlement_date date NULL COMMENT '会计年月';

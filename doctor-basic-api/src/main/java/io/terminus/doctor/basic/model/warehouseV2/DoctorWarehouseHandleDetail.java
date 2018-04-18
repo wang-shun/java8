@@ -18,6 +18,7 @@ import java.util.Date;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Deprecated
 public class DoctorWarehouseHandleDetail implements Serializable {
 
     private static final long serialVersionUID = -1939299962983172278L;
