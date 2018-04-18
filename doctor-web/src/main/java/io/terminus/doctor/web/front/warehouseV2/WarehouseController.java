@@ -264,7 +264,6 @@ public class WarehouseController {
         if (null == orgId && null == farmId)
             throw new JsonResponseException("missing parameter,orgId or farmId must pick one");
 
-
         List<DoctorWareHouse> wareHouses;
         if (null != orgId) {
             wareHouses = RespHelper.or500(doctorWarehouseReaderService.findByOrgId(RespHelper.or500(doctorFarmReadService.findFarmsByOrgId(orgId)).stream().map(DoctorFarm::getId).collect(Collectors.toList()), type));
@@ -287,6 +286,38 @@ public class WarehouseController {
         });
         return vos;
     }
+
+
+    /*************************     2018/04/18  start       ******************************/
+    /**
+     * 猪厂下同类型的仓库列表
+     *
+     * @param farmId
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "type/")
+    public List<WarehouseVo> sameTypeWarehouse(Integer type,Long farmId) {
+        if (null == farmId)
+            throw new JsonResponseException("missing parameter,farmId must pick one");
+
+        List<DoctorWareHouse> wareHouses;
+        DoctorWareHouse criteria = new DoctorWareHouse();
+        if(null != type){ //全部仓库数据
+            criteria.setType(type);
+        }
+        criteria.setFarmId(farmId);
+        wareHouses = RespHelper.or500(doctorWarehouseReaderService.list(criteria));
+
+
+
+
+
+
+
+
+        return null;
+    }
+    /*************************    2018/04/18  end         ******************************/
 
     @RequestMapping(method = RequestMethod.GET, value = "type/statistics")
     @JsonView(WarehouseVo.WarehouseStatisticsView.class)

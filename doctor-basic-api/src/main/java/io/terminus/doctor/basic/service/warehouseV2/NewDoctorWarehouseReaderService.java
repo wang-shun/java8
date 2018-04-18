@@ -53,4 +53,7 @@ public interface NewDoctorWarehouseReaderService {
 
     Response<List<DoctorWareHouse>> getWarehouseByType(DoctorWareHouse criteria,Integer pageCurrent);
 
+
+
+
 }
