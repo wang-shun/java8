@@ -68,18 +68,20 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     }
 
 
-    public List<DoctorWarehouseMaterialHandle> findAfter(Long warehouseId, Long materialHandleId, Date handleDate) {
+//    @Deprecated
+//    public List<DoctorWarehouseMaterialHandle> findAfter(Long warehouseId, Long materialHandleId, Date handleDate) {
+//        Map<String, Object> criteria = Maps.newHashMap();
+//        criteria.put("warehouseId", warehouseId);
+//        criteria.put("materialHandleId", materialHandleId);
+//        criteria.put("handleDate", handleDate);
+//
+//        return this.sqlSession.selectList(this.sqlId("findAfter"), criteria);
+//    }
+
+    public List<DoctorWarehouseMaterialHandle> findAfter(Long warehouseId, Long skuId, Date handleDate) {
         Map<String, Object> criteria = Maps.newHashMap();
         criteria.put("warehouseId", warehouseId);
-        criteria.put("materialHandleId", materialHandleId);
-        criteria.put("handleDate", handleDate);
-
-        return this.sqlSession.selectList(this.sqlId("findAfter"), criteria);
-    }
-
-    public List<DoctorWarehouseMaterialHandle> findAfter(Long warehouseId, Date handleDate) {
-        Map<String, Object> criteria = Maps.newHashMap();
-        criteria.put("warehouseId", warehouseId);
+        criteria.put("skuId", skuId);
         criteria.put("handleDate", handleDate);
 
         return this.sqlSession.selectList(this.sqlId("findAfterByDate"), criteria);

@@ -31,7 +31,7 @@ public class WarehouseOutManager extends AbstractStockManager {
                        DoctorWareHouse wareHouse) {
         if (!DateUtil.inSameDate(stockHandle.getHandleDate(), new Date())) {
             //重算每个单据明细的beforeStockQuantity，并验证每个
-            recalculate(stockHandle.getHandleDate(), wareHouse.getId(), detail.getQuantity().negate());
+            recalculate(stockHandle.getHandleDate(), wareHouse.getId(), detail.getMaterialId(), detail.getQuantity().negate());
         }
 
         DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(detail.getMaterialId());
@@ -55,7 +55,7 @@ public class WarehouseOutManager extends AbstractStockManager {
         materialHandle.setType(WarehouseMaterialHandleType.OUT.getValue());
         materialHandle.setUnit(unit.getName());
         materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
-        materialHandle.setBeforeStockQuantity(getHistoryQuantity(stockHandle.getHandleDate(), wareHouse.getId(),detail.getMaterialId()));
+        materialHandle.setBeforeStockQuantity(getHistoryQuantity(stockHandle.getHandleDate(), wareHouse.getId(), detail.getMaterialId()));
         materialHandle.setQuantity(detail.getQuantity());
         materialHandle.setHandleDate(stockHandle.getHandleDate());
         materialHandle.setHandleYear(stockDto.getHandleDate().get(Calendar.YEAR));

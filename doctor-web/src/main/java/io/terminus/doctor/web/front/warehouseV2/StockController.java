@@ -33,6 +33,7 @@ import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.integration.support.locks.LockRegistry;
@@ -120,6 +121,10 @@ public class StockController {
             throw new JsonResponseException("already.settlement");
 
         setOperatorName(stockIn);
+        stockIn.setSettlementDate(settlementDate);
+        Calendar handleDateWithTime = Calendar.getInstance();
+        handleDateWithTime.set(stockIn.getHandleDate().get(Calendar.YEAR), stockIn.getHandleDate().get(Calendar.MONTH), stockIn.getHandleDate().get(Calendar.DAY_OF_MONTH));
+        stockIn.setHandleDate(handleDateWithTime);
 
         return RespHelper.or500(doctorWarehouseStockWriteService.in(stockIn));
     }

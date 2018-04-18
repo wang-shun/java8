@@ -23,6 +23,7 @@ import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorFarmBasicReadService;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -145,33 +146,57 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
         List<Lock> locks = lockedIfNecessary(stockIn);
 
         DoctorWareHouse wareHouse = doctorWareHouseDao.findById(stockIn.getWarehouseId());
-        if(null==wareHouse)
+        if (null == wareHouse)
             throw new ServiceException("warehouse.not.found");
 
-        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.handle(stockIn, wareHouse, WarehouseMaterialHandleType.IN);
-
+        DoctorWarehouseStockHandle stockHandle;
         if (null == stockIn.getStockHandleId()) {
+            stockHandle = doctorWarehouseStockHandleManager.create(stockIn, wareHouse, WarehouseMaterialHandleType.IN);
+
             stockIn.getDetails().forEach(detail -> {
 
                 warehouseInManager.create(detail, stockIn, stockHandle, wareHouse);
                 //增加库存
-                doctorWarehouseStockManager.in(detail, wareHouse);
+                doctorWarehouseStockManager.in(detail.getMaterialId(), detail.getQuantity(), wareHouse);
             });
         } else {
+            stockHandle = doctorWarehouseStockHandleDao.findById(stockIn.getStockHandleId());
+
             List<DoctorWarehouseMaterialHandle> oldMaterialHandle = doctorWarehouseMaterialHandleDao.findByStockHandle(stockIn.getStockHandleId());
 
             warehouseInManager.getNew(oldMaterialHandle, stockIn.getDetails()).forEach(detail -> {
                 warehouseInManager.create(detail, stockIn, stockHandle, wareHouse);
                 //增加库存
-                doctorWarehouseStockManager.in(detail, wareHouse);
+                doctorWarehouseStockManager.in(detail.getMaterialId(), detail.getQuantity(), wareHouse);
             });
             warehouseInManager.getDelete(oldMaterialHandle, stockIn.getDetails()).forEach(materialHandle -> {
                 warehouseInManager.delete(materialHandle, stockIn.getHandleDate().getTime());
+                doctorWarehouseStockManager.out(materialHandle.getMaterialId(), materialHandle.getQuantity(), wareHouse);
             });
-
-
+            warehouseInManager.getUpdate(oldMaterialHandle, stockIn.getDetails()).forEach((detail, materialHandle) -> {
+                if (!detail.getMaterialId().equals(materialHandle.getMaterialId())) {
+                    warehouseInManager.create(detail, stockIn, stockHandle, wareHouse);
+                    doctorWarehouseStockManager.in(detail.getMaterialId(), detail.getQuantity(), wareHouse);
+                    warehouseInManager.delete(materialHandle, stockIn.getHandleDate().getTime());
+                    doctorWarehouseStockManager.out(materialHandle.getMaterialId(), materialHandle.getQuantity(), wareHouse);
+                } else {
+                    if (detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0) {
+                        BigDecimal changedQuantity = detail.getQuantity().subtract(materialHandle.getQuantity());
+                        if (changedQuantity.compareTo(new BigDecimal(0)) > 0) {
+                            doctorWarehouseStockManager.in(detail.getMaterialId(), changedQuantity, wareHouse);
+                        } else {
+                            doctorWarehouseStockManager.out(detail.getMaterialId(), changedQuantity, wareHouse);
+                        }
+                        warehouseInManager.updateQuantity(materialHandle, changedQuantity);
+                    }
+                    if (!DateUtil.inSameDate(stockHandle.getHandleDate(), stockIn.getHandleDate().getTime())) {
+                        warehouseInManager.recalculate(materialHandle, stockIn.getHandleDate());
+                    }
+                    materialHandle.setRemark(detail.getRemark());
+                    doctorWarehouseMaterialHandleDao.update(materialHandle);
+                }
+            });
         }
-
 
         releaseLocks(locks);
         return Response.ok(stockHandle.getId());

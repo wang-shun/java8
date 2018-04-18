@@ -4,8 +4,10 @@ import lombok.Data;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -33,6 +35,11 @@ public class WarehouseStockInDto extends AbstractWarehouseStockDto implements Se
 
         @NotNull(message = "stock.unit.price.null", groups = StockDefaultValid.class)
         private Long unitPrice;
+
+
+        @NotNull(message = "stock.amount.null", groups = StockDefaultValid.class)
+        @DecimalMin(inclusive = false, value = "0", message = "stock.amount.small.then.zero", groups = StockDefaultValid.class)
+        private BigDecimal amount;
 
 //        @NotNull(message = "stock.quantity.null")
 //        @DecimalMin(inclusive = false, value = "0", message = "stock.quantity.small.then.zero")

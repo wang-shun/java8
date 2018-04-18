@@ -58,8 +58,12 @@ public class DoctorWarehouseStockHandleManager {
             doctorWarehouseStockHandleDao.update(stockHandle);
 
             return stockHandle;
-        }
+        } else
+            return create(stockDto, wareHouse, handleType);
+    }
 
+
+    public DoctorWarehouseStockHandle create(AbstractWarehouseStockDto stockDto, DoctorWareHouse wareHouse, WarehouseMaterialHandleType handleType) {
         String serialNo;
         if (handleType == WarehouseMaterialHandleType.IN)
             serialNo = "R" + DateFormatUtils.format(new Date(), "yyyyMMddhhmmssSSS");
@@ -88,7 +92,6 @@ public class DoctorWarehouseStockHandleManager {
         doctorWarehouseStockHandleDao.create(handle);
         return handle;
     }
-
 
     public <T extends AbstractWarehouseStockDetail> List<T> clean(AbstractWarehouseStockDto stockDto, List<T> stockDetails, DoctorWareHouse wareHouse) {
         doctorWarehouseMaterialHandleDao

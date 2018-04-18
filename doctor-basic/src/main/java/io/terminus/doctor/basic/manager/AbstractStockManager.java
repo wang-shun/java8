@@ -4,6 +4,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.basic.dao.DoctorBasicDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseSkuDao;
+import io.terminus.doctor.basic.dao.DoctorWarehouseStockDao;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDetail;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
@@ -12,6 +13,7 @@ import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.common.exception.InvalidException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,49 +38,42 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
     protected DoctorWarehouseSkuDao doctorWarehouseSkuDao;
 
     @Autowired
+    protected DoctorWarehouseStockDao doctorWarehouseStockDao;
+
+    @Autowired
     protected DoctorBasicDao doctorBasicDao;
 
     /**
      * 重算
      *
      * @param materialHandle 该笔之后，包括该笔
-     * @param newQuantity    修改后的数量
+     * @param newHandleDate  修改后的数量
      */
-    protected void recalculate(DoctorWarehouseMaterialHandle materialHandle, BigDecimal newQuantity) {
+    public void recalculate(DoctorWarehouseMaterialHandle materialHandle, Calendar newHandleDate) {
 
-        if (materialHandle.getBeforeStockQuantity().compareTo(newQuantity) < 0)
-            throw new ServiceException("warehouse.stock.not.enough");
+//        if (WarehouseMaterialHandleType.isBigOut(materialHandle.getType())
+//                && materialHandle.getBeforeStockQuantity().compareTo(newQuantity) < 0)
+//            throw new ServiceException("stock.not.enough");
+//
+//        BigDecimal newStockQuantity = materialHandle.getBeforeStockQuantity().subtract(newQuantity);
 
-        BigDecimal newStockQuantity = materialHandle.getBeforeStockQuantity().subtract(newQuantity);
+        Date newHandleDateTime = buildNewHandleDate(WarehouseMaterialHandleType.fromValue(materialHandle.getType()), newHandleDate);
+
+        //历史库存量
+        BigDecimal historyQuantity = getHistoryQuantity(newHandleDateTime, materialHandle.getWarehouseId(), materialHandle.getMaterialId());
+
+        materialHandle.setHandleDate(newHandleDateTime);
+        materialHandle.setBeforeStockQuantity(historyQuantity);
+        if (WarehouseMaterialHandleType.isBigIn(materialHandle.getType()))
+            historyQuantity = historyQuantity.add(materialHandle.getQuantity());
+        else
+            historyQuantity = historyQuantity.subtract(materialHandle.getQuantity());
+        doctorWarehouseMaterialHandleDao.update(materialHandle);
 
         List<DoctorWarehouseMaterialHandle> needToRecalculate = getMaterialHandleAfter(materialHandle.getWarehouseId(), materialHandle.getId(), materialHandle.getHandleDate());
         for (DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle : needToRecalculate) {
-            if (newStockQuantity.compareTo(doctorWarehouseMaterialHandle.getQuantity()) < 0)
-                throw new ServiceException("warehouse.stock.not.enough");
-
-            doctorWarehouseMaterialHandle.setBeforeStockQuantity(newStockQuantity);
-            newStockQuantity = newStockQuantity.subtract(doctorWarehouseMaterialHandle.getQuantity());
-        }
-
-        needToRecalculate.forEach(
-                m -> {
-                    doctorWarehouseMaterialHandleDao.update(m);
-                }
-        );
-    }
-
-    /**
-     * 重算
-     *
-     * @param handleDate      入库类型，是handleDate+00:00:00；出库类型，是handleDate+23:59:59
-     * @param historyQuantity 入库类型，是正数；出库类型，是负数
-     */
-    protected void recalculate(Date handleDate, Long warehouseId, BigDecimal historyQuantity) {
-
-        List<DoctorWarehouseMaterialHandle> needToRecalculate = doctorWarehouseMaterialHandleDao.findAfter(warehouseId, handleDate);
-
-        for (DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle : needToRecalculate) {
-            if (historyQuantity.compareTo(doctorWarehouseMaterialHandle.getQuantity()) < 0)
+            if (WarehouseMaterialHandleType.isBigOut(doctorWarehouseMaterialHandle.getType())
+                    && historyQuantity.compareTo(doctorWarehouseMaterialHandle.getQuantity()) < 0)
                 throw new ServiceException("warehouse.stock.not.enough");
 
             doctorWarehouseMaterialHandle.setBeforeStockQuantity(historyQuantity);
@@ -94,6 +89,51 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
                     doctorWarehouseMaterialHandleDao.update(m);
                 }
         );
+    }
+
+    /**
+     * 重算
+     *
+     * @param handleDate      入库类型，是handleDate+00:00:00；出库类型，是handleDate+23:59:59
+     * @param historyQuantity 入库类型，是正数；出库类型，是负数
+     */
+    public void recalculate(Date handleDate, Long warehouseId, Long skuId, BigDecimal historyQuantity) {
+
+        List<DoctorWarehouseMaterialHandle> needToRecalculate = doctorWarehouseMaterialHandleDao.findAfter(warehouseId, skuId, handleDate);
+
+        for (DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle : needToRecalculate) {
+            if (WarehouseMaterialHandleType.isBigOut(doctorWarehouseMaterialHandle.getType())
+                    && historyQuantity.compareTo(doctorWarehouseMaterialHandle.getQuantity()) < 0)
+                throw new ServiceException("warehouse.stock.not.enough");
+
+            doctorWarehouseMaterialHandle.setBeforeStockQuantity(historyQuantity);
+
+            if (WarehouseMaterialHandleType.isBigIn(doctorWarehouseMaterialHandle.getType()))
+                historyQuantity = historyQuantity.add(doctorWarehouseMaterialHandle.getQuantity());
+            else
+                historyQuantity = historyQuantity.subtract(doctorWarehouseMaterialHandle.getQuantity());
+        }
+
+        needToRecalculate.forEach(
+                m -> {
+                    doctorWarehouseMaterialHandleDao.update(m);
+                }
+        );
+    }
+
+
+    public Date buildNewHandleDate(WarehouseMaterialHandleType handleType, Calendar newHandleDate) {
+        if (WarehouseMaterialHandleType.isBigIn(handleType.getValue())) {
+            newHandleDate.set(Calendar.HOUR_OF_DAY, 0);
+            newHandleDate.set(Calendar.MINUTE, 0);
+            newHandleDate.set(Calendar.SECOND, 0);
+            return newHandleDate.getTime();
+        } else {
+            newHandleDate.set(Calendar.HOUR_OF_DAY, 23);
+            newHandleDate.set(Calendar.MINUTE, 59);
+            newHandleDate.set(Calendar.SECOND, 59);
+            return newHandleDate.getTime();
+        }
     }
 
 
@@ -215,7 +255,7 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
 //        materialHandle.setBeforeStockQuantity(getHistoryQuantity(stockHandle.getHandleDate(), wareHouse.getId()));
         materialHandle.setQuantity(detail.getQuantity());
         materialHandle.setSettlementDate(stockDto.getSettlementDate());
-        materialHandle.setHandleDate(stockHandle.getHandleDate());
+        materialHandle.setHandleDate(stockDto.getHandleDate().getTime());
         materialHandle.setHandleYear(stockDto.getHandleDate().get(Calendar.YEAR));
         materialHandle.setHandleMonth(stockDto.getHandleDate().get(Calendar.MONTH) + 1);
         materialHandle.setOperatorId(stockDto.getOperatorId());
