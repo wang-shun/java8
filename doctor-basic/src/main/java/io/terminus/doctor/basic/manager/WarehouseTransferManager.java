@@ -19,7 +19,7 @@ public class WarehouseTransferManager extends AbstractStockManager {
 
     @Override
     public void create(AbstractWarehouseStockDetail detail, AbstractWarehouseStockDto stockDto, DoctorWarehouseStockHandle stockHandle, DoctorWareHouse wareHouse) {
-        
+
     }
 
     @Override

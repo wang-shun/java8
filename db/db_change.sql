@@ -2166,3 +2166,6 @@ ALTER TABLE doctor_warehouse_stock_handle ADD rel_stock_handle_id BIGINT NULL CO
 ALTER TABLE doctor_warehouse_material_handle ADD org_id BIGINT NULL COMMENT '公司id';
 ALTER TABLE doctor_warehouse_material_handle
   MODIFY COLUMN org_id BIGINT COMMENT '公司id' AFTER stock_handle_id;
+
+-- 单据明细添加金额 2018-04-18
+ALTER TABLE doctor_warehouse_material_handle ADD amount decimal(23,2) NULL COMMENT '金额';

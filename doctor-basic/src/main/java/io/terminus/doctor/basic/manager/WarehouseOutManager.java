@@ -1,7 +1,6 @@
 package io.terminus.doctor.basic.manager;
 
 import io.terminus.common.exception.ServiceException;
-import io.terminus.doctor.basic.dao.DoctorWarehouseSkuDao;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDetail;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
@@ -12,10 +11,8 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.common.utils.DateUtil;
-import org.apache.log4j.xml.SAXErrorHandler;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -58,7 +55,7 @@ public class WarehouseOutManager extends AbstractStockManager {
         materialHandle.setType(WarehouseMaterialHandleType.OUT.getValue());
         materialHandle.setUnit(unit.getName());
         materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
-        materialHandle.setBeforeStockQuantity(getHistoryQuantity(stockHandle.getHandleDate(), wareHouse.getId()));
+        materialHandle.setBeforeStockQuantity(getHistoryQuantity(stockHandle.getHandleDate(), wareHouse.getId(),detail.getMaterialId()));
         materialHandle.setQuantity(detail.getQuantity());
         materialHandle.setHandleDate(stockHandle.getHandleDate());
         materialHandle.setHandleYear(stockDto.getHandleDate().get(Calendar.YEAR));
