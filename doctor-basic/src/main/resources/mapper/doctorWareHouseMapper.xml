@@ -212,7 +212,7 @@
         from doctor_ware_houses a
         where a.farm_id=#{farmId}
         <if test="type != null" > and a.type=#{type}</if>
-        group by a.type
+        <!--group by a.type-->
         order by a.type,a.created_at;
     </select>
 
@@ -238,7 +238,7 @@
    from doctor_warehouse_material_apply a
 	 where a.farm_id=#{farmId}
 	 and a.warehouse_id=#{wareHouseId}
-	 group by a.type
+        <!--group by a.type-->
 	 order by a.type
     </select>
 
