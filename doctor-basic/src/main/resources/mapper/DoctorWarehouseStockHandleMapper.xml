@@ -84,6 +84,11 @@
         WHERE id = #{id} LIMIT 1
     </select>
 
+    <select id="findwarehouseName" parameterType="long" resultType="String">
+        SELECT warehouse_name FROM <include refid="tb"/>
+        where rel_stock_handle_id=#{relStockHandleId}
+    </select>
+
     <select id="findByIds" parameterType="list" resultMap="DoctorWarehouseStockHandleMap">
         SELECT
         <include refid="cols_all"/>

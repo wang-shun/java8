@@ -177,6 +177,12 @@ public class StockHandleController {
                                detail.setRefundableQuantity(RefundableNumber.doubleValue());
                            }
 
+                           //配方生产出库
+                           if (mh.getType().intValue() == WarehouseMaterialHandleType.FORMULA_OUT.getValue()) {
+                               doctorWarehouseStockHandleReadService.findwarehouseName(stockHandle.getRelStockHandleId());
+                            }
+
+
                             //调出
                             if (mh.getType().intValue() == WarehouseMaterialHandleType.TRANSFER_OUT.getValue()) {
                                 //单据明细表

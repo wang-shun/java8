@@ -29,6 +29,11 @@ public class DoctorWarehouseStockHandleReadServiceImpl implements DoctorWarehous
     private DoctorWarehouseStockHandleDao doctorWarehouseStockHandleDao;
 
     @Override
+    public Response<String> findwarehouseName(Long RelId) {
+        return Response.ok(doctorWarehouseStockHandleDao.findwarehouseName(RelId));
+    }
+
+    @Override
     public Response<DoctorWarehouseStockHandle> findById(Long id) {
         try{
             return Response.ok(doctorWarehouseStockHandleDao.findById(id));

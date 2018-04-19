@@ -13,4 +13,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DoctorWarehouseStockHandleDao extends MyBatisDao<DoctorWarehouseStockHandle> {
 
+    //得到配方入库仓库
+    public String findwarehouseName(Long RelId) {
+        String warehouseName = this.sqlSession.selectOne(this.sqlId("findwarehouseName"), RelId);
+        return warehouseName;
+    }
 }

@@ -16,6 +16,13 @@ import java.util.Map;
 public interface DoctorWarehouseStockHandleReadService {
 
     /**
+     * 得到配方入库仓库
+     * @param RelId
+     * @return
+     */
+    Response<String> findwarehouseName(Long RelId);
+
+    /**
      * 查询
      * @param id
      * @return doctorWarehouseStockHandle
