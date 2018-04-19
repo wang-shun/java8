@@ -152,7 +152,7 @@ public class StockHandleController {
                                 log.warn("material apply not found,by material handle {}", mh.getId());
 
                             if (mh.getType().intValue() == WarehouseMaterialHandleType.TRANSFER_OUT.getValue()) {
-                                DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(mh.getOtherTransferHandleId()));
+                                DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(mh.getRelMaterialHandleId()));
                                 if (transferInHandle != null) {
                                     DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(transferInHandle.getWarehouseId()));
                                     if (wareHouse != null) {
@@ -163,7 +163,7 @@ public class StockHandleController {
                                     } else
                                         log.warn("warehouse not found,{}", transferInHandle.getWarehouseId());
                                 } else
-                                    log.warn("other transfer in handle not found,{}", mh.getOtherTransferHandleId());
+                                    log.warn("other transfer in handle not found,{}", mh.getRelMaterialHandleId());
                             }
 
                             return detail;
@@ -256,7 +256,7 @@ public class StockHandleController {
                         log.warn("material apply not found,by material handle {}", mh.getId());
 
                     if (mh.getType().intValue() == WarehouseMaterialHandleType.TRANSFER_OUT.getValue()) {
-                        DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(mh.getOtherTransferHandleId()));
+                        DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(mh.getRelMaterialHandleId()));
                         if (transferInHandle != null) {
                             DoctorWareHouse transferInWarehouse = RespHelper.or500(doctorWareHouseReadService.findById(transferInHandle.getWarehouseId()));
                             if (transferInWarehouse != null) {
@@ -265,7 +265,7 @@ public class StockHandleController {
                             } else
                                 log.warn("warehouse not found,{}", transferInHandle.getWarehouseId());
                         } else
-                            log.warn("other transfer in handle not found,{}", mh.getOtherTransferHandleId());
+                            log.warn("other transfer in handle not found,{}", mh.getRelMaterialHandleId());
                     }
 
                     vo.setUnitPrice(new BigDecimal(mh.getUnitPrice()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP).doubleValue());

@@ -9,7 +9,6 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.common.utils.DateUtil;
-import org.joda.time.DateTime;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -29,7 +28,6 @@ public class WarehouseInManager extends AbstractStockManager<WarehouseStockInDto
                        DoctorWarehouseStockHandle stockHandle,
                        DoctorWareHouse wareHouse) {
 
-
         DoctorWarehouseMaterialHandle materialHandle = buildMaterialHandle(detail, stockDto, stockHandle, wareHouse);
         materialHandle.setType(WarehouseMaterialHandleType.IN.getValue());
         materialHandle.setUnitPrice(detail.getUnitPrice());
@@ -38,15 +36,15 @@ public class WarehouseInManager extends AbstractStockManager<WarehouseStockInDto
         //入库类型，当天第一笔
         if (!DateUtil.inSameDate(stockDto.getHandleDate().getTime(), new Date())) {
 
-            materialHandle.setHandleDate(new DateTime(materialHandle.getHandleDate()).withTime(0, 0, 0, 0).toDate());
+            materialHandle.setHandleDate(this.buildNewHandleDate(WarehouseMaterialHandleType.IN, stockDto.getHandleDate()));
 
-            //获取该笔明细之前的库存量
-            BigDecimal historyQuantity = getHistoryQuantity(stockDto.getHandleDate().getTime(), wareHouse.getId(), detail.getMaterialId());
+            //获取该笔明细之前的库存量,handleDate+00:00:00
+            BigDecimal historyQuantity = getHistoryQuantityInclude(stockDto.getHandleDate().getTime(), wareHouse.getId(), detail.getMaterialId());
 
             materialHandle.setBeforeStockQuantity(historyQuantity);
             historyQuantity = historyQuantity.add(detail.getQuantity());
 
-            //需要重算每个明细的beforeStockQuantity
+            //需要重算每个明细的beforeStockQuantity,
             recalculate(stockDto.getHandleDate().getTime(), wareHouse.getId(), detail.getMaterialId(), historyQuantity);
         } else {
             BigDecimal currentQuantity = doctorWarehouseStockDao.findBySkuIdAndWarehouseId(detail.getMaterialId(), wareHouse.getId())

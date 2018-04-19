@@ -145,80 +145,83 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
         List<Lock> locks = lockedIfNecessary(stockIn);
 
-        DoctorWareHouse wareHouse = doctorWareHouseDao.findById(stockIn.getWarehouseId());
-        if (null == wareHouse)
-            throw new ServiceException("warehouse.not.found");
+        try {
+            DoctorWareHouse wareHouse = doctorWareHouseDao.findById(stockIn.getWarehouseId());
+            if (null == wareHouse)
+                throw new ServiceException("warehouse.not.found");
 
-        DoctorWarehouseStockHandle stockHandle;
-        if (null == stockIn.getStockHandleId()) { //新增
-            stockHandle = doctorWarehouseStockHandleManager.create(stockIn, wareHouse, WarehouseMaterialHandleType.IN);
+            DoctorWarehouseStockHandle stockHandle;
+            if (null == stockIn.getStockHandleId()) { //新增
+                stockHandle = doctorWarehouseStockHandleManager.create(stockIn, wareHouse, WarehouseMaterialHandleType.IN);
 
-            stockIn.getDetails().forEach(detail -> {
+                stockIn.getDetails().forEach(detail -> {
 
-                warehouseInManager.create(detail, stockIn, stockHandle, wareHouse);
-                //增加库存
-                doctorWarehouseStockManager.in(detail.getMaterialId(), detail.getQuantity(), wareHouse);
-            });
-        } else { //编辑
-            stockHandle = doctorWarehouseStockHandleDao.findById(stockIn.getStockHandleId());
-
-            List<DoctorWarehouseMaterialHandle> oldMaterialHandle = doctorWarehouseMaterialHandleDao.findByStockHandle(stockIn.getStockHandleId());
-
-            warehouseInManager.getNew(oldMaterialHandle, stockIn.getDetails()).forEach(detail -> {
-                warehouseInManager.create(detail, stockIn, stockHandle, wareHouse);
-                //增加库存
-                doctorWarehouseStockManager.in(detail.getMaterialId(), detail.getQuantity(), wareHouse);
-            });
-
-            warehouseInManager.getDelete(oldMaterialHandle, stockIn.getDetails()).forEach(materialHandle -> {
-                warehouseInManager.delete(materialHandle);
-                doctorWarehouseStockManager.out(materialHandle.getMaterialId(), materialHandle.getQuantity(), wareHouse);
-            });
-
-            warehouseInManager.getUpdate(oldMaterialHandle, stockIn.getDetails()).forEach((detail, materialHandle) -> {
-                if (!detail.getMaterialId().equals(materialHandle.getMaterialId())) {//更换了物料
-                    //如果是更换了物料，就不需要处理是否更换了金额，是否更换了事件日期，是否更换了备注
                     warehouseInManager.create(detail, stockIn, stockHandle, wareHouse);
+                    //增加库存
                     doctorWarehouseStockManager.in(detail.getMaterialId(), detail.getQuantity(), wareHouse);
+                });
+            } else { //编辑
+                stockHandle = doctorWarehouseStockHandleDao.findById(stockIn.getStockHandleId());
 
+                List<DoctorWarehouseMaterialHandle> oldMaterialHandle = doctorWarehouseMaterialHandleDao.findByStockHandle(stockIn.getStockHandleId());
+
+                warehouseInManager.getNew(oldMaterialHandle, stockIn.getDetails()).forEach(detail -> {
+                    warehouseInManager.create(detail, stockIn, stockHandle, wareHouse);
+                    //增加库存
+                    doctorWarehouseStockManager.in(detail.getMaterialId(), detail.getQuantity(), wareHouse);
+                });
+
+                warehouseInManager.getDelete(oldMaterialHandle, stockIn.getDetails()).forEach(materialHandle -> {
                     warehouseInManager.delete(materialHandle);
                     doctorWarehouseStockManager.out(materialHandle.getMaterialId(), materialHandle.getQuantity(), wareHouse);
-                } else {
+                });
 
-                    if (detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0
-                            || !DateUtil.inSameDate(stockHandle.getHandleDate(), stockIn.getHandleDate().getTime())) {
+                warehouseInManager.getUpdate(oldMaterialHandle, stockIn.getDetails()).forEach((detail, materialHandle) -> {
+                    if (!detail.getMaterialId().equals(materialHandle.getMaterialId())) {//更换了物料
+                        //如果是更换了物料，就不需要处理是否更换了金额，是否更换了事件日期，是否更换了备注
+                        warehouseInManager.create(detail, stockIn, stockHandle, wareHouse);
+                        doctorWarehouseStockManager.in(detail.getMaterialId(), detail.getQuantity(), wareHouse);
 
-                        //更改了数量，或更改了操作日期
-                        warehouseInManager.recalculate(materialHandle);
-                    }
-                    if (detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0) {
-                        BigDecimal changedQuantity = detail.getQuantity().subtract(materialHandle.getQuantity());
-                        if (changedQuantity.compareTo(new BigDecimal(0)) > 0) {
-                            doctorWarehouseStockManager.in(detail.getMaterialId(), changedQuantity, wareHouse);
+                        warehouseInManager.delete(materialHandle);
+                        doctorWarehouseStockManager.out(materialHandle.getMaterialId(), materialHandle.getQuantity(), wareHouse);
+                    } else {
+
+                        materialHandle.setRemark(detail.getRemark());
+
+                        if (detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0
+                                || !DateUtil.inSameDate(stockHandle.getHandleDate(), stockIn.getHandleDate().getTime())) {
+
+                            //更改了数量，或更改了操作日期
+                            if (detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0) {
+                                BigDecimal changedQuantity = detail.getQuantity().subtract(materialHandle.getQuantity());
+                                if (changedQuantity.compareTo(new BigDecimal(0)) > 0) {
+                                    doctorWarehouseStockManager.in(detail.getMaterialId(), changedQuantity, wareHouse);
+                                } else {
+                                    doctorWarehouseStockManager.out(detail.getMaterialId(), changedQuantity, wareHouse);
+                                }
+                                warehouseInManager.updateQuantity(materialHandle, changedQuantity);
+                            }
+
+                            if (!DateUtil.inSameDate(stockHandle.getHandleDate(), stockIn.getHandleDate().getTime())) {
+                                materialHandle.setHandleDate(warehouseInManager.buildNewHandleDate(WarehouseMaterialHandleType.IN, stockIn.getHandleDate()));
+                                doctorWarehouseMaterialHandleDao.update(materialHandle);
+                            }
+                            warehouseInManager.recalculate(materialHandle);
+
                         } else {
-                            doctorWarehouseStockManager.out(detail.getMaterialId(), changedQuantity, wareHouse);
+                            //只更新了备注
+                            doctorWarehouseMaterialHandleDao.update(materialHandle);
                         }
-                        warehouseInManager.updateQuantity(materialHandle, changedQuantity);
-                    }
-                    if (!DateUtil.inSameDate(stockHandle.getHandleDate(), stockIn.getHandleDate().getTime())) {
-                        materialHandle.setHandleDate(warehouseInManager.buildNewHandleDate(WarehouseMaterialHandleType.IN, stockIn.getHandleDate()));
-                    }
 
-                    if (detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0 ||
-                            !DateUtil.inSameDate(stockHandle.getHandleDate(), stockIn.getHandleDate().getTime())) {
-                        warehouseInManager.recalculate(materialHandle);
                     }
-
-                    materialHandle.setRemark(detail.getRemark());
-                    doctorWarehouseMaterialHandleDao.update(materialHandle);
-                }
-            });
-
-            doctorWarehouseStockHandleManager.update(stockIn, stockHandle);
+                });
+                //更新单据
+                doctorWarehouseStockHandleManager.update(stockIn, stockHandle);
+            }
+            return Response.ok(stockHandle.getId());
+        } finally {
+            releaseLocks(locks);
         }
-
-        releaseLocks(locks);
-        return Response.ok(stockHandle.getId());
     }
 
     private List<Lock> lockedIfNecessary(AbstractWarehouseStockDto stockDto) {
@@ -447,7 +450,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                             if (!source.getMaterialId().equals(target.getMaterialId()))
                                 return false;
 
-                            DoctorWarehouseMaterialHandle transferIn = doctorWarehouseMaterialHandleDao.findById(target.getOtherTransferHandleId());
+                            DoctorWarehouseMaterialHandle transferIn = doctorWarehouseMaterialHandleDao.findById(target.getRelMaterialHandleId());
                             return source.getTransferInWarehouseId().equals(transferIn.getWarehouseId());
                         }
 
@@ -549,13 +552,13 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 inHandle.setUnit(unit.getName());
             inHandle.setRemark(detail.getRemark());
             inHandle.setBeforeStockQuantity(stock.getQuantity());
-            inHandle.setOtherTransferHandleId(outHandle.getId());
+            inHandle.setRelMaterialHandleId(outHandle.getId());
             List<DoctorWarehousePurchase> transferInPurchase = new ArrayList<>();
             for (DoctorWarehousePurchase purchase : purchaseHandleContext.getPurchaseQuantity().keySet()) {
                 transferInPurchase.add(copyPurchase(purchase, stockTransfer.getHandleDate(), targetWareHouse, purchaseHandleContext.getPurchaseQuantity().get(purchase)));
             }
             doctorWarehouseHandlerManager.inStock(transferInStock, transferInPurchase, inHandle, null, null);
-            outHandle.setOtherTransferHandleId(inHandle.getId());
+            outHandle.setRelMaterialHandleId(inHandle.getId());
             doctorWarehouseMaterialHandleDao.update(outHandle);
             doctorWarehouseStockMonthlyManager.count(transferInStock.getWarehouseId(),
                     transferInStock.getSkuId(),

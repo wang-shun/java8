@@ -188,14 +188,14 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 
                         || m.getType().equals(WarehouseMaterialHandleType.RETURN.getValue())) {
 
-                    DoctorWarehouseMaterialHandle otherIn = doctorWarehouseMaterialHandleDao.findById(m.getOtherTransferHandleId());
+                    DoctorWarehouseMaterialHandle otherIn = doctorWarehouseMaterialHandleDao.findById(m.getRelMaterialHandleId());
                     if (null == otherIn)
                         throw new ServiceException("material.handle.not.found");
                     if (null != otherIn.getUnitPrice())
                         m.setUnitPrice(otherIn.getUnitPrice());
                     else {
                         settlement(otherIn.getWarehouseId(), settlementDate, settledWarehouses);
-                        m.setUnitPrice(doctorWarehouseMaterialHandleDao.findById(m.getOtherTransferHandleId()).getUnitPrice());
+                        m.setUnitPrice(doctorWarehouseMaterialHandleDao.findById(m.getRelMaterialHandleId()).getUnitPrice());
                     }
                 }
 
@@ -269,7 +269,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             } else if (materialHandle.getType().equals(WarehouseMaterialHandleType.TRANSFER_IN.getValue())
                     || materialHandle.getType().equals(WarehouseMaterialHandleType.RETURN.getValue())) {
 
-                DoctorWarehouseMaterialHandle otherIn = settlementMaterialHandles.get(materialHandle.getOtherTransferHandleId());
+                DoctorWarehouseMaterialHandle otherIn = settlementMaterialHandles.get(materialHandle.getRelMaterialHandleId());
                 if (null == otherIn)
                     throw new ServiceException("material.handle.not.found");
 

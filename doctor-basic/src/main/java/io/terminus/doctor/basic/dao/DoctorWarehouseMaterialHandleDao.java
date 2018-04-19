@@ -92,7 +92,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
      *
      * @return
      */
-    public BigDecimal getHistoryStock(Long warehouseId, Long skuId, Date handleDate) {
+    public BigDecimal getHistoryStock(Long warehouseId, Long skuId, Date handleDate, boolean include) {
 
         Map<String, Object> criteria = Maps.newHashMap();
         criteria.put("warehouseId", warehouseId);

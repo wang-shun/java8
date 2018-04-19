@@ -452,7 +452,7 @@ public class ReportController {
             }
 
             if (WarehouseMaterialHandleType.TRANSFER_OUT.getValue() == handle.getType()) {
-                DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(handle.getOtherTransferHandleId()));
+                DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(handle.getRelMaterialHandleId()));
                 handleVo.setTransferInWarehouseName(transferInHandle.getWarehouseName());
             }
 
