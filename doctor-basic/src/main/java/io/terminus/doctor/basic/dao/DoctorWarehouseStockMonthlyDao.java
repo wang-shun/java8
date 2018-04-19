@@ -22,13 +22,13 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
     public AmountAndQuantityDto statistics(Map<String, Object> params) {
 
         List<DoctorWarehouseStockMonthly> monthlies = this.getSqlSession().selectList(this.sqlId("statistics"), params);
-        long amount = 0;
+        BigDecimal amount = new BigDecimal(0);
         BigDecimal quantity = new BigDecimal(0);
         for (DoctorWarehouseStockMonthly monthly : monthlies) {
-            amount += monthly.getBalacneAmount();
+            amount = amount.add(monthly.getBalanceAmount());
             quantity = quantity.add(monthly.getBalanceQuantity());
         }
-        return new AmountAndQuantityDto(amount, quantity);
+        return new AmountAndQuantityDto(amount.longValue(), quantity);
     }
 
 
@@ -48,7 +48,7 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
 
         Map<Long, AmountAndQuantityDto> statistics = new HashMap<>();
         for (DoctorWarehouseStockMonthly monthly : monthlies) {
-            statistics.put(monthly.getMaterialId(), new AmountAndQuantityDto(monthly.getBalacneAmount(), monthly.getBalanceQuantity()));
+            statistics.put(monthly.getMaterialId(), new AmountAndQuantityDto(monthly.getBalanceAmount().longValue(), monthly.getBalanceQuantity()));
         }
 
         return statistics;
@@ -61,10 +61,10 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
         params.put("warehouseId", warehouseId);
         params.put("handleDate", handleDate);
         DoctorWarehouseStockMonthly monthly = this.getSqlSession().selectOne(this.sqlId("statisticsWarehouse"), params);
-        if (null == monthly || null == monthly.getBalanceQuantity() || null == monthly.getBalacneAmount())
+        if (null == monthly || null == monthly.getBalanceQuantity() || null == monthly.getBalanceAmount())
             return new AmountAndQuantityDto(0, new BigDecimal(0));
 
-        return new AmountAndQuantityDto(monthly.getBalacneAmount(), monthly.getBalanceQuantity());
+        return new AmountAndQuantityDto(monthly.getBalanceAmount().longValue(), monthly.getBalanceQuantity());
     }
 
 }
