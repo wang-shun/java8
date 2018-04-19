@@ -257,7 +257,14 @@
         FROM <include refid="tb"/>
         WHERE warehouse_id=#{warehouseId}
         AND material_id=#{skuId}
-        AND <![CDATA[ handle_date > #{handleDate}]]>
+        <choose>
+            <when test="includeHandleDate">
+                AND <![CDATA[ handle_date >= #{handleDate}]]>
+            </when>
+            <otherwise>
+                AND <![CDATA[ handle_date > #{handleDate}]]>
+            </otherwise>
+        </choose>
         AND delete_flag=1
         ORDER BY handle_date ASC,id DESC
     </select>
