@@ -97,7 +97,7 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
                 warehouseOutManager.delete(handle);
             }
             if(type == 6){
-                int a = doctorWarehouseMaterialHandleDao.findByRelMaterialHandleId(handle.getRel_material_handle_id(),6);
+                int a = doctorWarehouseMaterialHandleDao.findByRelMaterialHandleId(handle.getRelMaterialHandleId(),6);
                 if(a != 0){
                     return Response.fail("此物料存在退料,不支持删除");
                 }
