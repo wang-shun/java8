@@ -484,5 +484,34 @@ public class StockHandleController {
 //                .collect(Collectors.toList()), "web-wareHouse-stock-handle", request, response);
     }
 
+    @RequestMapping(method = RequestMethod.GET,value = "/stockPage")
+    public Paging<DoctorWarehouseStockHandle> stockPage(
+                                                        @RequestParam(required =false) Integer pageNo,
+                                                        @RequestParam(required =false) Integer pageSize,
+                                                        @RequestParam(required =false) String warehouseName,
+                                                        @RequestParam(required =false) String operatorName,
+                                                        @RequestParam(required =false) Integer handleSubType,
+                                                        @RequestParam(required =false) Date createdAtStart,
+                                                        @RequestParam(required =false) Date createdAtEnd,
+                                                        @RequestParam(required =false) Date updatedAtStart,
+                                                        @RequestParam(required =false) Date updatedAtEnd
+                                                         ) {
+
+        if (null != createdAtStart && null != createdAtEnd && createdAtStart.after(createdAtEnd))
+            throw new JsonResponseException("start.date.after.end.date");
+
+        if (null != updatedAtStart && null != updatedAtEnd && updatedAtStart.after(updatedAtEnd))
+            throw new JsonResponseException("start.date.after.end.date");
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("warehouseName", warehouseName);
+        params.put("operatorName", operatorName);
+        params.put("handleSubType", handleSubType);
+        params.put("createdAtStart", createdAtStart);
+        params.put("createdAtEnd", createdAtEnd);
+        params.put("updatedAtStart", updatedAtStart);
+        params.put("updatedAtEnd", updatedAtEnd);
+        return RespHelper.or500(doctorWarehouseStockHandleReadService.paging(pageNo,pageSize,params));
+    }
 
 }
