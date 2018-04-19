@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
-import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
 import io.terminus.doctor.event.enums.PigEvent;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -261,5 +260,10 @@ public class DoctorPigStatisticDao {
 
 
         return entryNum - matingNum;
+    }
+
+    public Integer mateLeadToFarrow(Long farmId, String startAt, String endAt) {
+        return sqlSession.selectOne(sqlId("mateLeadToFarrow"),
+                ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 }
