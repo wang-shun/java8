@@ -294,6 +294,7 @@
         <if test="materialName != null" > and b.`name` like CONCAT('%', #{materialName}, '%')</if>
         <if test="warehouseId != null" > and a.warehouse_id=#{warehouseId}</if>
         order by a.id
+        limit #{offset},#{limit}
     </select>
 
 </mapper>
