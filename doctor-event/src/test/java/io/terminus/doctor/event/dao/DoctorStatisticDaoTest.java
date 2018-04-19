@@ -109,4 +109,10 @@ public class DoctorStatisticDaoTest extends BaseDaoTest {
         System.out.println(JsonMapper.nonEmptyMapper().fromJson(JsonMapper.nonEmptyMapper().toJson(DateUtil.toDate("2017-01-01")), Date.class));
 
     }
+
+    @Test
+    public void mateLeadToFarrowTest() {
+        Integer count = doctorPigStatisticDao.mateLeadToFarrow(404L, "2018-04-19", "2018-04-20");
+        Assert.assertEquals(count.longValue(), 1);
+    }
 }
