@@ -24,11 +24,8 @@ import java.util.Date;
 @NoArgsConstructor
 public class DoctorWarehouseMaterialHandle implements Serializable {
 
-<<<<<<< HEAD
-    private static final long serialVersionUID = 3824033689550515536L;
-=======
+
     private static final long serialVersionUID = -2312281503041698696L;
->>>>>>> Merge branch 'feature/warehouse-v2' of D:\project\doctor2\doctor with conflicts.
 
     /**
      * 自增主键
@@ -70,7 +67,7 @@ public class DoctorWarehouseMaterialHandle implements Serializable {
     /**
      * 另一条调拨物料处理单的编号
      */
-    private Long rel_material_handle_id;
+    private Long relMaterialHandleId;
 
     /**
      * 物料供应商名称
