@@ -20,6 +20,8 @@ public class StockHandleVo extends DoctorWarehouseStockHandle {
 
     private String warehouseManagerName;
 
+    private String storageWarehouseName;
+
     private Double totalAmount;
 
     private Double totalQuantity;
