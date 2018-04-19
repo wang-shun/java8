@@ -33,14 +33,12 @@ import static java.util.Objects.isNull;
 @Slf4j
 @Component
 public class FieldHelper {
-    private final DoctorFiledUrlDao doctorFiledUrlDao;
     private Map<String, String> filedUrlMap;
     private Map<String, Object> map = new HashMap<>();
     private final ToJsonMapper JSON = ToJsonMapper.JSON_NON_EMPTY_MAPPER;
 
     @Autowired
     public FieldHelper(DoctorFiledUrlDao doctorFiledUrlDao) {
-        this.doctorFiledUrlDao = doctorFiledUrlDao;
         List<DoctorFiledUrl> filedUrls = doctorFiledUrlDao.listAll();
         filedUrlMap = filedUrls.stream().collect(Collectors.toMap(DoctorFiledUrl::getName, DoctorFiledUrl::getUrl));
     }

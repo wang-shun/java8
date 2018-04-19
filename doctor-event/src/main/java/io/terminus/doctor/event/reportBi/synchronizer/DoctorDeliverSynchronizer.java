@@ -1,7 +1,10 @@
 package io.terminus.doctor.event.reportBi.synchronizer;
 
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorPigStatisticDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportDeliverDao;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.reportBi.DoctorFiledUrlCriteria;
@@ -10,12 +13,18 @@ import io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend;
 import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.model.DoctorReportDeliver;
+import io.terminus.doctor.event.reportBi.helper.DateHelper;
 import io.terminus.doctor.event.reportBi.helper.FieldHelper;
 import io.terminus.doctor.event.util.EventUtil;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 import static io.terminus.doctor.event.reportBi.helper.DateHelper.dateCN;
@@ -31,11 +40,16 @@ import static java.util.Objects.isNull;
 public class DoctorDeliverSynchronizer {
     private final DoctorReportDeliverDao doctorReportDeliverDao;
     private final FieldHelper fieldHelper;
+    @RpcConsumer
+    private DoctorFarmReadService doctorFarmReadService;
+
+    private final DoctorPigStatisticDao doctorPigStatisticDao;
 
     @Autowired
-    public DoctorDeliverSynchronizer(DoctorReportDeliverDao doctorReportDeliverDao, FieldHelper fieldHelper) {
+    public DoctorDeliverSynchronizer(DoctorReportDeliverDao doctorReportDeliverDao, FieldHelper fieldHelper, DoctorPigStatisticDao doctorPigStatisticDao) {
         this.doctorReportDeliverDao = doctorReportDeliverDao;
         this.fieldHelper = fieldHelper;
+        this.doctorPigStatisticDao = doctorPigStatisticDao;
     }
 
     public void synchronize(DoctorPigDailyExtend pigDaily,
@@ -133,28 +147,28 @@ public class DoctorDeliverSynchronizer {
         reportBi.setFarrowWeak(pigDaily.getFarrowWeak());
         reportBi.setFarrowDead(pigDaily.getFarrowDead());
         reportBi.setFarrowJmh(pigDaily.getFarrowjmh());
-        reportBi.setPigletCountPerFarrow(fieldHelper.get(reportBi.getFarrowAll(), pigDaily.getFarrowNest()));
-        reportBi.setPigletLivingCountPerFarrow(fieldHelper.get(reportBi.getFarrowLiving(), pigDaily.getFarrowNest()));
-        reportBi.setPigletHealthCountPerFarrow(fieldHelper.get(reportBi.getFarrowHealth(), pigDaily.getFarrowNest()));
+        reportBi.setPigletCountPerFarrow(FieldHelper.get(reportBi.getFarrowAll(), pigDaily.getFarrowNest()));
+        reportBi.setPigletLivingCountPerFarrow(FieldHelper.get(reportBi.getFarrowLiving(), pigDaily.getFarrowNest()));
+        reportBi.setPigletHealthCountPerFarrow(FieldHelper.get(reportBi.getFarrowHealth(), pigDaily.getFarrowNest()));
         reportBi.setWeanNest(fieldHelper.filedUrl(filedUrlCriteria, pigDaily.getWeanNest(), "weanNest"));
         reportBi.setWeanCount(pigDaily.getWeanCount());
         reportBi.setWeanQualifiedCount(pigDaily.getWeanQualifiedCount());
-        reportBi.setWeanCountPerFarrow(fieldHelper.get(pigDaily.getWeanCount(), pigDaily.getWeanNest()));
+        reportBi.setWeanCountPerFarrow(FieldHelper.get(pigDaily.getWeanCount(), pigDaily.getWeanNest()));
     }
 
     private void buildDelay(DoctorPigDailyExtend pigDaily, DoctorReportDeliver reportBi) {
-        reportBi.setPigletWeakCountPerFarrow(fieldHelper.get(reportBi.getFarrowWeak(), pigDaily.getFarrowNest()));
+        reportBi.setPigletWeakCountPerFarrow(FieldHelper.get(reportBi.getFarrowWeak(), pigDaily.getFarrowNest()));
         reportBi.setAvgWeightPerFarrow(EventUtil.getAvgWeight(pigDaily.getFarrowWeight(), pigDaily.getFarrowNest()));
         reportBi.setFirstBornWeight(EventUtil.getAvgWeight(pigDaily.getFarrowWeight(), pigDaily.getFarrowLive()));
         reportBi.setWeanDayAge(FieldHelper.getInteger(pigDaily.getWeanDayAge(), pigDaily.getWeanCount()));
         reportBi.setWeanWeightPerFarrow(EventUtil.getAvgWeight(pigDaily.getWeanWeight(), pigDaily.getWeanCount()));
-        if (DateDimension.YEARLY.contains(reportBi.getDateType())) {
-            reportBi.setEarlyNestRate(fieldHelper.get(pigDaily.getFarrowNest(), pigDaily.getEarlyMating()));
-            reportBi.setLaterNestRate(fieldHelper.get(pigDaily.getLaterNest(), pigDaily.getMatingCount()));
-        }
+        reportBi.setEarlyNest(earlyFarrowNest(pigDaily, reportBi.getOrzType(), reportBi.getSumAt(), reportBi.getDateType()));
         reportBi.setEarlyMating(pigDaily.getEarlyMating());
-        reportBi.setEarlyNest(pigDaily.getEarlyFarrowNest());
-        reportBi.setLaterNest(pigDaily.getLaterNest());
+        reportBi.setLaterNest(laterFarrowNest(pigDaily, reportBi.getOrzType(), reportBi.getSumAt(), reportBi.getDateType()));
+        if (DateDimension.YEARLY.contains(reportBi.getDateType())) {
+            reportBi.setEarlyNestRate(FieldHelper.get(reportBi.getEarlyNest(), reportBi.getEarlyMating()));
+            reportBi.setLaterNestRate(FieldHelper.get(reportBi.getLaterNest(), pigDaily.getMatingCount()));
+        }
         reportBi.setTurnOutAvgWeight28(outAvgWeight28(reportBi));
     }
 
@@ -186,14 +200,14 @@ public class DoctorDeliverSynchronizer {
         reportBi.setPigletSaleAveWeight(EventUtil.getAvgWeight(groupDaily.getSaleWeight(), groupDaily.getSale()));
     }
 
-    public Integer otherIn(DoctorPigDailyExtend dailyExtend, Integer orzType) {
+    private Integer otherIn(DoctorPigDailyExtend dailyExtend, Integer orzType) {
         if (Objects.equals(orzType, OrzDimension.FARM.getValue())) {
             return dailyExtend.getSowCfInFarmIn();
         }
         return 0;
     }
 
-    public Integer otherIn(DoctorGroupDailyExtend dailyExtend, Integer orzType) {
+    private Integer otherIn(DoctorGroupDailyExtend dailyExtend, Integer orzType) {
         int otherIn = dailyExtend.getDeliverHandTurnInto();
         if (Objects.equals(orzType, OrzDimension.FARM.getValue())) {
             return otherIn + dailyExtend.getChgFarmIn();
@@ -208,6 +222,32 @@ public class DoctorDeliverSynchronizer {
                 + deliver.getWeanWeightPerFarrow();
     }
 
+    private Integer earlyFarrowNest(DoctorPigDailyExtend dailyExtend, Integer orzType, Date sumAt, Integer dateType) {
+        DateDimension dateDimension = DateDimension.from(dateType);
+        String startAt = DateUtil.toDateString(new DateTime(DateHelper.withDateStartDay(sumAt, dateDimension)).minusDays(114).toDate());
+        String endAt = DateUtil.toDateString(new DateTime(DateHelper.withDateEndDay(sumAt, dateDimension)).minusDays(114).toDate());
+        return farrowNest(dailyExtend, orzType, startAt, endAt);
+    }
+
+    private Integer laterFarrowNest(DoctorPigDailyExtend dailyExtend, Integer orzType, Date sumAt, Integer dateType) {
+        DateDimension dateDimension = DateDimension.from(dateType);
+        String startAt = DateUtil.toDateString(DateHelper.withDateStartDay(sumAt, dateDimension));
+        String endAt = DateUtil.toDateString(DateHelper.withDateEndDay(sumAt, dateDimension));
+        return farrowNest(dailyExtend, orzType, startAt, endAt);
+    }
+
+    private Integer farrowNest(DoctorPigDailyExtend dailyExtend, Integer orzType, String startAt, String endAt){
+        if (Objects.equals(orzType, OrzDimension.FARM.getValue())) {
+            return doctorPigStatisticDao.mateLeadToFarrow(dailyExtend.getFarmId(), startAt, endAt);
+        } else {
+            int earlyFarrowNest = 0;
+            List<DoctorFarm> farmList = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(dailyExtend.getOrgId()));
+            for (DoctorFarm farm: farmList) {
+                earlyFarrowNest += doctorPigStatisticDao.mateLeadToFarrow(farm.getId(), startAt, endAt);
+            }
+            return earlyFarrowNest;
+        }
+    }
     public void deleteAll() {
         doctorReportDeliverDao.deleteAll();
     }
