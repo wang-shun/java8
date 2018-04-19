@@ -1,6 +1,7 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,12 +35,14 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
     @Override
     public Response<BigDecimal> findLibraryById(Long id) {
-        return Response.ok(doctorWarehouseMaterialHandleDao.findLibraryById(id));
+        //return Response.ok(doctorWarehouseMaterialHandleDao.findLibraryById(id));
+        return null;
     }
 
     @Override
     public Response<BigDecimal> findRetreatingById(DoctorWarehouseMaterialHandle materialHandle) {
-        return Response.ok(doctorWarehouseMaterialHandleDao.findRetreatingById(materialHandle));
+        //return Response.ok(doctorWarehouseMaterialHandleDao.findRetreatingById(materialHandle));
+        return null;
     }
 
     @Override
@@ -160,4 +164,22 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
         return Response.ok(eachTypeAmounts);
     }
+
+    @Override
+    public Response<List<Map>> companyReport(Map<String, Object> criteria) {
+
+        try {
+            //按猪场Id，年月分组
+
+            return null;
+        } catch (Exception e) {
+            log.error("failed to list doctor warehouse material handle, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.material.handle.list.fail");
+        }
+
+    }
+
+
+
+
 }
