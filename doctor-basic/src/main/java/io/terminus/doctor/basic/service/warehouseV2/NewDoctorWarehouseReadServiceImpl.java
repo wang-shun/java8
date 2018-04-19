@@ -152,7 +152,17 @@ public class NewDoctorWarehouseReadServiceImpl implements NewDoctorWarehouseRead
     }
 
     @Override
-    public Response<List<Map<String, Object>>> listDetailTypeMap(Long wareHouseId) {
-        return Response.ok(doctorWareHouseDao.listDetailTypeMap(wareHouseId));
+    public Response<Paging<Map<String, Object>>> listDetailTypeMap(Integer type,
+                                                                 String materialName,
+                                                                 Long warehouseId,
+                                                                 Integer pageNo,
+                                                                 Integer pageSize) {
+        PageInfo pageInfo = new PageInfo(pageNo, pageSize);
+        Map<String, Object> param = new HashedMap();
+        param.put("type", type);
+        param.put("materialName", materialName);
+        param.put("warehouseId", warehouseId);
+        return Response.ok(doctorWareHouseDao.listDetailTypeMap(
+                pageInfo.getOffset(), pageInfo.getLimit(), param));
     }
 }

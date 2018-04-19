@@ -26,6 +26,7 @@ import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.front.warehouseV2.dto.WarehouseDto;
 import io.terminus.doctor.web.front.warehouseV2.vo.*;
 import io.terminus.pampas.common.UserUtil;
+import io.terminus.pampas.design.model.Page;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
@@ -308,10 +309,14 @@ public class WarehouseController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "/sameDetailTypeWarehouse")
-    public Response<List<Map<String,Object>>> sameDetailTypeWarehouse(Long wareHouseId) {
+    public Response<Paging<Map<String,Object>>> sameDetailTypeWarehouse(Integer type,
+                                                                      String materialName,
+                                                                      Long warehouseId,
+                                                                      Integer pageNo,
+                                                                      Integer pageSize) {
 //        if (null == farmId)
 //            throw new JsonResponseException("missing parameter,farmId must pick one");
-        return doctorWarehouseReaderService.listDetailTypeMap(wareHouseId);
+        return doctorWarehouseReaderService.listDetailTypeMap(type,materialName,warehouseId,pageNo,pageSize);
     }
     /*************************    2018/04/18  end         ******************************/
 
