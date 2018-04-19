@@ -152,7 +152,7 @@ public class NewDoctorWarehouseReadServiceImpl implements NewDoctorWarehouseRead
     }
 
     @Override
-    public Response<List<Map<String, Object>>> listDetailTypeMap(Long farmId, Long wareHouseId) {
-        return Response.ok(doctorWareHouseDao.listDetailTypeMap(farmId,wareHouseId));
+    public Response<List<Map<String, Object>>> listDetailTypeMap(Long wareHouseId) {
+        return Response.ok(doctorWareHouseDao.listDetailTypeMap(wareHouseId));
     }
 }

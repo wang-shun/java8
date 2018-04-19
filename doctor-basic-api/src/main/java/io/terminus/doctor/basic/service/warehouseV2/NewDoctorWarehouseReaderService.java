@@ -62,6 +62,6 @@ public interface NewDoctorWarehouseReaderService {
     /**
      * 展示该仓库所有物料结存数量和结存金额明细
      */
-    Response<List<Map<String,Object>>> listDetailTypeMap(Long farmId,Long wareHouseId);
+    Response<List<Map<String,Object>>> listDetailTypeMap(Long wareHouseId);
 
 }

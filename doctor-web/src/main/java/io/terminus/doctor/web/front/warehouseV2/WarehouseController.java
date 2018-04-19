@@ -305,14 +305,13 @@ public class WarehouseController {
     /**
      * 展示该仓库所有物料结存数量和结存金额明细
      *
-     * @param farmId
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "/sameDetailTypeWarehouse")
-    public Response<List<Map<String,Object>>> sameDetailTypeWarehouse(Long wareHouseId,Long farmId) {
-        if (null == farmId)
-            throw new JsonResponseException("missing parameter,farmId must pick one");
-        return doctorWarehouseReaderService.listDetailTypeMap(farmId,wareHouseId);
+    public Response<List<Map<String,Object>>> sameDetailTypeWarehouse(Long wareHouseId) {
+//        if (null == farmId)
+//            throw new JsonResponseException("missing parameter,farmId must pick one");
+        return doctorWarehouseReaderService.listDetailTypeMap(wareHouseId);
     }
     /*************************    2018/04/18  end         ******************************/
 

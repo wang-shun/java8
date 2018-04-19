@@ -220,23 +220,28 @@
      select a.type,
 	 (ifnull((select sum(quantity) from doctor_warehouse_material_handle b
 	 where b.id=a.material_handle_id
-	 and b.farm_id=#{farmId}
 	 and b.warehouse_id=#{wareHouseId}
-	 and b.delete_flag=1 and b.type in (1,2,3,4,5)),0)
+	 and b.delete_flag=1
+	 and b.type in (1,2,3,4,5)),0)
 	 -
 	 ifnull((select sum(quantity) from doctor_warehouse_material_handle b
-	 where b.id=a.material_handle_id  and b.farm_id=#{farmId}
-	 and b.warehouse_id=#{wareHouseId}  and b.delete_flag=1 and b.type in (6,7,8,9)),0) ) as wl_jc_sl,
+	 where b.id=a.material_handle_id
+	 and b.warehouse_id=#{wareHouseId}
+	 and b.delete_flag=1
+	 and b.type in (6,7,8,9)),0) ) as wl_jc_sl,
 	 (ifnull((select sum(amount) from doctor_warehouse_material_handle b
-	 where b.id=a.material_handle_id and b.farm_id=#{farmId}
-	 and b.warehouse_id=#{wareHouseId}   and b.delete_flag=1 and b.type in (1,2,3,4,5)),0)
+	 where b.id=a.material_handle_id
+	 and b.warehouse_id=#{wareHouseId}
+	 and b.delete_flag=1
+	 and b.type in (1,2,3,4,5)),0)
 	 -
 	 ifnull((select sum(amount) from doctor_warehouse_material_handle b
-	 where b.id=a.material_handle_id and b.farm_id=#{farmId}
-	 and b.warehouse_id=#{wareHouseId}   and b.delete_flag=1 and b.type in (6,7,8,9)),0) ) as wl_jc_je
-   from doctor_warehouse_material_apply a
-	 where a.farm_id=#{farmId}
-	 and a.warehouse_id=#{wareHouseId}
+	 where b.id=a.material_handle_id
+	 and b.warehouse_id=#{wareHouseId}
+	 and b.delete_flag=1
+	 and b.type in (6,7,8,9)),0) ) as wl_jc_je
+     from doctor_warehouse_material_apply a
+	 where a.warehouse_id=#{wareHouseId}
 	 order by a.type
     </select>
 
