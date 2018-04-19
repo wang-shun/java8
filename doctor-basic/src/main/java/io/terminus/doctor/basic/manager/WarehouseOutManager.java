@@ -35,7 +35,7 @@ public class WarehouseOutManager extends AbstractStockManager {
         DoctorWarehouseMaterialHandle materialHandle = buildMaterialHandle(detail, stockDto, stockHandle, wareHouse);
         materialHandle.setType(WarehouseMaterialHandleType.OUT.getValue());
 
-        //入库类型，当天第一笔
+        //出库类型，当天最后一笔
         if (!DateUtil.inSameDate(stockDto.getHandleDate().getTime(), new Date())) {
 
             materialHandle.setHandleDate(this.buildNewHandleDate(WarehouseMaterialHandleType.OUT, stockDto.getHandleDate()));
@@ -45,6 +45,9 @@ public class WarehouseOutManager extends AbstractStockManager {
 
             materialHandle.setBeforeStockQuantity(historyQuantity);
             historyQuantity = historyQuantity.subtract(detail.getQuantity());
+            if (historyQuantity.compareTo(new BigDecimal(0)) < 0) {
+                throw new ServiceException("warehouse.stock.not.enough");
+            }
 
             //该笔单据明细之后单据明细需要重算
             recalculate(stockDto.getHandleDate().getTime(), false, wareHouse.getId(), detail.getMaterialId(), historyQuantity);

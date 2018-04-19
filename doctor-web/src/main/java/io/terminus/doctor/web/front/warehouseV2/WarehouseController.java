@@ -212,31 +212,31 @@ public class WarehouseController {
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
         // 判断是否有猪场ID
-        Response<DoctorFarm> farmResponse = doctorFarmReadService.findFarmById(warehouseDto.getFarmId());
-        checkState(farmResponse.isSuccess(), "read.farmInfo.fail");
-        // 得到farmName
-        DoctorFarm doctorFarm = farmResponse.getResult();
-
-        if (doctorFarm == null)
-            throw new JsonResponseException("farm.not.found");
+//        Response<DoctorFarm> farmResponse = doctorFarmReadService.findFarmById(warehouseDto.getFarmId());
+//        checkState(farmResponse.isSuccess(), "read.farmInfo.fail");
+//        // 得到farmName
+//        DoctorFarm doctorFarm = farmResponse.getResult();
+//
+//        if (doctorFarm == null)
+//            throw new JsonResponseException("farm.not.found");
 
         // 得到managerName
-        UserProfile userProfile = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserId(warehouseDto.getManagerId()));
-
-        Response<User> currentUserResponse = userReadService.findById(UserUtil.getUserId());
-        // 得到creatorId,creatorName
-        User currentUser = currentUserResponse.getResult();
-        if (null == currentUser)
-            throw new JsonResponseException("user.not.login");
+//        UserProfile userProfile = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserId(warehouseDto.getManagerId()));
+//
+//        Response<User> currentUserResponse = userReadService.findById(UserUtil.getUserId());
+//        // 得到creatorId,creatorName
+//        User currentUser = currentUserResponse.getResult();
+//        if (null == currentUser)
+//            throw new JsonResponseException("user.not.login");
 
         DoctorWareHouse doctorWareHouse = DoctorWareHouse.builder()
                 .id(warehouseDto.getId())
-                .type(warehouseDto.getType())
-                .farmId(warehouseDto.getFarmId())
-                .wareHouseName(warehouseDto.getName())
-                .managerId(warehouseDto.getManagerId()).managerName(userProfile.getRealName())
-                .address(warehouseDto.getAddress())
-                .updatorId(currentUser.getId()).updatorName(currentUser.getName())
+//                .type(warehouseDto.getType())
+//                .farmId(warehouseDto.getFarmId())
+//                .wareHouseName(warehouseDto.getName())
+//                .managerId(warehouseDto.getManagerId()).managerName(userProfile.getRealName())
+//                .address(warehouseDto.getAddress())
+//                .updatorId(currentUser.getId()).updatorName(currentUser.getName())
                 .build();
 
         // 调删除仓库的方法
@@ -305,14 +305,13 @@ public class WarehouseController {
     /**
      * 展示该仓库所有物料结存数量和结存金额明细
      *
-     * @param farmId
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "/sameDetailTypeWarehouse")
-    public Response<List<Map<String,Object>>> sameDetailTypeWarehouse(Long wareHouseId,Long farmId) {
-        if (null == farmId)
-            throw new JsonResponseException("missing parameter,farmId must pick one");
-        return doctorWarehouseReaderService.listDetailTypeMap(farmId,wareHouseId);
+    public Response<List<Map<String,Object>>> sameDetailTypeWarehouse(Long wareHouseId) {
+//        if (null == farmId)
+//            throw new JsonResponseException("missing parameter,farmId must pick one");
+        return doctorWarehouseReaderService.listDetailTypeMap(wareHouseId);
     }
     /*************************    2018/04/18  end         ******************************/
 

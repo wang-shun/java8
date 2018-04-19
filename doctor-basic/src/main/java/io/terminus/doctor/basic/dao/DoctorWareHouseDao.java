@@ -43,13 +43,13 @@ public class DoctorWareHouseDao extends MyBatisDao<DoctorWareHouse>{
 
     /**
      * 按照仓库类型进行tab分页筛选，仓库按照创建时间进行排列
-     * @param farmId
+
      * @param wareHouseId
      * @return
      */
-    public List<Map<String, Object>> listDetailTypeMap(Long farmId, Long wareHouseId) {
+    public List<Map<String, Object>> listDetailTypeMap(Long wareHouseId) {
         Map<String, Object> params = new HashMap<>();
-        params.put("farmId", farmId);
+       // params.put("farmId", farmId);
         params.put("wareHouseId", wareHouseId);
         return this.getSqlSession().selectList(sqlId("listDetailTypeMap"),params);
     }

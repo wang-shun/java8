@@ -3,20 +3,20 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2017-12-10 15:21:37
+ ~ Date: 2018-04-19 17:05:11
  ~ Created by [ your name ]
 -->
 
 <mapper namespace="DoctorWarehouseStockMonthly">
     <resultMap id="DoctorWarehouseStockMonthlyMap" type="DoctorWarehouseStockMonthly">
         <id property="id" column="id"/>
+        <result property="orgId" column="org_id"/>
+        <result property="farmId" column="farm_id"/>
         <result property="warehouseId" column="warehouse_id"/>
         <result property="materialId" column="material_id"/>
-        <result property="handleYear" column="handle_year"/>
-        <result property="handleMonth" column="handle_month"/>
         <result property="balanceQuantity" column="balance_quantity"/>
-        <result property="balacneAmount" column="balacne_amount"/>
-        <result property="handleDate" column="handle_date"/>
+        <result property="balanceAmount" column="balance_amount"/>
+        <result property="settlementDate" column="settlement_date"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
@@ -31,24 +31,24 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `warehouse_id`, `material_id`, `handle_year`, `handle_month`, `balance_quantity`, `balacne_amount`, `handle_date`, 
+        `org_id`, `farm_id`, `warehouse_id`, `material_id`, `balance_quantity`, `balance_amount`, `settlement_date`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{warehouseId}, #{materialId}, #{handleYear}, #{handleMonth}, #{balanceQuantity}, #{balacneAmount}, #{handleDate}, 
+        #{orgId}, #{farmId}, #{warehouseId}, #{materialId}, #{balanceQuantity}, #{balanceAmount}, #{settlementDate}, 
         now(), now()
     </sql>
 
     <sql id="criteria">
         <where>
+            <if test="orgId != null">AND `org_id` = #{orgId}</if>
+            <if test="farmId != null">AND `farm_id` = #{farmId}</if>
             <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
             <if test="materialId != null">AND `material_id` = #{materialId}</if>
-            <if test="handleYear != null">AND `handle_year` = #{handleYear}</if>
-            <if test="handleMonth != null">AND `handle_month` = #{handleMonth}</if>
             <if test="balanceQuantity != null">AND `balance_quantity` = #{balanceQuantity}</if>
-            <if test="balacneAmount != null">AND `balacne_amount` = #{balacneAmount}</if>
-            <if test="handleDate != null">AND `handle_date` = #{handleDate}</if>
+            <if test="balanceAmount != null">AND `balance_amount` = #{balanceAmount}</if>
+            <if test="settlementDate != null">AND `settlement_date` = #{settlementDate}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
         </where>
@@ -85,13 +85,13 @@
         UPDATE
         <include refid="tb"/>
         <set>
+            <if test="orgId != null">`org_id` = #{orgId},</if>
+            <if test="farmId != null">`farm_id` = #{farmId},</if>
             <if test="warehouseId != null">`warehouse_id` = #{warehouseId},</if>
             <if test="materialId != null">`material_id` = #{materialId},</if>
-            <if test="handleYear != null">`handle_year` = #{handleYear},</if>
-            <if test="handleMonth != null">`handle_month` = #{handleMonth},</if>
             <if test="balanceQuantity != null">`balance_quantity` = #{balanceQuantity},</if>
-            <if test="balacneAmount != null">`balacne_amount` = #{balacneAmount},</if>
-            <if test="handleDate != null">`handle_date` = #{handleDate},</if>
+            <if test="balanceAmount != null">`balance_amount` = #{balanceAmount},</if>
+            <if test="settlementDate != null">`settlement_date` = #{settlementDate},</if>
             updated_at = now()
         </set>
         WHERE id = #{id}
@@ -163,6 +163,5 @@
         WHERE warehouse_id=#{warehouseId}
         and <![CDATA[handle_date<=#{handleDate}]]>
     </select>
-
 
 </mapper>

@@ -45,6 +45,7 @@ public class DoctorWarehouseStockHandleManager {
      * @param handleType
      * @return
      */
+    @Deprecated
     public DoctorWarehouseStockHandle handle(AbstractWarehouseStockDto stockDto, DoctorWareHouse wareHouse, WarehouseMaterialHandleType handleType) {
 
         if (stockDto.getStockHandleId() != null) {
@@ -102,6 +103,7 @@ public class DoctorWarehouseStockHandleManager {
         return handle;
     }
 
+    @Deprecated
     public <T extends AbstractWarehouseStockDetail> List<T> clean(AbstractWarehouseStockDto stockDto, List<T> stockDetails, DoctorWareHouse wareHouse) {
         doctorWarehouseMaterialHandleDao
                 .findByStockHandle(stockDto.getStockHandleId())
@@ -112,6 +114,7 @@ public class DoctorWarehouseStockHandleManager {
         return stockDetails;
     }
 
+    @Deprecated
     public <T extends AbstractWarehouseStockDetail> List<T> clean(AbstractWarehouseStockDto stockDto, List<T> stockDetails, DoctorWareHouse wareHouse, MaterialHandleComparator<T> keyComparator) {
 
         List<DoctorWarehouseMaterialHandle> oldSkuHandle = doctorWarehouseMaterialHandleDao
@@ -188,13 +191,5 @@ public class DoctorWarehouseStockHandleManager {
 
         boolean notImportDifferentProcess(T source, DoctorWarehouseMaterialHandle target);
 
-//        default boolean notImportDifferentProcess(T source, DoctorWarehouseMaterialHandle target) {
-//            if (Objects.equals(source.getRemark(), target.getRemark()))
-//                return false;
-//            else {
-//                target.setRemark(source.getRemark());
-//                return true;
-//            }
-//        }
     }
 }

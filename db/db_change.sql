@@ -2175,3 +2175,15 @@ ALTER TABLE doctor_warehouse_stock_handle ADD settlement_date date NULL COMMENT 
 
 --单据明细修改other_transfer_handle_id字段名称 2018-04-19
 ALTER TABLE doctor_warehouse_material_handle CHANGE other_transfer_handle_id rel_material_handle_id bigint(20) COMMENT '关联明细单据id';
+
+-- 修改doctor_warehouse_stock_monthly 2018-04-19
+ALTER TABLE doctor_warehouse_stock_monthly DROP handle_year;
+ALTER TABLE doctor_warehouse_stock_monthly DROP handle_month;
+ALTER TABLE doctor_warehouse_stock_monthly CHANGE handle_date settlement_date date COMMENT '会计年月';
+ALTER TABLE doctor_warehouse_stock_monthly CHANGE balacne_amount balance_amount decimal(23,2) NOT NULL DEFAULT '0' COMMENT '余额';
+ALTER TABLE doctor_warehouse_stock_monthly ADD farm_id bigint NULL COMMENT '猪场id';
+ALTER TABLE doctor_warehouse_stock_monthly ADD org_id bigint NULL COMMENT '公司id';
+ALTER TABLE doctor_warehouse_stock_monthly
+  MODIFY COLUMN org_id bigint COMMENT '公司id' AFTER id,
+  MODIFY COLUMN farm_id bigint COMMENT '猪场id' AFTER org_id,
+  MODIFY COLUMN settlement_date date COMMENT '会计年月' AFTER balance_amount;
