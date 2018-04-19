@@ -22,13 +22,13 @@ public enum WarehouseMaterialHandleType {
     UNKNOWN(0),
 
     /**
-     * 入库
+     * 采购入库
      */
     IN(1),
 
 
     /**
-     * 出库
+     * 领料出库
      */
     OUT(2),
 

@@ -2,12 +2,12 @@ package io.terminus.doctor.basic.service.warehouseV2;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.*;
-import io.terminus.doctor.basic.dto.DoctorWarehouseStockHandleDto;
 import io.terminus.doctor.basic.dto.warehouseV2.*;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
@@ -32,11 +32,16 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.jboss.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
+import javax.print.attribute.SetOfIntegerSyntax;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
 /**
@@ -50,36 +55,11 @@ import java.util.stream.Collectors;
 @RpcProvider
 public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStockWriteService {
 
-
-    @Autowired
-    private DoctorWarehouseStockDao doctorWarehouseStockDao;
-
-    @Autowired
-    private DoctorWarehouseHandlerManager doctorWarehouseHandlerManager;
-
     @Autowired
     private DoctorFarmBasicReadService doctorFarmBasicReadService;
 
     @Autowired
-    private DoctorWareHouseDao doctorWareHouseDao;
-
-    @Autowired
-    private DoctorBasicMaterialDao doctorBasicMaterialDao;
-
-    @Autowired
-    private DoctorWarehousePurchaseDao doctorWarehousePurchaseDao;
-
-    @Autowired
-    private DoctorWarehouseMaterialHandleDao doctorWarehouseMaterialHandleDao;
-
-    @Autowired
-    private DoctorWarehouseMaterialApplyManager doctorWarehouseMaterialApplyManager;
-    @Autowired
-    private DoctorWarehouseMaterialApplyDao doctorWarehouseMaterialApplyDao;
-    @Autowired
-    private DoctorWarehouseSkuDao doctorWarehouseSkuDao;
-
-
+    private DoctorWarehouseHandlerManager doctorWarehouseHandlerManager;
     @Autowired
     private DoctorWarehouseStockManager doctorWarehouseStockManager;
     @Autowired
@@ -90,9 +70,32 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     private DoctorWarehouseStockHandleManager doctorWarehouseStockHandleManager;
     @Autowired
     private DoctorWarehouseStockMonthlyManager doctorWarehouseStockMonthlyManager;
+    @Autowired
+    private DoctorWarehouseMaterialApplyManager doctorWarehouseMaterialApplyManager;
+    @Autowired
+    private WarehouseInManager warehouseInManager;
 
     @Autowired
     private DoctorBasicDao doctorBasicDao;
+    @Autowired
+    private DoctorWarehouseStockHandleDao doctorWarehouseStockHandleDao;
+    @Autowired
+    private DoctorWareHouseDao doctorWareHouseDao;
+    @Autowired
+    private DoctorBasicMaterialDao doctorBasicMaterialDao;
+    @Autowired
+    private DoctorWarehousePurchaseDao doctorWarehousePurchaseDao;
+    @Autowired
+    private DoctorWarehouseMaterialHandleDao doctorWarehouseMaterialHandleDao;
+    @Autowired
+    private DoctorWarehouseMaterialApplyDao doctorWarehouseMaterialApplyDao;
+    @Autowired
+    private DoctorWarehouseSkuDao doctorWarehouseSkuDao;
+    @Autowired
+    private DoctorWarehouseStockDao doctorWarehouseStockDao;
+
+    @Autowired
+    private LockRegistry lockRegistry;
 
     @Override
     public Response<Long> create(DoctorWarehouseStock doctorWarehouseStock) {
@@ -139,72 +142,77 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     @ExceptionHandle("doctor.warehouse.stock.in.fail")
     public Response<Long> in(WarehouseStockInDto stockIn) {
 
-        StockContext context = getWarehouseAndSupportedBasicMaterial(stockIn.getFarmId(), stockIn.getWarehouseId());
+        List<Lock> locks = lockedIfNecessary(stockIn);
 
-        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.handle(stockIn, context.getWareHouse(), WarehouseMaterialHandleType.IN);
+        DoctorWareHouse wareHouse = doctorWareHouseDao.findById(stockIn.getWarehouseId());
+        if(null==wareHouse)
+            throw new ServiceException("warehouse.not.found");
 
-        List<WarehouseStockInDto.WarehouseStockInDetailDto> needProcessDetails;
-        if (stockIn.getStockHandleId() != null)
-            needProcessDetails = doctorWarehouseStockHandleManager.clean(stockIn, stockIn.getDetails(), context.getWareHouse(),
-                    new DoctorWarehouseStockHandleManager.MaterialHandleComparator<WarehouseStockInDto.WarehouseStockInDetailDto>() {
-                        @Override
-                        public boolean same(WarehouseStockInDto.WarehouseStockInDetailDto source, DoctorWarehouseMaterialHandle target) {
-                            return source.getQuantity().compareTo(target.getQuantity()) == 0
-                                    && source.getUnitPrice().equals(target.getUnitPrice())
-                                    && source.getMaterialId().equals(target.getMaterialId());
-                        }
+        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.handle(stockIn, wareHouse, WarehouseMaterialHandleType.IN);
 
-                        @Override
-                        public boolean notImportDifferentProcess(WarehouseStockInDto.WarehouseStockInDetailDto source, DoctorWarehouseMaterialHandle target) {
-                            if (Objects.equals(source.getRemark(), target.getRemark()))
-                                return false;
-                            else {
-                                target.setRemark(source.getRemark());
-                                return true;
-                            }
-                        }
-                    }
-            );
-        else
-            needProcessDetails = stockIn.getDetails();
+        if (null == stockIn.getStockHandleId()) {
+            stockIn.getDetails().forEach(detail -> {
 
-        needProcessDetails.forEach(detail -> {
+                warehouseInManager.create(detail, stockIn, stockHandle, wareHouse);
+                //增加库存
+                doctorWarehouseStockManager.in(detail, wareHouse);
+            });
+        } else {
+            List<DoctorWarehouseMaterialHandle> oldMaterialHandle = doctorWarehouseMaterialHandleDao.findByStockHandle(stockIn.getStockHandleId());
 
-            DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(detail.getMaterialId());
-            if (null == sku)
-                throw new InvalidException("warehouse.sku.not.found", detail.getMaterialId());
-            if (!sku.getType().equals(context.getWareHouse().getType()))
-                throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
-            if (WarehouseSkuStatus.FORBIDDEN.getValue() == sku.getStatus())
-                throw new InvalidException("warehouse.sku.forbidden", sku.getName());
+            warehouseInManager.getNew(oldMaterialHandle, stockIn.getDetails()).forEach(detail -> {
+                warehouseInManager.create(detail, stockIn, stockHandle, wareHouse);
+                //增加库存
+                doctorWarehouseStockManager.in(detail, wareHouse);
+            });
+            warehouseInManager.getDelete(oldMaterialHandle, stockIn.getDetails()).forEach(materialHandle -> {
+                warehouseInManager.delete(materialHandle, stockIn.getHandleDate().getTime());
+            });
 
-            DoctorWarehouseStock stock = doctorWarehouseStockManager.in(stockIn, detail, context, sku);
 
-            //记录物料采购入库的单价
-            DoctorWarehousePurchase purchase = doctorWarehousePurchaseManager.in(stockIn, detail, stock, sku);
+        }
 
-            doctorWarehouseMaterialHandleManager.in(DoctorWarehouseMaterialHandleManager.MaterialHandleContext.builder()
-                    .stock(stock)
-                    .stockDto(stockIn)
-                    .stockDetail(detail)
-                    .sku(sku)
-                    .unitPrice(detail.getUnitPrice())
-                    .vendorName(purchase.getVendorName())
-                    .quantity(detail.getQuantity())
-                    .purchases(Collections.singletonMap(purchase, detail.getQuantity()))
-                    .stockHandle(stockHandle)
-                    .build());
 
-            doctorWarehouseStockMonthlyManager.count(stock.getWarehouseId(),
-                    stock.getSkuId(),
-                    stockIn.getHandleDate().get(Calendar.YEAR),
-                    stockIn.getHandleDate().get(Calendar.MONTH) + 1,
-                    detail.getQuantity(),
-                    detail.getUnitPrice(),
-                    true);
-        });
-
+        releaseLocks(locks);
         return Response.ok(stockHandle.getId());
+    }
+
+    private List<Lock> lockedIfNecessary(AbstractWarehouseStockDto stockDto) {
+
+        if (stockDto.getStockHandleId() != null && !stockDto.getHandleDate().equals(Calendar.getInstance())) {
+
+            List<Lock> locks = new ArrayList<>();
+
+            log.info("lock for warehouse :{}", stockDto.getWarehouseId());
+            Lock lock = lockRegistry.obtain(stockDto.getWarehouseId());
+            if (!lock.tryLock())
+                throw new JsonResponseException("stock.handle.in.operation");
+
+            locks.add(lock);
+            if (stockDto instanceof WarehouseStockTransferDto) {
+                Set<Long> transferInWarehouseIds = new HashSet<>();
+                ((WarehouseStockTransferDto) stockDto).getDetails().forEach(d -> {
+                    transferInWarehouseIds.add(d.getTransferInWarehouseId());
+                });
+
+                transferInWarehouseIds.forEach(id -> {
+                    log.info("lock for warehouse :{}", id);
+                    Lock l = lockRegistry.obtain(id);
+                    if (!l.tryLock())
+                        throw new JsonResponseException("stock.handle.in.operation");
+                    locks.add(l);
+                });
+            }
+
+            return locks;
+        }
+        return Collections.emptyList();
+    }
+
+    private void releaseLocks(List<Lock> locks) {
+        locks.forEach(l -> {
+            l.unlock();
+        });
     }
 
 
@@ -1130,4 +1138,90 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
         private List<DoctorWarehouseStock> stocks;
         private List<AbstractWarehouseStockDetail> details;
     }
+
+    /**
+     * 出库、入库单据主表、明细表新增,物料领用新增
+     *
+     * @param doctorWarehouseStockHandle
+     * @param list
+     * @param doctorWarehouseMaterialApplies
+     * @return
+     */
+    @Override
+    @Transactional
+    public Response<Long> create(DoctorWarehouseStockHandle doctorWarehouseStockHandle,
+                                 List<DoctorWarehouseMaterialHandle> list,
+                                 List<DoctorWarehouseMaterialHandle> dblist,
+                                 List<DoctorWarehouseMaterialApply> doctorWarehouseMaterialApplies) {
+        int count = 1;
+        try {
+            //先新增主表数据,会自动填充主键id值
+            doctorWarehouseStockHandleDao.create(doctorWarehouseStockHandle);
+
+            //填充list集合id值,填充主键关联Id值
+            for (DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle : list) {
+                doctorWarehouseMaterialHandle.setStockHandleId(doctorWarehouseStockHandle.getId());
+            }
+            int step = doctorWarehouseMaterialHandleDao.creates(list);
+            count += step;
+
+            if (!CollectionUtils.isEmpty(dblist)) {
+                for (DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle : dblist) {
+                    doctorWarehouseMaterialHandle.setStockHandleId(doctorWarehouseStockHandle.getId());
+                }
+                step = doctorWarehouseMaterialHandleDao.creates(dblist);
+                count += step;
+            }
+
+            if (!CollectionUtils.isEmpty(doctorWarehouseMaterialApplies)) {
+                for (int i = 0; i < list.size(); i++) {
+                    doctorWarehouseMaterialApplies.get(i).setMaterialHandleId(list.get(i).getId());
+                }
+                step = doctorWarehouseMaterialApplyDao.creates(doctorWarehouseMaterialApplies);
+                count += step;
+            }
+        } catch (Exception e) {
+            log.error("create warehouseStock failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("warehouseStock.create.fail");
+        }
+        return Response.ok(new Long(count));
+    }
+
+    @Override
+    @Transactional
+    public Response<Long> update(DoctorWarehouseStockHandle doctorWarehouseStockHandle,
+                                 List<DoctorWarehouseMaterialHandle> list,
+                                 List<DoctorWarehouseMaterialHandle> dblist,
+                                 List<DoctorWarehouseMaterialApply> doctorWarehouseMaterialApplies) {
+        int count = 1;
+        try {
+            //先新增主表数据,会自动填充主键id值
+            doctorWarehouseStockHandleDao.update(doctorWarehouseStockHandle);
+
+            //填充list集合id值,填充主键关联Id值
+            for (DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle : list) {
+                doctorWarehouseMaterialHandleDao.update(doctorWarehouseMaterialHandle);
+                count++;
+            }
+
+            if (!CollectionUtils.isEmpty(dblist)) {
+                for (DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle : dblist) {
+                    doctorWarehouseMaterialHandleDao.update(doctorWarehouseMaterialHandle);
+                    count++;
+                }
+            }
+
+            if (!CollectionUtils.isEmpty(doctorWarehouseMaterialApplies)) {
+                for (DoctorWarehouseMaterialApply doctorWarehouseMaterialApply : doctorWarehouseMaterialApplies) {
+                    doctorWarehouseMaterialApplyDao.update(doctorWarehouseMaterialApply);
+                    count++;
+                }
+            }
+        } catch (Exception e) {
+            log.error("update warehouseStock failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("warehouseStock.update.fail");
+        }
+        return Response.ok(new Long(count));
+    }
+
 }

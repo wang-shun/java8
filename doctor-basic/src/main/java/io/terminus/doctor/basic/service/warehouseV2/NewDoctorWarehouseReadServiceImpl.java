@@ -1,6 +1,7 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
@@ -125,5 +126,17 @@ public class NewDoctorWarehouseReadServiceImpl implements NewDoctorWarehouseRead
             totalAmount += leftQuantity.multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
         }
         return Response.ok(new AmountAndQuantityDto(totalAmount, totalQuantity));
+    }
+
+    @Override
+    public Response<List<DoctorWareHouse>> getWarehouseByType(DoctorWareHouse criteria,Integer pageCurrent) {
+        try {
+            int pageNum = 6;
+            int pageSize = (pageCurrent-1)*pageNum;
+            return Response.ok(doctorWareHouseDao.getWarehouseByType(criteria,pageSize,pageNum));
+        } catch (Exception e) {
+            log.error("failed to list doctor warehouseV2, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.list.fail");
+        }
     }
 }

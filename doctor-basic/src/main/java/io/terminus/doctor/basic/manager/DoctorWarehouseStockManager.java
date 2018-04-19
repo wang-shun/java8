@@ -2,10 +2,12 @@ package io.terminus.doctor.basic.manager;
 
 import io.terminus.doctor.basic.dao.DoctorMaterialCodeDao;
 import io.terminus.doctor.basic.dao.DoctorMaterialVendorDao;
+import io.terminus.doctor.basic.dao.DoctorWarehouseSkuDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseStockDao;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockInDto;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockOutDto;
 import io.terminus.doctor.basic.model.DoctorBasic;
+import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseStockWriteServiceImpl;
@@ -29,8 +31,10 @@ public class DoctorWarehouseStockManager {
     @Autowired
     private DoctorMaterialVendorDao doctorMaterialVendorDao;
 
+    @Autowired
+    private DoctorWarehouseSkuDao doctorWarehouseSkuDao;
 
-    //    @Transactional
+
     public DoctorWarehouseStock in(WarehouseStockInDto inDto, WarehouseStockInDto.WarehouseStockInDetailDto detailDto, DoctorWarehouseStockWriteServiceImpl.StockContext context, DoctorWarehouseSku sku) {
         //find stock
         DoctorWarehouseStock stock = getStock(inDto.getWarehouseId(), detailDto.getMaterialId()).orElseGet(() -> {
@@ -41,7 +45,6 @@ public class DoctorWarehouseStockManager {
                     .warehouseType(context.getWareHouse().getType())
                     .skuId(sku.getId())
                     .skuName(sku.getName())
-//                    .unit(detailDto.getUnit())
                     .quantity(detailDto.getQuantity())
                     .build();
         });
@@ -52,46 +55,31 @@ public class DoctorWarehouseStockManager {
         } else
             doctorWarehouseStockDao.create(stock);
 
-//        if ((StringUtils.isNotBlank(detailDto.getSpecification()) || StringUtils.isNotBlank(detailDto.getMaterialCode()))) {
-//
-//            List<DoctorMaterialCode> materialCodes = doctorMaterialCodeDao.list(DoctorMaterialCode.builder()
-//                    .warehouseId(stock.getWarehouseId())
-//                    .materialId(stock.getSkuId())
-//                    .vendorName(detailDto.getVendorName())
-//                    .build());
-//
-//            if (!materialCodes.isEmpty()) {
-//                if (!materialCodes.get(0).getSpecification().equals(detailDto.getSpecification()))
-//                    throw new InvalidException("material.code.or.vendor.existed", stock.getWarehouseName(), stock.getSkuName());
-//                if (!materialCodes.get(0).getCode().equals(detailDto.getMaterialCode()))
-//                    throw new InvalidException("material.code.or.vendor.existed", stock.getWarehouseName(), stock.getSkuName());
-//            }
-//            if (materialCodes.isEmpty()) {
-//                DoctorMaterialCode materialCode = new DoctorMaterialCode();
-//                materialCode.setWarehouseId(stock.getWarehouseId());
-//                materialCode.setMaterialId(stock.getSkuId());
-//                materialCode.setVendorName(detailDto.getVendorName());
-//                materialCode.setSpecification(detailDto.getSpecification());
-//                materialCode.setCode(detailDto.getMaterialCode());
-//                doctorMaterialCodeDao.create(materialCode);
-//            }
-//        }
-//
-//        if (StringUtils.isNotBlank(detailDto.getVendorName()) &&
-//                doctorMaterialVendorDao.list(DoctorMaterialVendor.builder()
-//                        .warehouseId(stock.getWarehouseId())
-//                        .materialId(stock.getSkuId())
-//                        .vendorName(detailDto.getVendorName())
-//                        .build()).isEmpty()) {
-//            DoctorMaterialVendor materialVendor = new DoctorMaterialVendor();
-//            materialVendor.setWarehouseId(stock.getWarehouseId());
-//            materialVendor.setMaterialId(stock.getSkuId());
-//            materialVendor.setVendorName(detailDto.getVendorName());
-//            doctorMaterialVendorDao.create(materialVendor);
-//        }
-
-
         return stock;
+    }
+
+    public void in(WarehouseStockInDto.WarehouseStockInDetailDto inDetail, DoctorWareHouse wareHouse) {
+        //find stock
+        DoctorWarehouseStock stock = getStock(wareHouse.getId(), inDetail.getMaterialId()).orElseGet(() -> {
+
+            DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(inDetail.getMaterialId());
+
+            return DoctorWarehouseStock.builder()
+                    .farmId(wareHouse.getFarmId())
+                    .warehouseId(wareHouse.getId())
+                    .warehouseName(wareHouse.getWareHouseName())
+                    .warehouseType(wareHouse.getType())
+                    .skuId(sku.getId())
+                    .skuName(sku.getName())
+                    .quantity(inDetail.getQuantity())
+                    .build();
+        });
+
+        if (null != stock.getId()) {
+            stock.setQuantity(stock.getQuantity().add(inDetail.getQuantity()));
+            doctorWarehouseStockDao.update(stock);
+        } else
+            doctorWarehouseStockDao.create(stock);
     }
 
     //    @Transactional(propagation = Propagation.NESTED)

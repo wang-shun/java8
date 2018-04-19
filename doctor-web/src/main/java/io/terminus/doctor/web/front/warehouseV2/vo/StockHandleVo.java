@@ -53,5 +53,8 @@ public class StockHandleVo extends DoctorWarehouseStockHandle {
 
         private Long transferInWarehouseId;
 
+        //可退数量
+        private Double refundableQuantity;
+
     }
 }

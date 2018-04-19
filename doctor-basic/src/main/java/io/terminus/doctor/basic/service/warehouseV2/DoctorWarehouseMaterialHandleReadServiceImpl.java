@@ -32,6 +32,16 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     private DoctorWarehouseMaterialHandleDao doctorWarehouseMaterialHandleDao;
 
     @Override
+    public Response<BigDecimal> findLibraryById(Long id) {
+        return Response.ok(doctorWarehouseMaterialHandleDao.findLibraryById(id));
+    }
+
+    @Override
+    public Response<BigDecimal> findRetreatingById(DoctorWarehouseMaterialHandle materialHandle) {
+        return Response.ok(doctorWarehouseMaterialHandleDao.findRetreatingById(materialHandle));
+    }
+
+    @Override
     public Response<DoctorWarehouseMaterialHandle> findById(Long id) {
         try {
             return Response.ok(doctorWarehouseMaterialHandleDao.findById(id));

@@ -27,7 +27,8 @@ zookeeper:
 
 # Redis
 redis:
-  host: 101.201.44.35
+  #host: 101.201.44.35
+  host: 127.0.0.1
   port: 6379
   max-total: 10
   max-idle: 2

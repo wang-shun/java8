@@ -4,11 +4,13 @@ import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 
+import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -75,11 +77,143 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectList(this.sqlId("findAfter"), criteria);
     }
 
+    public List<DoctorWarehouseMaterialHandle> findAfter(Long warehouseId, Date handleDate) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("handleDate", handleDate);
+
+        return this.sqlSession.selectList(this.sqlId("findAfterByDate"), criteria);
+    }
+
+    /**
+     * 根据单据明细统计历史某一个节点的库存量
+     *
+     * @return
+     */
+    public BigDecimal getHistoryStock(Long warehouseId, Long skuId, Date handleDate) {
+
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("skuId", skuId);
+        criteria.put("handleDate", handleDate);
+
+        return this.sqlSession.selectOne(this.sqlId("countHistoryStock"), criteria);
+    }
+
+
+    public List<DoctorWarehouseMaterialHandle> findByAccountingDate(Long warehouseId, Integer year, Integer month) {
+
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("year", year);
+        criteria.put("month", month);
+
+        return this.sqlSession.selectList(this.sqlId("findByAccountingDate"), criteria);
+    }
+
+    public List<DoctorWarehouseMaterialHandle> findByOrgAndSettlementDate(Long orgId, Date settlementDate) {
+
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("orgId", orgId);
+        criteria.put("settlementDate", settlementDate);
+
+        return this.sqlSession.selectList(this.sqlId("findByOrgAndSettlementDate"), criteria);
+    }
+
+    public void reverseSettlement(Long farmId, Integer year, Integer month) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("farmId", farmId);
+        criteria.put("year", year);
+        criteria.put("month", month);
+
+        this.sqlSession.update(this.sqlId("reverseSettlement"), criteria);
+    }
+
+
+    /**
+     * 获取本会计年月之前的库存量和金额
+     *
+     * @param warehouseId
+     * @param settlementDate
+     * @return
+     */
+    public AmountAndQuantityDto findBalanceByAccountingDate(Long warehouseId, Date settlementDate) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("settlementDate", settlementDate);
+
+        Map<String, Object> result = this.sqlSession.selectOne(this.sqlId("findBalanceByAccountingDate"), criteria);
+        return new AmountAndQuantityDto(((BigDecimal) result.get("amount")).longValue(), (BigDecimal) result.get("quantity"));
+    }
+
+
+    /**
+     * 获取公司下各个仓库在该会计年月之前的库存余量余额
+     *
+     * @param orgId
+     * @param settlementDate
+     * @return
+     */
+    public Map<Long, AmountAndQuantityDto> findEachWarehouseBalanceBySettlementDate(Long orgId, Date settlementDate) {
+
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("orgId", orgId);
+        criteria.put("settlementDate", settlementDate);
+
+        List<Map<String, Object>> results = this.sqlSession.selectList(this.sqlId("findEachWarehouseBalanceByAccountingDate"), criteria);
+
+        Map<Long/*warehouseId*/, AmountAndQuantityDto> balances = new HashMap<>();
+
+        results.forEach(m -> {
+            balances.put((Long) m.get("warehouseId"), new AmountAndQuantityDto(((BigDecimal) m.get("amount")).longValue(), (BigDecimal) m.get("quantity")));
+        });
+
+        return balances;
+    }
+
+    /**
+     * 获取指定明细获取上一笔明细
+     *
+     * @param materialHandle
+     * @return
+     */
+    public DoctorWarehouseMaterialHandle findPrevious(DoctorWarehouseMaterialHandle materialHandle, WarehouseMaterialHandleType handleType) {
+
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", materialHandle.getWarehouseId());
+        criteria.put("materialHandleId", materialHandle.getId());
+        criteria.put("handleDate", materialHandle.getHandleDate());
+        if (null != handleType)
+            criteria.put("type", handleType.getValue());
+
+        List<DoctorWarehouseMaterialHandle> materialHandles = this.sqlSession.selectList(this.sqlId("findPrevious"), criteria);
+        if (materialHandles.isEmpty())
+            return null;
+
+        return materialHandles.get(0);
+    }
+
     public Integer getWarehouseMaterialHandleCount(Long warehouseId) {
-        Map<String,String> m = new HashMap<>();
-        m.put("id",warehouseId.toString());
+        Map<String, String> m = new HashMap<>();
+        m.put("id", warehouseId.toString());
         Integer count = this.sqlSession.selectOne(this.sqlId("getWarehouseMaterialHandleCount"), warehouseId);
         return count;
+    }
+
+    //得到领料出库的数量
+    public BigDecimal findLibraryById(Long id) {
+        BigDecimal quantity = this.sqlSession.selectOne(this.sqlId("findLibraryById"), id);
+        return quantity;
+    }
+
+
+    //得到在此之前退料入库的数量和
+    public BigDecimal findRetreatingById(DoctorWarehouseMaterialHandle materialHandle) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("otherTransferHandleId", materialHandle.getOtherTransferHandleId());
+        criteria.put("handleDate", materialHandle.getHandleDate());
+        BigDecimal quantity = this.sqlSession.selectOne(this.sqlId("findRetreatingById"), criteria);
+        return quantity;
     }
 
 

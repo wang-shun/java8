@@ -5,6 +5,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.List;
 
@@ -15,6 +16,20 @@ import java.util.List;
  * Created by [ your name ]
  */
 public interface DoctorWarehouseMaterialHandleReadService {
+
+    /**
+     * 得到领料出库的数量
+     * @param id
+     * @return
+     */
+    Response<BigDecimal> findLibraryById(Long id);
+
+    /**
+     * 得到在此之前退料入库的数量和
+     * @param materialHandle
+     * @return
+     */
+    Response<BigDecimal> findRetreatingById(DoctorWarehouseMaterialHandle materialHandle);
 
     /**
      * 查询

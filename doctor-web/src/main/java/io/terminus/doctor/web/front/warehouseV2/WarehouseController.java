@@ -55,6 +55,7 @@ public class WarehouseController {
 
     @Autowired
     private DoctorFarmReadService doctorFarmReadService;
+
     @RpcConsumer
     private DoctorWareHouseReadService doctorWareHouseReadService;
 
@@ -66,12 +67,10 @@ public class WarehouseController {
     @Autowired
     private DoctorWareHouseWriteService doctorWareHouseWriteService;
 
-
     @Autowired
     private DoctorUserProfileReadService doctorUserProfileReadService;
     @RpcConsumer
     private NewDoctorWarehouseReaderService doctorWarehouseReaderService;
-
 
     @RpcConsumer
     private DoctorWarehouseMaterialHandleReadService doctorWarehouseMaterialHandleReadService;
@@ -106,7 +105,6 @@ public class WarehouseController {
     private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
     @RpcConsumer
     private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
-
 
     @Autowired
     private MessageSource messageSource;
@@ -201,7 +199,6 @@ public class WarehouseController {
         return RespHelper.or500(doctorWareHouseWriteService.updateWareHouse(doctorWareHouse));
     }
 
-
     /**
      * 删除仓库
      *
@@ -256,11 +253,10 @@ public class WarehouseController {
     /**
      * 猪厂下同类型的仓库列表
      *
-     * @param type
      * @param farmId
      * @return
      */
-    @RequestMapping(method = RequestMethod.GET, value = "type/{type}")
+   @RequestMapping(method = RequestMethod.GET, value = "type/{type}")
     @JsonView(WarehouseVo.WarehouseWithOutStatisticsView.class)
     public List<WarehouseVo> sameTypeWarehouse(@PathVariable Integer type,
                                                @RequestParam(required = false) Long orgId,
@@ -616,6 +612,10 @@ public class WarehouseController {
         vo.setType(wareHouseResponse.getResult().getType());
         vo.setManagerId(wareHouseResponse.getResult().getManagerId());
         vo.setManagerName(wareHouseResponse.getResult().getManagerName());
+        vo.setFarmId(wareHouseResponse.getResult().getFarmId());
+        vo.setFarmName(wareHouseResponse.getResult().getFarmName());
+        vo.setAddress(wareHouseResponse.getResult().getAddress());
+
 
         if (null != applyResponse && !applyResponse.getResult().isEmpty())
             vo.setLastApplyDate(applyResponse.getResult().get(0).getApplyDate());
@@ -1265,5 +1265,37 @@ public class WarehouseController {
 
         return unitPriceResponse.getResult();
     }
+    /**
+     * 猪厂下同类型的仓库列表
+     *
+     * @param type
+     * @param farmId
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "types/{type}")
+    @JsonView(WarehouseVo.WarehouseWithOutStatisticsView.class)
+    public List<WarehouseVo> getWarehouseByType(@PathVariable Integer type,
+                                               @RequestParam(required = false) Long orgId,
+                                               @RequestParam(required = false) Long farmId,
+                                                int currentPage) {
+        if (null == orgId && null == farmId)
+            throw new JsonResponseException("missing parameter,orgId or farmId must pick one");
 
+            DoctorWareHouse criteria = new DoctorWareHouse();
+            criteria.setType(type);
+            criteria.setFarmId(farmId);
+        List<DoctorWareHouse> wareHouses = RespHelper.or500(doctorWarehouseReaderService.getWarehouseByType(criteria,currentPage));
+
+        List<WarehouseVo> vos = new ArrayList<>(wareHouses.size());
+        wareHouses.forEach(wareHouse -> {
+            WarehouseVo vo = new WarehouseVo();
+            vo.setId(wareHouse.getId());
+            vo.setName(wareHouse.getWareHouseName());
+            vo.setType(wareHouse.getType());
+            vo.setManagerName(wareHouse.getManagerName());
+            vo.setManagerId(wareHouse.getManagerId());
+            vos.add(vo);
+        });
+        return vos;
+    }
 }

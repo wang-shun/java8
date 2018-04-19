@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Desc:
+ * Desc:物料领用表
  * Mail: [ your email ]
  * Date: 2018-01-18 20:05:20
  * Created by [ your name ]

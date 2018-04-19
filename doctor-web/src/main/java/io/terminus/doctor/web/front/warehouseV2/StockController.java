@@ -9,13 +9,13 @@ import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.enums.WarehouseSkuStatus;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
+import io.terminus.doctor.basic.model.warehouseV2.*;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
 import io.terminus.doctor.basic.service.warehouseV2.*;
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
@@ -25,16 +25,26 @@ import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
+import io.terminus.doctor.web.front.warehouseV2.dto.StockDto;
+import io.terminus.doctor.web.front.warehouseV2.dto.WarehouseDto;
 import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseStockStatisticsVo;
+import io.terminus.pampas.common.UserUtil;
+import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
+import io.terminus.parana.user.service.UserReadService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.integration.support.locks.LockRegistry;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
 /**
@@ -82,6 +92,9 @@ public class StockController {
     @Autowired
     private LockRegistry lockRegistry;
 
+    @RpcConsumer
+    private DoctorWarehouseSettlementService doctorWarehouseSettlementService;
+
     /**
      * 采购入库
      *
@@ -94,18 +107,21 @@ public class StockController {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
-        Response<UserProfile> userResponse = doctorUserProfileReadService.findProfileByUserId(stockIn.getOperatorId());
-        if (!userResponse.isSuccess())
-            throw new JsonResponseException(userResponse.getError());
-        if (null == userResponse.getResult())
-            throw new JsonResponseException("user.not.found");
-        stockIn.setOperatorName(userResponse.getResult().getRealName());
+        setOrgId(stockIn);
 
-        Response<Long> response = doctorWarehouseStockWriteService.in(stockIn);
-        if (!response.isSuccess())
-            throw new JsonResponseException(response.getError());
+        //是否该公司正在结算中
+        if (doctorWarehouseSettlementService.isUnderSettlement(stockIn.getOrgId()))
+            throw new JsonResponseException("under.settlement");
 
-        return response.getResult();
+        //会计年月
+        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(stockIn.getHandleDate().getTime());
+        //会计年月已经结算后，不允许新增或编辑单据
+        if (doctorWarehouseSettlementService.isSettled(stockIn.getOrgId(), settlementDate))
+            throw new JsonResponseException("already.settlement");
+
+        setOperatorName(stockIn);
+
+        return RespHelper.or500(doctorWarehouseStockWriteService.in(stockIn));
     }
 
     /**
@@ -120,18 +136,9 @@ public class StockController {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
-        Response<UserProfile> userResponse = doctorUserProfileReadService.findProfileByUserId(stockOut.getOperatorId());
-        if (!userResponse.isSuccess())
-            throw new JsonResponseException(userResponse.getError());
-        if (null == userResponse.getResult())
-            throw new JsonResponseException("user.not.found");
-        stockOut.setOperatorName(userResponse.getResult().getRealName());
+        setOperatorName(stockOut);
 
-
-        DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(stockOut.getFarmId()));
-        if (null == farm)
-            throw new JsonResponseException("farm.not.found");
-        stockOut.setOrgId(farm.getOrgId());
+        setOrgId(stockOut);
 
         stockOut.getDetails().forEach(detail -> {
             Response<String> realNameResponse = doctorGroupWebService.findRealName(detail.getApplyStaffId());
@@ -145,11 +152,7 @@ public class StockController {
             detail.setPigType(barn.getPigType());
         });
 
-        Response<Long> response = doctorWarehouseStockWriteService.out(stockOut);
-        if (!response.isSuccess())
-            throw new JsonResponseException(response.getError());
-
-        return response.getResult();
+        return RespHelper.or500(doctorWarehouseStockWriteService.out(stockOut));
     }
 
 
@@ -194,18 +197,9 @@ public class StockController {
         }
         stockInventory.setDetails(removedRepeat);
 
-        Response<UserProfile> userResponse = doctorUserProfileReadService.findProfileByUserId(stockInventory.getOperatorId());
-        if (!userResponse.isSuccess())
-            throw new JsonResponseException(userResponse.getError());
-        if (null == userResponse.getResult())
-            throw new JsonResponseException("user.not.found");
-        stockInventory.setOperatorName(userResponse.getResult().getRealName());
+        setOperatorName(stockInventory);
 
-        Response<Long> response = doctorWarehouseStockWriteService.inventory(stockInventory);
-        if (!response.isSuccess())
-            throw new JsonResponseException(response.getError());
-
-        return response.getResult();
+        return RespHelper.or500(doctorWarehouseStockWriteService.inventory(stockInventory));
     }
 
     /**
@@ -237,18 +231,24 @@ public class StockController {
         }
         stockTransfer.setDetails(removedRepeat);
 
-        Response<UserProfile> userResponse = doctorUserProfileReadService.findProfileByUserId(stockTransfer.getOperatorId());
-        if (!userResponse.isSuccess())
-            throw new JsonResponseException(userResponse.getError());
-        if (null == userResponse.getResult())
+        setOperatorName(stockTransfer);
+
+        return RespHelper.or500(doctorWarehouseStockWriteService.transfer(stockTransfer));
+    }
+
+
+    private void setOperatorName(AbstractWarehouseStockDto stockDto) {
+        UserProfile user = RespHelper.or500(doctorUserProfileReadService.findProfileByUserId(stockDto.getOperatorId()));
+        if (null == user)
             throw new JsonResponseException("user.not.found");
-        stockTransfer.setOperatorName(userResponse.getResult().getRealName());
+        stockDto.setOperatorName(user.getRealName());
+    }
 
-        Response<Long> response = doctorWarehouseStockWriteService.transfer(stockTransfer);
-        if (!response.isSuccess())
-            throw new JsonResponseException(response.getError());
-
-        return response.getResult();
+    private void setOrgId(AbstractWarehouseStockDto stockDto) {
+        DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(stockDto.getFarmId()));
+        if (null == farm)
+            throw new JsonResponseException("farm.not.found");
+        stockDto.setOrgId(farm.getOrgId());
     }
 
     /**
@@ -264,7 +264,6 @@ public class StockController {
             throw new JsonResponseException(response.getError());
         return true;
     }
-
 
     /**
      * 查询库存明细
@@ -349,7 +348,6 @@ public class StockController {
             vo.setMaterialName(stock.getSkuName());
 
             if (null != sku) {
-
                 DoctorBasic unit = RespHelper.or500(doctorBasicReadService.findBasicById(Long.parseLong(sku.getUnit())));
                 if (null != unit)
                     vo.setUnit(unit.getName());
@@ -395,5 +393,308 @@ public class StockController {
         return result;
     }
 
+
+    @Autowired
+    private UserReadService userReadService;
+
+    /***********    2018/04/11     *************/
+    /**
+     * 添加单据明细,事件类型就入库、出库
+     *
+     * @param stockDtoList
+     * @return
+     */
+    @RequestMapping(value = "/createStock", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public boolean create(@RequestBody @Valid List<StockDto> stockDtoList) {
+
+        if (CollectionUtils.isEmpty(stockDtoList)) {
+            throw new JsonResponseException("stock.stockDtoList.not.null");
+        }
+
+        StockDto stockDto = stockDtoList.get(0);
+//        Response<User> currentUserResponse = userReadService.findById(stockDto.getOperatorId());
+//        // 得到creatorId,creatorName
+//        User currentUser = currentUserResponse.getResult();
+//        if (null == currentUser)
+//            throw new JsonResponseException("stock.operator.not.exist");
+
+        //生成流水号(日期格式的时间戳,精确到毫秒)
+        String seq = DateUtil.formatDateStringForTimeorder(new Date());
+        int handleSubType = stockDto.getHandleSubType();
+
+        /**
+         * 单据主表
+         */
+        DoctorWarehouseStockHandle doctorWarehouseStockHandle =
+                DoctorWarehouseStockHandle.builder()
+                        .farmId(stockDto.getFarmId()) //猪场Id
+                        .warehouseId(stockDto.getWarehouseId()) //仓库id
+                        .warehouseName(stockDto.getWarehouseName()) //仓库名称
+                        .serialNo(seq) //流水号
+                        .handleDate(stockDto.getHandleDate()) //处理日期
+                        .handleSubType(handleSubType) //事件子类型
+                        .handleType(stockDto.getHandleType()) //事件类型
+                        //.operatorName(currentUser.getName()) //创建人名
+                        //.operatorId(currentUser.getId()) //创建人id
+                        .warehouseType(stockDto.getWarehouseType()) //仓库类型
+                        .build();
+
+        Date handlerDate = stockDto.getHandleDate();
+
+        List<DoctorWarehouseMaterialHandle> doctorWarehouseMaterialHandleList =
+                new ArrayList<>();
+
+        //支持添加多条单据数据
+        for (StockDto sd : stockDtoList) {
+            /**
+             * 单据明细表
+             */
+            DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle =
+                    DoctorWarehouseMaterialHandle.builder()
+                            .farmId(sd.getFarmId())
+                            .warehouseId(sd.getWarehouseId())
+                            .warehouseType(sd.getWarehouseType())
+                            .warehouseName(sd.getWarehouseName())
+                            .vendorName(sd.getVendorName())
+                            .materialId(sd.getMaterialId())
+                            .materialName(sd.getMaterialName())
+                            .type(handleSubType)
+                            .unitPrice(sd.getUnitPrice())
+                            .unit(sd.getUnit())
+                            .deleteFlag(1) //表示未删除
+                            .beforeStockQuantity(sd.getBeforeStockQuantity()) //当前数量
+                            .quantity(sd.getQuantity())
+                            .handleDate(handlerDate) //处理日期
+                            .handleYear(DateUtil.getYearForDate(handlerDate))
+                            .handleMonth(DateUtil.getMonthForDate(handlerDate))
+                            //.operatorId(currentUser.getId()) //创建人id
+                            //.operatorName(currentUser.getName()) //创建人名
+                            .remark(sd.getRemark())
+                            .build();
+            doctorWarehouseMaterialHandleList.add(doctorWarehouseMaterialHandle);
+        }
+
+        List<DoctorWarehouseMaterialHandle> doctorDBRKWarehouseMaterialHandleList =
+                new ArrayList<>();
+        if (handleSubType == 9) //调拨出库,生成调拨入库单
+        {
+            for (StockDto sd : stockDtoList) {
+                DoctorWarehouseMaterialHandle doctorDBRKWarehouseMaterialHandle =
+                        DoctorWarehouseMaterialHandle.builder()
+                                .farmId(sd.getDbFarmId())
+                                .warehouseId(sd.getDbWarehouseId())
+                                .warehouseType(sd.getDbWarehouseType())
+                                .warehouseName(sd.getDbWarehouseName())
+                                .vendorName(sd.getVendorName())
+                                .materialId(sd.getMaterialId())
+                                .materialName(sd.getMaterialName())
+                                .type(handleSubType)
+                                .unitPrice(sd.getUnitPrice())
+                                .unit(sd.getUnit())
+                                .deleteFlag(1) //表示未删除
+                                .beforeStockQuantity(sd.getBeforeStockQuantity()) //当前数量
+                                .quantity(sd.getQuantity())
+                                .handleDate(handlerDate) //处理日期
+                                .handleYear(DateUtil.getYearForDate(handlerDate))
+                                .handleMonth(DateUtil.getMonthForDate(handlerDate))
+                                //.operatorId(currentUser.getId()) //创建人id
+                                //.operatorName(currentUser.getName()) //创建人名
+                                .remark(sd.getRemark())
+                                .build();
+                doctorDBRKWarehouseMaterialHandleList.add(doctorDBRKWarehouseMaterialHandle);
+            }
+        }
+
+        List<DoctorWarehouseMaterialApply> doctorWarehouseMaterialApplies = new ArrayList<>();
+
+        /**
+         * applyType
+         * 0 表示按栋舍领用
+         * 1 表示按猪群领用
+         * 2 表示产房母猪
+         */
+        if (handleSubType == 6) //领料出库,涉及到猪群或猪舍的物料领用
+        {
+            for (StockDto sd : stockDtoList) {
+                DoctorWarehouseMaterialApply doctorWarehouseMaterialApply = DoctorWarehouseMaterialApply.builder()
+                        .farmId(sd.getFarmId())
+                        .warehouseId(sd.getWarehouseId())
+                        .warehouseType(sd.getWarehouseType())
+                        .warehouseName(sd.getWarehouseName())
+                        .pigBarnId(sd.getPigBarnId())
+                        .pigBarnName(sd.getPigBarnName())
+                        .pigGroupId(sd.getPigGroupId())
+                        .pigGroupName(sd.getPigGroupName())
+                        .materialId(sd.getMaterialId())
+                        .applyDate(handlerDate)
+                        .applyStaffName(sd.getApplyStaffName())
+                        .applyYear(DateUtil.getYearForDate(handlerDate))
+                        .applyMonth(DateUtil.getMonthForDate(handlerDate))
+                        .materialName(sd.getMaterialName())
+                        .type(sd.getMaterialType())
+                        .unit(sd.getUnit())
+                        .quantity(sd.getQuantity())
+                        .unitPrice(sd.getUnitPrice())
+                        .applyType(sd.getApplyType())
+                        .build();
+                doctorWarehouseMaterialApplies.add(doctorWarehouseMaterialApply);
+            }
+        }
+
+        Response<Long> response = doctorWarehouseStockWriteService.create(doctorWarehouseStockHandle, doctorWarehouseMaterialHandleList,
+                doctorDBRKWarehouseMaterialHandleList,
+                doctorWarehouseMaterialApplies);
+        if (!response.isSuccess())
+            throw new JsonResponseException(response.getError());
+        return true;
+    }
+
+    @RpcConsumer
+    private DoctorWarehouseMaterialApplyReadService doctorWarehouseMaterialApplyReadService;
+
+    /**
+     * 修改单据明细
+     *
+     * @param stockDtoList
+     * @return
+     */
+    @RequestMapping(value = "/updateStock", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+    public boolean update(@RequestBody @Valid List<StockDto> stockDtoList) {
+
+        if (CollectionUtils.isEmpty(stockDtoList)) {
+            throw new JsonResponseException("stock.stockDtoList.not.null");
+        }
+
+        StockDto stockDto = stockDtoList.get(0);
+        Response<User> currentUserResponse = userReadService.findById(stockDto.getOperatorId());
+        // 得到creatorId,creatorName
+        User currentUser = currentUserResponse.getResult();
+        if (null == currentUser)
+            throw new JsonResponseException("stock.operator.not.exist");
+
+        int handleSubType = stockDto.getHandleSubType();
+
+        /**
+         * 单据主表
+         */
+        DoctorWarehouseStockHandle doctorWarehouseStockHandle =
+                DoctorWarehouseStockHandle.builder()
+                        .id(stockDto.getStockHandleId())
+                        .handleDate(stockDto.getHandleDate()) //处理日期
+                        .operatorName(currentUser.getName()) //创建人名
+                        .operatorId(currentUser.getId()) //创建人id
+                        .build();
+
+        Date handlerDate = stockDto.getHandleDate();
+
+        List<DoctorWarehouseMaterialHandle> doctorWarehouseMaterialHandleList =
+                new ArrayList<>();
+
+        //支持添加多条单据数据
+        for (StockDto sd : stockDtoList) {
+            /**
+             * 单据明细表
+             */
+            DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle =
+                    DoctorWarehouseMaterialHandle.builder()
+                            .id(sd.getId())
+                            .vendorName(sd.getVendorName())
+                            .materialId(sd.getMaterialId())
+                            .materialName(sd.getMaterialName())
+                            .unitPrice(sd.getUnitPrice())
+                            .unit(sd.getUnit())
+                            .beforeStockQuantity(sd.getBeforeStockQuantity()) //当前数量
+                            .quantity(sd.getQuantity())
+                            .handleDate(handlerDate) //处理日期
+                            .handleYear(DateUtil.getYearForDate(handlerDate))
+                            .handleMonth(DateUtil.getMonthForDate(handlerDate))
+                            .operatorId(currentUser.getId()) //创建人id
+                            .operatorName(currentUser.getName()) //创建人名
+                            .remark(sd.getRemark())
+                            .build();
+            doctorWarehouseMaterialHandleList.add(doctorWarehouseMaterialHandle);
+        }
+
+        List<DoctorWarehouseMaterialHandle> doctorDBRKWarehouseMaterialHandleList =
+                new ArrayList<>();
+        if (handleSubType == 9) //调拨出库,生成调拨入库单
+        {
+            for (StockDto sd : stockDtoList) {
+                DoctorWarehouseMaterialHandle doctorDBRKWarehouseMaterialHandle =
+                        DoctorWarehouseMaterialHandle.builder()
+                                .id(sd.getOtherTransferHandleId())
+                                .farmId(sd.getDbFarmId())
+                                .warehouseId(sd.getDbWarehouseId())
+                                .warehouseType(sd.getDbWarehouseType())
+                                .warehouseName(sd.getDbWarehouseName())
+                                .vendorName(sd.getVendorName())
+                                .materialId(sd.getMaterialId())
+                                .materialName(sd.getMaterialName())
+                                .unitPrice(sd.getUnitPrice())
+                                .unit(sd.getUnit())
+                                .beforeStockQuantity(sd.getBeforeStockQuantity()) //当前数量
+                                .quantity(sd.getQuantity())
+                                .handleDate(handlerDate) //处理日期
+                                .handleYear(DateUtil.getYearForDate(handlerDate))
+                                .handleMonth(DateUtil.getMonthForDate(handlerDate))
+                                .operatorId(currentUser.getId()) //创建人id
+                                .operatorName(currentUser.getName()) //创建人名
+                                .remark(sd.getRemark())
+                                .build();
+                doctorDBRKWarehouseMaterialHandleList.add(doctorDBRKWarehouseMaterialHandle);
+            }
+        }
+
+        List<DoctorWarehouseMaterialApply> doctorWarehouseMaterialApplies = new ArrayList<>();
+
+        /**
+         * applyType
+         * 0 表示按栋舍领用
+         * 1 表示按猪群领用
+         * 2 表示产房母猪
+         */
+        if (handleSubType == 6) //领料出库,涉及到猪群或猪舍的物料领用
+        {
+            for (StockDto sd : stockDtoList) {
+                DoctorWarehouseMaterialApply apply = new DoctorWarehouseMaterialApply();
+                apply.setMaterialHandleId(sd.getId());
+                List<DoctorWarehouseMaterialApply> applies = doctorWarehouseMaterialApplyReadService.list(apply).getResult();
+                if (!CollectionUtils.isEmpty(applies)) {
+                    apply = applies.get(0);
+                    DoctorWarehouseMaterialApply doctorWarehouseMaterialApply = DoctorWarehouseMaterialApply.builder()
+                            .id(apply.getId())
+//                            .farmId(sd.getFarmId())
+//                            .warehouseId(sd.getWarehouseId())
+//                            .warehouseType(sd.getWarehouseType())
+//                            .warehouseName(sd.getWarehouseName())
+                            .pigBarnId(sd.getPigBarnId())
+                            .pigBarnName(sd.getPigBarnName())
+                            .pigGroupId(sd.getPigGroupId())
+                            .pigGroupName(sd.getPigGroupName())
+                            .materialId(sd.getMaterialId())
+                            .applyDate(handlerDate)
+                            .applyStaffName(sd.getApplyStaffName())
+                            .applyYear(DateUtil.getYearForDate(handlerDate))
+                            .applyMonth(DateUtil.getMonthForDate(handlerDate))
+                            .materialName(sd.getMaterialName())
+                            .type(sd.getMaterialType())
+                            .unit(sd.getUnit())
+                            .quantity(sd.getQuantity())
+                            .unitPrice(sd.getUnitPrice())
+                            .applyType(sd.getApplyType())
+                            .build();
+                    doctorWarehouseMaterialApplies.add(doctorWarehouseMaterialApply);
+                }
+            }
+        }
+
+        Response<Long> response = doctorWarehouseStockWriteService.update(doctorWarehouseStockHandle, doctorWarehouseMaterialHandleList,
+                doctorDBRKWarehouseMaterialHandleList,
+                doctorWarehouseMaterialApplies);
+        if (!response.isSuccess())
+            throw new JsonResponseException(response.getError());
+        return true;
+    }
+    /***********    2018/04/11    *************/
 
 }

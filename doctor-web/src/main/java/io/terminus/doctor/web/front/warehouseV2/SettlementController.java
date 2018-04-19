@@ -1,18 +1,24 @@
 package io.terminus.doctor.web.front.warehouseV2;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
-import io.terminus.common.model.Response;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSettlementService;
-import javafx.geometry.Pos;
+import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
 import java.util.Date;
-import java.util.concurrent.locks.Lock;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 结算服务
@@ -28,6 +34,9 @@ public class SettlementController {
     @RpcConsumer
     private DoctorWarehouseSettlementService doctorWarehouseSettlementService;
 
+    @RpcConsumer
+    private DoctorFarmReadService doctorFarmReadService;
+
     /**
      * 结算
      *
@@ -35,20 +44,21 @@ public class SettlementController {
      * @param settlementDate 需要结算的会计年月
      */
     @RequestMapping(method = RequestMethod.POST)
-    public Response<Boolean> settlement(@RequestParam Long orgId, @RequestParam Date settlementDate) {
+    public void settlement(@RequestParam Long orgId,
+                           @DateTimeFormat(pattern = "yyyy-MM")
+                           @RequestParam Date settlementDate) {
 
-        Lock lock = lockRegistry.obtain("settlement/" + orgId);
+        if (doctorWarehouseSettlementService.isUnderSettlement(orgId))
+            throw new ServiceException("under.settlement");
+        if (doctorWarehouseSettlementService.isSettled(orgId, settlementDate))
+            throw new ServiceException("already.settlement");
 
-        if (!lock.tryLock())
-            return Response.fail("under.settlement");
+        List<Long> farmIds = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orgId)).stream().map(DoctorFarm::getId).collect(Collectors.toList());
 
-        doctorWarehouseSettlementService.settlement(orgId, settlementDate);
+        RespHelper.orServEx(doctorWarehouseSettlementService.settlement(orgId, farmIds,
+                settlementDate));
 
-        lock.unlock();
-
-        return Response.ok(true);
     }
-
 
     /**
      * 反结算
@@ -57,17 +67,13 @@ public class SettlementController {
      * @param settlementDate 需要反结算的会计年月
      */
     @RequestMapping(method = RequestMethod.POST, value = "anti")
-    public Response<Boolean> AntiSettlement(@RequestParam Long orgId, @RequestParam Date settlementDate) {
+    public void AntiSettlement(@RequestParam Long orgId,
+                               @DateTimeFormat(pattern = "yyyy-MM")
+                               @RequestParam Date settlementDate) {
 
-        Lock lock = lockRegistry.obtain("settlement/" + orgId);
+        if (doctorWarehouseSettlementService.isUnderSettlement(orgId))
+            throw new ServiceException("under.settlement");
 
-        if (!lock.tryLock())
-            return Response.fail("under.settlement");
-
-        doctorWarehouseSettlementService.antiSettlement(orgId, settlementDate);
-
-        lock.unlock();
-
-        return Response.ok(true);
+        RespHelper.orServEx(doctorWarehouseSettlementService.antiSettlement(orgId, RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orgId)).stream().map(DoctorFarm::getId).collect(Collectors.toList()), settlementDate));
     }
 }
