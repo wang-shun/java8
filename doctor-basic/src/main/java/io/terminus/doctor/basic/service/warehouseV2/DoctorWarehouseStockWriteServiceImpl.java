@@ -418,7 +418,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 purchase.setHandleYear(stockInventory.getHandleDate().get(Calendar.YEAR));
 
                 materialHandle.setQuantity(changedQuantity);
-                materialHandle.setUnitPrice(purchase.getUnitPrice());
+                materialHandle.setUnitPrice(new BigDecimal(purchase.getUnitPrice()));
                 materialHandle.setVendorName(purchase.getVendorName());
                 materialHandle.setType(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue());
                 stock.setQuantity(detail.getQuantity());
@@ -517,7 +517,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             transferOutPurchases.sort(Comparator.comparing(DoctorWarehousePurchase::getHandleDate));
 
 //                long averagePrice = handleOutAndCalcAveragePrice(detail.getQuantity(), transferOutPurchases, stockAndPurchases, stocks, true, targetWareHouse, c);
-            long averagePrice = doctorWarehousePurchaseManager.calculateUnitPrice(stock);
+            BigDecimal averagePrice = doctorWarehousePurchaseManager.calculateUnitPrice(stock);
             DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = getNeedPurchase(transferOutPurchases, detail.getQuantity());
 
             //调出
@@ -647,7 +647,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                 thisWarehousePurchaseContext.setStock(stock.get(0));
                 thisWarehousePurchaseContext.setPurchaseQuantity(thisWarehousePurchaseMap);
 //                    long thisWarehouseAveragePrice = thisWarehouseAmount.divide(thisWarehouseQuantity, 0, BigDecimal.ROUND_HALF_UP).longValue();
-                long thisWarehouseAveragePrice = doctorWarehousePurchaseManager.calculateUnitPrice(stock.get(0));
+                BigDecimal thisWarehouseAveragePrice = doctorWarehousePurchaseManager.calculateUnitPrice(stock.get(0));
                 doctorWarehouseHandlerManager.outStock(stock.get(0), thisWarehousePurchaseContext, DoctorWarehouseMaterialHandle.builder()
                         .farmId(stock.get(0).getFarmId())
                         .warehouseId(stock.get(0).getWarehouseId())
@@ -705,7 +705,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
         } else
             stock.setQuantity(stock.getQuantity().add(formulaDto.getFeedMaterialQuantity()));
 
-        long unitPrice = new BigDecimal(totalAmount).divide(totalQuantity, 0, BigDecimal.ROUND_HALF_UP).longValue();
+        BigDecimal unitPrice = new BigDecimal(totalAmount).divide(totalQuantity, 0, BigDecimal.ROUND_HALF_UP);
 
         doctorWarehouseHandlerManager.inStock(stock, Collections.singletonList(DoctorWarehousePurchase.builder()
                         .farmId(stock.getFarmId())
@@ -718,7 +718,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                         .handleMonth(formulaDto.getHandleDate().get(Calendar.MONTH) + 1)
                         .handleYear(formulaDto.getHandleDate().get(Calendar.YEAR))
                         .quantity(formulaDto.getFeedMaterialQuantity())
-                        .unitPrice(unitPrice)
+                        .unitPrice(unitPrice.longValue())
                         .handleQuantity(new BigDecimal(0))
                         .handleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue())
                         .build()),
@@ -923,7 +923,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     }
 
     private DoctorWarehouseMaterialHandle buildMaterialHandle(DoctorWarehouseStock stock, AbstractWarehouseStockDto
-            stockDto, BigDecimal quantity, long price, int type) {
+            stockDto, BigDecimal quantity, BigDecimal price, int type) {
         DoctorWarehouseMaterialHandle materialHandle = new DoctorWarehouseMaterialHandle();
         materialHandle.setFarmId(stock.getFarmId());
         materialHandle.setWarehouseId(stock.getWarehouseId());

@@ -19,6 +19,7 @@ import java.util.*;
 public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseStockMonthly> {
 
 
+    @Deprecated
     public AmountAndQuantityDto statistics(Map<String, Object> params) {
 
         List<DoctorWarehouseStockMonthly> monthlies = this.getSqlSession().selectList(this.sqlId("statistics"), params);
@@ -28,7 +29,7 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
             amount = amount.add(monthly.getBalanceAmount());
             quantity = quantity.add(monthly.getBalanceQuantity());
         }
-        return new AmountAndQuantityDto(amount.longValue(), quantity);
+        return new AmountAndQuantityDto(amount, quantity);
     }
 
 
@@ -38,6 +39,7 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
      * @param warehouseId
      * @return
      */
+    @Deprecated
     public Map<Long/*skuId*/, AmountAndQuantityDto> statisticsGroupBySku(Long warehouseId, Date handleDate) {
 
         Map<String, Object> params = new HashMap<>(2);
@@ -48,13 +50,13 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
 
         Map<Long, AmountAndQuantityDto> statistics = new HashMap<>();
         for (DoctorWarehouseStockMonthly monthly : monthlies) {
-            statistics.put(monthly.getMaterialId(), new AmountAndQuantityDto(monthly.getBalanceAmount().longValue(), monthly.getBalanceQuantity()));
+            statistics.put(monthly.getMaterialId(), new AmountAndQuantityDto(monthly.getBalanceAmount(), monthly.getBalanceQuantity()));
         }
 
         return statistics;
     }
 
-
+    @Deprecated
     public AmountAndQuantityDto statistics(Long warehouseId, Date handleDate) {
 
         Map<String, Object> params = new HashMap<>();
@@ -62,9 +64,36 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
         params.put("handleDate", handleDate);
         DoctorWarehouseStockMonthly monthly = this.getSqlSession().selectOne(this.sqlId("statisticsWarehouse"), params);
         if (null == monthly || null == monthly.getBalanceQuantity() || null == monthly.getBalanceAmount())
-            return new AmountAndQuantityDto(0, new BigDecimal(0));
+            return new AmountAndQuantityDto(new BigDecimal(0), new BigDecimal(0));
 
-        return new AmountAndQuantityDto(monthly.getBalanceAmount().longValue(), monthly.getBalanceQuantity());
+        return new AmountAndQuantityDto(monthly.getBalanceAmount(), monthly.getBalanceQuantity());
+    }
+
+
+    /**
+     * 查询余额和余量
+     *
+     * @param warehouseId    仓库id
+     * @param skuId          物料id
+     * @param settlementDate 会计年月
+     * @return
+     */
+    public AmountAndQuantityDto findBalanceBySettlementDate(Long warehouseId, Long skuId, Date settlementDate) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("warehouseId", warehouseId);
+        params.put("skuId", skuId);
+        params.put("settlementDate", settlementDate);
+
+        Map<String, BigDecimal> result = this.sqlSession.selectOne(this.sqlId("findBalanceBySettlementDate"), params);
+        return new AmountAndQuantityDto(result.get("quantity"), result.get("amount"));
+    }
+
+    public void reverseSettlement(Long orgId, Date settlementDate) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("warehouseId", orgId);
+        params.put("handleDate", settlementDate);
+
+        this.sqlSession.delete(this.sqlId("reverseSettlement"), params);
     }
 
 }

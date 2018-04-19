@@ -113,7 +113,7 @@ public interface DoctorWarehouseMaterialHandleReadService {
      * @param data
      * @return
      */
-    Response<Map<Long/*warehouseId*/, Long>> countWarehouseAmount(List<DoctorWarehouseMaterialHandle> data);
+    Response<Map<Long/*warehouseId*/, BigDecimal>> countWarehouseAmount(List<DoctorWarehouseMaterialHandle> data);
 
 
     /**
@@ -123,7 +123,7 @@ public interface DoctorWarehouseMaterialHandleReadService {
      * @param types
      * @return
      */
-    Response<Map<WarehouseMaterialHandleType, Map<Long, Long>>> countWarehouseAmount(DoctorWarehouseMaterialHandle criteria, WarehouseMaterialHandleType... types);
+    Response<Map<WarehouseMaterialHandleType, Map<Long, BigDecimal>>> countWarehouseAmount(DoctorWarehouseMaterialHandle criteria, WarehouseMaterialHandleType... types);
 
 
 }

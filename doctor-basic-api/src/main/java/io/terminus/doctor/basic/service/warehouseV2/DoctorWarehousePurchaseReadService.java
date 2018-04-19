@@ -4,6 +4,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehousePurchase;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import java.util.List;
  * Date: 2017-08-21 00:18:50
  * Created by [ your name ]
  */
+@Deprecated
 public interface DoctorWarehousePurchaseReadService {
 
     /**

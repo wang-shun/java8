@@ -164,4 +164,17 @@
         and <![CDATA[handle_date<=#{handleDate}]]>
     </select>
 
+    <delete id="reverseSettlement" parameterType="map">
+        DELETE FROM <include refid="tb"/>
+        WHERE org_id=#{orgId}
+        AND settlement_date=#{settlementDate}
+    </delete>
+
+    <select id="findBalanceBySettlementDate" parameterType="map" resultType="Map">
+        SELECT balance_amount as amount,balance_quantity as quantity FROM <include refid="tb"/>
+        WHERE warehouse_id=#{warehouseId}
+        AND material_id=#{skuId}
+        AND settlement_date=#{settlementDate}
+    </select>
+
 </mapper>

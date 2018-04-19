@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2018-04-19 13:53:42
+ ~ Date: 2018-04-19 19:40:59
  ~ Created by [ your name ]
 -->
 
@@ -48,14 +48,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `stock_handle_id`, `org_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `other_transfer_handle_id`, `vendor_name`, `material_id`, `material_name`, `type`, `unit_price`, `unit`, `delete_flag`, `before_stock_quantity`, `quantity`, `handle_date`, `handle_year`, `handle_month`, `operator_id`, `operator_name`, `remark`, `settlement_date`, `amount`,
-        `stock_handle_id`, `org_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `rel_material_handle_id`, `vendor_name`, `material_id`, `material_name`, `type`, `unit_price`, `unit`, `delete_flag`, `before_stock_quantity`, `quantity`, `handle_date`, `handle_year`, `handle_month`, `operator_id`, `operator_name`, `remark`, `settlement_date`, `amount`,
+        `stock_handle_id`, `org_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `rel_material_handle_id`, `vendor_name`, `material_id`, `material_name`, `type`, `unit_price`, `unit`, `delete_flag`, `before_stock_quantity`, `quantity`, `handle_date`, `handle_year`, `handle_month`, `operator_id`, `operator_name`, `remark`, `settlement_date`, `amount`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{stockHandleId}, #{orgId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{otherTransferHandleId}, #{vendorName}, #{materialId}, #{materialName}, #{type}, #{unitPrice}, #{unit}, #{deleteFlag}, #{beforeStockQuantity}, #{quantity}, #{handleDate}, #{handleYear}, #{handleMonth}, #{operatorId}, #{operatorName}, #{remark}, #{settlementDate}, #{amount},
-        #{stockHandleId}, #{orgId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{relMaterialHandleId}, #{vendorName}, #{materialId}, #{materialName}, #{type}, #{unitPrice}, #{unit}, #{deleteFlag}, #{beforeStockQuantity}, #{quantity}, #{handleDate}, #{handleYear}, #{handleMonth}, #{operatorId}, #{operatorName}, #{remark}, #{settlementDate}, #{amount},
+        #{stockHandleId}, #{orgId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{relMaterialHandleId}, #{vendorName}, #{materialId}, #{materialName}, #{type}, #{unitPrice}, #{unit}, #{deleteFlag}, #{beforeStockQuantity}, #{quantity}, #{handleDate}, #{handleYear}, #{handleMonth}, #{operatorId}, #{operatorName}, #{remark}, #{settlementDate}, #{amount}, 
         now(), now()
     </sql>
 
@@ -153,18 +151,6 @@
         WHERE id = #{id} LIMIT 1
     </select>
 
-    <select id="findLibraryById" parameterType="long" resultType="BigDecimal">
-        select quantity from <include refid="cols_all"/>
-        where id=#{id} and type=2
-    </select>
-
-    <select id="findRetreatingById" parameterType="DoctorWarehouseMaterialHandle" resultType="BigDecimal">
-        select ifnull(sum(quantity),0) from <include refid="cols_all"/>
-        where type=13 and rel_material_handle_id=#{otherTransferHandleId}
-        and <![CDATA[ handle_date <= #{handleDate}]]>
-        order by handle_date ,id desc;
-    </select>
-
     <select id="findByIds" parameterType="list" resultMap="DoctorWarehouseMaterialHandleMap">
         SELECT
         <include refid="cols_all"/>
@@ -213,7 +199,7 @@
         DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
-
+    
     <select id="count" parameterType="map" resultType="long">
         SELECT COUNT(1)
         FROM <include refid="tb"/>
@@ -399,16 +385,38 @@
     <update id="reverseSettlement" parameterType="map">
         UPDATE
         <include refid="tb"/>
-        SET unit_price=0
+        SET unit_price=0,amount=0
         WHERE farm_id=#{farmId}
         AND (type=2 or type=8 or type=9 or type=10 or type=11 or type=12 or type=13)
         AND handle_year = #{year} AND handle_month=#{month}
         AND delete_flag=1
     </update>
 
+    <update id="reverseSettlementByOrg" parameterType="map">
+        UPDATE
+        <include refid="tb"/>
+        SET unit_price=0,amount=0
+        WHERE org_id=#{orgId}
+        AND (type=2 or type=8 or type=9 or type=10 or type=11 or type=12 or type=13)
+        AND settlement_date=#{settlementDate}
+        AND delete_flag=1
+    </update>
+
     <select id="getWarehouseMaterialHandleCount" resultType="int">
         select count(1) as count from  doctor_warehouse_material_handle
         where  warehouse_id = #{id}
+    </select>
+
+    <select id="findLibraryById" parameterType="long" resultType="BigDecimal">
+        select quantity from <include refid="cols_all"/>
+        where id=#{id} and type=2
+    </select>
+
+    <select id="findRetreatingById" parameterType="DoctorWarehouseMaterialHandle" resultType="BigDecimal">
+        select ifnull(sum(quantity),0) from <include refid="cols_all"/>
+        where type=13 and rel_material_handle_id=#{otherTransferHandleId}
+        and <![CDATA[ handle_date <= #{handleDate}]]>
+        order by handle_date ,id desc;
     </select>
 
 </mapper>

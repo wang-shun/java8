@@ -90,7 +90,7 @@ public class StockDto {
      * 单价
      */
     @NotNull(message = "stock.unitPrice.null")
-    private Long unitPrice;
+    private BigDecimal unitPrice;
 
     /**
      * 单位

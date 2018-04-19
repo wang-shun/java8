@@ -33,9 +33,9 @@ public class WarehouseMaterialEventVo {
 
     private String unit;
 
-    private Long unitPrice;
+    private BigDecimal unitPrice;
 
-    private Long amount;
+    private BigDecimal amount;
 
     private String vendorName;
 

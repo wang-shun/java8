@@ -19,7 +19,7 @@ public class DoctorWarehouseStockMonthlyManager {
     @Autowired
     private DoctorWarehouseStockMonthlyDao doctorWarehouseStockMonthlyDao;
 
-    public void count(Long warehouseId, Long materialId, int handleYear, int handleMonth, BigDecimal quantity, long unitPrice, boolean add) {
+    public void count(Long warehouseId, Long materialId, int handleYear, int handleMonth, BigDecimal quantity, BigDecimal unitPrice, boolean add) {
 
         List<DoctorWarehouseStockMonthly> stockMonthlies = doctorWarehouseStockMonthlyDao.list(DoctorWarehouseStockMonthly.builder()
                 .warehouseId(warehouseId)
@@ -28,7 +28,7 @@ public class DoctorWarehouseStockMonthlyManager {
 //                .handleMonth(handleMonth)
                 .build());
 
-        BigDecimal amount = quantity.multiply(new BigDecimal(unitPrice));
+        BigDecimal amount = quantity.multiply(unitPrice);
         if (stockMonthlies.isEmpty()) {
             doctorWarehouseStockMonthlyDao.create(DoctorWarehouseStockMonthly.builder()
                     .warehouseId(warehouseId)
