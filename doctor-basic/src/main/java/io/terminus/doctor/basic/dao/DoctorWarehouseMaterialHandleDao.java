@@ -83,7 +83,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         criteria.put("warehouseId", warehouseId);
         criteria.put("skuId", skuId);
         criteria.put("handleDate", handleDate);
-
+        criteria.put("includeHandleDate", includeHandleDate);
         return this.sqlSession.selectList(this.sqlId("findAfterByDate"), criteria);
     }
 
