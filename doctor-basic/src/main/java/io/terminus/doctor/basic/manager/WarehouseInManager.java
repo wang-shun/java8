@@ -60,7 +60,7 @@ public class WarehouseInManager extends AbstractStockManager<WarehouseStockInDto
 
 
     @Override
-    public void delete(DoctorWarehouseMaterialHandle materialHandle, Date handleDate) {
+    public void delete(DoctorWarehouseMaterialHandle materialHandle) {
 
         if (!DateUtil.inSameDate(materialHandle.getHandleDate(), new Date())) {
             //删除历史单据明细

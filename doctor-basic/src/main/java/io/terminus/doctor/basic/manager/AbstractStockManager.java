@@ -45,10 +45,9 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
     /**
      * 重算
      *
-     * @param materialHandle 该笔之后，包括该笔
-     * @param newHandleDate  修改后的数量
+     * @param materialHandle
      */
-    public void recalculate(DoctorWarehouseMaterialHandle materialHandle, Calendar newHandleDate) {
+    public void recalculate(DoctorWarehouseMaterialHandle materialHandle) {
 
 //        if (WarehouseMaterialHandleType.isBigOut(materialHandle.getType())
 //                && materialHandle.getBeforeStockQuantity().compareTo(newQuantity) < 0)
@@ -56,18 +55,18 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
 //
 //        BigDecimal newStockQuantity = materialHandle.getBeforeStockQuantity().subtract(newQuantity);
 
-        Date newHandleDateTime = buildNewHandleDate(WarehouseMaterialHandleType.fromValue(materialHandle.getType()), newHandleDate);
+//        Date newHandleDateTime = buildNewHandleDate(WarehouseMaterialHandleType.fromValue(materialHandle.getType()), newHandleDate);
 
         //历史库存量
-        BigDecimal historyQuantity = getHistoryQuantity(newHandleDateTime, materialHandle.getWarehouseId(), materialHandle.getMaterialId());
+        BigDecimal historyQuantity = getHistoryQuantity(materialHandle.getHandleDate(), materialHandle.getWarehouseId(), materialHandle.getMaterialId());
 
-        materialHandle.setHandleDate(newHandleDateTime);
-        materialHandle.setBeforeStockQuantity(historyQuantity);
-        if (WarehouseMaterialHandleType.isBigIn(materialHandle.getType()))
-            historyQuantity = historyQuantity.add(materialHandle.getQuantity());
-        else
-            historyQuantity = historyQuantity.subtract(materialHandle.getQuantity());
-        doctorWarehouseMaterialHandleDao.update(materialHandle);
+//        materialHandle.setHandleDate(newHandleDateTime);
+//        materialHandle.setBeforeStockQuantity(historyQuantity);
+//        if (WarehouseMaterialHandleType.isBigIn(materialHandle.getType()))
+//            historyQuantity = historyQuantity.add(materialHandle.getQuantity());
+//        else
+//            historyQuantity = historyQuantity.subtract(materialHandle.getQuantity());
+//        doctorWarehouseMaterialHandleDao.update(materialHandle);
 
         List<DoctorWarehouseMaterialHandle> needToRecalculate = getMaterialHandleAfter(materialHandle.getWarehouseId(), materialHandle.getId(), materialHandle.getHandleDate());
         for (DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle : needToRecalculate) {
@@ -209,6 +208,14 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
         return doctorWarehouseMaterialHandleDao.findAfter(warehouseId, materialHandleId, handleDate);
     }
 
+    /**
+     * 获取历史某一天之前的库存量
+     *
+     * @param handleDate  这一天之前，不包括这一天
+     * @param warehouseId 仓库id
+     * @param skuId       物料id
+     * @return 历史库存量
+     */
     protected BigDecimal getHistoryQuantity(Date handleDate, Long warehouseId, Long skuId) {
         //如果是入库，handleDate当日第一笔
         //如果是出库，handleDate当日最后一笔
@@ -264,5 +271,5 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
         return materialHandle;
     }
 
-    public abstract void delete(DoctorWarehouseMaterialHandle materialHandle, Date handleDate);
+    public abstract void delete(DoctorWarehouseMaterialHandle materialHandle);
 }

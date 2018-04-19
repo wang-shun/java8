@@ -268,7 +268,7 @@
         FROM <include refid="tb"/>
         WHERE warehouse_id=#{warehouseId}
         AND material_id=#{skuId}
-        AND <![CDATA[ handle_date <= #{handleDate}]]>
+        AND <![CDATA[ handle_date < #{handleDate}]]>
         <!--AND <![CDATA[ id < #{materialHandleId}]]>-->
         AND delete_flag=1
         ORDER BY handle_date ASC,id DESC

@@ -84,6 +84,7 @@ public class DoctorWarehouseStockHandle implements Serializable {
     /**
      * 关联单据id
      * 用于关联配方生产出库单据和配方生产入库单据
+     * 用于关联调拨出库和调拨入库单据
      */
     private Long relStockHandleId;
 

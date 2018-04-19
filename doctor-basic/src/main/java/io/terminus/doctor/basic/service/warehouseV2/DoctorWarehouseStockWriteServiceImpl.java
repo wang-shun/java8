@@ -171,17 +171,26 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             });
 
             warehouseInManager.getDelete(oldMaterialHandle, stockIn.getDetails()).forEach(materialHandle -> {
-                warehouseInManager.delete(materialHandle, stockIn.getHandleDate().getTime());
+                warehouseInManager.delete(materialHandle);
                 doctorWarehouseStockManager.out(materialHandle.getMaterialId(), materialHandle.getQuantity(), wareHouse);
             });
 
             warehouseInManager.getUpdate(oldMaterialHandle, stockIn.getDetails()).forEach((detail, materialHandle) -> {
-                if (!detail.getMaterialId().equals(materialHandle.getMaterialId())) {
+                if (!detail.getMaterialId().equals(materialHandle.getMaterialId())) {//更换了物料
+                    //如果是更换了物料，就不需要处理是否更换了金额，是否更换了事件日期，是否更换了备注
                     warehouseInManager.create(detail, stockIn, stockHandle, wareHouse);
                     doctorWarehouseStockManager.in(detail.getMaterialId(), detail.getQuantity(), wareHouse);
-                    warehouseInManager.delete(materialHandle, stockIn.getHandleDate().getTime());
+
+                    warehouseInManager.delete(materialHandle);
                     doctorWarehouseStockManager.out(materialHandle.getMaterialId(), materialHandle.getQuantity(), wareHouse);
                 } else {
+
+                    if (detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0
+                            || !DateUtil.inSameDate(stockHandle.getHandleDate(), stockIn.getHandleDate().getTime())) {
+
+                        //更改了数量，或更改了操作日期
+                        warehouseInManager.recalculate(materialHandle);
+                    }
                     if (detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0) {
                         BigDecimal changedQuantity = detail.getQuantity().subtract(materialHandle.getQuantity());
                         if (changedQuantity.compareTo(new BigDecimal(0)) > 0) {
@@ -197,7 +206,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
                     if (detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0 ||
                             !DateUtil.inSameDate(stockHandle.getHandleDate(), stockIn.getHandleDate().getTime())) {
-                        warehouseInManager.recalculate(materialHandle, stockIn.getHandleDate());
+                        warehouseInManager.recalculate(materialHandle);
                     }
 
                     materialHandle.setRemark(detail.getRemark());

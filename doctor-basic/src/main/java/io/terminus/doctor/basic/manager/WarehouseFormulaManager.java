@@ -22,7 +22,7 @@ public class WarehouseFormulaManager extends AbstractStockManager {
     }
 
     @Override
-    public void delete(DoctorWarehouseMaterialHandle materialHandle, Date handleDate) {
+    public void delete(DoctorWarehouseMaterialHandle materialHandle) {
 
     }
 }
