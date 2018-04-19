@@ -7,8 +7,6 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-
 /**
  * 配方生产
  * Created by sunbo@terminus.io on 2018/4/8.
@@ -22,7 +20,7 @@ public class WarehouseFormulaManager extends AbstractStockManager {
     }
 
     @Override
-    public void delete(DoctorWarehouseMaterialHandle materialHandle, Date handleDate) {
+    public void delete(DoctorWarehouseMaterialHandle materialHandle) {
 
     }
 }

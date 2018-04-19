@@ -124,7 +124,7 @@ public class DoctorWarehouseMaterialHandleManager {
             reverseOut(handle);
         } else if (WarehouseMaterialHandleType.TRANSFER_OUT.getValue() == handle.getType()
                 || WarehouseMaterialHandleType.TRANSFER_IN.getValue() == handle.getType()) {
-            DoctorWarehouseMaterialHandle otherHandle = doctorWarehouseMaterialHandleDao.findById(handle.getOtherTransferHandleId());
+            DoctorWarehouseMaterialHandle otherHandle = doctorWarehouseMaterialHandleDao.findById(handle.getRelMaterialHandleId());
             if (null == otherHandle)
                 throw new ServiceException("other.material.handle.not.found");
 

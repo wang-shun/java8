@@ -167,9 +167,9 @@ public class StockHandleController {
                            if (mh.getType().intValue() == WarehouseMaterialHandleType.RETURN.getValue()) {
                                BigDecimal RefundableNumber = new BigDecimal(0);
                                //得到领料出库的数量
-                               BigDecimal LibraryQuantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findLibraryById(mh.getOtherTransferHandleId()));
+                               BigDecimal LibraryQuantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findLibraryById(mh.getRelMaterialHandleId()));
                                DoctorWarehouseMaterialHandle wmh = new DoctorWarehouseMaterialHandle();
-                               wmh.setOtherTransferHandleId(mh.getOtherTransferHandleId());
+                               wmh.setRelMaterialHandleId(mh.getRelMaterialHandleId());
                                wmh.setHandleDate(mh.getHandleDate());
                                //得到在此之前退料入库的数量和
                                BigDecimal RetreatingQuantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findRetreatingById(wmh));
@@ -180,7 +180,7 @@ public class StockHandleController {
                             //调出
                             if (mh.getType().intValue() == WarehouseMaterialHandleType.TRANSFER_OUT.getValue()) {
                                 //单据明细表
-                                DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(mh.getOtherTransferHandleId()));
+                                DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(mh.getRelMaterialHandleId()));
                                 if (transferInHandle != null) {
                                     DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(transferInHandle.getWarehouseId()));
                                     if (wareHouse != null) {
@@ -191,7 +191,7 @@ public class StockHandleController {
                                     } else
                                         log.warn("warehouse not found,{}", transferInHandle.getWarehouseId());
                                 } else
-                                    log.warn("other transfer in handle not found,{}", mh.getOtherTransferHandleId());
+                                    log.warn("other transfer in handle not found,{}", mh.getRelMaterialHandleId());
                             }
 
                             return detail;
@@ -292,7 +292,7 @@ public class StockHandleController {
 
                     //调出
                     if (mh.getType().intValue() == WarehouseMaterialHandleType.TRANSFER_OUT.getValue()) {
-                        DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(mh.getOtherTransferHandleId()));
+                        DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(mh.getRelMaterialHandleId()));
                         if (transferInHandle != null) {
                             //单据明细表
                             DoctorWareHouse transferInWarehouse = RespHelper.or500(doctorWareHouseReadService.findById(transferInHandle.getWarehouseId()));
@@ -302,7 +302,7 @@ public class StockHandleController {
                             } else
                                 log.warn("warehouse not found,{}", transferInHandle.getWarehouseId());
                         } else
-                            log.warn("other transfer in handle not found,{}", mh.getOtherTransferHandleId());
+                            log.warn("other transfer in handle not found,{}", mh.getRelMaterialHandleId());
                     }
 
                     vo.setUnitPrice(new BigDecimal(mh.getUnitPrice()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP).doubleValue());
@@ -470,7 +470,6 @@ public class StockHandleController {
 
                     }
 
-                    //---------------------------------------------------------------------------------------------------------------
                     //调拨单
                 } else if (stockHandle.getHandleType().equals(WarehouseMaterialHandleType.TRANSFER.getValue())) {
                     title.createCell(0).setCellValue("物料名称");
@@ -634,5 +633,34 @@ public class StockHandleController {
 //                .collect(Collectors.toList()), "web-wareHouse-stock-handle", request, response);
     }
 
+    @RequestMapping(method = RequestMethod.GET,value = "/stockPage")
+    public Paging<DoctorWarehouseStockHandle> stockPage(
+                                                        @RequestParam(required =false) Integer pageNo,
+                                                        @RequestParam(required =false) Integer pageSize,
+                                                        @RequestParam(required =false) String warehouseName,
+                                                        @RequestParam(required =false) String operatorName,
+                                                        @RequestParam(required =false) Integer handleSubType,
+                                                        @RequestParam(required =false) Date createdAtStart,
+                                                        @RequestParam(required =false) Date createdAtEnd,
+                                                        @RequestParam(required =false) Date updatedAtStart,
+                                                        @RequestParam(required =false) Date updatedAtEnd
+                                                         ) {
+
+        if (null != createdAtStart && null != createdAtEnd && createdAtStart.after(createdAtEnd))
+            throw new JsonResponseException("start.date.after.end.date");
+
+        if (null != updatedAtStart && null != updatedAtEnd && updatedAtStart.after(updatedAtEnd))
+            throw new JsonResponseException("start.date.after.end.date");
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("warehouseName", warehouseName);
+        params.put("operatorName", operatorName);
+        params.put("handleSubType", handleSubType);
+        params.put("createdAtStart", createdAtStart);
+        params.put("createdAtEnd", createdAtEnd);
+        params.put("updatedAtStart", updatedAtStart);
+        params.put("updatedAtEnd", updatedAtEnd);
+        return RespHelper.or500(doctorWarehouseStockHandleReadService.paging(pageNo,pageSize,params));
+    }
 
 }

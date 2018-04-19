@@ -11,7 +11,7 @@ import java.util.Date;
 /**
  * Desc:单据表
  * Mail: [ your email ]
- * Date: 2018-04-16 10:38:45
+ * Date: 2018-04-18 23:12:59
  * Created by [ your name ]
  */
 @Builder
@@ -20,7 +20,7 @@ import java.util.Date;
 @AllArgsConstructor
 public class DoctorWarehouseStockHandle implements Serializable {
 
-    private static final long serialVersionUID = 4157765142814924253L;
+    private static final long serialVersionUID = 5800380886917720051L;
 
     /**
      * 自增主键
@@ -54,7 +54,8 @@ public class DoctorWarehouseStockHandle implements Serializable {
 
     /**
      * 事件子类型
-     * 入库，出库
+     *
+     * @see io.terminus.doctor.basic.enums.WarehouseMaterialHandleType
      */
     private Integer handleSubType;
 
@@ -77,15 +78,20 @@ public class DoctorWarehouseStockHandle implements Serializable {
 
     /**
      * 仓库类型
-     *
-     * @see io.terminus.doctor.common.enums.WareHouseType
      */
     private Integer warehouseType;
 
     /**
      * 关联单据id
+     * 用于关联配方生产出库单据和配方生产入库单据
+     * 用于关联调拨出库和调拨入库单据
      */
     private Long relStockHandleId;
+
+    /**
+     * 会计年月
+     */
+    private Date settlementDate;
 
     /**
      * 创建时间

@@ -27,4 +27,31 @@ public class DoctorWareHouseDao extends MyBatisDao<DoctorWareHouse>{
         params.put("pageSize", pageSize);
         return this.getSqlSession().selectList(sqlId("getWarehouseByType"),params);
     }
+
+    /**
+     * 按照仓库类型进行tab分页筛选，仓库按照创建时间进行排列
+     * @param farmId
+     * @param type
+     * @return
+     */
+    public List<Map<String, Object>> listTypeMap(Long farmId, Integer type) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("farmId", farmId);
+        params.put("type", type);
+        return this.getSqlSession().selectList(sqlId("listTypeMap"),params);
+    }
+
+    /**
+     * 按照仓库类型进行tab分页筛选，仓库按照创建时间进行排列
+     * @param farmId
+     * @param wareHouseId
+     * @return
+     */
+    public List<Map<String, Object>> listDetailTypeMap(Long farmId, Long wareHouseId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("farmId", farmId);
+        params.put("wareHouseId", wareHouseId);
+        return this.getSqlSession().selectList(sqlId("listDetailTypeMap"),params);
+    }
+
 }

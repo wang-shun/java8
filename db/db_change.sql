@@ -2169,3 +2169,9 @@ ALTER TABLE doctor_warehouse_material_handle
 
 -- 单据明细添加金额 2018-04-18
 ALTER TABLE doctor_warehouse_material_handle ADD amount decimal(23,2) NULL COMMENT '金额';
+
+-- 单据添加会计年月 2018-04-18
+ALTER TABLE doctor_warehouse_stock_handle ADD settlement_date date NULL COMMENT '会计年月';
+
+--单据明细修改other_transfer_handle_id字段名称 2018-04-19
+ALTER TABLE doctor_warehouse_material_handle CHANGE other_transfer_handle_id rel_material_handle_id bigint(20) COMMENT '关联明细单据id';

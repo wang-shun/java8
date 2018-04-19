@@ -15,6 +15,7 @@ import io.terminus.doctor.common.exception.InvalidException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,11 +59,11 @@ public class DoctorWarehouseStockManager {
         return stock;
     }
 
-    public void in(WarehouseStockInDto.WarehouseStockInDetailDto inDetail, DoctorWareHouse wareHouse) {
+    public void in(Long skuId, BigDecimal quantity, DoctorWareHouse wareHouse) {
         //find stock
-        DoctorWarehouseStock stock = getStock(wareHouse.getId(), inDetail.getMaterialId()).orElseGet(() -> {
+        DoctorWarehouseStock stock = getStock(wareHouse.getId(), skuId).orElseGet(() -> {
 
-            DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(inDetail.getMaterialId());
+            DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(skuId);
 
             return DoctorWarehouseStock.builder()
                     .farmId(wareHouse.getFarmId())
@@ -71,16 +72,17 @@ public class DoctorWarehouseStockManager {
                     .warehouseType(wareHouse.getType())
                     .skuId(sku.getId())
                     .skuName(sku.getName())
-                    .quantity(inDetail.getQuantity())
+                    .quantity(quantity)
                     .build();
         });
 
         if (null != stock.getId()) {
-            stock.setQuantity(stock.getQuantity().add(inDetail.getQuantity()));
+            stock.setQuantity(stock.getQuantity().add(quantity));
             doctorWarehouseStockDao.update(stock);
         } else
             doctorWarehouseStockDao.create(stock);
     }
+
 
     //    @Transactional(propagation = Propagation.NESTED)
     public DoctorWarehouseStock out(WarehouseStockOutDto outDto, WarehouseStockOutDto.WarehouseStockOutDetail detailDto, DoctorWarehouseStockWriteServiceImpl.StockContext context, DoctorWarehouseSku sku, DoctorBasic unit) {
@@ -94,6 +96,17 @@ public class DoctorWarehouseStockManager {
         doctorWarehouseStockDao.update(stock);
 
         return stock;
+    }
+
+    public void out(Long skuId, BigDecimal quantity, DoctorWareHouse wareHouse) {
+        DoctorWarehouseStock stock = getStock(wareHouse.getId(), skuId).orElseThrow(() ->
+                new InvalidException("stock.not.found", wareHouse.getWareHouseName(), skuId));
+
+        if (stock.getQuantity().compareTo(quantity) < 0)
+            throw new InvalidException("stock.not.enough.no.unit", stock.getWarehouseName(), stock.getSkuName(), stock.getQuantity());
+
+        stock.setQuantity(stock.getQuantity().subtract(quantity));
+        doctorWarehouseStockDao.update(stock);
     }
 
 

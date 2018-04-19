@@ -2,9 +2,11 @@ package io.terminus.doctor.basic.manager;
 
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDto;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockInDto;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.common.utils.DateUtil;
 import org.springframework.stereotype.Component;
@@ -26,27 +28,50 @@ public class WarehouseInManager extends AbstractStockManager<WarehouseStockInDto
                        DoctorWarehouseStockHandle stockHandle,
                        DoctorWareHouse wareHouse) {
 
-        //获取该笔明细之前的库存量
-        BigDecimal historyQuantity = getHistoryQuantity(stockHandle.getHandleDate(), wareHouse.getId(), detail.getMaterialId());
-
         DoctorWarehouseMaterialHandle materialHandle = buildMaterialHandle(detail, stockDto, stockHandle, wareHouse);
         materialHandle.setType(WarehouseMaterialHandleType.IN.getValue());
-        materialHandle.setBeforeStockQuantity(historyQuantity);
         materialHandle.setUnitPrice(detail.getUnitPrice());
-        doctorWarehouseMaterialHandleDao.create(materialHandle);
-
-        historyQuantity = historyQuantity.add(detail.getQuantity());
+        materialHandle.setAmount(detail.getAmount());
 
         //入库类型，当天第一笔
-        if (!DateUtil.inSameDate(stockHandle.getHandleDate(), new Date())) {
-            //需要重算每个明细的beforeStockQuantity
-            recalculate(stockHandle.getHandleDate(), wareHouse.getId(), historyQuantity);
+        if (!DateUtil.inSameDate(stockDto.getHandleDate().getTime(), new Date())) {
+
+            materialHandle.setHandleDate(this.buildNewHandleDate(WarehouseMaterialHandleType.IN, stockDto.getHandleDate()));
+
+            //获取该笔明细之前的库存量，包括该事件日期
+            BigDecimal historyQuantity = getHistoryQuantityInclude(stockDto.getHandleDate().getTime(), wareHouse.getId(), detail.getMaterialId());
+
+            materialHandle.setBeforeStockQuantity(historyQuantity);
+            historyQuantity = historyQuantity.add(detail.getQuantity());
+
+            //该笔单据明细之后单据明细需要重算
+            recalculate(stockDto.getHandleDate().getTime(), false, wareHouse.getId(), detail.getMaterialId(), historyQuantity);
+        } else {
+            BigDecimal currentQuantity = doctorWarehouseStockDao.findBySkuIdAndWarehouseId(detail.getMaterialId(), wareHouse.getId())
+                    .orElse(DoctorWarehouseStock.builder().quantity(new BigDecimal(0)).build())
+                    .getQuantity();
+            materialHandle.setBeforeStockQuantity(currentQuantity);
         }
+        doctorWarehouseMaterialHandleDao.create(materialHandle);
     }
 
 
     @Override
-    public void delete(DoctorWarehouseMaterialHandle materialHandle, Date handleDate) {
+    public void delete(DoctorWarehouseMaterialHandle materialHandle) {
+
+        if (!DateUtil.inSameDate(materialHandle.getHandleDate(), new Date())) {
+            //删除历史单据明细
+            recalculate(materialHandle);
+        }
+
+        materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.DELETE.getValue());
+        doctorWarehouseMaterialHandleDao.update(materialHandle);
+    }
+
+    public void updateQuantity(DoctorWarehouseMaterialHandle materialHandle, BigDecimal newQuantity) {
+
+        materialHandle.setQuantity(newQuantity);
+        materialHandle.setUnitPrice(materialHandle.getAmount().multiply(new BigDecimal(100)).divide(materialHandle.getQuantity(), 0, BigDecimal.ROUND_HALF_UP).longValue());
 
     }
 }

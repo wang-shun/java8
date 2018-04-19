@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2018-04-16 10:38:45
+ ~ Date: 2018-04-18 23:12:59
  ~ Created by [ your name ]
 -->
 
@@ -21,6 +21,7 @@
         <result property="operatorId" column="operator_id"/>
         <result property="warehouseType" column="warehouse_type"/>
         <result property="relStockHandleId" column="rel_stock_handle_id"/>
+        <result property="settlementDate" column="settlement_date"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
@@ -35,12 +36,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`, `warehouse_id`, `warehouse_name`, `serial_no`, `handle_date`, `handle_sub_type`, `handle_type`, `operator_name`, `operator_id`, `warehouse_type`, `rel_stock_handle_id`, 
+        `farm_id`, `warehouse_id`, `warehouse_name`, `serial_no`, `handle_date`, `handle_sub_type`, `handle_type`, `operator_name`, `operator_id`, `warehouse_type`, `rel_stock_handle_id`, `settlement_date`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{warehouseId}, #{warehouseName}, #{serialNo}, #{handleDate}, #{handleSubType}, #{handleType}, #{operatorName}, #{operatorId}, #{warehouseType}, #{relStockHandleId}, 
+        #{farmId}, #{warehouseId}, #{warehouseName}, #{serialNo}, #{handleDate}, #{handleSubType}, #{handleType}, #{operatorName}, #{operatorId}, #{warehouseType}, #{relStockHandleId}, #{settlementDate}, 
         now(), now()
     </sql>
 
@@ -57,10 +58,13 @@
             <if test="operatorId != null">AND `operator_id` = #{operatorId}</if>
             <if test="warehouseType != null">AND `warehouse_type` = #{warehouseType}</if>
             <if test="relStockHandleId != null">AND `rel_stock_handle_id` = #{relStockHandleId}</if>
+            <if test="settlementDate != null">AND `settlement_date` = #{settlementDate}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
-            <if test="startDate !=null">AND <![CDATA[handle_date >= #{startDate}]]></if>
-            <if test="endDate !=null">AND <![CDATA[handle_date <= #{endDate}]]></if>
+            <if test="updatedAtStart != null">AND <![CDATA[updated_at >= #{updatedAtStart}]]> </if>
+            <if test="updatedAtEnd != null">AND <![CDATA[updated_at <= #{updatedAtEnd}]]> </if>
+            <if test="createdAtStart != null">AND <![CDATA[created_at >= #{createdAtStart}]]> </if>
+            <if test="createdAtEnd != null">AND <![CDATA[created_at <= #{createdAtEnd}]]> </if>
         </where>
     </sql>
 
@@ -106,6 +110,7 @@
             <if test="operatorId != null">`operator_id` = #{operatorId},</if>
             <if test="warehouseType != null">`warehouse_type` = #{warehouseType},</if>
             <if test="relStockHandleId != null">`rel_stock_handle_id` = #{relStockHandleId},</if>
+            <if test="settlementDate != null">`settlement_date` = #{settlementDate},</if>
             updated_at = now()
         </set>
         WHERE id = #{id}

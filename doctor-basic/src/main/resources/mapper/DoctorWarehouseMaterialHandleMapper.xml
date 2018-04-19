@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2018-04-18 18:25:43
+ ~ Date: 2018-04-19 13:53:42
  ~ Created by [ your name ]
 -->
 
@@ -16,7 +16,7 @@
         <result property="warehouseId" column="warehouse_id"/>
         <result property="warehouseType" column="warehouse_type"/>
         <result property="warehouseName" column="warehouse_name"/>
-        <result property="otherTransferHandleId" column="other_transfer_handle_id"/>
+        <result property="relMaterialHandleId" column="rel_material_handle_id"/>
         <result property="vendorName" column="vendor_name"/>
         <result property="materialId" column="material_id"/>
         <result property="materialName" column="material_name"/>
@@ -49,11 +49,13 @@
 
     <sql id="cols_exclude_id">
         `stock_handle_id`, `org_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `other_transfer_handle_id`, `vendor_name`, `material_id`, `material_name`, `type`, `unit_price`, `unit`, `delete_flag`, `before_stock_quantity`, `quantity`, `handle_date`, `handle_year`, `handle_month`, `operator_id`, `operator_name`, `remark`, `settlement_date`, `amount`,
+        `stock_handle_id`, `org_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `rel_material_handle_id`, `vendor_name`, `material_id`, `material_name`, `type`, `unit_price`, `unit`, `delete_flag`, `before_stock_quantity`, `quantity`, `handle_date`, `handle_year`, `handle_month`, `operator_id`, `operator_name`, `remark`, `settlement_date`, `amount`,
         created_at, updated_at
     </sql>
 
     <sql id="vals">
         #{stockHandleId}, #{orgId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{otherTransferHandleId}, #{vendorName}, #{materialId}, #{materialName}, #{type}, #{unitPrice}, #{unit}, #{deleteFlag}, #{beforeStockQuantity}, #{quantity}, #{handleDate}, #{handleYear}, #{handleMonth}, #{operatorId}, #{operatorName}, #{remark}, #{settlementDate}, #{amount},
+        #{stockHandleId}, #{orgId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{relMaterialHandleId}, #{vendorName}, #{materialId}, #{materialName}, #{type}, #{unitPrice}, #{unit}, #{deleteFlag}, #{beforeStockQuantity}, #{quantity}, #{handleDate}, #{handleYear}, #{handleMonth}, #{operatorId}, #{operatorName}, #{remark}, #{settlementDate}, #{amount},
         now(), now()
     </sql>
 
@@ -65,7 +67,7 @@
             <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
             <if test="warehouseType != null">AND `warehouse_type` = #{warehouseType}</if>
             <if test="warehouseName != null">AND `warehouse_name` = #{warehouseName}</if>
-            <if test="otherTransferHandleId != null">AND `other_transfer_handle_id` = #{otherTransferHandleId}</if>
+            <if test="relMaterialHandleId != null">AND `rel_material_handle_id` = #{relMaterialHandleId}</if>
             <if test="vendorName != null">AND `vendor_name` = #{vendorName}</if>
             <if test="materialId != null">AND `material_id` = #{materialId}</if>
             <if test="materialName != null">AND `material_name` = #{materialName}</if>
@@ -96,7 +98,7 @@
             <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
             <if test="warehouseType != null">AND `warehouse_type` = #{warehouseType}</if>
             <if test="warehouseName != null">AND `warehouse_name` = #{warehouseName}</if>
-            <if test="otherTransferHandleId != null">AND `other_transfer_handle_id` = #{otherTransferHandleId}</if>
+            <if test="relMaterialHandleId != null">AND `rel_material_handle_id` = #{relMaterialHandleId}</if>
             <if test="vendorName != null">AND `vendor_name` = #{vendorName}</if>
             <if test="materialId != null">AND `material_id` = #{materialId}</if>
             <if test="materialName != null">AND `material_name` = #{materialName}</if>
@@ -184,7 +186,7 @@
             <if test="warehouseId != null">`warehouse_id` = #{warehouseId},</if>
             <if test="warehouseType != null">`warehouse_type` = #{warehouseType},</if>
             <if test="warehouseName != null">`warehouse_name` = #{warehouseName},</if>
-            <if test="otherTransferHandleId != null">`other_transfer_handle_id` = #{otherTransferHandleId},</if>
+            <if test="relMaterialHandleId != null">`rel_material_handle_id` = #{relMaterialHandleId},</if>
             <if test="vendorName != null">`vendor_name` = #{vendorName},</if>
             <if test="materialId != null">`material_id` = #{materialId},</if>
             <if test="materialName != null">`material_name` = #{materialName},</if>
@@ -233,7 +235,6 @@
         ORDER BY `id` DESC
     </select>
 
-
     <select id="advCount" parameterType="map" resultType="long">
         SELECT COUNT(1)
         FROM <include refid="tb"/>
@@ -271,6 +272,14 @@
         WHERE warehouse_id=#{warehouseId}
         AND material_id=#{skuId}
         AND <![CDATA[ handle_date >= #{handleDate}]]>
+        <choose>
+            <when test="includeHandleDate">
+                AND <![CDATA[ handle_date >= #{handleDate}]]>
+            </when>
+            <otherwise>
+                AND <![CDATA[ handle_date > #{handleDate}]]>
+            </otherwise>
+        </choose>
         AND delete_flag=1
         ORDER BY handle_date ASC,id DESC
     </select>
@@ -280,8 +289,15 @@
         FROM <include refid="tb"/>
         WHERE warehouse_id=#{warehouseId}
         AND material_id=#{skuId}
-        AND <![CDATA[ handle_date <= #{handleDate}]]>
-        <!--AND <![CDATA[ id < #{materialHandleId}]]>-->
+        <choose>
+            <when test="include">
+                AND <![CDATA[ handle_date <= #{handleDate}]]>
+            </when>
+            <otherwise>
+                AND <![CDATA[ handle_date < #{handleDate}]]>
+            </otherwise>
+        </choose>
+
         AND delete_flag=1
         ORDER BY handle_date ASC,id DESC
     </select>
