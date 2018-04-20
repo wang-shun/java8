@@ -59,6 +59,18 @@ public class FormulaController {
     @RpcConsumer
     private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
 
+    /********************   2018/04/20  start   ***************************/
+    @RequestMapping(method = RequestMethod.GET,value = "formulaList")
+    public Paging<FeedFormula> pagingFormulaList(
+                                      Long farmId,
+                                      String formulaName,
+                                      Long feedId,
+                                      Integer pageNo,
+                                      Integer pageSize) {
+        return RespHelper.or500(feedFormulaReadService.pagingFormulaList(
+                farmId,formulaName,feedId,pageNo, pageSize));
+    }
+    /********************   2018/04/20  end     ***************************/
 
     @RequestMapping(method = RequestMethod.GET)
     public Paging<FeedFormula> paging(@RequestParam("farmId") Long farmId,
