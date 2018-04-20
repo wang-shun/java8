@@ -65,7 +65,12 @@ public class FeedFormula implements Serializable {
      * 猪场名称
      */
     private String farmName;
-    
+
+    /**
+     * 配方名称
+     */
+    private String formulaName;
+
     /**
      * 配方json
      */
