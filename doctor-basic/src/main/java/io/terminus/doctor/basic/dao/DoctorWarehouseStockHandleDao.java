@@ -17,8 +17,8 @@ import java.util.Map;
 public class DoctorWarehouseStockHandleDao extends MyBatisDao<DoctorWarehouseStockHandle> {
 
     //得到配方入库仓库
-    public String findwarehouseName(Long RelId) {
-        String warehouseName = this.sqlSession.selectOne(this.sqlId("findwarehouseName"), RelId);
+    public String findwarehouseName(Long id) {
+        String warehouseName = this.sqlSession.selectOne(this.sqlId("findwarehouseName"), id);
         return warehouseName;
     }
     public DoctorWarehouseStockHandle findByRelStockHandleId(Long id,int type){
