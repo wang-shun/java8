@@ -37,12 +37,12 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
     @Autowired
     private DoctorWarehouseStockHandleDao doctorWarehouseStockHandleDao;
     @Autowired
-    private DoctorWarehouseMaterialHandleDao doctorWarehouseMaterialHandleDao;
+    protected DoctorWarehouseMaterialHandleDao doctorWarehouseMaterialHandleDao;
 
     @Autowired
     private DoctorWarehouseStockHandleManager doctorWarehouseStockHandleManager;
     @Autowired
-    private DoctorWarehouseStockManager doctorWarehouseStockManager;
+    protected DoctorWarehouseStockManager doctorWarehouseStockManager;
 
     public Response<Long> handle(T stockDto) {
 
@@ -110,8 +110,9 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
                     doctorWarehouseStockManager.in(detail.getMaterialId(), detail.getQuantity(), wareHouse);
                     delete(materialHandle);
                     doctorWarehouseStockManager.out(materialHandle.getMaterialId(), materialHandle.getQuantity(), wareHouse);
+                } else {
+                    changed(materialHandle, detail, stockHandle, stockDto, wareHouse);
                 }
-                
             }
         });
 
@@ -127,6 +128,12 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
     protected abstract void create(T stockDto, F detail, DoctorWarehouseStockHandle stockHandle, DoctorWareHouse wareHouse);
 
     protected abstract void delete(DoctorWarehouseMaterialHandle materialHandle);
+
+    protected abstract void changed(DoctorWarehouseMaterialHandle materialHandle,
+                                    F detail,
+                                    DoctorWarehouseStockHandle stockHandle,
+                                    T stockDto,
+                                    DoctorWareHouse wareHouse);
 
 
     private List<Lock> lockedIfNecessary(AbstractWarehouseStockDto stockDto) {

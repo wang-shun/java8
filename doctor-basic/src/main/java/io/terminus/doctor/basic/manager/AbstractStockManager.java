@@ -249,6 +249,8 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
         materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
 //        materialHandle.setBeforeStockQuantity(getHistoryQuantity(stockHandle.getHandleDate(), wareHouse.getId()));
         materialHandle.setQuantity(detail.getQuantity());
+        materialHandle.setUnitPrice(new BigDecimal(0));
+        materialHandle.setAmount(new BigDecimal(0));
         materialHandle.setSettlementDate(stockDto.getSettlementDate());
         materialHandle.setHandleDate(stockDto.getHandleDate().getTime());
         materialHandle.setHandleYear(stockDto.getHandleDate().get(Calendar.YEAR));
