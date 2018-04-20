@@ -100,11 +100,13 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
             newHandleDate.set(Calendar.HOUR_OF_DAY, 0);
             newHandleDate.set(Calendar.MINUTE, 0);
             newHandleDate.set(Calendar.SECOND, 0);
+            newHandleDate.set(Calendar.MILLISECOND, 0);
             return newHandleDate.getTime();
         } else {
             newHandleDate.set(Calendar.HOUR_OF_DAY, 23);
             newHandleDate.set(Calendar.MINUTE, 59);
             newHandleDate.set(Calendar.SECOND, 59);
+            newHandleDate.set(Calendar.MILLISECOND, 999);
             return newHandleDate.getTime();
         }
     }

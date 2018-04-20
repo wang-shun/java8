@@ -277,6 +277,11 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
         if (WarehouseMaterialHandleType.isBigIn(materialHandle.getType())) {
             //入库类型：采购入库，退料入库，盘盈入库，调拨入库，配方生产入库
 
+
+            if (materialHandle.getType().equals(WarehouseMaterialHandleType.IN.getValue())) {
+                return new AmountAndQuantityDto(historyStockAmount.add(materialHandle.getAmount()), historyStockQuantity.add(materialHandle.getQuantity()));
+            }
+
             //盘盈单的单价采用上一笔采购入库单的单价
             if (materialHandle.getType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue())) {
                 //获取上一笔采购入库单

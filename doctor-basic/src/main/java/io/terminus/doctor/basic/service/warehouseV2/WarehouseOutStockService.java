@@ -24,7 +24,7 @@ public class WarehouseOutStockService extends AbstractWarehouseStockService<Ware
 
     @Override
     protected WarehouseMaterialHandleType getMaterialHandleType() {
-        return WarehouseMaterialHandleType.IN;
+        return WarehouseMaterialHandleType.OUT;
     }
 
     @Override
