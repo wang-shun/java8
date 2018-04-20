@@ -77,44 +77,49 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
     @Transactional
     @ExceptionHandle("doctor.warehouse.stock.handle.delete.fail")
     public Response<Boolean> delete(Long id) {
+        //DoctorWarehouseStockHandle doctorWarehouseMaterialHandle = doctorWarehouseStockHandleDao.findById(id);
         List<DoctorWarehouseMaterialHandle> handles = doctorWarehouseMaterialHandleDao.findByStockHandle(id);
         WarehouseOutManager warehouseOutManager = new WarehouseOutManager();
         WarehouseInManager warehouseInManager = new WarehouseInManager();
         AbstractStockManager abstractStockManager = null;
         for (DoctorWarehouseMaterialHandle handle : handles) {
             int type = handle.getType();
+            if(type == 0){
+                return Response.fail("未知");
+            }
+            //配方生产
             if (type == 3) {
                 return Response.fail("配方生产不支持删除");
             }
+            //调拨入库
             if (type == 5) {
                 return Response.fail("调拨入库不支持删除");
             }
+            //采购入库,退料入库,盘盈入库
             if(type==1 || type == 2 || type==4){
                 abstractStockManager.recalculate(handle);
                 warehouseInManager.delete(handle);
             }
+            //盘亏出库
             if(type==7){
                 warehouseOutManager.delete(handle);
             }
+            //领料出库
             if(type == 6){
-                int a = doctorWarehouseMaterialHandleDao.findByRelMaterialHandleId(handle.getRelMaterialHandleId(),6);
-                if(a != 0){
+                DoctorWarehouseStockHandle a = doctorWarehouseStockHandleDao.findByRelStockHandleId(id,type);
+                if(a != null){
                     return Response.fail("此物料存在退料,不支持删除");
                 }
                 warehouseOutManager.delete(handle);
             }
+            //配方出库,调拨出库
             if (type == 8 || type == 9) {
+                DoctorWarehouseStockHandle a = doctorWarehouseStockHandleDao.findByRelStockHandleId(id,type);//被入库的单据表
+                DoctorWarehouseMaterialHandle b = doctorWarehouseMaterialHandleDao.findByStockHandleId(a.getId());//被入库的单据明细表
+                abstractStockManager.recalculate(b);//校验被入库是否为正
+                warehouseInManager.delete(b);//删除被入库的单据明细表
+                doctorWarehouseStockHandleDao.delete(a.getId());//删除被入库的单据表
                 warehouseOutManager.delete(handle);//删除出库单的单据明细
-                Long relStockHandleId = doctorWarehouseStockHandleDao.findById(handle.getStockHandleId()).getRelStockHandleId();//被入库的单据表id
-                List<DoctorWarehouseMaterialHandle> relHandlelist = doctorWarehouseMaterialHandleDao.findByStockHandle(relStockHandleId);
-                for (DoctorWarehouseMaterialHandle handlelists : relHandlelist) {
-                    int types = handlelists.getType();
-                    if (types == 3 || types == 5) {
-                        abstractStockManager.recalculate(handlelists);
-                    }
-                    warehouseInManager.delete(handlelists);//删除被入库的单据明细
-                }
-                doctorWarehouseStockHandleDao.delete(relStockHandleId);//删除被入库的单据
             }
         }
             /*Map<Long*//*skuId*//*, List<DoctorWarehouseMaterialHandle>> needValidSkuHandle = handles.stream()

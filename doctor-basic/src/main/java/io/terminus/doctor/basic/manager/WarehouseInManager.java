@@ -47,7 +47,7 @@ public class WarehouseInManager extends AbstractStockManager<WarehouseStockInDto
             historyQuantity = historyQuantity.add(detail.getQuantity());
 
             //需要重算每个明细的beforeStockQuantity
-            recalculate(stockDto.getHandleDate().getTime(), wareHouse.getId(), detail.getMaterialId(), historyQuantity);
+            recalculate(stockDto.getHandleDate().getTime(), false ,wareHouse.getId(), detail.getMaterialId(), historyQuantity);
         } else {
             BigDecimal currentQuantity = doctorWarehouseStockDao.findBySkuIdAndWarehouseId(detail.getMaterialId(), wareHouse.getId())
                     .orElse(DoctorWarehouseStock.builder().quantity(new BigDecimal(0)).build())
@@ -64,7 +64,7 @@ public class WarehouseInManager extends AbstractStockManager<WarehouseStockInDto
 
         if (!DateUtil.inSameDate(materialHandle.getHandleDate(), new Date())) {
             //删除历史单据明细
-            recalculate(materialHandle.getHandleDate(), materialHandle.getWarehouseId(), materialHandle.getMaterialId(), materialHandle.getBeforeStockQuantity());
+            recalculate(materialHandle);
         }
 
         materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.DELETE.getValue());

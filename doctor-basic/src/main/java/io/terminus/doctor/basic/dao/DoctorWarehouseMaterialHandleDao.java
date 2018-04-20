@@ -77,11 +77,13 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
 //        return this.sqlSession.selectList(this.sqlId("findAfter"), criteria);
 //    }
 
-    public List<DoctorWarehouseMaterialHandle> findAfter(Long warehouseId, Long skuId, Date handleDate) {
+    public List<DoctorWarehouseMaterialHandle> findAfter(Long warehouseId, Long skuId, Date handleDate, boolean includeHandleDate) {
         Map<String, Object> criteria = Maps.newHashMap();
         criteria.put("warehouseId", warehouseId);
         criteria.put("skuId", skuId);
         criteria.put("handleDate", handleDate);
+        criteria.put("includeHandleDate", includeHandleDate);
+
         return this.sqlSession.selectList(this.sqlId("findAfterByDate"), criteria);
     }
 
@@ -90,7 +92,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
      *
      * @return
      */
-    public BigDecimal getHistoryStock(Long warehouseId, Long skuId, Date handleDate) {
+    public BigDecimal getHistoryStock(Long warehouseId, Long skuId, Date handleDate, boolean include) {
 
         Map<String, Object> criteria = Maps.newHashMap();
         criteria.put("warehouseId", warehouseId);
@@ -223,11 +225,8 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         BigDecimal quantity = this.sqlSession.selectOne(this.sqlId("findRetreatingById"), criteria);
         return quantity;
     }
-    public Integer findByRelMaterialHandleId(Long materialId, int type) {
-        Map<String, Object> criteria = Maps.newHashMap();
-        criteria.put("id", materialId);
-        criteria.put("type", type);
-        return this.sqlSession.selectOne(this.sqlId("findSameMaterialId"), criteria);
-    }
 
+    public DoctorWarehouseMaterialHandle findByStockHandleId(Long id){
+       return this.sqlSession.selectOne(this.sqlId("findByStockHandleId"),id);
+    }
 }
