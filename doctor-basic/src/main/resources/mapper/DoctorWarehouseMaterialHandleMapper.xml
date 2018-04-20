@@ -152,12 +152,12 @@
     </select>
 
     <select id="findLibraryById" parameterType="long" resultType="BigDecimal">
-        select quantity from <include refid="cols_all"/>
-        where id=#{id} and type=2
+        select quantity from <include refid="tb"/>
+        where id = #{id} and type=2
     </select>
 
     <select id="findRetreatingById" parameterType="DoctorWarehouseMaterialHandle" resultType="BigDecimal">
-        select ifnull(sum(quantity),0) from <include refid="cols_all"/>
+        select ifnull(sum(quantity),0) from <include refid="tb"/>
         where type=13 and rel_material_handle_id=#{relMaterialHandleId}
         and <![CDATA[ handle_date <= #{handleDate}]]>
         order by handle_date ,id desc;

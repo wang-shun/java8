@@ -169,7 +169,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         try {
             //按猪场Id，年月分组
 
-            return null;
+            return Response.ok();
         } catch (Exception e) {
             log.error("failed to list doctor warehouse material handle, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.material.handle.list.fail");
