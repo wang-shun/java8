@@ -125,5 +125,10 @@ public interface DoctorWarehouseMaterialHandleReadService {
      */
     Response<Map<WarehouseMaterialHandleType, Map<Long, BigDecimal>>> countWarehouseAmount(DoctorWarehouseMaterialHandle criteria, WarehouseMaterialHandleType... types);
 
-
+    /**
+     * 公司结算报表
+     * @param criteria
+     * @return
+     */
+    Response<List<Map>> companyReport(Map<String, Object> criteria);
 }

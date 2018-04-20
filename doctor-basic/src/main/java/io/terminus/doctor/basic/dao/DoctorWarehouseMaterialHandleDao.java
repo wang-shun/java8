@@ -84,7 +84,6 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         criteria.put("skuId", skuId);
         criteria.put("handleDate", handleDate);
         criteria.put("includeHandleDate", includeHandleDate);
-
         return this.sqlSession.selectList(this.sqlId("findAfterByDate"), criteria);
     }
 
@@ -226,6 +225,5 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         BigDecimal quantity = this.sqlSession.selectOne(this.sqlId("findRetreatingById"), criteria);
         return quantity;
     }
-
 
 }

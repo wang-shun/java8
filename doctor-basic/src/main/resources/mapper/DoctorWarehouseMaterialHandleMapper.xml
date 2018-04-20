@@ -419,4 +419,12 @@
         where  warehouse_id = #{id}
     </select>
 
+    <select id="listByFarmIdTimeType" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
+        select <include refid="cols_all"/>
+        FROM <include refid="tb"/>ss
+        <include refid="criteria"/>
+        GROUP BY farmId,handleYear,handleMonth
+        ORDER BY createdAt desc
+    </select>
+
 </mapper>
