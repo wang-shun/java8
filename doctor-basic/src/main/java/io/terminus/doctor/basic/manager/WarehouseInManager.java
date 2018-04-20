@@ -1,6 +1,5 @@
 package io.terminus.doctor.basic.manager;
 
-import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDto;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockInDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
@@ -20,12 +19,12 @@ import java.util.Date;
  * Created by sunbo@terminus.io on 2018/4/8.
  */
 @Component
-public class WarehouseInManager extends AbstractStockManager<WarehouseStockInDto.WarehouseStockInDetailDto> {
+public class WarehouseInManager extends AbstractStockManager<WarehouseStockInDto.WarehouseStockInDetailDto,WarehouseStockInDto> {
 
 
     @Override
     public void create(WarehouseStockInDto.WarehouseStockInDetailDto detail,
-                       AbstractWarehouseStockDto stockDto,
+                       WarehouseStockInDto stockDto,
                        DoctorWarehouseStockHandle stockHandle,
                        DoctorWareHouse wareHouse) {
 
@@ -41,7 +40,7 @@ public class WarehouseInManager extends AbstractStockManager<WarehouseStockInDto
             materialHandle.setHandleDate(new DateTime(materialHandle.getHandleDate()).withTime(0, 0, 0, 0).toDate());
 
             //获取该笔明细之前的库存量
-            BigDecimal historyQuantity = getHistoryQuantity(stockDto.getHandleDate().getTime(), wareHouse.getId(), detail.getMaterialId());
+            BigDecimal historyQuantity = getHistoryQuantityInclude(stockDto.getHandleDate().getTime(), wareHouse.getId(), detail.getMaterialId());
 
             materialHandle.setBeforeStockQuantity(historyQuantity);
             historyQuantity = historyQuantity.add(detail.getQuantity());

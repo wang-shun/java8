@@ -54,6 +54,10 @@ public class WarehouseOutManager extends AbstractStockManager {
             BigDecimal currentQuantity = doctorWarehouseStockDao.findBySkuIdAndWarehouseId(detail.getMaterialId(), wareHouse.getId())
                     .orElse(DoctorWarehouseStock.builder().quantity(new BigDecimal(0)).build())
                     .getQuantity();
+
+            if (currentQuantity.compareTo(materialHandle.getQuantity()) < 0)
+                throw new ServiceException("warehouse.stock.not.enough");
+
             materialHandle.setBeforeStockQuantity(currentQuantity);
         }
         doctorWarehouseMaterialHandleDao.create(materialHandle);

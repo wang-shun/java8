@@ -166,6 +166,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
      * @param settlementDate
      * @return
      */
+    @Deprecated
     public Map<Long, AmountAndQuantityDto> findEachWarehouseBalanceBySettlementDate(Long orgId, Date settlementDate) {
 
         Map<String, Object> criteria = Maps.newHashMap();
@@ -212,6 +213,15 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return count;
     }
 
+    /**
+     * 统计出库单据已退数量
+     *
+     * @return
+     */
+    public BigDecimal countQuantityAlreadyRefund(Long materialHandleId) {
+        return this.sqlSession.selectOne(this.sqlId("countQuantityAlreadyRefund"), materialHandleId);
+    }
+
     //得到领料出库的数量
     public BigDecimal findLibraryById(Long id) {
         BigDecimal quantity = this.sqlSession.selectOne(this.sqlId("findLibraryById"), id);
@@ -234,17 +244,17 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
 
     //查公司结算列表
     public List<Map> listByFarmIdTime(Map<String, Object> criteria) {
-        List<Map> resultList = this.sqlSession.selectList("listByFarmIdTime",criteria);
+        List<Map> resultList = this.sqlSession.selectList("listByFarmIdTime", criteria);
 
-        resultList.stream().forEach(map ->{
+        resultList.stream().forEach(map -> {
 
-            map.put("type",WarehouseMaterialHandleType.IN.getValue());
+            map.put("type", WarehouseMaterialHandleType.IN.getValue());
 
-            map.put("inAmount",this.sqlSession.selectOne("selectSumAmount",map));
+            map.put("inAmount", this.sqlSession.selectOne("selectSumAmount", map));
 
-            map.put("type",WarehouseMaterialHandleType.OUT.getValue());
+            map.put("type", WarehouseMaterialHandleType.OUT.getValue());
 
-            map.put("inAmount",this.sqlSession.selectOne("selectSumAmount",map));
+            map.put("inAmount", this.sqlSession.selectOne("selectSumAmount", map));
         });
 
         return resultList;

@@ -135,9 +135,17 @@ public class StockController {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
-        setOperatorName(stockOut);
-
         setOrgId(stockOut);
+
+        //是否该公司正在结算中
+        if (doctorWarehouseSettlementService.isUnderSettlement(stockOut.getOrgId()))
+            throw new JsonResponseException("under.settlement");
+
+        //会计年月
+        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(stockOut.getHandleDate().getTime());
+        //会计年月已经结算后，不允许新增或编辑单据
+        if (doctorWarehouseSettlementService.isSettled(stockOut.getOrgId(), settlementDate))
+            throw new JsonResponseException("already.settlement");
 
         stockOut.getDetails().forEach(detail -> {
             Response<String> realNameResponse = doctorGroupWebService.findRealName(detail.getApplyStaffId());
@@ -151,6 +159,12 @@ public class StockController {
             detail.setPigType(barn.getPigType());
         });
 
+        setOperatorName(stockOut);
+        stockOut.setSettlementDate(settlementDate);
+        Calendar handleDateWithTime = Calendar.getInstance();
+        handleDateWithTime.set(stockOut.getHandleDate().get(Calendar.YEAR), stockOut.getHandleDate().get(Calendar.MONTH), stockOut.getHandleDate().get(Calendar.DAY_OF_MONTH));
+        stockOut.setHandleDate(handleDateWithTime);
+
         return RespHelper.or500(doctorWarehouseStockWriteService.out(stockOut));
     }
 
@@ -161,9 +175,33 @@ public class StockController {
      * @return
      */
     @RequestMapping(method = RequestMethod.PUT, value = "refund")
-    public Long refund() {
-        //TODO 领料入库
-        return 0L;
+    public Long refund(@RequestBody
+                       @Validated(AbstractWarehouseStockDetail.StockOtherValid.class)
+                               WarehouseStockRefundDto stockRefund,
+                       Errors errors) {
+        if (errors.hasErrors())
+            throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
+
+        setOrgId(stockRefund);
+
+        //是否该公司正在结算中
+        if (doctorWarehouseSettlementService.isUnderSettlement(stockRefund.getOrgId()))
+            throw new JsonResponseException("under.settlement");
+
+        //会计年月
+        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(stockRefund.getHandleDate().getTime());
+        //会计年月已经结算后，不允许新增或编辑单据
+        if (doctorWarehouseSettlementService.isSettled(stockRefund.getOrgId(), settlementDate))
+            throw new JsonResponseException("already.settlement");
+
+        setOperatorName(stockRefund);
+        stockRefund.setSettlementDate(settlementDate);
+        Calendar handleDateWithTime = Calendar.getInstance();
+        handleDateWithTime.set(stockRefund.getHandleDate().get(Calendar.YEAR), stockRefund.getHandleDate().get(Calendar.MONTH), stockRefund.getHandleDate().get(Calendar.DAY_OF_MONTH));
+        stockRefund.setHandleDate(handleDateWithTime);
+
+
+        return RespHelper.or500(doctorWarehouseStockWriteService.refund(stockRefund));
     }
 
     /**

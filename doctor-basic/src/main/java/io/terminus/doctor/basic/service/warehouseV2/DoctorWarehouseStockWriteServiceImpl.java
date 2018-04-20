@@ -60,6 +60,8 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     private DoctorFarmBasicReadService doctorFarmBasicReadService;
     @Autowired
     private WarehouseOutStockService warehouseOutStockService;
+    @Autowired
+    private WarehouseRefundStockService warehouseRefundStockService;
 
     @Autowired
     private DoctorWarehouseHandlerManager doctorWarehouseHandlerManager;
@@ -228,6 +230,13 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     @ExceptionHandle("doctor.warehouse.stock.out.fail")
     public Response<Long> out(WarehouseStockOutDto stockOut) {
         return warehouseOutStockService.handle(stockOut);
+    }
+
+    @Override
+    @Transactional
+    @ExceptionHandle("doctor.warehouse.stock.refund.fail")
+    public Response<Long> refund(WarehouseStockRefundDto stockRefundDto) {
+        return warehouseRefundStockService.handle(stockRefundDto);
     }
 
     private List<Lock> lockedIfNecessary(AbstractWarehouseStockDto stockDto) {

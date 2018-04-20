@@ -406,6 +406,10 @@
         AND delete_flag=1
     </update>
 
+    <select id="countQuantityAlreadyRefund" parameterType="long" resultType="BigDecimal">
+        select ifnull(sum(quantity),0) from doctor_warehouse_material_handle where rel_material_handle_id=#{countQuantityAlreadyRefund}
+    </select>
+
     <select id="getWarehouseMaterialHandleCount" resultType="int">
         select count(1) as count from  doctor_warehouse_material_handle
         where  warehouse_id = #{id}

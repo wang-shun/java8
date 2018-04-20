@@ -1,10 +1,7 @@
 package io.terminus.doctor.basic.manager;
 
 import io.terminus.common.exception.ServiceException;
-import io.terminus.doctor.basic.dao.DoctorBasicDao;
-import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
-import io.terminus.doctor.basic.dao.DoctorWarehouseSkuDao;
-import io.terminus.doctor.basic.dao.DoctorWarehouseStockDao;
+import io.terminus.doctor.basic.dao.*;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDetail;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
@@ -25,7 +22,7 @@ import java.util.stream.Collectors;
 /**
  * Created by sunbo@terminus.io on 2018/4/8.
  */
-public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetail> {
+public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetail, F extends AbstractWarehouseStockDto> {
 
     @Autowired
     private LockRegistry lockRegistry;
@@ -38,6 +35,9 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
 
     @Autowired
     protected DoctorWarehouseStockDao doctorWarehouseStockDao;
+
+    @Autowired
+    protected DoctorWarehouseStockHandleDao doctorWarehouseStockHandleDao;
 
     @Autowired
     protected DoctorBasicDao doctorBasicDao;
@@ -229,9 +229,16 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
      * @param wareHouse
      */
     public abstract void create(T detail,
-                                AbstractWarehouseStockDto stockDto,
+                                F stockDto,
                                 DoctorWarehouseStockHandle stockHandle,
                                 DoctorWareHouse wareHouse);
+
+    public void create(List<T> details, F stockDto, DoctorWarehouseStockHandle stockHandle, DoctorWareHouse wareHouse) {
+
+        details.forEach(d -> {
+            create(d, stockDto, stockHandle, wareHouse);
+        });
+    }
 
 
     protected DoctorWarehouseMaterialHandle buildMaterialHandle(T detail,

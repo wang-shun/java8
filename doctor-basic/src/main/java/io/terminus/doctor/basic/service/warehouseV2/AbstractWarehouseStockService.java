@@ -40,7 +40,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
     protected DoctorWarehouseMaterialHandleDao doctorWarehouseMaterialHandleDao;
 
     @Autowired
-    private DoctorWarehouseStockHandleManager doctorWarehouseStockHandleManager;
+    protected DoctorWarehouseStockHandleManager doctorWarehouseStockHandleManager;
     @Autowired
     protected DoctorWarehouseStockManager doctorWarehouseStockManager;
 
@@ -69,7 +69,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
         }
     }
 
-    private DoctorWarehouseStockHandle create(T stockDto, DoctorWareHouse wareHouse) {
+    protected DoctorWarehouseStockHandle create(T stockDto, DoctorWareHouse wareHouse) {
         DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.create(stockDto, wareHouse, getMaterialHandleType());
 
         this.getDetails(stockDto).forEach(detail -> {
