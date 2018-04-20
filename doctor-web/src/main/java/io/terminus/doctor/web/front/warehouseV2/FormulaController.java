@@ -60,7 +60,7 @@ public class FormulaController {
     private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
 
     /********************   2018/04/20  start   ***************************/
-    @RequestMapping(method = RequestMethod.GET,value = "formulaList")
+    @RequestMapping(method = RequestMethod.GET,value = "/formulaList")
     public Paging<FeedFormula> pagingFormulaList(
                                       Long farmId,
                                       String formulaName,

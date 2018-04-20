@@ -212,20 +212,19 @@
         from doctor_ware_houses a
         where a.farm_id=#{farmId}
         <if test="type != null" > and a.type=#{type}</if>
-        group by a.type
-        order by a.type,a.created_at;
+        order by a.type,a.created_at
     </select>
 
     <!--  按照仓库类型进行tab分页筛选，仓库按照创建时间进行排列 -->
     <select id="listDetailTypeCount" parameterType="Map" resultType="long">
-          select count(1) as ct
-            from doctor_warehouse_material_handle a
-            left join doctor_warehouse_sku b on a.material_id=b.id
-            left join doctor_warehouse_vendor c on b.vendor_id=c.id
-            where a.delete_flag=1
-            <if test="type != null" > and a.warehouse_type=#{type}</if>
-            <if test="materialName != null" > and b.`name` like CONCAT('%', #{materialName}, '%')</if>
-            <if test="warehouseId != null" > and a.warehouse_id=#{warehouseId}</if>
+        select count(1) as ct
+        from doctor_warehouse_material_handle a
+        left join doctor_warehouse_sku b on a.material_id=b.id
+        left join doctor_warehouse_vendor c on b.vendor_id=c.id
+        where a.delete_flag=1
+        <if test="type != null" > and a.warehouse_type=#{type}</if>
+        <if test="materialName != null" > and b.`name` like CONCAT('%', #{materialName}, '%')</if>
+        <if test="warehouseId != null" > and a.warehouse_id=#{warehouseId}</if>
     </select>
 
     <select id="listDetailTypeMap" parameterType="Map" resultType="map">
