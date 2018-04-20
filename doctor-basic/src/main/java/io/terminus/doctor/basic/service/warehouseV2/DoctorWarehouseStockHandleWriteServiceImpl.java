@@ -80,7 +80,7 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
     @Override
     @Transactional
     @ExceptionHandle("doctor.warehouse.stock.handle.delete.fail")
-    public Response<Boolean> delete(Long id) {
+    public Response<String> delete(Long id) {
         List<DoctorWarehouseMaterialHandle> handles = doctorWarehouseMaterialHandleDao.findByStockHandle(id);
         for (DoctorWarehouseMaterialHandle handle : handles) {
             int type = handle.getType();
@@ -156,7 +156,7 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
             });*/
             boolean isdelete = doctorWarehouseStockHandleDao.delete(id);
             if(isdelete){
-                return Response.ok(true);
+                return Response.ok("删除成功");
             }else{
                 return Response.fail("删除单据表失败");
             }

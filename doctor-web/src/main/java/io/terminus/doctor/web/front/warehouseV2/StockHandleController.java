@@ -235,11 +235,11 @@ public class StockHandleController {
 
     //删除
     @RequestMapping(method = RequestMethod.DELETE, value = "{id:\\d+}")
-    public boolean delete(@PathVariable Long id) {
-           Response<Boolean> response = doctorWarehouseStockHandleWriteService.delete(id);
-           if (!response.isSuccess())
+    public Response<String> delete(@PathVariable Long id) {
+           return doctorWarehouseStockHandleWriteService.delete(id);
+           /*if (!response.isSuccess())
                throw new JsonResponseException(response.getError());
-           return true;
+           return true;*/
    }
 
     //导出
