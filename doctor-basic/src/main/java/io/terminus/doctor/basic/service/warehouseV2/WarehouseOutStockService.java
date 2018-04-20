@@ -39,6 +39,7 @@ public class WarehouseOutStockService extends AbstractWarehouseStockService<Ware
                           DoctorWareHouse wareHouse) {
 
         warehouseOutManager.create(detail, stockDto, stockHandle, wareHouse);
+        doctorWarehouseStockManager.out(detail.getMaterialId(), detail.getQuantity(), wareHouse);
     }
 
     @Override
