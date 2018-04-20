@@ -143,7 +143,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
             List<Lock> locks = new ArrayList<>();
 
             log.info("lock for warehouse :{}", stockDto.getWarehouseId());
-            Lock lock = lockRegistry.obtain(stockDto.getWarehouseId());
+            Lock lock = lockRegistry.obtain(stockDto.getWarehouseId().toString());
             if (!lock.tryLock())
                 throw new JsonResponseException("stock.handle.in.operation");
 

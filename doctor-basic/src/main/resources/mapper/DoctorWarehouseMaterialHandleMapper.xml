@@ -261,7 +261,6 @@
         FROM <include refid="tb"/>
         WHERE warehouse_id=#{warehouseId}
         AND material_id=#{skuId}
-        AND <![CDATA[ handle_date >= #{handleDate}]]>
         <choose>
             <when test="includeHandleDate">
                 AND <![CDATA[ handle_date >= #{handleDate}]]>

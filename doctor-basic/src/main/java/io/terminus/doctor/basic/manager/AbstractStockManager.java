@@ -12,6 +12,8 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.common.utils.DateUtil;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.support.locks.LockRegistry;
 
@@ -57,6 +59,15 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
         recalculate(materialHandle.getHandleDate(), true, materialHandle.getWarehouseId(), materialHandle.getMaterialId(), historyQuantity);
     }
 
+    public void recalculate(DoctorWarehouseMaterialHandle materialHandle, Date recalculateDate) {
+
+        //历史库存量,不包括该笔单据所在的那一天
+        BigDecimal historyQuantity = getHistoryQuantity(recalculateDate, materialHandle.getWarehouseId(), materialHandle.getMaterialId());
+
+        //重算单据明细，包括该笔单据所在的那一天
+        recalculate(recalculateDate, true, materialHandle.getWarehouseId(), materialHandle.getMaterialId(), historyQuantity);
+    }
+
     /**
      * 重算
      *
@@ -96,6 +107,8 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
      * @return
      */
     public Date buildNewHandleDate(WarehouseMaterialHandleType handleType, Calendar newHandleDate) {
+
+
         if (WarehouseMaterialHandleType.isBigIn(handleType.getValue())) {
             newHandleDate.set(Calendar.HOUR_OF_DAY, 0);
             newHandleDate.set(Calendar.MINUTE, 0);
@@ -106,7 +119,29 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
             newHandleDate.set(Calendar.HOUR_OF_DAY, 23);
             newHandleDate.set(Calendar.MINUTE, 59);
             newHandleDate.set(Calendar.SECOND, 59);
-            newHandleDate.set(Calendar.MILLISECOND, 999);
+            newHandleDate.set(Calendar.MILLISECOND, 0);
+            return newHandleDate.getTime();
+        }
+    }
+
+    public Date buildNewHandleDateForUpdate(WarehouseMaterialHandleType handleType, Calendar newHandleDate) {
+
+        if (DateUtil.inSameDate(newHandleDate.getTime(), new Date())) {
+            DateTime old = new DateTime(newHandleDate.getTime());
+            return new DateTime().withDate(old.getYear(), old.getMonthOfYear(), old.getDayOfMonth()).toDate();
+        }
+
+        if (WarehouseMaterialHandleType.isBigIn(handleType.getValue())) {
+            newHandleDate.set(Calendar.HOUR_OF_DAY, 0);
+            newHandleDate.set(Calendar.MINUTE, 0);
+            newHandleDate.set(Calendar.SECOND, 0);
+            newHandleDate.set(Calendar.MILLISECOND, 0);
+            return newHandleDate.getTime();
+        } else {
+            newHandleDate.set(Calendar.HOUR_OF_DAY, 23);
+            newHandleDate.set(Calendar.MINUTE, 59);
+            newHandleDate.set(Calendar.SECOND, 59);
+            newHandleDate.set(Calendar.MILLISECOND, 0);
             return newHandleDate.getTime();
         }
     }

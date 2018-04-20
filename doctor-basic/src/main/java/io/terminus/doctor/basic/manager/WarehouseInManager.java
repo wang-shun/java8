@@ -19,7 +19,7 @@ import java.util.Date;
  * Created by sunbo@terminus.io on 2018/4/8.
  */
 @Component
-public class WarehouseInManager extends AbstractStockManager<WarehouseStockInDto.WarehouseStockInDetailDto,WarehouseStockInDto> {
+public class WarehouseInManager extends AbstractStockManager<WarehouseStockInDto.WarehouseStockInDetailDto, WarehouseStockInDto> {
 
 
     @Override
@@ -46,7 +46,7 @@ public class WarehouseInManager extends AbstractStockManager<WarehouseStockInDto
             historyQuantity = historyQuantity.add(detail.getQuantity());
 
             //需要重算每个明细的beforeStockQuantity
-            recalculate(stockDto.getHandleDate().getTime(), false ,wareHouse.getId(), detail.getMaterialId(), historyQuantity);
+            recalculate(stockDto.getHandleDate().getTime(), false, wareHouse.getId(), detail.getMaterialId(), historyQuantity);
         } else {
             BigDecimal currentQuantity = doctorWarehouseStockDao.findBySkuIdAndWarehouseId(detail.getMaterialId(), wareHouse.getId())
                     .orElse(DoctorWarehouseStock.builder().quantity(new BigDecimal(0)).build())
@@ -61,13 +61,13 @@ public class WarehouseInManager extends AbstractStockManager<WarehouseStockInDto
     @Override
     public void delete(DoctorWarehouseMaterialHandle materialHandle) {
 
+        materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.DELETE.getValue());
+        doctorWarehouseMaterialHandleDao.update(materialHandle);
+
         if (!DateUtil.inSameDate(materialHandle.getHandleDate(), new Date())) {
             //删除历史单据明细
             recalculate(materialHandle);
         }
-
-        materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.DELETE.getValue());
-        doctorWarehouseMaterialHandleDao.update(materialHandle);
     }
 
     public void updateQuantity(DoctorWarehouseMaterialHandle materialHandle, BigDecimal newQuantity) {

@@ -205,7 +205,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                         warehouseInManager.updateQuantity(materialHandle, changedQuantity);
                     }
                     if (!DateUtil.inSameDate(stockHandle.getHandleDate(), stockIn.getHandleDate().getTime())) {
-                        materialHandle.setHandleDate(warehouseInManager.buildNewHandleDate(WarehouseMaterialHandleType.IN, stockIn.getHandleDate()));
+                        materialHandle.setHandleDate(warehouseInManager.buildNewHandleDateForUpdate(WarehouseMaterialHandleType.IN, stockIn.getHandleDate()));
                     }
 
                     if (detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0 ||
