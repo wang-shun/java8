@@ -1,8 +1,6 @@
 package io.terminus.doctor.event;
 
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Table;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.event.editHandler.DoctorModifyGroupEventHandler;
@@ -41,8 +39,6 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
 import io.terminus.doctor.event.handler.DoctorPigEventHandler;
 import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
-import io.terminus.doctor.event.handler.DoctorRollbackGroupEventHandler;
-import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
 import io.terminus.doctor.event.handler.boar.DoctorSemenHandler;
 import io.terminus.doctor.event.handler.group.DoctorAntiepidemicGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorChangeGroupEventHandler;
@@ -63,15 +59,14 @@ import io.terminus.doctor.event.handler.sow.DoctorSowMatingHandler;
 import io.terminus.doctor.event.handler.sow.DoctorSowPigletsChgHandler;
 import io.terminus.doctor.event.handler.sow.DoctorSowPregCheckHandler;
 import io.terminus.doctor.event.handler.sow.DoctorSowWeanHandler;
-import io.terminus.doctor.event.handler.usual.DoctorChgFarmHandler;
-import io.terminus.doctor.event.handler.usual.DoctorChgFarmInHandler;
+import io.terminus.doctor.event.handler.usual.DoctorChgFarmInV2Handler;
+import io.terminus.doctor.event.handler.usual.DoctorChgFarmV2Handler;
 import io.terminus.doctor.event.handler.usual.DoctorChgLocationHandler;
 import io.terminus.doctor.event.handler.usual.DoctorConditionHandler;
 import io.terminus.doctor.event.handler.usual.DoctorDiseaseHandler;
 import io.terminus.doctor.event.handler.usual.DoctorEntryHandler;
 import io.terminus.doctor.event.handler.usual.DoctorRemovalHandler;
 import io.terminus.doctor.event.handler.usual.DoctorVaccinationHandler;
-import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.parana.msg.impl.MessageAutoConfig;
 import io.terminus.zookeeper.common.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
@@ -121,8 +116,8 @@ public class  DoctorEventConfiguration {
             DoctorSowFostersByHandler doctorSowFostersByHandler,
             DoctorSowMatingHandler doctorSowMatingHandler,
             DoctorSowPregCheckHandler doctorSowPregCheckHandler,
-            DoctorChgFarmHandler doctorChgFarmHandler,
-            DoctorChgFarmInHandler doctorChgFarmInHandler,
+            DoctorChgFarmV2Handler doctorChgFarmHandler,
+            DoctorChgFarmInV2Handler doctorChgFarmInHandler,
             DoctorChgLocationHandler doctorChgLocationHandler,
             DoctorConditionHandler doctorConditionHandler,
             DoctorDiseaseHandler doctorDiseaseHandler,

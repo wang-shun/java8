@@ -2143,3 +2143,18 @@ CREATE TABLE `doctor_track_snapshots` (
 ALTER TABLE `doctor_track_snapshots` ADD COLUMN `event_source` tinyint (4) DEFAULT NULL COMMENT '前置事件来源' after `event_id`;
 
 create index doctor_event_modify_logs_business_id on doctor_event_modify_logs(business_id);
+
+
+CREATE TABLE `doctor_chg_farm_records` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `farm_id` bigint(20) NOT NULL COMMENT '猪场id',
+  `pig_id` VARCHAR(64) NOT NULL COMMENT '猪场名称',
+  `track` VARCHAR (1024) NOT NULL COMMENT 'track json',
+  `pig` VARCHAR (1024) NOT NULL COMMENT 'pig json',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_farm_id` (`farm_id`),
+  KEY `index_pig_id` (`pig_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='猪场猪转场记录';
+
