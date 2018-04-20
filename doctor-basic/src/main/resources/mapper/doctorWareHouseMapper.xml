@@ -212,7 +212,8 @@
         from doctor_ware_houses a
         where a.farm_id=#{farmId}
         <if test="type != null" > and a.type=#{type}</if>
-        order by a.type,a.created_at
+        group by a.type
+        order by a.type,a.created_at;
     </select>
 
     <!--  按照仓库类型进行tab分页筛选，仓库按照创建时间进行排列 -->

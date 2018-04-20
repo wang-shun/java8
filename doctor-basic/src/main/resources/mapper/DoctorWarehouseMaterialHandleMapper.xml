@@ -427,4 +427,9 @@
         ORDER BY createdAt desc
     </select>
 
+    <select id="findByStockHandleId" parameterType="long" resultType="DoctorWarehouseMaterialHandle">
+        select * from  doctor_warehouse_material_handle
+        where  stock_handle_id = #{id}
+    </select>
+
 </mapper>

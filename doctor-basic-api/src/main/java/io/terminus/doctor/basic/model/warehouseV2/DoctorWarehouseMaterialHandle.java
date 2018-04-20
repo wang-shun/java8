@@ -11,7 +11,11 @@ import java.util.Date;
 /**
  * Desc:
  * Mail: [ your email ]
+<<<<<<< HEAD
  * Date: 2018-04-19 19:40:59
+=======
+ * Date: 2018-04-18 18:25:43
+>>>>>>> Merge branch 'feature/warehouse-v2' of D:\project\doctor2\doctor with conflicts.
  * Created by [ your name ]
  */
 @Data
@@ -20,7 +24,8 @@ import java.util.Date;
 @NoArgsConstructor
 public class DoctorWarehouseMaterialHandle implements Serializable {
 
-    private static final long serialVersionUID = 3824033689550515536L;
+
+    private static final long serialVersionUID = -2312281503041698696L;
 
     /**
      * 自增主键
@@ -60,7 +65,7 @@ public class DoctorWarehouseMaterialHandle implements Serializable {
     private String warehouseName;
 
     /**
-     * 关联明细单据id
+     * 另一条调拨物料处理单的编号
      */
     private Long relMaterialHandleId;
 
@@ -80,7 +85,7 @@ public class DoctorWarehouseMaterialHandle implements Serializable {
     private String materialName;
 
     /**
-     * 处理类别
+     * 处理类别，入库，出库，调拨，盘点
      *
      * @see io.terminus.doctor.basic.enums.WarehouseMaterialHandleType
      */

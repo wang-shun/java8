@@ -115,8 +115,10 @@ public class StockController {
             throw new JsonResponseException("already.settlement");
 
         setOperatorName(stockIn);
-        setHandleDate(stockIn);
         stockIn.setSettlementDate(settlementDate);
+        Calendar handleDateWithTime = Calendar.getInstance();
+        handleDateWithTime.set(stockIn.getHandleDate().get(Calendar.YEAR), stockIn.getHandleDate().get(Calendar.MONTH), stockIn.getHandleDate().get(Calendar.DAY_OF_MONTH));
+        stockIn.setHandleDate(handleDateWithTime);
 
         return RespHelper.or500(doctorWarehouseStockWriteService.in(stockIn));
     }
@@ -133,25 +135,15 @@ public class StockController {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
-        setOrgId(stockOut);
-
-        //是否该公司正在结算中
-        if (doctorWarehouseSettlementService.isUnderSettlement(stockOut.getOrgId()))
-            throw new JsonResponseException("under.settlement");
-
-        //会计年月
-        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(stockOut.getHandleDate().getTime());
-        //会计年月已经结算后，不允许新增或编辑单据
-        if (doctorWarehouseSettlementService.isSettled(stockOut.getOrgId(), settlementDate))
-            throw new JsonResponseException("already.settlement");
-
-        //设置操作人
         setOperatorName(stockOut);
 
-        //设置饲养员，猪舍类型
+        setOrgId(stockOut);
+
         stockOut.getDetails().forEach(detail -> {
-            String realName = RespHelper.or500(doctorGroupWebService.findRealName(detail.getApplyStaffId()));
-            detail.setApplyStaffName(realName);
+            Response<String> realNameResponse = doctorGroupWebService.findRealName(detail.getApplyStaffId());
+            if (!realNameResponse.isSuccess())
+                throw new JsonResponseException(realNameResponse.getError());
+            detail.setApplyStaffName(realNameResponse.getResult());
 
             DoctorBarn barn = RespHelper.orServEx(doctorBarnReadService.findBarnById(detail.getApplyPigBarnId()));
             if (null == barn)
@@ -159,11 +151,9 @@ public class StockController {
             detail.setPigType(barn.getPigType());
         });
 
-        setHandleDate(stockOut);
-        stockOut.setSettlementDate(settlementDate);
-
         return RespHelper.or500(doctorWarehouseStockWriteService.out(stockOut));
     }
+
 
     /**
      * 退料入库
@@ -258,12 +248,6 @@ public class StockController {
         if (null == farm)
             throw new JsonResponseException("farm.not.found");
         stockDto.setOrgId(farm.getOrgId());
-    }
-
-    private void setHandleDate(AbstractWarehouseStockDto stockDto) {
-        Calendar handleDateWithTime = Calendar.getInstance();
-        handleDateWithTime.set(stockDto.getHandleDate().get(Calendar.YEAR), stockDto.getHandleDate().get(Calendar.MONTH), stockDto.getHandleDate().get(Calendar.DAY_OF_MONTH));
-        stockDto.setHandleDate(handleDateWithTime);
     }
 
     /**

@@ -3,7 +3,6 @@ package io.terminus.doctor.basic.dao;
 import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
-
 import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
@@ -84,6 +83,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         criteria.put("skuId", skuId);
         criteria.put("handleDate", handleDate);
         criteria.put("includeHandleDate", includeHandleDate);
+
         return this.sqlSession.selectList(this.sqlId("findAfterByDate"), criteria);
     }
 
@@ -226,4 +226,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return quantity;
     }
 
+    public DoctorWarehouseMaterialHandle findByStockHandleId(Long id){
+       return this.sqlSession.selectOne(this.sqlId("findByStockHandleId"),id);
+    }
 }

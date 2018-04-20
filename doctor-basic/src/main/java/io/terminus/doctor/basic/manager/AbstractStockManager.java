@@ -262,3 +262,4 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
 
     public abstract void delete(DoctorWarehouseMaterialHandle materialHandle);
 }
+
