@@ -154,7 +154,11 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
             handles.stream().forEach(h -> {
                 doctorWarehouseMaterialHandleManager.delete(h);
             });*/
-            doctorWarehouseStockHandleDao.delete(id);
-            return Response.ok(true);
+            boolean isdelete = doctorWarehouseStockHandleDao.delete(id);
+            if(isdelete){
+                return Response.ok(true);
+            }else{
+                return Response.fail("删除单据表失败");
+            }
         }
 }
