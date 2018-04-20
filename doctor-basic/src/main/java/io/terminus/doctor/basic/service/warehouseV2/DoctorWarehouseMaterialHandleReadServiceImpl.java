@@ -167,9 +167,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     public Response<List<Map>> companyReport(Map<String, Object> criteria) {
 
         try {
-            //按猪场Id，年月分组
-
-            return Response.ok();
+            return Response.ok(doctorWarehouseMaterialHandleDao.listByFarmIdTime(criteria));
         } catch (Exception e) {
             log.error("failed to list doctor warehouse material handle, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.material.handle.list.fail");

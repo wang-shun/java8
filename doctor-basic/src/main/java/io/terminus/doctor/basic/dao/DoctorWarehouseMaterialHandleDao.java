@@ -3,6 +3,7 @@ package io.terminus.doctor.basic.dao;
 import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
+
 import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
@@ -83,7 +84,6 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         criteria.put("skuId", skuId);
         criteria.put("handleDate", handleDate);
         criteria.put("includeHandleDate", includeHandleDate);
-
         return this.sqlSession.selectList(this.sqlId("findAfterByDate"), criteria);
     }
 
@@ -228,5 +228,22 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
 
     public DoctorWarehouseMaterialHandle findByStockHandleId(Long id){
        return this.sqlSession.selectOne(this.sqlId("findByStockHandleId"),id);
+    }
+
+    //查公司结算列表
+    public List<Map> listByFarmIdTime(Map<String, Object> criteria) {
+        List<Map> resultList = this.sqlSession.selectList("listByFarmIdTime",criteria);
+
+        resultList.stream().forEach(map ->{
+            map.put("type",WarehouseMaterialHandleType.IN.getValue());
+
+            map.put("inAmount",this.sqlSession.selectOne("selectSumAmount",map));
+
+            map.put("type",WarehouseMaterialHandleType.OUT.getValue());
+
+            map.put("inAmount",this.sqlSession.selectOne("selectSumAmount",map));
+        });
+
+        return resultList;
     }
 }

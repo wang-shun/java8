@@ -151,18 +151,6 @@
         WHERE id = #{id} LIMIT 1
     </select>
 
-    <select id="findLibraryById" parameterType="long" resultType="BigDecimal">
-        select quantity from <include refid="tb"/>
-        where id = #{id} and type=2
-    </select>
-
-    <select id="findRetreatingById" parameterType="DoctorWarehouseMaterialHandle" resultType="BigDecimal">
-        select ifnull(sum(quantity),0) from <include refid="tb"/>
-        where type=13 and rel_material_handle_id=#{relMaterialHandleId}
-        and <![CDATA[ handle_date <= #{handleDate}]]>
-        order by handle_date ,id desc;
-    </select>
-
     <select id="findByIds" parameterType="list" resultMap="DoctorWarehouseMaterialHandleMap">
         SELECT
         <include refid="cols_all"/>
@@ -419,6 +407,18 @@
         where  warehouse_id = #{id}
     </select>
 
+    <select id="findLibraryById" parameterType="long" resultType="BigDecimal">
+        select quantity from <include refid="cols_all"/>
+        where id=#{id} and type=2
+    </select>
+
+    <select id="findRetreatingById" parameterType="DoctorWarehouseMaterialHandle" resultType="BigDecimal">
+        select ifnull(sum(quantity),0) from <include refid="cols_all"/>
+        where type=13 and rel_material_handle_id=#{otherTransferHandleId}
+        and <![CDATA[ handle_date <= #{handleDate}]]>
+        order by handle_date ,id desc;
+    </select>
+
     <select id="listByFarmIdTimeType" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
         select <include refid="cols_all"/>
         FROM <include refid="tb"/>ss
@@ -432,4 +432,30 @@
         where  stock_handle_id = #{id}
     </select>
 
+    <select id="listByFarmIdTime" parameterType="map" resultType="map">
+        select a.farm_id,a.type,a.handle_Date,a.handleYear,a.handleMonth,b.balanceAmount
+        from doctor_warehouse_material_handle a
+        left join doctor_warehouse_stock_monthly b
+        on a.farm_id = b.farm_id
+        and a.settlement_date = b.settlement_date
+        <include refid="criteria" />
+        group by a.farm_id,handle_year,handle_month
+    </select>
+
+    <select id="selectSumAmount" parameterType="map" resultType="BigDecimal">
+        select sum(amount)
+        from doctor_warehouse_material_handle
+        where farm_id = #{farmId,jdbcType = BIGINT}
+        and handle_year = #{handleYear,jdbcType=int}
+        and handle_month = #{handleMonth,jdbcType=int}
+        and type in (
+        <if test="type==1">
+            1,7,9,11,13
+        </if>
+        <if test="type==2">
+            2,8,10,12
+        </if>
+        )
+        GROUP BY handle_year,handle_month
+    </select>
 </mapper>
