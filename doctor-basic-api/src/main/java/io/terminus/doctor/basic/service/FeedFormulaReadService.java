@@ -30,13 +30,13 @@ public interface FeedFormulaReadService {
     /**
      * 分页查询配方列表数据
      * @param formulaName
-     * @param feedId
+     * @param feedName
      * @param pageNo
      * @param pageSize
      * @return
      */
     Response<Paging<FeedFormula>> pagingFormulaList(Long farmId,String formulaName,
-                                                    Long feedId,
+                                                    String feedName,
                                                     Integer pageNo,
                                                     Integer pageSize);
 
