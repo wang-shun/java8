@@ -222,7 +222,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     //得到在此之前退料入库的数量和
     public BigDecimal findRetreatingById(DoctorWarehouseMaterialHandle materialHandle) {
         Map<String, Object> criteria = Maps.newHashMap();
-        criteria.put("otherTransferHandleId", materialHandle.getRelMaterialHandleId());
+        criteria.put("relMaterialHandleId", materialHandle.getRelMaterialHandleId());
         criteria.put("handleDate", materialHandle.getHandleDate());
         BigDecimal quantity = this.sqlSession.selectOne(this.sqlId("findRetreatingById"), criteria);
         return quantity;
