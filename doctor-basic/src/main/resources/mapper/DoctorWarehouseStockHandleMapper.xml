@@ -151,5 +151,4 @@
         select * from  doctor_warehouse_stock_handle
         where  rel_stock_handle_id = #{id} and handle_sub_type = #{handle_sub_type};
     </select>
-
 </mapper>

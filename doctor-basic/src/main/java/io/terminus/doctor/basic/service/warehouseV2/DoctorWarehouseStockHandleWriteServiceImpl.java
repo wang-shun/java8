@@ -80,12 +80,12 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
     @Override
     @Transactional
     @ExceptionHandle("doctor.warehouse.stock.handle.delete.fail")
-    public Response<Boolean> delete(Long id) {
+    public Response<String> delete(Long id) {
         List<DoctorWarehouseMaterialHandle> handles = doctorWarehouseMaterialHandleDao.findByStockHandle(id);
         for (DoctorWarehouseMaterialHandle handle : handles) {
             int type = handle.getType();
-            if(type != 1 || type != 2 ||type != 3 ||type != 4 ||type != 5 ||type != 6 ||type != 7 ||type != 8 ||type != 9){
-                return Response.fail("未知");
+            if(type != 1 && type != 2 && type != 3 && type != 4 && type != 5 && type != 6 && type != 7 && type != 8 && type != 9){
+                return Response.fail("未知类型");
             }
             //配方生产
             if (type == 3) {
@@ -154,7 +154,11 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
             handles.stream().forEach(h -> {
                 doctorWarehouseMaterialHandleManager.delete(h);
             });*/
-            doctorWarehouseStockHandleDao.delete(id);
-            return Response.ok(true);
+            boolean isdelete = doctorWarehouseStockHandleDao.delete(id);
+            if(isdelete){
+                return Response.ok("删除成功");
+            }else{
+                return Response.fail("删除单据表失败");
+            }
         }
 }
