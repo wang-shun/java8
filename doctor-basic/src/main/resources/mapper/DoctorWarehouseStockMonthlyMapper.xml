@@ -177,4 +177,11 @@
         AND settlement_date=#{settlementDate}
     </select>
 
+    <select id="findEachWarehouseBalanceBySettlementDate" parameterType="map" resultType="map">
+        select sum(balance_amount) as amount ,sum(balance_quantity) as quantity,warehouse_id
+        FROM <include refid="tb"/>
+        where org_id=#{orgId}
+        group by warehouse_id;
+    </select>
+
 </mapper>
