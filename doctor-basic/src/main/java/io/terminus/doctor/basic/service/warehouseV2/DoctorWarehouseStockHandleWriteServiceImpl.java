@@ -84,7 +84,7 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
         List<DoctorWarehouseMaterialHandle> handles = doctorWarehouseMaterialHandleDao.findByStockHandle(id);
         for (DoctorWarehouseMaterialHandle handle : handles) {
             int type = handle.getType();
-            if(type != 1 || type != 2 ||type != 3 ||type != 4 ||type != 5 ||type != 6 ||type != 7 ||type != 8 ||type != 9){
+            if(type != 1 && type != 2 && type != 3 && type != 4 && type != 5 && type != 6 && type != 7 && type != 8 && type != 9){
                 return Response.fail("未知类型");
             }
             //配方生产
