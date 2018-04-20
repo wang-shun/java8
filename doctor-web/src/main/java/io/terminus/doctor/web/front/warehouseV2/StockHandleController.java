@@ -691,13 +691,13 @@ public class StockHandleController {
             @RequestParam(required = false,value = "warehouseName") String warehouseName,
             @RequestParam(required = false,value = "operatorName") String operatorName,
             @RequestParam(required = false,value = "handleSubType") Integer handleSubType,
-            @RequestParam(required = false,value = "createdAtStart") Date createdAtStart,
-            @RequestParam(required = false,value = "createdAtEnd") Date createdAtEnd,
+            @RequestParam(required = false,value = "handleDateStart") Date handleDateStart,
+            @RequestParam(required = false,value = "handleDateEnd") Date handleDateEnd,
             @RequestParam(required = false,value = "updatedAtStart") Date updatedAtStart,
             @RequestParam(required = false,value = "updatedAtEnd") Date updatedAtEnd
     ) {
 
-        if (null != createdAtStart && null != createdAtEnd && createdAtStart.after(createdAtEnd))
+        if (null != handleDateStart && null != handleDateEnd && handleDateStart.after(handleDateEnd))
             throw new JsonResponseException("start.date.after.end.date");
 
         if (null != updatedAtStart && null != updatedAtEnd && updatedAtStart.after(updatedAtEnd))
@@ -707,8 +707,8 @@ public class StockHandleController {
         params.put("warehouseName", warehouseName);
         params.put("operatorName", operatorName);
         params.put("handleSubType", handleSubType);
-        params.put("createdAtStart", createdAtStart);
-        params.put("createdAtEnd", createdAtEnd);
+        params.put("handleDateStart", handleDateStart);
+        params.put("handleDateEnd", handleDateEnd);
         params.put("updatedAtStart", updatedAtStart);
         params.put("updatedAtEnd", updatedAtEnd);
         return RespHelper.or500(doctorWarehouseStockHandleReadService.paging(pageNo, pageSize, params));

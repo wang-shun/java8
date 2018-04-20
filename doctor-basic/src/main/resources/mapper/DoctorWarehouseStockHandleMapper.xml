@@ -61,6 +61,10 @@
             <if test="settlementDate != null">AND `settlement_date` = #{settlementDate}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
+            <if test="handleDateStart != null">AND <![CDATA[handle_date >= #{handleDateStart}]]</if>
+            <if test="handleDateEnd != null">AND <![CDATA[handle_date <= #{handleDateEnd}]]</if>
+            <if test="updatedAtStart != null">AND <![CDATA[updated_At >= #{updatedAtStart}]]</if>
+            <if test="updatedAtEnd != null">AND <![CDATA[updated_At <= #{updatedAtEnd}]]</if>
         </where>
     </sql>
 
