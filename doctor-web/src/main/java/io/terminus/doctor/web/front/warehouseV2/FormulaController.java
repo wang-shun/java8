@@ -60,15 +60,15 @@ public class FormulaController {
     private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
 
     /********************   2018/04/20  start   ***************************/
-    @RequestMapping(method = RequestMethod.GET,value = "formulaList")
+    @RequestMapping(method = RequestMethod.GET,value = "/formulaList")
     public Paging<FeedFormula> pagingFormulaList(
                                       Long farmId,
                                       String formulaName,
-                                      Long feedId,
+                                      String feedName,
                                       Integer pageNo,
                                       Integer pageSize) {
         return RespHelper.or500(feedFormulaReadService.pagingFormulaList(
-                farmId,formulaName,feedId,pageNo, pageSize));
+                farmId,formulaName,feedName,pageNo, pageSize));
     }
     /********************   2018/04/20  end     ***************************/
 

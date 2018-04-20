@@ -85,8 +85,7 @@
             <if test="amount != null">AND `amount` = #{amount}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
-            <if test="settlementDateStart">AND <![CDATA[settlement_date >= #{settlementDateStart}]]></if>
-            <if test="settlementDateEnd">AND <![CDATA[settlement_date <= #{settlementDateEnd}]]></if>
+
         </where>
     </sql>
 
@@ -134,6 +133,9 @@
                     material_id =#{t}
                 </foreach>
             </if>
+
+            <if test="settlementDateStart">AND <![CDATA[settlement_date >= #{settlementDateStart}]]></if>
+            <if test="settlementDateEnd">AND <![CDATA[settlement_date <= #{settlementDateEnd}]]></if>
         </where>
     </sql>
 
@@ -416,7 +418,7 @@
 
     <select id="findRetreatingById" parameterType="DoctorWarehouseMaterialHandle" resultType="BigDecimal">
         select ifnull(sum(quantity),0) from <include refid="cols_all"/>
-        where type=13 and rel_material_handle_id=#{otherTransferHandleId}
+        where type=13 and rel_material_handle_id=#{relMaterialHandleId}
         and <![CDATA[ handle_date <= #{handleDate}]]>
         order by handle_date ,id desc;
     </select>

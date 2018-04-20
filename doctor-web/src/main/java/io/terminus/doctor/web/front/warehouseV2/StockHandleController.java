@@ -51,6 +51,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import io.terminus.common.model.Response;
 
 /**
@@ -224,7 +225,7 @@ public class StockHandleController {
         BigDecimal totalUnitPrice = new BigDecimal(0);
         for (StockHandleVo.Detail detail : vo.getDetails()) {
             totalQuantity = totalQuantity.add(detail.getQuantity());
-            totalUnitPrice = totalUnitPrice.add(detail.getUnitPrice());
+            totalUnitPrice = totalUnitPrice.add(null == detail.getUnitPrice() ? new BigDecimal(0) : detail.getUnitPrice());
         }
         vo.setTotalQuantity(totalQuantity.doubleValue());
         vo.setTotalAmount(totalQuantity.multiply(totalUnitPrice).doubleValue());
@@ -474,7 +475,7 @@ public class StockHandleController {
                     title.createCell(6).setCellValue("盘点数量");
                     title.createCell(7).setCellValue("备注");
 
-                    String typeName="";
+                    String typeName = "";
                     BigDecimal totalQuantity = new BigDecimal(0);
                     for (StockHandleExportVo vo : exportVos) {
                         BigDecimal quantity = new BigDecimal(0);
@@ -485,7 +486,7 @@ public class StockHandleController {
                             typeName = "盘亏";
                         }
                         //盘盈
-                        else if(vo.getHandleType() == WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue()) {
+                        else if (vo.getHandleType() == WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue()) {
                             quantity = vo.getBeforeInventoryQuantity().add(vo.getQuantity());
                             typeName = "盘盈";
                         }
@@ -500,7 +501,7 @@ public class StockHandleController {
                         row.createCell(6).setCellValue(quantity.doubleValue());
                         row.createCell(7).setCellValue(vo.getRemark());
 
-                        totalQuantity=vo.getQuantity();
+                        totalQuantity = vo.getQuantity();
                     }
 
                     Row countRow = sheet.createRow(pos);

@@ -52,21 +52,21 @@ public class FeedFormulaReadServiceImpl implements FeedFormulaReadService {
     /**
      * 配方列表按照创建时间由近及远排列
      * @param formulaName
-     * @param feedId
+     * @param feedName
      * @param pageNo
      * @param pageSize
      * @return
      */
     @Override
-    public Response<Paging<FeedFormula>> pagingFormulaList(Long farmId,String formulaName, Long feedId, Integer pageNo, Integer pageSize) {
+    public Response<Paging<FeedFormula>> pagingFormulaList(Long farmId,String formulaName, String feedName, Integer pageNo, Integer pageSize) {
         try {
             FeedFormula criteria = FeedFormula.builder()
-                    .feedId(feedId).formulaName(formulaName).farmId(farmId).build();
+                    .feedName(feedName).formulaName(formulaName).farmId(farmId).build();
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
             return Response.ok(feedFormulaDao.pagingFormulaList(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
         } catch (Exception e) {
-            log.error("paging feedFormula failed, formulaName:{}, feedId:{}, cause:{}",
-                    formulaName,feedId, Throwables.getStackTraceAsString(e));
+            log.error("paging feedFormula failed, formulaName:{}, feedName:{}, cause:{}",
+                    formulaName,feedName, Throwables.getStackTraceAsString(e));
             return Response.fail("feedFormula.find.fail");
         }
     }

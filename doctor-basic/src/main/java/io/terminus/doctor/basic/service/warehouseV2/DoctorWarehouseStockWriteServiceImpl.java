@@ -58,6 +58,8 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
     @Autowired
     private DoctorFarmBasicReadService doctorFarmBasicReadService;
+    @Autowired
+    private WarehouseOutStockService warehouseOutStockService;
 
     @Autowired
     private DoctorWarehouseHandlerManager doctorWarehouseHandlerManager;
@@ -219,6 +221,13 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
         releaseLocks(locks);
         return Response.ok(stockHandle.getId());
+    }
+
+    @Override
+    @Transactional
+    @ExceptionHandle("doctor.warehouse.stock.out.fail")
+    public Response<Long> out(WarehouseStockOutDto stockOut) {
+        return warehouseOutStockService.handle(stockOut);
     }
 
     private List<Lock> lockedIfNecessary(AbstractWarehouseStockDto stockDto) {
@@ -569,94 +578,6 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 //                handleContexts.add(handleContext);
         }
 //            doctorWarehouseHandlerManager.handle(handleContexts);
-
-        return Response.ok(stockHandle.getId());
-    }
-
-    @Override
-    @Transactional
-    @ExceptionHandle("doctor.warehouse.stock.out.fail")
-    public Response<Long> out(WarehouseStockOutDto stockOut) {
-
-        StockContext context = getWarehouseAndSupportedBasicMaterial(stockOut.getFarmId(), stockOut.getWarehouseId());
-
-        Long orgId = stockOut.getOrgId();
-
-        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.handle(stockOut, context.getWareHouse(), WarehouseMaterialHandleType.OUT);
-        List<WarehouseStockOutDto.WarehouseStockOutDetail> needProcessDetails;
-        if (stockOut.getStockHandleId() != null)
-            needProcessDetails = doctorWarehouseStockHandleManager.clean(stockOut, stockOut.getDetails(), context.getWareHouse(),
-                    new DoctorWarehouseStockHandleManager.MaterialHandleComparator<WarehouseStockOutDto.WarehouseStockOutDetail>() {
-                        @Override
-                        public boolean same(WarehouseStockOutDto.WarehouseStockOutDetail source, DoctorWarehouseMaterialHandle target) {
-                            return source.getQuantity().compareTo(target.getQuantity()) == 0 && source.getMaterialId().equals(target.getMaterialId());
-                        }
-
-                        @Override
-                        public boolean notImportDifferentProcess(WarehouseStockOutDto.WarehouseStockOutDetail source, DoctorWarehouseMaterialHandle target) {
-
-                            boolean needUpdate = false;
-
-                            DoctorWarehouseMaterialApply apply = doctorWarehouseMaterialApplyDao.findMaterialHandle(target.getId());
-                            boolean sameHandleDate = DateUtils.isSameDay(stockOut.getHandleDate().getTime(), apply.getApplyDate());
-                            if (!Objects.equals(source.getApplyPigGroupId(), apply.getPigGroupId())
-                                    || !Objects.equals(source.getApplyPigBarnId(), apply.getPigBarnId())
-                                    || !sameHandleDate) {
-
-                                if (!sameHandleDate)
-                                    target.setHandleDate(stockOut.getHandleDate().getTime());
-
-                                doctorWarehouseMaterialApplyDao.deleteByMaterialHandle(apply.getMaterialHandleId());//如果是猪群领用会有两条记录
-                                doctorWarehouseMaterialApplyManager.apply(target, source, orgId);
-
-                                needUpdate = !sameHandleDate;
-                            }
-
-                            if (!Objects.equals(source.getRemark(), target.getRemark())) {
-                                target.setRemark(source.getRemark());
-                                needUpdate = true;
-                            }
-                            return needUpdate;
-                        }
-                    });
-        else
-            needProcessDetails = stockOut.getDetails();
-
-        for (WarehouseStockOutDto.WarehouseStockOutDetail detail : needProcessDetails) {
-
-            DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(detail.getMaterialId());
-            if (null == sku)
-                throw new InvalidException("warehouse.sku.not.found", detail.getMaterialId());
-            if (!sku.getType().equals(context.getWareHouse().getType()))
-                throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
-
-            DoctorBasic unit = doctorBasicDao.findById(Long.parseLong(sku.getUnit()));
-
-            DoctorWarehouseStock stock = doctorWarehouseStockManager.out(stockOut, detail, context, sku, unit);
-
-            DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = doctorWarehousePurchaseManager.out(stock, detail.getQuantity());
-            BigDecimal unitPrice = doctorWarehousePurchaseManager.calculateUnitPrice(stock);
-
-            DoctorWarehouseMaterialHandle materialHandle = doctorWarehouseMaterialHandleManager.out(DoctorWarehouseMaterialHandleManager.MaterialHandleContext.builder()
-                    .stock(stock)
-                    .stockDto(stockOut)
-                    .stockDetail(detail)
-                    .sku(sku)
-                    .quantity(detail.getQuantity())
-                    .unitPrice(unitPrice)
-                    .purchases(purchaseHandleContext.getPurchaseQuantity())
-                    .stockHandle(stockHandle)
-                    .build());
-            doctorWarehouseMaterialApplyManager.apply(materialHandle, detail, orgId);
-
-            doctorWarehouseStockMonthlyManager.count(stock.getWarehouseId(),
-                    stock.getSkuId(),
-                    stockOut.getHandleDate().get(Calendar.YEAR),
-                    stockOut.getHandleDate().get(Calendar.MONTH) + 1,
-                    detail.getQuantity(),
-                    unitPrice,
-                    false);
-        }
 
         return Response.ok(stockHandle.getId());
     }
