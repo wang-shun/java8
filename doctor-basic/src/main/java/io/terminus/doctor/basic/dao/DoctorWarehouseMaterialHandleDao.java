@@ -210,6 +210,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return count;
     }
 
+<<<<<<< HEAD
     //得到领料出库的数量
     public BigDecimal findLibraryById(Long id) {
         BigDecimal quantity = this.sqlSession.selectOne(this.sqlId("findLibraryById"), id);
@@ -224,6 +225,13 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         criteria.put("handleDate", materialHandle.getHandleDate());
         BigDecimal quantity = this.sqlSession.selectOne(this.sqlId("findRetreatingById"), criteria);
         return quantity;
+=======
+    public Integer findByRelMaterialHandleId(Long materialId, int type) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("id", materialId);
+        criteria.put("type", type);
+        return this.sqlSession.selectOne(this.sqlId("findSameMaterialId"), criteria);
+>>>>>>> Merge branch 'feature/warehouse-v2' of D:\project\doctor2\doctor with conflicts.
     }
 
 }

@@ -419,6 +419,7 @@
         where  warehouse_id = #{id}
     </select>
 
+<<<<<<< HEAD
     <select id="listByFarmIdTimeType" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
         select <include refid="cols_all"/>
         FROM <include refid="tb"/>ss
@@ -426,5 +427,8 @@
         GROUP BY farmId,handleYear,handleMonth
         ORDER BY createdAt desc
     </select>
+=======
+
+>>>>>>> Merge branch 'feature/warehouse-v2' of D:\project\doctor2\doctor with conflicts.
 
 </mapper>
