@@ -235,9 +235,12 @@ public class StockHandleController {
 
     //删除
     @RequestMapping(method = RequestMethod.DELETE, value = "{id:\\d+}")
-    public void delete(@PathVariable Long id) {
-        RespHelper.or500(doctorWarehouseStockHandleWriteService.delete(id));
-    }
+    public boolean delete(@PathVariable Long id) {
+           Response<Boolean> response = doctorWarehouseStockHandleWriteService.delete(id);
+           if (!response.isSuccess())
+               throw new JsonResponseException(response.getError());
+           return true;
+   }
 
     //导出
     @RequestMapping(method = RequestMethod.GET, value = "{id:\\d+}/export")
