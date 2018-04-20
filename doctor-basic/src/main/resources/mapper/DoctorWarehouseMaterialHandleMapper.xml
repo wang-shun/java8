@@ -85,8 +85,7 @@
             <if test="amount != null">AND `amount` = #{amount}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
-            <if test="settlementDateStart">AND <![CDATA[settlement_date >= #{settlementDateStart}]]></if>
-            <if test="settlementDateEnd">AND <![CDATA[settlement_date <= #{settlementDateEnd}]]></if>
+
         </where>
     </sql>
 
@@ -134,6 +133,9 @@
                     material_id =#{t}
                 </foreach>
             </if>
+
+            <if test="settlementDateStart">AND <![CDATA[settlement_date >= #{settlementDateStart}]]></if>
+            <if test="settlementDateEnd">AND <![CDATA[settlement_date <= #{settlementDateEnd}]]></if>
         </where>
     </sql>
 
