@@ -33,6 +33,6 @@ public interface DoctorWareHouseWriteService {
      * @param doctorWareHouse
      * @return
      */
-    Response<Boolean> deleteWareHouse(@NotNull(message = "input.wareHouse.empty") DoctorWareHouse doctorWareHouse);
+    Response<Boolean> deleteWareHouse(DoctorWareHouse doctorWareHouse);
 
 }

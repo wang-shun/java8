@@ -204,42 +204,12 @@ public class WarehouseController {
      * 删除仓库
      *
      * @param warehouseDto
-     * @param errors
      */
     @RequestMapping(value = "/delete", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public boolean delete(@RequestBody @Valid WarehouseDto warehouseDto, Errors errors) {
-
-        if (errors.hasErrors())
-            throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
-
-        // 判断是否有猪场ID
-//        Response<DoctorFarm> farmResponse = doctorFarmReadService.findFarmById(warehouseDto.getFarmId());
-//        checkState(farmResponse.isSuccess(), "read.farmInfo.fail");
-//        // 得到farmName
-//        DoctorFarm doctorFarm = farmResponse.getResult();
-//
-//        if (doctorFarm == null)
-//            throw new JsonResponseException("farm.not.found");
-
-        // 得到managerName
-//        UserProfile userProfile = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserId(warehouseDto.getManagerId()));
-//
-//        Response<User> currentUserResponse = userReadService.findById(UserUtil.getUserId());
-//        // 得到creatorId,creatorName
-//        User currentUser = currentUserResponse.getResult();
-//        if (null == currentUser)
-//            throw new JsonResponseException("user.not.login");
-
+    public boolean delete(@RequestBody WarehouseDto warehouseDto) {
         DoctorWareHouse doctorWareHouse = DoctorWareHouse.builder()
                 .id(warehouseDto.getId())
-//                .type(warehouseDto.getType())
-//                .farmId(warehouseDto.getFarmId())
-//                .wareHouseName(warehouseDto.getName())
-//                .managerId(warehouseDto.getManagerId()).managerName(userProfile.getRealName())
-//                .address(warehouseDto.getAddress())
-//                .updatorId(currentUser.getId()).updatorName(currentUser.getName())
                 .build();
-
         // 调删除仓库的方法
         return RespHelper.or500(doctorWareHouseWriteService.deleteWareHouse(doctorWareHouse));
     }
