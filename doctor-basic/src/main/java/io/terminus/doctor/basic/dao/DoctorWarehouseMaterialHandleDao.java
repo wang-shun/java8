@@ -99,6 +99,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         criteria.put("warehouseId", warehouseId);
         criteria.put("skuId", skuId);
         criteria.put("handleDate", handleDate);
+        criteria.put("include", include);
 
         return this.sqlSession.selectOne(this.sqlId("countHistoryStock"), criteria);
     }
@@ -227,8 +228,8 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return quantity;
     }
 
-    public DoctorWarehouseMaterialHandle findByStockHandleId(Long id){
-       return this.sqlSession.selectOne(this.sqlId("findByStockHandleId"),id);
+    public DoctorWarehouseMaterialHandle findByStockHandleId(Long id) {
+        return this.sqlSession.selectOne(this.sqlId("findByStockHandleId"), id);
     }
 
     //查公司结算列表

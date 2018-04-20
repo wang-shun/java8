@@ -635,7 +635,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
             DoctorWarehouseStock stock = doctorWarehouseStockManager.out(stockOut, detail, context, sku, unit);
 
             DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = doctorWarehousePurchaseManager.out(stock, detail.getQuantity());
-            long unitPrice = doctorWarehousePurchaseManager.calculateUnitPrice(stock);
+            BigDecimal unitPrice = doctorWarehousePurchaseManager.calculateUnitPrice(stock);
 
             DoctorWarehouseMaterialHandle materialHandle = doctorWarehouseMaterialHandleManager.out(DoctorWarehouseMaterialHandleManager.MaterialHandleContext.builder()
                     .stock(stock)

@@ -6,9 +6,11 @@ import io.terminus.doctor.basic.manager.WarehouseOutManager;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
+import io.terminus.doctor.common.utils.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -41,6 +43,42 @@ public class WarehouseOutStockService extends AbstractWarehouseStockService<Ware
 
     @Override
     protected void delete(DoctorWarehouseMaterialHandle materialHandle) {
-        
+        warehouseOutManager.delete(materialHandle);
     }
+
+    @Override
+    protected void changed(DoctorWarehouseMaterialHandle materialHandle,
+                           WarehouseStockOutDto.WarehouseStockOutDetail detail,
+                           DoctorWarehouseStockHandle stockHandle,
+                           WarehouseStockOutDto stockDto,
+                           DoctorWareHouse wareHouse) {
+
+        materialHandle.setRemark(detail.getRemark());
+
+        if (detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0
+                || !DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime())) {
+
+            //更改了数量，或更改了操作日期
+            if (detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0) {
+                BigDecimal changedQuantity = detail.getQuantity().subtract(materialHandle.getQuantity());
+                if (changedQuantity.compareTo(new BigDecimal(0)) > 0) {
+                    doctorWarehouseStockManager.in(detail.getMaterialId(), changedQuantity, wareHouse);
+                } else {
+                    doctorWarehouseStockManager.out(detail.getMaterialId(), changedQuantity, wareHouse);
+                }
+            }
+
+            if (!DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime())) {
+                materialHandle.setHandleDate(warehouseOutManager.buildNewHandleDate(WarehouseMaterialHandleType.OUT, stockDto.getHandleDate()));
+                doctorWarehouseMaterialHandleDao.update(materialHandle);
+            }
+            warehouseOutManager.recalculate(materialHandle);
+
+        } else {
+            //只更新了备注
+            doctorWarehouseMaterialHandleDao.update(materialHandle);
+        }
+
+    }
+
 }
