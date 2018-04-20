@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2018-01-18 20:10:26
+ ~ Date: 2018-04-19 19:48:57
  ~ Created by [ your name ]
 -->
 
@@ -113,6 +113,7 @@
             <if test="applyType != null">AND `apply_type` = #{applyType}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
+
             <if test="materialNameLike != null">AND `material_name` like CONCAT('%',#{materialNameLike},'%')</if>
             <if test="skuIds != null and skuIds.size() > 0">
                 AND
@@ -126,12 +127,6 @@
                     pig_group_id =#{t}
                 </foreach>
             </if>
-            <!--<if test="groupOrBarn !=null and groupOrBarn=='barn'">-->
-            <!--AND `pig_group_id` is null-->
-            <!--</if>-->
-            <!--<if test="groupOrBarn !=null and groupOrBarn=='group'">-->
-            <!--AND `pig_group_id` is not null AND `pig_group_id` != -1-->
-            <!--</if>-->
             <if test="startDate !=null">
                 AND <![CDATA[apply_date >= #{startDate}]]>
             </if>

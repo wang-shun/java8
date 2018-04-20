@@ -110,7 +110,7 @@ public class EventController {
                     .type(handle.getType())
                     .unit(handle.getUnit())
                     .unitPrice(handle.getUnitPrice())
-                    .amount(handle.getQuantity().multiply(new BigDecimal(handle.getUnitPrice())).longValue())
+                    .amount(handle.getQuantity().multiply(handle.getUnitPrice()))
                     .vendorName(handle.getVendorName())
                     .allowDelete(allowDelete)
                     .operatorId(handle.getOperatorId())
@@ -159,7 +159,7 @@ public class EventController {
             eventExportVo.setUnitName(handle.getUnit());
             eventExportVo.setUnitPrice(handle.getUnitPrice());
             eventExportVo.setEventTime(handle.getHandleDate());
-            eventExportVo.setAmount(handle.getQuantity().multiply(new BigDecimal(handle.getUnitPrice())).longValue());
+            eventExportVo.setAmount(handle.getQuantity().multiply(handle.getUnitPrice()));
             return eventExportVo;
         }).collect(Collectors.toList()), "web-wareHouse-event", request, response);
     }

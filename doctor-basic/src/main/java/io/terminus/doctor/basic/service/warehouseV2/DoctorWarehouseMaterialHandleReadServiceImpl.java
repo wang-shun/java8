@@ -126,34 +126,34 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
 
     @Override
-    public Response<Map<Long, Long>> countWarehouseAmount(List<DoctorWarehouseMaterialHandle> data) {
-        Map<Long/*warehouseId*/, Long/*amount*/> amounts = new HashMap<>();
+    public Response<Map<Long, BigDecimal>> countWarehouseAmount(List<DoctorWarehouseMaterialHandle> data) {
+        Map<Long/*warehouseId*/, BigDecimal/*amount*/> amounts = new HashMap<>();
         for (DoctorWarehouseMaterialHandle inHandle : data) {
             log.debug("count material handle[{}],warehouse[{}],quantity[{}],unitPrice[{}]", inHandle.getId(), inHandle.getWarehouseId(), inHandle.getQuantity(), inHandle.getUnitPrice());
             if (!amounts.containsKey(inHandle.getWarehouseId())) {
-                long amount = inHandle.getQuantity().multiply(new BigDecimal(inHandle.getUnitPrice())).longValue();
+                BigDecimal amount = inHandle.getQuantity().multiply(inHandle.getUnitPrice());
                 log.debug("amount[{}]", amount);
                 amounts.put(inHandle.getWarehouseId(), amount);
             } else {
-                Long alreadyAmount = amounts.get(inHandle.getWarehouseId());
-                long amount = inHandle.getQuantity().multiply(new BigDecimal(inHandle.getUnitPrice())).longValue();
+                BigDecimal alreadyAmount = amounts.get(inHandle.getWarehouseId());
+                BigDecimal amount = inHandle.getQuantity().multiply(inHandle.getUnitPrice());
                 log.debug("amount[{}]", amount);
-                amounts.put(inHandle.getWarehouseId(), amount + alreadyAmount);
+                amounts.put(inHandle.getWarehouseId(), amount.add(alreadyAmount));
             }
         }
         return Response.ok(amounts);
     }
 
     @Override
-    public Response<Map<WarehouseMaterialHandleType, Map<Long, Long>>> countWarehouseAmount(DoctorWarehouseMaterialHandle criteria, WarehouseMaterialHandleType... types) {
+    public Response<Map<WarehouseMaterialHandleType, Map<Long, BigDecimal>>> countWarehouseAmount(DoctorWarehouseMaterialHandle criteria, WarehouseMaterialHandleType... types) {
 
 
-        Map<WarehouseMaterialHandleType, Map<Long, Long>> eachTypeAmounts = new HashMap<>();
+        Map<WarehouseMaterialHandleType, Map<Long, BigDecimal>> eachTypeAmounts = new HashMap<>();
         for (WarehouseMaterialHandleType type : types) {
             criteria.setType(type.getValue());
             List<DoctorWarehouseMaterialHandle> handles = doctorWarehouseMaterialHandleDao.list(criteria);
             log.debug("count each warehouse amount for type[{}],handleYear[{}],handleMonth[{}]", type.getValue(), criteria.getHandleYear(), criteria.getHandleMonth());
-            Map<Long/*warehouseId*/, Long/*amount*/> amounts = countWarehouseAmount(handles).getResult();
+            Map<Long/*warehouseId*/, BigDecimal/*amount*/> amounts = countWarehouseAmount(handles).getResult();
             log.debug(amounts.toString());
             eachTypeAmounts.put(type, amounts);
         }

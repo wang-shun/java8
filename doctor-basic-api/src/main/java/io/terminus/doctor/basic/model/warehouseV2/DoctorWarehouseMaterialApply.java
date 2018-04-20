@@ -9,9 +9,9 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Desc:物料领用表
+ * Desc:
  * Mail: [ your email ]
- * Date: 2018-01-18 20:05:20
+ * Date: 2018-04-19 19:48:57
  * Created by [ your name ]
  */
 @Data
@@ -20,7 +20,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class DoctorWarehouseMaterialApply implements Serializable {
 
-    private static final long serialVersionUID = 5178906286493864028L;
+    private static final long serialVersionUID = 247663270899996058L;
 
     /**
      * 自增主键
@@ -71,8 +71,6 @@ public class DoctorWarehouseMaterialApply implements Serializable {
 
     /**
      * 猪舍类型
-     *
-     * @see io.terminus.doctor.common.enums.PigType
      */
     private Integer pigType;
 
@@ -122,7 +120,7 @@ public class DoctorWarehouseMaterialApply implements Serializable {
     private String materialName;
 
     /**
-     * 物料类型，易耗品，原料，饲料，药品，饲料
+     * 物料类型
      *
      * @see io.terminus.doctor.common.enums.WareHouseType
      */
@@ -139,13 +137,12 @@ public class DoctorWarehouseMaterialApply implements Serializable {
     private java.math.BigDecimal quantity;
 
     /**
-     * 单价，单位分
+     * 单价
      */
-    private Long unitPrice;
+    private java.math.BigDecimal unitPrice;
 
     /**
      * 领用类型。0猪舍，1猪群，2母猪
-     *
      * @see io.terminus.doctor.basic.enums.WarehouseMaterialApplyType
      */
     private Integer applyType;

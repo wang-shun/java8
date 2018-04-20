@@ -20,32 +20,26 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
-import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.front.warehouseV2.dto.StockDto;
-import io.terminus.doctor.web.front.warehouseV2.dto.WarehouseDto;
 import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseStockStatisticsVo;
-import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.*;
-import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
 /**
@@ -387,18 +381,18 @@ public class StockController {
 //            vo.setTransferOutAmount(statisticsResponse.getResult().getTransferOut().getAmount());
 //            vo.setTransferOutQuantity(statisticsResponse.getResult().getTransferOut().getQuantity());
             vo.setInAmount(statisticsResponse.getResult().getIn().getAmount()
-                    + statisticsResponse.getResult().getInventoryProfit().getAmount()
-                    + statisticsResponse.getResult().getTransferIn().getAmount()
-                    + statisticsResponse.getResult().getFormulaIn().getAmount());
+                    .add(statisticsResponse.getResult().getInventoryProfit().getAmount())
+                    .add(statisticsResponse.getResult().getTransferIn().getAmount())
+                    .add(statisticsResponse.getResult().getFormulaIn().getAmount()));
             vo.setInQuantity(statisticsResponse.getResult().getIn().getQuantity()
                     .add(statisticsResponse.getResult().getInventoryProfit().getQuantity())
                     .add(statisticsResponse.getResult().getTransferIn().getQuantity())
                     .add(statisticsResponse.getResult().getFormulaIn().getQuantity()));
 
             vo.setOutAmount(statisticsResponse.getResult().getOut().getAmount()
-                    + statisticsResponse.getResult().getInventoryDeficit().getAmount()
-                    + statisticsResponse.getResult().getTransferOut().getAmount()
-                    + statisticsResponse.getResult().getFormulaOut().getAmount());
+                    .add(statisticsResponse.getResult().getInventoryDeficit().getAmount())
+                    .add(statisticsResponse.getResult().getTransferOut().getAmount())
+                    .add(statisticsResponse.getResult().getFormulaOut().getAmount()));
             vo.setOutQuantity(statisticsResponse.getResult().getOut().getQuantity()
                     .add(statisticsResponse.getResult().getInventoryDeficit().getQuantity())
                     .add(statisticsResponse.getResult().getTransferOut().getQuantity())

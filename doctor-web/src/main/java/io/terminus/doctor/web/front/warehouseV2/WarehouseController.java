@@ -26,6 +26,7 @@ import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.front.warehouseV2.dto.WarehouseDto;
 import io.terminus.doctor.web.front.warehouseV2.vo.*;
 import io.terminus.pampas.common.UserUtil;
+import io.terminus.pampas.design.model.Page;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
@@ -160,7 +161,7 @@ public class WarehouseController {
      * @param warehouseDto
      * @param errors
      */
-    @RequestMapping(value="/update",method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/update", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
     public boolean update(@RequestBody @Valid WarehouseDto warehouseDto, Errors errors) {
 
         if (errors.hasErrors())
@@ -256,7 +257,7 @@ public class WarehouseController {
      * @param farmId
      * @return
      */
-   @RequestMapping(method = RequestMethod.GET, value = "type/{type}")
+    @RequestMapping(method = RequestMethod.GET, value = "type/{type}")
     @JsonView(WarehouseVo.WarehouseWithOutStatisticsView.class)
     public List<WarehouseVo> sameTypeWarehouse(@PathVariable Integer type,
                                                @RequestParam(required = false) Long orgId,
@@ -296,10 +297,10 @@ public class WarehouseController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "/sameTypeWarehouse")
-    public Response<List<Map<String,Object>>> sameTypeWarehouse(Integer type,Long farmId) {
+    public Response<List<Map<String, Object>>> sameTypeWarehouse(Integer type, Long farmId) {
         if (null == farmId)
             throw new JsonResponseException("missing parameter,farmId must pick one");
-        return doctorWarehouseReaderService.listTypeMap(farmId,type);
+        return doctorWarehouseReaderService.listTypeMap(farmId, type);
     }
 
     /**
@@ -308,13 +309,18 @@ public class WarehouseController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "/sameDetailTypeWarehouse")
-    public Response<List<Map<String,Object>>> sameDetailTypeWarehouse(Long wareHouseId) {
+    public Response<Paging<Map<String,Object>>> sameDetailTypeWarehouse(Integer type,
+                                                                      String materialName,
+                                                                      Long warehouseId,
+                                                                      Integer pageNo,
+                                                                      Integer pageSize) {
+
 //        if (null == farmId)
 //            throw new JsonResponseException("missing parameter,farmId must pick one");
-        return doctorWarehouseReaderService.listDetailTypeMap(wareHouseId);
+        return doctorWarehouseReaderService.listDetailTypeMap(type,materialName,warehouseId,pageNo,pageSize);
     }
-    /*************************    2018/04/18  end         ******************************/
 
+    /*************************    2018/04/18  end         ******************************/
 
 
     @RequestMapping(method = RequestMethod.GET, value = "type/statistics")
@@ -477,24 +483,24 @@ public class WarehouseController {
 
             WarehouseStockStatisticsDto warehouseStatistics = statistics.get(wareHouse.getId());
             if (null == warehouseStatistics) {
-                vo.setInAmount(0);
+                vo.setInAmount(new BigDecimal(0));
                 vo.setInQuantity(new BigDecimal(0));
-                vo.setOutAmount(0);
+                vo.setOutAmount(new BigDecimal(0));
                 vo.setOutQuantity(new BigDecimal(0));
-                vo.setTransferInAmount(0);
+                vo.setTransferInAmount(new BigDecimal(0));
                 vo.setTransferInQuantity(new BigDecimal(0));
-                vo.setTransferOutAmount(0);
+                vo.setTransferOutAmount(new BigDecimal(0));
                 vo.setTransferOutQuantity(new BigDecimal(0));
             } else {
                 vo.setInAmount(warehouseStatistics.getIn().getAmount()
-                        + warehouseStatistics.getInventoryProfit().getAmount()
-                        + warehouseStatistics.getFormulaIn().getAmount());
+                        .add(warehouseStatistics.getInventoryProfit().getAmount())
+                        .add(warehouseStatistics.getFormulaIn().getAmount()));
                 vo.setInQuantity(warehouseStatistics.getIn().getQuantity()
                         .add(warehouseStatistics.getInventoryProfit().getQuantity())
                         .add(warehouseStatistics.getFormulaIn().getQuantity()));
                 vo.setOutAmount(warehouseStatistics.getOut().getAmount()
-                        + warehouseStatistics.getInventoryDeficit().getAmount()
-                        + warehouseStatistics.getFormulaOut().getAmount());
+                        .add(warehouseStatistics.getInventoryDeficit().getAmount())
+                        .add(warehouseStatistics.getFormulaOut().getAmount()));
                 vo.setOutQuantity(warehouseStatistics.getOut().getQuantity()
                         .add(warehouseStatistics.getInventoryDeficit().getQuantity())
                         .add(warehouseStatistics.getFormulaOut().getQuantity()));
@@ -507,7 +513,7 @@ public class WarehouseController {
             AmountAndQuantityDto balance = warehouseBalance.get(wareHouse.getId());
             if (null == balance) {
 //                vo.setBalanceQuantity(new BigDecimal(0));
-                vo.setBalanceAmount(0);
+                vo.setBalanceAmount(new BigDecimal(0));
             } else {
                 vo.setBalanceAmount(balance.getAmount());
 //                vo.setBalanceQuantity(balance.getQuantity());
@@ -588,18 +594,18 @@ public class WarehouseController {
             DoctorWarehouseSku sku = skuMap.containsKey(stock.getSkuId()) ? skuMap.get(stock.getSkuId()).get(0) : null;
 
             vo.setInAmount(statisticsResponse.getResult().getIn().getAmount()
-                    + statisticsResponse.getResult().getInventoryProfit().getAmount()
-                    + statisticsResponse.getResult().getTransferIn().getAmount()
-                    + statisticsResponse.getResult().getFormulaIn().getAmount());
+                    .add(statisticsResponse.getResult().getInventoryProfit().getAmount())
+                    .add(statisticsResponse.getResult().getTransferIn().getAmount())
+                    .add(statisticsResponse.getResult().getFormulaIn().getAmount()));
             vo.setInQuantity(statisticsResponse.getResult().getIn().getQuantity()
                     .add(statisticsResponse.getResult().getInventoryProfit().getQuantity())
                     .add(statisticsResponse.getResult().getTransferIn().getQuantity())
                     .add(statisticsResponse.getResult().getFormulaIn().getQuantity()));
 
             vo.setOutAmount(statisticsResponse.getResult().getOut().getAmount()
-                    + statisticsResponse.getResult().getInventoryDeficit().getAmount()
-                    + statisticsResponse.getResult().getTransferOut().getAmount()
-                    + statisticsResponse.getResult().getFormulaOut().getAmount());
+                    .add(statisticsResponse.getResult().getInventoryDeficit().getAmount())
+                    .add(statisticsResponse.getResult().getTransferOut().getAmount())
+                    .add(statisticsResponse.getResult().getFormulaOut().getAmount()));
             vo.setOutQuantity(statisticsResponse.getResult().getOut().getQuantity()
                     .add(statisticsResponse.getResult().getInventoryDeficit().getQuantity())
                     .add(statisticsResponse.getResult().getTransferOut().getQuantity())
@@ -699,15 +705,15 @@ public class WarehouseController {
                 .balanceAmount(amountAndQuantity.getAmount())
                 .balanceQuantity(new BigDecimal(quantity))
                 .inAmount(statistics.getIn().getAmount()
-                        + statistics.getFormulaIn().getAmount()
-                        + statistics.getInventoryProfit().getAmount())
+                        .add(statistics.getFormulaIn().getAmount())
+                        .add(statistics.getInventoryProfit().getAmount()))
                 .inQuantity(statistics.getIn().getQuantity()
                         .add(statistics.getFormulaIn().getQuantity())
                         .add(statistics.getInventoryProfit().getQuantity()))
 
-                .outAmount(statistics.getOut().getAmount() +
-                        statistics.getFormulaOut().getAmount() +
-                        statistics.getInventoryDeficit().getAmount())
+                .outAmount(statistics.getOut().getAmount().add(
+                        statistics.getFormulaOut().getAmount()).add(
+                        statistics.getInventoryDeficit().getAmount()))
                 .outQuantity(statistics.getOut().getQuantity()
                         .add(statistics.getFormulaOut().getQuantity())
                         .add(statistics.getInventoryDeficit().getQuantity()))
@@ -1095,7 +1101,7 @@ public class WarehouseController {
 
                     AmountAndQuantityDto balance = balanceResponse.getResult().get(type.getKey());
                     if (null == balance) {
-                        vo.setBalanceAmount(0);
+                        vo.setBalanceAmount(new BigDecimal(0));
                         vo.setBalanceQuantity(new BigDecimal(0));
                     } else {
                         vo.setBalanceAmount(balance.getAmount());
@@ -1104,17 +1110,17 @@ public class WarehouseController {
                     WarehouseStockStatisticsDto statistics = statisticsDtoResponse.getResult().get(type.getKey());
                     if (null == statistics) {
                         vo.setInQuantity(new BigDecimal(0));
-                        vo.setInAmount(0);
-                        vo.setOutAmount(0);
+                        vo.setInAmount(new BigDecimal(0));
+                        vo.setOutAmount(new BigDecimal(0));
                         vo.setOutQuantity(new BigDecimal(0));
-                        vo.setInventoryDeficitAmount(0);
+                        vo.setInventoryDeficitAmount(new BigDecimal(0));
                         vo.setInventoryDeficitQuantity(new BigDecimal(0));
-                        vo.setInventoryProfitAmount(0);
+                        vo.setInventoryProfitAmount(new BigDecimal(0));
                         vo.setInventoryProfitQuantity(new BigDecimal(0));
                         vo.setTransferOutQuantity(new BigDecimal(0));
-                        vo.setTransferOutAmount(0);
+                        vo.setTransferOutAmount(new BigDecimal(0));
                         vo.setTransferInQuantity(new BigDecimal(0));
-                        vo.setTransferInAmount(0);
+                        vo.setTransferInAmount(new BigDecimal(0));
                     } else {
                         vo.setInQuantity(statistics.getIn().getQuantity());
                         vo.setInAmount(statistics.getIn().getAmount());
@@ -1155,7 +1161,7 @@ public class WarehouseController {
 
                     AmountAndQuantityDto balance = balanceResponse.getResult().get(warehouse.getId());
                     if (null == balance) {
-                        vo.setBalanceAmount(0);
+                        vo.setBalanceAmount(new BigDecimal(0));
                         vo.setBalanceQuantity(new BigDecimal(0));
                     } else {
                         vo.setBalanceAmount(balance.getAmount());
@@ -1164,17 +1170,17 @@ public class WarehouseController {
                     WarehouseStockStatisticsDto statistics = statisticsDtoResponse.getResult().get(warehouse.getId());
                     if (null == statistics) {
                         vo.setInQuantity(new BigDecimal(0));
-                        vo.setInAmount(0);
-                        vo.setOutAmount(0);
+                        vo.setInAmount(new BigDecimal(0));
+                        vo.setOutAmount(new BigDecimal(0));
                         vo.setOutQuantity(new BigDecimal(0));
-                        vo.setInventoryDeficitAmount(0);
+                        vo.setInventoryDeficitAmount(new BigDecimal(0));
                         vo.setInventoryDeficitQuantity(new BigDecimal(0));
-                        vo.setInventoryProfitAmount(0);
+                        vo.setInventoryProfitAmount(new BigDecimal(0));
                         vo.setInventoryProfitQuantity(new BigDecimal(0));
                         vo.setTransferOutQuantity(new BigDecimal(0));
-                        vo.setTransferOutAmount(0);
+                        vo.setTransferOutAmount(new BigDecimal(0));
                         vo.setTransferInQuantity(new BigDecimal(0));
-                        vo.setTransferInAmount(0);
+                        vo.setTransferInAmount(new BigDecimal(0));
                     } else {
                         vo.setInQuantity(statistics.getIn().getQuantity());
                         vo.setInAmount(statistics.getIn().getAmount());
@@ -1217,7 +1223,7 @@ public class WarehouseController {
 //                    vo.setUnit(stock.getUnit());
                     AmountAndQuantityDto balance = balanceResponse.getResult().get(stock.getSkuId());
                     if (null == balance) {
-                        vo.setBalanceAmount(0);
+                        vo.setBalanceAmount(new BigDecimal(0));
                         vo.setBalanceQuantity(new BigDecimal(0));
                     } else {
                         vo.setBalanceAmount(balance.getAmount());
@@ -1226,17 +1232,17 @@ public class WarehouseController {
                     WarehouseStockStatisticsDto statistics = statisticsDtoResponse.getResult().get(stock.getSkuId());
                     if (null == statistics) {
                         vo.setInQuantity(new BigDecimal(0));
-                        vo.setInAmount(0);
-                        vo.setOutAmount(0);
+                        vo.setInAmount(new BigDecimal(0));
+                        vo.setOutAmount(new BigDecimal(0));
                         vo.setOutQuantity(new BigDecimal(0));
-                        vo.setInventoryDeficitAmount(0);
+                        vo.setInventoryDeficitAmount(new BigDecimal(0));
                         vo.setInventoryDeficitQuantity(new BigDecimal(0));
-                        vo.setInventoryProfitAmount(0);
+                        vo.setInventoryProfitAmount(new BigDecimal(0));
                         vo.setInventoryProfitQuantity(new BigDecimal(0));
                         vo.setTransferOutQuantity(new BigDecimal(0));
-                        vo.setTransferOutAmount(0);
+                        vo.setTransferOutAmount(new BigDecimal(0));
                         vo.setTransferInQuantity(new BigDecimal(0));
-                        vo.setTransferInAmount(0);
+                        vo.setTransferInAmount(new BigDecimal(0));
                     } else {
                         vo.setInQuantity(statistics.getIn().getQuantity());
                         vo.setInAmount(statistics.getIn().getAmount());
@@ -1294,6 +1300,7 @@ public class WarehouseController {
 
         return unitPriceResponse.getResult();
     }
+
     /**
      * 猪厂下同类型的仓库列表
      *
@@ -1304,16 +1311,16 @@ public class WarehouseController {
     @RequestMapping(method = RequestMethod.GET, value = "types/{type}")
     @JsonView(WarehouseVo.WarehouseWithOutStatisticsView.class)
     public List<WarehouseVo> getWarehouseByType(@PathVariable Integer type,
-                                               @RequestParam(required = false) Long orgId,
-                                               @RequestParam(required = false) Long farmId,
+                                                @RequestParam(required = false) Long orgId,
+                                                @RequestParam(required = false) Long farmId,
                                                 int currentPage) {
         if (null == orgId && null == farmId)
             throw new JsonResponseException("missing parameter,orgId or farmId must pick one");
 
-            DoctorWareHouse criteria = new DoctorWareHouse();
-            criteria.setType(type);
-            criteria.setFarmId(farmId);
-        List<DoctorWareHouse> wareHouses = RespHelper.or500(doctorWarehouseReaderService.getWarehouseByType(criteria,currentPage));
+        DoctorWareHouse criteria = new DoctorWareHouse();
+        criteria.setType(type);
+        criteria.setFarmId(farmId);
+        List<DoctorWareHouse> wareHouses = RespHelper.or500(doctorWarehouseReaderService.getWarehouseByType(criteria, currentPage));
 
         List<WarehouseVo> vos = new ArrayList<>(wareHouses.size());
         wareHouses.forEach(wareHouse -> {

@@ -34,7 +34,7 @@ public class WarehouseStockInDto extends AbstractWarehouseStockDto implements Se
 //        private String unit;
 
         @NotNull(message = "stock.unit.price.null", groups = StockDefaultValid.class)
-        private Long unitPrice;
+        private BigDecimal unitPrice;
 
 
         @NotNull(message = "stock.amount.null", groups = StockDefaultValid.class)

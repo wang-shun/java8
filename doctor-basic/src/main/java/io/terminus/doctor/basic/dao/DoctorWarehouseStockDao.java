@@ -59,6 +59,10 @@ public class DoctorWarehouseStockDao extends MyBatisDao<DoctorWarehouseStock> {
         return Optional.ofNullable(stocks.get(0));
     }
 
+    public List<Long> findSkuIds(Long warehouseId) {
+        return this.sqlSession.selectList(this.sqlId("findSkuIds"), warehouseId);
+    }
+
 
     public Long advCount(Map<String, Object> criteria) {
         return (Long) this.sqlSession.selectOne(this.sqlId("advCount"), criteria);

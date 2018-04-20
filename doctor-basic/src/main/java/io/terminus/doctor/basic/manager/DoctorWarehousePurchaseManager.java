@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
+@Deprecated
 public class DoctorWarehousePurchaseManager {
 
 
@@ -49,7 +50,7 @@ public class DoctorWarehousePurchaseManager {
         purchase.setVendorName(doctorVendorManager.findById(sku.getVendorId()).getName());
         purchase.setQuantity(detail.getQuantity());
         purchase.setHandleQuantity(new BigDecimal(0));
-        purchase.setUnitPrice(detail.getUnitPrice());
+        purchase.setUnitPrice(detail.getUnitPrice().longValue());
         purchase.setHandleDate(stockDto.getHandleDate().getTime());
         purchase.setHandleYear(stockDto.getHandleDate().get(Calendar.YEAR));
         purchase.setHandleMonth(stockDto.getHandleDate().get(Calendar.MONTH) + 1);
@@ -107,7 +108,7 @@ public class DoctorWarehousePurchaseManager {
     }
 
 
-    public long calculateUnitPrice(Long warehouseId, Long materialId) {
+    public BigDecimal calculateUnitPrice(Long warehouseId, Long materialId) {
         return calculateUnitPrice(doctorWarehouseStockManager.getStock(warehouseId, materialId).orElseThrow(() ->
                 new InvalidException("stock.not.found", warehouseId, materialId)
         ));
@@ -122,7 +123,7 @@ public class DoctorWarehousePurchaseManager {
      * @return
      * @throws ServiceException 如果物料没有任何入库记录
      */
-    public long calculateUnitPrice(DoctorWarehouseStock stock) {
+    public BigDecimal calculateUnitPrice(DoctorWarehouseStock stock) {
         Calendar thisMonth = Calendar.getInstance();
 //        lastMonth.add(Calendar.MONTH, -1);//上一个月
         List<DoctorWarehousePurchase> thisMonthPurchases = doctorWarehousePurchaseDao.list(DoctorWarehousePurchase.builder()
@@ -140,7 +141,7 @@ public class DoctorWarehousePurchaseManager {
                     .build());
             if (lastOnePurchases.isEmpty())
                 throw new InvalidException("purchase.not.found", stock.getWarehouseName(), stock.getSkuName());
-            return lastOnePurchases.getData().get(0).getUnitPrice();
+            return new BigDecimal(lastOnePurchases.getData().get(0).getUnitPrice());
         } else {
 
             long totalPrice = 0;
@@ -149,7 +150,7 @@ public class DoctorWarehousePurchaseManager {
                 totalPrice = totalPrice + purchase.getQuantity().multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
                 totalQuantity = totalQuantity.add(purchase.getQuantity());
             }
-            return new BigDecimal(totalPrice).divide(totalQuantity, 0, BigDecimal.ROUND_HALF_UP).longValue();
+            return new BigDecimal(totalPrice).divide(totalQuantity, 0, BigDecimal.ROUND_HALF_UP);
         }
     }
 

@@ -164,18 +164,18 @@ public class StockHandleController {
                                 log.warn("material apply not found,by material handle {}", mh.getId());
 
                             //退料入库-->可退数量
-                           if (mh.getType().intValue() == WarehouseMaterialHandleType.RETURN.getValue()) {
-                               BigDecimal RefundableNumber = new BigDecimal(0);
-                               //得到领料出库的数量
-                               BigDecimal LibraryQuantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findLibraryById(mh.getRelMaterialHandleId()));
-                               DoctorWarehouseMaterialHandle wmh = new DoctorWarehouseMaterialHandle();
-                               wmh.setRelMaterialHandleId(mh.getRelMaterialHandleId());
-                               wmh.setHandleDate(mh.getHandleDate());
-                               //得到在此之前退料入库的数量和
-                               BigDecimal RetreatingQuantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findRetreatingById(wmh));
-                               RefundableNumber = LibraryQuantity.subtract(RetreatingQuantity);
-                               detail.setRefundableQuantity(RefundableNumber.doubleValue());
-                           }
+                            if (mh.getType().intValue() == WarehouseMaterialHandleType.RETURN.getValue()) {
+                                BigDecimal RefundableNumber = new BigDecimal(0);
+                                //得到领料出库的数量
+                                BigDecimal LibraryQuantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findLibraryById(mh.getRelMaterialHandleId()));
+                                DoctorWarehouseMaterialHandle wmh = new DoctorWarehouseMaterialHandle();
+                                wmh.setRelMaterialHandleId(mh.getRelMaterialHandleId());
+                                wmh.setHandleDate(mh.getHandleDate());
+                                //得到在此之前退料入库的数量和
+                                BigDecimal RetreatingQuantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findRetreatingById(wmh));
+                                RefundableNumber = LibraryQuantity.subtract(RetreatingQuantity);
+                                detail.setRefundableQuantity(RefundableNumber.doubleValue());
+                            }
 
                             //调出
                             if (mh.getType().intValue() == WarehouseMaterialHandleType.TRANSFER_OUT.getValue()) {
@@ -220,13 +220,13 @@ public class StockHandleController {
         }
 
         BigDecimal totalQuantity = new BigDecimal(0);
-        long totalUnitPrice = 0L;
+        BigDecimal totalUnitPrice = new BigDecimal(0);
         for (StockHandleVo.Detail detail : vo.getDetails()) {
             totalQuantity = totalQuantity.add(detail.getQuantity());
-            totalUnitPrice += detail.getUnitPrice();
+            totalUnitPrice = totalUnitPrice.add(detail.getUnitPrice());
         }
         vo.setTotalQuantity(totalQuantity.doubleValue());
-        vo.setTotalAmount(totalQuantity.multiply(new BigDecimal(totalUnitPrice)).doubleValue());
+        vo.setTotalAmount(totalQuantity.multiply(totalUnitPrice).doubleValue());
 
         return vo;
     }
@@ -332,8 +332,10 @@ public class StockHandleController {
                     }
 
 
-                    vo.setUnitPrice(new BigDecimal(mh.getUnitPrice()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP).doubleValue());
-                    vo.setAmount(new BigDecimal(mh.getUnitPrice()).multiply(vo.getQuantity()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP).doubleValue());
+                    vo.setUnitPrice(mh.getUnitPrice().divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP).doubleValue());
+                    vo.setAmount(mh.getUnitPrice().multiply(vo.getQuantity()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP).doubleValue());
+                    vo.setUnitPrice(mh.getUnitPrice().doubleValue());
+                    vo.setAmount(mh.getAmount().doubleValue());
                     return vo;
                 })
                 .collect(Collectors.toList());
@@ -680,18 +682,18 @@ public class StockHandleController {
 //                .collect(Collectors.toList()), "web-wareHouse-stock-handle", request, response);
     }
 
-    @RequestMapping(method = RequestMethod.GET,value = "/stockPage")
+    @RequestMapping(method = RequestMethod.GET, value = "/stockPage")
     public Paging<DoctorWarehouseStockHandle> stockPage(
-                                                        @RequestParam(required =false) Integer pageNo,
-                                                        @RequestParam(required =false) Integer pageSize,
-                                                        @RequestParam(required =false) String warehouseName,
-                                                        @RequestParam(required =false) String operatorName,
-                                                        @RequestParam(required =false) Integer handleSubType,
-                                                        @RequestParam(required =false) Date createdAtStart,
-                                                        @RequestParam(required =false) Date createdAtEnd,
-                                                        @RequestParam(required =false) Date updatedAtStart,
-                                                        @RequestParam(required =false) Date updatedAtEnd
-                                                         ) {
+            @RequestParam(required = false) Integer pageNo,
+            @RequestParam(required = false) Integer pageSize,
+            @RequestParam(required = false) String warehouseName,
+            @RequestParam(required = false) String operatorName,
+            @RequestParam(required = false) Integer handleSubType,
+            @RequestParam(required = false) Date createdAtStart,
+            @RequestParam(required = false) Date createdAtEnd,
+            @RequestParam(required = false) Date updatedAtStart,
+            @RequestParam(required = false) Date updatedAtEnd
+    ) {
 
         if (null != createdAtStart && null != createdAtEnd && createdAtStart.after(createdAtEnd))
             throw new JsonResponseException("start.date.after.end.date");
@@ -707,7 +709,7 @@ public class StockHandleController {
         params.put("createdAtEnd", createdAtEnd);
         params.put("updatedAtStart", updatedAtStart);
         params.put("updatedAtEnd", updatedAtEnd);
-        return RespHelper.or500(doctorWarehouseStockHandleReadService.paging(pageNo,pageSize,params));
+        return RespHelper.or500(doctorWarehouseStockHandleReadService.paging(pageNo, pageSize, params));
     }
 
 }

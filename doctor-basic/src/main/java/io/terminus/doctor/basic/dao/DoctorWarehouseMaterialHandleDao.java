@@ -123,6 +123,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectList(this.sqlId("findByOrgAndSettlementDate"), criteria);
     }
 
+    @Deprecated
     public void reverseSettlement(Long farmId, Integer year, Integer month) {
         Map<String, Object> criteria = Maps.newHashMap();
         criteria.put("farmId", farmId);
@@ -132,6 +133,13 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         this.sqlSession.update(this.sqlId("reverseSettlement"), criteria);
     }
 
+    public void reverseSettlement(Long orgId, Date settlementDate) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("orgId", orgId);
+        criteria.put("settlementDate", settlementDate);
+
+        this.sqlSession.update(this.sqlId("reverseSettlementByOrg"), criteria);
+    }
 
     /**
      * 获取本会计年月之前的库存量和金额
@@ -145,8 +153,8 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         criteria.put("warehouseId", warehouseId);
         criteria.put("settlementDate", settlementDate);
 
-        Map<String, Object> result = this.sqlSession.selectOne(this.sqlId("findBalanceByAccountingDate"), criteria);
-        return new AmountAndQuantityDto(((BigDecimal) result.get("amount")).longValue(), (BigDecimal) result.get("quantity"));
+        Map<String, BigDecimal> result = this.sqlSession.selectOne(this.sqlId("findBalanceByAccountingDate"), criteria);
+        return new AmountAndQuantityDto((result.get("amount")), result.get("quantity"));
     }
 
 
@@ -168,7 +176,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         Map<Long/*warehouseId*/, AmountAndQuantityDto> balances = new HashMap<>();
 
         results.forEach(m -> {
-            balances.put((Long) m.get("warehouseId"), new AmountAndQuantityDto(((BigDecimal) m.get("amount")).longValue(), (BigDecimal) m.get("quantity")));
+            balances.put((Long) m.get("warehouseId"), new AmountAndQuantityDto(((BigDecimal) m.get("amount")), (BigDecimal) m.get("quantity")));
         });
 
         return balances;

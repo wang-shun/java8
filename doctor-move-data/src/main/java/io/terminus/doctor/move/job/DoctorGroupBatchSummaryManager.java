@@ -77,14 +77,14 @@ public class DoctorGroupBatchSummaryManager {
                 BigDecimal feedQuantity = new BigDecimal(0);
                 for (DoctorWarehouseMaterialApply apply : applies) {
                     if (WareHouseType.FEED.getKey() == apply.getType()) {
-                        feedAmount += apply.getQuantity().multiply(new BigDecimal(apply.getUnitPrice())).doubleValue();
+                        feedAmount += apply.getQuantity().multiply((apply.getUnitPrice())).doubleValue();
                         feedQuantity = feedQuantity.add(apply.getQuantity());
                     } else if (WareHouseType.VACCINATION.getKey() == apply.getType())
-                        vaccineAmount += apply.getQuantity().multiply(new BigDecimal(apply.getUnitPrice())).doubleValue();
+                        vaccineAmount += apply.getQuantity().multiply((apply.getUnitPrice())).doubleValue();
                     else if (WareHouseType.MEDICINE.getKey() == apply.getType())
-                        medicineAmount += apply.getQuantity().multiply(new BigDecimal(apply.getUnitPrice())).doubleValue();
+                        medicineAmount += apply.getQuantity().multiply((apply.getUnitPrice())).doubleValue();
                     else if (WareHouseType.CONSUME.getKey() == apply.getType())
-                        consumeAmount += apply.getQuantity().multiply(new BigDecimal(apply.getUnitPrice())).doubleValue();
+                        consumeAmount += apply.getQuantity().multiply((apply.getUnitPrice())).doubleValue();
                 }
                 s.setFeedAmount(feedAmount);
                 s.setFendNumber(feedQuantity.doubleValue());

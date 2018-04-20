@@ -255,7 +255,7 @@ public class DoctorWarehouseMaterialHandleManager {
         private AbstractWarehouseStockDetail stockDetail;
         private DoctorWarehouseStock stock;
         private Map<DoctorWarehousePurchase, BigDecimal/*quantity*/> purchases;
-        private long unitPrice;
+        private BigDecimal unitPrice;
         private String vendorName;
         private BigDecimal quantity;
         private DoctorWarehouseSku sku;

@@ -71,7 +71,6 @@ public class WarehouseInManager extends AbstractStockManager<WarehouseStockInDto
     public void updateQuantity(DoctorWarehouseMaterialHandle materialHandle, BigDecimal newQuantity) {
 
         materialHandle.setQuantity(newQuantity);
-        materialHandle.setUnitPrice(materialHandle.getAmount().multiply(new BigDecimal(100)).divide(materialHandle.getQuantity(), 0, BigDecimal.ROUND_HALF_UP).longValue());
-
+        materialHandle.setUnitPrice(materialHandle.getAmount().divide(materialHandle.getQuantity(), 4, BigDecimal.ROUND_HALF_UP));
     }
 }

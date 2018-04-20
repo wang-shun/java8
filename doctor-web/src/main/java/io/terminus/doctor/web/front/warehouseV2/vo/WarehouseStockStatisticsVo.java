@@ -40,7 +40,7 @@ public class WarehouseStockStatisticsVo {
     /**
      * 余额
      */
-    private long balanceAmount;
+    private BigDecimal balanceAmount;
 
     private String unit;
 
@@ -58,7 +58,7 @@ public class WarehouseStockStatisticsVo {
     /**
      * 入库金额
      */
-    private long inAmount;
+    private BigDecimal inAmount;
 
     /**
      * 出库数量
@@ -68,7 +68,7 @@ public class WarehouseStockStatisticsVo {
     /**
      * 出库金额
      */
-    private long outAmount;
+    private BigDecimal outAmount;
 
     /**
      * 调拨出数量
@@ -78,7 +78,7 @@ public class WarehouseStockStatisticsVo {
     /**
      * 调拨出金额
      */
-    private long transferOutAmount;
+    private BigDecimal transferOutAmount;
 
 
     /**
@@ -89,12 +89,12 @@ public class WarehouseStockStatisticsVo {
     /**
      * 调拨入金额
      */
-    private long transferInAmount;
+    private BigDecimal transferInAmount;
 
     /**
      * 盘亏金额
      */
-    private long inventoryDeficitAmount;
+    private BigDecimal inventoryDeficitAmount;
 
     /**
      * 盘亏数量
@@ -104,7 +104,7 @@ public class WarehouseStockStatisticsVo {
     /**
      * 盘盈金额
      */
-    private long inventoryProfitAmount;
+    private BigDecimal inventoryProfitAmount;
 
     /**
      * 盘盈数量

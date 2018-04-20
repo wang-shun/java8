@@ -2187,3 +2187,9 @@ ALTER TABLE doctor_warehouse_stock_monthly
   MODIFY COLUMN org_id bigint COMMENT '公司id' AFTER id,
   MODIFY COLUMN farm_id bigint COMMENT '猪场id' AFTER org_id,
   MODIFY COLUMN settlement_date date COMMENT '会计年月' AFTER balance_amount;
+
+-- 修改单据明细中的unit_price字段 2018-04-19
+ALTER TABLE doctor_warehouse_material_handle MODIFY unit_price decimal(23,4) COMMENT '单价'
+
+-- 修改出库领用单的unit_price字段 2018-04-19
+ALTER TABLE doctor_warehouse_material_apply MODIFY unit_price decimal(23,4) NOT NULL COMMENT '单价';
