@@ -96,7 +96,10 @@ public class DoctorWarehouseStockHandleManager {
         handle.setHandleDate(stockDto.getHandleDate().getTime());
         handle.setSerialNo(serialNo);
 
-        handle.setHandleType(handleType.getValue());
+        if (WarehouseMaterialHandleType.isBigIn(handleType.getValue()))
+            handle.setHandleType(1);//入库
+        else
+            handle.setHandleType(2);//出库
         handle.setHandleSubType(handleType.getValue());
 
         doctorWarehouseStockHandleDao.create(handle);
