@@ -687,13 +687,13 @@ public class StockHandleController {
     public Paging<DoctorWarehouseStockHandle> stockPage(
             @RequestParam(required = false) Integer pageNo,
             @RequestParam(required = false) Integer pageSize,
-            @RequestParam(required = false) String warehouseName,
-            @RequestParam(required = false) String operatorName,
-            @RequestParam(required = false) Integer handleSubType,
-            @RequestParam(required = false) Date createdAtStart,
-            @RequestParam(required = false) Date createdAtEnd,
-            @RequestParam(required = false) Date updatedAtStart,
-            @RequestParam(required = false) Date updatedAtEnd
+            @RequestParam(required = false,value = "warehouseName") String warehouseName,
+            @RequestParam(required = false,value = "operatorName") String operatorName,
+            @RequestParam(required = false,value = "handleSubType") Integer handleSubType,
+            @RequestParam(required = false,value = "createdAtStart") Date createdAtStart,
+            @RequestParam(required = false,value = "createdAtEnd") Date createdAtEnd,
+            @RequestParam(required = false,value = "updatedAtStart") Date updatedAtStart,
+            @RequestParam(required = false,value = "updatedAtEnd") Date updatedAtEnd
     ) {
 
         if (null != createdAtStart && null != createdAtEnd && createdAtStart.after(createdAtEnd))
