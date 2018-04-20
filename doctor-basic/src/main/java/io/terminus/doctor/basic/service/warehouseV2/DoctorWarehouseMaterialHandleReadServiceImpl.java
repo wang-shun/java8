@@ -14,10 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Desc:
@@ -32,6 +29,9 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
     @Autowired
     private DoctorWarehouseMaterialHandleDao doctorWarehouseMaterialHandleDao;
+
+    @Autowired
+    private DoctorWarehouseSettlementService doctorWarehouseSettlementService;
 
     @Override
     public Response<BigDecimal> findLibraryById(Long id) {
@@ -167,7 +167,12 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     public Response<List<Map>> companyReport(Map<String, Object> criteria) {
 
         try {
-            return Response.ok(doctorWarehouseMaterialHandleDao.listByFarmIdTime(criteria));
+            List<Map> resultList = doctorWarehouseMaterialHandleDao.listByFarmIdTime(criteria);
+            resultList.stream().forEach(map ->{
+                boolean settled = doctorWarehouseSettlementService.isSettled((Long) map.get("orgId"), (Date) map.get("settlementDate"));
+                map.put("settled",settled);
+            });
+            return Response.ok(resultList);
         } catch (Exception e) {
             log.error("failed to list doctor warehouse material handle, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.material.handle.list.fail");

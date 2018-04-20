@@ -8,6 +8,7 @@ import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSettlementService;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
@@ -235,6 +236,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         List<Map> resultList = this.sqlSession.selectList("listByFarmIdTime",criteria);
 
         resultList.stream().forEach(map ->{
+
             map.put("type",WarehouseMaterialHandleType.IN.getValue());
 
             map.put("inAmount",this.sqlSession.selectOne("selectSumAmount",map));
