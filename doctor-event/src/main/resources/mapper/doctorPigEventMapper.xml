@@ -1366,7 +1366,7 @@
         AND pig_id = #{pigId}
         AND event_at &lt;= date_format(#{eventAt}, '%Y-%m-%d')
         AND (
-        type in (2, 6, 7, 9, 11, 14, 15, 16)
+        type in (6, 7, 9, 11, 14, 15, 16)
         OR (type = 20 AND pig_status_before != pig_status_after)
         OR (type = 19 AND pig_status_before = 9)
         )

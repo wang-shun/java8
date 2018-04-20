@@ -2145,6 +2145,7 @@ ALTER TABLE `doctor_track_snapshots` ADD COLUMN `event_source` tinyint (4) DEFAU
 create index doctor_event_modify_logs_business_id on doctor_event_modify_logs(business_id);
 
 
+
 -- 修改单据明细中的盘点之前库存数量字段 2018-04-09
 ALTER TABLE doctor_warehouse_material_handle CHANGE before_inventory_quantity before_stock_quantity DECIMAL(23,2) COMMENT '之前库存数量';
 
@@ -2206,3 +2207,18 @@ ALTER TABLE doctor_warehouse_material_apply CHANGE settlementDate settlement_dat
 
 --领用表单价改为可为null 2018-04-23
 ALTER TABLE doctor_warehouse_material_apply MODIFY unit_price decimal(23,4) COMMENT '单价';
+
+CREATE TABLE `doctor_chg_farm_records` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `farm_id` bigint(20) NOT NULL COMMENT '猪场id',
+  `pig_id` VARCHAR(64) NOT NULL COMMENT '猪场名称',
+  `track` VARCHAR (1024) NOT NULL COMMENT 'track json',
+  `pig` VARCHAR (1024) NOT NULL COMMENT 'pig json',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_farm_id` (`farm_id`),
+  KEY `index_pig_id` (`pig_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='猪场猪转场记录';
+
+
