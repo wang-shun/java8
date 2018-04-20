@@ -2193,3 +2193,6 @@ ALTER TABLE doctor_warehouse_material_handle MODIFY unit_price decimal(23,4) COM
 
 -- 修改出库领用单的unit_price字段 2018-04-19
 ALTER TABLE doctor_warehouse_material_apply MODIFY unit_price decimal(23,4) NOT NULL COMMENT '单价';
+
+-- 配方表添加配方名称 2018-04-20
+ALTER TABLE doctor_feed_formulas ADD formula_name VARCHAR(64) NOT NULL COMMENT '配方名称';
