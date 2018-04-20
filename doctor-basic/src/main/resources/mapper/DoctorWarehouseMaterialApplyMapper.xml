@@ -264,4 +264,12 @@
         ORDER BY id DESC LIMIT 1
     </select>
 
+    <delete id="deleteGroupApply" parameterType="long">
+        DELETE FROM
+        <include refid="tb"/>
+        WHERE
+        material_handle_id=#{materialHandleId}
+        AND (apply_type=1 or apply_type=2)
+    </delete>
+
 </mapper>

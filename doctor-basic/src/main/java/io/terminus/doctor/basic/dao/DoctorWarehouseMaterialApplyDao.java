@@ -69,7 +69,7 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
      * @param materialHandleId
      */
     public void deleteGroupApply(Long materialHandleId) {
-        //TODO 删除猪群或母猪领用，保留猪舍领用
+        this.sqlSession.delete(this.sqlId("deleteGroupApply"), materialHandleId);
     }
 
     /**
