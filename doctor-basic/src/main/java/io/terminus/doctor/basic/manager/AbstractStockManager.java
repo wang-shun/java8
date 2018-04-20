@@ -218,6 +218,16 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
         return doctorWarehouseMaterialHandleDao.getHistoryStock(warehouseId, skuId, handleDate, true);
     }
 
+    /**
+     * 插入明细单据
+     * 如果是入库类型的明细单，handleDate+00:00:00,id正序，排在00:00:00的最后
+     * 如果是出库类型的明细单，handleDate+23:59:59,id正序，排在23:59:59的最后
+     *
+     * @param detail
+     * @param stockDto
+     * @param stockHandle
+     * @param wareHouse
+     */
     public abstract void create(T detail,
                                 AbstractWarehouseStockDto stockDto,
                                 DoctorWarehouseStockHandle stockHandle,

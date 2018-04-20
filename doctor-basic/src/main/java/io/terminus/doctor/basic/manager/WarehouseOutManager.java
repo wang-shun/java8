@@ -7,6 +7,7 @@ import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.common.utils.DateUtil;
 import org.springframework.stereotype.Component;
@@ -28,19 +29,34 @@ public class WarehouseOutManager extends AbstractStockManager {
                        AbstractWarehouseStockDto stockDto,
                        DoctorWarehouseStockHandle stockHandle,
                        DoctorWareHouse wareHouse) {
-        if (!DateUtil.inSameDate(stockHandle.getHandleDate(), new Date())) {
-            //重算每个单据明细的beforeStockQuantity，并验证每个
-            recalculate(stockHandle.getHandleDate(), wareHouse.getId(), detail.getMaterialId(), detail.getQuantity().negate());
-        }
-
         DoctorWarehouseMaterialHandle materialHandle = buildMaterialHandle(detail, stockDto, stockHandle, wareHouse);
         materialHandle.setType(WarehouseMaterialHandleType.OUT.getValue());
 
         //出库类型，当天最后一笔
         if (!DateUtil.inSameDate(stockDto.getHandleDate().getTime(), new Date())) {
+
             materialHandle.setHandleDate(this.buildNewHandleDate(WarehouseMaterialHandleType.OUT, stockDto.getHandleDate()));
-            doctorWarehouseMaterialHandleDao.create(materialHandle);
+
+            //获取该笔明细之前的库存量，包括该事件日期
+            BigDecimal historyQuantity = getHistoryQuantityInclude(stockDto.getHandleDate().getTime(), wareHouse.getId(), detail.getMaterialId());
+
+            materialHandle.setBeforeStockQuantity(historyQuantity);
+
+            historyQuantity = historyQuantity.subtract(detail.getQuantity());
+
+            if (historyQuantity.compareTo(new BigDecimal(0)) < 0) {
+                throw new ServiceException("warehouse.stock.not.enough");
+            }
+
+            //该笔单据明细之后单据明细需要重算
+            recalculate(stockDto.getHandleDate().getTime(), false, wareHouse.getId(), detail.getMaterialId(), historyQuantity);
+        } else {
+            BigDecimal currentQuantity = doctorWarehouseStockDao.findBySkuIdAndWarehouseId(detail.getMaterialId(), wareHouse.getId())
+                    .orElse(DoctorWarehouseStock.builder().quantity(new BigDecimal(0)).build())
+                    .getQuantity();
+            materialHandle.setBeforeStockQuantity(currentQuantity);
         }
+        doctorWarehouseMaterialHandleDao.create(materialHandle);
     }
 
     @Override
