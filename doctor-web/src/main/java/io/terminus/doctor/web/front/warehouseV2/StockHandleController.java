@@ -180,12 +180,8 @@ public class StockHandleController {
 
                             //调出
                             if (mh.getType().intValue() == WarehouseMaterialHandleType.TRANSFER_OUT.getValue()) {
-<<<<<<< HEAD
                                 //单据明细表
                                 DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(mh.getRelMaterialHandleId()));
-=======
-                                DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(mh.getOtherTransferHandleId()));
->>>>>>> Merge branch 'feature/warehouse-v2' of D:\project\doctor2\doctor with conflicts.
                                 if (transferInHandle != null) {
                                     DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(transferInHandle.getWarehouseId()));
                                     if (wareHouse != null) {
@@ -196,7 +192,7 @@ public class StockHandleController {
                                     } else
                                         log.warn("warehouse not found,{}", transferInHandle.getWarehouseId());
                                 } else
-                                    log.warn("other transfer in handle not found,{}", mh.getOtherTransferHandleId());
+                                    log.warn("other transfer in handle not found,{}", mh.getRelMaterialHandleId());
                             }
 
                             return detail;
@@ -236,7 +232,6 @@ public class StockHandleController {
         return vo;
     }
 
-<<<<<<< HEAD
     //删除
     @RequestMapping(method = RequestMethod.DELETE, value = "{id:\\d+}")
     public void delete(@PathVariable Long id) {
@@ -244,8 +239,6 @@ public class StockHandleController {
     }
 
     //导出
-=======
->>>>>>> Merge branch 'feature/warehouse-v2' of D:\project\doctor2\doctor with conflicts.
     @RequestMapping(method = RequestMethod.GET, value = "{id:\\d+}/export")
     public void export(@PathVariable Long id, HttpServletRequest request, HttpServletResponse response) {
 
@@ -306,7 +299,7 @@ public class StockHandleController {
 
                     //调出
                     if (mh.getType().intValue() == WarehouseMaterialHandleType.TRANSFER_OUT.getValue()) {
-                        DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(mh.getOtherTransferHandleId()));
+                        DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(mh.getRelMaterialHandleId()));
                         if (transferInHandle != null) {
                             //单据明细表
                             DoctorWareHouse transferInWarehouse = RespHelper.or500(doctorWareHouseReadService.findById(transferInHandle.getWarehouseId()));
@@ -316,7 +309,7 @@ public class StockHandleController {
                             } else
                                 log.warn("warehouse not found,{}", transferInHandle.getWarehouseId());
                         } else
-                            log.warn("other transfer in handle not found,{}", mh.getOtherTransferHandleId());
+                            log.warn("other transfer in handle not found,{}", mh.getRelMaterialHandleId());
                     }
 
                     //退料入库-->可退数量
@@ -690,7 +683,6 @@ public class StockHandleController {
 //                .collect(Collectors.toList()), "web-wareHouse-stock-handle", request, response);
     }
 
-<<<<<<< HEAD
     @RequestMapping(method = RequestMethod.GET, value = "/stockPage")
     public Paging<DoctorWarehouseStockHandle> stockPage(
             @RequestParam(required = false) Integer pageNo,
@@ -719,19 +711,19 @@ public class StockHandleController {
         params.put("updatedAtStart", updatedAtStart);
         params.put("updatedAtEnd", updatedAtEnd);
         return RespHelper.or500(doctorWarehouseStockHandleReadService.paging(pageNo, pageSize, params));
-=======
-    /**
-     * 删除库存明细
-     *
-     * @param id
-     * @return
-     */
-    @RequestMapping(method = RequestMethod.DELETE, value = "{id:\\d+}")
-    public boolean delete(@PathVariable Long id) {
-        Response<Boolean> response = doctorWarehouseStockHandleWriteService.delete(id);
-        if (!response.isSuccess())
-            throw new JsonResponseException(response.getError());
-        return true;
->>>>>>> Merge branch 'feature/warehouse-v2' of D:\project\doctor2\doctor with conflicts.
     }
+//    /**
+//     * 删除库存明细
+//     *
+//     * @param id
+//     * @return
+//     */
+//    @RequestMapping(method = RequestMethod.DELETE, value = "{id:\\d+}")
+//    public boolean delete(@PathVariable Long id) {
+//        Response<Boolean> response = doctorWarehouseStockHandleWriteService.delete(id);
+//        if (!response.isSuccess())
+//            throw new JsonResponseException(response.getError());
+//        return true;
+//    }
+
 }
