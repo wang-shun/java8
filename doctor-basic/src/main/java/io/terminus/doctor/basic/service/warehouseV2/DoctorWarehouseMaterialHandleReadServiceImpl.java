@@ -175,22 +175,11 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         List<List<Map>> resultList = Lists.newArrayList();
         try {
 
-            Date settlementDateStart = (Date)criteria.get("settlementDateStart");
-            Date settlementDateEnd = (Date)criteria.get("settlementDateEnd");
+            criteria = this.getMonth(criteria);
+            int count =(int)criteria.get("count");
+            int startMonth =(int)criteria.get("startMonth");
+            int startYear =(int)criteria.get("startYear");
 
-            Calendar c = Calendar.getInstance();
-            c.setTime(settlementDateStart);
-            int startYear = c.get(Calendar.YEAR);
-            int startMonth = c.get(Calendar.MONTH);
-
-            c.setTime(settlementDateEnd);
-            int endYear = c.get(Calendar.YEAR);
-            int endMonth = c.get(Calendar.MONTH);
-
-            int count = endMonth-startMonth;
-            if(endYear>startYear){
-                count+=12;
-            }
             for(;count>=0;count--,startMonth++){
                 if(startMonth>12) {
                     startMonth = 1;
@@ -198,11 +187,12 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
                 }
                 criteria.put("handleMonth",startMonth);
                 criteria.put("handleYear",startYear);
+
                 List<Map> lists = doctorWarehouseMaterialHandleDao.listByFarmIdTime(criteria);
+
                 if(lists!=null&&lists.size()>0) {
                     boolean settled = doctorWarehouseSettlementService.isSettled((Long) lists.get(0).get("orgId"), (Date) lists.get(0).get("settlementDate"));
                     HashMap<Object, Object> infoMap = Maps.newHashMap();
-
 
                     Date settleDate = null;
                     BigDecimal allInAmount = new BigDecimal(0);
@@ -223,7 +213,6 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
                         if(lists.get(x).get("balanceAmount")!=null)
                           allBalanceAmount = allBalanceAmount.add(new BigDecimal(lists.get(x).get("balanceAmount").toString()));
-
 
                     }
                     infoMap.put("month",startMonth);
@@ -246,7 +235,127 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
     }
 
+    @Override
+    public Response<List<List<Map>>> warehouseReport(Map<String, Object> criteria) {
+        List<List<Map>> resultList = Lists.newArrayList();
+        try {
+            criteria = this.getMonth(criteria);
+            int count =(int)criteria.get("count");
+            int startMonth =(int)criteria.get("startMonth");
+            int startYear =(int)criteria.get("startYear");
 
+            for(;count>=0;count--,startMonth++) {
+                if (startMonth > 12) {
+                    startMonth = 1;
+                    startYear += 1;
+                }
+                criteria.put("handleMonth",startMonth);
+                criteria.put("handleYear",startYear);
 
+                List<Map> lists = doctorWarehouseStockMonthlyDao.listByHouseIdTime(criteria);
+
+                if(lists!=null&&lists.size()>0) {
+
+                    boolean settled = doctorWarehouseSettlementService.isSettled((Long) lists.get(0).get("orgId"), (Date) lists.get(0).get("settlementDate"));
+
+                    HashMap<Object, Object> infoMap = Maps.newHashMap();
+
+                    BigDecimal allInAmount = new BigDecimal(0);
+                    BigDecimal allOutAmount = new BigDecimal(0);
+                    BigDecimal allBalanceAmount = new BigDecimal(0);
+                    for(int x=0;x<lists.size();x++){
+                        if(lists.get(x).get("inAmount")!=null)
+                            allInAmount = allInAmount.add(new BigDecimal(lists.get(x).get("inAmount").toString()));
+
+                        if(lists.get(x).get("outAmount")!=null)
+                            allOutAmount = allOutAmount.add(new BigDecimal(lists.get(x).get("outAmount").toString()));
+
+                        if(lists.get(x).get("balanceAmount")!=null)
+                            allBalanceAmount = allBalanceAmount.add(new BigDecimal(lists.get(x).get("balanceAmount").toString()));
+                    }
+                    infoMap.put("month",startMonth);
+                    infoMap.put("settled", settled);
+                    infoMap.put("allInAmount",allInAmount);
+                    infoMap.put("allOutAmount",allOutAmount);
+                    infoMap.put("allBalanceAmount",allBalanceAmount);
+
+                    lists.add(infoMap);
+                    resultList.add(lists);
+                }
+
+            }
+
+            return Response.ok(resultList);
+        }catch (Exception e) {
+            log.error("failed to list doctor warehouse material handle, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.material.handle.list.fail");
+        }
+    }
+
+    @Override
+    public Response<List<Map>> monthWarehouseDetail(Map<String, Object> criteria) {
+        try {
+            List<Map> resultList = doctorWarehouseStockMonthlyDao.monthWarehouseDetail(criteria);
+            resultList.add(this.countInfo(resultList));
+            return Response.ok(resultList);
+        }catch (Exception e) {
+            log.error("failed to list doctor warehouse material handle, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.material.handle.list.fail");
+        }
+    }
+
+    private Map<String, Object> getMonth(Map<String, Object> criteria){
+        Date settlementDateStart = (Date)criteria.get("settlementDateStart");
+        Date settlementDateEnd = (Date)criteria.get("settlementDateEnd");
+
+        Calendar c = Calendar.getInstance();
+        c.setTime(settlementDateStart);
+        int startYear = c.get(Calendar.YEAR);
+        int startMonth = c.get(Calendar.MONTH);
+
+        c.setTime(settlementDateEnd);
+        int endYear = c.get(Calendar.YEAR);
+        int endMonth = c.get(Calendar.MONTH);
+
+        int count = endMonth-startMonth;
+        if(endYear>startYear){
+            count+=12;
+        }
+        criteria.put("count",count);
+        criteria.put("startYear",startYear);
+        criteria.put("startMonth",startMonth);
+        return criteria;
+    }
+
+    private Map<String, Object> countInfo(List<Map> resultList){
+        BigDecimal allLastQuantity = new BigDecimal(0);
+        BigDecimal allLastAmount = new BigDecimal(0);
+        BigDecimal allInAmount = new BigDecimal(0);
+        BigDecimal allInQuantity = new BigDecimal(0);
+        BigDecimal allOutAmount = new BigDecimal(0);
+        BigDecimal allOutQuantity = new BigDecimal(0);
+        BigDecimal allBalanceQuantity = new BigDecimal(0);
+        BigDecimal allBalanceAmount = new BigDecimal(0);
+        for(Map map : resultList){
+            allLastQuantity = allLastQuantity.add(new BigDecimal(map.get("lastQuantity").toString()));
+            allLastAmount = allLastAmount.add(new BigDecimal(map.get("lastAmount").toString()));
+            allInAmount = allInAmount.add(new BigDecimal(map.get("inAmount").toString()));
+            allInQuantity = allInQuantity.add(new BigDecimal(map.get("inQuantity").toString()));
+            allOutAmount = allOutAmount.add(new BigDecimal(map.get("outAmount").toString()));
+            allOutQuantity = allOutQuantity.add(new BigDecimal(map.get("outQuantity").toString()));
+            allBalanceQuantity = allBalanceQuantity.add(new BigDecimal(map.get("balanceQuantity").toString()));
+            allBalanceAmount = allBalanceAmount.add(new BigDecimal(map.get("balanceAmount").toString()));
+        }
+        HashMap<String, Object> map = Maps.newHashMap();
+        map.put("allLastQuantity",allLastQuantity);
+        map.put("allLastAmount",allLastAmount);
+        map.put("allInAmount",allInAmount);
+        map.put("allInQuantity",allInQuantity);
+        map.put("allOutAmount",allOutAmount);
+        map.put("allOutQuantity",allOutQuantity);
+        map.put("allBalanceQuantity",allBalanceQuantity);
+        map.put("allBalanceAmount",allBalanceAmount);
+        return map;
+    }
 
 }

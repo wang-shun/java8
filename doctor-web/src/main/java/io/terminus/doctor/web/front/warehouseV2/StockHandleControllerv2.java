@@ -53,7 +53,7 @@ public class StockHandleControllerv2 {
 
     //公司单据数据展示
     @RequestMapping(value = "/companyReport", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response<List<List<Map>>> companyReport(@RequestParam(required = false) Long farmId,
+    public Response<List<List<Map>>> companyReport(@RequestParam(required = false,value = "farmId") Long farmId,
                                              @RequestParam(required = false,value = "settlementDateStart") Date settlementDateStart,
                                              @RequestParam(required = false,value = "settlementDateEnd") Date settlementDateEnd){
         if (null != settlementDateStart && null != settlementDateEnd && settlementDateStart.after(settlementDateEnd))
@@ -66,7 +66,34 @@ public class StockHandleControllerv2 {
         return doctorWarehouseMaterialHandleReadService.companyReport(params);
     }
 
+    //仓库单据展示
+    @RequestMapping(value = "/warehouseReport", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response<List<List<Map>>> warehouseReport(@RequestParam(required = false,value = "farmId") Long farmId,
+                                                   @RequestParam(required = false,value = "settlementDateStart") Date settlementDateStart,
+                                                   @RequestParam(required = false,value = "settlementDateEnd") Date settlementDateEnd){
 
+        if (null != settlementDateStart && null != settlementDateEnd && settlementDateStart.after(settlementDateEnd))
+            throw new JsonResponseException("start.date.after.end.date");
 
+        Map<String, Object> params = new HashMap<>();
+        params.put("farmId",farmId);
+        params.put("settlementDateStart",settlementDateStart);
+        params.put("settlementDateEnd",settlementDateEnd);
+
+        return doctorWarehouseMaterialHandleReadService.warehouseReport(params);
+
+    }
+
+    //仓库月报
+    @RequestMapping(value = "/monthWarehouseDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response<List<Map>> warehouseReport(@RequestParam(required = true,value = "warehouseId") Long warehouseId,
+                                                     @RequestParam(required = true,value = "settlementDate") Date settlementDate
+                                                     ){
+        Map<String, Object> params = new HashMap<>();
+        params.put("warehouseId",warehouseId);
+        params.put("settlementDate",settlementDate);
+        return doctorWarehouseMaterialHandleReadService.monthWarehouseDetail(params);
+
+    }
 
 }

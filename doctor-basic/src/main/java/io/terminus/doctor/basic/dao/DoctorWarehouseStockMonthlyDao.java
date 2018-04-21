@@ -117,4 +117,15 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
         this.sqlSession.delete(this.sqlId("reverseSettlement"), params);
     }
 
+    public List<Map> listByHouseIdTime(Map<String, Object> criteria){
+
+        return this.sqlSession.selectList("listByHouseIdTime", criteria);
+
+    }
+
+    public List<Map> monthWarehouseDetail(Map<String, Object> criteria){
+
+        return this.sqlSession.selectList("monthWarehouseDetail", criteria);
+
+    }
 }

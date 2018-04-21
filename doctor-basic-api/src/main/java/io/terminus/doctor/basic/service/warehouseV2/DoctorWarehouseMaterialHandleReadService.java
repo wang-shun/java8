@@ -131,4 +131,18 @@ public interface DoctorWarehouseMaterialHandleReadService {
      * @return
      */
     Response<List<List<Map>>> companyReport(Map<String, Object> criteria);
+
+    /**
+     * 仓库结算报表
+     * @param criteria
+     * @return
+     */
+    Response<List<List<Map>>> warehouseReport(Map<String,Object> criteria);
+
+    /**
+     * 仓库月度详情
+     * @param params
+     * @return
+     */
+    Response<List<Map>> monthWarehouseDetail(Map<String, Object> criteria);
 }

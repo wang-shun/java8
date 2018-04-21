@@ -245,7 +245,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     public List<Map> listByFarmIdTime(Map<String, Object> criteria) {
         List<Map> resultList = this.sqlSession.selectList("listByFarmIdTime", criteria);
 
-        resultList.stream().forEach(map -> {
+       /* resultList.stream().forEach(map -> {
 
             map.put("type", WarehouseMaterialHandleType.IN.getValue());
 
@@ -255,7 +255,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
 
             map.put("outAmount",this.sqlSession.selectOne("selectSumAmount",map));
 
-        });
+        });*/
 
         return resultList;
     }

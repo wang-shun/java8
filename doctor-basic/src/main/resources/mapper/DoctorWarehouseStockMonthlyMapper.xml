@@ -184,4 +184,147 @@
         group by warehouse_id;
     </select>
 
+    <select id="listByHouseIdTime" parameterType="map" resultType="map">
+        select a.farm_id as farmId,a.warehouse_id as warehouseId,a.type as type,max(a.handle_date) as handleDate,
+        a.handle_year as handleYear,a.handle_month as handleMonth,a.org_id as orgId,
+        <include refid="inAmount"/>
+        <include refid="outAmount"/>
+        <include refid="balanceAmount"/>
+        from doctor_warehouse_material_handle a
+        where a.delete_flag = 1
+        <if test="farmId!=null">
+            and a.farm_id = #{farmId,jdbcType = BIGINT}
+        </if>
+        <if test="handleMonth!=null">
+            and a.handle_month = #{handleMonth,jdbcType=BIGINT}
+        </if>
+        <if test="handleYear!=null">
+            and a.handle_year = #{handleYear,jdbcType=BIGINT}
+        </if>
+        GROUP BY a.warehouse_id
+        order by a.warehouse_id
+    </select>
+
+    <select id="monthWarehouseDetail" parameterType="map" resultType="map">
+        select a.material_name as materialName,b.code as code,a.vendor_name as vendorName,
+        b.specification as specification,
+        <include refid="detail"></include>
+        a.unit as unit
+        from doctor_warehouse_material_handle a
+        left join doctor_warehouse_sku b
+        on a.material_id = b.id
+        where
+           a.delete_flag=1
+        and a.warehouse_id = #{warehouseId,jdbcType=BIGINT}
+        and a.settlement_date = #{settlementDate,jdbcType=TIMESTAMP}
+        group by a.material_id
+    </select>
+
+    <sql id="detail">
+        ifnull((select c.balance_quantity
+         from doctor_warehouse_stock_monthly c
+         where c.warehouse_id = a.warehouse_id
+         and c.material_id = a.material_id
+         and c.settlement_date = date_sub(a.settlement_date, interval 1 month)
+        ),0) as lastQuantity,
+        ifnull((select d.balance_amount
+        from doctor_warehouse_stock_monthly d
+        where d.warehouse_id = a.warehouse_id
+        and d.material_id = a.material_id
+        and d.settlement_date = date_sub(a.settlement_date, interval 1 month)
+        ),0) as lastAmount,
+       ifnull((select  sum(e.amount)
+        from doctor_warehouse_material_handle e
+        where e.farm_id = a.farm_id
+        and e.warehouse_id = a.warehouse_id
+        and e.material_id = a.material_id
+        and e.settlement_date = a.settlement_date
+        and e.delete_flag = 1
+        and e.type in (
+            1,7,9,11,13
+        )
+        ),0) as inAmount,
+        ifnull((select  sum(f.quantity)
+        from doctor_warehouse_material_handle f
+        where f.farm_id = a.farm_id
+        and f.warehouse_id = a.warehouse_id
+        and f.material_id = a.material_id
+        and f.settlement_date = a.settlement_date
+        and f.delete_flag = 1
+        and f.type in (
+            1,7,9,11,13
+        )
+        ),0) as inQuantity,
+        ifnull((select  sum(g.amount)
+            from doctor_warehouse_material_handle g
+            where g.farm_id = a.farm_id
+            and g.warehouse_id = a.warehouse_id
+            and g.material_id = a.material_id
+            and g.settlement_date = a.settlement_date
+            and g.delete_flag = 1
+            and g.type in (
+                 2,8,10,12
+            )
+        ),0) as outAmount,
+        ifnull((select  sum(h.quantity)
+            from doctor_warehouse_material_handle h
+            where h.farm_id = a.farm_id
+            and h.warehouse_id = a.warehouse_id
+            and h.material_id = a.material_id
+            and h.settlement_date = a.settlement_date
+            and h.delete_flag = 1
+            and h.type in (
+                 2,8,10,12
+            )
+        ),0) as outQuantity,
+       ifnull((select l.balance_quantity
+         from doctor_warehouse_stock_monthly l
+         where l.warehouse_id = a.warehouse_id
+         and l.material_id = a.material_id
+         and l.settlement_date = a.settlement_date
+        ),0) as balanceQuantity,
+       ifnull((select i.balance_amount
+         from doctor_warehouse_stock_monthly i
+         where i.warehouse_id = a.warehouse_id
+         and i.material_id = a.material_id
+         and i.settlement_date = a.settlement_date
+        ),0) as balanceAmount,
+    </sql>
+
+    <sql id ="balanceAmount">
+        (select ifnull(sum(b.balance_amount),0)
+         from doctor_warehouse_stock_monthly b
+         where b.warehouse_id = a.warehouse_id
+        <!--and b.farm_id = a.farm_id-->
+         and b.settlement_date = a.settlement_date
+        )as balanceAmount
+    </sql>
+
+    <sql id="inAmount">
+         (select  ifnull(sum(c.amount),0)
+            from doctor_warehouse_material_handle c
+            where c.farm_id = a.farm_id
+            and c.delete_flag = 1
+            and c.handle_year = #{handleYear,jdbcType=BIGINT}
+            and c.handle_month = #{handleMonth,jdbcType=BIGINT}
+            and c.type in (
+                1,7,9,11,13
+            )
+        ) as inAmount,
+    </sql>
+
+    <sql id="outAmount">
+         (select  ifnull(sum(d.amount),0)
+            from doctor_warehouse_material_handle d
+            where d.farm_id = a.farm_id
+            and d.delete_flag = 1
+            and d.handle_year = #{handleYear,jdbcType=BIGINT}
+            and d.handle_month = #{handleMonth,jdbcType=BIGINT}
+            and d.type in (
+                 2,8,10,12
+            )
+        ) as outAmount,
+    </sql>
+
+
 </mapper>
