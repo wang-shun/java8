@@ -2,11 +2,13 @@ package io.terminus.doctor.basic.service.warehouseV2;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
+import io.terminus.doctor.basic.dao.DoctorWarehouseStockMonthlyDao;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +17,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Desc:
@@ -32,6 +36,9 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
     @Autowired
     private DoctorWarehouseSettlementService doctorWarehouseSettlementService;
+
+    @Autowired
+    private DoctorWarehouseStockMonthlyDao doctorWarehouseStockMonthlyDao;
 
     @Override
     public Response<BigDecimal> findLibraryById(Long id) {
@@ -164,14 +171,73 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     }
 
     @Override
-    public Response<List<Map>> companyReport(Map<String, Object> criteria) {
-
+    public Response<List<List<Map>>> companyReport(Map<String, Object> criteria) {
+        List<List<Map>> resultList = Lists.newArrayList();
         try {
-            List<Map> resultList = doctorWarehouseMaterialHandleDao.listByFarmIdTime(criteria);
-            resultList.stream().forEach(map ->{
-                boolean settled = doctorWarehouseSettlementService.isSettled((Long) map.get("orgId"), (Date) map.get("settlementDate"));
-                map.put("settled",settled);
-            });
+
+            Date settlementDateStart = (Date)criteria.get("settlementDateStart");
+            Date settlementDateEnd = (Date)criteria.get("settlementDateEnd");
+
+            Calendar c = Calendar.getInstance();
+            c.setTime(settlementDateStart);
+            int startYear = c.get(Calendar.YEAR);
+            int startMonth = c.get(Calendar.MONTH);
+
+            c.setTime(settlementDateEnd);
+            int endYear = c.get(Calendar.YEAR);
+            int endMonth = c.get(Calendar.MONTH);
+
+            int count = endMonth-startMonth;
+            if(endYear>startYear){
+                count+=12;
+            }
+            for(;count>=0;count--,startMonth++){
+                if(startMonth>12) {
+                    startMonth = 1;
+                    startYear += 1;
+                }
+                criteria.put("handleMonth",startMonth);
+                criteria.put("handleYear",startYear);
+                List<Map> lists = doctorWarehouseMaterialHandleDao.listByFarmIdTime(criteria);
+                if(lists!=null&&lists.size()>0) {
+                    boolean settled = doctorWarehouseSettlementService.isSettled((Long) lists.get(0).get("orgId"), (Date) lists.get(0).get("settlementDate"));
+                    HashMap<Object, Object> infoMap = Maps.newHashMap();
+
+
+                    Date settleDate = null;
+                    BigDecimal allInAmount = new BigDecimal(0);
+                    BigDecimal allOutAmount = new BigDecimal(0);
+                    BigDecimal allBalanceAmount = new BigDecimal(0);
+                    for(int x=0;x<lists.size();x++){
+                        if(settleDate==null)
+                            settleDate = (Date)lists.get(x).get("handleDate");
+                        if(settleDate!=null&&lists.get(x).get("handleDate")!=null) {
+                            if (settleDate.getTime() < ((Date) lists.get(x).get("handleDate")).getTime())
+                                settleDate = (Date) lists.get(x).get("handleDate");
+                        }
+                        if(lists.get(x).get("inAmount")!=null)
+                           allInAmount = allInAmount.add(new BigDecimal(lists.get(x).get("inAmount").toString()));
+
+                        if(lists.get(x).get("outAmount")!=null)
+                          allOutAmount = allOutAmount.add(new BigDecimal(lists.get(x).get("outAmount").toString()));
+
+                        if(lists.get(x).get("balanceAmount")!=null)
+                          allBalanceAmount = allBalanceAmount.add(new BigDecimal(lists.get(x).get("balanceAmount").toString()));
+
+
+                    }
+                    infoMap.put("month",startMonth);
+                    infoMap.put("handleDate",settleDate);
+                    infoMap.put("settled", settled);
+                    infoMap.put("allInAmount",allInAmount);
+                    infoMap.put("allOutAmount",allOutAmount);
+                    infoMap.put("allBalanceAmount",allBalanceAmount);
+
+                    lists.add(infoMap);
+                    resultList.add(lists);
+                }
+            }
+
             return Response.ok(resultList);
         } catch (Exception e) {
             log.error("failed to list doctor warehouse material handle, cause:{}", Throwables.getStackTraceAsString(e));

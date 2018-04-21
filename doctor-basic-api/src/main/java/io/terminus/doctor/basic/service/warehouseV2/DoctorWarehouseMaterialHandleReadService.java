@@ -130,5 +130,5 @@ public interface DoctorWarehouseMaterialHandleReadService {
      * @param criteria
      * @return
      */
-    Response<List<Map>> companyReport(Map<String, Object> criteria);
+    Response<List<List<Map>>> companyReport(Map<String, Object> criteria);
 }
