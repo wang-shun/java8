@@ -34,9 +34,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static io.terminus.common.utils.Arguments.isNull;
-import static io.terminus.common.utils.Arguments.notEmpty;
-import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.common.utils.Arguments.*;
 import static io.terminus.doctor.common.enums.PigType.MATING_FARROW_TYPES;
 import static io.terminus.doctor.common.enums.PigType.MATING_TYPES;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
@@ -82,35 +80,6 @@ public class DoctorChgFarmV2Handler extends DoctorAbstractEventHandler{
     @Override
     protected void specialHandle(DoctorPigEvent executeEvent, DoctorPigTrack toTrack) {
         super.specialHandle(executeEvent, toTrack);
-        DoctorPigTrack track = new DoctorPigTrack();
-        BeanMapper.copy(toTrack, track);
-        if (Objects.equals(executeEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
-            track.setStatus(PigStatus.Removal.getKey());
-        } else {
-            track.setStatus(PigStatus.BOAR_LEAVE.getKey());
-        }
-        track.setIsRemoval(IsOrNot.YES.getValue());
-        String trackJson = TO_JSON_MAPPER.toJson(track);
-
-        DoctorPig doctorPig = doctorPigDao.findById(toTrack.getPigId());
-        String pigJson = TO_JSON_MAPPER.toJson(doctorPig);
-
-        DoctorChgFarmInfo doctorChgFarmInfo = doctorChgFarmInfoDao.findByFarmIdAndPigId(toTrack.getFarmId(), toTrack.getPigId());
-        if (isNull(doctorChgFarmInfo)) {
-            doctorChgFarmInfo = DoctorChgFarmInfo.builder()
-                    .farmId(toTrack.getFarmId())
-                    .pigId(toTrack.getPigId())
-                    .eventId(executeEvent.getId())
-                    .track(trackJson)
-                    .pig(pigJson)
-                    .build();
-            doctorChgFarmInfoDao.create(doctorChgFarmInfo);
-        } else {
-            doctorChgFarmInfo.setEventId(executeEvent.getId());
-            doctorChgFarmInfo.setTrack(trackJson);
-            doctorChgFarmInfo.setPig(pigJson);
-            doctorChgFarmInfoDao.update(doctorChgFarmInfo);
-        }
     }
 
     @Override
@@ -214,5 +183,45 @@ public class DoctorChgFarmV2Handler extends DoctorAbstractEventHandler{
                 || (MATING_TYPES.contains(fromBarn.getPigType()) && MATING_TYPES.contains(toBarn.getPigType()))
                 || (Objects.equals(fromBarn.getPigType(), PigType.DELIVER_SOW.getValue()) && MATING_FARROW_TYPES.contains(toBarn.getPigType())))
                 || Objects.equals(pigStatus, PigStatus.Pregnancy.getKey()) && MATING_FARROW_TYPES.contains(toBarn.getPigType());
+    }
+
+    /**
+     * 创建转场信息
+     * @param chgFarmEvent
+     * @param toTrack
+     */
+    private void createChgFarmInfo(DoctorPigEvent chgFarmEvent, DoctorPigTrack toTrack ) {
+        DoctorPigTrack track = new DoctorPigTrack();
+        BeanMapper.copy(toTrack, track);
+        if (Objects.equals(chgFarmEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
+            track.setStatus(PigStatus.Removal.getKey());
+        } else {
+            track.setStatus(PigStatus.BOAR_LEAVE.getKey());
+        }
+        track.setIsRemoval(IsOrNot.YES.getValue());
+        String trackJson = TO_JSON_MAPPER.toJson(track);
+
+        DoctorPig doctorPig = doctorPigDao.findById(toTrack.getPigId());
+        String pigJson = TO_JSON_MAPPER.toJson(doctorPig);
+
+        DoctorChgFarmInfo doctorChgFarmInfo = doctorChgFarmInfoDao.findByFarmIdAndPigId(track.getFarmId(), track.getPigId());
+        if (isNull(doctorChgFarmInfo)) {
+            doctorChgFarmInfo = new DoctorChgFarmInfo();
+            doctorChgFarmInfo.setFarmId(track.getFarmId());
+            doctorChgFarmInfo.setPigId(toTrack.getPigId());
+            doctorChgFarmInfo.setPigCode(doctorPig.getPigCode());
+            doctorChgFarmInfo.setRfid(doctorPig.getRfid());
+        }
+
+        doctorChgFarmInfo.setBarnId(track.getCurrentBarnId());
+        doctorChgFarmInfo.setEventId(chgFarmEvent.getId());
+        doctorChgFarmInfo.setTrack(trackJson);
+        doctorChgFarmInfo.setPig(pigJson);
+
+        if (isNull(doctorChgFarmInfo.getId())) {
+            doctorChgFarmInfoDao.create(doctorChgFarmInfo);
+        } else {
+            doctorChgFarmInfoDao.update(doctorChgFarmInfo);
+        }
     }
 }
