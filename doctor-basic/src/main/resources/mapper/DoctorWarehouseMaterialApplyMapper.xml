@@ -341,14 +341,14 @@
             JOIN doctor_barns e ON e.id = a.pig_barn_id
         WHERE
             a.apply_type = 1
-            AND a.farm_id = #{farmId}
-            AND a.pig_type = #{pigType}
-            AND e.name = #{pigName}
-            AND a.pig_group_name = #{pigGroupName}
-            AND c.type= #{skuType}
-            AND c.name = #{skuName}
-            AND d.open_at = #{openAt}
-            AND d.close_at = #{closeAt}
+            <if test="farmId != null"> AND a.farm_id = #{farmId}</if>
+            <if test="pigType != null"> AND a.pig_type = #{pigType}</if>
+            <if test="pigName != null"> AND e.name = #{pigName}</if>
+            <if test="pigGroupName != null"> AND a.pig_group_name = #{pigGroupName}</if>
+            <if test="skuType != null">  AND c.type= #{skuType}</if>
+            <if test="skuName != null"> AND c.name = #{skuName}</if>
+            <if test="openAt != null"> AND d.open_at = #{openAt}</if>
+            <if test="closeAt != null">  AND d.close_at = #{closeAt}</if>
         GROUP BY
             a.material_id,
             a.pig_group_id,
