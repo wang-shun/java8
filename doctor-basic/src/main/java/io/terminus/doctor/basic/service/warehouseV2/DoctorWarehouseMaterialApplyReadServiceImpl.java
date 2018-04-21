@@ -139,8 +139,12 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         Double allQuantity = 0.0;
         Double allAmount = 0.0;
         for(int i = 0;i<pigGroupList.size(); i++){
-            allQuantity =((DoctorWarehouseMaterialApplyPigGroup)pigGroupList.get(i)).getQuantity() + allQuantity;
-            allAmount =((DoctorWarehouseMaterialApplyPigGroup)pigGroupList.get(i)).getAmount() + allAmount;
+            if(((DoctorWarehouseMaterialApplyPigGroup)pigGroupList.get(i)).getQuantity() != null){
+                allQuantity =((DoctorWarehouseMaterialApplyPigGroup)pigGroupList.get(i)).getQuantity() + allQuantity;
+            }
+            if(((DoctorWarehouseMaterialApplyPigGroup)pigGroupList.get(i)).getAmount() != null) {
+                allAmount = ((DoctorWarehouseMaterialApplyPigGroup) pigGroupList.get(i)).getAmount() + allAmount;
+            }
         }
         Map<String,Object> map = new HashMap<>();
         map.put("pigGroupList",pigGroupList);
