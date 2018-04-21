@@ -130,19 +130,19 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
             return new DateTime().withDate(old.getYear(), old.getMonthOfYear(), old.getDayOfMonth()).toDate();
         }
 
-        if (WarehouseMaterialHandleType.isBigIn(handleType.getValue())) {
-            newHandleDate.set(Calendar.HOUR_OF_DAY, 0);
-            newHandleDate.set(Calendar.MINUTE, 0);
-            newHandleDate.set(Calendar.SECOND, 0);
-            newHandleDate.set(Calendar.MILLISECOND, 0);
-            return newHandleDate.getTime();
-        } else {
+//        if (WarehouseMaterialHandleType.isBigIn(handleType.getValue())) {
+//            newHandleDate.set(Calendar.HOUR_OF_DAY, 0);
+//            newHandleDate.set(Calendar.MINUTE, 0);
+//            newHandleDate.set(Calendar.SECOND, 0);
+//            newHandleDate.set(Calendar.MILLISECOND, 0);
+//            return newHandleDate.getTime();
+//        } else {
             newHandleDate.set(Calendar.HOUR_OF_DAY, 23);
             newHandleDate.set(Calendar.MINUTE, 59);
             newHandleDate.set(Calendar.SECOND, 59);
             newHandleDate.set(Calendar.MILLISECOND, 0);
             return newHandleDate.getTime();
-        }
+//        }
     }
 
 

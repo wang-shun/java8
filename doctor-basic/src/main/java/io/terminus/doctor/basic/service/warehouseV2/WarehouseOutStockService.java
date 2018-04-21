@@ -10,6 +10,7 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.common.utils.DateUtil;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -53,6 +54,7 @@ public class WarehouseOutStockService extends AbstractWarehouseStockService<Ware
     @Override
     protected void delete(DoctorWarehouseMaterialHandle materialHandle) {
         warehouseOutManager.delete(materialHandle);
+
         DoctorWareHouse wareHouse = new DoctorWareHouse();
         wareHouse.setId(materialHandle.getWarehouseId());
         wareHouse.setWareHouseName(materialHandle.getWarehouseName());

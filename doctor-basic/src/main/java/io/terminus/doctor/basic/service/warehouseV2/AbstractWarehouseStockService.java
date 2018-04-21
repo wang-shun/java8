@@ -99,6 +99,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
             }
         });
 
+        Map<F, DoctorWarehouseMaterialHandle> changed = new HashMap<>();
         details.forEach(detail -> {
             if (detail.getMaterialHandleId() == null)
                 create(stockDto, detail, stockHandle, wareHouse);
@@ -111,10 +112,13 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
                     delete(materialHandle);
                     doctorWarehouseStockManager.out(materialHandle.getMaterialId(), materialHandle.getQuantity(), wareHouse);
                 } else {
-                    changed(materialHandle, detail, stockHandle, stockDto, wareHouse);
+//                    changed(materialHandle, detail, stockHandle, stockDto, wareHouse);
+                    changed.put(detail, materialHandle);
                 }
             }
         });
+
+        changed(changed, stockHandle, stockDto, wareHouse);
 
         //更新单据
         doctorWarehouseStockHandleManager.update(stockDto, stockHandle);
@@ -128,6 +132,16 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
     protected abstract void create(T stockDto, F detail, DoctorWarehouseStockHandle stockHandle, DoctorWareHouse wareHouse);
 
     protected abstract void delete(DoctorWarehouseMaterialHandle materialHandle);
+
+
+    public void changed(Map<F, DoctorWarehouseMaterialHandle> changed, DoctorWarehouseStockHandle stockHandle,
+                        T stockDto,
+                        DoctorWareHouse wareHouse) {
+        changed.forEach((detail, materialHandle) -> {
+            changed(materialHandle, detail, stockHandle, stockDto, wareHouse);
+        });
+
+    }
 
     protected abstract void changed(DoctorWarehouseMaterialHandle materialHandle,
                                     F detail,
