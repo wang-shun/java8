@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.usual;
 
+import io.terminus.doctor.event.dao.DoctorChgFarmInfoDao;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmInEventHandler;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Component;
 public class DoctorChgFarmInV2Handler extends DoctorAbstractEventHandler {
     @Autowired
     private DoctorModifyPigChgFarmInEventHandler modifyPigChgFarmInEventHandler;
+    @Autowired
+    private DoctorChgFarmInfoDao doctorChgFarmInfoDao;
 
     @Override
     public DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {

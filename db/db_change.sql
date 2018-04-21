@@ -2146,6 +2146,7 @@ create index doctor_event_modify_logs_business_id on doctor_event_modify_logs(bu
 
 
 
+
 -- 修改单据明细中的盘点之前库存数量字段 2018-04-09
 ALTER TABLE doctor_warehouse_material_handle CHANGE before_inventory_quantity before_stock_quantity DECIMAL(23,2) COMMENT '之前库存数量';
 
@@ -2209,6 +2210,9 @@ ALTER TABLE doctor_warehouse_material_apply CHANGE settlementDate settlement_dat
 ALTER TABLE doctor_warehouse_material_apply MODIFY unit_price decimal(23,4) COMMENT '单价';
 
 CREATE TABLE `doctor_chg_farm_records` (
+
+CREATE TABLE `doctor_chg_farm_infos` (
+
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `farm_id` bigint(20) NOT NULL COMMENT '猪场id',
   `pig_id` VARCHAR(64) NOT NULL COMMENT '猪场名称',
@@ -2220,5 +2224,8 @@ CREATE TABLE `doctor_chg_farm_records` (
   KEY `index_farm_id` (`farm_id`),
   KEY `index_pig_id` (`pig_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='猪场猪转场记录';
+ALTER TABLE `doctor_chg_farm_infos` ADD COLUMN `event_id` bigint(20) DEFAULT NULL COMMENT '转场事件id' after `pig_id`;
+
+
 
 

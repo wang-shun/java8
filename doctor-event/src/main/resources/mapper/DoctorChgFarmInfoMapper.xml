@@ -7,11 +7,12 @@
  ~ Created by [ your name ]
 -->
 
-<mapper namespace="DoctorChgFarmRecord">
-    <resultMap id="DoctorChgFarmRecordMap" type="DoctorChgFarmRecord">
+<mapper namespace="DoctorChgFarmInfo">
+    <resultMap id="DoctorChgFarmInfoMap" type="DoctorChgFarmInfo">
         <id property="id" column="id"/>
         <result property="farmId" column="farm_id"/>
         <result property="pigId" column="pig_id"/>
+        <result property="eventId" column="event_id"/>
         <result property="track" column="track"/>
         <result property="pig" column="pig"/>
         <result property="createdAt" column="created_at"/>
@@ -19,7 +20,7 @@
     </resultMap>
 
     <sql id="tb">
-        doctor_chg_farm_records
+        doctor_chg_farm_infos
     </sql>
 
     <sql id="cols_all">
@@ -28,12 +29,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`, `pig_id`, `track`, `pig`, 
+        `farm_id`, `pig_id`, `event_id`, `track`, `pig`,
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{pigId}, #{track}, #{pig}, 
+        #{farmId}, #{pigId}, #{eventId}, #{track}, #{pig},
         now(), now()
     </sql>
 
@@ -41,6 +42,7 @@
         <where>
             <if test="farmId != null">AND `farm_id` = #{farmId}</if>
             <if test="pigId != null">AND `pig_id` = #{pigId}</if>
+            <if test="eventId != null">AND `event_id` = #{eventId}</if>
             <if test="track != null">AND `track` = #{track}</if>
             <if test="pig != null">AND `pig` = #{pig}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
@@ -48,7 +50,7 @@
         </where>
     </sql>
 
-    <insert id="create" parameterType="DoctorChgFarmRecord" useGeneratedKeys="true" keyProperty="id">
+    <insert id="create" parameterType="DoctorChgFarmInfo" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO
         <include refid="tb"/>
         (<include refid="cols_exclude_id"/>)
@@ -56,7 +58,7 @@
         (<include refid="vals"/>)
     </insert>
 
-    <select id="findById" parameterType="long" resultMap="DoctorChgFarmRecordMap">
+    <select id="findById" parameterType="long" resultMap="DoctorChgFarmInfoMap">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -64,7 +66,7 @@
         WHERE id = #{id} LIMIT 1
     </select>
 
-    <select id="findByIds" parameterType="list" resultMap="DoctorChgFarmRecordMap">
+    <select id="findByIds" parameterType="list" resultMap="DoctorChgFarmInfoMap">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -75,12 +77,13 @@
         </foreach>
     </select>
 
-    <update id="update" parameterType="DoctorChgFarmRecord">
+    <update id="update" parameterType="DoctorChgFarmInfo">
         UPDATE
         <include refid="tb"/>
         <set>
             <if test="farmId != null">`farm_id` = #{farmId},</if>
             <if test="pigId != null">`pig_id` = #{pigId},</if>
+            <if test="eventId != null">`event_id` = #{eventId},</if>
             <if test="track != null">`track` = #{track},</if>
             <if test="pig != null">`pig` = #{pig},</if>
             updated_at = now()
@@ -99,7 +102,7 @@
         <include refid="criteria"/>
     </select>
 
-    <select id="paging" parameterType="map" resultMap="DoctorChgFarmRecordMap">
+    <select id="paging" parameterType="map" resultMap="DoctorChgFarmInfoMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
@@ -107,11 +110,20 @@
         LIMIT #{offset}, #{limit}
     </select>
 
-    <select id="list" parameterType="map" resultMap="DoctorChgFarmRecordMap">
+    <select id="list" parameterType="map" resultMap="DoctorChgFarmInfoMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
+    </select>
+
+    <select id="findByFarmIdAndPigId" parameterType="map" resultMap="DoctorChgFarmInfoMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            farm_id = #{farmId}
+            AND pig_id = #{pigId}
+        </where>
     </select>
 
 </mapper>

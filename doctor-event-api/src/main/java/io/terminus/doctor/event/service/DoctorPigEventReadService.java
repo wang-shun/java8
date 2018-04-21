@@ -37,7 +37,7 @@ public interface DoctorPigEventReadService {
      * @param endDate
      * @return
      */
-    Response<Paging<DoctorPigEvent>> queryPigDoctorEvents(@NotNull(message = "input.farmId.empty") Long farmId,
+    Response<Paging<DoctorPigEvent>> queryPigDoctorEvents(Long farmId,
                                                           @NotNull(message = "input.pigId.empty") Long pigId,
                                                           Integer pageNo, Integer pageSize,
                                                           Date beginDate, Date endDate);

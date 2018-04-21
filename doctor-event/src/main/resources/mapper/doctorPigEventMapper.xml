@@ -1836,4 +1836,17 @@
             order by event_at desc, id desc
         </where>
     </select>
+
+    <select id="queryBeforeChgFarm" parameterType="map" resultMap="DoctorPigEventMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        <where>
+            pig_id = #{pigId}
+            AND id &lt;= #{eventId}
+            AND status = 1
+            order by event_at desc, id desc
+        </where>
+    </select>
 </mapper>

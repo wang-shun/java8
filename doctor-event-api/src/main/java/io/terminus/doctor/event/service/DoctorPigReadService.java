@@ -9,6 +9,7 @@ import io.terminus.doctor.event.dto.IotPigDto;
 import io.terminus.doctor.event.dto.search.DoctorPigCountDto;
 import io.terminus.doctor.event.dto.search.SearchedPig;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorChgFarmInfo;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -41,7 +42,7 @@ public interface DoctorPigReadService {
      * @param pigId
      * @return
      */
-    RespWithEx<DoctorPigInfoDetailDto> queryPigDetailInfoByPigId(@NotNull(message = "input.pigId.empty") Long pigId, Integer eventSize);
+    RespWithEx<DoctorPigInfoDetailDto> queryPigDetailInfoByPigId(@NotNull(message = "farmId.not.null") Long farmId, @NotNull(message = "input.pigId.empty") Long pigId, Integer eventSize);
 
     /**
      * 通过pigId 查询pig
@@ -198,4 +199,12 @@ public interface DoctorPigReadService {
      * @return
      */
     Response<List<DoctorPig>> findUnRemovalPigsBy(Long barnId);
+
+    /**
+     * 查询转场记录
+     * @param farmId
+     * @param pigId
+     * @return
+     */
+    Response<DoctorChgFarmInfo> findByFarmIdAndPigId(Long farmId, Long pigId);
 }

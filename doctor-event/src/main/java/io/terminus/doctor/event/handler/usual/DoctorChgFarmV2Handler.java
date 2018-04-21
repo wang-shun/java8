@@ -5,7 +5,7 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
-import io.terminus.doctor.event.dao.DoctorChgFarmRecordDao;
+import io.terminus.doctor.event.dao.DoctorChgFarmInfoDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
@@ -21,9 +21,10 @@ import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorTransGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorChgFarmRecord;
+import io.terminus.doctor.event.model.DoctorChgFarmInfo;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.enums.PigType.MATING_FARROW_TYPES;
@@ -58,7 +60,7 @@ public class DoctorChgFarmV2Handler extends DoctorAbstractEventHandler{
     @Autowired
     private DoctorChgFarmInV2Handler doctorChgFarmInHandler;
     @Autowired
-    private DoctorChgFarmRecordDao doctorChgFarmRecordDao;
+    private DoctorChgFarmInfoDao doctorChgFarmInfoDao;
 
     @Override
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
@@ -80,15 +82,35 @@ public class DoctorChgFarmV2Handler extends DoctorAbstractEventHandler{
     @Override
     protected void specialHandle(DoctorPigEvent executeEvent, DoctorPigTrack toTrack) {
         super.specialHandle(executeEvent, toTrack);
+        DoctorPigTrack track = new DoctorPigTrack();
+        BeanMapper.copy(toTrack, track);
+        if (Objects.equals(executeEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
+            track.setStatus(PigStatus.Removal.getKey());
+        } else {
+            track.setStatus(PigStatus.BOAR_LEAVE.getKey());
+        }
+        track.setIsRemoval(IsOrNot.YES.getValue());
+        String trackJson = TO_JSON_MAPPER.toJson(track);
 
-        DoctorChgFarmRecord doctorChgFarmRecord = DoctorChgFarmRecord.builder()
-                .farmId(toTrack.getFarmId())
-                .pigId(toTrack.getPigId())
-                .track("")
-                .pig("")
-                .build();
-        // TODO: 18/4/20  
-        doctorChgFarmRecordDao.create(doctorChgFarmRecord);
+        DoctorPig doctorPig = doctorPigDao.findById(toTrack.getPigId());
+        String pigJson = TO_JSON_MAPPER.toJson(doctorPig);
+
+        DoctorChgFarmInfo doctorChgFarmInfo = doctorChgFarmInfoDao.findByFarmIdAndPigId(toTrack.getFarmId(), toTrack.getPigId());
+        if (isNull(doctorChgFarmInfo)) {
+            doctorChgFarmInfo = DoctorChgFarmInfo.builder()
+                    .farmId(toTrack.getFarmId())
+                    .pigId(toTrack.getPigId())
+                    .eventId(executeEvent.getId())
+                    .track(trackJson)
+                    .pig(pigJson)
+                    .build();
+            doctorChgFarmInfoDao.create(doctorChgFarmInfo);
+        } else {
+            doctorChgFarmInfo.setEventId(executeEvent.getId());
+            doctorChgFarmInfo.setTrack(trackJson);
+            doctorChgFarmInfo.setPig(pigJson);
+            doctorChgFarmInfoDao.update(doctorChgFarmInfo);
+        }
     }
 
     @Override
