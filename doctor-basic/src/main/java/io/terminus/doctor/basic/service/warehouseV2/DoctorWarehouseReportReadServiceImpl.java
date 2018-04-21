@@ -471,4 +471,17 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
         return doctorWarehouseMaterialHandleDao.advList(criteria);
     }
 
+    @Override
+    public Response<List<Map<String, Object>>> wlbdReport(
+            Long farmId,
+            String settlementDate, Integer pigBarnType,
+            Long pigBarnId, Long pigGroupId, Integer handlerType,
+            Integer type, Long warehouseId, String materialName) {
+        List<Map<String,Object>> lists = doctorWarehouseMaterialHandleDao.wlbdReport(
+                farmId, settlementDate, pigBarnType,
+                pigBarnId, pigGroupId, handlerType,
+                type, warehouseId, materialName);
+        return Response.ok(lists);
+    }
+
 }

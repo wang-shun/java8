@@ -31,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
@@ -661,6 +662,40 @@ public class ReportController {
         }
 
         return vos;
+    }
+
+    /**
+     * 物料变动报表
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "wlbdReport")
+    public List<Map<String,Object>> wlbdReport(
+            Long farmId,
+            String settlementDate,
+            Integer pigBarnType,
+            Long pigBarnId,
+            Long pigGroupId,
+            Integer handlerType,
+            Integer type,
+            Long warehouseId,
+            String materialName
+    ) {
+
+        if(null == farmId)
+        {
+            throw new JsonResponseException("stock.farmId.null");
+        }
+
+        if(null == materialName)
+        {
+            throw new JsonResponseException("stock.materialName.null");
+        }
+
+        return doctorWarehouseReportReadService.wlbdReport(
+                farmId,settlementDate,pigBarnType,
+                pigBarnId,pigGroupId,handlerType,
+                type,warehouseId,materialName
+        ).getResult();
+
     }
 
 }
