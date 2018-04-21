@@ -2148,7 +2148,11 @@ create index doctor_event_modify_logs_business_id on doctor_event_modify_logs(bu
 CREATE TABLE `doctor_chg_farm_infos` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `farm_id` bigint(20) NOT NULL COMMENT '猪场id',
-  `pig_id` VARCHAR(64) NOT NULL COMMENT '猪场名称',
+  `pig_id`  bigint(20) NOT NULL COMMENT '猪id',
+  `pig_code` VARCHAR(64) NOT NULL COMMENT '猪耳号',
+  `barn_id` bigint(20) NOT NULL COMMENT '所属猪舍',
+  `rfid` VARCHAR(32) NOT NULL COMMENT 'rfid',
+  `event_id` VARCHAR(64) NOT NULL COMMENT '转场事件id',
   `track` VARCHAR (1024) NOT NULL COMMENT 'track json',
   `pig` VARCHAR (1024) NOT NULL COMMENT 'pig json',
   `created_at` datetime DEFAULT NULL,
@@ -2157,7 +2161,6 @@ CREATE TABLE `doctor_chg_farm_infos` (
   KEY `index_farm_id` (`farm_id`),
   KEY `index_pig_id` (`pig_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='猪场猪转场记录';
-ALTER TABLE `doctor_chg_farm_infos` ADD COLUMN `event_id` bigint(20) DEFAULT NULL COMMENT '转场事件id' after `pig_id`;
 
 
 

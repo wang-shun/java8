@@ -12,6 +12,9 @@
         <id property="id" column="id"/>
         <result property="farmId" column="farm_id"/>
         <result property="pigId" column="pig_id"/>
+        <result property="pigCode" column="pig_code"/>
+        <result property="barnId" column="barn_id"/>
+        <result property="rfid" column="rfid"/>
         <result property="eventId" column="event_id"/>
         <result property="track" column="track"/>
         <result property="pig" column="pig"/>
@@ -29,12 +32,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`, `pig_id`, `event_id`, `track`, `pig`,
+        `farm_id`, `pig_id`, `pig_code`, `barn_id`, `rfid`, `event_id`, `track`, `pig`,
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{pigId}, #{eventId}, #{track}, #{pig},
+        #{farmId}, #{pigId}, #{pigCode}, #{barnId}, #{rfid}, #{eventId}, #{track}, #{pig},
         now(), now()
     </sql>
 
@@ -42,6 +45,9 @@
         <where>
             <if test="farmId != null">AND `farm_id` = #{farmId}</if>
             <if test="pigId != null">AND `pig_id` = #{pigId}</if>
+            <if test="pigCode != null">AND `pig_code` = #{pigCode}</if>
+            <if test="barnId != null">AND `barn_id` = #{barnId}</if>
+            <if test="rfid != null">AND `rfid` = #{rfid}</if>
             <if test="eventId != null">AND `event_id` = #{eventId}</if>
             <if test="track != null">AND `track` = #{track}</if>
             <if test="pig != null">AND `pig` = #{pig}</if>
@@ -83,6 +89,9 @@
         <set>
             <if test="farmId != null">`farm_id` = #{farmId},</if>
             <if test="pigId != null">`pig_id` = #{pigId},</if>
+            <if test="pigCode != null">`pig_code` = #{pigCode},</if>
+            <if test="barnId != null">`barn_id` = #{barnId},</if>
+            <if test="rfid != null">`rfid` = #{rfid},</if>
             <if test="eventId != null">`event_id` = #{eventId},</if>
             <if test="track != null">`track` = #{track},</if>
             <if test="pig != null">`pig` = #{pig},</if>

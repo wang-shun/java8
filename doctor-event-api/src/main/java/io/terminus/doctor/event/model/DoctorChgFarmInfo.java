@@ -26,6 +26,12 @@ public class DoctorChgFarmInfo implements Serializable {
 
     private Long pigId;
 
+    private String pigCode;
+
+    private Long barnId;
+
+    private String rfid;
+
     /**
      * 转场id
      */
