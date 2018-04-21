@@ -41,22 +41,22 @@
 
     <resultMap id="DoctorWarehouseMaterialApplyPigGroupMap" type="DoctorWarehouseMaterialApplyPigGroup">
     <id property="id" column="id"/>
-        <result property="materialHandleId" column="staff_name"/>
-        <result property="materialHandleId" column="pig_group_name"/>
-        <result property="materialHandleId" column="pig_name"/>
-        <result property="materialHandleId" column="code"/>
-        <result property="materialHandleId" column="quantity"/>
-        <result property="materialHandleId" column="unit_price"/>
-        <result property="materialHandleId" column="amount"/>
-        <result property="materialHandleId" column="settlement_date"/>
-        <result property="materialHandleId" column="name"/>
-        <result property="materialHandleId" column="unit"/>
-        <result property="materialHandleId" column="type"/>
-        <result property="materialHandleId" column="specification"/>
-        <result property="materialHandleId" column="vendor_name"/>
-        <result property="materialHandleId" column="open_at"/>
-        <result property="materialHandleId" column="close_at"/>
-        <result property="materialHandleId" column="farm_name"/>
+        <result property="staffName" column="staff_name"/>
+        <result property="pigGroupName" column="pig_group_name"/>
+        <result property="pigName" column="pig_name"/>
+        <result property="code" column="code"/>
+        <result property="quantity" column="quantity"/>
+        <result property="unitPrice" column="unit_price"/>
+        <result property="amount" column="amount"/>
+        <result property="settlementDate" column="settlement_date"/>
+        <result property="skuName" column="sku_name"/>
+        <result property="unit" column="unit"/>
+        <result property="skuType" column="sku_type"/>
+        <result property="specification" column="specification"/>
+        <result property="vendorName" column="vendor_name"/>
+        <result property="openAt" column="open_at"/>
+        <result property="closeAt" column="close_at"/>
+        <result property="farmName" column="farm_name"/>
     </resultMap>
 
 
@@ -325,9 +325,9 @@
             ifnull(sum( a.unit_price * a.quantity ) / sum( a.quantity ),0) AS unit_price,
             sum(a.amount) AS amount,
             b.settlement_date,
-            c.name,
+            c.name as sku_name,
             c.unit,
-            c.type,
+            c.type as sku_type,
             c.specification,
             b.vendor_name,
             d.open_at,

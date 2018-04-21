@@ -4,6 +4,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -63,4 +64,6 @@ public interface DoctorWarehouseMaterialApplyReadService {
      */
     Response<List<DoctorWarehouseMaterialApply>> month(Long warehouseId, Integer applyYear, Integer applyMonth, String skuName);
 
+    Response<List<Map<String,Object>>> selectPigGroupApply(Integer farmId, Integer pigType, String pigName, String pigGroupName,
+                                                           Integer skuType, String skuName, Date openAt, Date closeAt);
 }

@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -126,5 +127,18 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
                 .applyYear(applyYear)
                 .applyMonth(applyMonth)
                 .build()));
+    }
+
+    @Override
+    public Response<List<Map<String,Object>>> selectPigGroupApply(Integer farmId, Integer pigType, String pigName, String pigGroupName,
+                                                           Integer skuType, String skuName, Date openAt, Date closeAt){
+        List<Map<String,Object>> pigGroupList =doctorWarehouseMaterialApplyDao.selectPigGroupApply(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAt,closeAt);
+        Double allQuantity = 0.0;
+        Double allAmount = 0.0;
+       /* for(int i = 0;i<pigGroupList.size(); i++){
+            allQuantity = pigGroupList.get(i).get("quantity") + allQuantity;
+            allAmount = pigGroupList.get(i).get("amount") + allAmount;
+        }*/
+        return null;
     }
 }

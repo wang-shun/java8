@@ -16,9 +16,6 @@ import java.util.Date;
 @NoArgsConstructor
 public class DoctorWarehouseMaterialApplyPigGroup {
 
-    //猪舍类别
-    private Integer pigType;
-
     //猪舍名称
     private String pigName;
 
@@ -63,5 +60,8 @@ public class DoctorWarehouseMaterialApplyPigGroup {
 
     //厂家
     private String vendorName;
+
+    //猪场名称
+    private String farmName;
 
 }
