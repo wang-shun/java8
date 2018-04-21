@@ -8,10 +8,7 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Desc:
@@ -108,6 +105,19 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         map.put("unitPrice", unitPrice);
         map.put("amount", amount);
         this.sqlSession.update(this.sqlId("updateUnitPriceAndAmountByMaterialHandle"), map);
+    }
+    public List<Map<String,Object>> selectPigGroupApply(Integer farmId, Integer pigType, String pigName, String pigGroupName,
+                                                        Integer skuType, String skuName, Date openAt, Date closeAt){
+        Map<String,Object> map = Maps.newHashMap();
+        map.put("farmId",farmId);
+        map.put("pigType",pigType);
+        map.put("pigName",pigName);
+        map.put("pigGroupName",pigGroupName);
+        map.put("skuType",skuType);
+        map.put("skuName",skuName);
+        map.put("openAt",openAt);
+        map.put("closeAt",closeAt);
+        return this.sqlSession.selectList(this.sqlId("selectPigGroupApply"),map);
     }
 }
 

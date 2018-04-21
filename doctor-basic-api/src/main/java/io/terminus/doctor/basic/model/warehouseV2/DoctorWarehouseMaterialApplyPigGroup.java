@@ -1,4 +1,4 @@
-package io.terminus.doctor.web.front.warehouseV2.vo;
+package io.terminus.doctor.basic.model.warehouseV2;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +14,7 @@ import java.util.Date;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class WarehouseMaterialApplyVo {
+public class DoctorWarehouseMaterialApplyPigGroup {
 
     //猪舍类别
     private Integer pigType;
@@ -36,9 +36,6 @@ public class WarehouseMaterialApplyVo {
 
     //关群日期
     private Date closeAt;
-
-    //猪场编号
-    //private Integer farmId;
 
     //饲养员
     private String staffName;

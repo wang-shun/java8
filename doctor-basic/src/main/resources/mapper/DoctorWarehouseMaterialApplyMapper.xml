@@ -39,6 +39,27 @@
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
+    <resultMap id="DoctorWarehouseMaterialApplyPigGroupMap" type="DoctorWarehouseMaterialApplyPigGroup">
+    <id property="id" column="id"/>
+        <result property="materialHandleId" column="staff_name"/>
+        <result property="materialHandleId" column="pig_group_name"/>
+        <result property="materialHandleId" column="pig_name"/>
+        <result property="materialHandleId" column="code"/>
+        <result property="materialHandleId" column="quantity"/>
+        <result property="materialHandleId" column="unit_price"/>
+        <result property="materialHandleId" column="amount"/>
+        <result property="materialHandleId" column="settlement_date"/>
+        <result property="materialHandleId" column="name"/>
+        <result property="materialHandleId" column="unit"/>
+        <result property="materialHandleId" column="type"/>
+        <result property="materialHandleId" column="specification"/>
+        <result property="materialHandleId" column="vendor_name"/>
+        <result property="materialHandleId" column="open_at"/>
+        <result property="materialHandleId" column="close_at"/>
+        <result property="materialHandleId" column="farm_name"/>
+    </resultMap>
+
+
     <sql id="tb">
         doctor_warehouse_material_apply
     </sql>
@@ -294,4 +315,44 @@
         where material_handle_id=#{materialHandleId}
     </update>
 
+    <select id="selectPigGroupApply" parameterType="map" resultMap="DoctorWarehouseMaterialApplyPigGroupMap">
+      SELECT
+            e.staff_name,
+            a.pig_group_name,
+            e.NAME as pig_name,
+            c.code,
+            sum( a.quantity ) AS quantity,
+            ifnull(sum( a.unit_price * a.quantity ) / sum( a.quantity ),0) AS unit_price,
+            sum(a.amount) AS amount,
+            b.settlement_date,
+            c.name,
+            c.unit,
+            c.type,
+            c.specification,
+            b.vendor_name,
+            d.open_at,
+            d.close_at,
+            d.farm_name
+        FROM
+            doctor_warehouse_material_apply a
+          JOIN doctor_warehouse_material_handle b ON a.material_handle_id = b.id
+            JOIN doctor_warehouse_sku c ON a.material_id = c.id
+            JOIN doctor_groups d ON d.id = a.pig_group_id
+            JOIN doctor_barns e ON e.id = a.pig_barn_id
+        WHERE
+            a.apply_type = 1
+            AND a.farm_id = #{farmId}
+            AND a.pig_type = #{pigType}
+            AND e.name = #{pigName}
+            AND a.pig_group_name = #{pigGroupName}
+            AND c.type= #{skuType}
+            AND c.name = #{skuName}
+            AND d.open_at = #{openAt}
+            AND d.close_at = #{closeAt}
+        GROUP BY
+            a.material_id,
+            a.pig_group_id,
+            a.pig_barn_id,
+            a.material_handle_id
+    </select>
 </mapper>
