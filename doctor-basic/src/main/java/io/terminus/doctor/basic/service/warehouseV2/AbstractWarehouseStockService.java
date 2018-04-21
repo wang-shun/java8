@@ -33,7 +33,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
     private LockRegistry lockRegistry;
 
     @Autowired
-    private DoctorWareHouseDao doctorWareHouseDao;
+    protected DoctorWareHouseDao doctorWareHouseDao;
     @Autowired
     private DoctorWarehouseStockHandleDao doctorWarehouseStockHandleDao;
     @Autowired
@@ -58,8 +58,12 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
                 //新增
                 stockHandle = create(stockDto, wareHouse);
             } else {
+
+                stockHandle = doctorWarehouseStockHandleDao.findById(stockDto.getStockHandleId());
+
+                beforeUpdate(stockDto, stockHandle);
                 //编辑
-                stockHandle = update(stockDto, wareHouse);
+                stockHandle = update(stockDto, wareHouse, stockHandle);
             }
 
             return Response.ok(stockHandle.getId());
@@ -78,8 +82,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
         return stockHandle;
     }
 
-    private DoctorWarehouseStockHandle update(T stockDto, DoctorWareHouse wareHouse) {
-        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleDao.findById(stockDto.getStockHandleId());
+    private DoctorWarehouseStockHandle update(T stockDto, DoctorWareHouse wareHouse, DoctorWarehouseStockHandle stockHandle) {
 
         //之前的明细单
         Map<Long, List<DoctorWarehouseMaterialHandle>> oldMaterialHandles = doctorWarehouseMaterialHandleDao.findByStockHandle(stockDto.getStockHandleId()).stream().collect(Collectors.groupingBy(DoctorWarehouseMaterialHandle::getId));
@@ -99,6 +102,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
             }
         });
 
+        Map<F, DoctorWarehouseMaterialHandle> changed = new HashMap<>();
         details.forEach(detail -> {
             if (detail.getMaterialHandleId() == null)
                 create(stockDto, detail, stockHandle, wareHouse);
@@ -111,14 +115,26 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
                     delete(materialHandle);
                     doctorWarehouseStockManager.out(materialHandle.getMaterialId(), materialHandle.getQuantity(), wareHouse);
                 } else {
-                    changed(materialHandle, detail, stockHandle, stockDto, wareHouse);
+//                    changed(materialHandle, detail, stockHandle, stockDto, wareHouse);
+                    changed.put(detail, materialHandle);
                 }
             }
         });
 
+        changed(changed, stockHandle, stockDto, wareHouse);
+
         //更新单据
         doctorWarehouseStockHandleManager.update(stockDto, stockHandle);
         return stockHandle;
+    }
+
+    /**
+     * 为了子类自定义实现一些功能
+     *
+     * @param stockDto
+     */
+    public void beforeUpdate(T stockDto, DoctorWarehouseStockHandle stockHandle) {
+
     }
 
     protected abstract WarehouseMaterialHandleType getMaterialHandleType();
@@ -128,6 +144,16 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
     protected abstract void create(T stockDto, F detail, DoctorWarehouseStockHandle stockHandle, DoctorWareHouse wareHouse);
 
     protected abstract void delete(DoctorWarehouseMaterialHandle materialHandle);
+
+
+    public void changed(Map<F, DoctorWarehouseMaterialHandle> changed, DoctorWarehouseStockHandle stockHandle,
+                        T stockDto,
+                        DoctorWareHouse wareHouse) {
+        changed.forEach((detail, materialHandle) -> {
+            changed(materialHandle, detail, stockHandle, stockDto, wareHouse);
+        });
+
+    }
 
     protected abstract void changed(DoctorWarehouseMaterialHandle materialHandle,
                                     F detail,

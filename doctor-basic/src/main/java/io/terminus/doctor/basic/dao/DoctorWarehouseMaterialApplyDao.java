@@ -5,11 +5,11 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.enums.WarehouseMaterialApplyType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroup;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * Desc:
@@ -91,6 +91,34 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
 
     public void deleteByMaterialHandle(Long materialHandleId) {
         getSqlSession().delete("deleteByMaterialHandle", materialHandleId);
+    }
+
+    public void reverseSettlement(Long orgId, Date settlementDate) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("orgId", orgId);
+        map.put("settlementDate", settlementDate);
+        this.sqlSession.update(this.sqlId("reverseSettlement"), map);
+    }
+
+    public void updateUnitPriceAndAmountByMaterialHandle(Long materialHandleId, BigDecimal unitPrice, BigDecimal amount) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("materialHandleId", materialHandleId);
+        map.put("unitPrice", unitPrice);
+        map.put("amount", amount);
+        this.sqlSession.update(this.sqlId("updateUnitPriceAndAmountByMaterialHandle"), map);
+    }
+    public List<Map<String,DoctorWarehouseMaterialApplyPigGroup>> selectPigGroupApply(Integer farmId, Integer pigType, String pigName, String pigGroupName,
+                                                                                      Integer skuType, String skuName, Date openAt, Date closeAt){
+        Map<String,Object> map = Maps.newHashMap();
+        map.put("farmId",farmId);
+        map.put("pigType",pigType);
+        map.put("pigName",pigName);
+        map.put("pigGroupName",pigGroupName);
+        map.put("skuType",skuType);
+        map.put("skuName",skuName);
+        map.put("openAt",openAt);
+        map.put("closeAt",closeAt);
+        return this.sqlSession.selectList(this.sqlId("selectPigGroupApply"),map);
     }
 }
 

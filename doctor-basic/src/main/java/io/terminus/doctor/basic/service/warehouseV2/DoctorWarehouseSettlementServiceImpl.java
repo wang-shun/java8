@@ -10,7 +10,6 @@ import io.terminus.doctor.basic.model.DoctorWarehouseOrgSettlement;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockMonthly;
-import io.terminus.doctor.common.utils.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
@@ -55,6 +54,8 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
     private DoctorWareHouseDao doctorWareHouseDao;
     @Autowired
     private DoctorWarehouseStockDao doctorWarehouseStockDao;
+    @Autowired
+    private DoctorWarehouseMaterialApplyDao doctorWarehouseMaterialApplyDao;
 
 
     @Override
@@ -321,6 +322,10 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             //出库类型：领料出库，盘亏出库，调拨出库，配方生产出库
             materialHandle.setUnitPrice(new BigDecimal(historyStockAmount.toString()).divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
 
+            if (materialHandle.getType().equals(WarehouseMaterialHandleType.OUT.getValue())) {
+                doctorWarehouseMaterialApplyDao.updateUnitPriceAndAmountByMaterialHandle(materialHandle.getId(), materialHandle.getUnitPrice(), materialHandle.getQuantity().multiply(materialHandle.getUnitPrice()));
+            }
+
             historyStockQuantity = historyStockQuantity.subtract(materialHandle.getQuantity());
             historyStockAmount = historyStockAmount.add(new BigDecimal(materialHandle.getUnitPrice().toString()).multiply(materialHandle.getQuantity()));
         }
@@ -351,8 +356,10 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             throw new ServiceException("anti.settlement.first");
         }
 
-        //清空明细单的单价
+        //清空明细单的单价和金额
         doctorWarehouseMaterialHandleDao.reverseSettlement(orgId, settlementDate);
+        //清空领用的单价和金额
+        doctorWarehouseMaterialApplyDao.reverseSettlement(orgId, settlementDate);
         //删除月度结余
         doctorWarehouseStockMonthlyDao.reverseSettlement(orgId, settlementDate);
 

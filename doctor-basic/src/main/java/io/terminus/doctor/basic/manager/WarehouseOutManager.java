@@ -1,16 +1,17 @@
 package io.terminus.doctor.basic.manager;
 
 import io.terminus.common.exception.ServiceException;
+import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialApplyDao;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDetail;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDto;
+import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockOutDto;
+import io.terminus.doctor.basic.enums.WarehouseMaterialApplyType;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
+import io.terminus.doctor.basic.model.warehouseV2.*;
 import io.terminus.doctor.common.utils.DateUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -22,12 +23,15 @@ import java.util.Date;
  * Created by sunbo@terminus.io on 2018/4/8.
  */
 @Component
-public class WarehouseOutManager extends AbstractStockManager {
+public class WarehouseOutManager extends AbstractStockManager<WarehouseStockOutDto.WarehouseStockOutDetail, WarehouseStockOutDto> {
 
+
+    @Autowired
+    private DoctorWarehouseMaterialApplyDao doctorWarehouseMaterialApplyDao;
 
     @Override
-    public void create(AbstractWarehouseStockDetail detail,
-                       AbstractWarehouseStockDto stockDto,
+    public void create(WarehouseStockOutDto.WarehouseStockOutDetail detail,
+                       WarehouseStockOutDto stockDto,
                        DoctorWarehouseStockHandle stockHandle,
                        DoctorWareHouse wareHouse) {
         DoctorWarehouseMaterialHandle materialHandle = buildMaterialHandle(detail, stockDto, stockHandle, wareHouse);
@@ -62,6 +66,36 @@ public class WarehouseOutManager extends AbstractStockManager {
             materialHandle.setBeforeStockQuantity(currentQuantity);
         }
         doctorWarehouseMaterialHandleDao.create(materialHandle);
+
+        DoctorWarehouseMaterialApply apply = new DoctorWarehouseMaterialApply();
+        apply.setFarmId(materialHandle.getFarmId());
+        apply.setWarehouseId(materialHandle.getWarehouseId());
+        apply.setWarehouseName(materialHandle.getWarehouseName());
+        apply.setWarehouseType(materialHandle.getWarehouseType());
+        apply.setOrgId(materialHandle.getOrgId());
+        apply.setSettlementDate(materialHandle.getSettlementDate());
+        apply.setQuantity(materialHandle.getQuantity());
+        apply.setPigBarnId(detail.getApplyPigBarnId());
+        apply.setPigBarnName(detail.getApplyPigBarnName());
+        apply.setPigGroupId(detail.getApplyPigGroupId());
+        apply.setApplyStaffId(detail.getApplyStaffId());
+        apply.setApplyStaffName(detail.getApplyStaffName());
+        apply.setPigType(detail.getPigType());
+        apply.setApplyDate(materialHandle.getHandleDate());
+        apply.setApplyYear(stockDto.getHandleDate().get(Calendar.YEAR));
+        apply.setApplyMonth(stockDto.getHandleDate().get(Calendar.MONTH) + 1);
+        if (detail.getApplyPigGroupId() != null) {
+            if (detail.getApplyPigGroupId().equals(-1L)) {
+                apply.setPigGroupName("母猪");
+                apply.setApplyType(WarehouseMaterialApplyType.SOW.getValue());
+            } else {
+                apply.setPigGroupName(detail.getApplyPigGroupName());
+                apply.setApplyType(WarehouseMaterialApplyType.GROUP.getValue());
+            }
+        } else {
+            apply.setApplyType(WarehouseMaterialApplyType.BARN.getValue());
+        }
+        doctorWarehouseMaterialApplyDao.create(apply);
     }
 
     @Override
@@ -73,5 +107,7 @@ public class WarehouseOutManager extends AbstractStockManager {
         if (!DateUtil.inSameDate(materialHandle.getHandleDate(), new Date())) {
             recalculate(materialHandle);
         }
+
+        doctorWarehouseMaterialApplyDao.deleteByMaterialHandle(materialHandle.getId());
     }
 }

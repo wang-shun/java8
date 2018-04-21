@@ -461,6 +461,193 @@
         group by a.farm_id
         order by a.farm_id
     </select>
+    <select id="wlbdReport" parameterType="Map" resultType="map">
+        select
+        '' as id,'上月结存' as material_name,
+        '' as material_type,'' as ware_house_name,'' as handle_date,
+        '' as settlement_date,'' as 	handler_type,
+        '' as rksl,'' as rkdj,'' as rkjc,
+        '' as cksl,'' as ckdj,'' as ckjc,
+        a.balance_quantity as jcsl,
+        ifnull(a.balance_amount / a.balance_quantity,'') as jcdj,
+        a.balance_amount as jcje,
+        '' as pig_barn_name,
+        '' as pig_type,
+        '' as pig_group_name,
+        '' as apply_staff_name,
+        '' as farm_name,
+        '' as unit,
+        '' as provider_name,
+        '' as specification
+        from  doctor_warehouse_stock_monthly  a
+        join  doctor_warehouse_sku b on a.material_id=b.id
+        where date_format(a.settlement_date,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
+        and a.farm_id=#{farmId}
+        and a.warehouse_id=#{warehouseId}
+        and b.name like CONCAT('%',#{materialName},'%')
+        union all
+        select * from (
+        select b.id,b.material_name,d.type as material_type,a.ware_house_name,b.handle_date,
+        b.settlement_date,b.type as handler_type,
+        ifnull(case when b.type in (1,2,3,4,5)
+        then b.quantity end,'') as rksl,
+        ifnull(case when b.type in (1,2,3,4,5)
+        then  b.unit_price end,'') as rkdj,
+        ifnull(case when b.type in (1,2,3,4,5)
+        then b.amount end,'') as rkje,
+        ifnull(case when b.type in (6,7,8,9)
+        then b.quantity end,'') as cksl,
+        ifnull(case when b.type in (6,7,8,9)
+        then  b.unit_price end,'') as ckdj,
+        ifnull(case when b.type in (6,7,8,9)
+        then b.amount end,'') as ckje,
+        (
+        ifnull(case when b.type in (6,7,8,9)
+        then b.quantity end,'')
+        -
+        ifnull(case when b.type in (1,2,3,4,5)
+        then b.quantity end,'')
+        ) as jcsl,
+        ifnull((
+        (
+        ifnull(case when b.type in (6,7,8,9)
+        then b.amount end,'')
+        -
+        ifnull(case when b.type in (1,2,3,4,5)
+        then b.amount end,'')
+        )
+        /
+        ifnull(case when b.type in (6,7,8,9)
+        then b.quantity end,'')
+        -
+        ifnull(case when b.type in (1,2,3,4,5)
+        then b.quantity end,'')
+        ),'') as jcdj,
+        (
+        ifnull(case when b.type in (6,7,8,9)
+        then b.amount end,'')
+        -
+        ifnull(case when b.type in (1,2,3,4,5)
+        then b.amount end,'')
+        ) as jcje,
+        f.pig_barn_name,
+        f.pig_type,
+        f.pig_group_name,
+        f.apply_staff_name,
+        c.`name` as farm_name,
+        b.unit,
+        e.`name` as provider_name,
+        d.specification
+        from doctor_warehouse_material_handle b
+        join doctor_ware_houses a
+        on b.warehouse_id=a.id
+        left join doctor_warehouse_material_apply f
+        on b.id=f.material_handle_id
+        join doctor_farms c
+        on a.farm_id=c.id
+        join doctor_warehouse_sku d
+        on b.material_id=d.id
+        join doctor_warehouse_vendor e
+        on d.vendor_id=e.id
+        where b.farm_id=#{farmId}
+        and b.delete_flag=1
+        and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
+        and a.warehouse_id=#{warehouseId}
+        and d.name like CONCAT('%',#{materialName},'%')
+        <if test="settlementDate != null">
+            and date_format(b.settlement_date,'%Y-%m') = #{settlementDate}
+        </if>
+        <if test="pigBarnType != null">
+            and f.pig_type=#{pigBarnType}
+        </if>
+        <if test="pigBarnId != null">
+            and f.pig_barn_id=#{pigBarnId}
+        </if>
+        <if test="pigGroupId != null">
+            and f.pig_group_id=#{pigGroupId}
+        </if>
+        <if test="handlerType != null">
+            and b.type=#{handlerType}
+        </if>
+        <if test="type != null">
+            and d.type=#{type}
+        </if>
+        order by b.handle_date,b.settlement_date,b.id
+        ) as bjdata
+        union all
+        select
+        '' as id,'本月结存' as material_name,
+        '' as material_type,'' as ware_house_name,'' as handle_date,
+        '' as settlement_date,'' as 	handler_type,
+        '' as rksl,'' as rkdj,'' as rkjc,
+        '' as cksl,'' as ckdj,'' as ckjc,
+        case when
+        (ifnull(case when b.type in (6,7,8,9) then sum(b.quantity) end,0)
+        -
+        ifnull(case when b.type in (1,2,3,4,5) then sum(b.quantity) end,0)) = 0
+        then ''
+        else
+        (ifnull(case when b.type in (6,7,8,9) then sum(b.quantity) end,0)
+        -
+        ifnull(case when b.type in (1,2,3,4,5) then sum(b.quantity) end,0))
+        end as jcsl,
+        ifnull(
+        (ifnull(case when b.type in (6,7,8,9) then sum(b.amount) end,0)
+        -
+        ifnull(case when b.type in (1,2,3,4,5) then sum(b.amount) end,0))
+        /
+        (ifnull(case when b.type in (6,7,8,9) then sum(b.quantity) end,0)
+        -
+        ifnull(case when b.type in (1,2,3,4,5) then sum(b.quantity) end,0)),'')
+        as jcdj,
+        case when
+        (ifnull(case when b.type in (6,7,8,9) then sum(b.amount) end,0)
+        -
+        ifnull(case when b.type in (1,2,3,4,5) then sum(b.amount) end,0)) = 0
+        then ''
+        else
+        (ifnull(case when b.type in (6,7,8,9) then sum(b.amount) end,0)
+        -
+        ifnull(case when b.type in (1,2,3,4,5) then sum(b.amount) end,0))
+        end as jcje,
+        '' as pig_barn_name,
+        '' as pig_type,
+        '' as pig_group_name,
+        '' as apply_staff_name,
+        '' as farm_name,
+        '' as unit,
+        '' as provider_name,
+        '' as specification
+        from  doctor_warehouse_material_handle b
+        join doctor_ware_houses a
+        on b.warehouse_id=a.id
+        left join doctor_warehouse_material_apply f
+        on b.id=f.material_handle_id
+        join doctor_farms c
+        on a.farm_id=c.id
+        join doctor_warehouse_sku d
+        on b.material_id=d.id
+        join doctor_warehouse_vendor e
+        on d.vendor_id=e.id
+        where b.farm_id=#{farmId}
+        and b.delete_flag=1
+        and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
+        and b.warehouse_id=#{warehouseId}
+        and d.name like CONCAT('%',#{materialName},'%')
+    </select>
+
+    <select id="getPigBarnNameOption" parameterType="long" resultType="map">
+        select id,`name` from doctor_barns where farm_id=#{farmId}
+    </select>
+
+    <select id="getPigGroupNameOption" parameterType="long" resultType="map">
+        select id,group_code from doctor_groups where farm_id=#{farmId}
+    </select>
+
+    <select id="getWareHouseDataOption" parameterType="long" resultType="map">
+        select id,ware_house_name from doctor_ware_houses where farm_id=#{farmId}
+    </select>
+
 
     <sql id ="balanceAmount">
         (select ifnull(sum(b.balance_amount),0)
@@ -478,7 +665,6 @@
         and c.handle_year = #{handleYear,jdbcType=BIGINT}
         and c.handle_month = #{handleMonth,jdbcType=BIGINT}
         and c.type in (
-            1,7,9,11,13
         )
         ) as inAmount,
     </sql>
@@ -495,4 +681,191 @@
             )
         ) as outAmount,
     </sql>
+
+    <select id="wlbdReport" parameterType="Map" resultType="map">
+        select
+        '' as id,'上月结存' as material_name,
+        '' as material_type,'' as ware_house_name,'' as handle_date,
+        '' as settlement_date,'' as 	handler_type,
+        '' as rksl,'' as rkdj,'' as rkjc,
+        '' as cksl,'' as ckdj,'' as ckjc,
+        a.balance_quantity as jcsl,
+        ifnull(a.balance_amount / a.balance_quantity,'') as jcdj,
+        a.balance_amount as jcje,
+        '' as pig_barn_name,
+        '' as pig_type,
+        '' as pig_group_name,
+        '' as apply_staff_name,
+        '' as farm_name,
+        '' as unit,
+        '' as provider_name,
+        '' as specification
+        from  doctor_warehouse_stock_monthly  a
+        join  doctor_warehouse_sku b on a.material_id=b.id
+        where date_format(a.settlement_date,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
+        and a.farm_id=#{farmId}
+        and a.warehouse_id=#{warehouseId}
+        and b.name like CONCAT('%',#{materialName},'%')
+        union all
+        select * from (
+        select b.id,b.material_name,d.type as material_type,a.ware_house_name,b.handle_date,
+        b.settlement_date,b.type as handler_type,
+        ifnull(case when b.type in (1,2,3,4,5)
+        then b.quantity end,'') as rksl,
+        ifnull(case when b.type in (1,2,3,4,5)
+        then  b.unit_price end,'') as rkdj,
+        ifnull(case when b.type in (1,2,3,4,5)
+        then b.amount end,'') as rkje,
+        ifnull(case when b.type in (6,7,8,9)
+        then b.quantity end,'') as cksl,
+        ifnull(case when b.type in (6,7,8,9)
+        then  b.unit_price end,'') as ckdj,
+        ifnull(case when b.type in (6,7,8,9)
+        then b.amount end,'') as ckje,
+        (
+        ifnull(case when b.type in (6,7,8,9)
+        then b.quantity end,'')
+        -
+        ifnull(case when b.type in (1,2,3,4,5)
+        then b.quantity end,'')
+        ) as jcsl,
+        ifnull((
+        (
+        ifnull(case when b.type in (6,7,8,9)
+        then b.amount end,'')
+        -
+        ifnull(case when b.type in (1,2,3,4,5)
+        then b.amount end,'')
+        )
+        /
+        ifnull(case when b.type in (6,7,8,9)
+        then b.quantity end,'')
+        -
+        ifnull(case when b.type in (1,2,3,4,5)
+        then b.quantity end,'')
+        ),'') as jcdj,
+        (
+        ifnull(case when b.type in (6,7,8,9)
+        then b.amount end,'')
+        -
+        ifnull(case when b.type in (1,2,3,4,5)
+        then b.amount end,'')
+        ) as jcje,
+        f.pig_barn_name,
+        f.pig_type,
+        f.pig_group_name,
+        f.apply_staff_name,
+        c.`name` as farm_name,
+        b.unit,
+        e.`name` as provider_name,
+        d.specification
+        from doctor_warehouse_material_handle b
+        join doctor_ware_houses a
+        on b.warehouse_id=a.id
+        left join doctor_warehouse_material_apply f
+        on b.id=f.material_handle_id
+        join doctor_farms c
+        on a.farm_id=c.id
+        join doctor_warehouse_sku d
+        on b.material_id=d.id
+        join doctor_warehouse_vendor e
+        on d.vendor_id=e.id
+        where b.farm_id=#{farmId}
+        and b.delete_flag=1
+        and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
+        and a.warehouse_id=#{warehouseId}
+        and d.name like CONCAT('%',#{materialName},'%')
+        <if test="settlementDate != null">
+            and date_format(b.settlement_date,'%Y-%m') = #{settlementDate}
+        </if>
+        <if test="pigBarnType != null">
+            and f.pig_type=#{pigBarnType}
+        </if>
+        <if test="pigBarnId != null">
+            and f.pig_barn_id=#{pigBarnId}
+        </if>
+        <if test="pigGroupId != null">
+            and f.pig_group_id=#{pigGroupId}
+        </if>
+        <if test="handlerType != null">
+            and b.type=#{handlerType}
+        </if>
+        <if test="type != null">
+            and d.type=#{type}
+        </if>
+        order by b.handle_date,b.settlement_date,b.id
+        ) as bjdata
+        union all
+        select
+        '' as id,'本月结存' as material_name,
+        '' as material_type,'' as ware_house_name,'' as handle_date,
+        '' as settlement_date,'' as 	handler_type,
+        '' as rksl,'' as rkdj,'' as rkjc,
+        '' as cksl,'' as ckdj,'' as ckjc,
+        case when
+        (ifnull(case when b.type in (6,7,8,9) then sum(b.quantity) end,0)
+        -
+        ifnull(case when b.type in (1,2,3,4,5) then sum(b.quantity) end,0)) = 0
+        then ''
+        else
+        (ifnull(case when b.type in (6,7,8,9) then sum(b.quantity) end,0)
+        -
+        ifnull(case when b.type in (1,2,3,4,5) then sum(b.quantity) end,0))
+        end as jcsl,
+        ifnull(
+        (ifnull(case when b.type in (6,7,8,9) then sum(b.amount) end,0)
+        -
+        ifnull(case when b.type in (1,2,3,4,5) then sum(b.amount) end,0))
+        /
+        (ifnull(case when b.type in (6,7,8,9) then sum(b.quantity) end,0)
+        -
+        ifnull(case when b.type in (1,2,3,4,5) then sum(b.quantity) end,0)),'')
+        as jcdj,
+        case when
+        (ifnull(case when b.type in (6,7,8,9) then sum(b.amount) end,0)
+        -
+        ifnull(case when b.type in (1,2,3,4,5) then sum(b.amount) end,0)) = 0
+        then ''
+        else
+        (ifnull(case when b.type in (6,7,8,9) then sum(b.amount) end,0)
+        -
+        ifnull(case when b.type in (1,2,3,4,5) then sum(b.amount) end,0))
+        end as jcje,
+        '' as pig_barn_name,
+        '' as pig_type,
+        '' as pig_group_name,
+        '' as apply_staff_name,
+        '' as farm_name,
+        '' as unit,
+        '' as provider_name,
+        '' as specification
+        from  doctor_warehouse_material_handle b
+        join doctor_ware_houses a
+        on b.warehouse_id=a.id
+        left join doctor_warehouse_material_apply f
+        on b.id=f.material_handle_id
+        join doctor_farms c
+        on a.farm_id=c.id
+        join doctor_warehouse_sku d
+        on b.material_id=d.id
+        join doctor_warehouse_vendor e
+        on d.vendor_id=e.id
+        where b.farm_id=#{farmId}
+        and b.delete_flag=1
+        and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
+        and b.warehouse_id=#{warehouseId}
+        and d.name like CONCAT('%',#{materialName},'%')
+    </select>
+
+    <select id="getPigBarnNameOption" parameterType="long" resultType="map">
+        select id,`name` from doctor_barns where farm_id=#{farmId}
+    </select>
+
+    <select id="getPigGroupNameOption" parameterType="long" resultType="map">
+        select id,group_code from doctor_groups where farm_id=#{farmId}
+    </select>
+
+    <select id="getWareHouseDataOption" parameterType="long" resultType="map">
+        select id,ware_house_name from doctor_ware_houses where farm_id=#{farmId}
+    </select>
 </mapper>

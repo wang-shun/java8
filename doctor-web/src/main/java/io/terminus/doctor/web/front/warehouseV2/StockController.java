@@ -4,15 +4,18 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.dto.warehouseV2.*;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.enums.WarehouseSkuStatus;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
+import io.terminus.doctor.basic.model.FeedFormula;
 import io.terminus.doctor.basic.model.warehouseV2.*;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
+import io.terminus.doctor.basic.service.FeedFormulaReadService;
 import io.terminus.doctor.basic.service.warehouseV2.*;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -39,8 +42,11 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * 库存
@@ -64,6 +70,8 @@ public class StockController {
 
     @RpcConsumer
     private DoctorUserProfileReadService doctorUserProfileReadService;
+    @Autowired
+    private FeedFormulaReadService feedFormulaReadService;
 
     @RpcConsumer
     private DoctorWarehouseReportReadService doctorWarehouseReportReadService;
@@ -219,6 +227,18 @@ public class StockController {
         if (null == stockInventory.getStockHandleId() && stockInventory.getDetails().isEmpty())
             throw new JsonResponseException("stock.detail.empty");
 
+        setOrgId(stockInventory);
+
+        //是否该公司正在结算中
+        if (doctorWarehouseSettlementService.isUnderSettlement(stockInventory.getOrgId()))
+            throw new JsonResponseException("under.settlement");
+
+        //会计年月
+        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(stockInventory.getHandleDate().getTime());
+        //会计年月已经结算后，不允许新增或编辑单据
+        if (doctorWarehouseSettlementService.isSettled(stockInventory.getOrgId(), settlementDate))
+            throw new JsonResponseException("already.settlement");
+
         Collections.reverse(stockInventory.getDetails());//倒序，最新的覆盖替换老的
         List<WarehouseStockInventoryDto.WarehouseStockInventoryDetail> removedRepeat = new ArrayList<>();
         for (WarehouseStockInventoryDto.WarehouseStockInventoryDetail detail : stockInventory.getDetails()) {
@@ -233,8 +253,11 @@ public class StockController {
                 removedRepeat.add(detail);
         }
         stockInventory.setDetails(removedRepeat);
-
         setOperatorName(stockInventory);
+        stockInventory.setSettlementDate(settlementDate);
+        Calendar handleDateWithTime = Calendar.getInstance();
+        handleDateWithTime.set(stockInventory.getHandleDate().get(Calendar.YEAR), stockInventory.getHandleDate().get(Calendar.MONTH), stockInventory.getHandleDate().get(Calendar.DAY_OF_MONTH));
+        stockInventory.setHandleDate(handleDateWithTime);
 
         return RespHelper.or500(doctorWarehouseStockWriteService.inventory(stockInventory));
     }
@@ -250,6 +273,18 @@ public class StockController {
     public Long transfer(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockTransferDto stockTransfer, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
+
+        setOrgId(stockTransfer);
+
+        //是否该公司正在结算中
+        if (doctorWarehouseSettlementService.isUnderSettlement(stockTransfer.getOrgId()))
+            throw new JsonResponseException("under.settlement");
+
+        //会计年月
+        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(stockTransfer.getHandleDate().getTime());
+        //会计年月已经结算后，不允许新增或编辑单据
+        if (doctorWarehouseSettlementService.isSettled(stockTransfer.getOrgId(), settlementDate))
+            throw new JsonResponseException("already.settlement");
 
         Collections.reverse(stockTransfer.getDetails());
         List<WarehouseStockTransferDto.WarehouseStockTransferDetail> removedRepeat = new ArrayList<>();
@@ -269,8 +304,67 @@ public class StockController {
         stockTransfer.setDetails(removedRepeat);
 
         setOperatorName(stockTransfer);
+        stockTransfer.setSettlementDate(settlementDate);
+        Calendar handleDateWithTime = Calendar.getInstance();
+        handleDateWithTime.set(stockTransfer.getHandleDate().get(Calendar.YEAR), stockTransfer.getHandleDate().get(Calendar.MONTH), stockTransfer.getHandleDate().get(Calendar.DAY_OF_MONTH));
+        stockTransfer.setHandleDate(handleDateWithTime);
 
         return RespHelper.or500(doctorWarehouseStockWriteService.transfer(stockTransfer));
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "formula")
+    public boolean produce(@RequestParam("farmId") Long farmId,
+                           @RequestParam("warehouseId") Long warehouseId,
+                           @RequestParam("feedFormulaId") Long feedFormulaId,
+                           @RequestParam("materialProduceJson") String materialProduceJson) {
+
+        FeedFormula feedFormula = RespHelper.or500(feedFormulaReadService.findFeedFormulaById(feedFormulaId));
+
+        if (null == feedFormula)
+            throw new JsonResponseException("formula.not.found");
+
+        FeedFormula.FeedProduce feedProduce = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(materialProduceJson, FeedFormula.FeedProduce.class);
+        // 校验用户修改数量信息
+        validateCountRange(feedProduce);
+
+        // 查询对应的饲料
+//        DoctorBasicMaterial feed = RespHelper.orServEx(doctorBasicMaterialReadService.findBasicMaterialById(feedFormula.getFeedId()));
+        DoctorWarehouseSku feed = RespHelper.or500(doctorWarehouseSkuReadService.findById(feedFormula.getFeedId()));
+        if (null == feed)
+            throw new JsonResponseException("warehouse.feed.not.found");
+
+        // 校验生产后的入仓仓库类型
+        DoctorWareHouse wareHouse = RespHelper.orServEx(doctorWareHouseReadService.findById(warehouseId));
+        checkState(Objects.equals(wareHouse.getType(), feed.getType()), "produce.targetWarehouseType.fail");
+
+
+        List<FeedFormula.MaterialProduceEntry> totalOut = new ArrayList<>(feedProduce.getMaterialProduceEntries());
+        if (null != feedProduce.getMedicalProduceEntries() && !feedProduce.getMedicalProduceEntries().isEmpty())
+            totalOut.addAll(feedProduce.getMedicalProduceEntries());
+
+        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+
+        WarehouseFormulaDto formulaDto = new WarehouseFormulaDto();
+        formulaDto.setFarmId(farmId);
+        formulaDto.setFarmName(farm.getName());
+        formulaDto.setWarehouseId(warehouseId);
+        formulaDto.setHandleDate(Calendar.getInstance());
+        formulaDto.setFeedMaterial(feed);
+        formulaDto.setFeedMaterialId(feed.getId());
+        formulaDto.setFeedMaterialQuantity(new BigDecimal(feedProduce.getTotal()));
+        List<WarehouseFormulaDto.WarehouseFormulaDetail> details = new ArrayList<>();
+        for (FeedFormula.MaterialProduceEntry entry : totalOut) {
+            WarehouseFormulaDto.WarehouseFormulaDetail detail = new WarehouseFormulaDto.WarehouseFormulaDetail();
+            detail.setMaterialId(entry.getMaterialId());
+            detail.setMaterialName(entry.getMaterialName());
+            detail.setQuantity(new BigDecimal(entry.getMaterialCount()));
+            details.add(detail);
+        }
+        formulaDto.setDetails(details);
+        Response<Boolean> response = doctorWarehouseStockWriteService.formula(formulaDto);
+        if (!response.isSuccess())
+            throw new JsonResponseException(response.getError());
+        return true;
     }
 
 
@@ -287,6 +381,15 @@ public class StockController {
             throw new JsonResponseException("farm.not.found");
         stockDto.setOrgId(farm.getOrgId());
     }
+
+
+    private void validateCountRange(FeedFormula.FeedProduce materialProduce) {
+        Double realTotal = materialProduce.getMaterialProduceEntries().stream()
+                .map(FeedFormula.MaterialProduceEntry::getMaterialCount)
+                .reduce((a, b) -> a + b).orElse(0D);
+        checkState(!Objects.equals(0, realTotal.intValue()), "input.materialProduceTotal.error");
+    }
+
 
     /**
      * 删除库存明细
