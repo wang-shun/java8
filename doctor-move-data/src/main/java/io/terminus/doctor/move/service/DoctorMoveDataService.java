@@ -3107,10 +3107,10 @@ public class DoctorMoveDataService {
         int pageSize = 1000;
         Map<String, Object> map = new HashMap<>();
         map.put("type", PigEvent.FARROWING.getKey());
+        DoctorPigEvent updateEvent = new DoctorPigEvent();
         while (true) {
             PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
             Paging<DoctorPigEvent> paging = doctorPigEventDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), map);
-            DoctorPigEvent updateEvent = new DoctorPigEvent();
             paging.getData().parallelStream().forEach(doctorPigEvent -> flushFarrowRelMate(doctorPigEvent, updateEvent));
 
             pageNo++;
@@ -3128,7 +3128,6 @@ public class DoctorMoveDataService {
             doctorPigEventDao.update(updateEvent);
         } catch (Exception e) {
             log.error("flush farrow rel mate, event id:{}", farrowEvent.getId());
-            throw e;
         }
     }
 }
