@@ -17,7 +17,7 @@ import java.util.Date;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorChgFarmRecord implements Serializable {
+public class DoctorChgFarmInfo implements Serializable {
     private static final long serialVersionUID = 4072321777263676445L;
 
     private Long id;
@@ -26,11 +26,16 @@ public class DoctorChgFarmRecord implements Serializable {
 
     private Long pigId;
 
+    /**
+     * 转场id
+     */
+    private Long eventId;
+
     private String track;
 
     private String pig;
 
-    private Date created_at;
+    private Date createdAt;
 
-    private Date updated_at;
+    private Date updatedAt;
 }

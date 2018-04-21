@@ -23,11 +23,13 @@ import io.terminus.doctor.event.enums.Category;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorChgFarmInfo;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorMessage;
 import io.terminus.doctor.event.model.DoctorMessageRuleTemplate;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
@@ -145,8 +147,8 @@ public class DoctorPigs {
         return dto;
     }
 
-    private DoctorPigInfoDetailDto getPigDetail(Long pigId, Integer eventSize) {
-        DoctorPigInfoDetailDto pigDetail = RespWithExHelper.orInvalid(doctorPigReadService.queryPigDetailInfoByPigId(pigId, eventSize));
+    private DoctorPigInfoDetailDto getPigDetail(Long farmId, Long pigId, Integer eventSize) {
+        DoctorPigInfoDetailDto pigDetail = RespWithExHelper.orInvalid(doctorPigReadService.queryPigDetailInfoByPigId(farmId, pigId, eventSize));
 
         doctorFarmAuthCenter.checkFarmAuthResponse(pigDetail.getDoctorPig().getFarmId());
         transFromUtil.transFromExtraMap(pigDetail.getDoctorPigEvents());
@@ -155,16 +157,18 @@ public class DoctorPigs {
 
     @RequestMapping(value = "/getSowPigDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public DoctorSowDetailDto querySowPigDetailInfoDto(@RequestParam("pigId") Long pigId,
-                                                                 @RequestParam(value = "eventSize", required = false) Integer eventSize){
-            return buildSowDetailDto(getPigDetail(pigId, eventSize));
+    public DoctorSowDetailDto querySowPigDetailInfoDto(@RequestParam("farmId") Long farmId,
+                                                       @RequestParam("pigId") Long pigId,
+                                                       @RequestParam(value = "eventSize", required = false) Integer eventSize){
+            return buildSowDetailDto(getPigDetail(farmId, pigId, eventSize));
     }
 
     @RequestMapping(value = "/getBoarPigDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public DoctorBoarDetailDto queryBoarPigDetailInfoDto(@RequestParam("pigId") Long pigId,
-                                                                   @RequestParam(value = "eventSize", required = false) Integer eventSize){
-            return buildDoctorBoarDetailDto(getPigDetail(pigId, eventSize));
+    public DoctorBoarDetailDto queryBoarPigDetailInfoDto(@RequestParam("farmId") Long farmId,
+                                                         @RequestParam("pigId") Long pigId,
+                                                         @RequestParam(value = "eventSize", required = false) Integer eventSize){
+            return buildDoctorBoarDetailDto(getPigDetail(farmId, pigId, eventSize));
           }
 
     private DoctorBoarDetailDto buildDoctorBoarDetailDto(DoctorPigInfoDetailDto dto){
@@ -184,21 +188,28 @@ public class DoctorPigs {
         DoctorPigTrack doctorPigTrack = dto.getDoctorPigTrack();
         Integer pregCheckResult = null;
         try{
-            String extra = doctorPigTrack.getExtra();
-            Date eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(dto.getDoctorPig().getId()
-                    , dto.getDoctorPigTrack().getStatus()));
-            Integer statusDay = DateUtil.getDeltaDays(eventAt, new Date());
+            String warnMessage = null;
+            Integer statusDay;
+            if (Objects.equals(dto.getIsChgFarm(), true)) {
+                DoctorChgFarmInfo doctorChgFarmInfo = RespHelper.or500(doctorPigReadService.findByFarmIdAndPigId(doctorPigTrack.getFarmId(), doctorPigTrack.getPigId()));
+                DoctorPigEvent chgFarm = RespHelper.or500(doctorPigEventReadService.findById(doctorChgFarmInfo.getEventId()));
+                statusDay = DateUtil.getDeltaDays(chgFarm.getEventAt(), new Date());
+            } else {
+                String extra = doctorPigTrack.getExtra();
+                Date eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(dto.getDoctorPig().getId()
+                        , dto.getDoctorPigTrack().getStatus()));
+                statusDay = DateUtil.getDeltaDays(eventAt, new Date());
 
-            if (doctorPigTrack.getStatus() == PigStatus.KongHuai.getKey() && StringUtils.isNotBlank(extra)){
-                Map<String, Object> extraMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(extra, JacksonType.MAP_OF_OBJECT);
-                Object checkResult = extraMap.get("pregCheckResult");
-                if (checkResult != null) {
-                    pregCheckResult = Integer.parseInt(checkResult.toString());
-                    doctorPigTrack.setStatus(pregCheckResult);
+                if (doctorPigTrack.getStatus() == PigStatus.KongHuai.getKey() && StringUtils.isNotBlank(extra)) {
+                    Map<String, Object> extraMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(extra, JacksonType.MAP_OF_OBJECT);
+                    Object checkResult = extraMap.get("pregCheckResult");
+                    if (checkResult != null) {
+                        pregCheckResult = Integer.parseInt(checkResult.toString());
+                        doctorPigTrack.setStatus(pregCheckResult);
+                    }
                 }
+                warnMessage = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().writeValueAsString(queryPigNotifyMessages(dto.getDoctorPig().getId()));
             }
-            String warnMessage = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().writeValueAsString(queryPigNotifyMessages(dto.getDoctorPig().getId()));
-
             return DoctorSowDetailDto.builder()
                     .pigSowCode(dto.getDoctorPig().getPigCode())
                     .warnMessage(warnMessage)
@@ -207,7 +218,7 @@ public class DoctorPigs {
                     .barnCode(dto.getDoctorPigTrack().getCurrentBarnName())
                     .pigStatus(dto.getDoctorPigTrack().getStatus())
                     .dayAge(Days.daysBetween(new DateTime(dto.getDoctorPig().getBirthDate()), DateTime.now()).getDays() + 1)
-                    .parity(RespHelper.or500(doctorPigEventReadService.findLastParity(dto.getDoctorPig().getId())))
+                    .parity(doctorPigTrack.getCurrentParity())
                     .entryDate(dto.getDoctorPig().getInFarmDate())
                     .birthDate(dto.getDoctorPig().getBirthDate())
                     .doctorPigEvents(dto.getDoctorPigEvents())
