@@ -1,13 +1,10 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
 import io.terminus.common.exception.ServiceException;
-import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockOutDto;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockRefundDto;
-import io.terminus.doctor.basic.enums.WarehouseMaterialApplyType;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.manager.WarehouseReturnManager;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -15,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -44,6 +40,11 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
     protected DoctorWarehouseStockHandle create(WarehouseStockRefundDto stockDto, DoctorWareHouse wareHouse) {
         DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.create(stockDto, wareHouse, getMaterialHandleType());
         warehouseReturnManager.create(stockDto.getDetails(), stockDto, stockHandle, wareHouse);
+
+        stockDto.getDetails().forEach(detail -> {
+            doctorWarehouseStockManager.in(detail.getMaterialId(), detail.getQuantity(), wareHouse);
+        });
+
         return stockHandle;
     }
 
@@ -55,6 +56,7 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
     @Override
     protected void delete(DoctorWarehouseMaterialHandle materialHandle) {
         warehouseReturnManager.delete(materialHandle);
+
         DoctorWareHouse wareHouse = new DoctorWareHouse();
         wareHouse.setId(materialHandle.getWarehouseId());
         wareHouse.setWareHouseName(materialHandle.getMaterialName());

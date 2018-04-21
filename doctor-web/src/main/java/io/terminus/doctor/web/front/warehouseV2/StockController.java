@@ -219,6 +219,18 @@ public class StockController {
         if (null == stockInventory.getStockHandleId() && stockInventory.getDetails().isEmpty())
             throw new JsonResponseException("stock.detail.empty");
 
+        setOrgId(stockInventory);
+
+        //是否该公司正在结算中
+        if (doctorWarehouseSettlementService.isUnderSettlement(stockInventory.getOrgId()))
+            throw new JsonResponseException("under.settlement");
+
+        //会计年月
+        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(stockInventory.getHandleDate().getTime());
+        //会计年月已经结算后，不允许新增或编辑单据
+        if (doctorWarehouseSettlementService.isSettled(stockInventory.getOrgId(), settlementDate))
+            throw new JsonResponseException("already.settlement");
+
         Collections.reverse(stockInventory.getDetails());//倒序，最新的覆盖替换老的
         List<WarehouseStockInventoryDto.WarehouseStockInventoryDetail> removedRepeat = new ArrayList<>();
         for (WarehouseStockInventoryDto.WarehouseStockInventoryDetail detail : stockInventory.getDetails()) {
@@ -233,8 +245,11 @@ public class StockController {
                 removedRepeat.add(detail);
         }
         stockInventory.setDetails(removedRepeat);
-
         setOperatorName(stockInventory);
+        stockInventory.setSettlementDate(settlementDate);
+        Calendar handleDateWithTime = Calendar.getInstance();
+        handleDateWithTime.set(stockInventory.getHandleDate().get(Calendar.YEAR), stockInventory.getHandleDate().get(Calendar.MONTH), stockInventory.getHandleDate().get(Calendar.DAY_OF_MONTH));
+        stockInventory.setHandleDate(handleDateWithTime);
 
         return RespHelper.or500(doctorWarehouseStockWriteService.inventory(stockInventory));
     }

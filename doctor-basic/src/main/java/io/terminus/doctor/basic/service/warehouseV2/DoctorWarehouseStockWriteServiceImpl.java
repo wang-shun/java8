@@ -62,6 +62,8 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     private WarehouseOutStockService warehouseOutStockService;
     @Autowired
     private WarehouseRefundStockService warehouseRefundStockService;
+    @Autowired
+    private WarehouseInventoryStockService warehouseInventoryStockService;
 
     @Autowired
     private DoctorWarehouseHandlerManager doctorWarehouseHandlerManager;
@@ -282,166 +284,8 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     @Transactional
     @ExceptionHandle("doctor.warehouse.stock.inventory.fail")
     public Response<Long> inventory(WarehouseStockInventoryDto stockInventory) {
-        StockContext context = getWarehouseAndSupportedBasicMaterial(stockInventory.getFarmId(), stockInventory.getWarehouseId());
 
-        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.handle(stockInventory, context.getWareHouse(), WarehouseMaterialHandleType.INVENTORY);
-
-        List<WarehouseStockInventoryDto.WarehouseStockInventoryDetail> needProcessDetails;
-
-        boolean updateMode = stockInventory.getStockHandleId() != null;
-        if (updateMode) {
-            needProcessDetails = doctorWarehouseStockHandleManager.clean(stockInventory, stockInventory.getDetails(), context.getWareHouse(),
-                    new DoctorWarehouseStockHandleManager.MaterialHandleComparator<WarehouseStockInventoryDto.WarehouseStockInventoryDetail>() {
-                        @Override
-                        public boolean same(WarehouseStockInventoryDto.WarehouseStockInventoryDetail source, DoctorWarehouseMaterialHandle target) {
-
-                            if (!source.getMaterialId().equals(target.getMaterialId()))
-                                return false;
-                            if (target.getType().intValue() == WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue())
-                                return source.getQuantity().compareTo(target.getBeforeStockQuantity().subtract(target.getQuantity())) == 0;
-                            else
-                                return source.getQuantity().compareTo(target.getBeforeStockQuantity().add(target.getQuantity())) == 0;
-                        }
-
-                        @Override
-                        public boolean notImportDifferentProcess(WarehouseStockInventoryDto.WarehouseStockInventoryDetail source, DoctorWarehouseMaterialHandle target) {
-                            if (Objects.equals(source.getRemark(), target.getRemark()))
-                                return false;
-                            else {
-                                target.setRemark(source.getRemark());
-                                return true;
-                            }
-                        }
-                    });
-        } else
-            needProcessDetails = stockInventory.getDetails();
-
-        Map<Long, List<DoctorWarehouseSku>> skuMap = doctorWarehouseSkuDao.findByIds(
-                needProcessDetails.stream()
-                        .map(WarehouseStockInventoryDto.WarehouseStockInventoryDetail::getMaterialId)
-                        .collect(Collectors.toList()))
-                .stream().collect(Collectors.groupingBy(DoctorWarehouseSku::getId));
-
-        for (WarehouseStockInventoryDto.WarehouseStockInventoryDetail detail : needProcessDetails) {
-
-//            DoctorWarehouseSku sku = doctorWarehouseSkuDao.findById(detail.getMaterialId());
-            if (!skuMap.containsKey(detail.getMaterialId()))
-                throw new InvalidException("warehouse.sku.not.found", detail.getMaterialId());
-
-            DoctorWarehouseSku sku = skuMap.get(detail.getMaterialId()).get(0);
-
-            if (!sku.getType().equals(context.getWareHouse().getType()))
-                throw new InvalidException("basic.material.not.allow.in.this.warehouse", sku.getItemId(), context.getWareHouse().getWareHouseName());
-
-            //找到对应库存
-            DoctorWarehouseStock stock = getStock(stockInventory.getWarehouseId(), detail.getMaterialId(), null);
-            if (null == stock)
-                throw new InvalidException("stock.not.found", context.getWareHouse().getWareHouseName(), sku.getName());
-
-            int compareResult = stock.getQuantity().compareTo(detail.getQuantity());
-
-            if (!updateMode && compareResult == 0) {
-                log.info("盘点库存量与原库存量一致，warehouse[{}],material[{}]", stockInventory.getWarehouseId(), detail.getMaterialId());
-                continue;
-            }
-
-            DoctorWarehousePurchase purchaseCriteria = new DoctorWarehousePurchase();
-            purchaseCriteria.setWarehouseId(stock.getWarehouseId());
-            purchaseCriteria.setMaterialId(stock.getSkuId());
-
-            DoctorWarehouseMaterialHandle materialHandle = new DoctorWarehouseMaterialHandle();
-            materialHandle.setStockHandleId(stockHandle.getId());
-            materialHandle.setFarmId(stockInventory.getFarmId());
-            materialHandle.setWarehouseId(stockInventory.getWarehouseId());
-            materialHandle.setWarehouseName(context.getWareHouse().getWareHouseName());
-            materialHandle.setWarehouseType(context.getWareHouse().getType());
-            materialHandle.setMaterialId(detail.getMaterialId());
-            materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
-            materialHandle.setMaterialName(sku.getName());
-
-            materialHandle.setHandleDate(stockInventory.getHandleDate().getTime());
-            materialHandle.setHandleYear(stockInventory.getHandleDate().get(Calendar.YEAR));
-            materialHandle.setHandleMonth(stockInventory.getHandleDate().get(Calendar.MONTH) + 1);
-            DoctorBasic unit = doctorBasicDao.findById(Long.parseLong(sku.getUnit()));
-            if (null != unit)
-                materialHandle.setUnit(unit.getName());
-            materialHandle.setBeforeStockQuantity(stock.getQuantity());
-            materialHandle.setOperatorId(stockInventory.getOperatorId());
-            materialHandle.setOperatorName(stockInventory.getOperatorName());
-            materialHandle.setRemark(detail.getRemark());
-
-            BigDecimal changedQuantity;
-            if (compareResult > 0) {  //盘亏
-
-                purchaseCriteria.setHandleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue());
-                List<DoctorWarehousePurchase> purchases = doctorWarehousePurchaseDao.list(purchaseCriteria);
-                if (null == purchases || purchases.isEmpty())
-                    throw new InvalidException("purchase.not.found", stock.getWarehouseName(), stock.getSkuName());
-                //根据处理日期倒序，找出最近一次的入库记录
-                purchases.sort(Comparator.comparing(DoctorWarehousePurchase::getHandleDate));
-
-                //盘亏
-                changedQuantity = stock.getQuantity().subtract(detail.getQuantity());
-//                    long averagePrice = handleOutAndCalcAveragePrice(changedQuantity, purchases, stockAndPurchases, stocks, false, null, null);
-                DoctorWarehouseHandlerManager.PurchaseHandleContext purchaseHandleContext = getNeedPurchase(purchases, changedQuantity);
-                materialHandle.setUnitPrice(doctorWarehousePurchaseManager.calculateUnitPrice(stock));
-
-                materialHandle.setType(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue());
-                materialHandle.setQuantity(changedQuantity);
-                stock.setQuantity(detail.getQuantity());
-                doctorWarehouseHandlerManager.outStock(stock, purchaseHandleContext, materialHandle);
-                doctorWarehouseStockMonthlyManager.count(stock.getWarehouseId(),
-                        stock.getSkuId(),
-                        stockInventory.getHandleDate().get(Calendar.YEAR),
-                        stockInventory.getHandleDate().get(Calendar.MONTH) + 1,
-                        changedQuantity,
-                        materialHandle.getUnitPrice(),
-                        false);
-            } else {
-
-                PageInfo page = new PageInfo(1, 1);
-                Paging<DoctorWarehousePurchase> purchases = doctorWarehousePurchaseDao.paging(page.getOffset(), page.getLimit(), purchaseCriteria);
-                if (null == purchases || purchases.isEmpty())
-                    new InvalidException("purchase.not.found", stock.getWarehouseName(), stock.getSkuName());
-
-                DoctorWarehousePurchase lastPurchase = purchases.getData().get(0);
-
-                //盘盈
-                changedQuantity = detail.getQuantity().subtract(stock.getQuantity());
-                DoctorWarehousePurchase purchase = new DoctorWarehousePurchase();
-                purchase.setFarmId(stock.getFarmId());
-                purchase.setHandleDate(stockInventory.getHandleDate().getTime());
-                purchase.setWarehouseId(stock.getWarehouseId());
-                purchase.setWarehouseName(stock.getWarehouseName());
-                purchase.setWarehouseType(stock.getWarehouseType());
-                purchase.setMaterialId(stock.getSkuId());
-                purchase.setVendorName(lastPurchase.getVendorName());
-                purchase.setQuantity(changedQuantity);
-                purchase.setHandleFinishFlag(WarehousePurchaseHandleFlag.NOT_OUT_FINISH.getValue());
-                purchase.setHandleQuantity(new BigDecimal(0));
-                purchase.setUnitPrice(lastPurchase.getUnitPrice());
-                purchase.setHandleMonth(stockInventory.getHandleDate().get(Calendar.MONTH) + 1);
-                purchase.setHandleYear(stockInventory.getHandleDate().get(Calendar.YEAR));
-
-                materialHandle.setQuantity(changedQuantity);
-                materialHandle.setUnitPrice(new BigDecimal(purchase.getUnitPrice()));
-                materialHandle.setVendorName(purchase.getVendorName());
-                materialHandle.setType(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue());
-                stock.setQuantity(detail.getQuantity());
-
-                doctorWarehouseHandlerManager.inStock(stock, Collections.singletonList(purchase), materialHandle, null, null);
-                doctorWarehouseStockMonthlyManager.count(stock.getWarehouseId(),
-                        stock.getSkuId(),
-                        stockInventory.getHandleDate().get(Calendar.YEAR),
-                        stockInventory.getHandleDate().get(Calendar.MONTH) + 1,
-                        changedQuantity,
-                        materialHandle.getUnitPrice(),
-                        true);
-            }
-
-        }
-
-        return Response.ok(stockHandle.getId());
+        return warehouseInventoryStockService.handle(stockInventory);
     }
 
     @Override

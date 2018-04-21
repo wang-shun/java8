@@ -108,20 +108,19 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
      */
     public Date buildNewHandleDate(WarehouseMaterialHandleType handleType, Calendar newHandleDate) {
 
-
-        if (WarehouseMaterialHandleType.isBigIn(handleType.getValue())) {
-            newHandleDate.set(Calendar.HOUR_OF_DAY, 0);
-            newHandleDate.set(Calendar.MINUTE, 0);
-            newHandleDate.set(Calendar.SECOND, 0);
-            newHandleDate.set(Calendar.MILLISECOND, 0);
-            return newHandleDate.getTime();
-        } else {
+//        if (WarehouseMaterialHandleType.isBigIn(handleType.getValue())) {
+//            newHandleDate.set(Calendar.HOUR_OF_DAY, 0);
+//            newHandleDate.set(Calendar.MINUTE, 0);
+//            newHandleDate.set(Calendar.SECOND, 0);
+//            newHandleDate.set(Calendar.MILLISECOND, 0);
+//            return newHandleDate.getTime();
+//        } else {
             newHandleDate.set(Calendar.HOUR_OF_DAY, 23);
             newHandleDate.set(Calendar.MINUTE, 59);
             newHandleDate.set(Calendar.SECOND, 59);
             newHandleDate.set(Calendar.MILLISECOND, 0);
             return newHandleDate.getTime();
-        }
+//        }
     }
 
     public Date buildNewHandleDateForUpdate(WarehouseMaterialHandleType handleType, Calendar newHandleDate) {
@@ -237,7 +236,7 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
      * @param skuId       物料id
      * @return 历史库存量
      */
-    protected BigDecimal getHistoryQuantity(Date handleDate, Long warehouseId, Long skuId) {
+    public BigDecimal getHistoryQuantity(Date handleDate, Long warehouseId, Long skuId) {
         //如果是入库，handleDate当日第一笔
         //如果是出库，handleDate当日最后一笔
         return doctorWarehouseMaterialHandleDao.getHistoryStock(warehouseId, skuId, handleDate, false);
@@ -251,7 +250,7 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
      * @param skuId       物料id
      * @return 历史库存量
      */
-    protected BigDecimal getHistoryQuantityInclude(Date handleDate, Long warehouseId, Long skuId) {
+    public BigDecimal getHistoryQuantityInclude(Date handleDate, Long warehouseId, Long skuId) {
         return doctorWarehouseMaterialHandleDao.getHistoryStock(warehouseId, skuId, handleDate, true);
     }
 
