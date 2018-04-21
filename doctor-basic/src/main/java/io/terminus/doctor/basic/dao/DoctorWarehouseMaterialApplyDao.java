@@ -5,6 +5,7 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.enums.WarehouseMaterialApplyType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroup;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
@@ -106,8 +107,8 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         map.put("amount", amount);
         this.sqlSession.update(this.sqlId("updateUnitPriceAndAmountByMaterialHandle"), map);
     }
-    public List<Map<String,Object>> selectPigGroupApply(Integer farmId, Integer pigType, String pigName, String pigGroupName,
-                                                        Integer skuType, String skuName, Date openAt, Date closeAt){
+    public List<Map<String,DoctorWarehouseMaterialApplyPigGroup>> selectPigGroupApply(Integer farmId, Integer pigType, String pigName, String pigGroupName,
+                                                                                      Integer skuType, String skuName, Date openAt, Date closeAt){
         Map<String,Object> map = Maps.newHashMap();
         map.put("farmId",farmId);
         map.put("pigType",pigType);
