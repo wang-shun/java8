@@ -60,6 +60,8 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     private DoctorFarmBasicReadService doctorFarmBasicReadService;
     @Autowired
     private WarehouseOutStockService warehouseOutStockService;
+    @Autowired
+    private WarehouseRefundStockService warehouseRefundStockService;
 
     @Autowired
     private DoctorWarehouseHandlerManager doctorWarehouseHandlerManager;
@@ -203,7 +205,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
                         warehouseInManager.updateQuantity(materialHandle, changedQuantity);
                     }
                     if (!DateUtil.inSameDate(stockHandle.getHandleDate(), stockIn.getHandleDate().getTime())) {
-                        materialHandle.setHandleDate(warehouseInManager.buildNewHandleDate(WarehouseMaterialHandleType.IN, stockIn.getHandleDate()));
+                        materialHandle.setHandleDate(warehouseInManager.buildNewHandleDateForUpdate(WarehouseMaterialHandleType.IN, stockIn.getHandleDate()));
                     }
 
                     if (detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0 ||
@@ -228,6 +230,13 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     @ExceptionHandle("doctor.warehouse.stock.out.fail")
     public Response<Long> out(WarehouseStockOutDto stockOut) {
         return warehouseOutStockService.handle(stockOut);
+    }
+
+    @Override
+    @Transactional
+    @ExceptionHandle("doctor.warehouse.stock.refund.fail")
+    public Response<Long> refund(WarehouseStockRefundDto stockRefundDto) {
+        return warehouseRefundStockService.handle(stockRefundDto);
     }
 
     private List<Lock> lockedIfNecessary(AbstractWarehouseStockDto stockDto) {

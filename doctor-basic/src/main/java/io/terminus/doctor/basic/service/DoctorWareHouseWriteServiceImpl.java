@@ -69,7 +69,7 @@ public class DoctorWareHouseWriteServiceImpl implements DoctorWareHouseWriteServ
         try {
             Integer count =  doctorWarehouseMaterialHandleDao.getWarehouseMaterialHandleCount(wareHouse.getId());
             if(count > 0) {
-                throw new JsonResponseException("warehouse.handle.not.allow.updateOrDelete.type");
+                return  Response.fail("该仓库有单据数据,不能修改或删除");
             }
         	return Response.ok(this.doctorWareHouseManager.updateWareHouseInfo(wareHouse));
         }catch (IllegalStateException se){
@@ -91,7 +91,7 @@ public class DoctorWareHouseWriteServiceImpl implements DoctorWareHouseWriteServ
         try{
             Integer count =  doctorWarehouseMaterialHandleDao.getWarehouseMaterialHandleCount(wareHouse.getId());
             if(count > 0) {
-                throw new JsonResponseException("warehouse.handle.not.allow.updateOrDelete.type");
+                return  Response.fail("该仓库有单据数据,不能修改或删除");
             }
             return Response.ok(this.doctorWareHouseManager.deleteWareHouseInfo(wareHouse));
         }catch (IllegalStateException se){

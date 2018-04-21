@@ -1,10 +1,7 @@
 package io.terminus.doctor.basic.manager;
 
 import io.terminus.common.exception.ServiceException;
-import io.terminus.doctor.basic.dao.DoctorBasicDao;
-import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
-import io.terminus.doctor.basic.dao.DoctorWarehouseSkuDao;
-import io.terminus.doctor.basic.dao.DoctorWarehouseStockDao;
+import io.terminus.doctor.basic.dao.*;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDetail;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
@@ -15,6 +12,8 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.common.utils.DateUtil;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.support.locks.LockRegistry;
 
@@ -25,7 +24,7 @@ import java.util.stream.Collectors;
 /**
  * Created by sunbo@terminus.io on 2018/4/8.
  */
-public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetail> {
+public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetail, F extends AbstractWarehouseStockDto> {
 
     @Autowired
     private LockRegistry lockRegistry;
@@ -38,6 +37,9 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
 
     @Autowired
     protected DoctorWarehouseStockDao doctorWarehouseStockDao;
+
+    @Autowired
+    protected DoctorWarehouseStockHandleDao doctorWarehouseStockHandleDao;
 
     @Autowired
     protected DoctorBasicDao doctorBasicDao;
@@ -55,6 +57,15 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
 
         //重算单据明细，包括该笔单据所在的那一天
         recalculate(materialHandle.getHandleDate(), true, materialHandle.getWarehouseId(), materialHandle.getMaterialId(), historyQuantity);
+    }
+
+    public void recalculate(DoctorWarehouseMaterialHandle materialHandle, Date recalculateDate) {
+
+        //历史库存量,不包括该笔单据所在的那一天
+        BigDecimal historyQuantity = getHistoryQuantity(recalculateDate, materialHandle.getWarehouseId(), materialHandle.getMaterialId());
+
+        //重算单据明细，包括该笔单据所在的那一天
+        recalculate(recalculateDate, true, materialHandle.getWarehouseId(), materialHandle.getMaterialId(), historyQuantity);
     }
 
     /**
@@ -96,15 +107,41 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
      * @return
      */
     public Date buildNewHandleDate(WarehouseMaterialHandleType handleType, Calendar newHandleDate) {
+
+
         if (WarehouseMaterialHandleType.isBigIn(handleType.getValue())) {
             newHandleDate.set(Calendar.HOUR_OF_DAY, 0);
             newHandleDate.set(Calendar.MINUTE, 0);
             newHandleDate.set(Calendar.SECOND, 0);
+            newHandleDate.set(Calendar.MILLISECOND, 0);
             return newHandleDate.getTime();
         } else {
             newHandleDate.set(Calendar.HOUR_OF_DAY, 23);
             newHandleDate.set(Calendar.MINUTE, 59);
             newHandleDate.set(Calendar.SECOND, 59);
+            newHandleDate.set(Calendar.MILLISECOND, 0);
+            return newHandleDate.getTime();
+        }
+    }
+
+    public Date buildNewHandleDateForUpdate(WarehouseMaterialHandleType handleType, Calendar newHandleDate) {
+
+        if (DateUtil.inSameDate(newHandleDate.getTime(), new Date())) {
+            DateTime old = new DateTime(newHandleDate.getTime());
+            return new DateTime().withDate(old.getYear(), old.getMonthOfYear(), old.getDayOfMonth()).toDate();
+        }
+
+        if (WarehouseMaterialHandleType.isBigIn(handleType.getValue())) {
+            newHandleDate.set(Calendar.HOUR_OF_DAY, 0);
+            newHandleDate.set(Calendar.MINUTE, 0);
+            newHandleDate.set(Calendar.SECOND, 0);
+            newHandleDate.set(Calendar.MILLISECOND, 0);
+            return newHandleDate.getTime();
+        } else {
+            newHandleDate.set(Calendar.HOUR_OF_DAY, 23);
+            newHandleDate.set(Calendar.MINUTE, 59);
+            newHandleDate.set(Calendar.SECOND, 59);
+            newHandleDate.set(Calendar.MILLISECOND, 0);
             return newHandleDate.getTime();
         }
     }
@@ -229,9 +266,16 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
      * @param wareHouse
      */
     public abstract void create(T detail,
-                                AbstractWarehouseStockDto stockDto,
+                                F stockDto,
                                 DoctorWarehouseStockHandle stockHandle,
                                 DoctorWareHouse wareHouse);
+
+    public void create(List<T> details, F stockDto, DoctorWarehouseStockHandle stockHandle, DoctorWareHouse wareHouse) {
+
+        details.forEach(d -> {
+            create(d, stockDto, stockHandle, wareHouse);
+        });
+    }
 
 
     protected DoctorWarehouseMaterialHandle buildMaterialHandle(T detail,

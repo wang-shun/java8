@@ -64,6 +64,15 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
     }
 
     /**
+     * 删除猪群或母猪领用
+     *
+     * @param materialHandleId
+     */
+    public void deleteGroupApply(Long materialHandleId) {
+        this.sqlSession.delete(this.sqlId("deleteGroupApply"), materialHandleId);
+    }
+
+    /**
      * 猪群饲料指定时间段内领用和
      *
      * @param groupId 猪群id

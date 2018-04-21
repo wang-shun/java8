@@ -78,9 +78,18 @@ public interface DoctorWarehouseStockWriteService {
      */
     Response<Long> out(WarehouseStockOutDto stockOut);
 
+    /**
+     * 退料入库
+     *
+     * @param stockRefundDto
+     * @return
+     */
+    Response<Long> refund(WarehouseStockRefundDto stockRefundDto);
+
 
     /**
      * 配方生产
+     *
      * @param formulaDto
      * @return
      */
@@ -88,6 +97,7 @@ public interface DoctorWarehouseStockWriteService {
 
     /**
      * 创建
+     *
      * @param doctorWarehouseStock
      * @param list
      * @param dblist
@@ -100,6 +110,7 @@ public interface DoctorWarehouseStockWriteService {
 
     /**
      * 修改
+     *
      * @param doctorWarehouseStock
      * @param list
      * @param dblist

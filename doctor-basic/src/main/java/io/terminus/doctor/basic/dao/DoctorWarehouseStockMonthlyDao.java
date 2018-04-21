@@ -88,6 +88,27 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
         return new AmountAndQuantityDto(result.get("quantity"), result.get("amount"));
     }
 
+    /**
+     * 查询每个仓库的余额和余量
+     *
+     * @return
+     */
+    public Map<Long, AmountAndQuantityDto> findEachWarehouseBalanceBySettlementDate(Long orgId, Date settlementDate) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("orgId", orgId);
+        params.put("settlementDate", settlementDate);
+
+        List<Map<String, Object>> result = this.sqlSession.selectList(this.sqlId("findEachWarehouseBalanceBySettlementDate"), params);
+
+        Map<Long, AmountAndQuantityDto> balances = new HashMap<>();
+
+        result.forEach(r -> {
+            balances.put((Long) r.get("warehouseId"), new AmountAndQuantityDto((BigDecimal) r.get("amount"), (BigDecimal) r.get("quantity")));
+        });
+
+        return balances;
+    }
+
     public void reverseSettlement(Long orgId, Date settlementDate) {
         Map<String, Object> params = new HashMap<>();
         params.put("warehouseId", orgId);

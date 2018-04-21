@@ -260,7 +260,6 @@
         FROM <include refid="tb"/>
         WHERE warehouse_id=#{warehouseId}
         AND material_id=#{skuId}
-        AND <![CDATA[ handle_date >= #{handleDate}]]>
         <choose>
             <when test="includeHandleDate">
                 AND <![CDATA[ handle_date >= #{handleDate}]]>
@@ -274,7 +273,18 @@
     </select>
 
     <select id="countHistoryStock" parameterType="map" resultType="BigDecimal">
-        SELECT ifnull(sum(quantity),0) as quantity
+        SELECT ifnull(sum(
+        case type
+        when '1' then quantity
+        when '2' then -quantity
+        when '7' then quantity
+        when '8' then -quantity
+        when '9' then quantity
+        when '10' then -quantity
+        when '11' then quantity
+        when '12' then -quantity
+        when '13' then quantity end
+        ),0) as quantity
         FROM <include refid="tb"/>
         WHERE warehouse_id=#{warehouseId}
         AND material_id=#{skuId}
@@ -404,6 +414,10 @@
         AND settlement_date=#{settlementDate}
         AND delete_flag=1
     </update>
+
+    <select id="countQuantityAlreadyRefund" parameterType="long" resultType="BigDecimal">
+        select ifnull(sum(quantity),0) from doctor_warehouse_material_handle where rel_material_handle_id=#{countQuantityAlreadyRefund}
+    </select>
 
     <select id="getWarehouseMaterialHandleCount" resultType="int">
         select count(1) as count from  doctor_warehouse_material_handle

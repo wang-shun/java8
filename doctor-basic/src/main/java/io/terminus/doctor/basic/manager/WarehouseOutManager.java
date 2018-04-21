@@ -3,6 +3,7 @@ package io.terminus.doctor.basic.manager;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDetail;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDto;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
@@ -54,6 +55,10 @@ public class WarehouseOutManager extends AbstractStockManager {
             BigDecimal currentQuantity = doctorWarehouseStockDao.findBySkuIdAndWarehouseId(detail.getMaterialId(), wareHouse.getId())
                     .orElse(DoctorWarehouseStock.builder().quantity(new BigDecimal(0)).build())
                     .getQuantity();
+
+            if (currentQuantity.compareTo(materialHandle.getQuantity()) < 0)
+                throw new ServiceException("warehouse.stock.not.enough");
+
             materialHandle.setBeforeStockQuantity(currentQuantity);
         }
         doctorWarehouseMaterialHandleDao.create(materialHandle);
@@ -62,5 +67,11 @@ public class WarehouseOutManager extends AbstractStockManager {
     @Override
     public void delete(DoctorWarehouseMaterialHandle materialHandle) {
 
+        materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.DELETE.getValue());
+        doctorWarehouseMaterialHandleDao.update(materialHandle);
+
+        if (!DateUtil.inSameDate(materialHandle.getHandleDate(), new Date())) {
+            recalculate(materialHandle);
+        }
     }
 }
