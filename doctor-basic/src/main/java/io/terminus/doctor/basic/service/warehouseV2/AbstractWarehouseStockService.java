@@ -33,7 +33,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
     private LockRegistry lockRegistry;
 
     @Autowired
-    private DoctorWareHouseDao doctorWareHouseDao;
+    protected DoctorWareHouseDao doctorWareHouseDao;
     @Autowired
     private DoctorWarehouseStockHandleDao doctorWarehouseStockHandleDao;
     @Autowired
@@ -58,8 +58,12 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
                 //新增
                 stockHandle = create(stockDto, wareHouse);
             } else {
+
+                stockHandle = doctorWarehouseStockHandleDao.findById(stockDto.getStockHandleId());
+
+                beforeUpdate(stockDto, stockHandle);
                 //编辑
-                stockHandle = update(stockDto, wareHouse);
+                stockHandle = update(stockDto, wareHouse, stockHandle);
             }
 
             return Response.ok(stockHandle.getId());
@@ -78,8 +82,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
         return stockHandle;
     }
 
-    private DoctorWarehouseStockHandle update(T stockDto, DoctorWareHouse wareHouse) {
-        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleDao.findById(stockDto.getStockHandleId());
+    private DoctorWarehouseStockHandle update(T stockDto, DoctorWareHouse wareHouse, DoctorWarehouseStockHandle stockHandle) {
 
         //之前的明细单
         Map<Long, List<DoctorWarehouseMaterialHandle>> oldMaterialHandles = doctorWarehouseMaterialHandleDao.findByStockHandle(stockDto.getStockHandleId()).stream().collect(Collectors.groupingBy(DoctorWarehouseMaterialHandle::getId));
@@ -123,6 +126,15 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
         //更新单据
         doctorWarehouseStockHandleManager.update(stockDto, stockHandle);
         return stockHandle;
+    }
+
+    /**
+     * 为了子类自定义实现一些功能
+     *
+     * @param stockDto
+     */
+    public void beforeUpdate(T stockDto, DoctorWarehouseStockHandle stockHandle) {
+
     }
 
     protected abstract WarehouseMaterialHandleType getMaterialHandleType();

@@ -85,8 +85,8 @@ public class DoctorWarehouseStockHandleManager {
             serialNo = "D" + DateFormatUtils.format(new Date(), "yyyyMMddhhmmssSSS");
 
         DoctorWarehouseStockHandle handle = new DoctorWarehouseStockHandle();
-        handle.setFarmId(stockDto.getFarmId());
-        handle.setWarehouseId(stockDto.getWarehouseId());
+        handle.setFarmId(wareHouse.getFarmId());
+        handle.setWarehouseId(wareHouse.getId());
         handle.setWarehouseType(wareHouse.getType());
         handle.setWarehouseName(wareHouse.getWareHouseName());
 

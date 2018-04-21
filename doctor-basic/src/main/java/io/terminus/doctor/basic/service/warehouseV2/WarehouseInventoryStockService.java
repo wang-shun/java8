@@ -235,53 +235,6 @@ public class WarehouseInventoryStockService extends
     @Override
     protected void changed(DoctorWarehouseMaterialHandle materialHandle, WarehouseStockInventoryDto.WarehouseStockInventoryDetail detail, DoctorWarehouseStockHandle stockHandle, WarehouseStockInventoryDto stockDto, DoctorWareHouse wareHouse) {
 
-        materialHandle.setRemark(detail.getRemark());
-
-
-        BigDecimal inventoryQuantity;
-        if (materialHandle.getType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue()))
-            inventoryQuantity = materialHandle.getBeforeStockQuantity().add(materialHandle.getQuantity());
-        else
-            inventoryQuantity = materialHandle.getBeforeStockQuantity().subtract(materialHandle.getQuantity());
-
-        if (detail.getQuantity().compareTo(inventoryQuantity) != 0
-                || !DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime())) {
-
-            //更改了数量
-            if (detail.getQuantity().compareTo(inventoryQuantity) != 0) {
-
-                BigDecimal changedQuantity = detail.getQuantity().subtract(materialHandle.getBeforeStockQuantity());
-                if (changedQuantity.compareTo(new BigDecimal(0)) < 0)
-                    changedQuantity = changedQuantity.negate();
-
-                if (changedQuantity.compareTo(materialHandle.getQuantity()) != 0) {
-
-                }
-
-                if (changedQuantity.compareTo(new BigDecimal(0)) > 0) {
-
-                    doctorWarehouseStockManager.in(detail.getMaterialId(), changedQuantity, wareHouse);
-                } else {
-                    doctorWarehouseStockManager.out(detail.getMaterialId(), changedQuantity, wareHouse);
-                }
-                materialHandle.setQuantity(detail.getQuantity());
-            }
-
-            Date recalculateDate = materialHandle.getHandleDate();
-            int days = DateUtil.getDeltaDays(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
-            //更改了操作日期
-            if (days != 0) {
-                materialHandle.setHandleDate(warehouseInventoryManager.buildNewHandleDateForUpdate(WarehouseMaterialHandleType.OUT, stockDto.getHandleDate()));
-                doctorWarehouseMaterialHandleDao.update(materialHandle);
-                if (days < 0) {//事件日期改小了，重算日期采用新的日期
-                    recalculateDate = materialHandle.getHandleDate();
-                }
-            }
-            warehouseInventoryManager.recalculate(materialHandle, recalculateDate);
-
-        } else {
-            //只更新了备注
-            doctorWarehouseMaterialHandleDao.update(materialHandle);
-        }
+        throw new UnsupportedOperationException();
     }
 }
