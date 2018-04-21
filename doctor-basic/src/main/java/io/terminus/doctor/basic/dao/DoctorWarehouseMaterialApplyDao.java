@@ -7,6 +7,8 @@ import io.terminus.doctor.basic.enums.WarehouseMaterialApplyType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -91,6 +93,21 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
 
     public void deleteByMaterialHandle(Long materialHandleId) {
         getSqlSession().delete("deleteByMaterialHandle", materialHandleId);
+    }
+
+    public void reverseSettlement(Long orgId, Date settlementDate) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("orgId", orgId);
+        map.put("settlementDate", settlementDate);
+        this.sqlSession.update(this.sqlId("reverseSettlement"), map);
+    }
+
+    public void updateUnitPriceAndAmountByMaterialHandle(Long materialHandleId, BigDecimal unitPrice, BigDecimal amount) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("materialHandleId", materialHandleId);
+        map.put("unitPrice", unitPrice);
+        map.put("amount", amount);
+        this.sqlSession.update(this.sqlId("updateUnitPriceAndAmountByMaterialHandle"), map);
     }
 }
 

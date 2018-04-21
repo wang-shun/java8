@@ -11,7 +11,7 @@ import java.util.Date;
 /**
  * Desc:
  * Mail: [ your email ]
- * Date: 2018-04-19 19:48:57
+ * Date: 2018-04-21 12:22:21
  * Created by [ your name ]
  */
 @Data
@@ -20,7 +20,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class DoctorWarehouseMaterialApply implements Serializable {
 
-    private static final long serialVersionUID = 247663270899996058L;
+    private static final long serialVersionUID = 7135833311250873988L;
 
     /**
      * 自增主键
@@ -120,7 +120,7 @@ public class DoctorWarehouseMaterialApply implements Serializable {
     private String materialName;
 
     /**
-     * 物料类型
+     * 物料类型，易耗品，原料，饲料，药品，饲料
      *
      * @see io.terminus.doctor.common.enums.WareHouseType
      */
@@ -143,9 +143,20 @@ public class DoctorWarehouseMaterialApply implements Serializable {
 
     /**
      * 领用类型。0猪舍，1猪群，2母猪
+     *
      * @see io.terminus.doctor.basic.enums.WarehouseMaterialApplyType
      */
     private Integer applyType;
+
+    /**
+     * 金额
+     */
+    private java.math.BigDecimal amount;
+
+    /**
+     * 会计年月
+     */
+    private Date settlementDate;
 
     /**
      * 创建时间

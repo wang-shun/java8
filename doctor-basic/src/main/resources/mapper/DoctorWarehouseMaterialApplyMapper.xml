@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2018-04-19 19:48:57
+ ~ Date: 2018-04-21 12:22:21
  ~ Created by [ your name ]
 -->
 
@@ -33,6 +33,8 @@
         <result property="quantity" column="quantity"/>
         <result property="unitPrice" column="unit_price"/>
         <result property="applyType" column="apply_type"/>
+        <result property="amount" column="amount"/>
+        <result property="settlementDate" column="settlementDate"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
@@ -47,12 +49,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `material_handle_id`, `org_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `pig_barn_id`, `pig_barn_name`, `pig_type`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_id`, `apply_staff_name`, `apply_year`, `apply_month`, `material_name`, `type`, `unit`, `quantity`, `unit_price`, `apply_type`,
+        `material_handle_id`, `org_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `pig_barn_id`, `pig_barn_name`, `pig_type`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_id`, `apply_staff_name`, `apply_year`, `apply_month`, `material_name`, `type`, `unit`, `quantity`, `unit_price`, `apply_type`, `amount`, `settlementDate`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{materialHandleId}, #{orgId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{pigBarnId}, #{pigBarnName}, #{pigType}, #{pigGroupId}, #{pigGroupName}, #{materialId}, #{applyDate}, #{applyStaffId}, #{applyStaffName}, #{applyYear}, #{applyMonth}, #{materialName}, #{type}, #{unit}, #{quantity}, #{unitPrice}, #{applyType},
+        #{materialHandleId}, #{orgId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{pigBarnId}, #{pigBarnName}, #{pigType}, #{pigGroupId}, #{pigGroupName}, #{materialId}, #{applyDate}, #{applyStaffId}, #{applyStaffName}, #{applyYear}, #{applyMonth}, #{materialName}, #{type}, #{unit}, #{quantity}, #{unitPrice}, #{applyType}, #{amount}, #{settlementDate}, 
         now(), now()
     </sql>
 
@@ -81,11 +83,13 @@
             <if test="quantity != null">AND `quantity` = #{quantity}</if>
             <if test="unitPrice != null">AND `unit_price` = #{unitPrice}</if>
             <if test="applyType != null">AND `apply_type` = #{applyType}</if>
+            <if test="amount != null">AND `amount` = #{amount}</if>
+            <if test="settlementDate != null">AND `settlementDate` = #{settlementDate}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
         </where>
     </sql>
-
+    
     <sql id="advCriteria">
         <where>
             <if test="materialHandleId != null">AND `material_handle_id` = #{materialHandleId}</if>
@@ -111,6 +115,8 @@
             <if test="quantity != null">AND `quantity` = #{quantity}</if>
             <if test="unitPrice != null">AND `unit_price` = #{unitPrice}</if>
             <if test="applyType != null">AND `apply_type` = #{applyType}</if>
+            <if test="amount != null">AND `amount` = #{amount}</if>
+            <if test="settlementDate != null">AND `settlementDate` = #{settlementDate}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
 
@@ -190,6 +196,8 @@
             <if test="quantity != null">`quantity` = #{quantity},</if>
             <if test="unitPrice != null">`unit_price` = #{unitPrice},</if>
             <if test="applyType != null">`apply_type` = #{applyType},</if>
+            <if test="amount != null">`amount` = #{amount},</if>
+            <if test="settlementDate != null">`settlementDate` = #{settlementDate},</if>
             updated_at = now()
         </set>
         WHERE id = #{id}
@@ -271,5 +279,19 @@
         material_handle_id=#{materialHandleId}
         AND (apply_type=1 or apply_type=2)
     </delete>
+
+    <update id="reverseSettlement" parameterType="map">
+        UPDATE
+        <include refid="tb"/>
+        set unit_price=0,amount=0
+        where org_id=#{orgId} and settlement_date=#{settlementDate}
+    </update>
+
+    <update id="updateUnitPriceAndAmountByMaterialHandle" parameterType="map">
+        UPDATE
+        <include refid="tb"/>
+        set unit_price=#{unitPrice},amount=#{amount}
+        where material_handle_id=#{materialHandleId}
+    </update>
 
 </mapper>

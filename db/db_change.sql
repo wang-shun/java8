@@ -2196,3 +2196,7 @@ ALTER TABLE doctor_warehouse_material_apply MODIFY unit_price decimal(23,4) NOT 
 
 -- 配方表添加配方名称 2018-04-20
 ALTER TABLE doctor_feed_formulas ADD formula_name VARCHAR(64) NOT NULL COMMENT '配方名称';
+
+-- 领用表添加金额,会计年月字段 2018-04-21
+ALTER TABLE doctor_warehouse_material_apply ADD amount decimal(23,2) NULL COMMENT '金额';
+ALTER TABLE doctor_warehouse_material_apply ADD settlementDate date NULL COMMENT '会计年月';
