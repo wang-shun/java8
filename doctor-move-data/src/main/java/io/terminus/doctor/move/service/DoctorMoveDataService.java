@@ -3122,6 +3122,9 @@ public class DoctorMoveDataService {
 
     private void flushFarrowRelMate(DoctorPigEvent farrowEvent, DoctorPigEvent updateEvent) {
         try {
+            if (notNull(farrowEvent.getRelEventId())) {
+                return;
+            }
             DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(farrowEvent.getPigId(), farrowEvent.getParity());
             updateEvent.setId(farrowEvent.getId());
             updateEvent.setRelEventId(firstMate.getId());
