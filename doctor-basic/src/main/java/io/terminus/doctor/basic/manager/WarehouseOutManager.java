@@ -69,6 +69,10 @@ public class WarehouseOutManager extends AbstractStockManager<WarehouseStockOutD
 
         DoctorWarehouseMaterialApply apply = new DoctorWarehouseMaterialApply();
         apply.setMaterialHandleId(materialHandle.getId());
+        apply.setType(materialHandle.getWarehouseType());
+        apply.setAmount(new BigDecimal(0));
+        apply.setUnitPrice(new BigDecimal(0));
+        apply.setUnit(materialHandle.getUnit());
         apply.setMaterialId(materialHandle.getMaterialId());
         apply.setMaterialName(materialHandle.getMaterialName());
         apply.setFarmId(materialHandle.getFarmId());
