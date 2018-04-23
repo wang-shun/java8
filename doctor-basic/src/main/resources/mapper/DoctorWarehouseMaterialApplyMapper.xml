@@ -320,7 +320,7 @@
             a.pig_group_name,
             e.NAME as pig_name,
             e.staff_name,
-            FROM_UNIXTIME(b.settlement_date),
+            b.settlement_date,
             c.code,
             c.name as sku_name,
             c.unit,
@@ -330,8 +330,8 @@
             c.type as sku_type,
             b.vendor_name,
             c.specification,
-            FROM_UNIXTIME(d.open_at),
-            FROM_UNIXTIME(d.close_at),
+            d.open_at,
+            d.close_at,
             d.farm_name
         FROM
             doctor_warehouse_material_apply a
