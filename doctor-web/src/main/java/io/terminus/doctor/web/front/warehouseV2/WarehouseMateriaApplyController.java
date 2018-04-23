@@ -27,7 +27,7 @@ public class WarehouseMateriaApplyController {
                                                                                @RequestParam(required = false) String skuName,
                                                                                @RequestParam(required = false) Date openAt,
                                                                                @RequestParam(required = false) Date closeAt){
-        Map<String,Object> a = doctorWarehouseMaterialApplyReadService.selectPigGroupApply(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAt,closeAt);
+        Map<String,Object> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApply(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAt,closeAt));
         return a;
     }
 }
