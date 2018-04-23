@@ -729,7 +729,7 @@ public class ReportController {
         //开始导出
         try {
 
-            DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+            DoctorFarm farm = doctorFarmReadService.findFarmById(farmId).getResult();
             if (null == farm)
                 throw new JsonResponseException("farm.not.found");
 
@@ -747,6 +747,7 @@ public class ReportController {
             exporter.setHttpServletResponse(request, response, "物料变动报表");
 
             try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+
                 //设置表头标题
                 Sheet sheet = workbook.createSheet();
 
@@ -762,13 +763,21 @@ public class ReportController {
                 XSSFCellStyle titleCellStyle = workbook.createCellStyle();
                 //样式居中
                 titleCellStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                titleCellStyle.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
                 titleCellStyle.setFont(titleFont);
 
                 //数据样式
                 XSSFCellStyle normalCellStyle = workbook.createCellStyle();
                 //样式居中
                 normalCellStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                normalCellStyle.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
                 normalCellStyle.setFont(normalFont);
+
+                XSSFCellStyle leftCellStyle = workbook.createCellStyle();
+                //样式居左
+                leftCellStyle.setAlignment(HSSFCellStyle.ALIGN_LEFT);
+                leftCellStyle.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
+                leftCellStyle.setFont(normalFont);
 
                 //设置表头列
                 Row titleRow =  sheet.createRow(0);
@@ -908,7 +917,7 @@ public class ReportController {
                             {
                                 dataCell = dataRow.createCell(i);
                                 dataCell.setCellValue(tName);
-                                dataCell.setCellStyle(normalCellStyle);
+                                dataCell.setCellStyle(leftCellStyle);
                             }
 
                             if((i > 0 && i < 12) || (i > 14 && i <= 22))
@@ -937,7 +946,7 @@ public class ReportController {
                         }
 
                         //合并单元格
-                        cra = new CellRangeAddress(startRowIndex, startRowIndex, 1, 11);
+                        cra = new CellRangeAddress(startRowIndex, startRowIndex, 0, 11);
                         sheet.addMergedRegion(cra);
                         cra = new CellRangeAddress(startRowIndex, startRowIndex, 15, 22);
                         sheet.addMergedRegion(cra);
@@ -1059,7 +1068,7 @@ public class ReportController {
                             {
                                 dataCell = dataRow.createCell(i);
                                 dataCell.setCellValue(tName);
-                                dataCell.setCellStyle(normalCellStyle);
+                                dataCell.setCellStyle(leftCellStyle);
                             }
 
                             if((i > 0 && i < 6) || (i > 14 && i <= 22))
@@ -1124,7 +1133,7 @@ public class ReportController {
                         }
 
                         //合并单元格
-                        cra = new CellRangeAddress(startRowIndex, startRowIndex, 1, 5);
+                        cra = new CellRangeAddress(startRowIndex, startRowIndex, 0, 5);
                         sheet.addMergedRegion(cra);
                         cra = new CellRangeAddress(startRowIndex, startRowIndex, 15, 22);
                         sheet.addMergedRegion(cra);
