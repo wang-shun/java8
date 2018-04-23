@@ -107,6 +107,19 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         map.put("amount", amount);
         this.sqlSession.update(this.sqlId("updateUnitPriceAndAmountByMaterialHandle"), map);
     }
+
+    /**
+     * 猪群领用报表
+     * @param farmId
+     * @param pigType
+     * @param pigName
+     * @param pigGroupName
+     * @param skuType
+     * @param skuName
+     * @param openAt
+     * @param closeAt
+     * @return
+     */
     public List<DoctorWarehouseMaterialApplyPigGroup> selectPigGroupApply(Integer farmId, String pigType, String pigName, String pigGroupName,
                                                                                       Integer skuType, String skuName, Date openAt, Date closeAt){
         Map<String,Object> map = Maps.newHashMap();
