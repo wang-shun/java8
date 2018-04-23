@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -14,7 +15,9 @@ import java.util.Date;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorWarehouseMaterialApplyPigGroup {
+public class DoctorWarehouseMaterialApplyPigGroup implements Serializable {
+
+    private static final long serialVersionUID = 2900698176964489592L;
 
     //猪舍名称
     private String pigName;

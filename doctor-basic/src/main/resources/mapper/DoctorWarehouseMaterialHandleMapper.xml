@@ -636,18 +636,6 @@
         and d.name like CONCAT('%',#{materialName},'%')
     </select>
 
-    <select id="getPigBarnNameOption" parameterType="long" resultType="map">
-        select id,`name` from doctor_barns where farm_id=#{farmId}
-    </select>
-
-    <select id="getPigGroupNameOption" parameterType="long" resultType="map">
-        select id,group_code from doctor_groups where farm_id=#{farmId}
-    </select>
-
-    <select id="getWareHouseDataOption" parameterType="long" resultType="map">
-        select id,ware_house_name from doctor_ware_houses where farm_id=#{farmId}
-    </select>
-
 
     <sql id ="balanceAmount">
         (select ifnull(sum(b.balance_amount),0)
@@ -682,4 +670,15 @@
         ) as outAmount,
     </sql>
 
+    <select id="getPigBarnNameOption" parameterType="long" resultType="map">
+        select id,`name` from doctor_barns where farm_id=#{farmId}
+    </select>
+
+    <select id="getPigGroupNameOption" parameterType="long" resultType="map">
+        select id,group_code from doctor_groups where farm_id=#{farmId}
+    </select>
+
+    <select id="getWareHouseDataOption" parameterType="long" resultType="map">
+        select id,ware_house_name from doctor_ware_houses where farm_id=#{farmId}
+    </select>
 </mapper>

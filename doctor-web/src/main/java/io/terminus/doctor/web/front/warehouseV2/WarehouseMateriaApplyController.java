@@ -20,7 +20,7 @@ public class WarehouseMateriaApplyController {
 
     @RequestMapping(method = RequestMethod.GET, value = "piggroup/{farmId}")
     public Map<String,Object> selectPigGroupApply(@PathVariable Integer farmId,
-                                                                               @RequestParam(required = false) Integer pigType,
+                                                                               @RequestParam(required = false) String pigType,
                                                                                @RequestParam(required = false) String pigName,
                                                                                @RequestParam(required = false) String pigGroupName,
                                                                                @RequestParam(required = false) Integer skuType,

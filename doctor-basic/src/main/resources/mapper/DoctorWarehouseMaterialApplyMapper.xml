@@ -317,7 +317,7 @@
 
     <select id="selectPigGroupApply" parameterType="map" resultMap="DoctorWarehouseMaterialApplyPigGroupMap">
       SELECT
-        a.pig_group_name,
+            a.pig_group_name,
             e.NAME as pig_name,
             e.staff_name,
             b.settlement_date,

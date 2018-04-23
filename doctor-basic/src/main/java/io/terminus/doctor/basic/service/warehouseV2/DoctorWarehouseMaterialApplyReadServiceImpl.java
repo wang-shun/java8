@@ -132,18 +132,17 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
     }
 
     @Override
-    public Map<String,Object> selectPigGroupApply(Integer farmId, Integer pigType, String pigName, String pigGroupName,
+    public Map<String,Object> selectPigGroupApply(Integer farmId, String pigType, String pigName, String pigGroupName,
                                                                                                 Integer skuType, String skuName, Date openAt, Date closeAt){
-        List<Map<String,DoctorWarehouseMaterialApplyPigGroup>> pigGroupList =doctorWarehouseMaterialApplyDao.selectPigGroupApply(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAt,closeAt);
-        pigGroupList.get(0);
+        List<DoctorWarehouseMaterialApplyPigGroup> pigGroupList =doctorWarehouseMaterialApplyDao.selectPigGroupApply(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAt,closeAt);
         Double allQuantity = 0.0;
         Double allAmount = 0.0;
         for(int i = 0;i<pigGroupList.size(); i++){
-            if(((DoctorWarehouseMaterialApplyPigGroup)pigGroupList.get(i)).getQuantity() != null){
-                allQuantity =((DoctorWarehouseMaterialApplyPigGroup)pigGroupList.get(i)).getQuantity() + allQuantity;
+            if(pigGroupList.get(i).getQuantity() != null){
+                allQuantity =pigGroupList.get(i).getQuantity() + allQuantity;
             }
-            if(((DoctorWarehouseMaterialApplyPigGroup)pigGroupList.get(i)).getAmount() != null) {
-                allAmount = ((DoctorWarehouseMaterialApplyPigGroup) pigGroupList.get(i)).getAmount() + allAmount;
+            if(pigGroupList.get(i).getAmount() != null) {
+                allAmount = pigGroupList.get(i).getAmount() + allAmount;
             }
         }
         Map<String,Object> map = new HashMap<>();
