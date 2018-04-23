@@ -736,6 +736,26 @@ public class ReportController {
             String materialName,
             HttpServletRequest request, HttpServletResponse response) {
 
+        if(null == farmId)
+        {
+            throw new JsonResponseException("stock.farmId.null");
+        }
+
+        if(null == settlementDate)
+        {
+            throw new JsonResponseException("stock.settlementDate.null");
+        }
+
+        if(null == warehouseId)
+        {
+            throw new JsonResponseException("stock.warehouseId.null");
+        }
+
+        if(null == materialName)
+        {
+            throw new JsonResponseException("stock.materialName.null");
+        }
+
         //开始导出
         try {
 
