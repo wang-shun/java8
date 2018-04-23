@@ -773,7 +773,7 @@
         where b.farm_id=#{farmId}
         and b.delete_flag=1
         and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
-        and a.warehouse_id=#{warehouseId}
+        and b.warehouse_id=#{warehouseId}
         and d.name like CONCAT('%',#{materialName},'%')
         <if test="settlementDate != null">
             and date_format(b.settlement_date,'%Y-%m') = #{settlementDate}
@@ -793,7 +793,7 @@
         <if test="type != null">
             and d.type=#{type}
         </if>
-        order by b.handle_date,b.settlement_date,b.id
+        order by d.`name`,b.handle_date,b.settlement_date,b.id
         ) as bjdata
         union all
         select
