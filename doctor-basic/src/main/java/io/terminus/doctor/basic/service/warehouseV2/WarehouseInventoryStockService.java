@@ -65,9 +65,9 @@ public class WarehouseInventoryStockService extends
         DoctorWarehouseStockHandle profitInventoryStockHandle = null, deficitInventoryStockHandle = null;
 
         if (!profitInventory.isEmpty())
-            profitInventoryStockHandle = doctorWarehouseStockHandleManager.create(stockDto, wareHouse, WarehouseMaterialHandleType.INVENTORY_PROFIT);
+            profitInventoryStockHandle = doctorWarehouseStockHandleManager.create(stockDto, wareHouse, WarehouseMaterialHandleType.INVENTORY_PROFIT, null);
         if (!deficitInventory.isEmpty())
-            deficitInventoryStockHandle = doctorWarehouseStockHandleManager.create(stockDto, wareHouse, WarehouseMaterialHandleType.INVENTORY_DEFICIT);
+            deficitInventoryStockHandle = doctorWarehouseStockHandleManager.create(stockDto, wareHouse, WarehouseMaterialHandleType.INVENTORY_DEFICIT, null);
 
         for (WarehouseStockInventoryDto.WarehouseStockInventoryDetail detail : profitInventory.keySet()) {
             detail.setQuantity(profitInventory.get(detail));
@@ -133,9 +133,9 @@ public class WarehouseInventoryStockService extends
         DoctorWarehouseStockHandle newStockHandle = null;
         if (needCreateStockHandle) {
             if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue()))
-                newStockHandle = doctorWarehouseStockHandleManager.create(stockDto, wareHouse, WarehouseMaterialHandleType.INVENTORY_DEFICIT);
+                newStockHandle = doctorWarehouseStockHandleManager.create(stockDto, wareHouse, WarehouseMaterialHandleType.INVENTORY_DEFICIT, null);
             else
-                newStockHandle = doctorWarehouseStockHandleManager.create(stockDto, wareHouse, WarehouseMaterialHandleType.INVENTORY_PROFIT);
+                newStockHandle = doctorWarehouseStockHandleManager.create(stockDto, wareHouse, WarehouseMaterialHandleType.INVENTORY_PROFIT, null);
         }
 
         for (WarehouseStockInventoryDto.WarehouseStockInventoryDetail detail : changed.keySet()) {
@@ -217,7 +217,7 @@ public class WarehouseInventoryStockService extends
                 int days = DateUtil.getDeltaDays(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
                 //更改了操作日期
                 if (days != 0) {
-                    materialHandle.setHandleDate(warehouseInventoryManager.buildNewHandleDateForUpdate(WarehouseMaterialHandleType.OUT, stockDto.getHandleDate()));
+                    warehouseInventoryManager.buildNewHandleDateForUpdate(materialHandle, stockDto.getHandleDate());
                     doctorWarehouseMaterialHandleDao.update(materialHandle);
                     if (days < 0) {//事件日期改小了，重算日期采用新的日期
                         recalculateDate = materialHandle.getHandleDate();

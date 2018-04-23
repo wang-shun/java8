@@ -95,6 +95,8 @@ public interface DoctorWarehouseStockWriteService {
      */
     Response<Boolean> formula(WarehouseFormulaDto formulaDto);
 
+    Response<Long> updateFormula(WarehouseFormulaDto formulaDto);
+
     /**
      * 创建
      *

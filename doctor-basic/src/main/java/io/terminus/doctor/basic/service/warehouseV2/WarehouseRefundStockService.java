@@ -38,7 +38,7 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
 
     @Override
     protected DoctorWarehouseStockHandle create(WarehouseStockRefundDto stockDto, DoctorWareHouse wareHouse) {
-        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.create(stockDto, wareHouse, getMaterialHandleType());
+        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.create(stockDto, wareHouse, getMaterialHandleType(), null);
         warehouseReturnManager.create(stockDto.getDetails(), stockDto, stockHandle, wareHouse);
 
         stockDto.getDetails().forEach(detail -> {
@@ -85,7 +85,7 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
                 if (changedQuantity.compareTo(new BigDecimal(0)) > 0) {
                     doctorWarehouseStockManager.in(detail.getMaterialId(), changedQuantity, wareHouse);
                 } else {
-                    doctorWarehouseStockManager.out(detail.getMaterialId(), changedQuantity, wareHouse);
+                    doctorWarehouseStockManager.out(detail.getMaterialId(), changedQuantity.negate(), wareHouse);
                 }
                 materialHandle.setQuantity(detail.getQuantity());
             }
@@ -96,7 +96,7 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
                 if (DateUtil.getDeltaDays(outMaterialHandle.getHandleDate(), stockDto.getHandleDate().getTime()) < 0)
                     throw new ServiceException("");
 
-                materialHandle.setHandleDate(warehouseReturnManager.buildNewHandleDateForUpdate(WarehouseMaterialHandleType.OUT, stockDto.getHandleDate()));
+                warehouseReturnManager.buildNewHandleDateForUpdate(materialHandle, stockDto.getHandleDate());
                 doctorWarehouseMaterialHandleDao.update(materialHandle);
                 if (days < 0) {//事件日期改小了，重算日期采用新的日期
                     recalculateDate = materialHandle.getHandleDate();

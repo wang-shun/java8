@@ -10,7 +10,6 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.common.utils.DateUtil;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -85,14 +84,14 @@ public class WarehouseOutStockService extends AbstractWarehouseStockService<Ware
                 if (changedQuantity.compareTo(new BigDecimal(0)) > 0) {
                     doctorWarehouseStockManager.in(detail.getMaterialId(), changedQuantity, wareHouse);
                 } else {
-                    doctorWarehouseStockManager.out(detail.getMaterialId(), changedQuantity, wareHouse);
+                    doctorWarehouseStockManager.out(detail.getMaterialId(), changedQuantity.negate(), wareHouse);
                 }
                 materialHandle.setQuantity(detail.getQuantity());
             }
             Date recalculateDate = materialHandle.getHandleDate();
             int days = DateUtil.getDeltaDays(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
             if (days != 0) {
-                materialHandle.setHandleDate(warehouseOutManager.buildNewHandleDateForUpdate(WarehouseMaterialHandleType.OUT, stockDto.getHandleDate()));
+                warehouseOutManager.buildNewHandleDateForUpdate(materialHandle, stockDto.getHandleDate());
                 doctorWarehouseMaterialHandleDao.update(materialHandle);
                 if (days < 0) {//事件日期改小了，重算日期采用新的日期
                     recalculateDate = materialHandle.getHandleDate();

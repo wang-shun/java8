@@ -35,7 +35,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
     @Autowired
     protected DoctorWareHouseDao doctorWareHouseDao;
     @Autowired
-    private DoctorWarehouseStockHandleDao doctorWarehouseStockHandleDao;
+    protected DoctorWarehouseStockHandleDao doctorWarehouseStockHandleDao;
     @Autowired
     protected DoctorWarehouseMaterialHandleDao doctorWarehouseMaterialHandleDao;
 
@@ -74,7 +74,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
     }
 
     protected DoctorWarehouseStockHandle create(T stockDto, DoctorWareHouse wareHouse) {
-        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.create(stockDto, wareHouse, getMaterialHandleType());
+        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.create(stockDto, wareHouse, getMaterialHandleType(), null);
 
         this.getDetails(stockDto).forEach(detail -> {
             create(stockDto, detail, stockHandle, wareHouse);
@@ -82,7 +82,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
         return stockHandle;
     }
 
-    private DoctorWarehouseStockHandle update(T stockDto, DoctorWareHouse wareHouse, DoctorWarehouseStockHandle stockHandle) {
+    protected DoctorWarehouseStockHandle update(T stockDto, DoctorWareHouse wareHouse, DoctorWarehouseStockHandle stockHandle) {
 
         //之前的明细单
         Map<Long, List<DoctorWarehouseMaterialHandle>> oldMaterialHandles = doctorWarehouseMaterialHandleDao.findByStockHandle(stockDto.getStockHandleId()).stream().collect(Collectors.groupingBy(DoctorWarehouseMaterialHandle::getId));

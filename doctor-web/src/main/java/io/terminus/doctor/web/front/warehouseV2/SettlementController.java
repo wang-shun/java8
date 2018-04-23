@@ -37,6 +37,11 @@ public class SettlementController {
     @RpcConsumer
     private DoctorFarmReadService doctorFarmReadService;
 
+    @RequestMapping(method = RequestMethod.GET, value = "date")
+    public Date getSettlementDate() {
+        return doctorWarehouseSettlementService.getSettlementDate(new Date());
+    }
+
     /**
      * 结算
      *

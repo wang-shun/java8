@@ -23,11 +23,10 @@ public class WarehouseInManager extends AbstractStockManager<WarehouseStockInDto
 
 
     @Override
-    public void create(WarehouseStockInDto.WarehouseStockInDetailDto detail,
+    public DoctorWarehouseMaterialHandle create(WarehouseStockInDto.WarehouseStockInDetailDto detail,
                        WarehouseStockInDto stockDto,
                        DoctorWarehouseStockHandle stockHandle,
                        DoctorWareHouse wareHouse) {
-
 
         DoctorWarehouseMaterialHandle materialHandle = buildMaterialHandle(detail, stockDto, stockHandle, wareHouse);
         materialHandle.setType(WarehouseMaterialHandleType.IN.getValue());
@@ -55,6 +54,7 @@ public class WarehouseInManager extends AbstractStockManager<WarehouseStockInDto
         }
 
         doctorWarehouseMaterialHandleDao.create(materialHandle);
+        return materialHandle;
     }
 
 

@@ -15,6 +15,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.support.locks.LockRegistry;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +38,9 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 
     @Autowired
     private LockRegistry lockRegistry;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     private DoctorWarehouseMaterialHandleDao doctorWarehouseMaterialHandleDao;
@@ -78,10 +82,15 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
     @Override
     public Date getSettlementDate(Date date) {
 
-        Date settlementDate = new Date();
-        if (null == settlementDate)
-            throw new ServiceException("get.settlement.date.fail");
-        return settlementDate;
+//        List<Map<String, Object>> results = jdbcTemplate.queryForList("select * from v_pc_fiscal_period where company_id=? and deleted_flag=0 and start_date<=? and end_date>=?", new Object[]{1, date, date});
+//        if (results.isEmpty())
+//            throw new ServiceException("settlement.date.empty");
+//
+//        int year = (int) results.get(0).get("fiscal_year");
+//        int month = (int) results.get(0).get("fiscal_period");
+//
+//        Date settlementDate = new DateTime(year, month, 1, 0, 0).toDate();
+        return new Date();
     }
 
     @Override

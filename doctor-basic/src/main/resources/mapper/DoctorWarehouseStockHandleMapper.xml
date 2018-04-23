@@ -151,4 +151,10 @@
         select * from  doctor_warehouse_stock_handle
         where  rel_stock_handle_id = #{id} and handle_sub_type = #{handle_sub_type};
     </select>
+    
+    <select id="findRelStockHandle" parameterType="long" resultMap="DoctorWarehouseStockHandleMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE rel_stock_handle_id=#{stockHandleId}
+    </select>
 </mapper>

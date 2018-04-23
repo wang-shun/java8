@@ -253,7 +253,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
 
             map.put("type", WarehouseMaterialHandleType.OUT.getValue());
 
-            map.put("outAmount",this.sqlSession.selectOne("selectSumAmount",map));
+            map.put("outAmount", this.sqlSession.selectOne("selectSumAmount", map));
 
         });*/
 

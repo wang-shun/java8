@@ -5,6 +5,7 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,20 +22,26 @@ public class DoctorWarehouseStockHandleDao extends MyBatisDao<DoctorWarehouseSto
         String warehouseName = this.sqlSession.selectOne(this.sqlId("findwarehouseName"), RelId);
         return warehouseName;
     }
-    public DoctorWarehouseStockHandle findByRelStockHandleId(Long id,int type){
+
+    public DoctorWarehouseStockHandle findByRelStockHandleId(Long id, int type) {
         int handle_sub_type = 0;
-        if(type == 6){
+        if (type == 6) {
             handle_sub_type = 2;
         }
-        if(type == 8){
+        if (type == 8) {
             handle_sub_type = 3;
         }
-        if(type == 9){
+        if (type == 9) {
             handle_sub_type = 5;
         }
         Map<String, Object> criteria = Maps.newHashMap();
-        criteria.put("id",id);
+        criteria.put("id", id);
         criteria.put("handle_sub_type", handle_sub_type);
-        return this.sqlSession.selectOne(this.sqlId("findByRelStockHandleId"),criteria);
+        return this.sqlSession.selectOne(this.sqlId("findByRelStockHandleId"), criteria);
+    }
+
+
+    public List<DoctorWarehouseStockHandle> findRelStockHandle(Long stockHandleId) {
+        return this.sqlSession.selectList(this.sqlId("findRelStockHandle"), stockHandleId);
     }
 }

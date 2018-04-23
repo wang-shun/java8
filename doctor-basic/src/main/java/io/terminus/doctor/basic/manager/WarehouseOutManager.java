@@ -30,7 +30,7 @@ public class WarehouseOutManager extends AbstractStockManager<WarehouseStockOutD
     private DoctorWarehouseMaterialApplyDao doctorWarehouseMaterialApplyDao;
 
     @Override
-    public void create(WarehouseStockOutDto.WarehouseStockOutDetail detail,
+    public DoctorWarehouseMaterialHandle create(WarehouseStockOutDto.WarehouseStockOutDetail detail,
                        WarehouseStockOutDto stockDto,
                        DoctorWarehouseStockHandle stockHandle,
                        DoctorWareHouse wareHouse) {
@@ -68,6 +68,9 @@ public class WarehouseOutManager extends AbstractStockManager<WarehouseStockOutD
         doctorWarehouseMaterialHandleDao.create(materialHandle);
 
         DoctorWarehouseMaterialApply apply = new DoctorWarehouseMaterialApply();
+        apply.setMaterialHandleId(materialHandle.getId());
+        apply.setMaterialId(materialHandle.getMaterialId());
+        apply.setMaterialName(materialHandle.getMaterialName());
         apply.setFarmId(materialHandle.getFarmId());
         apply.setWarehouseId(materialHandle.getWarehouseId());
         apply.setWarehouseName(materialHandle.getWarehouseName());
@@ -96,6 +99,7 @@ public class WarehouseOutManager extends AbstractStockManager<WarehouseStockOutD
             apply.setApplyType(WarehouseMaterialApplyType.BARN.getValue());
         }
         doctorWarehouseMaterialApplyDao.create(apply);
+        return materialHandle;
     }
 
     @Override

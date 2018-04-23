@@ -2200,3 +2200,9 @@ ALTER TABLE doctor_feed_formulas ADD formula_name VARCHAR(64) NOT NULL COMMENT '
 -- 领用表添加金额,会计年月字段 2018-04-21
 ALTER TABLE doctor_warehouse_material_apply ADD amount decimal(23,2) NULL COMMENT '金额';
 ALTER TABLE doctor_warehouse_material_apply ADD settlementDate date NULL COMMENT '会计年月';
+
+--修改领用表的会计年月字段名称 2018-04-23
+ALTER TABLE doctor_warehouse_material_apply CHANGE settlementDate settlement_date date COMMENT '会计年月';
+
+--领用表单价改为可为null 2018-04-23
+ALTER TABLE doctor_warehouse_material_apply MODIFY unit_price decimal(23,4) COMMENT '单价';

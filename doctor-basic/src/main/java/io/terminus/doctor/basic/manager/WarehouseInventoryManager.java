@@ -22,10 +22,10 @@ import java.util.Date;
 public class WarehouseInventoryManager extends AbstractStockManager {
 
     @Override
-    public void create(AbstractWarehouseStockDetail detail,
-                       AbstractWarehouseStockDto stockDto,
-                       DoctorWarehouseStockHandle stockHandle,
-                       DoctorWareHouse wareHouse) {
+    public DoctorWarehouseMaterialHandle create(AbstractWarehouseStockDetail detail,
+                                                AbstractWarehouseStockDto stockDto,
+                                                DoctorWarehouseStockHandle stockHandle,
+                                                DoctorWareHouse wareHouse) {
 
         DoctorWarehouseMaterialHandle materialHandle = buildMaterialHandle(detail, stockDto, stockHandle, wareHouse);
 
@@ -61,6 +61,7 @@ public class WarehouseInventoryManager extends AbstractStockManager {
         }
 
         doctorWarehouseMaterialHandleDao.create(materialHandle);
+        return materialHandle;
     }
 
     @Override

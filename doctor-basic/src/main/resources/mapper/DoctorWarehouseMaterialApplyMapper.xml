@@ -34,7 +34,7 @@
         <result property="unitPrice" column="unit_price"/>
         <result property="applyType" column="apply_type"/>
         <result property="amount" column="amount"/>
-        <result property="settlementDate" column="settlementDate"/>
+        <result property="settlementDate" column="settlement_date"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
@@ -92,7 +92,7 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `material_handle_id`, `org_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `pig_barn_id`, `pig_barn_name`, `pig_type`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_id`, `apply_staff_name`, `apply_year`, `apply_month`, `material_name`, `type`, `unit`, format(`quantity`,2), format(`unit_price`,4), `apply_type`, format(`amount`,4), `settlementDate`,
+        `material_handle_id`, `org_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `pig_barn_id`, `pig_barn_name`, `pig_type`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_id`, `apply_staff_name`, `apply_year`, `apply_month`, `material_name`, `type`, `unit`, format(`quantity`,2), format(`unit_price`,4), `apply_type`, format(`amount`,4), `settlement_date`,
         created_at, updated_at
     </sql>
 
@@ -127,7 +127,7 @@
             <if test="unitPrice != null">AND `unit_price` = #{unitPrice}</if>
             <if test="applyType != null">AND `apply_type` = #{applyType}</if>
             <if test="amount != null">AND `amount` = #{amount}</if>
-            <if test="settlementDate != null">AND `settlementDate` = #{settlementDate}</if>
+            <if test="settlementDate != null">AND `settlement_date` = #{settlementDate}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
         </where>
@@ -159,7 +159,7 @@
             <if test="unitPrice != null">AND `unit_price` = #{unitPrice}</if>
             <if test="applyType != null">AND `apply_type` = #{applyType}</if>
             <if test="amount != null">AND `amount` = #{amount}</if>
-            <if test="settlementDate != null">AND `settlementDate` = #{settlementDate}</if>
+            <if test="settlementDate != null">AND `settlement_date` = #{settlementDate}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
 
@@ -240,7 +240,7 @@
             <if test="unitPrice != null">`unit_price` = #{unitPrice},</if>
             <if test="applyType != null">`apply_type` = #{applyType},</if>
             <if test="amount != null">`amount` = #{amount},</if>
-            <if test="settlementDate != null">`settlementDate` = #{settlementDate},</if>
+            <if test="settlementDate != null">`settlement_date` = #{settlementDate},</if>
             updated_at = now()
         </set>
         WHERE id = #{id}

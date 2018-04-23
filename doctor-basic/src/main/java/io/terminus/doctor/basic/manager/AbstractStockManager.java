@@ -11,6 +11,7 @@ import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
+import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import org.joda.time.DateTime;
@@ -115,34 +116,48 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
 //            newHandleDate.set(Calendar.MILLISECOND, 0);
 //            return newHandleDate.getTime();
 //        } else {
-            newHandleDate.set(Calendar.HOUR_OF_DAY, 23);
-            newHandleDate.set(Calendar.MINUTE, 59);
-            newHandleDate.set(Calendar.SECOND, 59);
-            newHandleDate.set(Calendar.MILLISECOND, 0);
-            return newHandleDate.getTime();
+        newHandleDate.set(Calendar.HOUR_OF_DAY, 23);
+        newHandleDate.set(Calendar.MINUTE, 59);
+        newHandleDate.set(Calendar.SECOND, 59);
+        newHandleDate.set(Calendar.MILLISECOND, 0);
+        return newHandleDate.getTime();
 //        }
     }
 
-    public Date buildNewHandleDateForUpdate(WarehouseMaterialHandleType handleType, Calendar newHandleDate) {
+    public void buildNewHandleDateForUpdate(DoctorWarehouseMaterialHandle materialHandle, Calendar newHandleDate) {
 
         if (DateUtil.inSameDate(newHandleDate.getTime(), new Date())) {
             DateTime old = new DateTime(newHandleDate.getTime());
-            return new DateTime().withDate(old.getYear(), old.getMonthOfYear(), old.getDayOfMonth()).toDate();
+            DateTime newDate = new DateTime().withDate(old.getYear(), old.getMonthOfYear(), old.getDayOfMonth());
+            materialHandle.setHandleDate(newDate.toDate());
+            materialHandle.setHandleYear(newDate.getYear());
+            materialHandle.setHandleMonth(newDate.getMonthOfYear());
+            return;
         }
 
-//        if (WarehouseMaterialHandleType.isBigIn(handleType.getValue())) {
-//            newHandleDate.set(Calendar.HOUR_OF_DAY, 0);
-//            newHandleDate.set(Calendar.MINUTE, 0);
-//            newHandleDate.set(Calendar.SECOND, 0);
-//            newHandleDate.set(Calendar.MILLISECOND, 0);
-//            return newHandleDate.getTime();
-//        } else {
-            newHandleDate.set(Calendar.HOUR_OF_DAY, 23);
-            newHandleDate.set(Calendar.MINUTE, 59);
-            newHandleDate.set(Calendar.SECOND, 59);
-            newHandleDate.set(Calendar.MILLISECOND, 0);
-            return newHandleDate.getTime();
-//        }
+        newHandleDate.set(Calendar.HOUR_OF_DAY, 23);
+        newHandleDate.set(Calendar.MINUTE, 59);
+        newHandleDate.set(Calendar.SECOND, 59);
+        newHandleDate.set(Calendar.MILLISECOND, 0);
+        materialHandle.setHandleDate(newHandleDate.getTime());
+        materialHandle.setHandleYear(newHandleDate.get(Calendar.YEAR));
+        materialHandle.setHandleMonth(newHandleDate.get(Calendar.MONTH) + 1);
+    }
+
+    public void buildNewHandleDateForUpdate(DoctorWarehouseStockHandle stockHandle, Calendar newHandleDate) {
+
+        if (DateUtil.inSameDate(newHandleDate.getTime(), new Date())) {
+            DateTime old = new DateTime(newHandleDate.getTime());
+            DateTime newDate = new DateTime().withDate(old.getYear(), old.getMonthOfYear(), old.getDayOfMonth());
+            stockHandle.setHandleDate(newDate.toDate());
+            return;
+        }
+
+        newHandleDate.set(Calendar.HOUR_OF_DAY, 23);
+        newHandleDate.set(Calendar.MINUTE, 59);
+        newHandleDate.set(Calendar.SECOND, 59);
+        newHandleDate.set(Calendar.MILLISECOND, 0);
+        stockHandle.setHandleDate(newHandleDate.getTime());
     }
 
 
@@ -264,10 +279,10 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
      * @param stockHandle
      * @param wareHouse
      */
-    public abstract void create(T detail,
-                                F stockDto,
-                                DoctorWarehouseStockHandle stockHandle,
-                                DoctorWareHouse wareHouse);
+    public abstract DoctorWarehouseMaterialHandle create(T detail,
+                                                         F stockDto,
+                                                         DoctorWarehouseStockHandle stockHandle,
+                                                         DoctorWareHouse wareHouse);
 
     public void create(List<T> details, F stockDto, DoctorWarehouseStockHandle stockHandle, DoctorWareHouse wareHouse) {
 
@@ -286,13 +301,16 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
             throw new InvalidException("warehouse.sku.not.found", detail.getMaterialId());
         }
 
+        if (!wareHouse.getType().equals(sku.getType()))
+            throw new InvalidException("material.not.allow.warehouse", WareHouseType.from(sku.getType()).getDesc(), WareHouseType.from(wareHouse.getType()).getDesc());
+
         DoctorBasic unit = doctorBasicDao.findById(Long.parseLong(sku.getUnit()));
 
         DoctorWarehouseMaterialHandle materialHandle = new DoctorWarehouseMaterialHandle();
         materialHandle.setStockHandleId(stockHandle.getId());
         materialHandle.setOrgId(stockDto.getOrgId());
-        materialHandle.setFarmId(stockDto.getFarmId());
-        materialHandle.setWarehouseId(stockDto.getWarehouseId());
+        materialHandle.setFarmId(wareHouse.getFarmId());
+        materialHandle.setWarehouseId(wareHouse.getId());
         materialHandle.setWarehouseType(wareHouse.getType());
         materialHandle.setWarehouseName(wareHouse.getWareHouseName());
         materialHandle.setMaterialId(detail.getMaterialId());

@@ -29,6 +29,7 @@ import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.front.warehouseV2.dto.StockDto;
 import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseStockStatisticsVo;
+import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
@@ -313,10 +314,22 @@ public class StockController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "formula")
-    public boolean produce(@RequestParam("farmId") Long farmId,
+    public boolean produce(
+                           @RequestParam("orgId") Long orgId,
                            @RequestParam("warehouseId") Long warehouseId,
                            @RequestParam("feedFormulaId") Long feedFormulaId,
                            @RequestParam("materialProduceJson") String materialProduceJson) {
+
+
+        //是否该公司正在结算中
+        if (doctorWarehouseSettlementService.isUnderSettlement(orgId))
+            throw new JsonResponseException("under.settlement");
+
+        //会计年月
+        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(new Date());
+        //会计年月已经结算后，不允许新增或编辑单据
+        if (doctorWarehouseSettlementService.isSettled(orgId, settlementDate))
+            throw new JsonResponseException("already.settlement");
 
         FeedFormula feedFormula = RespHelper.or500(feedFormulaReadService.findFeedFormulaById(feedFormulaId));
 
@@ -328,7 +341,6 @@ public class StockController {
         validateCountRange(feedProduce);
 
         // 查询对应的饲料
-//        DoctorBasicMaterial feed = RespHelper.orServEx(doctorBasicMaterialReadService.findBasicMaterialById(feedFormula.getFeedId()));
         DoctorWarehouseSku feed = RespHelper.or500(doctorWarehouseSkuReadService.findById(feedFormula.getFeedId()));
         if (null == feed)
             throw new JsonResponseException("warehouse.feed.not.found");
@@ -342,11 +354,12 @@ public class StockController {
         if (null != feedProduce.getMedicalProduceEntries() && !feedProduce.getMedicalProduceEntries().isEmpty())
             totalOut.addAll(feedProduce.getMedicalProduceEntries());
 
-        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+//        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
 
         WarehouseFormulaDto formulaDto = new WarehouseFormulaDto();
-        formulaDto.setFarmId(farmId);
-        formulaDto.setFarmName(farm.getName());
+//        formulaDto.setFarmId(farmId);
+        formulaDto.setOrgId(orgId);
+//        formulaDto.setFarmName(farm.getName());
         formulaDto.setWarehouseId(warehouseId);
         formulaDto.setHandleDate(Calendar.getInstance());
         formulaDto.setFeedMaterial(feed);
@@ -357,14 +370,43 @@ public class StockController {
             WarehouseFormulaDto.WarehouseFormulaDetail detail = new WarehouseFormulaDto.WarehouseFormulaDetail();
             detail.setMaterialId(entry.getMaterialId());
             detail.setMaterialName(entry.getMaterialName());
+            detail.setWarehouseId(entry.getWarehouseId());
             detail.setQuantity(new BigDecimal(entry.getMaterialCount()));
             details.add(detail);
         }
         formulaDto.setDetails(details);
-        Response<Boolean> response = doctorWarehouseStockWriteService.formula(formulaDto);
-        if (!response.isSuccess())
-            throw new JsonResponseException(response.getError());
-        return true;
+
+        //当前登录用户
+//        formulaDto.setOperatorId(UserUtil.getCurrentUser().getId());
+//        formulaDto.setOperatorName(UserUtil.getCurrentUser().getName());
+
+
+        return RespHelper.or500(doctorWarehouseStockWriteService.formula(formulaDto));
+    }
+
+    @RequestMapping(method = RequestMethod.PUT, value = "formula")
+    public Long formula(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseFormulaDto formulaDto, Errors errors) {
+        if (errors.hasErrors())
+            throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
+
+        setOrgId(formulaDto);
+
+        //是否该公司正在结算中
+        if (doctorWarehouseSettlementService.isUnderSettlement(formulaDto.getOrgId()))
+            throw new JsonResponseException("under.settlement");
+
+        //会计年月
+        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(formulaDto.getHandleDate().getTime());
+        //会计年月已经结算后，不允许新增或编辑单据
+        if (doctorWarehouseSettlementService.isSettled(formulaDto.getOrgId(), settlementDate))
+            throw new JsonResponseException("already.settlement");
+
+        formulaDto.setSettlementDate(settlementDate);
+        Calendar handleDateWithTime = Calendar.getInstance();
+        handleDateWithTime.set(formulaDto.getHandleDate().get(Calendar.YEAR), formulaDto.getHandleDate().get(Calendar.MONTH), formulaDto.getHandleDate().get(Calendar.DAY_OF_MONTH));
+        formulaDto.setHandleDate(handleDateWithTime);
+
+        return RespHelper.or500(doctorWarehouseStockWriteService.updateFormula(formulaDto));
     }
 
 

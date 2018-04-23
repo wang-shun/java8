@@ -27,12 +27,12 @@ public class WarehouseReturnManager extends AbstractStockManager<WarehouseStockR
 
 
     @Override
-    public void create(WarehouseStockRefundDto.WarehouseStockRefundDetailDto detail,
-                       WarehouseStockRefundDto stockDto,
-                       DoctorWarehouseStockHandle stockHandle,
-                       DoctorWareHouse wareHouse) {
+    public DoctorWarehouseMaterialHandle create(WarehouseStockRefundDto.WarehouseStockRefundDetailDto detail,
+                                                WarehouseStockRefundDto stockDto,
+                                                DoctorWarehouseStockHandle stockHandle,
+                                                DoctorWareHouse wareHouse) {
 
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
