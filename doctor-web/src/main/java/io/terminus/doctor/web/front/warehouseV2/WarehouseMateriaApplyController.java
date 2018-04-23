@@ -3,6 +3,7 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroup;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroupDetail;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialApplyReadService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseMaterialApplyVo;
@@ -50,11 +51,10 @@ public class WarehouseMateriaApplyController {
         Map<String,Object> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApply(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAt,closeAt));
         return a;
     }
-    @RequestMapping(method = RequestMethod.GET, value = "piggroup/detail/{farmId}")
-    public Map<String,Object> PigGroupApplyDetail(@PathVariable Integer farmId,
-                                                  @RequestParam(required = false) Long pigGroupId,
-                                                  @RequestParam(required = false) Integer skuId){
-        //Map<String,Object> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApply(farmId,skuType));
-        return null;
+    @RequestMapping(method = RequestMethod.GET, value = "piggroup/detail")
+    public List<DoctorWarehouseMaterialApplyPigGroupDetail> PigGroupApplyDetail(@RequestParam(required = true) Long pigGroupId,
+                                                  @RequestParam(required = true) Long skuId){
+        List<DoctorWarehouseMaterialApplyPigGroupDetail> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApplyDetail(pigGroupId,skuId));
+        return a;
     }
 }

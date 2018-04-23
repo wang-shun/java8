@@ -9,6 +9,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialApplyDao;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroup;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroupDetail;
 import io.terminus.doctor.common.enums.WareHouseType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -164,5 +165,9 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         return Response.ok(doctorWarehouseMaterialApplyDao.piggeryDetails(criteria));
     }
 
+    @Override
+    public Response<List<DoctorWarehouseMaterialApplyPigGroupDetail>> selectPigGroupApplyDetail(Long pigGroupId, Long materiaId) {
+        return Response.ok(doctorWarehouseMaterialApplyDao.selectPigGroupApplyDetail(pigGroupId, materiaId));
+    }
 
 }

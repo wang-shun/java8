@@ -6,6 +6,7 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.enums.WarehouseMaterialApplyType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroup;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroupDetail;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
@@ -169,6 +170,19 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
 //            params.putAll(objMap);
         }
         return sqlSession.selectList(sqlId("piggeryDetails"), params);
+    }
+
+    /**
+     * 猪群领用报表详情
+     * @param pigGroupId
+     * @param materiaId
+     * @return
+     */
+    public List<DoctorWarehouseMaterialApplyPigGroupDetail> selectPigGroupApplyDetail(Long pigGroupId, Long materiaId){
+        Map<String,Object> map = Maps.newHashMap();
+        map.put("farmId",pigGroupId);
+        map.put("pigType",materiaId);
+        return this.sqlSession.selectList(this.sqlId("selectPigGroupApplyDetail"),map);
     }
 }
 
