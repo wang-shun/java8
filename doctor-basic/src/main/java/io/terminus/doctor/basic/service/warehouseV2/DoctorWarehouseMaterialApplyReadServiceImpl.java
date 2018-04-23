@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -137,6 +138,7 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         List<DoctorWarehouseMaterialApplyPigGroup> pigGroupList =doctorWarehouseMaterialApplyDao.selectPigGroupApply(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAt,closeAt);
         Double allQuantity = 0.0;
         Double allAmount = 0.0;
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         for(int i = 0;i<pigGroupList.size(); i++){
             if(pigGroupList.get(i).getQuantity() != null){
                 allQuantity =pigGroupList.get(i).getQuantity() + allQuantity;
