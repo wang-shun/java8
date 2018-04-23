@@ -11,7 +11,7 @@ import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
-import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmEventHandler;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -19,7 +19,7 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorTransGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorTransFarmGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorChgFarmInfo;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -52,7 +52,7 @@ public class DoctorChgFarmV2Handler extends DoctorAbstractEventHandler{
     @Autowired
     private DoctorGroupTrackDao doctorGroupTrackDao;
     @Autowired
-    private DoctorTransGroupEventHandler transGroupEventHandler;
+    private DoctorTransFarmGroupEventHandler transFarmGroupEventHandler;
     @Autowired
     private DoctorModifyPigChgFarmEventHandler modifyPigChgFarmEventHandler;
     @Autowired
@@ -125,11 +125,16 @@ public class DoctorChgFarmV2Handler extends DoctorAbstractEventHandler{
     private Long pigletTrans(List<DoctorEventInfo> eventInfoList, DoctorPigEvent executeEvent, DoctorPigTrack pigTrack, DoctorChgFarmDto chgLocationDto, DoctorBarn doctorToBarn) {
         expectTrue(notNull(pigTrack.getGroupId()), "farrow.groupId.not.null", pigTrack.getPigId());
         //未断奶仔猪id
-        DoctorTransGroupInput input = new DoctorTransGroupInput();
+        DoctorTransFarmGroupInput input = new DoctorTransFarmGroupInput();
+        input.setFromFarmId(chgLocationDto.getFromFarmId());
+        input.setFromFarmName(chgLocationDto.getFromFarmName());
+        input.setToFarmId(chgLocationDto.getToFarmId());
+        input.setToFarmName(chgLocationDto.getToFarmName());
         input.setSowId(chgLocationDto.getPigId());
         input.setSowCode(chgLocationDto.getPigCode());
         input.setToBarnId(doctorToBarn.getId());
         input.setToBarnName(doctorToBarn.getName());
+        input.setToBarnType(doctorToBarn.getPigType());
         List<DoctorGroup> groupList = doctorGroupDao.findByCurrentBarnId(doctorToBarn.getId());
         if (notEmpty(groupList)) {
             input.setIsCreateGroup(IsOrNot.NO.getValue());
@@ -162,7 +167,7 @@ public class DoctorChgFarmV2Handler extends DoctorAbstractEventHandler{
         input.setWeight(input.getAvgWeight() * input.getQuantity());
         input.setRelPigEventId(executeEvent.getId());
 
-        transGroupEventHandler.handle(eventInfoList, group, groupTrack, input);
+        transFarmGroupEventHandler.handle(eventInfoList, group, groupTrack, input);
         if (Objects.equals(input.getIsCreateGroup(), IsOrNot.YES.getValue())) {
             //DoctorGroup toGroup = doctorGroupDao.findByFarmIdAndGroupCode(group.getFarmId(), input.getToGroupCode());
             return input.getToGroupId();

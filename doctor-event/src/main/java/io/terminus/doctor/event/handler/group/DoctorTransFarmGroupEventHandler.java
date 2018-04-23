@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.group;
 
+import com.google.common.base.MoreObjects;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.SourceType;
@@ -156,10 +157,19 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         groupTrack.setBoarQty(getBoarQty(groupTrack, EventUtil.minusInt(0, transFarm.getBoarQty())));
         groupTrack.setSowQty(getSowQty(groupTrack, EventUtil.minusInt(0, transFarm.getSowQty())));
 
+
+        if (Objects.equals(transFarm.isSowEvent(), true)) {
+            groupTrack.setNest(EventUtil.plusInt(groupTrack.getNest(), -1));
+            groupTrack.setLiveQty(EventUtil.plusInt(groupTrack.getLiveQty(), - event.getQuantity()));
+            groupTrack.setHealthyQty(groupTrack.getLiveQty() - MoreObjects.firstNonNull(groupTrack.getWeakQty(), 0));
+            groupTrack.setUnweanQty(EventUtil.plusInt(groupTrack.getUnweanQty(), -event.getQuantity()));
+            groupTrack.setBirthWeight(EventUtil.plusDouble(groupTrack.getBirthWeight(), - event.getAvgWeight() * event.getQuantity()));
+        }
+
         updateGroupTrack(groupTrack, event);
         //设置来源为外场
         transFarm.setSource(PigSource.OUTER.getKey());
-        if (Objects.equals(transFarm.getEventSource(), SourceType.INPUT.getValue())) {
+        if (Objects.equals(event.getEventSource(), SourceType.INPUT.getValue())) {
             updateDailyForNew(event);
 
             //5.判断转场数量, 如果 = 猪群数量, 触发关闭猪群事件, 同时生成批次总结
