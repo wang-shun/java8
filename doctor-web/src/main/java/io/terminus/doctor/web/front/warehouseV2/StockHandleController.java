@@ -154,25 +154,27 @@ public class StockHandleController {
                             }
 
                             //物料领用表
-                            DoctorWarehouseMaterialApply apply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandle(mh.getId()));
-                            if (null != apply) {
-                                detail.setApplyPigBarnName(apply.getPigBarnName());
-                                detail.setApplyPigBarnId(apply.getPigBarnId());
-                                detail.setApplyPigGroupName(apply.getPigGroupName());
-                                detail.setApplyPigGroupId(apply.getPigGroupId());
-                                detail.setApplyStaffName(apply.getApplyStaffName());
-                                detail.setApplyStaffId(apply.getApplyStaffId());
-                            } else
-                                log.warn("material apply not found,by material handle {}", mh.getId());
+                            if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.OUT.getValue())) {
+                                DoctorWarehouseMaterialApply apply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandle(mh.getId()));
+                                if (null != apply) {
+                                    detail.setApplyPigBarnName(apply.getPigBarnName());
+                                    detail.setApplyPigBarnId(apply.getPigBarnId());
+                                    detail.setApplyPigGroupName(apply.getPigGroupName());
+                                    detail.setApplyPigGroupId(apply.getPigGroupId());
+                                    detail.setApplyStaffName(apply.getApplyStaffName());
+                                    detail.setApplyStaffId(apply.getApplyStaffId());
+                                } else
+                                    log.warn("material apply not found,by material handle {}", mh.getId());
+                            }
 
                             //退料入库-->可退数量
-                            if (mh.getType().intValue() == WarehouseMaterialHandleType.RETURN.getValue()) {
+                            if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.RETURN.getValue())) {
                                 BigDecimal RefundableNumber = new BigDecimal(0);
                                 //得到领料出库的数量
                                 BigDecimal LibraryQuantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findLibraryById(mh.getRelMaterialHandleId()));
                                 DoctorWarehouseMaterialHandle wmh = new DoctorWarehouseMaterialHandle();
                                 wmh.setRelMaterialHandleId(mh.getRelMaterialHandleId());
-                                wmh.setHandleDate(mh.getHandleDate());
+                                wmh.setSettlementDate(mh.getSettlementDate());
                                 //得到在此之前退料入库的数量和
                                 BigDecimal RetreatingQuantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findRetreatingById(wmh));
                                 RefundableNumber = LibraryQuantity.subtract(RetreatingQuantity);
@@ -180,7 +182,7 @@ public class StockHandleController {
                             }
 
                             //调出
-                            if (mh.getType().intValue() == WarehouseMaterialHandleType.TRANSFER_OUT.getValue()) {
+                            if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.TRANSFER_OUT.getValue())) {
                                 //单据明细表
                                 DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(mh.getRelMaterialHandleId()));
                                 if (transferInHandle != null) {
@@ -201,7 +203,7 @@ public class StockHandleController {
                         .collect(Collectors.toList()));
 
         //配方生产出库
-        if (stockHandle.getHandleSubType().intValue() == WarehouseMaterialHandleType.FORMULA_OUT.getValue()) {
+        if (stockHandle.getHandleSubType().equals( WarehouseMaterialHandleType.FORMULA_OUT.getValue())) {
             String warehouseName = RespHelper.or500(doctorWarehouseStockHandleReadService.findwarehouseName(stockHandle.getRelStockHandleId()));
             vo.setStorageWarehouseName(warehouseName);
         }
@@ -283,26 +285,31 @@ public class StockHandleController {
                 .map(mh -> {
                     StockHandleExportVo vo = new StockHandleExportVo();
                     BeanUtils.copyProperties(mh, vo);
-
                     vo.setHandleType(mh.getType());
+
                     //物料表
                     DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(mh.getMaterialId()));
                     if (null != sku) {
                         vo.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())));
                         vo.setMaterialCode(sku.getCode());
                         vo.setMaterialSpecification(sku.getSpecification());
+                    }else
+                        log.warn("DoctorWarehouseSku found", mh.getMaterialId());
+
+                    //领料出库
+                    if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.OUT.getValue())) {
+                        //物料领用表
+                        DoctorWarehouseMaterialApply apply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandle(mh.getId()));
+                        if (null != apply) {
+                            vo.setApplyPigBarnName(apply.getPigBarnName());
+                            vo.setApplyPigGroupName(apply.getPigGroupName());
+                            vo.setApplyStaffName(apply.getApplyStaffName());
+                        } else
+                            log.warn("material apply not found,by material handle {}", mh.getId());
                     }
-                    //物料领用表
-                    DoctorWarehouseMaterialApply apply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandle(mh.getId()));
-                    if (null != apply) {
-                        vo.setApplyPigBarnName(apply.getPigBarnName());
-                        vo.setApplyPigGroupName(apply.getPigGroupName());
-                        vo.setApplyStaffName(apply.getApplyStaffName());
-                    } else
-                        log.warn("material apply not found,by material handle {}", mh.getId());
 
                     //调出
-                    if (mh.getType().intValue() == WarehouseMaterialHandleType.TRANSFER_OUT.getValue()) {
+                    if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.TRANSFER_OUT.getValue())) {
                         DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(mh.getRelMaterialHandleId()));
                         if (transferInHandle != null) {
                             //单据明细表
@@ -317,13 +324,13 @@ public class StockHandleController {
                     }
 
                     //退料入库-->可退数量
-                    if (mh.getType().intValue() == WarehouseMaterialHandleType.RETURN.getValue()) {
+                    if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.RETURN.getValue())) {
                         BigDecimal RefundableNumber = new BigDecimal(0);
                         //得到领料出库的数量
                         BigDecimal LibraryQuantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findLibraryById(mh.getRelMaterialHandleId()));
                         DoctorWarehouseMaterialHandle wmh = new DoctorWarehouseMaterialHandle();
                         wmh.setRelMaterialHandleId(mh.getRelMaterialHandleId());
-                        wmh.setHandleDate(mh.getHandleDate());
+                        wmh.setSettlementDate(mh.getSettlementDate());
                         //得到在此之前退料入库的数量和
                         BigDecimal RetreatingQuantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findRetreatingById(wmh));
                         RefundableNumber = LibraryQuantity.subtract(RetreatingQuantity);
@@ -331,16 +338,16 @@ public class StockHandleController {
                     }
 
                     //配方生产出库
-                    if (stockHandle.getHandleSubType().intValue() == WarehouseMaterialHandleType.FORMULA_OUT.getValue()) {
+                    if (stockHandle.getHandleSubType().equals( WarehouseMaterialHandleType.FORMULA_OUT.getValue())) {
                         String warehouseName = RespHelper.or500(doctorWarehouseStockHandleReadService.findwarehouseName(stockHandle.getRelStockHandleId()));
                         vo.setTransferInWarehouseName(warehouseName);
                     }
 
-
                     vo.setUnitPrice(mh.getUnitPrice().divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP).doubleValue());
                     vo.setAmount(mh.getUnitPrice().multiply(vo.getQuantity()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP).doubleValue());
                     vo.setUnitPrice(mh.getUnitPrice().doubleValue());
-                    vo.setAmount(mh.getAmount().doubleValue());
+                    vo.setAmount(mh.getAmount()!=null?mh.getAmount().doubleValue():0);
+
                     return vo;
                 })
                 .collect(Collectors.toList());
@@ -363,14 +370,23 @@ public class StockHandleController {
                 head.createCell(3).setCellValue(WareHouseType.from(stockHandle.getWarehouseType()).getDesc() + "仓库");
                 head.createCell(4).setCellValue("仓库名称");
                 head.createCell(5).setCellValue(stockHandle.getWarehouseName());
-                head.createCell(6).setCellValue("单据编号");
-                head.createCell(7).setCellValue(stockHandle.getSerialNo());
+                head.createCell(6).setCellValue("会计年月");
+                if(stockHandle.getSettlementDate()!=null&&!stockHandle.getSettlementDate().equals("")){
+                    Date settlementDate = stockHandle.getSettlementDate();
+                    SimpleDateFormat format=new SimpleDateFormat("yyyy年MM月");
+                    String ss = format.format(settlementDate);
+                    head.createCell(7).setCellValue(ss);
+                }else{
+                    head.createCell(7).setCellValue("");
+                }
+                head.createCell(8).setCellValue("单据编号");
+                head.createCell(9).setCellValue(stockHandle.getSerialNo());
 
                 Row title = sheet.createRow(2);
                 int pos = 3;
 
                 //入库单-->采购入库
-                if (stockHandle.getHandleType().equals(WarehouseMaterialHandleType.IN.getValue())) {
+                if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.IN.getValue())) {
                     title.createCell(0).setCellValue("物料名称");
                     title.createCell(1).setCellValue("厂家");
                     title.createCell(2).setCellValue("物料编码");
@@ -417,7 +433,7 @@ public class StockHandleController {
                     pos++;
 
                     //出库单-->领料出库
-                } else if (stockHandle.getHandleType().equals(WarehouseMaterialHandleType.OUT.getValue())) {
+                } else if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.OUT.getValue())) {
                     title.createCell(0).setCellValue("物料名称");
                     title.createCell(1).setCellValue("物料编码");
                     title.createCell(2).setCellValue("厂家");
@@ -434,7 +450,6 @@ public class StockHandleController {
                     BigDecimal totalQuantity = new BigDecimal(0);
                     double totalAmount = 0L;
                     for (StockHandleExportVo vo : exportVos) {
-
                         Row row = sheet.createRow(pos++);
                         row.createCell(0).setCellValue(vo.getMaterialName());
                         row.createCell(2).setCellValue(vo.getVendorName());
@@ -483,13 +498,13 @@ public class StockHandleController {
                     for (StockHandleExportVo vo : exportVos) {
                         BigDecimal quantity = new BigDecimal(0);
                         //盘亏
-                        if (vo.getHandleType() == WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue()) {
+                        if (stockHandle.getHandleSubType() == WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue()) {
                             //subtract：减去
                             quantity = vo.getBeforeInventoryQuantity().subtract(vo.getQuantity());
                             typeName = "盘亏";
                         }
                         //盘盈
-                        else if (vo.getHandleType() == WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue()) {
+                        else if (stockHandle.getHandleSubType() == WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue()) {
                             quantity = vo.getBeforeInventoryQuantity().add(vo.getQuantity());
                             typeName = "盘盈";
                         }
@@ -536,7 +551,6 @@ public class StockHandleController {
                     title.createCell(8).setCellValue("数量");
                     title.createCell(9).setCellValue("备注");
 
-
                     for (StockHandleExportVo vo : exportVos) {
                         Row row = sheet.createRow(pos++);
                         row.createCell(0).setCellValue(vo.getMaterialName());
@@ -551,9 +565,8 @@ public class StockHandleController {
                         row.createCell(9).setCellValue(vo.getRemark());
                     }
                 }
-
                 //配方生成出库
-                else if (stockHandle.getHandleType().equals(WarehouseMaterialHandleType.FORMULA_OUT.getValue())) {
+                else if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.FORMULA_OUT.getValue())) {
                     title.createCell(0).setCellValue("物料名称");
                     title.createCell(1).setCellValue("物料编码");
                     title.createCell(2).setCellValue("厂家");
@@ -562,7 +575,6 @@ public class StockHandleController {
                     title.createCell(5).setCellValue("入库仓库");
                     title.createCell(6).setCellValue("出库数量");
                     title.createCell(7).setCellValue("备注");
-
 
                     for (StockHandleExportVo vo : exportVos) {
                         Row row = sheet.createRow(pos++);
@@ -576,9 +588,8 @@ public class StockHandleController {
                         row.createCell(7).setCellValue(vo.getRemark());
                     }
                 }
-
                 //配方生产入库
-                else if (stockHandle.getHandleType().equals(WarehouseMaterialHandleType.FORMULA_IN.getValue())) {
+                else if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.FORMULA_IN.getValue())) {
                     title.createCell(0).setCellValue("物料名称");
                     title.createCell(1).setCellValue("物料编码");
                     title.createCell(2).setCellValue("厂家");
@@ -586,7 +597,6 @@ public class StockHandleController {
                     title.createCell(4).setCellValue("单位");
                     title.createCell(5).setCellValue("入库数量");
                     title.createCell(6).setCellValue("备注");
-
 
                     for (StockHandleExportVo vo : exportVos) {
                         Row row = sheet.createRow(pos++);
@@ -599,9 +609,8 @@ public class StockHandleController {
                         row.createCell(6).setCellValue(vo.getRemark());
                     }
                 }
-
                 //退料入库
-                else if (stockHandle.getHandleType().equals(WarehouseMaterialHandleType.RETURN.getValue())) {
+                else if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.RETURN.getValue())) {
                     title.createCell(0).setCellValue("物料名称");
                     title.createCell(1).setCellValue("物料编码");
                     title.createCell(2).setCellValue("厂家");
@@ -613,7 +622,6 @@ public class StockHandleController {
                     title.createCell(8).setCellValue("金额(元)");
                     title.createCell(9).setCellValue("备注");
 
-
                     BigDecimal totalQuantity = new BigDecimal(0);
                     double totalAmount = 0L;
                     for (StockHandleExportVo vo : exportVos) {
@@ -623,7 +631,6 @@ public class StockHandleController {
                         row.createCell(1).setCellValue(vo.getMaterialCode());
                         row.createCell(3).setCellValue(vo.getMaterialSpecification());
                         row.createCell(4).setCellValue(vo.getUnit());
-
                         row.createCell(5).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
                         row.createCell(6).setCellValue(vo.getQuantity().doubleValue());
                         row.createCell(7).setCellValue(vo.getUnitPrice());
@@ -635,7 +642,6 @@ public class StockHandleController {
                     }
 
                     Row countRow = sheet.createRow(pos);
-
                     CellRangeAddress cra = new CellRangeAddress(pos, pos, 0, 4);
                     sheet.addMergedRegion(cra);
 
@@ -647,10 +653,8 @@ public class StockHandleController {
 
                     countRow.createCell(6).setCellValue(totalQuantity.doubleValue());
                     countRow.createCell(8).setCellValue(totalAmount);
-
                     pos++;
                 }
-
 
                 Row foot = sheet.createRow(pos);
                 foot.createCell(0).setCellValue("仓管员");
@@ -666,27 +670,8 @@ public class StockHandleController {
             e.printStackTrace();
         }
 
-//        exporter.export(RespHelper.or500(doctorWarehouseMaterialHandleReadService.findByStockHandle(id))
-//                .stream()
-//                .map(mh -> {
-//                    StockHandleExportVo vo = new StockHandleExportVo();
-//                    BeanUtils.copyProperties(mh, vo);
-//
-//                    DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(mh.getMaterialId()));
-//                    if (null != sku) {
-//                        DoctorWarehouseVendor vendor = RespHelper.or500(doctorWarehouseVendorReadService.findById(sku.getVendorId()));
-//                        if (vendor != null)
-//                            vo.setVendorName(vendor.getName());
-//                        vo.setMaterialCode(sku.getCode());
-//                        vo.setMaterialSpecification(sku.getSpecification());
-//                    }
-//                    vo.setUnitPrice(new BigDecimal(mh.getUnitPrice()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP).doubleValue());
-//                    vo.setAmount(new BigDecimal(mh.getUnitPrice()).multiply(vo.getQuantity()).divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP).doubleValue());
-//                    return vo;
-//                })
-//                .collect(Collectors.toList()), "web-wareHouse-stock-handle", request, response);
-    }
 
+    }
     @RequestMapping(method = RequestMethod.GET, value = "/stockPage")
     public Paging<DoctorWarehouseStockHandle> stockPage(
             @RequestParam(required = false) Integer pageNo,
@@ -716,18 +701,6 @@ public class StockHandleController {
         params.put("updatedAtEnd", updatedAtEnd);
         return RespHelper.or500(doctorWarehouseStockHandleReadService.paging(pageNo, pageSize, params));
     }
-//    /**
-//     * 删除库存明细
-//     *
-//     * @param id
-//     * @return
-//     */
-//    @RequestMapping(method = RequestMethod.DELETE, value = "{id:\\d+}")
-//    public boolean delete(@PathVariable Long id) {
-//        Response<Boolean> response = doctorWarehouseStockHandleWriteService.delete(id);
-//        if (!response.isSuccess())
-//            throw new JsonResponseException(response.getError());
-//        return true;
-//    }
+
 
 }

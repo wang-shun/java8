@@ -50,19 +50,25 @@ public class PiggeryCollarController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "/piggeryReport")
-    public List<Map> piggeryReport(@RequestParam(required = false) Long farmId,
-                                         @RequestParam(required = false)@DateTimeFormat(pattern = "yyyy-MM") Date date,
+    public List<Map> piggeryReport(@RequestParam Long farmId,
+                                         @RequestParam(required = false) String date,
                                          @RequestParam(required = false) Long pigBarnId,
                                          @RequestParam(required = false) Integer pigType,
                                          @RequestParam(required = false) Integer type,
                                          @RequestParam(required = false) String materialName) {
         DoctorWarehouseMaterialApply materialApply=new DoctorWarehouseMaterialApply();
         materialApply.setFarmId(farmId);
-        System.out.println("farmId:"+farmId);
-        System.out.println("date:"+date);
+        String[] split = date.split("-");
+        System.out.println("Date:"+date);
+        System.out.println("Integer.valueOf(split[0])"+Integer.valueOf(split[0]));
+        System.out.println("Integer.valueOf(split[1])"+Integer.valueOf(split[1]));
         if (null != date){
-            materialApply.setApplyYear(date.getYear());
-            materialApply.setApplyMonth(date.getMonth());
+            materialApply.setApplyYear( Integer.valueOf(split[0]));
+            materialApply.setApplyMonth(Integer.valueOf(split[1]));
+        }else{
+            Date dd=new Date(System.currentTimeMillis());
+            materialApply.setApplyYear( dd.getYear());
+            materialApply.setApplyMonth(dd.getMonth());
         }
         if (null != pigBarnId){
             materialApply.setPigBarnId(pigBarnId);
@@ -90,13 +96,18 @@ public class PiggeryCollarController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "/piggeryDetails")
-    public List<Map> piggeryDetails(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") Date date,
-                                   @RequestParam(required = false) Long pigBarnId,
+    public List<Map> piggeryDetails(@RequestParam(required = false) String date,
+                                   @RequestParam Long pigBarnId,
                                    @RequestParam(required = false) String materialName) {
         DoctorWarehouseMaterialApply materialApply=new DoctorWarehouseMaterialApply();
+        String[] split = date.split("-");
         if (null != date){
-            materialApply.setApplyYear( date.getYear());
-            materialApply.setApplyMonth(date.getMonth());
+            materialApply.setApplyYear( Integer.valueOf(split[0]));
+            materialApply.setApplyMonth(Integer.valueOf(split[1]));
+        }else{
+            Date dd=new Date(System.currentTimeMillis());
+            materialApply.setApplyYear( dd.getYear());
+            materialApply.setApplyMonth(dd.getMonth());
         }
         if (null != pigBarnId){
             materialApply.setPigBarnId(pigBarnId);
@@ -111,8 +122,8 @@ public class PiggeryCollarController {
 
     //猪舍领用报表导出
     @RequestMapping(method = RequestMethod.GET, value = "/piggeryReport/export")
-    public void piggeryReportExport(@RequestParam(required = false) Long farmId,
-                                    @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") Date date,
+    public void piggeryReportExport(@RequestParam Long farmId,
+                                    @RequestParam(required = false) String date,
                                     @RequestParam(required = false) Long pigBarnId,
                                     @RequestParam(required = false) Integer pigType,
                                     @RequestParam(required = false) Integer type,
@@ -121,9 +132,14 @@ public class PiggeryCollarController {
         //取到值
         DoctorWarehouseMaterialApply materialApply=new DoctorWarehouseMaterialApply();
         materialApply.setFarmId(farmId);
+        String[] split = date.split("-");
         if (null != date){
-            materialApply.setApplyYear( date.getYear());
-            materialApply.setApplyMonth(date.getMonth());
+            materialApply.setApplyYear( Integer.valueOf(split[0]));
+            materialApply.setApplyMonth(Integer.valueOf(split[1]));
+        }else{
+            Date dd=new Date(System.currentTimeMillis());
+            materialApply.setApplyYear( dd.getYear());
+            materialApply.setApplyMonth(dd.getMonth());
         }
         if (null != pigBarnId){
             materialApply.setPigBarnId(pigBarnId);
@@ -230,15 +246,20 @@ public class PiggeryCollarController {
 
     //猪舍领用详情导出
     @RequestMapping(method = RequestMethod.GET, value = "/piggeryDetails/export")
-    public void piggeryDetailsExport(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") Date date,
-                                    @RequestParam(required = false) Long pigBarnId,
-                                    @RequestParam(required = false) String materialName,
+    public void piggeryDetailsExport(@RequestParam(required = false) String date,
+                                    @RequestParam Long pigBarnId,
+                                    @RequestParam String materialName,
                                     HttpServletRequest request, HttpServletResponse response) {
         //取到值
         DoctorWarehouseMaterialApply materialApply=new DoctorWarehouseMaterialApply();
+        String[] split = date.split("-");
         if (null != date){
-            materialApply.setApplyYear( date.getYear());
-            materialApply.setApplyMonth(date.getMonth());
+            materialApply.setApplyYear( Integer.valueOf(split[0]));
+            materialApply.setApplyMonth(Integer.valueOf(split[1]));
+        }else{
+            Date dd=new Date(System.currentTimeMillis());
+            materialApply.setApplyYear( dd.getYear());
+            materialApply.setApplyMonth(dd.getMonth());
         }
         if (null != pigBarnId){
             materialApply.setPigBarnId(pigBarnId);

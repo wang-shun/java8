@@ -48,7 +48,7 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `stock_handle_id`, `org_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `rel_material_handle_id`, `vendor_name`, `material_id`, `material_name`, `type`, `unit_price`, `unit`, `delete_flag`, `before_stock_quantity`, `quantity`, `handle_date`, `handle_year`, `handle_month`, `operator_id`, `operator_name`, `remark`, `settlement_date`, `amount`,
+        `stock_handle_id`, `org_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `rel_material_handle_id`, `vendor_name`, `material_id`, `material_name`, `type`, format(`unit_price`,4), `unit`, `delete_flag`, format(`before_stock_quantity`,2), format(`quantity`,2), `handle_date`, `handle_year`, `handle_month`, `operator_id`, `operator_name`, `remark`, `settlement_date`, format(`amount`,4),
         created_at, updated_at
     </sql>
 
@@ -416,7 +416,7 @@
     </update>
 
     <select id="countQuantityAlreadyRefund" parameterType="long" resultType="BigDecimal">
-        select ifnull(sum(quantity),0) from doctor_warehouse_material_handle where rel_material_handle_id=#{countQuantityAlreadyRefund}
+        select format(ifnull(sum(quantity),0),2) from doctor_warehouse_material_handle where rel_material_handle_id=#{countQuantityAlreadyRefund}
     </select>
 
     <select id="getWarehouseMaterialHandleCount" resultType="int">
@@ -425,15 +425,15 @@
     </select>
 
     <select id="findLibraryById" parameterType="long" resultType="BigDecimal">
-        select quantity from <include refid="cols_all"/>
+        select format(quantity,2) from <include refid="tb"/>
         where id=#{id} and type=2
     </select>
 
     <select id="findRetreatingById" parameterType="DoctorWarehouseMaterialHandle" resultType="BigDecimal">
-        select ifnull(sum(quantity),0) from <include refid="cols_all"/>
+        select format(ifnull(sum(quantity),0),2) from <include refid="tb"/>
         where type=13 and rel_material_handle_id=#{relMaterialHandleId}
-        and <![CDATA[ handle_date <= #{handleDate}]]>
-        order by handle_date ,id desc;
+        and <![CDATA[ settlement_date <= #{settlementDate}]]>
+        order by settlement_date ,id desc;
     </select>
 
     <select id="findByStockHandleId" parameterType="long" resultType="DoctorWarehouseMaterialHandle">
