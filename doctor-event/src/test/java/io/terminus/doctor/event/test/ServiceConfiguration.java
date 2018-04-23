@@ -19,8 +19,8 @@ import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTransFarmEven
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTransGroupEventHandler;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTurnSeedEventHandler;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupWeanEventHandler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmEventHandler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmInEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmEventV2Handler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmInEventV2Handler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgLocationEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigConditionEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigDiseaseEventHandler;
@@ -61,8 +61,8 @@ import io.terminus.doctor.event.handler.sow.DoctorSowMatingHandler;
 import io.terminus.doctor.event.handler.sow.DoctorSowPigletsChgHandler;
 import io.terminus.doctor.event.handler.sow.DoctorSowPregCheckHandler;
 import io.terminus.doctor.event.handler.sow.DoctorSowWeanHandler;
-import io.terminus.doctor.event.handler.usual.DoctorChgFarmHandler;
-import io.terminus.doctor.event.handler.usual.DoctorChgFarmInHandler;
+import io.terminus.doctor.event.handler.usual.DoctorChgFarmInV2Handler;
+import io.terminus.doctor.event.handler.usual.DoctorChgFarmV2Handler;
 import io.terminus.doctor.event.handler.usual.DoctorChgLocationHandler;
 import io.terminus.doctor.event.handler.usual.DoctorConditionHandler;
 import io.terminus.doctor.event.handler.usual.DoctorDiseaseHandler;
@@ -126,8 +126,8 @@ public class ServiceConfiguration {
             DoctorSowFostersByHandler doctorSowFostersByHandler,
             DoctorSowMatingHandler doctorSowMatingHandler,
             DoctorSowPregCheckHandler doctorSowPregCheckHandler,
-            DoctorChgFarmHandler doctorChgFarmHandler,
-            DoctorChgFarmInHandler doctorChgFarmInHandler,
+            DoctorChgFarmV2Handler doctorChgFarmHandler,
+            DoctorChgFarmInV2Handler doctorChgFarmInHandler,
             DoctorChgLocationHandler doctorChgLocationHandler,
             DoctorConditionHandler doctorConditionHandler,
             DoctorDiseaseHandler doctorDiseaseHandler,
@@ -194,8 +194,8 @@ public class ServiceConfiguration {
 
     @Bean
     public DoctorModifyPigEventHandlers doctorModifyPigEventHandlers(
-            DoctorModifyPigChgFarmEventHandler modifyPigChgFarmEventHandler,
-            DoctorModifyPigChgFarmInEventHandler modifyPigChgFarmInEventHandler,
+            DoctorModifyPigChgFarmEventV2Handler modifyPigChgFarmEventHandler,
+            DoctorModifyPigChgFarmInEventV2Handler modifyPigChgFarmInEventHandler,
             DoctorModifyPigChgLocationEventHandler modifyPigChgLocationEventHandler,
             DoctorModifyPigConditionEventHandler modifyPigConditionEventHandler,
             DoctorModifyPigDiseaseEventHandler modifyPigDiseaseEventHandler,

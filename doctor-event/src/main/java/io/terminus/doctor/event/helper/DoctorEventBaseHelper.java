@@ -246,6 +246,10 @@ public class DoctorEventBaseHelper {
             return true;
         }
 
+        if (Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM.getKey())) {
+            return true;
+        }
+
         if (Objects.equals(pigEvent.getIsAuto(), IsOrNot.YES.getValue())) {
             return false;
         }

@@ -23,7 +23,9 @@ import static io.terminus.doctor.event.editHandler.group.DoctorAbstractModifyGro
 /**
  * Created by xjn on 17/4/19.
  * 转场
+ *
  */
+@Deprecated
 @Component
 public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigEventHandler {
     @Autowired

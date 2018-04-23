@@ -21,6 +21,7 @@ import static io.terminus.doctor.event.editHandler.group.DoctorAbstractModifyGro
  * Created by xjn on 17/4/27.
  * 转场触发转入
  */
+@Deprecated
 @Component
 public class DoctorModifyPigChgFarmInEventHandler extends DoctorAbstractModifyPigEventHandler {
 

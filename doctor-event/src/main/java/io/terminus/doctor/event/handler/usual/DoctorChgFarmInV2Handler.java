@@ -1,8 +1,9 @@
 package io.terminus.doctor.event.handler.usual;
 
-import io.terminus.doctor.event.dao.DoctorChgFarmInfoDao;
+import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmInEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmInEventV2Handler;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -18,9 +19,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class DoctorChgFarmInV2Handler extends DoctorAbstractEventHandler {
     @Autowired
-    private DoctorModifyPigChgFarmInEventHandler modifyPigChgFarmInEventHandler;
-    @Autowired
-    private DoctorChgFarmInfoDao doctorChgFarmInfoDao;
+    private DoctorModifyPigChgFarmInEventV2Handler modifyPigChgFarmInEventHandler;
+
+    @Override
+    public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
+        DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
+        doctorPigEvent.setRelEventId(inputDto.getRelPigEventId());
+        return doctorPigEvent;
+    }
 
     @Override
     public DoctorPigTrack buildPigTrack(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
