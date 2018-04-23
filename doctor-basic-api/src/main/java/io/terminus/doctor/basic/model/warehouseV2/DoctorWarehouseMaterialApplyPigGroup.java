@@ -67,4 +67,9 @@ public class DoctorWarehouseMaterialApplyPigGroup implements Serializable {
     //猪场名称
     private String farmName;
 
+    //猪群id
+    private Integer pigGroupId;
+
+    //物料id
+    private Integer materialId;
 }
