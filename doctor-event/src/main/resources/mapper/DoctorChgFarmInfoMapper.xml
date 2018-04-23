@@ -13,6 +13,7 @@
         <result property="farmId" column="farm_id"/>
         <result property="pigId" column="pig_id"/>
         <result property="pigCode" column="pig_code"/>
+        <result property="pigType" column="pig_type"/>
         <result property="barnId" column="barn_id"/>
         <result property="rfid" column="rfid"/>
         <result property="eventId" column="event_id"/>
@@ -32,12 +33,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`, `pig_id`, `pig_code`, `barn_id`, `rfid`, `event_id`, `track`, `pig`,
+        `farm_id`, `pig_id`, `pig_code`, `pig_type`, `barn_id`, `rfid`, `event_id`, `track`, `pig`,
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{pigId}, #{pigCode}, #{barnId}, #{rfid}, #{eventId}, #{track}, #{pig},
+        #{farmId}, #{pigId}, #{pigCode}, #{pigType}, #{barnId}, #{rfid}, #{eventId}, #{track}, #{pig},
         now(), now()
     </sql>
 
@@ -46,11 +47,27 @@
             <if test="farmId != null">AND `farm_id` = #{farmId}</if>
             <if test="pigId != null">AND `pig_id` = #{pigId}</if>
             <if test="pigCode != null">AND `pig_code` = #{pigCode}</if>
+            <if test="pigType != null">AND `pig_type` = #{pigType}</if>
             <if test="barnId != null">AND `barn_id` = #{barnId}</if>
             <if test="rfid != null">AND `rfid` = #{rfid}</if>
             <if test="eventId != null">AND `event_id` = #{eventId}</if>
             <if test="track != null">AND `track` = #{track}</if>
             <if test="pig != null">AND `pig` = #{pig}</if>
+            <if test="barnIds != null  &amp;&amp; barnIds.size() > 0">AND b.current_barn_id IN
+                <foreach collection="barnIds" item="barn" open="(" separator="," close=")">
+                    #{barn}
+                </foreach>
+            </if>
+            <if test="pigTypes != null  &amp;&amp; pigTypes.size() > 0">AND a.pig_type IN
+                <foreach collection="pigTypes" item="type" open="(" separator="," close=")">
+                    #{type}
+                </foreach>
+            </if>
+            <if test="pigIds != null &amp;&amp; pigIds.size() > 0">AND a.id in
+                <foreach collection="pigIds" item="id" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
         </where>
@@ -90,6 +107,7 @@
             <if test="farmId != null">`farm_id` = #{farmId},</if>
             <if test="pigId != null">`pig_id` = #{pigId},</if>
             <if test="pigCode != null">`pig_code` = #{pigCode},</if>
+            <if test="pigType != null">`pig_type` = #{pigType},</if>
             <if test="barnId != null">`barn_id` = #{barnId},</if>
             <if test="rfid != null">`rfid` = #{rfid},</if>
             <if test="eventId != null">`event_id` = #{eventId},</if>

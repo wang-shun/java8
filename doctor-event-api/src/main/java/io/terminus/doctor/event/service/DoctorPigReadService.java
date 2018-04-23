@@ -207,4 +207,6 @@ public interface DoctorPigReadService {
      * @return
      */
     Response<DoctorChgFarmInfo> findByFarmIdAndPigId(Long farmId, Long pigId);
+
+    Response<Paging<SearchedPig>> pagingChgFarmPig(Map<String, Object> params, Integer pageNo, Integer pageSize);
 }

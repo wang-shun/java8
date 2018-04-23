@@ -80,6 +80,7 @@ public class DoctorChgFarmV2Handler extends DoctorAbstractEventHandler{
     @Override
     protected void specialHandle(DoctorPigEvent executeEvent, DoctorPigTrack toTrack) {
         super.specialHandle(executeEvent, toTrack);
+        createChgFarmInfo(executeEvent, toTrack);
     }
 
     @Override
@@ -193,15 +194,12 @@ public class DoctorChgFarmV2Handler extends DoctorAbstractEventHandler{
     private void createChgFarmInfo(DoctorPigEvent chgFarmEvent, DoctorPigTrack toTrack ) {
         DoctorPigTrack track = new DoctorPigTrack();
         BeanMapper.copy(toTrack, track);
-        if (Objects.equals(chgFarmEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
-            track.setStatus(PigStatus.Removal.getKey());
-        } else {
-            track.setStatus(PigStatus.BOAR_LEAVE.getKey());
-        }
+        track.setStatus(PigStatus.CHG_FARM.getKey());
         track.setIsRemoval(IsOrNot.YES.getValue());
         String trackJson = TO_JSON_MAPPER.toJson(track);
 
         DoctorPig doctorPig = doctorPigDao.findById(toTrack.getPigId());
+        doctorPig.setExtra(null);
         String pigJson = TO_JSON_MAPPER.toJson(doctorPig);
 
         DoctorChgFarmInfo doctorChgFarmInfo = doctorChgFarmInfoDao.findByFarmIdAndPigId(track.getFarmId(), track.getPigId());
@@ -210,6 +208,7 @@ public class DoctorChgFarmV2Handler extends DoctorAbstractEventHandler{
             doctorChgFarmInfo.setFarmId(track.getFarmId());
             doctorChgFarmInfo.setPigId(toTrack.getPigId());
             doctorChgFarmInfo.setPigCode(doctorPig.getPigCode());
+            doctorChgFarmInfo.setPigType(doctorPig.getPigType());
             doctorChgFarmInfo.setRfid(doctorPig.getRfid());
         }
 

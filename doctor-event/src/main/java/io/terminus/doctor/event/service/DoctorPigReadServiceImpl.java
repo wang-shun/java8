@@ -12,6 +12,7 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
@@ -547,6 +548,37 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             log.error("find by farmId and pigId, farmId:{}, pigId:{}, cause:{}",
                     farmId, pigId, Throwables.getStackTraceAsString(e));
             return Response.fail("find.by.farmId.and.pigId");
+        }
+    }
+
+    @Override
+    public Response<Paging<SearchedPig>> pagingChgFarmPig(Map<String, Object> params, Integer pageNo, Integer pageSize) {
+        try {
+            PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
+            Paging<DoctorChgFarmInfo> paging = doctorChgFarmInfoDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), params);
+            if (paging.isEmpty()) {
+                return Response.ok(Paging.empty());
+            }
+
+            List<SearchedPig> list = paging.getData().stream().map(doctorChgFarmInfo -> {
+                DoctorPig doctorPig = JSON_MAPPER.fromJson(doctorChgFarmInfo.getPig(), DoctorPig.class);
+                DoctorPigTrack doctorPigTrack = JSON_MAPPER.fromJson(doctorChgFarmInfo.getTrack(), DoctorPigTrack.class);
+                SearchedPig searchedPig = new SearchedPig();
+                BeanMapper.copy(doctorPig, searchedPig);
+                if (searchedPig.getBirthDate() != null) {
+                    searchedPig.setDayAge((int)(DateTime.now().minus(searchedPig.getBirthDate().getTime()).getMillis() / (1000 * 60 * 60 * 24) + 1));
+                }
+                searchedPig.setStatus(doctorPigTrack.getStatus());
+                searchedPig.setStatusName(PigStatus.from(doctorPigTrack.getStatus()).getName());
+                searchedPig.setCurrentBarnId(doctorPigTrack.getCurrentBarnId());
+                searchedPig.setCurrentBarnName(doctorPigTrack.getCurrentBarnName());
+                searchedPig.setCurrentParity(doctorPigTrack.getCurrentParity());
+                return searchedPig;
+            }).collect(Collectors.toList());
+            return Response.ok(new Paging<>(paging.getTotal(), list));
+        } catch (Exception e) {
+            log.error("paging chg farm pig failed,cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("paging.chg.farm.pig.failed");
         }
     }
 }
