@@ -104,6 +104,7 @@ public class DoctorChgFarmV2Handler extends DoctorAbstractEventHandler{
                 .build();
         DoctorChgFarmDto chgFarmIn = new DoctorChgFarmDto();
         BeanMapper.copy(doctorChgFarmDto, chgFarmIn);
+        chgFarmIn.setIsAuto(IsOrNot.YES.getValue());
         chgFarmIn.setBarnId(toBarn.getId());
         chgFarmIn.setBarnName(toBarn.getName());
         chgFarmIn.setBarnType(toBarn.getPigType());
