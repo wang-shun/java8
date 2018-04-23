@@ -132,7 +132,7 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
     }
 
     @Override
-    public Response<Map<String,Object>> selectPigGroupApply(Integer farmId, Integer pigType, String pigName, String pigGroupName,
+    public Map<String,Object> selectPigGroupApply(Integer farmId, Integer pigType, String pigName, String pigGroupName,
                                                                                                 Integer skuType, String skuName, Date openAt, Date closeAt){
         List<Map<String,DoctorWarehouseMaterialApplyPigGroup>> pigGroupList =doctorWarehouseMaterialApplyDao.selectPigGroupApply(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAt,closeAt);
         pigGroupList.get(0);
@@ -150,6 +150,6 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         map.put("pigGroupList",pigGroupList);
         map.put("allQuantity",allQuantity);
         map.put("allAmount",allAmount);
-        return Response.ok(map);
+        return map;
     }
 }

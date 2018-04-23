@@ -317,19 +317,19 @@
 
     <select id="selectPigGroupApply" parameterType="map" resultMap="DoctorWarehouseMaterialApplyPigGroupMap">
       SELECT
-            e.staff_name,
-            a.pig_group_name,
+        a.pig_group_name,
             e.NAME as pig_name,
+            e.staff_name,
+            b.settlement_date,
             c.code,
+            c.name as sku_name,
+            c.unit,
             sum( a.quantity ) AS quantity,
             ifnull(sum( a.unit_price * a.quantity ) / sum( a.quantity ),0) AS unit_price,
             sum(a.amount) AS amount,
-            b.settlement_date,
-            c.name as sku_name,
-            c.unit,
             c.type as sku_type,
-            c.specification,
             b.vendor_name,
+            c.specification,
             d.open_at,
             d.close_at,
             d.farm_name

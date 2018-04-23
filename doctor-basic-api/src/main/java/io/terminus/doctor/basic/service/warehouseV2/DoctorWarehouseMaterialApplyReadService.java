@@ -65,6 +65,6 @@ public interface DoctorWarehouseMaterialApplyReadService {
      */
     Response<List<DoctorWarehouseMaterialApply>> month(Long warehouseId, Integer applyYear, Integer applyMonth, String skuName);
 
-    Response<Map<String,Object>> selectPigGroupApply(Integer farmId, Integer pigType, String pigName, String pigGroupName,
+     Map<String,Object> selectPigGroupApply(Integer farmId, Integer pigType, String pigName, String pigGroupName,
                                                                                          Integer skuType, String skuName, Date openAt, Date closeAt);
 }
