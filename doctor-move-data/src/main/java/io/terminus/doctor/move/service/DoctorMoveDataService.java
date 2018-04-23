@@ -3101,4 +3101,33 @@ public class DoctorMoveDataService {
             log.error("flush to mating error, event id:{}", doctorPigEvent.getId());
         }
     }
+
+    public void flushFarrowRelMate() {
+        int pageNo = 1;
+        int pageSize = 1000;
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", PigEvent.FARROWING.getKey());
+        DoctorPigEvent updateEvent = new DoctorPigEvent();
+        while (true) {
+            PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
+            Paging<DoctorPigEvent> paging = doctorPigEventDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), map);
+            paging.getData().parallelStream().forEach(doctorPigEvent -> flushFarrowRelMate(doctorPigEvent, updateEvent));
+
+            pageNo++;
+            if (paging.getData().size() < 1000) {
+                break;
+            }
+        }
+    }
+
+    private void flushFarrowRelMate(DoctorPigEvent farrowEvent, DoctorPigEvent updateEvent) {
+        try {
+            DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(farrowEvent.getPigId(), farrowEvent.getParity());
+            updateEvent.setId(farrowEvent.getId());
+            updateEvent.setRelEventId(firstMate.getId());
+            doctorPigEventDao.update(updateEvent);
+        } catch (Exception e) {
+            log.error("flush farrow rel mate, event id:{}", farrowEvent.getId());
+        }
+    }
 }

@@ -1406,4 +1406,16 @@ public class DoctorMoveDataController {
         log.info("flush chg location end");
         return Boolean.TRUE;
     }
+
+    /**
+     * 刷新分娩事件关联的初配事件
+     * @return
+     */
+    @RequestMapping(value = "/flush/farrow/rel/mate", method = RequestMethod.GET)
+    public Boolean flushFarrowRelMate() {
+        log.info("flush farrow rel mate starting");
+        doctorMoveDataService.flushFarrowRelMate();
+        log.info("flush farrow rel mate ending");
+        return Boolean.TRUE;
+    }
 }

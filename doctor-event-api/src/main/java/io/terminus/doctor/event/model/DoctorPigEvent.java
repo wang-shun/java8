@@ -76,6 +76,9 @@ public class DoctorPigEvent implements Serializable {
      */
     private Integer barnType;
 
+    /**
+     * 事件之间业务管理事件（例如分娩事件，用于记录导致分娩的初配事件id）
+     */
     private Long relEventId;
 
     /**
