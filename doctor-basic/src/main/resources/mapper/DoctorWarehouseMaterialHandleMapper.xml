@@ -466,8 +466,8 @@
         '' as id,'上月结存' as material_name,
         '' as material_type,'' as ware_house_name,'' as handle_date,
         '' as settlement_date,'' as 	handler_type,
-        '' as rksl,'' as rkdj,'' as rkjc,
-        '' as cksl,'' as ckdj,'' as ckjc,
+        '' as rksl,'' as rkdj,'' as rkje,
+        '' as cksl,'' as ckdj,'' as ckje,
         a.balance_quantity as jcsl,
         ifnull(a.balance_amount / a.balance_quantity,'') as jcdj,
         a.balance_amount as jcje,
@@ -579,8 +579,8 @@
         '' as id,'本月结存' as material_name,
         '' as material_type,'' as ware_house_name,'' as handle_date,
         '' as settlement_date,'' as 	handler_type,
-        '' as rksl,'' as rkdj,'' as rkjc,
-        '' as cksl,'' as ckdj,'' as ckjc,
+        '' as rksl,'' as rkdj,'' as rkje,
+        '' as cksl,'' as ckdj,'' as ckje,
         case when
         (ifnull(case when b.type in (6,7,8,9) then sum(b.quantity) end,0)
         -

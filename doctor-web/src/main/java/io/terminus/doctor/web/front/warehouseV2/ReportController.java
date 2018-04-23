@@ -893,14 +893,244 @@ public class ReportController {
                 }
 
                 if(!CollectionUtils.isEmpty(exportVos)) {
+                    Map<String,Object> lastMonthData = exportVos.get(0);
+                    String tName = String.valueOf(lastMonthData.get("material_name"));
+                    Row dataRow = null;
+                    Cell dataCell = null;
+                    int startRowIndex = 2;
+                    if("上月结存".equals(tName))
+                    {
+                        //只显示结存数据,从第二行开始创建起
+                        dataRow = sheet.createRow(startRowIndex);
+                        for(int i = 0;i <= 22; i++) {
 
+                            if(i == 0)
+                            {
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(tName);
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
 
+                            if((i > 0 && i < 12) || (i > 14 && i <= 22))
+                            {
+                                dataCell = dataRow.createCell(i);
+                            }
 
+                            if(i == 12){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("jcsl")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                            if(i == 13){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("jcdj")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                            if(i == 14){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("jcje")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                        }
+
+                        //合并单元格
+                        cra = new CellRangeAddress(startRowIndex, startRowIndex, 1, 11);
+                        sheet.addMergedRegion(cra);
+                        cra = new CellRangeAddress(startRowIndex, startRowIndex, 15, 22);
+                        sheet.addMergedRegion(cra);
+                        startRowIndex++;
+                    }
 
                     //表数据
                     for (Map<String, Object> map : exportVos) {
+                        String vId = String.valueOf(lastMonthData.get("id"));
+                        if(StringUtils.isNotBlank(vId)){ // id不为空
+                            dataRow = sheet.createRow(startRowIndex);
+
+                            dataCell = dataRow.createCell(0);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("material_name")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(1);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("material_type")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(2);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("ware_house_name")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(3);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("handle_date")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(4);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("settlement_date")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(5);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("handler_type")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(6);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("rksl")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(7);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("rkdj")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(8);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("rkje")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(9);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("cksl")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(10);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("ckdj")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(11);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("ckje")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(12);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("jcsl")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(13);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("jcdj")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(14);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("jcje")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(15);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("pig_barn_name")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(16);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("pig_type")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(17);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("pig_group_name")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(18);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("apply_staff_name")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(19);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("farm_name")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(20);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("unit")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(21);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("provider_name")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(22);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("specification")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            startRowIndex++;
+                        }
 
                     }
+
+                    //最后一行数据
+                    Map<String,Object> thisMonthHZData = exportVos.get(exportVos.size() - 1);
+                    tName = String.valueOf(lastMonthData.get("material_name"));
+                    if("本月结存".equals(tName)) {
+
+                        dataRow = sheet.createRow(startRowIndex);
+                        for(int i = 0;i <= 22; i++) {
+
+                            if(i == 0)
+                            {
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(tName);
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                            if((i > 0 && i < 6) || (i > 14 && i <= 22))
+                            {
+                                dataCell = dataRow.createCell(i);
+                            }
+
+                            if(i == 6){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("rksl")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                            if(i == 7){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("rkdj")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                            if(i == 8){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("rkje")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                            if(i == 9){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("cksl")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                            if(i == 10){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("ckdj")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                            if(i == 11){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("ckje")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                            if(i == 12){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("jcsl")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                            if(i == 13){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("jcdj")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                            if(i == 14){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("jcje")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                        }
+
+                        //合并单元格
+                        cra = new CellRangeAddress(startRowIndex, startRowIndex, 1, 5);
+                        sheet.addMergedRegion(cra);
+                        cra = new CellRangeAddress(startRowIndex, startRowIndex, 15, 22);
+                        sheet.addMergedRegion(cra);
+
+                    }
+
                 }
 
                 workbook.write(response.getOutputStream());
