@@ -170,4 +170,9 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         return Response.ok(doctorWarehouseMaterialApplyDao.selectPigGroupApplyDetail(pigGroupId, skuId));
     }
 
+    @Override
+    public List<DoctorWarehouseMaterialApplyPigGroup> selectPigGroupApplys(Integer farmId, String pigType, String pigName, String pigGroupName,
+                                                            Integer skuType, String skuName, Date openAt, Date closeAt) {
+       return  doctorWarehouseMaterialApplyDao.selectPigGroupApply(farmId, pigType, pigName, pigGroupName, skuType, skuName, openAt, closeAt);
+    }
 }

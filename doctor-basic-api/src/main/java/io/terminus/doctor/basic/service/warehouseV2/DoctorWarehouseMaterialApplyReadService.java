@@ -84,4 +84,7 @@ public interface DoctorWarehouseMaterialApplyReadService {
     Response<List<Map>> piggeryDetails(DoctorWarehouseMaterialApply criteria);
 
     public Response<List<DoctorWarehouseMaterialApplyPigGroupDetail>> selectPigGroupApplyDetail(Long pigGroupId, Long skuId);
+
+    public List<DoctorWarehouseMaterialApplyPigGroup> selectPigGroupApplys(Integer farmId, String pigType, String pigName, String pigGroupName,
+                                                                           Integer skuType, String skuName, Date openAt, Date closeAt);
 }
