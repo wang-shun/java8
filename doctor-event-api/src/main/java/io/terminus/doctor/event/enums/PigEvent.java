@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public enum PigEvent {
 
     CHG_LOCATION(1, "转舍", "转舍事件", 0),
-    CHG_FARM(2, "转场", "转场事件", 0),
+    CHG_FARM(2, "转场转出", "转场事件", 0),
     CONDITION(3, "体况", "体况事件", 0),
     DISEASE(4, "疾病", "疾病事件", 0),
     VACCINATION(5, "防疫", "免疫事件", 0),

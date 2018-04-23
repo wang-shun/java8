@@ -2163,5 +2163,5 @@ CREATE TABLE `doctor_chg_farm_infos` (
   KEY `index_pig_id` (`pig_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='猪场猪转场记录';
 
-
-
+-- 转场事件名 改为转场转出
+UPDATE doctor_pig_events set name = '转场转出' where type = 2;
