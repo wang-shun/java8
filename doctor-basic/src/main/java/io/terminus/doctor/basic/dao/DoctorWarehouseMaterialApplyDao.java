@@ -178,10 +178,10 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
      * @param materiaId
      * @return
      */
-    public List<DoctorWarehouseMaterialApplyPigGroupDetail> selectPigGroupApplyDetail(Long pigGroupId, Long materiaId){
+    public List<DoctorWarehouseMaterialApplyPigGroupDetail> selectPigGroupApplyDetail(Long pigGroupId, Long skuId){
         Map<String,Object> map = Maps.newHashMap();
         map.put("farmId",pigGroupId);
-        map.put("pigType",materiaId);
+        map.put("pigType",skuId);
         return this.sqlSession.selectList(this.sqlId("selectPigGroupApplyDetail"),map);
     }
 }

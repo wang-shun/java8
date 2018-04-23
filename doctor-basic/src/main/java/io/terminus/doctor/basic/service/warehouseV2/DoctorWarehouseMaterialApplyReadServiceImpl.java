@@ -166,8 +166,8 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
     }
 
     @Override
-    public Response<List<DoctorWarehouseMaterialApplyPigGroupDetail>> selectPigGroupApplyDetail(Long pigGroupId, Long materiaId) {
-        return Response.ok(doctorWarehouseMaterialApplyDao.selectPigGroupApplyDetail(pigGroupId, materiaId));
+    public Response<List<DoctorWarehouseMaterialApplyPigGroupDetail>> selectPigGroupApplyDetail(Long pigGroupId, Long skuId) {
+        return Response.ok(doctorWarehouseMaterialApplyDao.selectPigGroupApplyDetail(pigGroupId, skuId));
     }
 
 }

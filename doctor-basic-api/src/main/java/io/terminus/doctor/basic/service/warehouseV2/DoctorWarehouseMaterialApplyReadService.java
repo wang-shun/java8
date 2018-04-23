@@ -83,5 +83,5 @@ public interface DoctorWarehouseMaterialApplyReadService {
      */
     Response<List<Map>> piggeryDetails(DoctorWarehouseMaterialApply criteria);
 
-    public Response<List<DoctorWarehouseMaterialApplyPigGroupDetail>> selectPigGroupApplyDetail(Long pigGroupId, Long materiaId);
+    public Response<List<DoctorWarehouseMaterialApplyPigGroupDetail>> selectPigGroupApplyDetail(Long pigGroupId, Long skuId);
 }
