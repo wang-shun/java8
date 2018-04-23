@@ -58,7 +58,7 @@
         <result property="closeAt" column="close_at"/>
         <result property="farmName" column="farm_name"/>
         <result property="pigGroupId" column="pig_group_id"/>
-        <result property="materialId" column="material_id"/>
+        <result property="skuId" column="sku_id"/>
     </resultMap>
 
     <resultMap id="DoctorWarehouseMaterialApplyPigGroupDetailMap" type="DoctorWarehouseMaterialApplyPigGroupDetail">
@@ -354,9 +354,9 @@
             c.specification,
             d.open_at,
             d.close_at,
-            d.farm_name
-            a.pig_group_id
-            a.material_id
+            d.farm_name,
+            a.pig_group_id,
+            a.material_id as sku_id
         FROM
             doctor_warehouse_material_apply a
           JOIN doctor_warehouse_material_handle b ON a.material_handle_id = b.id
