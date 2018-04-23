@@ -1,5 +1,6 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
@@ -21,16 +22,45 @@ public class SelectOptionServiceImpl implements SelectOptionService {
     private DoctorWarehouseMaterialHandleDao doctorWarehouseMaterialHandleDao;
 
     @Override
-    public Map<Integer,String> getPigTypeOption() {
-        Map<Integer, String> sels = Maps.newHashMap();
-        sels.put(PigType.NURSERY_PIGLET.getValue(), PigType.NURSERY_PIGLET.getDesc());
-        sels.put(PigType.FATTEN_PIG.getValue(), PigType.FATTEN_PIG.getDesc());
-        sels.put(PigType.RESERVE.getValue(), PigType.RESERVE.getDesc());
-        sels.put(PigType.MATE_SOW.getValue(), PigType.MATE_SOW.getDesc());
-        sels.put(PigType.PREG_SOW.getValue(), PigType.PREG_SOW.getDesc());
-        sels.put(PigType.DELIVER_SOW.getValue(), PigType.DELIVER_SOW.getDesc());
-        sels.put(PigType.BOAR.getValue(), PigType.BOAR.getDesc());
-        return sels;
+    public List<Map<String,String>> getPigTypeOption() {
+        List<Map<String,String>> lists = Lists.newArrayList();
+
+        Map<String, String> sels = Maps.newHashMap();
+        sels.put("value",PigType.NURSERY_PIGLET.getValue() + "");
+        sels.put("name", PigType.NURSERY_PIGLET.getDesc());
+        lists.add(sels);
+
+        sels = Maps.newHashMap();
+        sels.put("value",PigType.FATTEN_PIG.getValue() + "");
+        sels.put("name", PigType.FATTEN_PIG.getDesc());
+        lists.add(sels);
+
+        sels = Maps.newHashMap();
+        sels.put("value",PigType.RESERVE.getValue() + "");
+        sels.put("name", PigType.RESERVE.getDesc());
+        lists.add(sels);
+
+        sels = Maps.newHashMap();
+        sels.put("value",PigType.MATE_SOW.getValue() + "");
+        sels.put("name", PigType.MATE_SOW.getDesc());
+        lists.add(sels);
+
+        sels = Maps.newHashMap();
+        sels.put("value",PigType.PREG_SOW.getValue() + "");
+        sels.put("name", PigType.PREG_SOW.getDesc());
+        lists.add(sels);
+
+        sels = Maps.newHashMap();
+        sels.put("value",PigType.DELIVER_SOW.getValue() + "");
+        sels.put("name", PigType.DELIVER_SOW.getDesc());
+        lists.add(sels);
+
+        sels = Maps.newHashMap();
+        sels.put("value",PigType.BOAR.getValue() + "");
+        sels.put("name", PigType.BOAR.getDesc());
+        lists.add(sels);
+
+        return lists;
     }
 
     @Override
@@ -44,29 +74,87 @@ public class SelectOptionServiceImpl implements SelectOptionService {
     }
 
     @Override
-    public Map<Integer, String> getHandlerTypeOption() {
-        Map<Integer, String> sels = Maps.newHashMap();
-        sels.put(WarehouseMaterialHandleSubType.CG_IN.getValue(), WarehouseMaterialHandleSubType.CG_IN.getDesc());
-        sels.put(WarehouseMaterialHandleSubType.TL_IN.getValue(), WarehouseMaterialHandleSubType.TL_IN.getDesc());
-        sels.put(WarehouseMaterialHandleSubType.PF_IN.getValue(), WarehouseMaterialHandleSubType.PF_IN.getDesc());
-        sels.put(WarehouseMaterialHandleSubType.PY_IN.getValue(), WarehouseMaterialHandleSubType.PY_IN.getDesc());
-        sels.put(WarehouseMaterialHandleSubType.DB_IN.getValue(), WarehouseMaterialHandleSubType.DB_IN.getDesc());
-        sels.put(WarehouseMaterialHandleSubType.LL_OUT.getValue(), WarehouseMaterialHandleSubType.LL_OUT.getDesc());
-        sels.put(WarehouseMaterialHandleSubType.PK_OUT.getValue(), WarehouseMaterialHandleSubType.PK_OUT.getDesc());
-        sels.put(WarehouseMaterialHandleSubType.PF_OUT.getValue(), WarehouseMaterialHandleSubType.PF_OUT.getDesc());
-        sels.put(WarehouseMaterialHandleSubType.DB_OUT.getValue(), WarehouseMaterialHandleSubType.DB_OUT.getDesc());
-        return sels;
+    public List<Map<String,String>> getHandlerTypeOption() {
+        List<Map<String,String>> lists = Lists.newArrayList();
+
+        Map<String, String> sels = Maps.newHashMap();
+        sels.put("value",WarehouseMaterialHandleSubType.CG_IN.getValue() + "");
+        sels.put("name", WarehouseMaterialHandleSubType.CG_IN.getDesc());
+        lists.add(sels);
+
+        sels = Maps.newHashMap();
+        sels.put("value",WarehouseMaterialHandleSubType.TL_IN.getValue() + "");
+        sels.put("name", WarehouseMaterialHandleSubType.TL_IN.getDesc());
+        lists.add(sels);
+
+        sels = Maps.newHashMap();
+        sels.put("value",WarehouseMaterialHandleSubType.PF_IN.getValue() + "");
+        sels.put("name", WarehouseMaterialHandleSubType.PF_IN.getDesc());
+        lists.add(sels);
+
+        sels = Maps.newHashMap();
+        sels.put("value",WarehouseMaterialHandleSubType.PY_IN.getValue() + "");
+        sels.put("name", WarehouseMaterialHandleSubType.PY_IN.getDesc());
+        lists.add(sels);
+
+        sels = Maps.newHashMap();
+        sels.put("value",WarehouseMaterialHandleSubType.DB_IN.getValue() + "");
+        sels.put("name", WarehouseMaterialHandleSubType.DB_IN.getDesc());
+        lists.add(sels);
+
+        sels = Maps.newHashMap();
+        sels.put("value",WarehouseMaterialHandleSubType.LL_OUT.getValue() + "");
+        sels.put("name", WarehouseMaterialHandleSubType.LL_OUT.getDesc());
+        lists.add(sels);
+
+        sels = Maps.newHashMap();
+        sels.put("value",WarehouseMaterialHandleSubType.PK_OUT.getValue() + "");
+        sels.put("name", WarehouseMaterialHandleSubType.PK_OUT.getDesc());
+        lists.add(sels);
+
+        sels = Maps.newHashMap();
+        sels.put("value",WarehouseMaterialHandleSubType.PF_OUT.getValue() + "");
+        sels.put("name", WarehouseMaterialHandleSubType.PF_OUT.getDesc());
+        lists.add(sels);
+
+        sels = Maps.newHashMap();
+        sels.put("value",WarehouseMaterialHandleSubType.DB_OUT.getValue() + "");
+        sels.put("name", WarehouseMaterialHandleSubType.DB_OUT.getDesc());
+        lists.add(sels);
+
+        return lists;
     }
 
     @Override
-    public Map<Integer, String> getSkuTypeOption() {
-        Map<Integer, String> sels = Maps.newHashMap();
-        sels.put(WareHouseType.FEED.getKey(), WareHouseType.FEED.getDesc());
-        sels.put(WareHouseType.MATERIAL.getKey(), WareHouseType.MATERIAL.getDesc());
-        sels.put(WareHouseType.VACCINATION.getKey(), WareHouseType.VACCINATION.getDesc());
-        sels.put(WareHouseType.MEDICINE.getKey(), WareHouseType.MEDICINE.getDesc());
-        sels.put(WareHouseType.CONSUME.getKey(), WareHouseType.CONSUME.getDesc());
-        return sels;
+    public List<Map<String,String>> getSkuTypeOption() {
+        List<Map<String,String>> lists = Lists.newArrayList();
+
+        Map<String, String> sels = Maps.newHashMap();
+        sels.put("value",WareHouseType.FEED.getKey().toString());
+        sels.put("name", WareHouseType.FEED.getDesc());
+        lists.add(sels);
+
+        sels = Maps.newHashMap();
+        sels.put("value",WareHouseType.MATERIAL.getKey().toString());
+        sels.put("name", WareHouseType.MATERIAL.getDesc());
+        lists.add(sels);
+
+        sels = Maps.newHashMap();
+        sels.put("value",WareHouseType.VACCINATION.getKey().toString());
+        sels.put("name", WareHouseType.VACCINATION.getDesc());
+        lists.add(sels);
+
+        sels = Maps.newHashMap();
+        sels.put("value",WareHouseType.MEDICINE.getKey().toString());
+        sels.put("name", WareHouseType.MEDICINE.getDesc());
+        lists.add(sels);
+
+        sels = Maps.newHashMap();
+        sels.put("value",WareHouseType.CONSUME.getKey().toString());
+        sels.put("name", WareHouseType.CONSUME.getDesc());
+        lists.add(sels);
+
+        return lists;
     }
 
     @Override

@@ -23,7 +23,7 @@ public class SelectOptionController {
      * @return
      */
     @RequestMapping(value = "/pigtype",method = RequestMethod.GET)
-    public Map<Integer,String> getPigTypeOption(){
+    public List<Map<String,String>> getPigTypeOption(){
         return selectOptionService.getPigTypeOption();
     }
 
@@ -50,7 +50,7 @@ public class SelectOptionController {
      * @return
      */
     @RequestMapping(value = "/handlertype",method = RequestMethod.GET)
-    public Map<Integer,String> getHandlerTypeOption(){
+    public List<Map<String,String>> getHandlerTypeOption(){
         return selectOptionService.getHandlerTypeOption();
     }
 
@@ -59,7 +59,7 @@ public class SelectOptionController {
      * @return
      */
     @RequestMapping(value = "/skutype",method = RequestMethod.GET)
-    public Map<Integer,String> getSkuTypeOption(){
+    public List<Map<String,String>> getSkuTypeOption(){
         return selectOptionService.getSkuTypeOption();
     }
 

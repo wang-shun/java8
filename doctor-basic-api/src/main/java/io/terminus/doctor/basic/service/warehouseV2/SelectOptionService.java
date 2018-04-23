@@ -5,15 +5,15 @@ import java.util.Map;
 
 public interface SelectOptionService {
 
-    Map<Integer,String> getPigTypeOption();
+    List<Map<String,String>> getPigTypeOption();
 
     List<Map<String,Object>> getPigBarnNameOption(Long farmId);
 
     List<Map<String,Object>> getPigGroupNameOption(Long farmId);
 
-    Map<Integer,String> getHandlerTypeOption();
+    List<Map<String,String>> getHandlerTypeOption();
 
-    Map<Integer,String> getSkuTypeOption();
+    List<Map<String,String>> getSkuTypeOption();
 
     List<Map<String,Object>> getWareHouseDataOption(Long farmId);
 
