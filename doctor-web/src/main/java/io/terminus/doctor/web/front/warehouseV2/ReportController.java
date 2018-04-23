@@ -697,6 +697,16 @@ public class ReportController {
             throw new JsonResponseException("stock.farmId.null");
         }
 
+        if(null == settlementDate)
+        {
+            throw new JsonResponseException("stock.settlementDate.null");
+        }
+
+        if(null == warehouseId)
+        {
+            throw new JsonResponseException("stock.warehouseId.null");
+        }
+
         if(null == materialName)
         {
             throw new JsonResponseException("stock.materialName.null");
