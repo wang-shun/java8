@@ -67,4 +67,18 @@ public interface DoctorWarehouseMaterialApplyReadService {
 
     Response<Map<String,Object>> selectPigGroupApply(Integer farmId, String pigType, String pigName, String pigGroupName,
                                                                                          Integer skuType, String skuName, Date openAt, Date closeAt);
+
+    /**
+     * 猪舍领用报表
+     * @param criteria
+     * @return
+     */
+    Response<List<Map>> piggeryReport(DoctorWarehouseMaterialApply criteria);
+
+    /**
+     * 猪舍领用详情
+     * @param criteria
+     * @return
+     */
+    Response<List<Map>> piggeryDetails(DoctorWarehouseMaterialApply criteria);
 }

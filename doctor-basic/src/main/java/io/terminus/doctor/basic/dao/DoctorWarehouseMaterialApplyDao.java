@@ -120,5 +120,42 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         map.put("closeAt",closeAt);
         return this.sqlSession.selectList(this.sqlId("selectPigGroupApply"),map);
     }
+
+    /**
+     * 猪舍领用报表
+     * @param criteria
+     * @return
+     */
+    public List<Map> piggeryReport(DoctorWarehouseMaterialApply criteria) {
+        Map<String, Object> params = Maps.newHashMap();
+        if (criteria != null) {
+            params.put("farmId", criteria.getFarmId());
+            params.put("applyYear", criteria.getApplyYear());
+            params.put("applyMonth", criteria.getApplyMonth());
+            params.put("pigBarnId", criteria.getPigBarnId());
+            params.put("pigType", criteria.getPigType());
+            params.put("type", criteria.getType());
+            params.put("materialName", criteria.getMaterialName());
+        }
+        return sqlSession.selectList(sqlId("piggeryReport"), params);
+    }
+
+    /**
+     * 猪舍领用详情
+     * @param criteria
+     * @return
+     */
+    public List<Map> piggeryDetails(DoctorWarehouseMaterialApply criteria) {
+        Map<String, Object> params = Maps.newHashMap();
+        if (criteria != null) {
+            params.put("applyYear", criteria.getApplyYear());
+            params.put("applyMonth", criteria.getApplyMonth());
+            params.put("pigBarnId", criteria.getPigBarnId());
+            params.put("materialName", criteria.getMaterialName());
+//            Map<String, Object> objMap = (Map) JsonMapper.nonDefaultMapper().getMapper().convertValue(criteria, Map.class);
+//            params.putAll(objMap);
+        }
+        return sqlSession.selectList(sqlId("piggeryDetails"), params);
+    }
 }
 

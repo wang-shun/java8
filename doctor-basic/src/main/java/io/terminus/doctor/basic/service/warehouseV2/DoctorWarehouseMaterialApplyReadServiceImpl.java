@@ -153,4 +153,16 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         map.put("allAmount",allAmount);
         return Response.ok(map);
     }
+
+    @Override
+    public Response<List<Map>> piggeryReport(DoctorWarehouseMaterialApply criteria) {
+        return Response.ok(doctorWarehouseMaterialApplyDao.piggeryReport(criteria));
+    }
+
+    @Override
+    public Response<List<Map>> piggeryDetails(DoctorWarehouseMaterialApply criteria) {
+        return Response.ok(doctorWarehouseMaterialApplyDao.piggeryDetails(criteria));
+    }
+
+
 }
