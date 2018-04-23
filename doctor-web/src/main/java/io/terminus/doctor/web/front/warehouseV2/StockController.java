@@ -28,6 +28,8 @@ import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseStockStatisticsVo;
 import io.terminus.parana.user.model.UserProfile;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +38,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * 库存
  * Created by sunbo@terminus.io on 2017/8/20.
  */
 @RestController
@@ -75,6 +78,17 @@ public class StockController {
     @RpcConsumer
     private DoctorOrgReadService doctorOrgReadService;
 
+
+    @Autowired
+    private LockRegistry lockRegistry;
+
+    /**
+     * 采购入库
+     *
+     * @param stockIn
+     * @param errors
+     * @return
+     */
     @RequestMapping(method = RequestMethod.PUT, value = "in")
     public Long in(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockInDto stockIn, Errors errors) {
         if (errors.hasErrors())
@@ -94,6 +108,13 @@ public class StockController {
         return response.getResult();
     }
 
+    /**
+     * 生产领料出库
+     *
+     * @param stockOut
+     * @param errors
+     * @return
+     */
     @RequestMapping(method = RequestMethod.PUT, value = "out")
     public Long out(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockOutDto stockOut, Errors errors) {
         if (errors.hasErrors())
@@ -131,6 +152,25 @@ public class StockController {
         return response.getResult();
     }
 
+
+    /**
+     * 退料入库
+     *
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.PUT, value = "refund")
+    public Long refund() {
+        //TODO 领料入库
+        return 0L;
+    }
+
+    /**
+     * 盘点
+     *
+     * @param stockInventory
+     * @param errors
+     * @return
+     */
     @RequestMapping(method = RequestMethod.PUT, value = "inventory")
     public Long inventory(@RequestBody @Validated(AbstractWarehouseStockDetail.StockInventoryValid.class) WarehouseStockInventoryDto stockInventory,
                           Errors errors) {
@@ -168,6 +208,13 @@ public class StockController {
         return response.getResult();
     }
 
+    /**
+     * 调拨
+     *
+     * @param stockTransfer
+     * @param errors
+     * @return
+     */
     @RequestMapping(method = RequestMethod.PUT, value = "transfer")
     public Long transfer(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockTransferDto stockTransfer, Errors errors) {
         if (errors.hasErrors())
@@ -204,6 +251,12 @@ public class StockController {
         return response.getResult();
     }
 
+    /**
+     * 删除库存明细
+     *
+     * @param id
+     * @return
+     */
     @RequestMapping(method = RequestMethod.DELETE, value = "{id}")
     public boolean delete(@PathVariable Long id) {
         Response<Boolean> response = doctorWarehouseStockWriteService.delete(id);
@@ -213,6 +266,16 @@ public class StockController {
     }
 
 
+    /**
+     * 查询库存明细
+     *
+     * @param warehouseId
+     * @param orgId
+     * @param materialName
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
     @RequestMapping(method = RequestMethod.GET)
     public Paging<WarehouseStockStatisticsVo> paging(@RequestParam Long warehouseId,
                                                      @RequestParam(required = false) Long orgId,

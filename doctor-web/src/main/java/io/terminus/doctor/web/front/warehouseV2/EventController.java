@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 /**
  * Created by sunbo@terminus.io on 2017/8/24.
  */
+@Deprecated
 @Slf4j
 @RestController
 @RequestMapping("api/doctor/warehouse/event")

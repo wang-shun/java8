@@ -2145,6 +2145,7 @@ ALTER TABLE `doctor_track_snapshots` ADD COLUMN `event_source` tinyint (4) DEFAU
 create index doctor_event_modify_logs_business_id on doctor_event_modify_logs(business_id);
 
 
+<<<<<<< HEAD
 CREATE TABLE `doctor_chg_farm_infos` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `farm_id` bigint(20) NOT NULL COMMENT '猪场id',
@@ -2165,3 +2166,5 @@ CREATE TABLE `doctor_chg_farm_infos` (
 
 -- 转场事件名 改为转场转出
 UPDATE doctor_pig_events set name = '转场转出' where type = 2;
+-- 修改单据明细中的盘点之前库存数量字段 2018-04-09
+ALTER TABLE doctor_warehouse_material_handle CHANGE before_inventory_quantity before_stock_quantity DECIMAL(23,2) COMMENT '之前库存数量';
