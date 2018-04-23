@@ -13,28 +13,40 @@ import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.enums.WarehouseSkuStatus;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
+import io.terminus.doctor.basic.model.warehouseV2.*;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.warehouseV2.*;
+import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.web.core.export.Exporter;
 import io.terminus.doctor.web.front.warehouseV2.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -667,7 +679,7 @@ public class ReportController {
     /**
      * 物料变动报表
      */
-    @RequestMapping(method = RequestMethod.GET, value = "wlbdReport")
+    @RequestMapping(method = RequestMethod.GET, value = "/wlbdReport")
     public List<Map<String,Object>> wlbdReport(
             Long farmId,
             String settlementDate,
@@ -695,7 +707,206 @@ public class ReportController {
                 pigBarnId,pigGroupId,handlerType,
                 type,warehouseId,materialName
         ).getResult();
-
     }
 
+    @Autowired
+    private Exporter exporter;
+
+    //导出
+    @RequestMapping(method = RequestMethod.GET, value = "/wlbdReport/export")
+    public void exportWlbdReport(
+            Long farmId,
+            String settlementDate,
+            Integer pigBarnType,
+            Long pigBarnId,
+            Long pigGroupId,
+            Integer handlerType,
+            Integer type,
+            Long warehouseId,
+            String materialName,
+            HttpServletRequest request, HttpServletResponse response) {
+
+        //开始导出
+        try {
+
+            DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+            if (null == farm)
+                throw new JsonResponseException("farm.not.found");
+
+            String farmName = farm.getName();
+            String operatorTypeName = "物料变动报表";
+
+            List<Map<String,Object>> exportVos = RespHelper.or500(
+                    doctorWarehouseReportReadService.wlbdReport(
+                            farmId,settlementDate,pigBarnType,
+                            pigBarnId,pigGroupId,handlerType,
+                            type,warehouseId,materialName
+                    ));
+
+            //导出名称
+            exporter.setHttpServletResponse(request, response, "物料变动报表");
+
+            try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+                //设置表头标题
+                Sheet sheet = workbook.createSheet();
+
+                String fontName = "微软雅黑";
+                XSSFFont titleFont = workbook.createFont();
+                titleFont.setFontName(fontName);  // 设置字体
+                titleFont.setBoldweight(XSSFFont.BOLDWEIGHT_BOLD); // 字体加粗
+
+                XSSFFont normalFont = workbook.createFont();
+                normalFont.setFontName(fontName);
+
+                //表头样式
+                XSSFCellStyle titleCellStyle = workbook.createCellStyle();
+                //样式居中
+                titleCellStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                titleCellStyle.setFont(titleFont);
+
+                //数据样式
+                XSSFCellStyle normalCellStyle = workbook.createCellStyle();
+                //样式居中
+                normalCellStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                normalCellStyle.setFont(normalFont);
+
+                //设置表头列
+                Row titleRow =  sheet.createRow(0);
+                Cell titleCell = titleRow.createCell(0);
+                titleCell.setCellValue("物料名称");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(1);
+                titleCell.setCellValue("物料类型");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(2);
+                titleCell.setCellValue("仓库名称");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(3);
+                titleCell.setCellValue("事件日期");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(4);
+                titleCell.setCellValue("会计年月");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(5);
+                titleCell.setCellValue("事件类型");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(6);
+                titleCell.setCellValue("入库");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(7);
+                titleCell = titleRow.createCell(8);
+                titleCell = titleRow.createCell(9);
+                titleCell.setCellValue("出库");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(10);
+                titleCell = titleRow.createCell(11);
+                titleCell = titleRow.createCell(12);
+                titleCell.setCellValue("结存");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(13);
+                titleCell = titleRow.createCell(14);
+                titleCell = titleRow.createCell(15);
+                titleCell.setCellValue("猪舍名称");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(16);
+                titleCell.setCellValue("猪舍类型");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(17);
+                titleCell.setCellValue("猪群名称");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(18);
+                titleCell.setCellValue("饲养员");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(19);
+                titleCell.setCellValue("猪场名称");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(20);
+                titleCell.setCellValue("单位");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(21);
+                titleCell.setCellValue("厂家");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(22);
+                titleCell.setCellValue("规格");
+                titleCell.setCellStyle(titleCellStyle);
+                titleRow =  sheet.createRow(1);
+                titleCell = titleRow.createCell(0);
+                titleCell = titleRow.createCell(1);
+                titleCell = titleRow.createCell(2);
+                titleCell = titleRow.createCell(3);
+                titleCell = titleRow.createCell(4);
+                titleCell = titleRow.createCell(5);
+                titleCell = titleRow.createCell(6);
+                titleCell.setCellValue("数量");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(7);
+                titleCell.setCellValue("单价");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(8);
+                titleCell.setCellValue("金额");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(9);
+                titleCell.setCellValue("数量");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(10);
+                titleCell.setCellValue("单价");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(11);
+                titleCell.setCellValue("金额");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(12);
+                titleCell.setCellValue("数量");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(13);
+                titleCell.setCellValue("单价");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(14);
+                titleCell.setCellValue("金额");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(15);
+                titleCell = titleRow.createCell(16);
+                titleCell = titleRow.createCell(17);
+                titleCell = titleRow.createCell(18);
+                titleCell = titleRow.createCell(19);
+                titleCell = titleRow.createCell(20);
+                titleCell = titleRow.createCell(21);
+                titleCell = titleRow.createCell(22);
+
+                int fis = 0;
+                int sec = 1;
+                ///第一行第一列到第五列与第二行第一列到第五列进行合并
+                for(int i=0;i <= 5;i++){
+                    CellRangeAddress cra = new CellRangeAddress(fis, sec, i, i);
+                    sheet.addMergedRegion(cra);
+                }
+
+                CellRangeAddress cra = new CellRangeAddress(fis, fis, 6, 8);
+                sheet.addMergedRegion(cra);
+                cra = new CellRangeAddress(fis, fis, 9, 11);
+                sheet.addMergedRegion(cra);
+                cra = new CellRangeAddress(fis, fis, 12, 14);
+                sheet.addMergedRegion(cra);
+
+                for(int i=15;i <= 22;i++){
+                    cra = new CellRangeAddress(fis, sec, i, i);
+                    sheet.addMergedRegion(cra);
+                }
+
+                if(!CollectionUtils.isEmpty(exportVos)) {
+
+
+
+
+                    //表数据
+                    for (Map<String, Object> map : exportVos) {
+
+                    }
+                }
+
+                workbook.write(response.getOutputStream());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
