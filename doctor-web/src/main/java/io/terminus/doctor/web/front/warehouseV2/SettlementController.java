@@ -49,9 +49,9 @@ public class SettlementController {
      * @param settlementDate 需要结算的会计年月
      */
     @RequestMapping(method = RequestMethod.POST)
-    public void settlement(@RequestParam Long orgId,
-                           @DateTimeFormat(pattern = "yyyy-MM")
-                           @RequestParam Date settlementDate) {
+    public Boolean settlement(@RequestParam Long orgId,
+                              @DateTimeFormat(pattern = "yyyy-MM")
+                              @RequestParam Date settlementDate) {
 
         if (doctorWarehouseSettlementService.isUnderSettlement(orgId))
             throw new ServiceException("under.settlement");
@@ -60,9 +60,8 @@ public class SettlementController {
 
         List<Long> farmIds = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orgId)).stream().map(DoctorFarm::getId).collect(Collectors.toList());
 
-        RespHelper.orServEx(doctorWarehouseSettlementService.settlement(orgId, farmIds,
+        return RespHelper.orServEx(doctorWarehouseSettlementService.settlement(orgId, farmIds,
                 settlementDate));
-
     }
 
     /**
@@ -72,13 +71,13 @@ public class SettlementController {
      * @param settlementDate 需要反结算的会计年月
      */
     @RequestMapping(method = RequestMethod.POST, value = "anti")
-    public void AntiSettlement(@RequestParam Long orgId,
-                               @DateTimeFormat(pattern = "yyyy-MM")
-                               @RequestParam Date settlementDate) {
+    public Boolean AntiSettlement(@RequestParam Long orgId,
+                                  @DateTimeFormat(pattern = "yyyy-MM")
+                                  @RequestParam Date settlementDate) {
 
         if (doctorWarehouseSettlementService.isUnderSettlement(orgId))
             throw new ServiceException("under.settlement");
 
-        RespHelper.orServEx(doctorWarehouseSettlementService.antiSettlement(orgId, RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orgId)).stream().map(DoctorFarm::getId).collect(Collectors.toList()), settlementDate));
+        return RespHelper.orServEx(doctorWarehouseSettlementService.antiSettlement(orgId, RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orgId)).stream().map(DoctorFarm::getId).collect(Collectors.toList()), settlementDate));
     }
 }
