@@ -59,6 +59,19 @@ public class FormulaController {
     @RpcConsumer
     private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
 
+    /********************   2018/04/20  start   ***************************/
+    @RequestMapping(method = RequestMethod.GET, value = "/formulaList")
+    public Paging<FeedFormula> pagingFormulaList(
+            Long farmId,
+            String formulaName,
+            String feedName,
+            Integer pageNo,
+            Integer pageSize) {
+        return RespHelper.or500(feedFormulaReadService.pagingFormulaList(
+                farmId, formulaName, feedName, pageNo, pageSize));
+    }
+
+    /********************   2018/04/20  end     ***************************/
 
     @RequestMapping(method = RequestMethod.GET)
     public Paging<FeedFormula> paging(@RequestParam("farmId") Long farmId,
@@ -133,162 +146,6 @@ public class FormulaController {
         return RespHelper.or500(feedFormulaWriteService.produceMaterial(materialId, produceCount.doubleValue()));
     }
 
-
-    @RequestMapping(method = RequestMethod.POST, value = "produce")
-    public boolean produce(@RequestParam("farmId") Long farmId,
-                           @RequestParam("warehouseId") Long warehouseId,
-                           @RequestParam("feedFormulaId") Long feedFormulaId,
-                           @RequestParam("materialProduceJson") String materialProduceJson) {
-
-        FeedFormula feedFormula = RespHelper.or500(feedFormulaReadService.findFeedFormulaById(feedFormulaId));
-
-        if (null == feedFormula)
-            throw new JsonResponseException("formula.not.found");
-
-        FeedFormula.FeedProduce feedProduce = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(materialProduceJson, FeedFormula.FeedProduce.class);
-        // 校验用户修改数量信息
-        validateCountRange(feedProduce);
-
-        // 查询对应的饲料
-//        DoctorBasicMaterial feed = RespHelper.orServEx(doctorBasicMaterialReadService.findBasicMaterialById(feedFormula.getFeedId()));
-        DoctorWarehouseSku feed = RespHelper.or500(doctorWarehouseSkuReadService.findById(feedFormula.getFeedId()));
-        if (null == feed)
-            throw new JsonResponseException("warehouse.feed.not.found");
-
-        // 校验生产后的入仓仓库类型
-        DoctorWareHouse wareHouse = RespHelper.orServEx(doctorWareHouseReadService.findById(warehouseId));
-        checkState(Objects.equals(wareHouse.getType(), feed.getType()), "produce.targetWarehouseType.fail");
-
-
-        List<FeedFormula.MaterialProduceEntry> totalOut = new ArrayList<>(feedProduce.getMaterialProduceEntries());
-        if (null != feedProduce.getMedicalProduceEntries() && !feedProduce.getMedicalProduceEntries().isEmpty())
-            totalOut.addAll(feedProduce.getMedicalProduceEntries());
-
-        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
-
-        WarehouseFormulaDto formulaDto = new WarehouseFormulaDto();
-        formulaDto.setFarmId(farmId);
-        formulaDto.setFarmName(farm.getName());
-        formulaDto.setWarehouseId(warehouseId);
-        formulaDto.setHandleDate(Calendar.getInstance());
-        formulaDto.setFeedMaterial(feed);
-        formulaDto.setFeedMaterialId(feed.getId());
-        formulaDto.setFeedMaterialQuantity(new BigDecimal(feedProduce.getTotal()));
-        List<WarehouseFormulaDto.WarehouseFormulaDetail> details = new ArrayList<>();
-        for (FeedFormula.MaterialProduceEntry entry : totalOut) {
-            WarehouseFormulaDto.WarehouseFormulaDetail detail = new WarehouseFormulaDto.WarehouseFormulaDetail();
-            detail.setMaterialId(entry.getMaterialId());
-            detail.setMaterialName(entry.getMaterialName());
-            detail.setQuantity(new BigDecimal(entry.getMaterialCount()));
-            details.add(detail);
-        }
-        formulaDto.setDetails(details);
-        Response<Boolean> response = doctorWarehouseStockWriteService.formula(formulaDto);
-        if (!response.isSuccess())
-            throw new JsonResponseException(response.getError());
-        return true;
-//        //入库
-//        List<DoctorWarehouseStockHandleDto> inStockHandle = new ArrayList<>();
-//        //出库
-//        List<DoctorWarehouseStockHandleDto> outStockHandle = new ArrayList<>();
-//
-//
-//        final BigDecimal tottalMoney = new BigDecimal(0);
-//
-//        Date handleDate = new Date();
-//
-//        //物料消耗
-//        List<FeedFormula.MaterialProduceEntry> totalConsumMaterial = new ArrayList<>(feedProduce.getMaterialProduceEntries());
-//        totalConsumMaterial.addAll(feedProduce.getMedicalProduceEntries());
-//        totalConsumMaterial.forEach(material -> {
-//            //获取库存
-//            Response<List<DoctorWarehouseStock>> stockResponse = doctorWarehouseStockReadService.list(farmId, material.getMaterialId());
-//            if (!stockResponse.isSuccess() || stockResponse.getResult().isEmpty())
-//                throw new JsonResponseException("material.stock.not.found");
-//
-//            List<DoctorWarehouseStock> stocks = stockResponse.getResult();
-//            BigDecimal materialTotalStock = stocks.stream().map(DoctorWarehouseStock::getQuantity).reduce((a, b) -> a.add(b)).orElse(new BigDecimal(0));
-//            if (materialTotalStock.doubleValue() < material.getMaterialCount().doubleValue())
-//                throw new JsonResponseException("material.stock.not.enough");
-//
-//            //对库存排序，从大到小，最大化减少需要操作的库存
-//            List<DoctorWarehouseStock> sortedStocks = stocks.stream().sorted((s1, s2) ->
-//                    s2.getQuantity().compareTo(s1.getQuantity())
-//            ).collect(Collectors.toList());
-//
-//            double needConsumeMaterialCount = material.getMaterialCount().doubleValue();
-//            for (DoctorWarehouseStock stock : sortedStocks) {
-//
-//                if (needConsumeMaterialCount <= 0)
-//                    break;
-//
-//                double outStockNumber = stock.getQuantity().doubleValue() >= needConsumeMaterialCount ?
-//                        needConsumeMaterialCount :
-//                        stock.getQuantity().doubleValue();
-//
-//
-//                DoctorWarehouseStockHandleDto outHandle = new DoctorWarehouseStockHandleDto();
-//                outHandle.setNumber(new BigDecimal(outStockNumber));
-//                outHandle.setHandleDate(handleDate);
-//
-//                outHandle.setStock(stock);
-//                DoctorWarehouseStockHandlerDetail detail = new DoctorWarehouseStockHandlerDetail();
-//                detail.setNumber(outHandle.getNumber());
-//                outHandle.setHandleDetail(detail);
-//                outStockHandle.add(outHandle);
-//                needConsumeMaterialCount = needConsumeMaterialCount - outStockNumber;
-////                tottalMoney.add(outHandle.getNumber().multiply(new BigDecimal(stock.getUnitPrice())));
-//            }
-//
-//        });
-//
-//        DoctorWarehouseStockHandleDto inHandle = new DoctorWarehouseStockHandleDto();
-//        inHandle.setNumber(new BigDecimal(feedProduce.getTotal()));
-//        DoctorWarehouseStock criteria = new DoctorWarehouseStock();
-//        Response<DoctorWarehouseStock> inStockResponse = doctorWarehouseStockReadService.findOneByCriteria(criteria);
-//        if (!inStockResponse.isSuccess())
-//            throw new JsonResponseException("find.stock.failed");
-//        if (null == inStockResponse.getResult()) {
-//            DoctorWarehouseStock stock = new DoctorWarehouseStock();
-//            stock.setFarmId(farmId);
-//            stock.setWarehouseId(warehouseId);
-//            stock.setWarehouseName(wareHouse.getWareHouseName());
-//            stock.setWarehouseType(wareHouse.getType());
-//            stock.setMaterialId(feed.getId());
-//            stock.setMaterialName(feed.getName());
-//            stock.setManagerId(wareHouse.getManagerId());
-//            stock.setUnit(feed.getUnitName());
-//            //计算价格
-//
-////            stock.setUnitPrice(tottalMoney.divide(new BigDecimal(feedProduce.getTotal())).longValue());
-//            inHandle.setStock(stock);
-//        } else {
-//            inHandle.setStock(inStockResponse.getResult());
-//        }
-//        DoctorWarehouseStockHandlerDetail handlerDetail = new DoctorWarehouseStockHandlerDetail();
-//        handlerDetail.setNumber(inHandle.getNumber());
-//        inHandle.setHandleDetail(handlerDetail);
-//        inHandle.setHandleDate(handleDate);
-//        inStockHandle.add(inHandle);
-//
-//
-//        DoctorWarehouseStockHandler stockHandle = new DoctorWarehouseStockHandler();
-//        stockHandle.setFarmId(farmId);
-//        //配方生产后的物料的入仓仓库
-//        stockHandle.setWarehouseId(warehouseId);
-//        stockHandle.setHandlerType(WarehouseMaterialHandleType.FORMULA.getValue());
-//        stockHandle.setHandlerDate(handleDate);
-//        doctorWarehouseStockWriteService.outAndIn(inStockHandle, outStockHandle, stockHandle);
-
-    }
-
-
-    private void validateCountRange(FeedFormula.FeedProduce materialProduce) {
-        Double realTotal = materialProduce.getMaterialProduceEntries().stream()
-                .map(FeedFormula.MaterialProduceEntry::getMaterialCount)
-                .reduce((a, b) -> a + b).orElse(0D);
-        checkState(!Objects.equals(0, realTotal.intValue()), "input.materialProduceTotal.error");
-    }
 
 
     private void buildProduceInfo(FeedFormula.FeedProduce materialProduce) {

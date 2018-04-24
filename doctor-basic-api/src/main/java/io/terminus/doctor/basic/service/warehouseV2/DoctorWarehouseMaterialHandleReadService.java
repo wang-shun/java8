@@ -5,6 +5,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.List;
 
@@ -15,6 +16,20 @@ import java.util.List;
  * Created by [ your name ]
  */
 public interface DoctorWarehouseMaterialHandleReadService {
+
+    /**
+     * 得到领料出库的数量
+     * @param id
+     * @return
+     */
+    Response<BigDecimal> findLibraryById(Long id);
+
+    /**
+     * 得到在此之前退料入库的数量和
+     * @param materialHandle
+     * @return
+     */
+    Response<BigDecimal> findRetreatingById(DoctorWarehouseMaterialHandle materialHandle);
 
     /**
      * 查询
@@ -98,7 +113,7 @@ public interface DoctorWarehouseMaterialHandleReadService {
      * @param data
      * @return
      */
-    Response<Map<Long/*warehouseId*/, Long>> countWarehouseAmount(List<DoctorWarehouseMaterialHandle> data);
+    Response<Map<Long/*warehouseId*/, BigDecimal>> countWarehouseAmount(List<DoctorWarehouseMaterialHandle> data);
 
 
     /**
@@ -108,7 +123,26 @@ public interface DoctorWarehouseMaterialHandleReadService {
      * @param types
      * @return
      */
-    Response<Map<WarehouseMaterialHandleType, Map<Long, Long>>> countWarehouseAmount(DoctorWarehouseMaterialHandle criteria, WarehouseMaterialHandleType... types);
+    Response<Map<WarehouseMaterialHandleType, Map<Long, BigDecimal>>> countWarehouseAmount(DoctorWarehouseMaterialHandle criteria, WarehouseMaterialHandleType... types);
 
+    /**
+     * 公司结算报表
+     * @param criteria
+     * @return
+     */
+    Response<List<List<Map>>> companyReport(Map<String, Object> criteria);
 
+    /**
+     * 仓库结算报表
+     * @param criteria
+     * @return
+     */
+    Response<List<List<Map>>> warehouseReport(Map<String,Object> criteria);
+
+    /**
+     * 仓库月度详情
+     * @param params
+     * @return
+     */
+    Response<List<Map>> monthWarehouseDetail(Map<String, Object> criteria);
 }

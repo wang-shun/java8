@@ -21,7 +21,6 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -144,7 +143,7 @@ public class DoctorGroupProfitManage {
                 params.put("startDate", startDate);
                 params.put("endDate", endDate);
                 List<DoctorWarehouseMaterialApply> applies = RespHelper.or500(doctorWarehouseMaterialApplyReadService.list(params));
-                double totalAmount = applies.stream().mapToDouble(a -> a.getQuantity().multiply(new BigDecimal(a.getUnitPrice())).doubleValue()).sum();
+                double totalAmount = applies.stream().mapToDouble(a -> a.getQuantity().multiply((a.getUnitPrice())).doubleValue()).sum();
                 if (type == WareHouseType.FEED.getKey().intValue()) {
                     doctorProfitMaterialOrPig.setFeedTypeName("饲料");
                     doctorProfitMaterialOrPig.setFeedTypeId(type);
@@ -224,7 +223,7 @@ public class DoctorGroupProfitManage {
             params.put("startDate", startDate);
             params.put("endDate", endDate);
             List<DoctorWarehouseMaterialApply> applies = RespHelper.or500(doctorWarehouseMaterialApplyReadService.list(params));
-            amount += applies.stream().mapToDouble(a -> a.getQuantity().multiply(new BigDecimal(a.getUnitPrice())).doubleValue()).sum();
+            amount += applies.stream().mapToDouble(a -> a.getQuantity().multiply((a.getUnitPrice())).doubleValue()).sum();
 
             yearBarnAmount.put(key, amount);
         }

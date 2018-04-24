@@ -13,27 +13,40 @@ import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.enums.WarehouseSkuStatus;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
+import io.terminus.doctor.basic.model.warehouseV2.*;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.warehouseV2.*;
+import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.web.core.export.Exporter;
 import io.terminus.doctor.web.front.warehouseV2.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -118,7 +131,7 @@ public class ReportController {
             int year = date.get(Calendar.YEAR);
 
             //统计猪厂下每个仓库本月的入库和出库金额
-            Response<Map<WarehouseMaterialHandleType, Map<Long, Long>>> inAndOutAmountsResponse = doctorWarehouseMaterialHandleReadService.
+            Response<Map<WarehouseMaterialHandleType, Map<Long, BigDecimal>>> inAndOutAmountsResponse = doctorWarehouseMaterialHandleReadService.
                     countWarehouseAmount(DoctorWarehouseMaterialHandle.builder()
                                     .farmId(farmId)
                                     .handleYear(year)
@@ -149,7 +162,7 @@ public class ReportController {
             List<WarehouseReportVo.WarehouseReportMonthDetail> balanceDetails = new ArrayList<>(warehouseResponse.getResult().size());
             List<WarehouseReportVo.WarehouseReportMonthDetail> inDetails = new ArrayList<>(warehouseResponse.getResult().size());
             List<WarehouseReportVo.WarehouseReportMonthDetail> outDetails = new ArrayList<>(warehouseResponse.getResult().size());
-            long totalBalance = 0, totalIn = 0, totalOut = 0;
+            BigDecimal totalBalance = new BigDecimal(0), totalIn = new BigDecimal(0), totalOut = new BigDecimal(0);
             for (DoctorWareHouse wareHouse : warehouseResponse.getResult()) {
 //                AmountAndQuantityDto balance = RespHelper.or500(doctorWarehouseStockMonthlyReadService.countWarehouseBalance(wareHouse.getId(), year, month));
 //
@@ -167,54 +180,58 @@ public class ReportController {
 //                    lastMonthBalance.put(wareHouse.getId(), new AmountAndQuantityDto(balance.getAmount(), balance.getQuantity()));
 
 
-                long inAmount;
+                BigDecimal inAmount;
                 if (!inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.IN))
-                    inAmount = 0;
+                    inAmount = new BigDecimal(0);
                 else if (!inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.IN).containsKey(wareHouse.getId()))
-                    inAmount = 0;
+                    inAmount = new BigDecimal(0);
                 else
                     inAmount = inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.IN).get(wareHouse.getId());
-                inAmount += inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.INVENTORY_PROFIT) ?
+                inAmount = inAmount.add(inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.INVENTORY_PROFIT) ?
                         inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.INVENTORY_PROFIT).containsKey(wareHouse.getId()) ?
-                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.INVENTORY_PROFIT).get(wareHouse.getId()) : 0 : 0;
-                inAmount += inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.TRANSFER_IN) ?
-                        inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.TRANSFER_IN).containsKey(wareHouse.getId()) ?
-                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.TRANSFER_IN).get(wareHouse.getId()) : 0 : 0;
+                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.INVENTORY_PROFIT).get(wareHouse.getId()) : new BigDecimal(0) : new BigDecimal(0));
 
-                inAmount += inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.FORMULA_IN) ?
+                inAmount = inAmount.add(inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.TRANSFER_IN) ?
+                        inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.TRANSFER_IN).containsKey(wareHouse.getId()) ?
+                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.TRANSFER_IN).get(wareHouse.getId()) : new BigDecimal(0) : new BigDecimal(0));
+
+                inAmount = inAmount.add(inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.FORMULA_IN) ?
                         inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.FORMULA_IN).containsKey(wareHouse.getId()) ?
-                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.FORMULA_IN).get(wareHouse.getId()) : 0 : 0;
+                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.FORMULA_IN).get(wareHouse.getId()) : new BigDecimal(0) : new BigDecimal(0));
 
                 inDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
                         .name(wareHouse.getWareHouseName())
                         .amount(inAmount)
                         .build());
 
-                long outAmount;
+                BigDecimal outAmount;
                 if (!inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.OUT))
-                    outAmount = 0;
+                    outAmount = new BigDecimal(0);
                 else if (!inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.OUT).containsKey(wareHouse.getId()))
-                    outAmount = 0;
+                    outAmount = new BigDecimal(0);
                 else
                     outAmount = inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.OUT).get(wareHouse.getId());
 
-                outAmount += inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.INVENTORY_DEFICIT) ?
+                outAmount = outAmount.add(inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.INVENTORY_DEFICIT) ?
                         inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.INVENTORY_DEFICIT).containsKey(wareHouse.getId()) ?
-                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.INVENTORY_DEFICIT).get(wareHouse.getId()) : 0 : 0;
-                outAmount += inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.TRANSFER_OUT) ?
+                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.INVENTORY_DEFICIT).get(wareHouse.getId()) : new BigDecimal(0) : new BigDecimal(0));
+
+                outAmount = outAmount.add(inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.TRANSFER_OUT) ?
                         inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.TRANSFER_OUT).containsKey(wareHouse.getId()) ?
-                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.TRANSFER_OUT).get(wareHouse.getId()) : 0 : 0;
-                outAmount += inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.FORMULA_OUT) ?
+                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.TRANSFER_OUT).get(wareHouse.getId()) : new BigDecimal(0) : new BigDecimal(0));
+
+                outAmount = outAmount.add(inAndOutAmountsResponse.getResult().containsKey(WarehouseMaterialHandleType.FORMULA_OUT) ?
                         inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.FORMULA_OUT).containsKey(wareHouse.getId()) ?
-                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.FORMULA_OUT).get(wareHouse.getId()) : 0 : 0;
+                                inAndOutAmountsResponse.getResult().get(WarehouseMaterialHandleType.FORMULA_OUT).get(wareHouse.getId()) : new BigDecimal(0) : new BigDecimal(0));
+
                 outDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
                         .name(wareHouse.getWareHouseName())
                         .amount(outAmount)
                         .build());
 
-                totalBalance += balance.getAmount();
-                totalIn += inAmount;
-                totalOut += outAmount;
+                totalBalance = totalBalance.add(balance.getAmount());
+                totalIn = totalIn.add(inAmount);
+                totalOut = totalOut.add(outAmount);
             }
             balanceDetails.add(WarehouseReportVo.WarehouseReportMonthDetail.builder()
                     .name("合计")
@@ -278,7 +295,7 @@ public class ReportController {
 //                    .countMaterialBalance(warehouseId, stock.getSkuId(), lastMonth.get(Calendar.YEAR), lastMonth.get(Calendar.MONTH) + 1));
 
 //            AmountAndQuantityDto balance = balanceMap.containsKey(stock.getSkuId()) ? balanceMap.get(stock.getSkuId()) : new AmountAndQuantityDto(0, new BigDecimal(0));
-            AmountAndQuantityDto initialBalance = lastMonthBalanceMap.containsKey(stock.getSkuId()) ? lastMonthBalanceMap.get(stock.getSkuId()) : new AmountAndQuantityDto(0, new BigDecimal(0));
+            AmountAndQuantityDto initialBalance = lastMonthBalanceMap.containsKey(stock.getSkuId()) ? lastMonthBalanceMap.get(stock.getSkuId()) : new AmountAndQuantityDto();
 
             Response<WarehouseStockStatisticsDto> statisticsResponse = doctorWarehouseReportReadService.countMaterialHandleByMaterialVendor(warehouseId, stock.getSkuId(), null, date,
                     WarehouseMaterialHandleType.IN,
@@ -308,18 +325,19 @@ public class ReportController {
             }
 
             vo.setInAmount(statisticsResponse.getResult().getIn().getAmount()
-                    + statisticsResponse.getResult().getInventoryProfit().getAmount()
-                    + statisticsResponse.getResult().getTransferIn().getAmount()
-                    + statisticsResponse.getResult().getFormulaIn().getAmount());
+                    .add(statisticsResponse.getResult().getInventoryProfit().getAmount())
+                    .add(statisticsResponse.getResult().getTransferIn().getAmount())
+                    .add(statisticsResponse.getResult().getFormulaIn().getAmount()));
+
             vo.setInQuantity(statisticsResponse.getResult().getIn().getQuantity()
                     .add(statisticsResponse.getResult().getInventoryProfit().getQuantity())
                     .add(statisticsResponse.getResult().getTransferIn().getQuantity())
                     .add(statisticsResponse.getResult().getFormulaIn().getQuantity()));
 
             vo.setOutAmount(statisticsResponse.getResult().getOut().getAmount()
-                    + statisticsResponse.getResult().getInventoryDeficit().getAmount()
-                    + statisticsResponse.getResult().getTransferOut().getAmount()
-                    + statisticsResponse.getResult().getFormulaOut().getAmount());
+                    .add(statisticsResponse.getResult().getInventoryDeficit().getAmount())
+                    .add(statisticsResponse.getResult().getTransferOut().getAmount())
+                    .add(statisticsResponse.getResult().getFormulaOut().getAmount()));
             vo.setOutQuantity(statisticsResponse.getResult().getOut().getQuantity()
                     .add(statisticsResponse.getResult().getInventoryDeficit().getQuantity())
                     .add(statisticsResponse.getResult().getTransferOut().getQuantity())
@@ -330,7 +348,7 @@ public class ReportController {
 
 //            vo.setBalanceAmount(initialBalance.getAmount() + balance.getAmount());
 //            vo.setBalanceQuantity(initialBalance.getQuantity().add(balance.getQuantity()));
-            vo.setBalanceAmount(initialBalance.getAmount() + vo.getInAmount() - vo.getOutAmount());
+            vo.setBalanceAmount(initialBalance.getAmount().add(vo.getInAmount()).subtract(vo.getOutAmount()));
             vo.setBalanceQuantity(initialBalance.getQuantity().add(vo.getInQuantity()).subtract(vo.getOutQuantity()));
 
             report.add(vo);
@@ -452,7 +470,7 @@ public class ReportController {
             }
 
             if (WarehouseMaterialHandleType.TRANSFER_OUT.getValue() == handle.getType()) {
-                DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(handle.getOtherTransferHandleId()));
+                DoctorWarehouseMaterialHandle transferInHandle = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findById(handle.getRelMaterialHandleId()));
                 handleVo.setTransferInWarehouseName(transferInHandle.getWarehouseName());
             }
 
@@ -640,7 +658,7 @@ public class ReportController {
 //                    .specification(skuMap.get(apply.getMaterialId()).get(0).getSpecification())
                     .quantity(apply.getQuantity())
                     .unitPrice(apply.getUnitPrice())
-                    .amount(apply.getQuantity().multiply(new BigDecimal(apply.getUnitPrice())).longValue())
+                    .amount(apply.getQuantity().multiply(apply.getUnitPrice()))
                     .applyDate(apply.getApplyDate())
                     .build();
 
@@ -658,4 +676,506 @@ public class ReportController {
         return vos;
     }
 
+    /**
+     * 物料变动报表
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/wlbdReport")
+    public List<Map<String,Object>> wlbdReport(
+            Long farmId,
+            String settlementDate,
+            Integer pigBarnType,
+            Long pigBarnId,
+            Long pigGroupId,
+            Integer handlerType,
+            Integer type,
+            Long warehouseId,
+            String materialName
+    ) {
+
+        if(null == farmId)
+        {
+            throw new JsonResponseException("stock.farmId.null");
+        }
+
+        if(null == settlementDate)
+        {
+            throw new JsonResponseException("stock.settlementDate.null");
+        }
+
+        if(null == warehouseId)
+        {
+            throw new JsonResponseException("stock.warehouseId.null");
+        }
+
+        if(null == materialName)
+        {
+            throw new JsonResponseException("stock.materialName.null");
+        }
+
+        return doctorWarehouseReportReadService.wlbdReport(
+                farmId,settlementDate,pigBarnType,
+                pigBarnId,pigGroupId,handlerType,
+                type,warehouseId,materialName
+        ).getResult();
+    }
+
+    @Autowired
+    private Exporter exporter;
+
+    //导出
+    @RequestMapping(method = RequestMethod.GET, value = "/wlbdReport/export")
+    public void exportWlbdReport(
+            Long farmId,
+            String settlementDate,
+            Integer pigBarnType,
+            Long pigBarnId,
+            Long pigGroupId,
+            Integer handlerType,
+            Integer type,
+            Long warehouseId,
+            String materialName,
+            HttpServletRequest request, HttpServletResponse response) {
+
+        if(null == farmId)
+        {
+            throw new JsonResponseException("stock.farmId.null");
+        }
+
+        if(null == settlementDate)
+        {
+            throw new JsonResponseException("stock.settlementDate.null");
+        }
+
+        if(null == warehouseId)
+        {
+            throw new JsonResponseException("stock.warehouseId.null");
+        }
+
+        if(null == materialName)
+        {
+            throw new JsonResponseException("stock.materialName.null");
+        }
+
+        //开始导出
+        try {
+
+            DoctorFarm farm = doctorFarmReadService.findFarmById(farmId).getResult();
+            if (null == farm)
+                throw new JsonResponseException("farm.not.found");
+
+            String farmName = farm.getName();
+            String operatorTypeName = "物料变动报表";
+
+            List<Map<String,Object>> exportVos = RespHelper.or500(
+                    doctorWarehouseReportReadService.wlbdReport(
+                            farmId,settlementDate,pigBarnType,
+                            pigBarnId,pigGroupId,handlerType,
+                            type,warehouseId,materialName
+                    ));
+
+            //导出名称
+            exporter.setHttpServletResponse(request, response, "物料变动报表");
+
+            try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+
+                //设置表头标题
+                Sheet sheet = workbook.createSheet();
+
+                String fontName = "微软雅黑";
+                XSSFFont titleFont = workbook.createFont();
+                titleFont.setFontName(fontName);  // 设置字体
+                titleFont.setBoldweight(XSSFFont.BOLDWEIGHT_BOLD); // 字体加粗
+
+                XSSFFont normalFont = workbook.createFont();
+                normalFont.setFontName(fontName);
+
+                //表头样式
+                XSSFCellStyle titleCellStyle = workbook.createCellStyle();
+                //样式居中
+                titleCellStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                titleCellStyle.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
+                titleCellStyle.setFont(titleFont);
+
+                //数据样式
+                XSSFCellStyle normalCellStyle = workbook.createCellStyle();
+                //样式居中
+                normalCellStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                normalCellStyle.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
+                normalCellStyle.setFont(normalFont);
+
+                XSSFCellStyle leftCellStyle = workbook.createCellStyle();
+                //样式居左
+                leftCellStyle.setAlignment(HSSFCellStyle.ALIGN_LEFT);
+                leftCellStyle.setVerticalAlignment(HSSFCellStyle.VERTICAL_CENTER);
+                leftCellStyle.setFont(normalFont);
+
+                //设置表头列
+                Row titleRow =  sheet.createRow(0);
+                Cell titleCell = titleRow.createCell(0);
+                titleCell.setCellValue("物料名称");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(1);
+                titleCell.setCellValue("物料类型");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(2);
+                titleCell.setCellValue("仓库名称");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(3);
+                titleCell.setCellValue("事件日期");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(4);
+                titleCell.setCellValue("会计年月");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(5);
+                titleCell.setCellValue("事件类型");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(6);
+                titleCell.setCellValue("入库");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(7);
+                titleCell = titleRow.createCell(8);
+                titleCell = titleRow.createCell(9);
+                titleCell.setCellValue("出库");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(10);
+                titleCell = titleRow.createCell(11);
+                titleCell = titleRow.createCell(12);
+                titleCell.setCellValue("结存");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(13);
+                titleCell = titleRow.createCell(14);
+                titleCell = titleRow.createCell(15);
+                titleCell.setCellValue("猪舍名称");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(16);
+                titleCell.setCellValue("猪舍类型");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(17);
+                titleCell.setCellValue("猪群名称");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(18);
+                titleCell.setCellValue("饲养员");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(19);
+                titleCell.setCellValue("猪场名称");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(20);
+                titleCell.setCellValue("单位");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(21);
+                titleCell.setCellValue("厂家");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(22);
+                titleCell.setCellValue("规格");
+                titleCell.setCellStyle(titleCellStyle);
+                titleRow =  sheet.createRow(1);
+                titleCell = titleRow.createCell(0);
+                titleCell = titleRow.createCell(1);
+                titleCell = titleRow.createCell(2);
+                titleCell = titleRow.createCell(3);
+                titleCell = titleRow.createCell(4);
+                titleCell = titleRow.createCell(5);
+                titleCell = titleRow.createCell(6);
+                titleCell.setCellValue("数量");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(7);
+                titleCell.setCellValue("单价");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(8);
+                titleCell.setCellValue("金额");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(9);
+                titleCell.setCellValue("数量");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(10);
+                titleCell.setCellValue("单价");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(11);
+                titleCell.setCellValue("金额");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(12);
+                titleCell.setCellValue("数量");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(13);
+                titleCell.setCellValue("单价");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(14);
+                titleCell.setCellValue("金额");
+                titleCell.setCellStyle(titleCellStyle);
+                titleCell = titleRow.createCell(15);
+                titleCell = titleRow.createCell(16);
+                titleCell = titleRow.createCell(17);
+                titleCell = titleRow.createCell(18);
+                titleCell = titleRow.createCell(19);
+                titleCell = titleRow.createCell(20);
+                titleCell = titleRow.createCell(21);
+                titleCell = titleRow.createCell(22);
+
+                int fis = 0;
+                int sec = 1;
+                ///第一行第一列到第五列与第二行第一列到第五列进行合并
+                for(int i=0;i <= 5;i++){
+                    CellRangeAddress cra = new CellRangeAddress(fis, sec, i, i);
+                    sheet.addMergedRegion(cra);
+                }
+
+                CellRangeAddress cra = new CellRangeAddress(fis, fis, 6, 8);
+                sheet.addMergedRegion(cra);
+                cra = new CellRangeAddress(fis, fis, 9, 11);
+                sheet.addMergedRegion(cra);
+                cra = new CellRangeAddress(fis, fis, 12, 14);
+                sheet.addMergedRegion(cra);
+
+                for(int i=15;i <= 22;i++){
+                    cra = new CellRangeAddress(fis, sec, i, i);
+                    sheet.addMergedRegion(cra);
+                }
+
+                if(!CollectionUtils.isEmpty(exportVos)) {
+                    Map<String,Object> lastMonthData = exportVos.get(0);
+                    String tName = String.valueOf(lastMonthData.get("material_name"));
+                    Row dataRow = null;
+                    Cell dataCell = null;
+                    int startRowIndex = 2;
+                    if("上月结存".equals(tName))
+                    {
+                        //只显示结存数据,从第二行开始创建起
+                        dataRow = sheet.createRow(startRowIndex);
+                        for(int i = 0;i <= 22; i++) {
+
+                            if(i == 0)
+                            {
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(tName);
+                                dataCell.setCellStyle(leftCellStyle);
+                            }
+
+                            if((i > 0 && i < 12) || (i > 14 && i <= 22))
+                            {
+                                dataCell = dataRow.createCell(i);
+                            }
+
+                            if(i == 12){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("jcsl")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                            if(i == 13){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("jcdj")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                            if(i == 14){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("jcje")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                        }
+
+                        //合并单元格
+                        cra = new CellRangeAddress(startRowIndex, startRowIndex, 0, 11);
+                        sheet.addMergedRegion(cra);
+                        cra = new CellRangeAddress(startRowIndex, startRowIndex, 15, 22);
+                        sheet.addMergedRegion(cra);
+                        startRowIndex++;
+                    }
+
+                    //表数据
+                    for (Map<String, Object> map : exportVos) {
+                        String vId = String.valueOf(lastMonthData.get("id"));
+                        if(StringUtils.isNotBlank(vId)){ // id不为空
+                            dataRow = sheet.createRow(startRowIndex);
+
+                            dataCell = dataRow.createCell(0);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("material_name")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(1);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("material_type")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(2);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("ware_house_name")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(3);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("handle_date")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(4);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("settlement_date")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(5);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("handler_type")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(6);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("rksl")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(7);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("rkdj")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(8);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("rkje")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(9);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("cksl")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(10);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("ckdj")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(11);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("ckje")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(12);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("jcsl")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(13);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("jcdj")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(14);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("jcje")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(15);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("pig_barn_name")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(16);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("pig_type")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(17);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("pig_group_name")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(18);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("apply_staff_name")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(19);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("farm_name")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(20);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("unit")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(21);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("provider_name")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            dataCell = dataRow.createCell(22);
+                            dataCell.setCellValue(String.valueOf(lastMonthData.get("specification")));
+                            dataCell.setCellStyle(normalCellStyle);
+
+                            startRowIndex++;
+                        }
+
+                    }
+
+                    //最后一行数据
+                    Map<String,Object> thisMonthHZData = exportVos.get(exportVos.size() - 1);
+                    tName = String.valueOf(lastMonthData.get("material_name"));
+                    if("本月结存".equals(tName)) {
+
+                        dataRow = sheet.createRow(startRowIndex);
+                        for(int i = 0;i <= 22; i++) {
+
+                            if(i == 0)
+                            {
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(tName);
+                                dataCell.setCellStyle(leftCellStyle);
+                            }
+
+                            if((i > 0 && i < 6) || (i > 14 && i <= 22))
+                            {
+                                dataCell = dataRow.createCell(i);
+                            }
+
+                            if(i == 6){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("rksl")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                            if(i == 7){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("rkdj")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                            if(i == 8){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("rkje")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                            if(i == 9){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("cksl")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                            if(i == 10){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("ckdj")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                            if(i == 11){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("ckje")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                            if(i == 12){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("jcsl")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                            if(i == 13){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("jcdj")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                            if(i == 14){
+                                dataCell = dataRow.createCell(i);
+                                dataCell.setCellValue(String.valueOf(lastMonthData.get("jcje")));
+                                dataCell.setCellStyle(normalCellStyle);
+                            }
+
+                        }
+
+                        //合并单元格
+                        cra = new CellRangeAddress(startRowIndex, startRowIndex, 0, 5);
+                        sheet.addMergedRegion(cra);
+                        cra = new CellRangeAddress(startRowIndex, startRowIndex, 15, 22);
+                        sheet.addMergedRegion(cra);
+
+                    }
+
+                }
+
+                workbook.write(response.getOutputStream());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

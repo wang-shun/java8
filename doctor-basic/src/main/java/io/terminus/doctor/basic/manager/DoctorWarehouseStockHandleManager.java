@@ -14,7 +14,10 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -42,6 +45,7 @@ public class DoctorWarehouseStockHandleManager {
      * @param handleType
      * @return
      */
+    @Deprecated
     public DoctorWarehouseStockHandle handle(AbstractWarehouseStockDto stockDto, DoctorWareHouse wareHouse, WarehouseMaterialHandleType handleType) {
 
         if (stockDto.getStockHandleId() != null) {
@@ -55,8 +59,75 @@ public class DoctorWarehouseStockHandleManager {
             doctorWarehouseStockHandleDao.update(stockHandle);
 
             return stockHandle;
-        }
+        } else
+            return create(stockDto, wareHouse, handleType, null);
+    }
 
+    public void update(AbstractWarehouseStockDto stockDto, DoctorWarehouseStockHandle stockHandle) {
+
+        stockHandle.setHandleDate(stockDto.getHandleDate().getTime());
+
+        stockHandle.setOperatorId(stockDto.getOperatorId());
+        stockHandle.setOperatorName(stockDto.getOperatorName());
+        doctorWarehouseStockHandleDao.update(stockHandle);
+    }
+
+
+    public DoctorWarehouseStockHandle create(AbstractWarehouseStockDto stockDto,
+                                             DoctorWareHouse wareHouse,
+                                             WarehouseMaterialHandleType handleType,
+                                             Long relStockHandleId) {
+        String serialNo;
+        if (handleType == WarehouseMaterialHandleType.IN)
+            serialNo = "R" + DateFormatUtils.format(new Date(), "yyyyMMddhhmmssSSS");
+        else if (handleType == WarehouseMaterialHandleType.OUT)
+            serialNo = "C" + DateFormatUtils.format(new Date(), "yyyyMMddhhmmssSSS");
+        else if (handleType == WarehouseMaterialHandleType.INVENTORY_PROFIT)
+            serialNo = "PY" + DateFormatUtils.format(new Date(), "yyyyMMddhhmmssSSS");
+        else if (handleType == WarehouseMaterialHandleType.INVENTORY_DEFICIT)
+            serialNo = "PK" + DateFormatUtils.format(new Date(), "yyyyMMddhhmmssSSS");
+        else if (handleType == WarehouseMaterialHandleType.TRANSFER_IN)
+            serialNo = "DR" + DateFormatUtils.format(new Date(), "yyyyMMddhhmmssSSS");
+        else if (handleType == WarehouseMaterialHandleType.TRANSFER_OUT)
+            serialNo = "DC" + DateFormatUtils.format(new Date(), "yyyyMMddhhmmssSSS");
+        else if (handleType == WarehouseMaterialHandleType.FORMULA_IN)
+            serialNo = "PR" + DateFormatUtils.format(new Date(), "yyyyMMddhhmmssSSS");
+        else if (handleType == WarehouseMaterialHandleType.FORMULA_OUT)
+            serialNo = "PC" + DateFormatUtils.format(new Date(), "yyyyMMddhhmmssSSS");
+        else
+            serialNo = "T" + DateFormatUtils.format(new Date(), "yyyyMMddhhmmssSSS");
+
+        DoctorWarehouseStockHandle handle = new DoctorWarehouseStockHandle();
+        handle.setFarmId(wareHouse.getFarmId());
+        handle.setWarehouseId(wareHouse.getId());
+        handle.setWarehouseType(wareHouse.getType());
+        handle.setWarehouseName(wareHouse.getWareHouseName());
+
+        handle.setRelStockHandleId(relStockHandleId);
+
+        handle.setOperatorId(stockDto.getOperatorId());
+        handle.setOperatorName(stockDto.getOperatorName());
+
+        handle.setHandleDate(stockDto.getHandleDate().getTime());
+        handle.setSettlementDate(stockDto.getSettlementDate());
+        handle.setSerialNo(serialNo);
+
+        if (WarehouseMaterialHandleType.isBigIn(handleType.getValue()))
+            handle.setHandleType(1);//入库
+        else
+            handle.setHandleType(2);//出库
+        handle.setHandleSubType(handleType.getValue());
+
+        doctorWarehouseStockHandleDao.create(handle);
+        return handle;
+    }
+
+    public DoctorWarehouseStockHandle create(Long operatorId,
+                                             String operatorName,
+                                             Date handleDate,
+                                             DoctorWareHouse wareHouse,
+                                             WarehouseMaterialHandleType handleType,
+                                             Long relStockHandleId) {
         String serialNo;
         if (handleType == WarehouseMaterialHandleType.IN)
             serialNo = "R" + DateFormatUtils.format(new Date(), "yyyyMMddhhmmssSSS");
@@ -68,25 +139,30 @@ public class DoctorWarehouseStockHandleManager {
             serialNo = "D" + DateFormatUtils.format(new Date(), "yyyyMMddhhmmssSSS");
 
         DoctorWarehouseStockHandle handle = new DoctorWarehouseStockHandle();
-        handle.setFarmId(stockDto.getFarmId());
-        handle.setWarehouseId(stockDto.getWarehouseId());
+        handle.setFarmId(wareHouse.getFarmId());
+        handle.setWarehouseId(wareHouse.getId());
         handle.setWarehouseType(wareHouse.getType());
         handle.setWarehouseName(wareHouse.getWareHouseName());
 
-        handle.setOperatorId(stockDto.getOperatorId());
-        handle.setOperatorName(stockDto.getOperatorName());
+        handle.setRelStockHandleId(relStockHandleId);
 
-        handle.setHandleDate(stockDto.getHandleDate().getTime());
+        handle.setOperatorId(operatorId);
+        handle.setOperatorName(operatorName);
+
+        handle.setHandleDate(handleDate);
         handle.setSerialNo(serialNo);
 
-        handle.setHandleType(handleType.getValue());
+        if (WarehouseMaterialHandleType.isBigIn(handleType.getValue()))
+            handle.setHandleType(1);//入库
+        else
+            handle.setHandleType(2);//出库
         handle.setHandleSubType(handleType.getValue());
 
         doctorWarehouseStockHandleDao.create(handle);
         return handle;
     }
 
-
+    @Deprecated
     public <T extends AbstractWarehouseStockDetail> List<T> clean(AbstractWarehouseStockDto stockDto, List<T> stockDetails, DoctorWareHouse wareHouse) {
         doctorWarehouseMaterialHandleDao
                 .findByStockHandle(stockDto.getStockHandleId())
@@ -97,6 +173,7 @@ public class DoctorWarehouseStockHandleManager {
         return stockDetails;
     }
 
+    @Deprecated
     public <T extends AbstractWarehouseStockDetail> List<T> clean(AbstractWarehouseStockDto stockDto, List<T> stockDetails, DoctorWareHouse wareHouse, MaterialHandleComparator<T> keyComparator) {
 
         List<DoctorWarehouseMaterialHandle> oldSkuHandle = doctorWarehouseMaterialHandleDao
@@ -173,13 +250,5 @@ public class DoctorWarehouseStockHandleManager {
 
         boolean notImportDifferentProcess(T source, DoctorWarehouseMaterialHandle target);
 
-//        default boolean notImportDifferentProcess(T source, DoctorWarehouseMaterialHandle target) {
-//            if (Objects.equals(source.getRemark(), target.getRemark()))
-//                return false;
-//            else {
-//                target.setRemark(source.getRemark());
-//                return true;
-//            }
-//        }
     }
 }

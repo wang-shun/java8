@@ -33,7 +33,7 @@ public class WarehouseMaterialHandleVo {
     private BigDecimal quantity;
 
     @JsonView(MaterialHandleDefaultView.class)
-    private Long unitPrice;
+    private BigDecimal unitPrice;
 
     @JsonView(MaterialHandleReportView.class)
     private String pigBarnName;

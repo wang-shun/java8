@@ -5,11 +5,12 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.enums.WarehouseMaterialApplyType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroup;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroupDetail;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * Desc:
@@ -64,6 +65,15 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
     }
 
     /**
+     * 删除猪群或母猪领用
+     *
+     * @param materialHandleId
+     */
+    public void deleteGroupApply(Long materialHandleId) {
+        this.sqlSession.delete(this.sqlId("deleteGroupApply"), materialHandleId);
+    }
+
+    /**
      * 猪群饲料指定时间段内领用和
      *
      * @param groupId 猪群id
@@ -82,6 +92,97 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
 
     public void deleteByMaterialHandle(Long materialHandleId) {
         getSqlSession().delete("deleteByMaterialHandle", materialHandleId);
+    }
+
+    public void reverseSettlement(Long orgId, Date settlementDate) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("orgId", orgId);
+        map.put("settlementDate", settlementDate);
+        this.sqlSession.update(this.sqlId("reverseSettlement"), map);
+    }
+
+    public void updateUnitPriceAndAmountByMaterialHandle(Long materialHandleId, BigDecimal unitPrice, BigDecimal amount) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("materialHandleId", materialHandleId);
+        map.put("unitPrice", unitPrice);
+        map.put("amount", amount);
+        this.sqlSession.update(this.sqlId("updateUnitPriceAndAmountByMaterialHandle"), map);
+    }
+
+    /**
+     * 猪群领用报表
+     * @param farmId
+     * @param pigType
+     * @param pigName
+     * @param pigGroupName
+     * @param skuType
+     * @param skuName
+     * @param openAt
+     * @param closeAt
+     * @return
+     */
+    public List<DoctorWarehouseMaterialApplyPigGroup> selectPigGroupApply(Integer farmId, String pigType, String pigName, String pigGroupName,
+                                                                                      Integer skuType, String skuName, Date openAt, Date closeAt){
+        Map<String,Object> map = Maps.newHashMap();
+        map.put("farmId",farmId);
+        map.put("pigType",pigType);
+        map.put("pigName",pigName);
+        map.put("pigGroupName",pigGroupName);
+        map.put("skuType",skuType);
+        map.put("skuName",skuName);
+        map.put("openAt",openAt);
+        map.put("closeAt",closeAt);
+        return this.sqlSession.selectList(this.sqlId("selectPigGroupApply"),map);
+    }
+
+    /**
+     * 猪舍领用报表
+     * @param criteria
+     * @return
+     */
+    public List<Map> piggeryReport(DoctorWarehouseMaterialApply criteria) {
+        Map<String, Object> params = Maps.newHashMap();
+        if (criteria != null) {
+            params.put("farmId", criteria.getFarmId());
+            params.put("applyYear", criteria.getApplyYear());
+            params.put("applyMonth", criteria.getApplyMonth());
+            params.put("pigBarnId", criteria.getPigBarnId());
+            params.put("pigType", criteria.getPigType());
+            params.put("type", criteria.getType());
+            params.put("materialName", criteria.getMaterialName());
+        }
+        return sqlSession.selectList(sqlId("piggeryReport"), params);
+    }
+
+    /**
+     * 猪舍领用详情
+     * @param criteria
+     * @return
+     */
+    public List<Map> piggeryDetails(DoctorWarehouseMaterialApply criteria) {
+        Map<String, Object> params = Maps.newHashMap();
+        if (criteria != null) {
+            params.put("applyYear", criteria.getApplyYear());
+            params.put("applyMonth", criteria.getApplyMonth());
+            params.put("pigBarnId", criteria.getPigBarnId());
+            params.put("materialName", criteria.getMaterialName());
+//            Map<String, Object> objMap = (Map) JsonMapper.nonDefaultMapper().getMapper().convertValue(criteria, Map.class);
+//            params.putAll(objMap);
+        }
+        return sqlSession.selectList(sqlId("piggeryDetails"), params);
+    }
+
+    /**
+     * 猪群领用报表详情
+     * @param pigGroupId
+     * @param materiaId
+     * @return
+     */
+    public List<DoctorWarehouseMaterialApplyPigGroupDetail> selectPigGroupApplyDetail(Long pigGroupId, Long skuId){
+        Map<String,Object> map = Maps.newHashMap();
+        map.put("farmId",pigGroupId);
+        map.put("pigType",skuId);
+        return this.sqlSession.selectList(this.sqlId("selectPigGroupApplyDetail"),map);
     }
 }
 

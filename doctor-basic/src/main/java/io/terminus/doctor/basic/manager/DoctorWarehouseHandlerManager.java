@@ -83,8 +83,8 @@ public class DoctorWarehouseHandlerManager {
             //两笔物料处理记录，只有调拨才有。
             if (context.getMaterialHandle().size() == 2) {
                 //相互保存各自编号，方便通过一条调拨记录找到另一条
-                context.getMaterialHandle().get(0).setOtherTransferHandleId(context.getMaterialHandle().get(1).getId());
-                context.getMaterialHandle().get(1).setOtherTransferHandleId(context.getMaterialHandle().get(0).getId());
+                context.getMaterialHandle().get(0).setRelMaterialHandleId(context.getMaterialHandle().get(1).getId());
+                context.getMaterialHandle().get(1).setRelMaterialHandleId(context.getMaterialHandle().get(0).getId());
                 doctorWarehouseMaterialHandleDao.update(context.getMaterialHandle().get(0));
                 doctorWarehouseMaterialHandleDao.update(context.getMaterialHandle().get(1));
             }

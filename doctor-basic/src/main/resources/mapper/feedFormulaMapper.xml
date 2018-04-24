@@ -14,6 +14,7 @@
         <result column="formula" property="formula"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
+        <result column="formula_name" property="formulaName"/>
     </resultMap>
 
     <sql id="tb">
@@ -25,11 +26,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        feed_id, feed_name, farm_id, farm_name, formula, created_at, updated_at
+        feed_id, feed_name, farm_id, farm_name, formula, created_at, updated_at, formula_name
     </sql>
 
     <sql id="vals">
-        #{feedId}, #{feedName}, #{farmId}, #{farmName}, #{formula}, now(), now()
+        #{feedId}, #{feedName}, #{farmId}, #{farmName}, #{formula}, now(), now(), formula_name
     </sql>
 
     <insert id="create" parameterType="FeedFormula" keyProperty="id" useGeneratedKeys="true">
@@ -61,6 +62,7 @@
             <if test="farmId != null">farm_id = #{farmId},</if>
             <if test="farmName != null">farm_name = #{farmName},</if>
             <if test="formula != null">formula = #{formula},</if>
+            <if test="formulaName != null">formula_name = #{formulaName},</if>
             updated_at=now()
         </set>
         WHERE id = #{id}
@@ -91,9 +93,22 @@
         LIMIT #{offset}, #{limit}
     </select>
 
+    <select id="formulaListPaging" parameterType="map" resultMap="FeedFormulaMap">
+        SELECT id,
+        <include refid="cols_exclude_id"/>
+        FROM
+        <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        order by created_at
+        LIMIT #{offset}, #{limit}
+    </select>
+
     <sql id="criteria">
         <if test="feedId != null"> and feed_id = #{feedId} </if>
         <if test="feedName != null"> and feed_name like concat('%', #{feedName}, '%') </if>
         <if test="farmId != null"> and farm_id = #{farmId} </if>
+        <if test="formulaName != null">and formula_name like concat('%', #{formulaName}, '%') </if>
     </sql>
 </mapper>

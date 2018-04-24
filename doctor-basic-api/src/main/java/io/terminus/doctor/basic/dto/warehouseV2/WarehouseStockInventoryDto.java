@@ -32,6 +32,9 @@ public class WarehouseStockInventoryDto extends AbstractWarehouseStockDto implem
 
         private static final long serialVersionUID = -3947299201390395960L;
 
+        @NotNull(message = "stock.unit.price.null", groups = StockDefaultValid.class)
+        private BigDecimal unitPrice;
+
 //        @NotNull(message = "stock.quantity.null")
 //        @DecimalMin.List(
 //                @DecimalMin(inclusive = true, value = "0", message = "stock.quantity.small.then.zero"),

@@ -4,11 +4,14 @@ import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 
+import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
-import org.apache.ibatis.annotations.Param;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSettlementService;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -66,21 +69,227 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     }
 
 
-    public List<DoctorWarehouseMaterialHandle> findAfter(Long warehouseId, Long materialHandleId, Date handleDate) {
+//    @Deprecated
+//    public List<DoctorWarehouseMaterialHandle> findAfter(Long warehouseId, Long materialHandleId, Date handleDate) {
+//        Map<String, Object> criteria = Maps.newHashMap();
+//        criteria.put("warehouseId", warehouseId);
+//        criteria.put("materialHandleId", materialHandleId);
+//        criteria.put("handleDate", handleDate);
+//
+//        return this.sqlSession.selectList(this.sqlId("findAfter"), criteria);
+//    }
+
+    public List<DoctorWarehouseMaterialHandle> findAfter(Long warehouseId, Long skuId, Date handleDate, boolean includeHandleDate) {
         Map<String, Object> criteria = Maps.newHashMap();
         criteria.put("warehouseId", warehouseId);
-        criteria.put("materialHandleId", materialHandleId);
+        criteria.put("skuId", skuId);
         criteria.put("handleDate", handleDate);
+        criteria.put("includeHandleDate", includeHandleDate);
+        return this.sqlSession.selectList(this.sqlId("findAfterByDate"), criteria);
+    }
 
-        return this.sqlSession.selectList(this.sqlId("findAfter"), criteria);
+    /**
+     * 根据单据明细统计历史某一个节点的库存量
+     *
+     * @return
+     */
+    public BigDecimal getHistoryStock(Long warehouseId, Long skuId, Date handleDate, boolean include) {
+
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("skuId", skuId);
+        criteria.put("handleDate", handleDate);
+        criteria.put("include", include);
+
+        return this.sqlSession.selectOne(this.sqlId("countHistoryStock"), criteria);
+    }
+
+
+    public List<DoctorWarehouseMaterialHandle> findByAccountingDate(Long warehouseId, Integer year, Integer month) {
+
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("year", year);
+        criteria.put("month", month);
+
+        return this.sqlSession.selectList(this.sqlId("findByAccountingDate"), criteria);
+    }
+
+    public List<DoctorWarehouseMaterialHandle> findByOrgAndSettlementDate(Long orgId, Date settlementDate) {
+
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("orgId", orgId);
+        criteria.put("settlementDate", settlementDate);
+
+        return this.sqlSession.selectList(this.sqlId("findByOrgAndSettlementDate"), criteria);
+    }
+
+    @Deprecated
+    public void reverseSettlement(Long farmId, Integer year, Integer month) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("farmId", farmId);
+        criteria.put("year", year);
+        criteria.put("month", month);
+
+        this.sqlSession.update(this.sqlId("reverseSettlement"), criteria);
+    }
+
+    public void reverseSettlement(Long orgId, Date settlementDate) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("orgId", orgId);
+        criteria.put("settlementDate", settlementDate);
+
+        this.sqlSession.update(this.sqlId("reverseSettlementByOrg"), criteria);
+    }
+
+    /**
+     * 获取本会计年月之前的库存量和金额
+     *
+     * @param warehouseId
+     * @param settlementDate
+     * @return
+     */
+    public AmountAndQuantityDto findBalanceByAccountingDate(Long warehouseId, Date settlementDate) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("settlementDate", settlementDate);
+
+        Map<String, BigDecimal> result = this.sqlSession.selectOne(this.sqlId("findBalanceByAccountingDate"), criteria);
+        return new AmountAndQuantityDto((result.get("amount")), result.get("quantity"));
+    }
+
+
+    /**
+     * 获取公司下各个仓库在该会计年月之前的库存余量余额
+     *
+     * @param orgId
+     * @param settlementDate
+     * @return
+     */
+    public Map<Long, AmountAndQuantityDto> findEachWarehouseBalanceBySettlementDate(Long orgId, Date settlementDate) {
+
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("orgId", orgId);
+        criteria.put("settlementDate", settlementDate);
+
+        List<Map<String, Object>> results = this.sqlSession.selectList(this.sqlId("findEachWarehouseBalanceByAccountingDate"), criteria);
+
+        Map<Long/*warehouseId*/, AmountAndQuantityDto> balances = new HashMap<>();
+
+        results.forEach(m -> {
+            balances.put((Long) m.get("warehouseId"), new AmountAndQuantityDto(((BigDecimal) m.get("amount")), (BigDecimal) m.get("quantity")));
+        });
+
+        return balances;
+    }
+
+    /**
+     * 获取指定明细获取上一笔明细
+     *
+     * @param materialHandle
+     * @return
+     */
+    public DoctorWarehouseMaterialHandle findPrevious(DoctorWarehouseMaterialHandle materialHandle, WarehouseMaterialHandleType handleType) {
+
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", materialHandle.getWarehouseId());
+        criteria.put("materialHandleId", materialHandle.getId());
+        criteria.put("handleDate", materialHandle.getHandleDate());
+        if (null != handleType)
+            criteria.put("type", handleType.getValue());
+
+        List<DoctorWarehouseMaterialHandle> materialHandles = this.sqlSession.selectList(this.sqlId("findPrevious"), criteria);
+        if (materialHandles.isEmpty())
+            return null;
+
+        return materialHandles.get(0);
     }
 
     public Integer getWarehouseMaterialHandleCount(Long warehouseId) {
-        Map<String,String> m = new HashMap<>();
-        m.put("id",warehouseId.toString());
+        Map<String, String> m = new HashMap<>();
+        m.put("id", warehouseId.toString());
         Integer count = this.sqlSession.selectOne(this.sqlId("getWarehouseMaterialHandleCount"), warehouseId);
         return count;
     }
 
+    /**
+     * 统计出库单据已退数量
+     *
+     * @return
+     */
+    public BigDecimal countQuantityAlreadyRefund(Long materialHandleId) {
+        return this.sqlSession.selectOne(this.sqlId("countQuantityAlreadyRefund"), materialHandleId);
+    }
+
+    //得到领料出库的数量
+    public BigDecimal findLibraryById(Long id) {
+        BigDecimal quantity = this.sqlSession.selectOne(this.sqlId("findLibraryById"), id);
+        return quantity;
+    }
+
+
+    //得到在此之前退料入库的数量和
+    public BigDecimal findRetreatingById(DoctorWarehouseMaterialHandle materialHandle) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("relMaterialHandleId", materialHandle.getRelMaterialHandleId());
+        criteria.put("settlementDate", materialHandle.getSettlementDate());
+        BigDecimal quantity = this.sqlSession.selectOne(this.sqlId("findRetreatingById"), criteria);
+        return quantity;
+    }
+
+    public DoctorWarehouseMaterialHandle findByStockHandleId(Long id) {
+        return this.sqlSession.selectOne(this.sqlId("findByStockHandleId"), id);
+    }
+
+    //查公司结算列表
+    public List<Map> listByFarmIdTime(Map<String, Object> criteria) {
+        List<Map> resultList = this.sqlSession.selectList("listByFarmIdTime", criteria);
+
+       /* resultList.stream().forEach(map -> {
+
+            map.put("type", WarehouseMaterialHandleType.IN.getValue());
+
+            map.put("inAmount", this.sqlSession.selectOne("selectSumAmount", map));
+
+            map.put("type", WarehouseMaterialHandleType.OUT.getValue());
+
+            map.put("outAmount", this.sqlSession.selectOne("selectSumAmount", map));
+
+        });*/
+
+        return resultList;
+    }
+
+    public List<Map<String, Object>> wlbdReport(
+            Long farmId,
+            String settlementDate, Integer pigBarnType,
+            Long pigBarnId, Long pigGroupId, Integer handlerType,
+            Integer type, Long warehouseId, String materialName
+    )
+    {
+        Map<String,Object> params = new HashMap<>();
+        params.put("farmId",farmId);
+        params.put("settlementDate",settlementDate);
+        params.put("pigBarnType",pigBarnType);
+        params.put("pigBarnId",pigBarnId);
+        params.put("pigGroupId",pigGroupId);
+        params.put("handlerType",handlerType);
+        params.put("type",type);
+        params.put("warehouseId",warehouseId);
+        params.put("materialName",materialName);
+        return this.sqlSession.selectList("wlbdReport",params);
+    }
+
+    public List<Map<String, Object>> getPigBarnNameOption(Long farmId) {
+        return this.sqlSession.selectList("getPigBarnNameOption",farmId);
+    }
+
+    public List<Map<String, Object>> getPigGroupNameOption(Long farmId) {
+        return this.sqlSession.selectList("getPigGroupNameOption",farmId);
+    }
+
+    public List<Map<String, Object>> getWareHouseDataOption(Long farmId) {
+        return this.sqlSession.selectList("getWareHouseDataOption",farmId);
+    }
 
 }
