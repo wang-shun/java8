@@ -269,7 +269,7 @@
             </otherwise>
         </choose>
         AND delete_flag=1
-        ORDER BY handle_date ASC,id ASC
+        ORDER BY handle_date ASC,id DESC
     </select>
 
     <select id="countHistoryStock" parameterType="map" resultType="BigDecimal">
@@ -298,7 +298,7 @@
         </choose>
 
         AND delete_flag=1
-        ORDER BY handle_date ASC,id ASC
+        ORDER BY handle_date ASC,id DESC
     </select>
 
     <select id="findByAccountingDate" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
