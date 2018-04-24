@@ -92,7 +92,7 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `material_handle_id`, `org_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `pig_barn_id`, `pig_barn_name`, `pig_type`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_id`, `apply_staff_name`, `apply_year`, `apply_month`, `material_name`, `type`, `unit`, format(`quantity`,2), format(`unit_price`,4), `apply_type`, format(`amount`,4), `settlement_date`,
+        `material_handle_id`, `org_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `pig_barn_id`, `pig_barn_name`, `pig_type`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_id`, `apply_staff_name`, `apply_year`, `apply_month`, `material_name`, `type`, `unit`, `quantity`, `unit_price`, `apply_type`, `amount`, `settlement_date`,
         created_at, updated_at
     </sql>
 

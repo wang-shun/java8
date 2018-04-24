@@ -33,10 +33,11 @@ public class WarehouseInManager extends AbstractStockManager<WarehouseStockInDto
         materialHandle.setUnitPrice(detail.getUnitPrice());
         materialHandle.setAmount(detail.getAmount());
 
+
         //入库类型，当天第一笔
         if (!DateUtil.inSameDate(stockDto.getHandleDate().getTime(), new Date())) {
 
-            materialHandle.setHandleDate(new DateTime(materialHandle.getHandleDate()).withTime(0, 0, 0, 0).toDate());
+            materialHandle.setHandleDate(this.buildNewHandleDate(stockDto.getHandleDate()).getTime());
 
             //获取该笔明细之前的库存量
             BigDecimal historyQuantity = getHistoryQuantityInclude(stockDto.getHandleDate().getTime(), wareHouse.getId(), detail.getMaterialId());

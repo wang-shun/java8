@@ -69,16 +69,6 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     }
 
 
-//    @Deprecated
-//    public List<DoctorWarehouseMaterialHandle> findAfter(Long warehouseId, Long materialHandleId, Date handleDate) {
-//        Map<String, Object> criteria = Maps.newHashMap();
-//        criteria.put("warehouseId", warehouseId);
-//        criteria.put("materialHandleId", materialHandleId);
-//        criteria.put("handleDate", handleDate);
-//
-//        return this.sqlSession.selectList(this.sqlId("findAfter"), criteria);
-//    }
-
     public List<DoctorWarehouseMaterialHandle> findAfter(Long warehouseId, Long skuId, Date handleDate, boolean includeHandleDate) {
         Map<String, Object> criteria = Maps.newHashMap();
         criteria.put("warehouseId", warehouseId);
@@ -104,17 +94,13 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectOne(this.sqlId("countHistoryStock"), criteria);
     }
 
-
-    public List<DoctorWarehouseMaterialHandle> findByAccountingDate(Long warehouseId, Integer year, Integer month) {
-
-        Map<String, Object> criteria = Maps.newHashMap();
-        criteria.put("warehouseId", warehouseId);
-        criteria.put("year", year);
-        criteria.put("month", month);
-
-        return this.sqlSession.selectList(this.sqlId("findByAccountingDate"), criteria);
-    }
-
+    /**
+     * 获取会计年月内的明细单据
+     *
+     * @param orgId          公司id
+     * @param settlementDate 会计年月
+     * @return
+     */
     public List<DoctorWarehouseMaterialHandle> findByOrgAndSettlementDate(Long orgId, Date settlementDate) {
 
         Map<String, Object> criteria = Maps.newHashMap();
@@ -284,17 +270,17 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectList("wlbdReport", params);
     }
 
-    public List<Map<String, Object>> getPigBarnNameOption(Long farmId,Integer pigType) {
-        Map<String,Object> params = Maps.newHashMap();
-        params.put("farmId",farmId);
-        params.put("pigType",pigType);
+    public List<Map<String, Object>> getPigBarnNameOption(Long farmId, Integer pigType) {
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("farmId", farmId);
+        params.put("pigType", pigType);
         return this.sqlSession.selectList("getPigBarnNameOption", params);
     }
 
-    public List<Map<String, Object>> getPigGroupNameOption(Long farmId,Long barnId) {
-        Map<String,Long> params = Maps.newHashMap();
-        params.put("farmId",farmId);
-        params.put("barnId",barnId);
+    public List<Map<String, Object>> getPigGroupNameOption(Long farmId, Long barnId) {
+        Map<String, Long> params = Maps.newHashMap();
+        params.put("farmId", farmId);
+        params.put("barnId", barnId);
         return this.sqlSession.selectList("getPigGroupNameOption", params);
     }
 

@@ -245,15 +245,6 @@
         ORDER BY `id` DESC
     </select>
 
-    <select id="findAfter" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
-        WHERE warehouse_id=#{warehouseId}
-        AND <![CDATA[ handle_date >= #{handleDate}]]>
-        AND <![CDATA[ id < #{materialHandleId}]]>
-        AND delete_flag=1
-        ORDER BY handle_date ASC,id DESC
-    </select>
 
     <select id="findAfterByDate" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
         SELECT <include refid="cols_all"/>
@@ -269,7 +260,7 @@
             </otherwise>
         </choose>
         AND delete_flag=1
-        ORDER BY handle_date ASC,id DESC
+        ORDER BY handle_date ASC,id ASC
     </select>
 
     <select id="countHistoryStock" parameterType="map" resultType="BigDecimal">
@@ -298,16 +289,7 @@
         </choose>
 
         AND delete_flag=1
-        ORDER BY handle_date ASC,id DESC
-    </select>
-
-    <select id="findByAccountingDate" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
-        WHERE warehouse_id=#{warehouseId}
-        AND handle_year = #{year} AND handle_month=#{month}
-        AND delete_flag=1
-        ORDER BY handle_date ASC,id DESC
+        ORDER BY handle_date ASC,id ASC
     </select>
 
     <select id="findByOrgAndSettlementDate" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
@@ -316,7 +298,7 @@
         WHERE org_id=#{orgId}
         AND settlement_date=#{settlementDate}
         AND delete_flag=1
-        ORDER BY handle_date ASC,id DESC
+        ORDER BY handle_date ASC,id ASC
     </select>
 
     <select id="findBalanceByAccountingDate" parameterType="map" resultType="map">
