@@ -73,18 +73,19 @@ public class WarehouseOutStockService extends AbstractWarehouseStockService<Ware
 
         DoctorWarehouseMaterialApply apply = doctorWarehouseMaterialApplyDao.findMaterialHandle(materialHandle.getId());
         boolean applyChanged = false;
+        boolean changeHandleDate = !DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
 
         if (detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0
-                || !DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime())) {
+                || changeHandleDate) {
 
             //更改了数量，或更改了操作日期
 
             if (detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0) {
                 BigDecimal changedQuantity = detail.getQuantity().subtract(materialHandle.getQuantity());
                 if (changedQuantity.compareTo(new BigDecimal(0)) > 0) {
-                    doctorWarehouseStockManager.in(detail.getMaterialId(), changedQuantity, wareHouse);
+                    doctorWarehouseStockManager.out(detail.getMaterialId(), changedQuantity, wareHouse);
                 } else {
-                    doctorWarehouseStockManager.out(detail.getMaterialId(), changedQuantity.negate(), wareHouse);
+                    doctorWarehouseStockManager.in(detail.getMaterialId(), changedQuantity.negate(), wareHouse);
                 }
                 materialHandle.setQuantity(detail.getQuantity());
             }

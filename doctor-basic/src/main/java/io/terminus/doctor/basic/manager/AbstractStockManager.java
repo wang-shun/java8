@@ -215,7 +215,7 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
                 DoctorWarehouseMaterialHandle materialHandle = materialHandleMap.get(d.getMaterialHandleId()).get(0);
                 if (!d.getMaterialId().equals(materialHandle.getMaterialId())
                         || d.getQuantity().compareTo(materialHandle.getQuantity()) != 0
-                        || !d.getRemark().equals(materialHandle.getRemark())) {
+                        ) {
                     needUpdate.put(d, materialHandle);
                 }
             }

@@ -97,11 +97,12 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
                     throw new ServiceException("");
 
                 warehouseReturnManager.buildNewHandleDateForUpdate(materialHandle, stockDto.getHandleDate());
-                doctorWarehouseMaterialHandleDao.update(materialHandle);
+
                 if (days < 0) {//事件日期改小了，重算日期采用新的日期
                     recalculateDate = materialHandle.getHandleDate();
                 }
             }
+            doctorWarehouseMaterialHandleDao.update(materialHandle);
             warehouseReturnManager.recalculate(materialHandle, recalculateDate);
 
         } else {
