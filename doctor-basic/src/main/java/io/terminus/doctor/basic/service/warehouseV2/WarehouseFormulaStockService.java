@@ -159,14 +159,13 @@ public class WarehouseFormulaStockService extends AbstractWarehouseStockService<
                 Date recalculateDate = stockHandle.getHandleDate();
                 if (changeHandleDate) {
                     warehouseFormulaManager.buildNewHandleDateForUpdate(materialHandle, stockDto.getHandleDate());
-                    doctorWarehouseMaterialHandleDao.update(materialHandle);
 
                     int days = DateUtil.getDeltaDays(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
                     if (days < 0) {//事件日期改小了，重算日期采用新的日期
                         recalculateDate = materialHandle.getHandleDate();
                     }
                 }
-
+                doctorWarehouseMaterialHandleDao.update(materialHandle);
                 warehouseFormulaManager.recalculate(materialHandle, recalculateDate);
             } else {
                 doctorWarehouseMaterialHandleDao.update(materialHandle);
@@ -193,12 +192,12 @@ public class WarehouseFormulaStockService extends AbstractWarehouseStockService<
                 Date recalculateDate = stockHandle.getHandleDate();
                 if (changeHandleDate) {
                     warehouseFormulaManager.buildNewHandleDateForUpdate(inMaterialHandles.get(0), stockDto.getHandleDate());
-                    doctorWarehouseMaterialHandleDao.update(inMaterialHandles.get(0));
                     int days = DateUtil.getDeltaDays(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
                     if (days < 0) {//事件日期改小了，重算日期采用新的日期
                         recalculateDate = inMaterialHandles.get(0).getHandleDate();
                     }
                 }
+                doctorWarehouseMaterialHandleDao.update(inMaterialHandles.get(0));
                 warehouseFormulaManager.recalculate(inMaterialHandles.get(0), recalculateDate);
 
             } else {
