@@ -37,5 +37,5 @@ application-*.properties
 !*/src/test/resources/application-*.properties
 *.perm
 *.bak
-*/.dubbo
+/null/*
 
