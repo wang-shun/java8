@@ -273,12 +273,18 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectList("wlbdReport", params);
     }
 
-    public List<Map<String, Object>> getPigBarnNameOption(Long farmId) {
-        return this.sqlSession.selectList("getPigBarnNameOption", farmId);
+    public List<Map<String, Object>> getPigBarnNameOption(Long farmId,Integer pigType) {
+        Map<String,Object> params = Maps.newHashMap();
+        params.put("farmId",farmId);
+        params.put("pigType",pigType);
+        return this.sqlSession.selectList("getPigBarnNameOption", params);
     }
 
-    public List<Map<String, Object>> getPigGroupNameOption(Long farmId) {
-        return this.sqlSession.selectList("getPigGroupNameOption", farmId);
+    public List<Map<String, Object>> getPigGroupNameOption(Long farmId,Long barnId) {
+        Map<String,Long> params = Maps.newHashMap();
+        params.put("farmId",farmId);
+        params.put("barnId",barnId);
+        return this.sqlSession.selectList("getPigGroupNameOption", params);
     }
 
     public List<Map<String, Object>> getWareHouseDataOption(Long farmId) {

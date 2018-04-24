@@ -7,9 +7,9 @@ public interface SelectOptionService {
 
     List<Map<String,String>> getPigTypeOption();
 
-    List<Map<String,Object>> getPigBarnNameOption(Long farmId);
+    List<Map<String,Object>> getPigBarnNameOption(Long farmId,Integer pigType);
 
-    List<Map<String,Object>> getPigGroupNameOption(Long farmId);
+    List<Map<String,Object>> getPigGroupNameOption(Long farmId,Long barnId);
 
     List<Map<String,String>> getHandlerTypeOption();
 

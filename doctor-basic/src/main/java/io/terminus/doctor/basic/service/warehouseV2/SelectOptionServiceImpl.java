@@ -36,13 +36,13 @@ public class SelectOptionServiceImpl implements SelectOptionService {
     }
 
     @Override
-    public List<Map<String, Object>> getPigBarnNameOption(Long farmId) {
-        return doctorWarehouseMaterialHandleDao.getPigBarnNameOption(farmId);
+    public List<Map<String, Object>> getPigBarnNameOption(Long farmId,Integer pigType) {
+        return doctorWarehouseMaterialHandleDao.getPigBarnNameOption(farmId,pigType);
     }
 
     @Override
-    public List<Map<String, Object>> getPigGroupNameOption(Long farmId) {
-        return doctorWarehouseMaterialHandleDao.getPigGroupNameOption(farmId);
+    public List<Map<String, Object>> getPigGroupNameOption(Long farmId,Long barnId) {
+        return doctorWarehouseMaterialHandleDao.getPigGroupNameOption(farmId,barnId);
     }
 
     @Override

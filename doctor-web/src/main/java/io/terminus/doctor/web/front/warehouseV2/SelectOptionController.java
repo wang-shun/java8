@@ -32,8 +32,8 @@ public class SelectOptionController {
      * @return
      */
     @RequestMapping(value = "/pigbarnname",method = RequestMethod.GET)
-    public List<Map<String,Object>> getPigBarnNameOption(Long farmId){
-        return selectOptionService.getPigBarnNameOption(farmId);
+    public List<Map<String,Object>> getPigBarnNameOption(Long farmId,Integer pigType){
+        return selectOptionService.getPigBarnNameOption(farmId,pigType);
     }
 
     /**
@@ -41,8 +41,8 @@ public class SelectOptionController {
      * @return
      */
     @RequestMapping(value = "/piggroupname",method = RequestMethod.GET)
-    public List<Map<String,Object>> getPigGroupNameOption(Long farmId){
-        return selectOptionService.getPigGroupNameOption(farmId);
+    public List<Map<String,Object>> getPigGroupNameOption(Long farmId,Long barnId){
+        return selectOptionService.getPigGroupNameOption(farmId,barnId);
     }
 
     /**

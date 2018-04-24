@@ -675,12 +675,12 @@
         ),0) as outAmount,
     </sql>
 
-    <select id="getPigBarnNameOption" parameterType="long" resultType="map">
-        select id,`name` from doctor_barns where farm_id=#{farmId}
+    <select id="getPigBarnNameOption" parameterType="Map" resultType="map">
+        select id,`name` from doctor_barns where farm_id=#{farmId} and pig_type=#{pigType}
     </select>
 
-    <select id="getPigGroupNameOption" parameterType="long" resultType="map">
-        select id,group_code from doctor_groups where farm_id=#{farmId}
+    <select id="getPigGroupNameOption" parameterType="Map" resultType="map">
+        select id,group_code from doctor_groups where farm_id=#{farmId} and current_barn_id=#{barnId}
     </select>
 
     <select id="getWareHouseDataOption" parameterType="long" resultType="map">
