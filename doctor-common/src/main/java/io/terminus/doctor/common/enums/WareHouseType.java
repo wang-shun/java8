@@ -1,7 +1,9 @@
 package io.terminus.doctor.common.enums;
 
+import com.google.common.collect.Lists;
 import lombok.Getter;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -28,6 +30,24 @@ public enum WareHouseType {
         this.key = key;
         this.desc = desc;
     }
+
+    //所有类型
+    public static final List<Integer> ALL_TYPES = Lists.newArrayList(
+            FEED.getKey(),
+            MATERIAL.getKey(),
+            VACCINATION.getKey(),
+            MEDICINE.getKey(),
+            CONSUME.getKey()
+    );
+
+    //所有类型名称
+    public static final List<String> ALL_TYPES_DESC = Lists.newArrayList(
+            FEED.getDesc(),
+            MATERIAL.getDesc(),
+            VACCINATION.getDesc(),
+            MEDICINE.getDesc(),
+            CONSUME.getDesc()
+    );
 
     public static WareHouseType from(Integer key){
         for(WareHouseType wareHouseType : WareHouseType.values()){

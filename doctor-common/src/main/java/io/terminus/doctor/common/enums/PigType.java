@@ -129,6 +129,17 @@ public enum PigType {
             BOAR.getValue()
     );
 
+    //所有类型名称
+    public static final List<String> ALL_TYPES_DESC = Lists.newArrayList(
+            NURSERY_PIGLET.getDesc(),
+            FATTEN_PIG.getDesc(),
+            RESERVE.getDesc(),
+            MATE_SOW.getDesc(),
+            PREG_SOW.getDesc(),
+            DELIVER_SOW.getDesc(),
+            BOAR.getDesc()
+    );
+
     public static int compareTo(Integer type1, Integer type2) {
         PigType pigType1 = PigType.from(type1);
         PigType pigEvent2 = PigType.from(type2);

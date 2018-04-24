@@ -1,6 +1,9 @@
 package io.terminus.doctor.basic.enums;
 
+import com.google.common.collect.Lists;
 import lombok.Getter;
+
+import java.util.List;
 
 /**
  * @Author:Danny
@@ -71,5 +74,31 @@ public enum WarehouseMaterialHandleSubType {
         this.value = value;
         this.desc = desc;
     }
+
+    //所有类型
+    public static final List<Integer> ALL_TYPES = Lists.newArrayList(
+            CG_IN.getValue(),
+            TL_IN.getValue(),
+            PF_IN.getValue(),
+            PY_IN.getValue(),
+            DB_IN.getValue(),
+            LL_OUT.getValue(),
+            PK_OUT.getValue(),
+            PF_OUT.getValue(),
+            DB_OUT.getValue()
+    );
+
+    //所有类型名称
+    public static final List<String> ALL_TYPES_DESC = Lists.newArrayList(
+            CG_IN.getDesc(),
+            TL_IN.getDesc(),
+            PF_IN.getDesc(),
+            PY_IN.getDesc(),
+            DB_IN.getDesc(),
+            LL_OUT.getDesc(),
+            PK_OUT.getDesc(),
+            PF_OUT.getDesc(),
+            DB_OUT.getDesc()
+    );
 
 }
