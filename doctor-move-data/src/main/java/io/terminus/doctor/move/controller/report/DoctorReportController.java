@@ -262,7 +262,7 @@ public class DoctorReportController {
      */
     @RequestMapping(value = "/synchronize/all/bi/data", method = RequestMethod.GET)
     public Boolean synchronizeAllDayBiData(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start) {
-
+        log.info("synchronize all day bi data starting, start:{}", DateUtil.toDateString(start));
         List<DoctorFarm> doctorFarms = RespHelper.orServEx(doctorFarmReadService.findAllFarms());
         Set<Long> orzList = doctorFarms.stream().map(DoctorFarm::getId).collect(Collectors.toSet());
         orzList.parallelStream().forEach(orzId ->
@@ -271,6 +271,7 @@ public class DoctorReportController {
         orzList = doctorFarms.stream().map(DoctorFarm::getOrgId).collect(Collectors.toSet());
         orzList.parallelStream().forEach(orzId ->
                 doctorDailyReportV2Service.synchronizeDeltaDayBiData(orzId, start, OrzDimension.ORG.getValue()));
+        log.info("synchronize all day bi data end");
         return Boolean.TRUE;
     }
 

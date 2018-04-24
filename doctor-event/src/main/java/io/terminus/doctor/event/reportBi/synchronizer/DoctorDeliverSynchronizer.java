@@ -251,4 +251,15 @@ public class DoctorDeliverSynchronizer {
     public void deleteAll() {
         doctorReportDeliverDao.deleteAll();
     }
+
+
+    public void synchronizeDeliverRate(D) {
+        reportBi.setEarlyNest(earlyFarrowNest(pigDaily, reportBi.getOrzType(), reportBi.getSumAt(), reportBi.getDateType()));
+        reportBi.setEarlyMating(pigDaily.getEarlyMating());
+        reportBi.setLaterNest(laterFarrowNest(pigDaily, reportBi.getOrzType(), reportBi.getSumAt(), reportBi.getDateType()));
+        if (DateDimension.YEARLY.contains(reportBi.getDateType())) {
+            reportBi.setEarlyNestRate(FieldHelper.get(reportBi.getEarlyNest(), reportBi.getEarlyMating()));
+            reportBi.setLaterNestRate(FieldHelper.get(reportBi.getLaterNest(), pigDaily.getMatingCount()));
+        }
+    }
 }
