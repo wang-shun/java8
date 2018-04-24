@@ -7,46 +7,20 @@ import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
-import static io.terminus.doctor.common.utils.Checks.expectTrue;
 import static io.terminus.doctor.event.editHandler.group.DoctorAbstractModifyGroupEventHandler.getAfterDay;
 
 /**
- * Created by xjn on 17/4/27.
- * 转场触发转入
+ * Created by xjn on 18/4/23.
+ * email:xiaojiannan@terminus.io
  */
-@Deprecated
 @Component
-public class DoctorModifyPigChgFarmInEventHandler extends DoctorAbstractModifyPigEventHandler {
-
-    @Override
-    public void rollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
-        String key = "pig" + deletePigEvent.getPigId().toString();
-        expectTrue(doctorConcurrentControl.setKey(key), "event.concurrent.error", deletePigEvent.getPigCode());
-
-        //1.删除转场触发的事件
-        doctorPigEventDao.deleteByChgFarm(deletePigEvent.getPigId());
-
-        //2.转场转入事件
-        doctorPigEventDao.delete(deletePigEvent.getId());
-
-        //3.删除猪
-        doctorPigDao.delete(deletePigEvent.getPigId());
-
-        //4.删除猪track
-        DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(deletePigEvent.getPigId());
-        doctorPigTrackDao.delete(pigTrack.getId());
-
-        //5.更新记录表
-        updateDailyOfDelete(deletePigEvent);
-
-    }
+public class DoctorModifyPigChgFarmInEventV2Handler extends DoctorAbstractModifyPigEventHandler {
 
     @Override
     protected boolean rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
@@ -122,13 +96,13 @@ public class DoctorModifyPigChgFarmInEventHandler extends DoctorAbstractModifyPi
     protected DoctorPigDaily buildDailyPig(DoctorPigDaily oldDailyPig, DoctorEventChangeDto changeDto) {
         oldDailyPig = super.buildDailyPig(oldDailyPig, changeDto);
         if (Objects.equals(changeDto.getPigSex(), DoctorPig.PigSex.SOW.getKey())) {
-           if (Objects.equals(changeDto.getBarnType(), PigType.DELIVER_SOW.getValue())) {
-               oldDailyPig.setSowCfEnd(EventUtil.plusInt(oldDailyPig.getSowCfEnd(), changeDto.getEntryCountChange()));
-               oldDailyPig.setSowCfInFarmIn(EventUtil.plusInt(oldDailyPig.getSowCfInFarmIn(), changeDto.getEntryCountChange()));
-           } else {
-               oldDailyPig.setSowPhEnd(EventUtil.plusInt(oldDailyPig.getSowPhEnd(), changeDto.getEntryCountChange()));
-               oldDailyPig.setSowPhChgFarmIn(EventUtil.plusInt(oldDailyPig.getSowPhChgFarmIn(), changeDto.getEntryCountChange()));
-           }
+            if (Objects.equals(changeDto.getBarnType(), PigType.DELIVER_SOW.getValue())) {
+                oldDailyPig.setSowCfEnd(EventUtil.plusInt(oldDailyPig.getSowCfEnd(), changeDto.getEntryCountChange()));
+                oldDailyPig.setSowCfInFarmIn(EventUtil.plusInt(oldDailyPig.getSowCfInFarmIn(), changeDto.getEntryCountChange()));
+            } else {
+                oldDailyPig.setSowPhEnd(EventUtil.plusInt(oldDailyPig.getSowPhEnd(), changeDto.getEntryCountChange()));
+                oldDailyPig.setSowPhChgFarmIn(EventUtil.plusInt(oldDailyPig.getSowPhChgFarmIn(), changeDto.getEntryCountChange()));
+            }
 
         } else {
             oldDailyPig.setBoarChgFarmIn(EventUtil.plusInt(oldDailyPig.getBoarChgFarmIn(), changeDto.getEntryCountChange()));

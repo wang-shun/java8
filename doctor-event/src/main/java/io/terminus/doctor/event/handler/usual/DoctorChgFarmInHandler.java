@@ -31,7 +31,7 @@ import static io.terminus.doctor.event.helper.DoctorEventBaseHelper.getStatus;
  * 转场转入
  */
 @Component
-@Deprecated()
+@Deprecated
 public class DoctorChgFarmInHandler extends DoctorAbstractEventHandler {
 
     @Autowired

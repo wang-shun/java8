@@ -13,7 +13,7 @@ import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmEventV2Handler;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
@@ -54,7 +54,7 @@ public class DoctorChgFarmV2Handler extends DoctorAbstractEventHandler{
     @Autowired
     private DoctorTransFarmGroupEventHandler transFarmGroupEventHandler;
     @Autowired
-    private DoctorModifyPigChgFarmEventHandler modifyPigChgFarmEventHandler;
+    private DoctorModifyPigChgFarmEventV2Handler modifyPigChgFarmEventHandler;
     @Autowired
     private DoctorChgFarmInV2Handler doctorChgFarmInHandler;
     @Autowired
@@ -64,7 +64,7 @@ public class DoctorChgFarmV2Handler extends DoctorAbstractEventHandler{
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         super.handleCheck(executeEvent, fromTrack);
         DoctorChgFarmDto chgFarmDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorChgFarmDto.class);
-//        expectTrue(!Objects.equals(fromTrack.getStatus(), PigStatus.FEED.getKey()), "feed.sow.not.chg.farm");
+        expectTrue(!Objects.equals(fromTrack.getStatus(), PigStatus.FEED.getKey()), "feed.sow.not.chg.farm");
         DoctorBarn doctorCurrentBarn = doctorBarnDao.findById(fromTrack.getCurrentBarnId());
         expectTrue(notNull(doctorCurrentBarn), "barn.not.null", fromTrack.getCurrentBarnId());
         DoctorBarn doctorToBarn = doctorBarnDao.findById(chgFarmDto.getToBarnId());
@@ -105,6 +105,7 @@ public class DoctorChgFarmV2Handler extends DoctorAbstractEventHandler{
         DoctorChgFarmDto chgFarmIn = new DoctorChgFarmDto();
         BeanMapper.copy(doctorChgFarmDto, chgFarmIn);
         chgFarmIn.setIsAuto(IsOrNot.YES.getValue());
+        chgFarmIn.setRelPigEventId(executeEvent.getId());
         chgFarmIn.setBarnId(toBarn.getId());
         chgFarmIn.setBarnName(toBarn.getName());
         chgFarmIn.setBarnType(toBarn.getPigType());

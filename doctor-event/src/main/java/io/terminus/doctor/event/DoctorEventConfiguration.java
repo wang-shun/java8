@@ -17,8 +17,8 @@ import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTransFarmEven
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTransGroupEventHandler;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTurnSeedEventHandler;
 import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupWeanEventHandler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmEventHandler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmInEventHandler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmEventV2Handler;
+import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmInEventV2Handler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgLocationEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigConditionEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigDiseaseEventHandler;
@@ -184,8 +184,8 @@ public class  DoctorEventConfiguration {
 
     @Bean
     public DoctorModifyPigEventHandlers doctorModifyPigEventHandlers(
-            DoctorModifyPigChgFarmEventHandler modifyPigChgFarmEventHandler,
-            DoctorModifyPigChgFarmInEventHandler modifyPigChgFarmInEventHandler,
+            DoctorModifyPigChgFarmEventV2Handler modifyPigChgFarmEventHandler,
+            DoctorModifyPigChgFarmInEventV2Handler modifyPigChgFarmInEventHandler,
             DoctorModifyPigChgLocationEventHandler modifyPigChgLocationEventHandler,
             DoctorModifyPigConditionEventHandler modifyPigConditionEventHandler,
             DoctorModifyPigDiseaseEventHandler modifyPigDiseaseEventHandler,
