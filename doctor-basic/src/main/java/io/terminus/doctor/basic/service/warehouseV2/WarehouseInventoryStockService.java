@@ -106,7 +106,11 @@ public class WarehouseInventoryStockService extends
     }
 
     @Override
-    public void changed(Map<WarehouseStockInventoryDto.WarehouseStockInventoryDetail, DoctorWarehouseMaterialHandle> changed, DoctorWarehouseStockHandle stockHandle, WarehouseStockInventoryDto stockDto, DoctorWareHouse wareHouse) {
+    public void changed(Map<WarehouseStockInventoryDto.WarehouseStockInventoryDetail,
+            DoctorWarehouseMaterialHandle> changed,
+                        DoctorWarehouseStockHandle stockHandle,
+                        WarehouseStockInventoryDto stockDto,
+                        DoctorWareHouse wareHouse) {
 
         boolean needCreateStockHandle = false;
         for (WarehouseStockInventoryDto.WarehouseStockInventoryDetail k : changed.keySet()) {
@@ -143,6 +147,7 @@ public class WarehouseInventoryStockService extends
             DoctorWarehouseMaterialHandle materialHandle = changed.get(detail);
 
             materialHandle.setRemark(detail.getRemark());
+            materialHandle.setSettlementDate(stockDto.getSettlementDate());
 
             BigDecimal inventoryQuantity;
             if (materialHandle.getType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue()))
@@ -218,11 +223,11 @@ public class WarehouseInventoryStockService extends
                 //更改了操作日期
                 if (days != 0) {
                     warehouseInventoryManager.buildNewHandleDateForUpdate(materialHandle, stockDto.getHandleDate());
-                    doctorWarehouseMaterialHandleDao.update(materialHandle);
                     if (days < 0) {//事件日期改小了，重算日期采用新的日期
                         recalculateDate = materialHandle.getHandleDate();
                     }
                 }
+                doctorWarehouseMaterialHandleDao.update(materialHandle);
                 warehouseInventoryManager.recalculate(materialHandle, recalculateDate);
 
             } else {
@@ -230,6 +235,10 @@ public class WarehouseInventoryStockService extends
             }
 
         }
+
+//        if (stockHandle.getSettlementDate().equals(stockDto.getSettlementDate())) {
+//
+//        }
     }
 
     @Override

@@ -170,8 +170,6 @@ public class WarehouseTransferStockService
                 //更改了操作日期
                 if (days != 0) {
                     warehouseTransferManager.buildNewHandleDateForUpdate(materialHandle, stockDto.getHandleDate());
-                    doctorWarehouseMaterialHandleDao.update(materialHandle);
-
                     if (!changedTransferInWarehouse) {
                         transferIn.setHandleDate(materialHandle.getHandleDate());
                         transferIn.setHandleYear(materialHandle.getHandleYear());
@@ -184,6 +182,7 @@ public class WarehouseTransferStockService
                     }
                 }
 
+                doctorWarehouseMaterialHandleDao.update(materialHandle);
                 warehouseTransferManager.recalculate(materialHandle, recalculateDate);
                 if (!changedTransferInWarehouse)
                     warehouseTransferManager.recalculate(transferIn, recalculateDate);
