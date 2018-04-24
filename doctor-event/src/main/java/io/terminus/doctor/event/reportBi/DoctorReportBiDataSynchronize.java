@@ -278,6 +278,48 @@ public class DoctorReportBiDataSynchronize {
     }
 
     /**
+     * 增量同步产房区，分娩率
+     * @param farmIdToSumAt
+     */
+    public void synchronizeDeltaDeliverRate(Map<Long, Date> farmIdToSumAt) {
+        log.info("synchronize delta day bi data starting");
+        farmIdToSumAt.entrySet().parallelStream().forEach(entry -> {
+            synchronizeDeliverRate(entry.getKey(), OrzDimension.FARM.getValue(), entry.getValue(), 1);
+            log.info("synchronize delta farm ending: farmId:{}, date:{}", entry.getKey(), entry.getValue());
+        });
+        Map<Long, Date> orgIdToSumAt = Maps.newHashMap();
+        farmIdToSumAt.forEach((key, value) -> {
+            Long orgId = cache.getUnchecked(key).getOrgId();
+            if (!orgIdToSumAt.containsKey(orgId) || value.before(orgIdToSumAt.get(orgId))) {
+                orgIdToSumAt.put(orgId, value);
+            }
+        });
+        orgIdToSumAt.entrySet().parallelStream().forEach(entry -> {
+            synchronizeDeliverRate(entry.getKey(), OrzDimension.ORG.getValue(), entry.getValue(), 1);
+            log.info("synchronize delta orgId ending: orgId:{}, date:{}", entry.getKey(), entry.getValue());
+        });
+        log.info("synchronize delta day bi data end");
+
+    }
+
+    /**
+     * 同步产房区
+     * @param orzId
+     * @param orzType
+     * @param pigDate
+     * @param type
+     */
+    private void synchronizeDeliverRate(Long orzId, Integer orzType, Date pigDate, Integer type) {
+        List<DoctorDimensionCriteria> criteriaList = Lists.newArrayList();
+        criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, pigDate, type, DateDimension.DAY.getValue(), orzType));
+        criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, pigDate, type, DateDimension.WEEK.getValue(), orzType));
+        criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, pigDate, type, DateDimension.MONTH.getValue(), orzType));
+        criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, pigDate, type, DateDimension.QUARTER.getValue(), orzType));
+        criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, pigDate, type, DateDimension.YEAR.getValue(), orzType));
+        criteriaList.parallelStream().forEach(deliverSynchronizer::synchronizeDeliverRate);
+    }
+
+    /**
      * 增量同步猪场天维度
      *
      * @param groupDailyList
