@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
+import java.util.stream.Collectors;
 
 /**
  * 结算服务
@@ -124,32 +125,48 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                 settlementMaterialHandles.put(materialHandle.getId(), materialHandle);
             }
 
-            //统计各个仓库下各个物料在该会计年月内的发生额和发生量
+            //统计各个仓库下各个物料余额和余量
             farmIds.stream().forEach(f -> {
                 doctorWareHouseDao.findByFarmId(f).forEach(wareHouse -> {
                     doctorWarehouseStockDao.findSkuIds(wareHouse.getId()).forEach(sku -> {
 
                         //上一个会计年月的余额和余量
-                        AmountAndQuantityDto balance = doctorWarehouseStockMonthlyDao.findBalanceBySettlementDate(wareHouse.getId(), sku, DateUtils.addMonths(settlementDate, -1));
+                        DoctorWarehouseStockMonthly balance = doctorWarehouseStockMonthlyDao.findBalanceBySettlementDate(wareHouse.getId(), sku, DateUtils.addMonths(settlementDate, -1));
+                        BigDecimal balanceAmount, balanceQuantity;
+                        if (null == balance || null == balance.getBalanceAmount())
+                            balanceAmount = new BigDecimal(0);
+                        else balanceAmount = balance.getBalanceAmount();
+                        if (null == balance || null == balance.getBalanceQuantity())
+                            balanceQuantity = new BigDecimal(0);
+                        else balanceQuantity = balance.getBalanceQuantity();
 
+                        //本会计年月发生额和发生量
                         BigDecimal totalAmount = new BigDecimal(0);
                         BigDecimal totalQuantity = new BigDecimal(0);
-                        settlementMaterialHandles.values()
+                        List<DoctorWarehouseMaterialHandle> mh = settlementMaterialHandles.values()
                                 .stream()
                                 .filter(m -> m.getWarehouseId().equals(wareHouse.getId()) && m.getMaterialId().equals(sku))
-                                .forEach(m -> {
-                                    totalAmount.add(m.getAmount());
-                                    totalQuantity.add(m.getQuantity());
-                                });
+                                .collect(Collectors.toList());
 
-                        DoctorWarehouseStockMonthly stockMonthly = new DoctorWarehouseStockMonthly();
+                        for (DoctorWarehouseMaterialHandle m : mh) {
+                            totalAmount = totalAmount.add(m.getAmount());
+                            totalQuantity = totalQuantity.add(m.getQuantity());
+                        }
+
+                        //创建或更新月度统计
+                        DoctorWarehouseStockMonthly stockMonthly = doctorWarehouseStockMonthlyDao.findBalanceBySettlementDate(wareHouse.getId(), sku, settlementDate);
+                        if (null == stockMonthly)
+                            stockMonthly = new DoctorWarehouseStockMonthly();
                         stockMonthly.setOrgId(orgId);
                         stockMonthly.setFarmId(f);
+                        stockMonthly.setWarehouseId(wareHouse.getId());
                         stockMonthly.setMaterialId(sku);
                         stockMonthly.setSettlementDate(settlementDate);
-                        stockMonthly.setBalanceAmount(balance.getAmount().add(totalAmount));
-                        stockMonthly.setBalanceQuantity(balance.getQuantity().add(totalQuantity));
-                        doctorWarehouseStockMonthlyDao.create(stockMonthly);
+                        stockMonthly.setBalanceAmount(balanceAmount.add(totalAmount));
+                        stockMonthly.setBalanceQuantity(balanceQuantity.add(totalQuantity));
+                        if (null == stockMonthly.getId())
+                            doctorWarehouseStockMonthlyDao.create(stockMonthly);
+                        else doctorWarehouseStockMonthlyDao.update(stockMonthly);
                     });
                 });
             });

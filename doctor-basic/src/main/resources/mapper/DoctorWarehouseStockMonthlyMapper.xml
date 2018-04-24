@@ -170,8 +170,8 @@
         AND settlement_date=#{settlementDate}
     </delete>
 
-    <select id="findBalanceBySettlementDate" parameterType="map" resultType="Map">
-        SELECT balance_amount as amount,balance_quantity as quantity FROM <include refid="tb"/>
+    <select id="findBalanceBySettlementDate" parameterType="map" resultMap="DoctorWarehouseStockMonthlyMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
         WHERE warehouse_id=#{warehouseId}
         AND material_id=#{skuId}
         AND settlement_date=#{settlementDate}

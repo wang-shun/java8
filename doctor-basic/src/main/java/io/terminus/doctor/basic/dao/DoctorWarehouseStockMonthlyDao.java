@@ -78,14 +78,13 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
      * @param settlementDate 会计年月
      * @return
      */
-    public AmountAndQuantityDto findBalanceBySettlementDate(Long warehouseId, Long skuId, Date settlementDate) {
+    public DoctorWarehouseStockMonthly findBalanceBySettlementDate(Long warehouseId, Long skuId, Date settlementDate) {
         Map<String, Object> params = new HashMap<>();
         params.put("warehouseId", warehouseId);
         params.put("skuId", skuId);
         params.put("settlementDate", settlementDate);
 
-        Map<String, BigDecimal> result = this.sqlSession.selectOne(this.sqlId("findBalanceBySettlementDate"), params);
-        return new AmountAndQuantityDto(result.get("quantity"), result.get("amount"));
+        return this.sqlSession.selectOne(this.sqlId("findBalanceBySettlementDate"), params);
     }
 
     /**
@@ -117,13 +116,13 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
         this.sqlSession.delete(this.sqlId("reverseSettlement"), params);
     }
 
-    public List<Map> listByHouseIdTime(Map<String, Object> criteria){
+    public List<Map> listByHouseIdTime(Map<String, Object> criteria) {
 
         return this.sqlSession.selectList("listByHouseIdTime", criteria);
 
     }
 
-    public List<Map> monthWarehouseDetail(Map<String, Object> criteria){
+    public List<Map> monthWarehouseDetail(Map<String, Object> criteria) {
 
         return this.sqlSession.selectList("monthWarehouseDetail", criteria);
 
