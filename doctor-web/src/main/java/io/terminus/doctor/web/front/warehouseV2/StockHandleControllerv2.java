@@ -63,7 +63,7 @@ public class StockHandleControllerv2 {
     }
 
     //公司单据数据展示
-        @RequestMapping(value = "/companyReport", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/companyReport", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response<List<List<Map>>> companyReport(@RequestParam(required = false,value = "farmId") Long farmId,
                                                    @RequestParam(required = false,value = "orgId") Long orgId,
                                                    @RequestParam(required = false,value = "settlementDateStart") Date settlementDateStart,

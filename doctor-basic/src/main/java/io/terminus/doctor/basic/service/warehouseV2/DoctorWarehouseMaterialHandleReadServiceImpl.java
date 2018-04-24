@@ -11,6 +11,7 @@ import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseStockMonthlyDao;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
+import io.terminus.doctor.common.utils.ResponseUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -174,11 +175,13 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     public Response<List<List<Map>>> companyReport(Map<String, Object> criteria) {
         List<List<Map>> resultList = Lists.newArrayList();
         try {
-
             criteria = this.getMonth(criteria);
             int count =(int)criteria.get("count");
             int startMonth =(int)criteria.get("startMonth");
             int startYear =(int)criteria.get("startYear");
+
+            int size = 0;
+            List<Map<String,Object>> farms = Lists.newArrayList();
 
             for(;count>=0;count--,startMonth++){
                 if(startMonth>12) {
@@ -189,6 +192,8 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
                 criteria.put("handleYear",startYear);
 
                 List<Map> lists = doctorWarehouseMaterialHandleDao.listByFarmIdTime(criteria);
+
+
 
                 if(lists!=null&&lists.size()>0) {
                     boolean settled = doctorWarehouseSettlementService.isSettled((Long) lists.get(0).get("orgId"), (Date) lists.get(0).get("settlementDate"));
@@ -222,15 +227,26 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
                     infoMap.put("allOutAmount",allOutAmount);
                     infoMap.put("allBalanceAmount",allBalanceAmount);
 
+                    if(lists.size()>size){
+                        farms.clear();
+                        for(int x=0;x<(lists.size());x++) {
+                            Map map = Maps.newHashMap();
+                            map.put("id", lists.get(x).get("farmId"));
+                            map.put("name", lists.get(x).get("farmName"));
+                            farms.add(map);
+                        }
+                        size = lists.size();
+                    }
                     lists.add(infoMap);
                     resultList.add(lists);
                 }
             }
+
             Collections.reverse(resultList);
-            return Response.ok(resultList);
+            return ResponseUtil.isOk(resultList,farms);
         } catch (Exception e) {
             log.error("failed to list doctor warehouse material handle, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.material.handle.list.fail");
+            return ResponseUtil.fail("doctor.warehouse.material.handle.list.fail");
         }
 
     }
@@ -243,6 +259,9 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
             int count =(int)criteria.get("count");
             int startMonth =(int)criteria.get("startMonth");
             int startYear =(int)criteria.get("startYear");
+
+            int size = 0;
+            List<Map<String,Object>> farms = Lists.newArrayList();
 
             for(;count>=0;count--,startMonth++) {
                 if (startMonth > 12) {
@@ -279,13 +298,24 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
                     infoMap.put("allOutAmount",allOutAmount);
                     infoMap.put("allBalanceAmount",allBalanceAmount);
 
+                    if(lists.size()>size){
+                        farms.clear();
+                        for(int x=0;x<(lists.size());x++) {
+                            Map map = Maps.newHashMap();
+                            map.put("id", lists.get(x).get("farmId"));
+                            map.put("name", lists.get(x).get("farmName"));
+                            farms.add(map);
+                        }
+                        size = lists.size();
+                    }
+
                     lists.add(infoMap);
                     resultList.add(lists);
                 }
 
             }
             Collections.reverse(resultList);
-            return Response.ok(resultList);
+            return ResponseUtil.isOk(resultList,farms);
         }catch (Exception e) {
             log.error("failed to list doctor warehouse material handle, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("doctor.warehouse.material.handle.list.fail");
