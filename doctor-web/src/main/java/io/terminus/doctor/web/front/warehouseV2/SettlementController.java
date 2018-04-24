@@ -60,8 +60,10 @@ public class SettlementController {
 
         List<Long> farmIds = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orgId)).stream().map(DoctorFarm::getId).collect(Collectors.toList());
 
-        return RespHelper.orServEx(doctorWarehouseSettlementService.settlement(orgId, farmIds,
+        RespHelper.orServEx(doctorWarehouseSettlementService.settlement(orgId, farmIds,
                 settlementDate));
+
+        return true;
     }
 
     /**
@@ -78,6 +80,7 @@ public class SettlementController {
         if (doctorWarehouseSettlementService.isUnderSettlement(orgId))
             throw new ServiceException("under.settlement");
 
-        return RespHelper.orServEx(doctorWarehouseSettlementService.antiSettlement(orgId, RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orgId)).stream().map(DoctorFarm::getId).collect(Collectors.toList()), settlementDate));
+        RespHelper.orServEx(doctorWarehouseSettlementService.antiSettlement(orgId, RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orgId)).stream().map(DoctorFarm::getId).collect(Collectors.toList()), settlementDate));
+        return true;
     }
 }
