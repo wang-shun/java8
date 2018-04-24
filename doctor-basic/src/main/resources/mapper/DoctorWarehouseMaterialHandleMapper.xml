@@ -384,6 +384,17 @@
         AND delete_flag=1
     </select>
 
+    <update id="updateHandleDateAndSettlementDate" parameterType="map">
+        UPDATE
+        <include refid="tb"/>
+        SET handle_date=#{handleDate},
+        settlement_date=#{settlementDate}
+        WHERE
+        handle_year=#{year},
+        handle_month=#{month}
+        WHERE rel_material_handle_id=#{materialHandleId}
+    </update>
+
     <select id="findPrevious" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>

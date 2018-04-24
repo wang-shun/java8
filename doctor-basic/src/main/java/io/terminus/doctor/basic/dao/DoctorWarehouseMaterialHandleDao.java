@@ -215,6 +215,17 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectOne(this.sqlId("countQuantityAlreadyRefund"), materialHandleId);
     }
 
+    public void updateHandleDateAndSettlementDate(Calendar handleDate, Date settlementDate, Long materialHandleId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("materialHandleId", materialHandleId);
+        params.put("handleDate", handleDate.getTime());
+        params.put("year", handleDate.get(Calendar.YEAR));
+        params.put("month", handleDate.get(Calendar.MONTH) + 1);
+        params.put("settlementDate", settlementDate);
+
+        this.sqlSession.update(this.sqlId("updateHandleDateAndSettlementDate"), params);
+    }
+
     //得到领料出库的数量
     public BigDecimal findLibraryById(Long id) {
         BigDecimal quantity = this.sqlSession.selectOne(this.sqlId("findLibraryById"), id);

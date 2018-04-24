@@ -36,7 +36,7 @@ public class WarehouseFormulaManager extends AbstractStockManager<WarehouseFormu
         //新增历史配方生产出库明细
         if (!DateUtil.inSameDate(stockDto.getHandleDate().getTime(), new Date())) {
 
-            materialHandle.setHandleDate(this.buildNewHandleDate(WarehouseMaterialHandleType.fromValue(stockHandle.getHandleSubType()), stockDto.getHandleDate()));
+            materialHandle.setHandleDate(this.buildNewHandleDate(stockDto.getHandleDate()).getTime());
 
             //获取该笔明细之前的库存量，包括该事件日期
             BigDecimal historyQuantity = getHistoryQuantityInclude(stockDto.getHandleDate().getTime(), wareHouse.getId(), detail.getMaterialId());

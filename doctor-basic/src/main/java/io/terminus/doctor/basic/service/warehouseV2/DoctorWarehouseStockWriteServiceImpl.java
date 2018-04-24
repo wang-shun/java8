@@ -232,15 +232,11 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     }
 
     @Override
-    @Transactional
-    @ExceptionHandle("doctor.warehouse.stock.out.fail")
     public Response<Long> out(WarehouseStockOutDto stockOut) {
         return warehouseOutStockService.handle(stockOut);
     }
 
     @Override
-    @Transactional
-    @ExceptionHandle("doctor.warehouse.stock.refund.fail")
     public Response<Long> refund(WarehouseStockRefundDto stockRefundDto) {
         return warehouseRefundStockService.handle(stockRefundDto);
     }
@@ -285,32 +281,24 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
 
     @Override
-    @Transactional
-    @ExceptionHandle("doctor.warehouse.stock.inventory.fail")
     public Response<Long> inventory(WarehouseStockInventoryDto stockInventory) {
 
         return warehouseInventoryStockService.handle(stockInventory);
     }
 
     @Override
-    @Transactional
-    @ExceptionHandle("doctor.warehouse.stock.transfer.fail")
     public Response<Long> transfer(WarehouseStockTransferDto stockTransfer) {
 
         return warehouseTransferStockService.handle(stockTransfer);
     }
 
     @Override
-    @Transactional
-    @ExceptionHandle("doctor.warehouse.produce.formula.fail")
     public Response<Boolean> formula(WarehouseFormulaDto formulaDto) {
         warehouseFormulaStockService.handle(formulaDto);
         return Response.ok(true);
     }
 
     @Override
-    @Transactional
-    @ExceptionHandle("doctor.warehouse.produce.formula.fail")
     public Response<Long> updateFormula(WarehouseFormulaDto formulaDto) {
         return warehouseFormulaStockService.handle(formulaDto);
     }

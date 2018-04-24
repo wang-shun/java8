@@ -117,7 +117,7 @@ public class WarehouseFormulaStockService extends AbstractWarehouseStockService<
         DoctorWarehouseStockHandle inStockHandle = doctorWarehouseStockHandleDao.findById(stockHandle.getRelStockHandleId());
 
         //配方生产出库单据
-        List<DoctorWarehouseStockHandle> outStockHandles = doctorWarehouseStockHandleDao.findRelStockHandle(inStockHandle.getId());
+//        List<DoctorWarehouseStockHandle> outStockHandles = doctorWarehouseStockHandleDao.findRelStockHandle(inStockHandle.getId());
 
         boolean changeHandleDate = !DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
         boolean changeInWarehouse = !stockDto.getWarehouseId().equals(inStockHandle.getWarehouseId());
@@ -172,7 +172,9 @@ public class WarehouseFormulaStockService extends AbstractWarehouseStockService<
             }
         }
 
-        if (changeInWarehouse || thisStockHandleChangedQuantity.compareTo(new BigDecimal(0)) != 0) {
+        if (changeInWarehouse || thisStockHandleChangedQuantity.compareTo(new BigDecimal(0)) != 0 || changeHandleDate) {
+
+            boolean needUpdateInStockHandle = false;
             List<DoctorWarehouseMaterialHandle> inMaterialHandles = doctorWarehouseMaterialHandleDao.findByStockHandle(inStockHandle.getId());
             if (inMaterialHandles.isEmpty())
                 throw new ServiceException("material.handle.not.found");
@@ -210,21 +212,28 @@ public class WarehouseFormulaStockService extends AbstractWarehouseStockService<
                 detail.setQuantity(inMaterialHandles.get(0).getQuantity().add(thisStockHandleChangedQuantity));
                 warehouseFormulaManager.create(detail, stockDto, stockHandle, wareHouse);
                 doctorWarehouseStockManager.in(inMaterialHandles.get(0).getMaterialId(), detail.getQuantity(), wareHouse);
-            }
-        }
 
-        if (changeHandleDate || changeInWarehouse) {
-            if (changeInWarehouse) {
                 inStockHandle.setWarehouseId(wareHouse.getId());
                 inStockHandle.setWarehouseName(wareHouse.getWareHouseName());
                 inStockHandle.setWarehouseType(wareHouse.getType());
+                needUpdateInStockHandle = true;
             }
-            warehouseFormulaManager.buildNewHandleDateForUpdate(inStockHandle, stockDto.getHandleDate());
-            doctorWarehouseStockHandleDao.update(inStockHandle);
-            outStockHandles.forEach(s -> {
-                warehouseFormulaManager.buildNewHandleDateForUpdate(s, stockDto.getHandleDate());
-                doctorWarehouseStockHandleDao.update(s);
-            });
+
+            if (changeHandleDate) {
+                needUpdateInStockHandle = true;
+
+                warehouseFormulaManager.buildNewHandleDateForUpdate(inStockHandle, stockDto.getHandleDate());
+
+                Calendar newHandleDate = warehouseFormulaManager.buildNewHandleDate(stockDto.getHandleDate());
+                //更新其他出库单据的事件日期
+                doctorWarehouseStockHandleDao.updateHandleDateAndSettlementDate(newHandleDate, stockDto.getSettlementDate(), inStockHandle.getId());
+                //更新其他出库单据下的明细单据的事件日期
+                doctorWarehouseMaterialHandleDao.updateHandleDateAndSettlementDate(newHandleDate, stockDto.getSettlementDate(), inMaterialHandles.get(0).getId());
+            }
+
+            if (needUpdateInStockHandle)
+                doctorWarehouseStockHandleDao.update(inStockHandle);
+
         }
         return stockHandle;
     }

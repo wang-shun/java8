@@ -5,8 +5,7 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Desc:
@@ -43,5 +42,17 @@ public class DoctorWarehouseStockHandleDao extends MyBatisDao<DoctorWarehouseSto
 
     public List<DoctorWarehouseStockHandle> findRelStockHandle(Long stockHandleId) {
         return this.sqlSession.selectList(this.sqlId("findRelStockHandle"), stockHandleId);
+    }
+
+    public void updateHandleDateAndSettlementDate(Calendar handleDate, Date SettlementDate, Long stockHandleId) {
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("stockHandleId", stockHandleId);
+        params.put("handleDate", handleDate.getTime());
+        params.put("year", handleDate.get(Calendar.YEAR));
+        params.put("month", handleDate.get(Calendar.MONTH) + 1);
+        params.put("settlementDate", SettlementDate);
+
+        this.sqlSession.update(this.sqlId("updateHandleDateAndSettlementDate"), params);
     }
 }

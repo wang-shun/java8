@@ -41,7 +41,7 @@ public class WarehouseInventoryManager extends AbstractStockManager {
         if (!DateUtil.inSameDate(stockDto.getHandleDate().getTime(), new Date())) {
             //历史明细单
 
-            materialHandle.setHandleDate(this.buildNewHandleDate(WarehouseMaterialHandleType.OUT, stockDto.getHandleDate()));
+            materialHandle.setHandleDate(this.buildNewHandleDate(stockDto.getHandleDate()).getTime());
 
             BigDecimal historyQuantity = getHistoryQuantityInclude(stockDto.getHandleDate().getTime(), wareHouse.getId(), detail.getMaterialId());
 

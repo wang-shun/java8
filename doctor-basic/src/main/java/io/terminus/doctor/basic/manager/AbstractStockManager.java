@@ -101,27 +101,23 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
 
     /**
      * 构建事件日期
-     * 新的事件日期只包含年月日，对于入库类型+00:00:00；对于出库类型23:59:59
+     * 新的事件日期只包含年月日，+23:59:59
      *
-     * @param handleType    事件类型
      * @param newHandleDate 新的事件日期
      * @return
      */
-    public Date buildNewHandleDate(WarehouseMaterialHandleType handleType, Calendar newHandleDate) {
+    public Calendar buildNewHandleDate(Calendar newHandleDate) {
 
-//        if (WarehouseMaterialHandleType.isBigIn(handleType.getValue())) {
-//            newHandleDate.set(Calendar.HOUR_OF_DAY, 0);
-//            newHandleDate.set(Calendar.MINUTE, 0);
-//            newHandleDate.set(Calendar.SECOND, 0);
-//            newHandleDate.set(Calendar.MILLISECOND, 0);
-//            return newHandleDate.getTime();
-//        } else {
+        if (DateUtil.inSameDate(newHandleDate.getTime(), new Date())) {
+            return newHandleDate;
+        }
+
         newHandleDate.set(Calendar.HOUR_OF_DAY, 23);
         newHandleDate.set(Calendar.MINUTE, 59);
         newHandleDate.set(Calendar.SECOND, 59);
         newHandleDate.set(Calendar.MILLISECOND, 0);
-        return newHandleDate.getTime();
-//        }
+
+        return newHandleDate;
     }
 
     public void buildNewHandleDateForUpdate(DoctorWarehouseMaterialHandle materialHandle, Calendar newHandleDate) {
@@ -159,7 +155,6 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
         newHandleDate.set(Calendar.MILLISECOND, 0);
         stockHandle.setHandleDate(newHandleDate.getTime());
     }
-
 
     /**
      * 获取新增的单据明细

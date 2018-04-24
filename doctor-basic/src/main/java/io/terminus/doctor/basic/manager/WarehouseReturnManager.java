@@ -76,7 +76,7 @@ public class WarehouseReturnManager extends AbstractStockManager<WarehouseStockR
             //入库类型，当天第一笔
             if (!DateUtil.inSameDate(stockDto.getHandleDate().getTime(), new Date())) {
 
-                materialHandle.setHandleDate(this.buildNewHandleDate(WarehouseMaterialHandleType.RETURN, stockDto.getHandleDate()));
+                materialHandle.setHandleDate(this.buildNewHandleDate(stockDto.getHandleDate()).getTime());
 
                 //获取该笔明细之前的库存量，包括该事件日期
                 BigDecimal historyQuantity = getHistoryQuantityInclude(stockDto.getHandleDate().getTime(), wareHouse.getId(), d.getMaterialId());

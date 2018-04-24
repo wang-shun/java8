@@ -18,6 +18,7 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.support.locks.LockRegistry;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -44,6 +45,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
     @Autowired
     protected DoctorWarehouseStockManager doctorWarehouseStockManager;
 
+    @Transactional
     @ExceptionHandle("stock.handle.fail")
     public Response<Long> handle(T stockDto) {
 

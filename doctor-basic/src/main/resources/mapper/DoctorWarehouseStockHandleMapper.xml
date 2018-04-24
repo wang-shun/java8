@@ -157,4 +157,15 @@
         FROM <include refid="tb"/>
         WHERE rel_stock_handle_id=#{stockHandleId}
     </select>
+    
+    <update id="updateHandleDateAndSettlementDate" parameterType="map">
+        UPDATE
+        <include refid="tb"/>
+        SET handle_date=#{handleDate},
+        settlement_date=#{settlementDate}
+        WHERE
+        handle_year=#{year},
+        handle_month=#{month}
+        WHERE rel_stock_handle_id=#{stockHandleId}
+    </update>
 </mapper>
