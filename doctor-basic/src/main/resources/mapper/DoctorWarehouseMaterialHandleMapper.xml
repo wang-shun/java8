@@ -442,12 +442,13 @@
     </select>
 
     <select id="listByFarmIdTime" parameterType="map" resultType="map">
-        select a.farm_id as farmId,a.type as type,max(a.handle_Date) as handleDate,
+        select a.farm_id as farmId,ifnull(f.name,'') as farmName,a.type as type,max(a.handle_Date) as handleDate,
         a.handle_year as handleYear,a.handle_Month as handleMonth,a.org_id as orgId,
         <include refid="inAmount"/>
         <include refid="outAmount"/>
         <include refid="balanceAmount"/>
         from doctor_warehouse_material_handle a
+        left join doctor_farms f on a.farm_id = f.number
         where a.delete_flag = 1
         <if test="farmId!=null">
             and a.farm_id = #{farmId,jdbcType = BIGINT}
@@ -457,6 +458,9 @@
         </if>
         <if test="handleYear!=null">
             and a.handle_year = #{handleYear,jdbcType=BIGINT}
+        </if>
+        <if test="orgId!=null">
+            and a.org_id = #{orgId,jdbcType=BIGINT}
         </if>
         group by a.farm_id
         order by a.farm_id
@@ -638,27 +642,28 @@
 
 
     <sql id ="balanceAmount">
-        (select ifnull(sum(b.balance_amount),0)
+        ifnull((select sum(b.balance_amount)
         from doctor_warehouse_stock_monthly b
         where b.farm_id = a.farm_id
         and b.settlement_date = a.settlement_date
-        )as balanceAmount
+        ),0)as balanceAmount
     </sql>
 
     <sql id="inAmount">
-        (select  ifnull(sum(c.amount),0)
+        ifnull((select  sum(c.amount)
         from doctor_warehouse_material_handle c
         where c.farm_id = a.farm_id
         and c.delete_flag = 1
         and c.handle_year = #{handleYear,jdbcType=BIGINT}
         and c.handle_month = #{handleMonth,jdbcType=BIGINT}
         and c.type in (
+           1,7,9,11,13
         )
-        ) as inAmount,
+        ),0) as inAmount,
     </sql>
 
     <sql id="outAmount">
-         (select  ifnull(sum(d.amount),0)
+         ifnull((select sum(d.amount)
             from doctor_warehouse_material_handle d
             where d.farm_id = a.farm_id
             and d.delete_flag = 1
@@ -667,7 +672,7 @@
             and d.type in (
                 2,8,10,12
             )
-        ) as outAmount,
+        ),0) as outAmount,
     </sql>
 
     <select id="getPigBarnNameOption" parameterType="long" resultType="map">

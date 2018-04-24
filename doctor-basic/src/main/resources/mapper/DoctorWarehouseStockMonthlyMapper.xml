@@ -185,7 +185,7 @@
     </select>
 
     <select id="listByHouseIdTime" parameterType="map" resultType="map">
-        select a.farm_id as farmId,a.warehouse_id as warehouseId,a.type as type,max(a.handle_date) as handleDate,
+        select a.farm_id as farmId,a.warehouse_id as warehouseId,a.warehouse_name as warehouseName,a.type as type,max(a.handle_date) as handleDate,
         a.handle_year as handleYear,a.handle_month as handleMonth,a.org_id as orgId,
         <include refid="inAmount"/>
         <include refid="outAmount"/>
