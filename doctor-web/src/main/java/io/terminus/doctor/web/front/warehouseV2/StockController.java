@@ -385,7 +385,7 @@ public class StockController {
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "formula")
-    public Long formula(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseFormulaDto formulaDto, Errors errors) {
+    public Long formula(@RequestBody @Validated(AbstractWarehouseStockDetail.StockFormulaValid.class) WarehouseFormulaDto formulaDto, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 

@@ -1,6 +1,8 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
+import com.sun.org.apache.regexp.internal.RE;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseFormulaDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.manager.WarehouseFormulaManager;
@@ -11,7 +13,9 @@ import io.terminus.doctor.common.utils.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -57,7 +61,7 @@ public class WarehouseFormulaStockService extends AbstractWarehouseStockService<
         //增加库存
         doctorWarehouseStockManager.in(stockDto.getFeedMaterialId(), stockDto.getFeedMaterialQuantity(), wareHouse);
 
-        //每个出库仓库及对应的单据
+        //按照不同的出库仓库，拆分成不同的单据
         Map<Long/**warehouseId*/, DoctorWarehouseStockHandle> eachWarehouseStockHandles = new HashMap<>();
         Map<Long/*warehouseId*/, DoctorWareHouse> outWarehouses = new HashMap<>();
         stockDto.getDetails()
@@ -96,118 +100,133 @@ public class WarehouseFormulaStockService extends AbstractWarehouseStockService<
             throw new ServiceException("formula.in.not.allow.edit");
     }
 
+    /**
+     * 更改数量，更改事件日期，更改入库仓库
+     *
+     * @param stockDto
+     * @param wareHouse   入库仓库
+     * @param stockHandle 出库单据
+     * @return
+     */
     @Override
     protected DoctorWarehouseStockHandle update(WarehouseFormulaDto stockDto,
                                                 DoctorWareHouse wareHouse,
                                                 DoctorWarehouseStockHandle stockHandle) {
 
+        //配方生产入库单据
+        DoctorWarehouseStockHandle inStockHandle = doctorWarehouseStockHandleDao.findById(stockHandle.getRelStockHandleId());
+
+        //配方生产出库单据
+        List<DoctorWarehouseStockHandle> outStockHandles = doctorWarehouseStockHandleDao.findRelStockHandle(inStockHandle.getId());
+
         boolean changeHandleDate = !DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
+        boolean changeInWarehouse = !stockDto.getWarehouseId().equals(inStockHandle.getWarehouseId());
 
-        List<DoctorWarehouseMaterialHandle> inMaterialHandles = doctorWarehouseMaterialHandleDao.findByStockHandle(stockHandle.getId());
-        if (inMaterialHandles.isEmpty())
-            throw new ServiceException("");
-        DoctorWarehouseMaterialHandle inMaterialHandle = inMaterialHandles.get(0);
+        //该出库单据下的出库明细
+        Map<Long, List<DoctorWarehouseMaterialHandle>> materialHandles = doctorWarehouseMaterialHandleDao
+                .findByStockHandle(stockHandle.getId())
+                .stream()
+                .collect(Collectors.groupingBy(DoctorWarehouseMaterialHandle::getId));
 
-        if (!stockHandle.getWarehouseId().equals(stockDto.getWarehouseId())) {
-            //更换了入库仓库
-            DoctorWareHouse oldInWarehouse = new DoctorWareHouse();
-            oldInWarehouse.setId(inMaterialHandle.getWarehouseId());
-            oldInWarehouse.setWareHouseName(inMaterialHandle.getWarehouseName());
-            doctorWarehouseStockManager.out(stockDto.getFeedMaterialId(), stockDto.getFeedMaterialQuantity(), oldInWarehouse);
-            warehouseFormulaManager.delete(inMaterialHandle);
+        BigDecimal thisStockHandleChangedQuantity = new BigDecimal(0);
+        for (WarehouseFormulaDto.WarehouseFormulaDetail detail : stockDto.getDetails()) {
+            if (!materialHandles.containsKey(detail.getMaterialHandleId()))
+                throw new ServiceException("material.handle.unknown");
+            DoctorWarehouseMaterialHandle materialHandle = materialHandles.get(detail.getMaterialHandleId()).get(0);
 
-            WarehouseFormulaDto.WarehouseFormulaDetail detail = new WarehouseFormulaDto.WarehouseFormulaDetail();
-            detail.setMaterialId(stockDto.getFeedMaterialId());
-            detail.setWarehouseId(stockDto.getWarehouseId());
-            detail.setQuantity(stockDto.getFeedMaterialQuantity());
-            warehouseFormulaManager.create(detail, stockDto, stockHandle, wareHouse);
-            doctorWarehouseStockManager.in(stockDto.getFeedMaterialId(), stockDto.getFeedMaterialQuantity(), wareHouse);
+            materialHandle.setRemark(detail.getRemark());
 
-        } else {
-            if (!inMaterialHandle.getQuantity().equals(stockDto.getFeedMaterialQuantity())
-                    || changeHandleDate) {
-
-                if (!inMaterialHandle.getQuantity().equals(stockDto.getFeedMaterialQuantity())) {
-                    //更改了饲料入库数量
-                    if (inMaterialHandle.getQuantity().compareTo(stockDto.getFeedMaterialQuantity()) > 0)
-                        doctorWarehouseStockManager.out(stockDto.getFeedMaterialId(), inMaterialHandle.getQuantity().subtract(stockDto.getFeedMaterialQuantity()), wareHouse);
-                    else
-                        doctorWarehouseStockManager.in(stockDto.getFeedMaterialId(), stockDto.getFeedMaterialQuantity().subtract(inMaterialHandle.getQuantity()), wareHouse);
-                }
-
-                inMaterialHandle.setQuantity(stockDto.getFeedMaterialQuantity());
-
-                Date recalculateDate = stockHandle.getHandleDate();
-
-                if (changeHandleDate) {
-
-                    warehouseFormulaManager.buildNewHandleDateForUpdate(stockHandle, stockDto.getHandleDate());
-                    doctorWarehouseStockHandleDao.update(stockHandle);
-
-                    warehouseFormulaManager.buildNewHandleDateForUpdate(inMaterialHandle, stockDto.getHandleDate());
-                    doctorWarehouseMaterialHandleDao.update(inMaterialHandle);
-
-                    int days = DateUtil.getDeltaDays(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
-                    if (days < 0) {//事件日期改小了，重算日期采用新的日期
-                        recalculateDate = inMaterialHandle.getHandleDate();
-                    }
-                }
-
-                warehouseFormulaManager.recalculate(inMaterialHandle, recalculateDate);
-            }
-        }
-
-        //出库明细修改
-        List<DoctorWarehouseStockHandle> outStockHandles = doctorWarehouseStockHandleDao.findRelStockHandle(stockHandle.getId());
-        Map<Long, DoctorWarehouseMaterialHandle> outMaterialHandles = new HashMap<>();
-        outStockHandles.forEach(sh -> {
-            doctorWarehouseMaterialHandleDao.findByStockHandle(sh.getId()).forEach(m -> {
-                outMaterialHandles.put(m.getId(), m);
-            });
-        });
-        if (changeHandleDate) {
-            outStockHandles.forEach(sh -> {
-                warehouseFormulaManager.buildNewHandleDateForUpdate(sh, stockDto.getHandleDate());
-                doctorWarehouseStockHandleDao.update(sh);
-            });
-        }
-        stockDto.getDetails().forEach(detail -> {
-
-            DoctorWarehouseMaterialHandle outMaterialHandle = outMaterialHandles.get(detail.getMaterialHandleId());
-            outMaterialHandle.setRemark(detail.getRemark());
-            if (!detail.getQuantity().equals(outMaterialHandle.getQuantity())
-                    || changeHandleDate) {
+            int quantityChange = materialHandle.getQuantity().compareTo(detail.getQuantity());
+            if (quantityChange != 0 || changeHandleDate) {
 
                 DoctorWareHouse outWarehouse = new DoctorWareHouse();
-                outWarehouse.setId(outMaterialHandle.getWarehouseId());
-                outWarehouse.setWareHouseName(outMaterialHandle.getWarehouseName());
+                outWarehouse.setId(materialHandle.getWarehouseId());
+                outWarehouse.setFarmId(materialHandle.getFarmId());
+                outWarehouse.setWareHouseName(materialHandle.getWarehouseName());
+                outWarehouse.setType(materialHandle.getWarehouseType());
 
-                if (detail.getQuantity().compareTo(outMaterialHandle.getQuantity()) > 0) {
-                    doctorWarehouseStockManager.out(detail.getMaterialId(), detail.getQuantity().subtract(outMaterialHandle.getQuantity()), outWarehouse);
+                thisStockHandleChangedQuantity = thisStockHandleChangedQuantity.add(detail.getQuantity().subtract(materialHandle.getQuantity()));
+                if (quantityChange > 0) {
+                    //改小
+                    doctorWarehouseStockManager.in(materialHandle.getMaterialId(), materialHandle.getQuantity().subtract(detail.getQuantity()), outWarehouse);
                 } else {
-                    doctorWarehouseStockManager.in(detail.getMaterialId(), outMaterialHandle.getQuantity().subtract(detail.getQuantity()), outWarehouse);
+                    //改大
+                    doctorWarehouseStockManager.out(materialHandle.getMaterialId(), detail.getQuantity().subtract(materialHandle.getQuantity()), outWarehouse);
                 }
 
-                outMaterialHandle.setQuantity(detail.getQuantity());
+                materialHandle.setQuantity(detail.getQuantity());
 
                 Date recalculateDate = stockHandle.getHandleDate();
-
                 if (changeHandleDate) {
-                    warehouseFormulaManager.buildNewHandleDateForUpdate(outMaterialHandle, stockDto.getHandleDate());
-                    doctorWarehouseMaterialHandleDao.update(outMaterialHandle);
+                    warehouseFormulaManager.buildNewHandleDateForUpdate(materialHandle, stockDto.getHandleDate());
+                    doctorWarehouseMaterialHandleDao.update(materialHandle);
 
                     int days = DateUtil.getDeltaDays(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
                     if (days < 0) {//事件日期改小了，重算日期采用新的日期
-                        recalculateDate = outMaterialHandle.getHandleDate();
+                        recalculateDate = materialHandle.getHandleDate();
                     }
                 }
 
-                warehouseFormulaManager.recalculate(outMaterialHandle, recalculateDate);
+                warehouseFormulaManager.recalculate(materialHandle, recalculateDate);
             } else {
-                doctorWarehouseMaterialHandleDao.update(outMaterialHandle);
+                doctorWarehouseMaterialHandleDao.update(materialHandle);
             }
-        });
+        }
 
+        if (changeInWarehouse || thisStockHandleChangedQuantity.compareTo(new BigDecimal(0)) != 0) {
+            List<DoctorWarehouseMaterialHandle> inMaterialHandles = doctorWarehouseMaterialHandleDao.findByStockHandle(inStockHandle.getId());
+            if (inMaterialHandles.isEmpty())
+                throw new ServiceException("material.handle.not.found");
+
+            DoctorWareHouse oldInWarehouse = new DoctorWareHouse();
+            oldInWarehouse.setId(inStockHandle.getWarehouseId());
+            oldInWarehouse.setWareHouseName(inStockHandle.getWarehouseName());
+            if (!changeInWarehouse) {
+                ////如果该单据明细变动了数量，并未改入库仓库，对应的入库单据的明细中的数量也要发生相应变动
+                if (thisStockHandleChangedQuantity.compareTo(new BigDecimal(0)) > 0)
+                    doctorWarehouseStockManager.in(inMaterialHandles.get(0).getMaterialId(), thisStockHandleChangedQuantity, oldInWarehouse);
+                else
+                    doctorWarehouseStockManager.out(inMaterialHandles.get(0).getMaterialId(), thisStockHandleChangedQuantity, oldInWarehouse);
+
+                inMaterialHandles.get(0).setQuantity(inMaterialHandles.get(0).getQuantity().add(thisStockHandleChangedQuantity));
+
+                Date recalculateDate = stockHandle.getHandleDate();
+                if (changeHandleDate) {
+                    warehouseFormulaManager.buildNewHandleDateForUpdate(inMaterialHandles.get(0), stockDto.getHandleDate());
+                    doctorWarehouseMaterialHandleDao.update(inMaterialHandles.get(0));
+                    int days = DateUtil.getDeltaDays(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
+                    if (days < 0) {//事件日期改小了，重算日期采用新的日期
+                        recalculateDate = inMaterialHandles.get(0).getHandleDate();
+                    }
+                }
+                warehouseFormulaManager.recalculate(inMaterialHandles.get(0), recalculateDate);
+
+            } else {
+                doctorWarehouseStockManager.out(inMaterialHandles.get(0).getMaterialId(), inMaterialHandles.get(0).getQuantity(), oldInWarehouse);
+                warehouseFormulaManager.delete(inMaterialHandles.get(0));
+
+                WarehouseFormulaDto.WarehouseFormulaDetail detail = new WarehouseFormulaDto.WarehouseFormulaDetail();
+                detail.setMaterialId(inMaterialHandles.get(0).getMaterialId());
+                detail.setWarehouseId(wareHouse.getId());
+                detail.setQuantity(inMaterialHandles.get(0).getQuantity().add(thisStockHandleChangedQuantity));
+                warehouseFormulaManager.create(detail, stockDto, stockHandle, wareHouse);
+                doctorWarehouseStockManager.in(inMaterialHandles.get(0).getMaterialId(), detail.getQuantity(), wareHouse);
+            }
+        }
+
+        if (changeHandleDate || changeInWarehouse) {
+            if (changeInWarehouse) {
+                inStockHandle.setWarehouseId(wareHouse.getId());
+                inStockHandle.setWarehouseName(wareHouse.getWareHouseName());
+                inStockHandle.setWarehouseType(wareHouse.getType());
+            }
+            warehouseFormulaManager.buildNewHandleDateForUpdate(inStockHandle, stockDto.getHandleDate());
+            doctorWarehouseStockHandleDao.update(inStockHandle);
+            outStockHandles.forEach(s -> {
+                warehouseFormulaManager.buildNewHandleDateForUpdate(s, stockDto.getHandleDate());
+                doctorWarehouseStockHandleDao.update(s);
+            });
+        }
         return stockHandle;
     }
 

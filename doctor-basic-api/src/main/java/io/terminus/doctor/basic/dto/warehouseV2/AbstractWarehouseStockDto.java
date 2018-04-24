@@ -20,16 +20,16 @@ public class AbstractWarehouseStockDto {
 
     private Long orgId;
 
-    @NotNull(message = "farm.id.null", groups = AbstractWarehouseStockDetail.StockDefaultValid.class)
+    @NotNull(message = "farm.id.null", groups = {AbstractWarehouseStockDetail.StockDefaultValid.class, AbstractWarehouseStockDetail.StockFormulaValid.class})
     private Long farmId;
 
-    @NotNull(message = "warehouse.stock.handle.date.null", groups = AbstractWarehouseStockDetail.StockDefaultValid.class)
+    @NotNull(message = "warehouse.stock.handle.date.null", groups = {AbstractWarehouseStockDetail.StockDefaultValid.class, AbstractWarehouseStockDetail.StockFormulaValid.class})
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Calendar handleDate;
 
     private Date settlementDate;
 
-    @NotNull(message = "warehouse.id.null", groups = AbstractWarehouseStockDetail.StockDefaultValid.class)
+    @NotNull(message = "warehouse.id.null", groups = {AbstractWarehouseStockDetail.StockDefaultValid.class, AbstractWarehouseStockDetail.StockFormulaValid.class})
     private Long warehouseId;
 
     @NotNull(message = "warehouse.stock.operator.id.null", groups = AbstractWarehouseStockDetail.StockDefaultValid.class)

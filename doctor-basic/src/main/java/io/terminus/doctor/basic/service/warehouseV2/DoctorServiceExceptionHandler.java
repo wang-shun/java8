@@ -14,6 +14,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.context.MessageSource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Locale;
 
 /**
@@ -47,7 +49,7 @@ public class DoctorServiceExceptionHandler {
                     ExceptionHandle exceptionHandle = method.getDeclaredAnnotation(ExceptionHandle.class);
 
                     if (throwable instanceof ServiceException)
-                        return Response.fail(throwable.getMessage());
+                        return Response.fail(messageSource.getMessage(throwable.getMessage(), new Object[0], Locale.CHINA));
                     if (throwable instanceof InvalidException) {
                         InvalidException invalidException = (InvalidException) throwable;
                         return Response.fail(messageSource.getMessage(invalidException.getError(), invalidException.getParams(), Locale.CHINA));

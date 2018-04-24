@@ -2,7 +2,10 @@ package io.terminus.doctor.basic.dto.warehouseV2;
 
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import lombok.Data;
+import org.hibernate.validator.constraints.NotEmpty;
+import org.springframework.validation.annotation.Validated;
 
+import javax.validation.Valid;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -29,6 +32,8 @@ public class WarehouseFormulaDto extends AbstractWarehouseStockDto implements Se
 
     private String farmName;
 
+    @Valid
+    @NotEmpty(message = "stock.detail.empty", groups = {AbstractWarehouseStockDetail.StockDefaultValid.class, AbstractWarehouseStockDetail.StockFormulaValid.class})
     private List<WarehouseFormulaDetail> details;
 
     @Data

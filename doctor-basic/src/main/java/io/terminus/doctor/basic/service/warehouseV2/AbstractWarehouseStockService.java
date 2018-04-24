@@ -44,6 +44,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
     @Autowired
     protected DoctorWarehouseStockManager doctorWarehouseStockManager;
 
+    @ExceptionHandle("stock.handle.fail")
     public Response<Long> handle(T stockDto) {
 
         List<Lock> locks = lockedIfNecessary(stockDto);
