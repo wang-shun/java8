@@ -226,7 +226,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
                     resultList.add(lists);
                 }
             }
-
+            Collections.reverse(resultList);
             return Response.ok(resultList);
         } catch (Exception e) {
             log.error("failed to list doctor warehouse material handle, cause:{}", Throwables.getStackTraceAsString(e));
@@ -284,7 +284,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
                 }
 
             }
-
+            Collections.reverse(resultList);
             return Response.ok(resultList);
         }catch (Exception e) {
             log.error("failed to list doctor warehouse material handle, cause:{}", Throwables.getStackTraceAsString(e));
