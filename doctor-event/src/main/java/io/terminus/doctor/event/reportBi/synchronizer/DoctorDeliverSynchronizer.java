@@ -6,6 +6,7 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorPigStatisticDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportDeliverDao;
+import io.terminus.doctor.event.dao.reportBi.DoctorReportMatingDao;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.reportBi.DoctorFiledUrlCriteria;
 import io.terminus.doctor.event.dto.reportBi.DoctorGroupDailyExtend;
@@ -13,6 +14,7 @@ import io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend;
 import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.model.DoctorReportDeliver;
+import io.terminus.doctor.event.model.DoctorReportMating;
 import io.terminus.doctor.event.reportBi.helper.DateHelper;
 import io.terminus.doctor.event.reportBi.helper.FieldHelper;
 import io.terminus.doctor.event.util.EventUtil;
@@ -45,11 +47,14 @@ public class DoctorDeliverSynchronizer {
 
     private final DoctorPigStatisticDao doctorPigStatisticDao;
 
+    private final DoctorReportMatingDao doctorReportMatingDao;
+
     @Autowired
-    public DoctorDeliverSynchronizer(DoctorReportDeliverDao doctorReportDeliverDao, FieldHelper fieldHelper, DoctorPigStatisticDao doctorPigStatisticDao) {
+    public DoctorDeliverSynchronizer(DoctorReportDeliverDao doctorReportDeliverDao, FieldHelper fieldHelper, DoctorPigStatisticDao doctorPigStatisticDao, DoctorReportMatingDao doctorReportMatingDao) {
         this.doctorReportDeliverDao = doctorReportDeliverDao;
         this.fieldHelper = fieldHelper;
         this.doctorPigStatisticDao = doctorPigStatisticDao;
+        this.doctorReportMatingDao = doctorReportMatingDao;
     }
 
     public void synchronize(DoctorPigDailyExtend pigDaily,
@@ -162,13 +167,14 @@ public class DoctorDeliverSynchronizer {
         reportBi.setFirstBornWeight(EventUtil.getAvgWeight(pigDaily.getFarrowWeight(), pigDaily.getFarrowLive()));
         reportBi.setWeanDayAge(FieldHelper.getInteger(pigDaily.getWeanDayAge(), pigDaily.getWeanCount()));
         reportBi.setWeanWeightPerFarrow(EventUtil.getAvgWeight(pigDaily.getWeanWeight(), pigDaily.getWeanCount()));
-        reportBi.setEarlyNest(earlyFarrowNest(pigDaily, reportBi.getOrzType(), reportBi.getSumAt(), reportBi.getDateType()));
         reportBi.setEarlyMating(pigDaily.getEarlyMating());
-        reportBi.setLaterNest(laterFarrowNest(pigDaily, reportBi.getOrzType(), reportBi.getSumAt(), reportBi.getDateType()));
-        if (DateDimension.YEARLY.contains(reportBi.getDateType())) {
-            reportBi.setEarlyNestRate(FieldHelper.get(reportBi.getEarlyNest(), reportBi.getEarlyMating()));
-            reportBi.setLaterNestRate(FieldHelper.get(reportBi.getLaterNest(), pigDaily.getMatingCount()));
-        }
+        // TODO: 18/4/24 单独同步数据
+//        reportBi.setEarlyNest(earlyFarrowNest(pigDaily, reportBi.getOrzType(), reportBi.getSumAt(), reportBi.getDateType()));
+//        reportBi.setLaterNest(laterFarrowNest(pigDaily, reportBi.getOrzType(), reportBi.getSumAt(), reportBi.getDateType()));
+//        if (DateDimension.YEARLY.contains(reportBi.getDateType())) {
+//            reportBi.setEarlyNestRate(FieldHelper.get(reportBi.getEarlyNest(), reportBi.getEarlyMating()));
+//            reportBi.setLaterNestRate(FieldHelper.get(reportBi.getLaterNest(), pigDaily.getMatingCount()));
+//        }
         reportBi.setTurnOutAvgWeight28(outAvgWeight28(reportBi));
     }
 
@@ -222,26 +228,26 @@ public class DoctorDeliverSynchronizer {
                 + deliver.getWeanWeightPerFarrow();
     }
 
-    private Integer earlyFarrowNest(DoctorPigDailyExtend dailyExtend, Integer orzType, Date sumAt, Integer dateType) {
+    private Integer earlyFarrowNest(Long orzId, Integer orzType, Date sumAt, Integer dateType) {
         DateDimension dateDimension = DateDimension.from(dateType);
         String startAt = DateUtil.toDateString(new DateTime(DateHelper.withDateStartDay(sumAt, dateDimension)).minusDays(114).toDate());
         String endAt = DateUtil.toDateString(new DateTime(DateHelper.withDateEndDay(sumAt, dateDimension)).minusDays(114).toDate());
-        return farrowNest(dailyExtend, orzType, startAt, endAt);
+        return farrowNest(orzId, orzType, startAt, endAt);
     }
 
-    private Integer laterFarrowNest(DoctorPigDailyExtend dailyExtend, Integer orzType, Date sumAt, Integer dateType) {
+    private Integer laterFarrowNest(Long orzId, Integer orzType, Date sumAt, Integer dateType) {
         DateDimension dateDimension = DateDimension.from(dateType);
         String startAt = DateUtil.toDateString(DateHelper.withDateStartDay(sumAt, dateDimension));
         String endAt = DateUtil.toDateString(DateHelper.withDateEndDay(sumAt, dateDimension));
-        return farrowNest(dailyExtend, orzType, startAt, endAt);
+        return farrowNest(orzId, orzType, startAt, endAt);
     }
 
-    private Integer farrowNest(DoctorPigDailyExtend dailyExtend, Integer orzType, String startAt, String endAt){
+    private Integer farrowNest(Long orzId, Integer orzType, String startAt, String endAt){
         if (Objects.equals(orzType, OrzDimension.FARM.getValue())) {
-            return doctorPigStatisticDao.mateLeadToFarrow(dailyExtend.getFarmId(), startAt, endAt);
+            return doctorPigStatisticDao.mateLeadToFarrow(orzId, startAt, endAt);
         } else {
             int earlyFarrowNest = 0;
-            List<DoctorFarm> farmList = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(dailyExtend.getOrgId()));
+            List<DoctorFarm> farmList = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orzId));
             for (DoctorFarm farm: farmList) {
                 earlyFarrowNest += doctorPigStatisticDao.mateLeadToFarrow(farm.getId(), startAt, endAt);
             }
@@ -250,5 +256,21 @@ public class DoctorDeliverSynchronizer {
     }
     public void deleteAll() {
         doctorReportDeliverDao.deleteAll();
+    }
+
+    /**
+     * 计算前推分娩数，后推分娩数，前推分娩率，后推分娩率
+     */
+    public void synchronizeDeliverRate(DoctorDimensionCriteria dimensionCriteria) {
+        DoctorReportDeliver reportBi = doctorReportDeliverDao.findByDimension(dimensionCriteria);
+        DoctorReportMating doctorReportMating = doctorReportMatingDao.findByDimension(dimensionCriteria);
+        Integer matingCount = doctorReportMating.getMatingCount();
+        reportBi.setEarlyNest(earlyFarrowNest(reportBi.getOrzId(), reportBi.getOrzType(), reportBi.getSumAt(), reportBi.getDateType()));
+        reportBi.setLaterNest(laterFarrowNest(reportBi.getOrzId(), reportBi.getOrzType(), reportBi.getSumAt(), reportBi.getDateType()));
+        if (DateDimension.YEARLY.contains(reportBi.getDateType())) {
+            reportBi.setEarlyNestRate(FieldHelper.get(reportBi.getEarlyNest(), reportBi.getEarlyMating()));
+            reportBi.setLaterNestRate(FieldHelper.get(reportBi.getLaterNest(), matingCount));
+        }
+        doctorReportDeliverDao.update(reportBi);
     }
 }

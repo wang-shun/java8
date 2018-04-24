@@ -3,12 +3,14 @@ package io.terminus.doctor.event.dao;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
+import io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by xjn on 17/12/19.
@@ -114,5 +116,12 @@ public class DoctorStatisticDaoTest extends BaseDaoTest {
     public void mateLeadToFarrowTest() {
         Integer count = doctorPigStatisticDao.mateLeadToFarrow(404L, "2018-04-19", "2018-04-20");
         Assert.assertEquals(count.longValue(), 1);
+    }
+    
+    @Test
+    public void earlyMateDateTest() {
+        List<DoctorFarmEarlyEventAtDto> list = doctorPigStatisticDao.earlyMateDate("2018-04-24");
+        Assert.assertNotEquals(list.size(), 0);
+        System.out.println(list);
     }
 }

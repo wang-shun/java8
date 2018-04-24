@@ -123,4 +123,12 @@ public interface DoctorDailyReportV2Service {
     Response<Boolean> syncEfficiency(Long farmId);
 
     Response<List<DoctorFarmEarlyEventAtDto>> findEarLyAt();
+
+    /**
+     * 刷新分娩率
+     * @param farmIds 猪场ids
+     * @param date 刷新日期之后数据
+     * @return
+     */
+    Response<Boolean> generateDeliverRate(List<Long> farmIds, Date date);
 }

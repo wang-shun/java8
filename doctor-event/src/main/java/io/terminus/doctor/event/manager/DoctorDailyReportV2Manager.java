@@ -18,6 +18,7 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigStatisticDao;
 import io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.ReportTime;
 import io.terminus.doctor.event.model.DoctorEventModifyLog;
 import io.terminus.doctor.event.model.DoctorEventModifyRequest;
@@ -415,6 +416,47 @@ public class DoctorDailyReportV2Manager {
                 DoctorGroupEvent event = JsonMapperUtil.nonEmptyMapper().fromJson(json, DoctorGroupEvent.class);
                 list3.add(new DoctorFarmEarlyEventAtDto(event.getFarmId(), event.getEventAt()));
             }
+        }
+    }
+
+    public Map<Long, Date> queryFarmDeliverRateDate(String startAt) {
+        List<DoctorFarmEarlyEventAtDto> list = pigStatisticDao.earlyMateDate(startAt);
+        Map<Long, Date> farmToDate = list.stream().collect(Collectors.toMap(DoctorFarmEarlyEventAtDto::getFarmId, DoctorFarmEarlyEventAtDto::getEventAt));
+        List<DoctorEventModifyLog> modifyLogList = doctorEventModifyLogDao.getEventModifyLog(startAt);
+        modifyLogList.forEach(doctorEventModifyLog -> {
+            if (Objects.equals(doctorEventModifyLog.getType(), DoctorEventModifyRequest.TYPE.PIG.getValue())) {
+                if (notNull(doctorEventModifyLog.getDeleteEvent())) {
+                    DoctorPigEvent pigEvent = JsonMapperUtil.nonEmptyMapper().fromJson(doctorEventModifyLog.getDeleteEvent(), DoctorPigEvent.class);
+                    if (Objects.equals(pigEvent.getType(), PigEvent.FARROWING.getKey()) && notNull(pigEvent.getRelEventId())) {
+                        DoctorPigEvent mating = doctorPigEventDao.findById(pigEvent.getRelPigEventId());
+                        putFarmDate(farmToDate, mating.getFarmId(), mating.getEventAt());
+
+                    } else if (Objects.equals(pigEvent.getType(), PigEvent.MATING.getKey())
+                            && Objects.equals(pigEvent.getCurrentMatingCount(), 1)) {
+                        putFarmDate(farmToDate, pigEvent.getFarmId(), pigEvent.getEventAt());
+                    }
+                } else {
+                    DoctorPigEvent fromEvent = JsonMapperUtil.nonEmptyMapper().fromJson(doctorEventModifyLog.getFromEvent(), DoctorPigEvent.class);
+                    if (Objects.equals(fromEvent.getType(), PigEvent.MATING.getKey())
+                            && Objects.equals(fromEvent.getCurrentMatingCount(), 1)) {
+                        putFarmDate(farmToDate, fromEvent.getFarmId(), fromEvent.getEventAt());
+                    }
+
+                    DoctorPigEvent toEvent = JsonMapperUtil.nonEmptyMapper().fromJson(doctorEventModifyLog.getToEvent(), DoctorPigEvent.class);
+                    if (Objects.equals(toEvent.getType(), PigEvent.MATING.getKey())
+                            && Objects.equals(toEvent.getCurrentMatingCount(), 1)) {
+                        putFarmDate(farmToDate, toEvent.getFarmId(), toEvent.getEventAt());
+                }
+            }
+        }
+        });
+        return farmToDate;
+    }
+
+    private void putFarmDate(Map<Long, Date> farmToDate, Long farmId, Date date) {
+        Date earlyDate = farmToDate.get(farmId);
+        if (isNull(earlyDate) || earlyDate.after(date)) {
+            farmToDate.put(farmId, date);
         }
     }
 }
