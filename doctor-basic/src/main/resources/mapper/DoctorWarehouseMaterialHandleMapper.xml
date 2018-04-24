@@ -390,8 +390,10 @@
         SET handle_date=#{handleDate},
         settlement_date=#{settlementDate}
         WHERE
-        handle_year=#{year},
+        handle_year=#{year}
+        AND
         handle_month=#{month}
+        AND
         WHERE rel_material_handle_id=#{materialHandleId}
     </update>
 
