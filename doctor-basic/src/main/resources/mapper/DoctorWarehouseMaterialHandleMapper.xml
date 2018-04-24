@@ -335,23 +335,23 @@
         ),0) as quantity,
         ifnull(sum(
         case type
-        when '1' then unit_price*quantity
-        when '2' then -unit_price*quantity
-        when '7' then unit_price*quantity
-        when '8' then -unit_price*quantity
-        when '9' then unit_price*quantity
-        when '10' then -unit_price*quantity
-        when '11' then unit_price*quantity
-        when '12' then -unit_price*quantity
-        when '13' then unit_price*quantity end
+        when '1' then amount
+        when '2' then -amount
+        when '7' then amount
+        when '8' then -amount
+        when '9' then amount
+        when '10' then -amount
+        when '11' then amount
+        when '12' then -amount
+        when '13' then amount end
         ),0) as amount
         FROM <include refid="tb"/>
         WHERE warehouse_id=#{warehouseId}
-        AND <![CDATA[ settlement_date < #{settlementDate}]]>
+        AND settlement_date = #{settlementDate}
         AND delete_flag=1
     </select>
 
-    <select id="findEachWarehouseBalanceByAccountingDate" parameterType="map" resultType="map">
+    <select id="findBalanceBySettlementDate" parameterType="map" resultType="map">
         SELECT
         ifnull(sum(
         case type
@@ -367,21 +367,21 @@
         ),0) as quantity,
         ifnull(sum(
         case type
-        when '1' then unit_price*quantity
-        when '2' then -unit_price*quantity
-        when '7' then unit_price*quantity
-        when '8' then -unit_price*quantity
-        when '9' then unit_price*quantity
-        when '10' then -unit_price*quantity
-        when '11' then unit_price*quantity
-        when '12' then -unit_price*quantity
-        when '13' then unit_price*quantity end
-        ),0) as amount,warehouse_id as warehouseId
+        when '1' then amount
+        when '2' then -amount
+        when '7' then amount
+        when '8' then -amount
+        when '9' then amount
+        when '10' then -amount
+        when '11' then amount
+        when '12' then -amount
+        when '13' then amount end
+        ),0) as amount
         FROM <include refid="tb"/>
-        WHERE org_id=#{orgId}
-        AND <![CDATA[ settlement_date < #{settlementDate}]]>
+        WHERE warehouse_id=#{warehouseId}
+        AND material_id=#{skuId}
+        AND settlement_date = #{settlementDate}
         AND delete_flag=1
-        group by warehouse_id
     </select>
 
     <select id="findPrevious" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">

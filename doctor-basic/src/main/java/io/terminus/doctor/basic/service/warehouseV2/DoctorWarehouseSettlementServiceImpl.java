@@ -141,17 +141,28 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                         else balanceQuantity = balance.getBalanceQuantity();
 
                         //本会计年月发生额和发生量
-                        BigDecimal totalAmount = new BigDecimal(0);
-                        BigDecimal totalQuantity = new BigDecimal(0);
-                        List<DoctorWarehouseMaterialHandle> mh = settlementMaterialHandles.values()
-                                .stream()
-                                .filter(m -> m.getWarehouseId().equals(wareHouse.getId()) && m.getMaterialId().equals(sku))
-                                .collect(Collectors.toList());
+//                        BigDecimal totalAmount = new BigDecimal(0);
+//                        totalAmount.setScale(2, BigDecimal.ROUND_HALF_UP);
+//                        BigDecimal totalQuantity = new BigDecimal(0);
+//                        totalQuantity.setScale(2, BigDecimal.ROUND_HALF_UP);
+//                        List<DoctorWarehouseMaterialHandle> mh = settlementMaterialHandles.values()
+//                                .stream()
+//                                .filter(m -> m.getWarehouseId().equals(wareHouse.getId()) && m.getMaterialId().equals(sku))
+//                                .collect(Collectors.toList());
 
-                        for (DoctorWarehouseMaterialHandle m : mh) {
-                            totalAmount = totalAmount.add(m.getAmount());
-                            totalQuantity = totalQuantity.add(m.getQuantity());
-                        }
+//                        for (DoctorWarehouseMaterialHandle m : mh) {
+//                            if (WarehouseMaterialHandleType.isBigIn(m.getType())) {
+//                                System.out.println("warehouse:" + m.getWarehouseId() + ",sku:" + m.getMaterialId() + ",now:" + totalAmount + "-" + totalQuantity + ",add:" + m.getAmount() + "-" + m.getQuantity());
+//                                totalAmount = totalAmount.add(m.getAmount());
+//                                totalQuantity = totalQuantity.add(m.getQuantity());
+//                            } else {
+//                                System.out.println("warehouse:" + m.getWarehouseId() + ",sku:" + m.getMaterialId() + ",now:" + totalAmount + "-" + totalQuantity + ",sub:" + m.getAmount() + "-" + m.getQuantity());
+//                                totalAmount = totalAmount.subtract(m.getAmount());
+//                                totalQuantity = totalQuantity.subtract(m.getQuantity());
+//                            }
+//                        }
+
+                        AmountAndQuantityDto thisSettlementAmountAndQuantity = doctorWarehouseMaterialHandleDao.findBalanceBySettlementDate(wareHouse.getId(), sku, settlementDate);
 
                         //创建或更新月度统计
                         DoctorWarehouseStockMonthly stockMonthly = doctorWarehouseStockMonthlyDao.findBalanceBySettlementDate(wareHouse.getId(), sku, settlementDate);
@@ -162,8 +173,8 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                         stockMonthly.setWarehouseId(wareHouse.getId());
                         stockMonthly.setMaterialId(sku);
                         stockMonthly.setSettlementDate(settlementDate);
-                        stockMonthly.setBalanceAmount(balanceAmount.add(totalAmount));
-                        stockMonthly.setBalanceQuantity(balanceQuantity.add(totalQuantity));
+                        stockMonthly.setBalanceAmount(balanceAmount.add(thisSettlementAmountAndQuantity.getAmount()));
+                        stockMonthly.setBalanceQuantity(balanceQuantity.add(thisSettlementAmountAndQuantity.getQuantity()));
                         if (null == stockMonthly.getId())
                             doctorWarehouseStockMonthlyDao.create(stockMonthly);
                         else doctorWarehouseStockMonthlyDao.update(stockMonthly);

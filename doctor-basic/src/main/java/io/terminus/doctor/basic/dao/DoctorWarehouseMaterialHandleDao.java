@@ -143,12 +143,13 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     }
 
     /**
-     * 获取本会计年月之前的库存量和金额
+     * 通过明细单据统计某个会计年月的发生额和发生量
      *
-     * @param warehouseId
-     * @param settlementDate
+     * @param warehouseId    仓库id
+     * @param settlementDate 会计年月
      * @return
      */
+    @Deprecated
     public AmountAndQuantityDto findBalanceByAccountingDate(Long warehouseId, Date settlementDate) {
         Map<String, Object> criteria = Maps.newHashMap();
         criteria.put("warehouseId", warehouseId);
@@ -158,29 +159,22 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return new AmountAndQuantityDto((result.get("amount")), result.get("quantity"));
     }
 
-
     /**
-     * 获取公司下各个仓库在该会计年月之前的库存余量余额
+     * 通过明细单据统计某个会计年月的发生额和发生量
      *
-     * @param orgId
-     * @param settlementDate
-     * @return
+     * @param warehouseId    仓库id
+     * @param skuId          物料id
+     * @param settlementDate 会计年月
+     * @return amount and quantity
      */
-    public Map<Long, AmountAndQuantityDto> findEachWarehouseBalanceBySettlementDate(Long orgId, Date settlementDate) {
-
+    public AmountAndQuantityDto findBalanceBySettlementDate(Long warehouseId, Long skuId, Date settlementDate) {
         Map<String, Object> criteria = Maps.newHashMap();
-        criteria.put("orgId", orgId);
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("skuId", skuId);
         criteria.put("settlementDate", settlementDate);
 
-        List<Map<String, Object>> results = this.sqlSession.selectList(this.sqlId("findEachWarehouseBalanceByAccountingDate"), criteria);
-
-        Map<Long/*warehouseId*/, AmountAndQuantityDto> balances = new HashMap<>();
-
-        results.forEach(m -> {
-            balances.put((Long) m.get("warehouseId"), new AmountAndQuantityDto(((BigDecimal) m.get("amount")), (BigDecimal) m.get("quantity")));
-        });
-
-        return balances;
+        Map<String, BigDecimal> result = this.sqlSession.selectOne(this.sqlId("findBalanceBySettlementDate"), criteria);
+        return new AmountAndQuantityDto((result.get("amount")), result.get("quantity"));
     }
 
     /**
@@ -265,31 +259,30 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
             String settlementDate, Integer pigBarnType,
             Long pigBarnId, Long pigGroupId, Integer handlerType,
             Integer type, Long warehouseId, String materialName
-    )
-    {
-        Map<String,Object> params = new HashMap<>();
-        params.put("farmId",farmId);
-        params.put("settlementDate",settlementDate);
-        params.put("pigBarnType",pigBarnType);
-        params.put("pigBarnId",pigBarnId);
-        params.put("pigGroupId",pigGroupId);
-        params.put("handlerType",handlerType);
-        params.put("type",type);
-        params.put("warehouseId",warehouseId);
-        params.put("materialName",materialName);
-        return this.sqlSession.selectList("wlbdReport",params);
+    ) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("farmId", farmId);
+        params.put("settlementDate", settlementDate);
+        params.put("pigBarnType", pigBarnType);
+        params.put("pigBarnId", pigBarnId);
+        params.put("pigGroupId", pigGroupId);
+        params.put("handlerType", handlerType);
+        params.put("type", type);
+        params.put("warehouseId", warehouseId);
+        params.put("materialName", materialName);
+        return this.sqlSession.selectList("wlbdReport", params);
     }
 
     public List<Map<String, Object>> getPigBarnNameOption(Long farmId) {
-        return this.sqlSession.selectList("getPigBarnNameOption",farmId);
+        return this.sqlSession.selectList("getPigBarnNameOption", farmId);
     }
 
     public List<Map<String, Object>> getPigGroupNameOption(Long farmId) {
-        return this.sqlSession.selectList("getPigGroupNameOption",farmId);
+        return this.sqlSession.selectList("getPigGroupNameOption", farmId);
     }
 
     public List<Map<String, Object>> getWareHouseDataOption(Long farmId) {
-        return this.sqlSession.selectList("getWareHouseDataOption",farmId);
+        return this.sqlSession.selectList("getWareHouseDataOption", farmId);
     }
 
 }
