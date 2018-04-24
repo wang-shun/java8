@@ -164,10 +164,6 @@
         SET handle_date=#{handleDate},
         settlement_date=#{settlementDate}
         WHERE
-        handle_year=#{year}
-        AND
-        handle_month=#{month}
-        AND
         rel_stock_handle_id=#{stockHandleId}
     </update>
 </mapper>

@@ -388,12 +388,9 @@
         UPDATE
         <include refid="tb"/>
         SET handle_date=#{handleDate},
-        settlement_date=#{settlementDate}
-        WHERE
-        handle_year=#{year}
-        AND
+        settlement_date=#{settlementDate},
+        handle_year=#{year},
         handle_month=#{month}
-        AND
         WHERE rel_material_handle_id=#{materialHandleId}
     </update>
 
