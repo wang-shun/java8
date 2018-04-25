@@ -365,14 +365,14 @@
             JOIN doctor_barns e ON e.id = a.pig_barn_id
         WHERE
             a.apply_type = 1
-            <if test="farmId != null"> AND a.farm_id = #{farmId}</if>
-            <if test="pigType != null"> AND a.pig_type = #{pigType}</if>
-            <if test="pigName != null"> AND e.name = #{pigName}</if>
-            <if test="pigGroupName != null"> AND a.pig_group_name = #{pigGroupName}</if>
-            <if test="skuType != null">  AND c.type= #{skuType}</if>
-            <if test="skuName != null"> AND c.name like concat('%',#{skuName},'%')</if>
-            <if test="openAt != null"> AND d.open_at = #{openAt}</if>
-            <if test="closeAt != null">  AND d.close_at = #{closeAt}</if>
+            <if test="farmId != null || farmId != ''"> AND a.farm_id = #{farmId}</if>
+            <if test="pigType != null || pigType != ''"> AND a.pig_type = #{pigType}</if>
+            <if test="pigName != null || pigName != ''"> AND e.name = #{pigName}</if>
+            <if test="pigGroupName != null || pigGroupName != ''"> AND a.pig_group_name = #{pigGroupName}</if>
+            <if test="skuType != null || skuType != ''">  AND c.type= #{skuType}</if>
+            <if test="skuName != null || skuName != ''"> AND c.name like concat('%',#{skuName},'%')</if>
+            <if test="openAt != null || openAt != ''"> AND d.open_at = #{openAt}</if>
+            <if test="closeAt != null || closeAt != ''">  AND d.close_at = #{closeAt}</if>
         GROUP BY
             a.material_id,
             a.pig_group_id,
@@ -555,7 +555,7 @@
         JOIN doctor_barns e ON e.id = a.pig_barn_id
         WHERE
         a.apply_type = 1
-        <if test="pigGroupId != null"> AND a.pig_group_id = #{pigGroupId}</if>
-        <if test="materiaId != null"> AND a.material_id = #{materiaId}</if>
+        <if test="pigGroupId != null || pigGroupId != ''"> AND a.pig_group_id = #{pigGroupId}</if>
+        <if test="materiaId != null || materiaId != ''"> AND a.material_id = #{materiaId}</if>
     </select>
 </mapper>
