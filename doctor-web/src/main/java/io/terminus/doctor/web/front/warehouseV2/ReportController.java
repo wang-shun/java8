@@ -1088,7 +1088,7 @@ public class ReportController {
 
                     //最后一行数据
                     Map<String,Object> thisMonthHZData = exportVos.get(exportVos.size() - 1);
-                    tName = String.valueOf(lastMonthData.get("material_name"));
+                    tName = String.valueOf(thisMonthHZData.get("material_name"));
                     if("本月结存".equals(tName)) {
 
                         dataRow = sheet.createRow(startRowIndex);
@@ -1108,55 +1108,55 @@ public class ReportController {
 
                             if(i == 6){
                                 dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(String.valueOf(lastMonthData.get("rksl")));
+                                dataCell.setCellValue(String.valueOf(thisMonthHZData.get("rksl")));
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 7){
                                 dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(String.valueOf(lastMonthData.get("rkdj")));
+                                dataCell.setCellValue(String.valueOf(thisMonthHZData.get("rkdj")));
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 8){
                                 dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(String.valueOf(lastMonthData.get("rkje")));
+                                dataCell.setCellValue(String.valueOf(thisMonthHZData.get("rkje")));
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 9){
                                 dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(String.valueOf(lastMonthData.get("cksl")));
+                                dataCell.setCellValue(String.valueOf(thisMonthHZData.get("cksl")));
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 10){
                                 dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(String.valueOf(lastMonthData.get("ckdj")));
+                                dataCell.setCellValue(String.valueOf(thisMonthHZData.get("ckdj")));
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 11){
                                 dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(String.valueOf(lastMonthData.get("ckje")));
+                                dataCell.setCellValue(String.valueOf(thisMonthHZData.get("ckje")));
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 12){
                                 dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(String.valueOf(lastMonthData.get("jcsl")));
+                                dataCell.setCellValue(String.valueOf(thisMonthHZData.get("jcsl")));
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 13){
                                 dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(String.valueOf(lastMonthData.get("jcdj")));
+                                dataCell.setCellValue(String.valueOf(thisMonthHZData.get("jcdj")));
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 14){
                                 dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(String.valueOf(lastMonthData.get("jcje")));
+                                dataCell.setCellValue(String.valueOf(thisMonthHZData.get("jcje")));
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
