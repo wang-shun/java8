@@ -51,8 +51,8 @@ public class WarehouseMateriaApplyController {
                                                                                @RequestParam(required = false) String pigGroupName,
                                                                                @RequestParam(required = false) Integer skuType,
                                                                                @RequestParam(required = false) String skuName,
-                                                                               @RequestParam(required = false) Date openAt,
-                                                                               @RequestParam(required = false) Date closeAt){
+                                                                               @RequestParam(required = false) String openAt,
+                                                                               @RequestParam(required = false) String closeAt){
         Map<String,Object> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApply(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAt,closeAt));
         return a;
     }
@@ -164,8 +164,8 @@ public class WarehouseMateriaApplyController {
                                             @RequestParam(required = false) String pigGroupName,
                                             @RequestParam(required = false) Integer skuType,
                                             @RequestParam(required = false) String skuName,
-                                            @RequestParam(required = false) Date openAt,
-                                            @RequestParam(required = false) Date closeAt,
+                                            @RequestParam(required = false) String openAt,
+                                            @RequestParam(required = false) String closeAt,
                                             HttpServletRequest  request,  HttpServletResponse  response) {
         //取到值
         List<DoctorWarehouseMaterialApplyPigGroup> a =doctorWarehouseMaterialApplyReadService.selectPigGroupApplys(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAt,closeAt);

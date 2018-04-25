@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class ResponseUtil<T> extends Response {
 
-    private List<Map<String,Object>> farms;
+    private List<Map> farms;
 
     /*public static <T> Response<T> ok(T data) {
         Response<T> resp = new Response();
@@ -22,12 +22,18 @@ public class ResponseUtil<T> extends Response {
         return resp;
     }
 
+    public static <T> ResponseUtil isFail(String error){
+        ResponseUtil<T> resp = new ResponseUtil();
+        resp.setError(error);
+        return resp;
+    }
 
-    public List<Map<String, Object>> getFarms() {
+
+    public List<Map> getFarms() {
         return farms;
     }
 
-    public void setFarms(List<Map<String, Object>> farms) {
+    public void setFarms(List<Map> farms) {
         this.farms = farms;
     }
 }

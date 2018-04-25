@@ -1,5 +1,6 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
+import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialApplyDao;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockOutDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialApplyType;
@@ -10,6 +11,7 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.common.utils.DateUtil;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,8 @@ import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by sunbo@terminus.io on 2018/4/19.
@@ -63,6 +67,25 @@ public class WarehouseOutStockService extends AbstractWarehouseStockService<Ware
     }
 
     @Override
+    public void changed(Map<WarehouseStockOutDto.WarehouseStockOutDetail, DoctorWarehouseMaterialHandle> changed, DoctorWarehouseStockHandle stockHandle, WarehouseStockOutDto stockDto, DoctorWareHouse wareHouse) {
+
+        if (!DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime())) {
+            Date newDate = warehouseOutManager.buildNewHandleDate(stockDto.getHandleDate()).getTime();
+
+            //最早一笔退料入库明细单据的事件日期
+            Date firstRefundDate = doctorWarehouseMaterialHandleDao.findFirstRefundHandleDate(changed.values().stream().map(DoctorWarehouseMaterialHandle::getId).collect(Collectors.toList()));
+
+            if (firstRefundDate != null && newDate.after(firstRefundDate)) {
+                throw new ServiceException("out.handle.date.after.refund");
+            }
+        }
+
+        changed.forEach((detail, materialHandle) -> {
+            this.changed(materialHandle, detail, stockHandle, stockDto, wareHouse);
+        });
+    }
+
+    @Override
     protected void changed(DoctorWarehouseMaterialHandle materialHandle,
                            WarehouseStockOutDto.WarehouseStockOutDetail detail,
                            DoctorWarehouseStockHandle stockHandle,
@@ -70,13 +93,12 @@ public class WarehouseOutStockService extends AbstractWarehouseStockService<Ware
                            DoctorWareHouse wareHouse) {
 
         materialHandle.setRemark(detail.getRemark());
+        materialHandle.setSettlementDate(stockDto.getSettlementDate());
 
-        DoctorWarehouseMaterialApply apply = doctorWarehouseMaterialApplyDao.findMaterialHandle(materialHandle.getId());
-        boolean applyChanged = false;
         boolean changeHandleDate = !DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
+        boolean changeQuantity = detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0;
 
-        if (detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0
-                || changeHandleDate) {
+        if (changeQuantity || changeHandleDate) {
 
             //更改了数量，或更改了操作日期
 
@@ -90,67 +112,85 @@ public class WarehouseOutStockService extends AbstractWarehouseStockService<Ware
                 materialHandle.setQuantity(detail.getQuantity());
             }
             Date recalculateDate = materialHandle.getHandleDate();
-            int days = DateUtil.getDeltaDays(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
-            if (days != 0) {
+            if (changeHandleDate) {
                 warehouseOutManager.buildNewHandleDateForUpdate(materialHandle, stockDto.getHandleDate());
-                doctorWarehouseMaterialHandleDao.update(materialHandle);
-                if (days < 0) {//事件日期改小了，重算日期采用新的日期
+                if (stockDto.getHandleDate().getTime().before(stockHandle.getHandleDate())) {//事件日期改早了，重算日期采用新的日期
                     recalculateDate = materialHandle.getHandleDate();
                 }
-                apply.setApplyDate(materialHandle.getHandleDate());
-                apply.setApplyYear(stockDto.getHandleDate().get(Calendar.YEAR));
-                apply.setApplyMonth(stockDto.getHandleDate().get(Calendar.MONTH) + 1);
-                applyChanged = true;
             }
+            doctorWarehouseMaterialHandleDao.update(materialHandle);
             warehouseOutManager.recalculate(materialHandle, recalculateDate);
 
-        } else if (!detail.getApplyPigBarnId().equals(apply.getPigBarnId())
-                || (detail.getApplyPigGroupId() != null && !detail.getApplyPigGroupId().equals(apply.getPigGroupId()))) {
-            apply.setPigBarnId(detail.getApplyPigBarnId());
-            apply.setPigGroupId(detail.getApplyPigBarnId());
-            apply.setApplyStaffId(detail.getApplyStaffId());
-            apply.setApplyStaffName(detail.getApplyStaffName());
-            apply.setPigType(detail.getPigType());
-
-            if (apply.getApplyType().equals(WarehouseMaterialApplyType.BARN.getValue())
-                    && (detail.getApplyPigGroupId().equals(-1) || detail.getApplyPigGroupId() != null)) {
-
-                DoctorWarehouseMaterialApply groupApply = new DoctorWarehouseMaterialApply();
-
-                if (detail.getApplyPigGroupId().equals(-1)) {
-                    groupApply.setApplyType(WarehouseMaterialApplyType.SOW.getValue());
-                    groupApply.setPigGroupId(-1L);
-                    groupApply.setPigGroupName("母猪");
-                }
-                if (detail.getApplyPigGroupId() != null) {
-                    groupApply.setApplyType(WarehouseMaterialApplyType.GROUP.getValue());
-                }
-                //新增猪群领用
-                doctorWarehouseMaterialApplyDao.create(groupApply);
-            } else if ((apply.getApplyType().equals(WarehouseMaterialApplyType.GROUP.getValue()) || apply.getApplyType().equals(WarehouseMaterialApplyType.SOW.getValue()))
-                    && detail.getApplyPigGroupId() == null) {
-                //删除原母猪或猪群领用
-                doctorWarehouseMaterialApplyDao.deleteByMaterialHandle(materialHandle.getId());
-            } else if ((apply.getApplyType().equals(WarehouseMaterialApplyType.SOW.getValue()) && detail.getApplyPigGroupId() != -1)
-                    || (apply.getApplyType().equals(WarehouseMaterialApplyType.GROUP.getValue()) && detail.getApplyPigGroupId() == -1)) {
-                //从猪群改成母猪，从母猪改成猪群
-                if (detail.getApplyPigGroupId().equals(-1)) {
-                    apply.setApplyType(WarehouseMaterialApplyType.SOW.getValue());
-                    apply.setPigGroupName("母猪");
-                    apply.setPigGroupId(-1L);
-                } else {
-                    apply.setApplyType(WarehouseMaterialApplyType.GROUP.getValue());
-                    apply.setPigGroupName(detail.getApplyPigGroupName());
-                    apply.setPigGroupId(detail.getApplyPigGroupId());
-                }
-            }
-            applyChanged = true;
         } else {
             //只更新了备注
             doctorWarehouseMaterialHandleDao.update(materialHandle);
         }
-        if (applyChanged)
-            doctorWarehouseMaterialApplyDao.update(apply);
-    }
 
+        DoctorWarehouseMaterialApply apply = doctorWarehouseMaterialApplyDao.findMaterialHandle(materialHandle.getId());
+        if (null == apply)
+            warehouseOutManager.createApply(materialHandle, detail);
+        else if (!detail.getApplyPigBarnId().equals(apply.getPigBarnId())
+                || (detail.getApplyPigGroupId() != null && !detail.getApplyPigGroupId().equals(apply.getPigGroupId()))
+                || (detail.getApplyPigGroupId() == null && apply.getPigGroupId() != null)
+                || changeHandleDate
+                || changeQuantity) {
+
+            if (changeHandleDate) {
+                apply.setSettlementDate(stockDto.getSettlementDate());
+                apply.setSettlementDate(stockDto.getSettlementDate());
+                apply.setApplyDate(stockDto.getHandleDate().getTime());
+                apply.setApplyYear(stockDto.getHandleDate().get(Calendar.YEAR));
+                apply.setApplyMonth(stockDto.getHandleDate().get(Calendar.MONTH) + 1);
+            }
+
+            if (changeQuantity) {
+                apply.setQuantity(detail.getQuantity());
+            }
+
+            apply.setPigBarnId(detail.getApplyPigBarnId());
+            apply.setApplyStaffId(detail.getApplyStaffId());
+            apply.setApplyStaffName(detail.getApplyStaffName());
+            apply.setPigType(detail.getPigType());
+
+            if (apply.getApplyType().equals(WarehouseMaterialApplyType.SOW.getValue())
+                    || apply.getApplyType().equals(WarehouseMaterialApplyType.GROUP.getValue())) {
+
+                if (detail.getApplyPigGroupId() == null) {
+                    //从母猪或猪群领用调整为猪舍领用，删除猪群或母猪领用
+                    doctorWarehouseMaterialApplyDao.deleteGroupApply(materialHandle.getId());
+                } else if (apply.getApplyType().equals(WarehouseMaterialApplyType.SOW.getValue()) && !detail.getApplyPigGroupId().equals(-1L)) {
+                    //从母猪领用调整为猪群领用
+                    apply.setApplyType(WarehouseMaterialApplyType.GROUP.getValue());
+                    apply.setPigGroupName(detail.getApplyPigGroupName());
+                    apply.setPigGroupId(detail.getApplyPigGroupId());
+                } else if (apply.getApplyType().equals(WarehouseMaterialApplyType.GROUP.getValue()) && detail.getApplyPigGroupId().equals(-1L)) {
+                    //从猪群领用调整为母猪领用
+                    apply.setApplyType(WarehouseMaterialApplyType.SOW.getValue());
+                    apply.setPigGroupName("母猪");
+                    apply.setPigGroupId(-1L);
+                }
+                //还需要调整猪舍领用
+                doctorWarehouseMaterialApplyDao.updateBarnApply(materialHandle.getId(), apply);
+            } else {
+                if (detail.getApplyPigGroupId() != null) {
+                    //原猪舍改为猪群或母猪领用，需补一条
+                    DoctorWarehouseMaterialApply groupApply = new DoctorWarehouseMaterialApply();
+                    BeanUtils.copyProperties(apply, groupApply);
+                    if (detail.getApplyPigGroupId().equals(-1L)) {
+                        groupApply.setApplyType(WarehouseMaterialApplyType.SOW.getValue());
+                        groupApply.setPigGroupId(-1L);
+                        groupApply.setPigGroupName("母猪");
+                    } else {
+                        groupApply.setApplyType(WarehouseMaterialApplyType.GROUP.getValue());
+                        groupApply.setPigGroupId(detail.getApplyPigGroupId());
+                        groupApply.setPigGroupName(detail.getApplyPigGroupName());
+                    }
+                    //新增猪群领用
+                    doctorWarehouseMaterialApplyDao.create(groupApply);
+                }
+            }
+
+            doctorWarehouseMaterialApplyDao.update(apply);
+        }
+    }
 }

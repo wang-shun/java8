@@ -10,6 +10,7 @@ import io.terminus.doctor.basic.model.DoctorWarehouseOrgSettlement;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockMonthly;
+import io.terminus.doctor.common.utils.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 import org.joda.time.DateTime;
@@ -91,7 +92,6 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
         int month = (int) results.get(0).get("fiscal_period");
 
         return new DateTime(year, month, 1, 0, 0).toDate();
-
     }
 
     @Override
@@ -178,98 +178,6 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             lock.unlock();
         }
     }
-
-
-    /**
-     * 结算某一个仓库下某个会计区间的单据明细
-     */
-    @Deprecated
-    private void settlement(Long warehouseId, DateTime settlementDate, List<Long> settledWarehouses) {
-
-        if (settledWarehouses.contains(warehouseId))
-            return;
-
-        log.info("start to settlement warehouse {} at {}-{}", warehouseId, settlementDate.getYear(), settlementDate.getMonthOfYear());
-
-        //获取本仓库该会计年月之前的总库存量和总金额
-        AmountAndQuantityDto amountAndQuantityDto = doctorWarehouseMaterialHandleDao.findBalanceByAccountingDate(warehouseId, settlementDate.toDate());
-
-        BigDecimal historyStockQuantity = amountAndQuantityDto.getQuantity();
-        BigDecimal historyStockAmount = amountAndQuantityDto.getAmount();
-
-        log.debug("before {}-{} stock quantity is {} and amount is {}", settlementDate.getYear(), settlementDate.getMonthOfYear(), historyStockQuantity, historyStockAmount);
-
-        //获取本仓库该会计年月，需要结算的单据明细
-        List<DoctorWarehouseMaterialHandle> materialHandles = doctorWarehouseMaterialHandleDao.findByAccountingDate(warehouseId, settlementDate.getYear(), settlementDate.getMonthOfYear());
-
-        if (materialHandles.isEmpty())
-            log.warn("no material handle to be settlement at {}", settlementDate);
-
-        for (DoctorWarehouseMaterialHandle m : materialHandles) {
-
-            log.debug("settlement for material handle {},material {},warehouse {},quantity {}", m.getId(), m.getMaterialName(), m.getWarehouseName(), m.getQuantity());
-
-            if (WarehouseMaterialHandleType.isBigIn(m.getType())) {
-                //入库类型：采购入库，退料入库，盘盈入库，调拨入库，配方生产入库
-
-                //盘盈单的单价采用上一笔采购入库单的单价
-                if (m.getType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue())) {
-                    //获取上一笔采购入库单
-                    DoctorWarehouseMaterialHandle previousIn = doctorWarehouseMaterialHandleDao.findPrevious(m, WarehouseMaterialHandleType.IN);
-                    if (null != previousIn) {
-                        log.debug("use previous material handle[purchase in] unit price :{}", previousIn.getUnitPrice());
-                        m.setUnitPrice(previousIn.getUnitPrice());
-                    }
-                } else if (m.getType().equals(WarehouseMaterialHandleType.FORMULA_IN.getValue())) {
-                    //配方生产入库，根据出库的总价/入库的数量
-                    DoctorWarehouseStockHandle formulaInStockHandle = doctorWarehouseStockHandleDao.findById(m.getStockHandleId());
-                    if (null == formulaInStockHandle)
-                        throw new ServiceException("stock.handle.not.found");
-                    DoctorWarehouseStockHandle formulaOutStockHandle = doctorWarehouseStockHandleDao.findById(formulaInStockHandle.getRelStockHandleId());
-                    if (null == formulaOutStockHandle)
-                        throw new ServiceException("stock.handle.not.found");
-                    List<DoctorWarehouseMaterialHandle> formulaOutMaterialHandles = doctorWarehouseMaterialHandleDao.findByStockHandle(formulaOutStockHandle.getId());
-
-                    BigDecimal totalFormulaOutAmount = formulaOutMaterialHandles
-                            .stream()
-                            .map(mh -> new BigDecimal(mh.getUnitPrice().toString()).multiply(mh.getQuantity()))
-                            .reduce((a, b) -> a.add(b))
-                            .orElse(new BigDecimal(0));
-
-                    m.setUnitPrice(totalFormulaOutAmount.divide(m.getQuantity(), 4, BigDecimal.ROUND_HALF_UP));
-
-                } else if (m.getType().equals(WarehouseMaterialHandleType.TRANSFER_IN.getValue())
-
-                        || m.getType().equals(WarehouseMaterialHandleType.RETURN.getValue())) {
-
-                    DoctorWarehouseMaterialHandle otherIn = doctorWarehouseMaterialHandleDao.findById(m.getRelMaterialHandleId());
-                    if (null == otherIn)
-                        throw new ServiceException("material.handle.not.found");
-                    if (null != otherIn.getUnitPrice())
-                        m.setUnitPrice(otherIn.getUnitPrice());
-                    else {
-                        settlement(otherIn.getWarehouseId(), settlementDate, settledWarehouses);
-                        m.setUnitPrice(doctorWarehouseMaterialHandleDao.findById(m.getRelMaterialHandleId()).getUnitPrice());
-                    }
-                }
-
-                historyStockQuantity = historyStockQuantity.add(m.getQuantity());
-                historyStockAmount = historyStockAmount.add(new BigDecimal(m.getUnitPrice().toString()).multiply(m.getQuantity()));
-            } else {
-                //出库类型：领料出库，盘亏出库，调拨出库，配方生产出库
-
-                m.setUnitPrice(new BigDecimal(historyStockAmount.toString()).divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
-
-                historyStockQuantity = historyStockQuantity.subtract(m.getQuantity());
-                historyStockAmount = historyStockAmount.add(new BigDecimal(m.getUnitPrice().toString()).multiply(m.getQuantity()));
-            }
-
-            doctorWarehouseMaterialHandleDao.update(m);
-        }
-
-        settledWarehouses.add(warehouseId);
-    }
-
 
     /**
      * 计算单价

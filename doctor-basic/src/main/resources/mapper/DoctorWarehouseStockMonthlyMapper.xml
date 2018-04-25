@@ -186,7 +186,7 @@
 
     <select id="listByHouseIdTime" parameterType="map" resultType="map">
         select a.farm_id as farmId,a.warehouse_id as warehouseId,a.warehouse_name as warehouseName,a.type as type,max(a.handle_date) as handleDate,
-        a.handle_year as handleYear,a.handle_month as handleMonth,a.org_id as orgId,
+        a.handle_year as handleYear,a.handle_month as handleMonth,a.org_id as orgId,a.settlement_date as settlementDate,
         <include refid="inAmount"/>
         <include refid="outAmount"/>
         <include refid="balanceAmount"/>
@@ -207,7 +207,7 @@
 
     <select id="monthWarehouseDetail" parameterType="map" resultType="map">
         select a.material_name as materialName,b.code as code,a.vendor_name as vendorName,
-        b.specification as specification,
+        b.specification as specification,a.warehouse_type as warehouseType,
         <include refid="detail"></include>
         a.unit as unit
         from doctor_warehouse_material_handle a

@@ -11,6 +11,7 @@ import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -41,6 +42,9 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
 
     @Autowired
     protected DoctorWarehouseStockHandleDao doctorWarehouseStockHandleDao;
+
+    @Autowired
+    private DoctorWarehouseVendorDao doctorWarehouseVendorDao;
 
     @Autowired
     protected DoctorBasicDao doctorBasicDao;
@@ -86,10 +90,11 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
 
             doctorWarehouseMaterialHandle.setBeforeStockQuantity(historyQuantity);
 
-            if (WarehouseMaterialHandleType.isBigIn(doctorWarehouseMaterialHandle.getType()))
+            if (WarehouseMaterialHandleType.isBigIn(doctorWarehouseMaterialHandle.getType())) {
                 historyQuantity = historyQuantity.add(doctorWarehouseMaterialHandle.getQuantity());
-            else
+            } else {
                 historyQuantity = historyQuantity.subtract(doctorWarehouseMaterialHandle.getQuantity());
+            }
         }
 
         needToRecalculate.forEach(
@@ -138,22 +143,6 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
         materialHandle.setHandleDate(newHandleDate.getTime());
         materialHandle.setHandleYear(newHandleDate.get(Calendar.YEAR));
         materialHandle.setHandleMonth(newHandleDate.get(Calendar.MONTH) + 1);
-    }
-
-    public void buildNewHandleDateForUpdate(DoctorWarehouseStockHandle stockHandle, Calendar newHandleDate) {
-
-        if (DateUtil.inSameDate(newHandleDate.getTime(), new Date())) {
-            DateTime old = new DateTime(newHandleDate.getTime());
-            DateTime newDate = new DateTime().withDate(old.getYear(), old.getMonthOfYear(), old.getDayOfMonth());
-            stockHandle.setHandleDate(newDate.toDate());
-            return;
-        }
-
-        newHandleDate.set(Calendar.HOUR_OF_DAY, 23);
-        newHandleDate.set(Calendar.MINUTE, 59);
-        newHandleDate.set(Calendar.SECOND, 59);
-        newHandleDate.set(Calendar.MILLISECOND, 0);
-        stockHandle.setHandleDate(newHandleDate.getTime());
     }
 
     /**
@@ -310,8 +299,16 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
         materialHandle.setWarehouseName(wareHouse.getWareHouseName());
         materialHandle.setMaterialId(detail.getMaterialId());
         materialHandle.setMaterialName(sku.getName());
-//        materialHandle.setType(WarehouseMaterialHandleType.OUT.getValue());
+        materialHandle.setType(stockHandle.getHandleSubType());
         materialHandle.setUnit(null == unit ? "" : unit.getName());
+
+        if (WarehouseMaterialHandleType.IN.getValue() == stockHandle.getHandleSubType().longValue()) {
+            DoctorWarehouseVendor vendor = doctorWarehouseVendorDao.findById(sku.getVendorId());
+            if (null == vendor)
+                throw new InvalidException("doctor.vendor.not.found", sku.getVendorId());
+            materialHandle.setVendorName(vendor.getName());
+        }
+
         materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
 //        materialHandle.setBeforeStockQuantity(getHistoryQuantity(stockHandle.getHandleDate(), wareHouse.getId()));
         materialHandle.setQuantity(detail.getQuantity());

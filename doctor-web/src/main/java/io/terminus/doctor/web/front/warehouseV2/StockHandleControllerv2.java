@@ -10,6 +10,7 @@ import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
 import io.terminus.doctor.basic.service.warehouseV2.*;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.ResponseUtil;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.web.core.export.Exporter;
 import lombok.extern.slf4j.Slf4j;
@@ -64,10 +65,10 @@ public class StockHandleControllerv2 {
 
     //公司单据数据展示
     @RequestMapping(value = "/companyReport", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response<List<List<Map>>> companyReport(@RequestParam(required = false,value = "farmId") Long farmId,
-                                                   @RequestParam(required = false,value = "orgId") Long orgId,
-                                                   @RequestParam(required = false,value = "settlementDateStart") Date settlementDateStart,
-                                                   @RequestParam(required = false,value = "settlementDateEnd") Date settlementDateEnd){
+    public ResponseUtil<List<List<Map>>> companyReport(@RequestParam(required = false,value = "farmId") Long farmId,
+                                                       @RequestParam(required = false,value = "orgId") Long orgId,
+                                                       @RequestParam(required = false,value = "settlementDateStart") Date settlementDateStart,
+                                                       @RequestParam(required = false,value = "settlementDateEnd") Date settlementDateEnd){
         if (null != settlementDateStart && null != settlementDateEnd && settlementDateStart.after(settlementDateEnd))
             throw new JsonResponseException("start.date.after.end.date");
 
@@ -81,7 +82,7 @@ public class StockHandleControllerv2 {
 
     //仓库单据展示
     @RequestMapping(value = "/warehouseReport", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Response<List<List<Map>>> warehouseReport(@RequestParam(required = false,value = "farmId") Long farmId,
+    public ResponseUtil<List<List<Map>>> warehouseReport(@RequestParam(required = false,value = "farmId") Long farmId,
                                                    @RequestParam(required = false,value = "settlementDateStart") Date settlementDateStart,
                                                    @RequestParam(required = false,value = "settlementDateEnd") Date settlementDateEnd){
 
@@ -126,8 +127,8 @@ public class StockHandleControllerv2 {
                     params.put("farmId", farmId);
                     params.put("settlementDateStart", settlementDateStart);
                     params.put("settlementDateEnd", settlementDateEnd);
-                    Response<List<List<Map>>> listResponse = doctorWarehouseMaterialHandleReadService.companyReport(params);
-                    List<List<Map>> result = listResponse.getResult();
+                    ResponseUtil<List<List<Map>>> listResponse = doctorWarehouseMaterialHandleReadService.companyReport(params);
+                    List<List<Map>> result = (List<List<Map>>)listResponse.getResult();
                     //开始导出
                     exporter.setHttpServletResponse(request, response, "公司报表");
 
@@ -136,7 +137,8 @@ public class StockHandleControllerv2 {
                         Sheet sheet = workbook.createSheet();
                         //样式
                         sheet.addMergedRegion(new CellRangeAddress(0,0,0, 1));
-                        sheet = this.setWorkStyle(sheet,result.get(0));
+
+                        sheet = this.setWorkStyle(sheet,listResponse.getFarms());
                         //行
                         Row head = sheet.createRow(0);
 
@@ -160,7 +162,7 @@ public class StockHandleControllerv2 {
 
                             sheet.addMergedRegion(new CellRangeAddress(firstRow, firstRow, 1, 1));
 
-                            sheet = this.setWorkStyle(sheet,lists);
+                            sheet = this.setWorkStyle(sheet,listResponse.getFarms());
 
                             Row row = sheet.createRow(firstRow);
                             Cell cell = row.createCell(0);
@@ -170,7 +172,7 @@ public class StockHandleControllerv2 {
 
                             for (int y=0;y<3;y++) {
                                 if(y!=0){
-                                    sheet = this.setWorkStyle(sheet,lists);
+                                    sheet = this.setWorkStyle(sheet,listResponse.getFarms());
                                     row = sheet.createRow(firstRow+y);
                                 }
                                 cell = row.createCell(1);
@@ -214,8 +216,8 @@ public class StockHandleControllerv2 {
                     params.put("farmId", farmId);
                     params.put("settlementDateStart", settlementDateStart);
                     params.put("settlementDateEnd", settlementDateEnd);
-                    Response<List<List<Map>>> listResponse1 = doctorWarehouseMaterialHandleReadService.warehouseReport(params);
-                    List<List<Map>> result1 = listResponse1.getResult();
+                    ResponseUtil<List<List<Map>>> listResponse1 = doctorWarehouseMaterialHandleReadService.warehouseReport(params);
+                    List<List<Map>> result1 = (List<List<Map>>)listResponse1.getResult();
                     //开始导出
                     exporter.setHttpServletResponse(request, response, "仓库报表");
 
@@ -224,7 +226,7 @@ public class StockHandleControllerv2 {
                         Sheet sheet = workbook.createSheet();
                         //样式
                         sheet.addMergedRegion(new CellRangeAddress(0,0,0, 1));
-                        sheet = this.setWorkStyle(sheet,result1.get(0));
+                        sheet = this.setWorkStyle(sheet,listResponse1.getFarms());
                         //行
                         Row head = sheet.createRow(0);
 
@@ -248,7 +250,7 @@ public class StockHandleControllerv2 {
 
                             sheet.addMergedRegion(new CellRangeAddress(firstRow, firstRow, 1, 1));
 
-                            sheet = this.setWorkStyle(sheet,lists);
+                            sheet = this.setWorkStyle(sheet,listResponse1.getFarms());
 
                             Row row = sheet.createRow(firstRow);
                             Cell cell = row.createCell(0);
@@ -258,7 +260,7 @@ public class StockHandleControllerv2 {
 
                             for (int y=0;y<3;y++) {
                                 if(y!=0){
-                                    sheet = this.setWorkStyle(sheet,lists);
+                                    sheet = this.setWorkStyle(sheet,listResponse1.getFarms());
                                     row = sheet.createRow(firstRow+y);
                                 }
                                 cell = row.createCell(1);

@@ -38,17 +38,12 @@ public class WarehouseReturnManager extends AbstractStockManager<WarehouseStockR
     @Override
     public void create(List<WarehouseStockRefundDto.WarehouseStockRefundDetailDto> details, WarehouseStockRefundDto stockDto, DoctorWarehouseStockHandle stockHandle, DoctorWareHouse wareHouse) {
         //出库单据
-        DoctorWarehouseStockHandle outStockHandle = doctorWarehouseStockHandleDao.findById(stockDto.getOutMaterialHandleId());
+        DoctorWarehouseStockHandle outStockHandle = doctorWarehouseStockHandleDao.findById(stockDto.getOutStockHandleId());
         if (null == outStockHandle)
             throw new ServiceException("stock.handle.not.found");
-        int days = DateUtil.getDeltaDays(stockDto.getHandleDate().getTime(), outStockHandle.getHandleDate());
-        if (days > 0)
+        
+        if (stockDto.getHandleDate().getTime().before(outStockHandle.getHandleDate()))
             throw new ServiceException("refund.date.before.out.date");
-        if (!DateUtil.inSameDate(stockDto.getHandleDate().getTime(), new Date())) {
-            //如果是历史单据，还不能是同一天，入库类型的单据会被放在这一天的00:00:00
-            if (days == 0)
-                throw new ServiceException("refund.date.before.out.date");
-        }
 
         Map<Long, List<DoctorWarehouseMaterialHandle>> outMaterialHandleMap = doctorWarehouseMaterialHandleDao
                 .findByStockHandle(outStockHandle.getId())

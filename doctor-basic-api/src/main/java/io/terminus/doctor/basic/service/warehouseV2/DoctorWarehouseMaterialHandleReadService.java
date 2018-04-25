@@ -4,6 +4,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
+import io.terminus.doctor.common.utils.ResponseUtil;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -130,14 +131,14 @@ public interface DoctorWarehouseMaterialHandleReadService {
      * @param criteria
      * @return
      */
-    Response<List<List<Map>>> companyReport(Map<String, Object> criteria);
+    ResponseUtil<List<List<Map>>> companyReport(Map<String, Object> criteria);
 
     /**
      * 仓库结算报表
      * @param criteria
      * @return
      */
-    Response<List<List<Map>>> warehouseReport(Map<String,Object> criteria);
+    ResponseUtil<List<List<Map>>> warehouseReport(Map<String,Object> criteria);
 
     /**
      * 仓库月度详情

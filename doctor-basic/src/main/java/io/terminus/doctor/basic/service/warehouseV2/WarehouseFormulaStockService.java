@@ -222,7 +222,7 @@ public class WarehouseFormulaStockService extends AbstractWarehouseStockService<
             if (changeHandleDate) {
                 needUpdateInStockHandle = true;
 
-                warehouseFormulaManager.buildNewHandleDateForUpdate(inStockHandle, stockDto.getHandleDate());
+                buildNewHandleDateForUpdate(inStockHandle, stockDto.getHandleDate());
 
                 Calendar newHandleDate = warehouseFormulaManager.buildNewHandleDate(stockDto.getHandleDate());
                 //更新其他出库单据的事件日期

@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -135,11 +136,10 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
     @Override
     public Response<Map<String,Object>> selectPigGroupApply(Integer farmId, String pigType, String pigName, String pigGroupName,
-                                                                                                Integer skuType, String skuName, Date openAt, Date closeAt){
+                                                                                                Integer skuType, String skuName, String openAt, String closeAt){
         List<DoctorWarehouseMaterialApplyPigGroup> pigGroupList =doctorWarehouseMaterialApplyDao.selectPigGroupApply(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAt,closeAt);
         Double allQuantity = 0.0;
         Double allAmount = 0.0;
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         for(int i = 0;i<pigGroupList.size(); i++){
             if(pigGroupList.get(i).getQuantity() != null){
                 allQuantity =pigGroupList.get(i).getQuantity() + allQuantity;
@@ -172,7 +172,8 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
     @Override
     public List<DoctorWarehouseMaterialApplyPigGroup> selectPigGroupApplys(Integer farmId, String pigType, String pigName, String pigGroupName,
-                                                            Integer skuType, String skuName, Date openAt, Date closeAt) {
-       return  doctorWarehouseMaterialApplyDao.selectPigGroupApply(farmId, pigType, pigName, pigGroupName, skuType, skuName, openAt, closeAt);
+                                                            Integer skuType, String skuName, String openAt, String closeAt) {
+
+        return  doctorWarehouseMaterialApplyDao.selectPigGroupApply(farmId, pigType, pigName, pigGroupName, skuType, skuName, openAt, closeAt);
     }
 }

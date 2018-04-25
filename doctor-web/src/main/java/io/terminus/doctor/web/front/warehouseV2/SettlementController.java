@@ -62,7 +62,6 @@ public class SettlementController {
 
         RespHelper.orServEx(doctorWarehouseSettlementService.settlement(orgId, farmIds,
                 settlementDate));
-
         return true;
     }
 

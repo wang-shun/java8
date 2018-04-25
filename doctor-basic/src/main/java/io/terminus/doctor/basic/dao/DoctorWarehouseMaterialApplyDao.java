@@ -10,6 +10,8 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPi
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -74,6 +76,29 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
     }
 
     /**
+     * 更新猪舍领用
+     *
+     * @param materialHandleId
+     */
+    public void updateBarnApply(Long materialHandleId, DoctorWarehouseMaterialApply groupApply) {
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("settlementDate", groupApply.getSettlementDate());
+        params.put("quantity", groupApply.getQuantity());
+        params.put("handleDate", groupApply.getApplyDate());
+        params.put("year", groupApply.getApplyYear());
+        params.put("month", groupApply.getApplyMonth());
+        params.put("barnId", groupApply.getPigBarnId());
+        params.put("barnName", groupApply.getPigBarnName());
+        params.put("pigType", groupApply.getPigType());
+        params.put("staffId", groupApply.getApplyStaffId());
+        params.put("staffName", groupApply.getApplyStaffName());
+        params.put("materialHandleId", materialHandleId);
+
+        this.sqlSession.update(this.sqlId("updateBarnApply"), params);
+    }
+
+    /**
      * 猪群饲料指定时间段内领用和
      *
      * @param groupId 猪群id
@@ -111,6 +136,7 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
 
     /**
      * 猪群领用报表
+     *
      * @param farmId
      * @param pigType
      * @param pigName
@@ -122,7 +148,22 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
      * @return
      */
     public List<DoctorWarehouseMaterialApplyPigGroup> selectPigGroupApply(Integer farmId, String pigType, String pigName, String pigGroupName,
-                                                                                      Integer skuType, String skuName, Date openAt, Date closeAt){
+
+                                                                                      Integer skuType, String skuName, String openAt, String closeAt){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date openAt1;
+        Date closeAt1;
+        try {
+            if(openAt != null){
+                openAt1 = sdf.parse(openAt);
+            }
+            if(closeAt != null) {
+                closeAt1 = sdf.parse(closeAt);
+            }
+        }catch (ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         Map<String,Object> map = Maps.newHashMap();
         map.put("farmId",farmId);
         map.put("pigType",pigType);
@@ -130,13 +171,15 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         map.put("pigGroupName",pigGroupName);
         map.put("skuType",skuType);
         map.put("skuName",skuName);
-        map.put("openAt",openAt);
-        map.put("closeAt",closeAt);
+        map.put("openAt1",openAt);
+        map.put("closeAt1",closeAt);
         return this.sqlSession.selectList(this.sqlId("selectPigGroupApply"),map);
+
     }
 
     /**
      * 猪舍领用报表
+     *
      * @param criteria
      * @return
      */
@@ -156,6 +199,7 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
 
     /**
      * 猪舍领用详情
+     *
      * @param criteria
      * @return
      */
@@ -174,15 +218,16 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
 
     /**
      * 猪群领用报表详情
+     *
      * @param pigGroupId
-     * @param materiaId
+     * @param skuId
      * @return
      */
-    public List<DoctorWarehouseMaterialApplyPigGroupDetail> selectPigGroupApplyDetail(Long pigGroupId, Long skuId){
-        Map<String,Object> map = Maps.newHashMap();
-        map.put("farmId",pigGroupId);
-        map.put("pigType",skuId);
-        return this.sqlSession.selectList(this.sqlId("selectPigGroupApplyDetail"),map);
+    public List<DoctorWarehouseMaterialApplyPigGroupDetail> selectPigGroupApplyDetail(Long pigGroupId, Long skuId) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("farmId", pigGroupId);
+        map.put("pigType", skuId);
+        return this.sqlSession.selectList(this.sqlId("selectPigGroupApplyDetail"), map);
     }
 }
 

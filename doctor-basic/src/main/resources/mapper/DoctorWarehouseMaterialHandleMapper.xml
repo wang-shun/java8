@@ -245,15 +245,6 @@
         ORDER BY `id` DESC
     </select>
 
-    <select id="findAfter" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
-        WHERE warehouse_id=#{warehouseId}
-        AND <![CDATA[ handle_date >= #{handleDate}]]>
-        AND <![CDATA[ id < #{materialHandleId}]]>
-        AND delete_flag=1
-        ORDER BY handle_date ASC,id DESC
-    </select>
 
     <select id="findAfterByDate" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
         SELECT <include refid="cols_all"/>
@@ -301,22 +292,13 @@
         ORDER BY handle_date ASC,id DESC
     </select>
 
-    <select id="findByAccountingDate" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
-        WHERE warehouse_id=#{warehouseId}
-        AND handle_year = #{year} AND handle_month=#{month}
-        AND delete_flag=1
-        ORDER BY handle_date ASC,id DESC
-    </select>
-
     <select id="findByOrgAndSettlementDate" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         WHERE org_id=#{orgId}
         AND settlement_date=#{settlementDate}
         AND delete_flag=1
-        ORDER BY handle_date ASC,id DESC
+        ORDER BY handle_date ASC,id ASC
     </select>
 
     <select id="findBalanceByAccountingDate" parameterType="map" resultType="map">
@@ -393,6 +375,16 @@
         handle_month=#{month}
         WHERE rel_material_handle_id=#{materialHandleId}
     </update>
+
+    <select id="findFirstRefundHandleDate" parameterType="list" resultType="Date">
+        SELECT min(handle_date)
+        FROM <include refid="tb"/>
+        WHERE
+        <foreach collection="outMaterialHandleIds" item="i" open="(" separator="or" close=")">
+            rel_material_handle_id=#{i}
+        </foreach>
+        AND type=13
+    </select>
 
     <select id="findPrevious" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
         SELECT <include refid="cols_all"/>
@@ -479,12 +471,12 @@
         select
         '' as id,'上月结存' as material_name,
         '' as material_type,'' as ware_house_name,'' as handle_date,
-        '' as settlement_date,'' as 	handler_type,
+        '' as settlement_date,'' as handler_type,
         '' as rksl,'' as rkdj,'' as rkje,
         '' as cksl,'' as ckdj,'' as ckje,
-        a.balance_quantity as jcsl,
-        ifnull(a.balance_amount / a.balance_quantity,'') as jcdj,
-        a.balance_amount as jcje,
+        ifnull(sum(a.balance_quantity),'') as jcsl,
+        ifnull(sum(a.balance_amount) / sum(a.balance_quantity),'') as jcdj,
+        ifnull(sum(a.balance_amount),'') as jcje,
         '' as pig_barn_name,
         '' as pig_type,
         '' as pig_group_name,
@@ -495,14 +487,25 @@
         '' as specification
         from  doctor_warehouse_stock_monthly  a
         join  doctor_warehouse_sku b on a.material_id=b.id
-        where date_format(a.settlement_date,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
-        and a.farm_id=#{farmId}
-        and a.warehouse_id=#{warehouseId}
-        and b.name like CONCAT('%',#{materialName},'%')
+        where 1=1
+        <if test="settlementDate != null">
+          and date_format(a.settlement_date,'%Y-%m')=date_format(DATE_SUB(CONCAT(#{settlementDate},'-01'), INTERVAL 1 MONTH),'%Y-%m')
+        </if>
+        <if test="farmId != null">
+          and a.farm_id=#{farmId}
+        </if>
+        <if test="warehouseId != null">
+          and a.warehouse_id=#{warehouseId}
+        </if>
+        <if test="materialName != null">
+          and b.`name` like CONCAT('%',#{materialName},'%')
+        </if>
         union all
         select * from (
-        select b.id,b.material_name,d.type as material_type,a.ware_house_name,b.handle_date,
-        b.settlement_date,b.type as handler_type,
+        select b.id,b.material_name,d.type as material_type,a.ware_house_name,
+        date_format(b.handle_date,'%Y-%m-%d') as handle_date,
+        date_format(b.settlement_date,'%Y-%m') as settlement_date,
+        b.type as handler_type,
         ifnull(case when b.type in (1,2,3,4,5)
         then b.quantity end,'') as rksl,
         ifnull(case when b.type in (1,2,3,4,5)
@@ -563,13 +566,18 @@
         on b.material_id=d.id
         join doctor_warehouse_vendor e
         on d.vendor_id=e.id
-        where b.farm_id=#{farmId}
-        and b.delete_flag=1
-        and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
-        and b.warehouse_id=#{warehouseId}
-        and d.name like CONCAT('%',#{materialName},'%')
+        where b.delete_flag=1
+        <if test="farmId != null">
+          and b.farm_id=#{farmId}
+        </if>
         <if test="settlementDate != null">
-            and date_format(b.settlement_date,'%Y-%m') = #{settlementDate}
+          and date_format(b.settlement_date,'%Y-%m')=#{settlementDate}
+        </if>
+        <if test="warehouseId != null">
+          and b.warehouse_id=#{warehouseId}
+        </if>
+        <if test="materialName != null">
+            and d.`name` like CONCAT('%',#{materialName},'%')
         </if>
         <if test="pigBarnType != null">
             and f.pig_type=#{pigBarnType}
@@ -586,7 +594,7 @@
         <if test="type != null">
             and d.type=#{type}
         </if>
-        order by b.handle_date,b.settlement_date,b.id
+        order by b.settlement_date,b.id
         ) as bjdata
         union all
         select
@@ -643,13 +651,20 @@
         on b.material_id=d.id
         join doctor_warehouse_vendor e
         on d.vendor_id=e.id
-        where b.farm_id=#{farmId}
-        and b.delete_flag=1
-        and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
-        and b.warehouse_id=#{warehouseId}
-        and d.name like CONCAT('%',#{materialName},'%')
+        where b.delete_flag=1
+        <if test="farmId != null">
+          and b.farm_id=#{farmId}
+        </if>
+        <if test="settlementDate != null">
+          and date_format(b.settlement_date,'%Y-%m')=#{settlementDate}
+        </if>
+        <if test="warehouseId != null">
+          and b.warehouse_id=#{warehouseId}
+        </if>
+        <if test="materialName != null">
+          and d.`name` like CONCAT('%',#{materialName},'%')
+        </if>
     </select>
-
 
     <sql id ="balanceAmount">
         ifnull((select sum(b.balance_amount)
