@@ -92,7 +92,7 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `material_handle_id`, `org_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `pig_barn_id`, `pig_barn_name`, `pig_type`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_id`, `apply_staff_name`, `apply_year`, `apply_month`, `material_name`, `type`, `unit`, `quantity`, `unit_price`, `apply_type`, `amount`, `settlement_date`,
+        `material_handle_id`, `org_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `pig_barn_id`, `pig_barn_name`, `pig_type`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_id`, `apply_staff_name`, `apply_year`, `apply_month`, `material_name`, `type`, `unit`, format(`quantity`,2), format(`unit_price`,4), `apply_type`, format(`amount`,4), `settlement_date`,
         created_at, updated_at
     </sql>
 
@@ -346,9 +346,9 @@
             c.code,
             c.name as sku_name,
             c.unit,
-            format(sum( a.quantity ),2) AS quantity,
-            format(ifnull(sum( a.unit_price * a.quantity ) / sum( a.quantity ),0),4) AS unit_price,
-            format(sum(a.amount),4) AS amount,
+            sum( a.quantity ) AS quantity,
+            ifnull(sum( a.unit_price * a.quantity ) / sum( a.quantity ),0) AS unit_price,
+            sum(a.amount) AS amount,
             c.type as sku_type,
             b.vendor_name,
             c.specification,
@@ -528,4 +528,34 @@
 
     <!--猪群Start-->
 
+    <select id="selectPigGroupApplyDetail" parameterType="map" resultMap="DoctorWarehouseMaterialApplyPigGroupDetailMap">
+        SELECT
+        c.name as sku_name,
+        a.type as sku_type,
+        a.warehouse_name,
+        a.apply_date,
+        b.settlement_date,
+        b.type,
+        a.quantity,
+        a.unit_price,
+        b.amount,
+        a.pig_barn_name,
+        a.pig_type,
+        a.pig_group_name,
+        e.staff_name,
+        d.farm_name,
+        c.unit,
+        b.vendor_name,
+        c.specification
+        FROM
+        doctor_warehouse_material_apply a
+        JOIN doctor_warehouse_material_handle b ON a.material_handle_id = b.id
+        JOIN doctor_warehouse_sku c ON a.material_id = c.id
+        JOIN doctor_groups d ON d.id = a.pig_group_id
+        JOIN doctor_barns e ON e.id = a.pig_barn_id
+        WHERE
+        a.apply_type = 1
+        <if test="pigGroupId != null"> AND a.pig_group_id = #{pigGroupId}</if>
+        <if test="materiaId != null"> AND a.material_id = #{materiaId}</if>
+    </select>
 </mapper>
