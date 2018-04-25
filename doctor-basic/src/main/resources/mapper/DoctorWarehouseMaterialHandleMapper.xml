@@ -467,6 +467,7 @@
         group by a.farm_id
         order by a.farm_id
     </select>
+
     <select id="wlbdReport" parameterType="Map" resultType="map">
         select
         '' as id,'上月结存' as material_name,
@@ -474,9 +475,9 @@
         '' as settlement_date,'' as handler_type,
         '' as rksl,'' as rkdj,'' as rkje,
         '' as cksl,'' as ckdj,'' as ckje,
-        ifnull(sum(a.balance_quantity),'') as jcsl,
-        ifnull(sum(a.balance_amount) / sum(a.balance_quantity),'') as jcdj,
-        ifnull(sum(a.balance_amount),'') as jcje,
+        ifnull(ROUND(sum(a.balance_quantity),2),'') as jcsl,
+        ifnull(ROUND(sum(a.balance_amount) / sum(a.balance_quantity),4),'') as jcdj,
+        ifnull(ROUND(sum(a.balance_amount),4),'') as jcje,
         '' as pig_barn_name,
         '' as pig_type,
         '' as pig_group_name,
@@ -507,46 +508,55 @@
         date_format(b.settlement_date,'%Y-%m') as settlement_date,
         b.type as handler_type,
         ifnull(case when b.type in (1,2,3,4,5)
-        then b.quantity end,'') as rksl,
+        then ROUND(b.quantity,2) end,'') as rksl,
         ifnull(case when b.type in (1,2,3,4,5)
-        then  b.unit_price end,'') as rkdj,
+        then  ROUND(b.unit_price,4) end,'') as rkdj,
         ifnull(case when b.type in (1,2,3,4,5)
-        then b.amount end,'') as rkje,
+        then ROUND(b.amount,4) end,'') as rkje,
         ifnull(case when b.type in (6,7,8,9)
-        then b.quantity end,'') as cksl,
+        then ROUND(b.quantity,2) end,'') as cksl,
         ifnull(case when b.type in (6,7,8,9)
-        then  b.unit_price end,'') as ckdj,
+        then ROUND(b.unit_price,4) end,'') as ckdj,
         ifnull(case when b.type in (6,7,8,9)
-        then b.amount end,'') as ckje,
-        (
-        ifnull(case when b.type in (6,7,8,9)
-        then b.quantity end,'')
+        then ROUND(b.amount,4) end,'') as ckje,
+        ifnull(
+        ROUND(
+        (select sum(c.balance_quantity)
+        from doctor_warehouse_stock_monthly c
+        where c.material_id=b.material_id and c.warehouse_id=b.warehouse_id
+        ) +
+        ((case when b.type in (6,7,8,9) then b.quantity end)
         -
-        ifnull(case when b.type in (1,2,3,4,5)
-        then b.quantity end,'')
-        ) as jcsl,
-        ifnull((
-        (
-        ifnull(case when b.type in (6,7,8,9)
-        then b.amount end,'')
+        (case when b.type in (1,2,3,4,5) then b.quantity end))
+        ,2),'') as jcsl,
+        ifnull(
+        ROUND(
+        ((select sum(c.balance_amount)
+        from doctor_warehouse_stock_monthly c
+        where c.material_id=b.material_id and c.warehouse_id=b.warehouse_id
+        ) +
+        ((case when b.type in (6,7,8,9) then b.amount end)
         -
-        ifnull(case when b.type in (1,2,3,4,5)
-        then b.amount end,'')
+        (case when b.type in (1,2,3,4,5) then b.amount end))
         )
         /
-        ifnull(case when b.type in (6,7,8,9)
-        then b.quantity end,'')
+        ((select sum(c.balance_quantity)
+        from doctor_warehouse_stock_monthly c
+        where c.material_id=b.material_id and c.warehouse_id=b.warehouse_id
+        ) +
+        ((case when b.type in (6,7,8,9) then b.quantity end)
         -
-        ifnull(case when b.type in (1,2,3,4,5)
-        then b.quantity end,'')
-        ),'') as jcdj,
-        (
-        ifnull(case when b.type in (6,7,8,9)
-        then b.amount end,'')
+        (case when b.type in (1,2,3,4,5) then b.quantity end))
+        ),4),'') as jcdj,
+        ifnull(
+        ROUND((select sum(c.balance_amount)
+        from doctor_warehouse_stock_monthly c
+        where c.material_id=b.material_id and c.warehouse_id=b.warehouse_id
+        ) +
+        ((case when b.type in (6,7,8,9) then b.amount end)
         -
-        ifnull(case when b.type in (1,2,3,4,5)
-        then b.amount end,'')
-        ) as jcje,
+        (case when b.type in (1,2,3,4,5) then b.amount end))
+        ,4),'') as jcje,
         f.pig_barn_name,
         f.pig_type,
         f.pig_group_name,
@@ -601,37 +611,56 @@
         '' as id,'本月结存' as material_name,
         '' as material_type,'' as ware_house_name,'' as handle_date,
         '' as settlement_date,'' as 	handler_type,
-        '' as rksl,'' as rkdj,'' as rkje,
-        '' as cksl,'' as ckdj,'' as ckje,
-        case when
-        (ifnull(case when b.type in (6,7,8,9) then sum(b.quantity) end,0)
-        -
-        ifnull(case when b.type in (1,2,3,4,5) then sum(b.quantity) end,0)) = 0
-        then ''
-        else
-        (ifnull(case when b.type in (6,7,8,9) then sum(b.quantity) end,0)
-        -
-        ifnull(case when b.type in (1,2,3,4,5) then sum(b.quantity) end,0))
-        end as jcsl,
+        ifnull(case when b.type in (1,2,3,4,5)
+        then ROUND(SUM(b.quantity),2) end,'') as rksl,
+        ifnull(case when b.type in (1,2,3,4,5)
+        then  ROUND(SUM(b.amount) / SUM(b.quantity),4) end,'') as rkdj,
+        ifnull(case when b.type in (1,2,3,4,5)
+        then ROUND(SUM(b.amount),4) end,'') as rkje,
+        ifnull(case when b.type in (6,7,8,9)
+        then ROUND(SUM(b.quantity),2) end,'') as cksl,
+        ifnull(case when b.type in (6,7,8,9)
+        then ROUND(SUM(b.amount) / SUM(b.quantity),4) end,'') as ckdj,
+        ifnull(case when b.type in (6,7,8,9)
+        then ROUND(SUM(b.amount),4) end,'') as ckje,
         ifnull(
-        (ifnull(case when b.type in (6,7,8,9) then sum(b.amount) end,0)
-        -
-        ifnull(case when b.type in (1,2,3,4,5) then sum(b.amount) end,0))
-        /
+        ROUND((
+        (select sum(c.balance_quantity)
+        from doctor_warehouse_stock_monthly c
+        where c.warehouse_id=b.warehouse_id
+        )
+        +
         (ifnull(case when b.type in (6,7,8,9) then sum(b.quantity) end,0)
         -
-        ifnull(case when b.type in (1,2,3,4,5) then sum(b.quantity) end,0)),'')
-        as jcdj,
-        case when
-        (ifnull(case when b.type in (6,7,8,9) then sum(b.amount) end,0)
+        ifnull(case when b.type in (1,2,3,4,5) then sum(b.quantity) end,0)))
+        ,2),'') as jcsl,
+        ifnull(
+        ROUND(((select sum(c.balance_amount)
+        from doctor_warehouse_stock_monthly c
+        where c.material_id=b.material_id and c.warehouse_id=b.warehouse_id
+        ) +
+        ((case when b.type in (6,7,8,9) then sum(b.amount) end)
         -
-        ifnull(case when b.type in (1,2,3,4,5) then sum(b.amount) end,0)) = 0
-        then ''
-        else
-        (ifnull(case when b.type in (6,7,8,9) then sum(b.amount) end,0)
+        (case when b.type in (1,2,3,4,5) then sum(b.amount) end))
+        )
+        /
+        ((select sum(c.balance_quantity)
+        from doctor_warehouse_stock_monthly c
+        where c.material_id=b.material_id and c.warehouse_id=b.warehouse_id
+        ) +
+        ((case when b.type in (6,7,8,9) then sum(b.quantity) end)
         -
-        ifnull(case when b.type in (1,2,3,4,5) then sum(b.amount) end,0))
-        end as jcje,
+        (case when b.type in (1,2,3,4,5) then sum(b.quantity) end))
+        ),4),'') as jcdj,
+        ifnull(
+        ROUND((select sum(c.balance_amount)
+        from doctor_warehouse_stock_monthly c
+        where c.material_id=b.material_id and c.warehouse_id=b.warehouse_id
+        ) +
+        ((case when b.type in (6,7,8,9) then sum(b.amount) end)
+        -
+        (case when b.type in (1,2,3,4,5) then sum(b.amount) end))
+        ,4),'') as jcje,
         '' as pig_barn_name,
         '' as pig_type,
         '' as pig_group_name,
