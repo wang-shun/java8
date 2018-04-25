@@ -26,10 +26,10 @@ public class DoctorWarehouseMaterialApplyPigGroupDetail implements Serializable 
     private String warehouseName;
 
     //时间日期
-    private Date applyDate;
+    private String applyDate;
 
     //会计年月
-    private Date settlementDate;
+    private String settlementDate;
 
     //事件类型
     private Integer type;

@@ -32,10 +32,10 @@ public class DoctorWarehouseMaterialApplyPigGroup implements Serializable {
     private String skuName;
 
     //建群日期
-    private Date openAt;
+    private String openAt;
 
     //关群日期
-    private Date closeAt;
+    private String closeAt;
 
     //饲养员
     private String staffName;
@@ -53,7 +53,7 @@ public class DoctorWarehouseMaterialApplyPigGroup implements Serializable {
     private Double amount;
 
     //会计年月
-    private Date settlementDate;
+    private String settlementDate;
 
     //单位
     private String unit;

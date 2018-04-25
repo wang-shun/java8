@@ -151,8 +151,8 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
 
                                                                                       Integer skuType, String skuName, String openAt, String closeAt){
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Date openAt1;
-        Date closeAt1;
+        Date openAt1 = null;
+        Date closeAt1 = null;
         try {
             if(openAt != null){
                 openAt1 = sdf.parse(openAt);
@@ -171,8 +171,8 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         map.put("pigGroupName",pigGroupName);
         map.put("skuType",skuType);
         map.put("skuName",skuName);
-        map.put("openAt1",openAt);
-        map.put("closeAt1",closeAt);
+        map.put("openAt",openAt1);
+        map.put("closeAt",closeAt1);
         return this.sqlSession.selectList(this.sqlId("selectPigGroupApply"),map);
 
     }
