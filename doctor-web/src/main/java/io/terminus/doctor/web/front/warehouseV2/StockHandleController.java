@@ -678,6 +678,7 @@ public class StockHandleController {
     public Paging<DoctorWarehouseStockHandle> stockPage(
             @RequestParam(required = false) Integer pageNo,
             @RequestParam(required = false) Integer pageSize,
+            @RequestParam(required = false) Integer farmId,
             @RequestParam(required = false,value = "warehouseName") String warehouseName,
             @RequestParam(required = false,value = "operatorName") String operatorName,
             @RequestParam(required = false,value = "handleSubType") Integer handleSubType,
@@ -700,6 +701,7 @@ public class StockHandleController {
         params.put("handleDateStart", handleDateStart);
         params.put("handleDateEnd", handleDateEnd);
         params.put("updatedAtStart", updatedAtStart);
+        params.put("farmId",farmId);
         params.put("updatedAtEnd", updatedAtEnd);
         return RespHelper.or500(doctorWarehouseStockHandleReadService.paging(pageNo, pageSize, params));
     }
