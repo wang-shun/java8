@@ -42,6 +42,7 @@ import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
@@ -692,24 +693,19 @@ public class ReportController {
             String materialName
     ) {
 
-        if(null == farmId)
+        if(ObjectUtils.isEmpty(farmId))
         {
             throw new JsonResponseException("stock.farmId.null");
         }
 
-        if(null == settlementDate)
+        if(ObjectUtils.isEmpty(settlementDate))
         {
             throw new JsonResponseException("stock.settlementDate.null");
         }
 
-        if(null == warehouseId)
+        if(ObjectUtils.isEmpty(warehouseId))
         {
             throw new JsonResponseException("stock.warehouseId.null");
-        }
-
-        if(null == materialName)
-        {
-            throw new JsonResponseException("stock.materialName.null");
         }
 
         return doctorWarehouseReportReadService.wlbdReport(
@@ -736,24 +732,19 @@ public class ReportController {
             String materialName,
             HttpServletRequest request, HttpServletResponse response) {
 
-        if(null == farmId)
+        if(ObjectUtils.isEmpty(farmId))
         {
             throw new JsonResponseException("stock.farmId.null");
         }
 
-        if(null == settlementDate)
+        if(ObjectUtils.isEmpty(settlementDate))
         {
             throw new JsonResponseException("stock.settlementDate.null");
         }
 
-        if(null == warehouseId)
+        if(ObjectUtils.isEmpty(warehouseId))
         {
             throw new JsonResponseException("stock.warehouseId.null");
-        }
-
-        if(null == materialName)
-        {
-            throw new JsonResponseException("stock.materialName.null");
         }
 
         //开始导出
@@ -764,7 +755,7 @@ public class ReportController {
                 throw new JsonResponseException("farm.not.found");
 
             String farmName = farm.getName();
-            String operatorTypeName = "物料变动报表";
+            String fileName = "物料变动报表" + new Date().getTime();
 
             List<Map<String,Object>> exportVos = RespHelper.or500(
                     doctorWarehouseReportReadService.wlbdReport(
@@ -774,7 +765,7 @@ public class ReportController {
                     ));
 
             //导出名称
-            exporter.setHttpServletResponse(request, response, "物料变动报表");
+            exporter.setHttpServletResponse(request, response, fileName);
 
             try (XSSFWorkbook workbook = new XSSFWorkbook()) {
 
@@ -985,100 +976,206 @@ public class ReportController {
 
                     //表数据
                     for (Map<String, Object> map : exportVos) {
-                        String vId = String.valueOf(lastMonthData.get("id"));
+                        String vId = String.valueOf(map.get("id"));
                         if(StringUtils.isNotBlank(vId)){ // id不为空
                             dataRow = sheet.createRow(startRowIndex);
 
                             dataCell = dataRow.createCell(0);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("material_name")));
+                            String mname = String.valueOf(map.get("material_name"));
+                            mname = null == mname || "".equals(mname.trim()) || "null".equals(mname.trim().toLowerCase()) ? "" : mname.trim();
+                            dataCell.setCellValue(mname);
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(1);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("material_type")));
+                            String mtype = String.valueOf(map.get("material_type"));
+                            mtype = null == mtype || "".equals(mtype.trim()) || "null".equals(mtype.trim().toLowerCase()) ? "" : mtype.trim();
+                            switch (mtype)
+                            {
+                                case "1":
+                                    dataCell.setCellValue("饲料");
+                                    break;
+                                case "2":
+                                    dataCell.setCellValue("原料");
+                                    break;
+                                case "3":
+                                    dataCell.setCellValue("疫苗");
+                                    break;
+                                case "4":
+                                    dataCell.setCellValue("药品");
+                                    break;
+                                case "5":
+                                    dataCell.setCellValue("消耗品");
+                                    break;
+                                default:
+                                    dataCell.setCellValue("");
+                                    break;
+                            }
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(2);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("ware_house_name")));
+                            String housename = String.valueOf(map.get("ware_house_name"));
+                            housename = null == housename || "".equals(housename.trim()) || "null".equals(housename.trim().toLowerCase())  ? "" : housename.trim();
+                            dataCell.setCellValue(housename);
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(3);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("handle_date")));
+                            String housedate = String.valueOf(map.get("handle_date"));
+                            housedate = null == housedate || "".equals(housedate.trim()) || "null".equals(housedate.trim().toLowerCase())  ? "" : housedate.trim();
+                            dataCell.setCellValue(housedate);
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(4);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("settlement_date")));
+                            String settlementdate = String.valueOf(map.get("settlement_date"));
+                            settlementdate = null == settlementdate || "".equals(settlementdate.trim()) || "null".equals(settlementdate.trim().toLowerCase())   ? "" : settlementdate.trim();
+                            dataCell.setCellValue(settlementdate);
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(5);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("handler_type")));
+                            String handler_type = String.valueOf(map.get("handler_type"));
+                            handler_type = null == handler_type || "".equals(handler_type.trim()) || "null".equals(handler_type.trim().toLowerCase())  ? "" : handler_type.trim();
+                            switch (handler_type)
+                            {
+                                case "1":
+                                    dataCell.setCellValue("采购入库");
+                                    break;
+                                case "2":
+                                    dataCell.setCellValue("退料入库");
+                                    break;
+                                case "3":
+                                    dataCell.setCellValue("配方入库");
+                                    break;
+                                case "4":
+                                    dataCell.setCellValue("盘盈入库");
+                                    break;
+                                case "5":
+                                    dataCell.setCellValue("调拨入库");
+                                    break;
+                                case "6":
+                                    dataCell.setCellValue("领料出库");
+                                    break;
+                                case "7":
+                                    dataCell.setCellValue("盘亏出库");
+                                    break;
+                                case "8":
+                                    dataCell.setCellValue("配方出库");
+                                    break;
+                                case "9":
+                                    dataCell.setCellValue("调拨出库");
+                                    break;
+                                default:
+                                    dataCell.setCellValue("");
+                                    break;
+                            }
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(6);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("rksl")));
+                            dataCell.setCellValue(String.valueOf(map.get("rksl")));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(7);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("rkdj")));
+                            dataCell.setCellValue(String.valueOf(map.get("rkdj")));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(8);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("rkje")));
+                            dataCell.setCellValue(String.valueOf(map.get("rkje")));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(9);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("cksl")));
+                            dataCell.setCellValue(String.valueOf(map.get("cksl")));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(10);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("ckdj")));
+                            dataCell.setCellValue(String.valueOf(map.get("ckdj")));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(11);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("ckje")));
+                            dataCell.setCellValue(String.valueOf(map.get("ckje")));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(12);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("jcsl")));
+                            dataCell.setCellValue(String.valueOf(map.get("jcsl")));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(13);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("jcdj")));
+                            dataCell.setCellValue(String.valueOf(map.get("jcdj")));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(14);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("jcje")));
+                            dataCell.setCellValue(String.valueOf(map.get("jcje")));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(15);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("pig_barn_name")));
+                            String pig_barn_name = String.valueOf(map.get("pig_barn_name"));
+                            pig_barn_name = null == pig_barn_name || "".equals(pig_barn_name.trim()) || "null".equals(pig_barn_name.trim().toLowerCase())  ? "" : pig_barn_name.trim();
+                            dataCell.setCellValue(pig_barn_name);
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(16);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("pig_type")));
+                            String pig_type = String.valueOf(map.get("pig_type"));
+                            pig_type = null == pig_type || "".equals(pig_type.trim()) || "null".equals(pig_type.trim().toLowerCase())  ? "" : pig_type.trim();
+                            switch (pig_type)
+                            {
+                                case "2":
+                                    dataCell.setCellValue("保育猪");
+                                    break;
+                                case "3":
+                                    dataCell.setCellValue("育肥猪");
+                                    break;
+                                case "4":
+                                    dataCell.setCellValue("后备猪");
+                                    break;
+                                case "5":
+                                    dataCell.setCellValue("配种母猪");
+                                    break;
+                                case "6":
+                                    dataCell.setCellValue("妊娠母猪");
+                                    break;
+                                case "7":
+                                    dataCell.setCellValue("分娩母猪");
+                                    break;
+                                case "9":
+                                    dataCell.setCellValue("种公猪");
+                                    break;
+                                default:
+                                    dataCell.setCellValue("");
+                                    break;
+                            }
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(17);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("pig_group_name")));
+                            String pig_group_name = String.valueOf(map.get("pig_group_name"));
+                            pig_group_name = null == pig_group_name || "".equals(pig_group_name.trim())  || "null".equals(pig_group_name.trim().toLowerCase()) ? "" : pig_group_name.trim();
+                            dataCell.setCellValue(pig_group_name);
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(18);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("apply_staff_name")));
+                            String apply_staff_name = String.valueOf(map.get("apply_staff_name"));
+                            apply_staff_name = null == apply_staff_name || "".equals(apply_staff_name.trim()) || "null".equals(apply_staff_name.trim().toLowerCase())  ? "" : apply_staff_name.trim();
+                            dataCell.setCellValue(apply_staff_name);
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(19);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("farm_name")));
+                            String farm_name = String.valueOf(map.get("farm_name"));
+                            farm_name = null == farm_name || "".equals(farm_name.trim()) || "null".equals(farm_name.trim().toLowerCase()) ? "" : farm_name.trim();
+                            dataCell.setCellValue(farm_name);
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(20);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("unit")));
+                            String unit = String.valueOf(map.get("unit"));
+                            unit = null == unit || "".equals(unit.trim()) || "null".equals(unit.trim().toLowerCase()) ? "" : unit.trim();
+                            dataCell.setCellValue(unit);
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(21);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("provider_name")));
+                            String provider_name = String.valueOf(map.get("provider_name"));
+                            provider_name = null == provider_name || "".equals(provider_name.trim()) || "null".equals(provider_name.trim().toLowerCase())  ? "" : provider_name.trim();
+                            dataCell.setCellValue(provider_name);
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(22);
-                            dataCell.setCellValue(String.valueOf(lastMonthData.get("specification")));
+                            String specification = String.valueOf(map.get("specification"));
+                            specification = null == specification || "".equals(specification.trim()) || "null".equals(specification.trim().toLowerCase())  ? "" : specification.trim();
+                            dataCell.setCellValue(specification);
                             dataCell.setCellStyle(normalCellStyle);
 
                             startRowIndex++;
