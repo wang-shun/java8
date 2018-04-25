@@ -33,9 +33,9 @@ public class DoctorWarehouseStockMonthlyManager {
             doctorWarehouseStockMonthlyDao.create(DoctorWarehouseStockMonthly.builder()
                     .warehouseId(warehouseId)
                     .materialId(materialId)
-//                    .handleYear(handleYear)
-//                    .handleMonth(handleMonth)
-//                    .handleDate(DateUtil.toDate(handleYear + "-" + handleMonth + "-01"))
+//                  .handleYear(handleYear)
+//                  .handleMonth(handleMonth)
+//                  .handleDate(DateUtil.toDate(handleYear + "-" + handleMonth + "-01"))
                     .balanceQuantity(add ? quantity : new BigDecimal(0).subtract(quantity))
                     .balanceAmount(add ? amount : new BigDecimal(0).subtract(amount))
                     .build());
