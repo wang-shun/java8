@@ -59,9 +59,6 @@ public class PiggeryCollarController {
         DoctorWarehouseMaterialApply materialApply=new DoctorWarehouseMaterialApply();
         materialApply.setFarmId(farmId);
         String[] split = date.split("-");
-        System.out.println("Date:"+date);
-        System.out.println("Integer.valueOf(split[0])"+Integer.valueOf(split[0]));
-        System.out.println("Integer.valueOf(split[1])"+Integer.valueOf(split[1]));
         if (null != date){
             materialApply.setApplyYear( Integer.valueOf(split[0]));
             materialApply.setApplyMonth(Integer.valueOf(split[1]));
@@ -248,7 +245,7 @@ public class PiggeryCollarController {
     @RequestMapping(method = RequestMethod.GET, value = "/piggeryDetails/export")
     public void piggeryDetailsExport(@RequestParam(required = false) String date,
                                     @RequestParam Long pigBarnId,
-                                    @RequestParam String materialName,
+                                    @RequestParam(required = false) String materialName,
                                     HttpServletRequest request, HttpServletResponse response) {
         //取到值
         DoctorWarehouseMaterialApply materialApply=new DoctorWarehouseMaterialApply();
