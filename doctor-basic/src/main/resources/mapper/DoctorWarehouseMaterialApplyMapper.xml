@@ -59,7 +59,6 @@
         <result property="farmName" column="farm_name"/>
         <result property="pigGroupId" column="pig_group_id"/>
         <result property="skuId" column="sku_id"/>
-        <result property="pigType" column="pig_type"/>
     </resultMap>
 
     <resultMap id="DoctorWarehouseMaterialApplyPigGroupDetailMap" type="DoctorWarehouseMaterialApplyPigGroupDetail">
@@ -361,8 +360,8 @@
       SELECT
             a.pig_group_name,
             e.NAME as pig_name,
-            a.pig_type
             e.staff_name,
+            b.settlement_date,
             c.code,
             c.name as sku_name,
             c.unit,

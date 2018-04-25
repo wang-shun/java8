@@ -72,6 +72,4 @@ public class DoctorWarehouseMaterialApplyPigGroup implements Serializable {
 
     //物料id
     private Integer skuId;
-
-    private Integer pigType;
 }
