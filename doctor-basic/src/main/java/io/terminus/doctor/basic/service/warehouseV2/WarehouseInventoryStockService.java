@@ -9,6 +9,7 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.common.utils.DateUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,7 @@ import java.util.*;
 /**
  * Created by sunbo@terminus.io on 2018/4/21.
  */
+@Slf4j
 @Component
 public class WarehouseInventoryStockService extends
         AbstractWarehouseStockService<WarehouseStockInventoryDto, WarehouseStockInventoryDto.WarehouseStockInventoryDetail> {
@@ -41,7 +43,7 @@ public class WarehouseInventoryStockService extends
         //盘亏明细单
         Map<WarehouseStockInventoryDto.WarehouseStockInventoryDetail, BigDecimal> deficitInventory = new HashMap<>();
 
-        stockDto.getDetails().forEach(detail -> {
+        for (WarehouseStockInventoryDto.WarehouseStockInventoryDetail detail : stockDto.getDetails()) {
             BigDecimal stockQuantity;
             if (historyBill) {
                 stockQuantity = warehouseInventoryManager.getHistoryQuantityInclude(stockDto.getHandleDate().getTime(), stockDto.getWarehouseId(), detail.getMaterialId());
@@ -57,7 +59,9 @@ public class WarehouseInventoryStockService extends
                 profitInventory.put(detail, detail.getQuantity().subtract(stockQuantity));
             else if (c < 0)
                 deficitInventory.put(detail, stockQuantity.subtract(detail.getQuantity()));
-        });
+            else
+                log.info("material[{}] at {} have same quantity with stock", detail.getMaterialId(), stockDto.getHandleDate(), detail.getQuantity());
+        }
 
         if (profitInventory.isEmpty() && deficitInventory.isEmpty())
             throw new ServiceException("inventory.quantity.all.equals");

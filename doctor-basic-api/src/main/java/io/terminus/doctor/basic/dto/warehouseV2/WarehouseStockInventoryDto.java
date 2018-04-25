@@ -3,6 +3,7 @@ package io.terminus.doctor.basic.dto.warehouseV2;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDetail;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDto;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
@@ -28,6 +29,7 @@ public class WarehouseStockInventoryDto extends AbstractWarehouseStockDto implem
 
 
     @Data
+    @EqualsAndHashCode(callSuper = true)
     public static class WarehouseStockInventoryDetail extends AbstractWarehouseStockDetail implements Serializable {
 
         private static final long serialVersionUID = -3947299201390395960L;
