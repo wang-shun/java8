@@ -138,8 +138,8 @@ public class WarehouseTransferStockService
                     //删除原调入明细
                     warehouseTransferManager.delete(transferIn);
 
-                    //新的调入仓库
                     //TODO 锁
+                    //新的调入仓库
                     transferInWarehouse = oldTransferInWarehouse.get(detail.getTransferInWarehouseId());
                     //创建新的调入明细
                     warehouseTransferManager.create(detail, stockDto, newTransferInStockHandle.get(detail.getTransferInWarehouseId()), transferInWarehouse);

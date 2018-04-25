@@ -66,6 +66,7 @@ public class DoctorWarehouseStockHandleManager {
     public void update(AbstractWarehouseStockDto stockDto, DoctorWarehouseStockHandle stockHandle) {
 
         stockHandle.setHandleDate(stockDto.getHandleDate().getTime());
+        stockHandle.setSettlementDate(stockDto.getSettlementDate());
 
         stockHandle.setOperatorId(stockDto.getOperatorId());
         stockHandle.setOperatorName(stockDto.getOperatorName());

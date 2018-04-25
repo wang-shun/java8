@@ -19,7 +19,7 @@ public class WarehouseStockRefundDto extends AbstractWarehouseStockDto implement
 
 
     @NotNull(message = "out.material.handle.id.null", groups = AbstractWarehouseStockDetail.StockDefaultValid.class)
-    private Long outMaterialHandleId;
+    private Long outStockHandleId;
 
     @Valid
     @NotEmpty(message = "stock.detail.empty", groups = AbstractWarehouseStockDetail.StockDefaultValid.class)

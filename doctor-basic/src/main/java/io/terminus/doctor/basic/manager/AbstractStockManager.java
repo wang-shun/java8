@@ -145,22 +145,6 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
         materialHandle.setHandleMonth(newHandleDate.get(Calendar.MONTH) + 1);
     }
 
-    public void buildNewHandleDateForUpdate(DoctorWarehouseStockHandle stockHandle, Calendar newHandleDate) {
-
-        if (DateUtil.inSameDate(newHandleDate.getTime(), new Date())) {
-            DateTime old = new DateTime(newHandleDate.getTime());
-            DateTime newDate = new DateTime().withDate(old.getYear(), old.getMonthOfYear(), old.getDayOfMonth());
-            stockHandle.setHandleDate(newDate.toDate());
-            return;
-        }
-
-        newHandleDate.set(Calendar.HOUR_OF_DAY, 23);
-        newHandleDate.set(Calendar.MINUTE, 59);
-        newHandleDate.set(Calendar.SECOND, 59);
-        newHandleDate.set(Calendar.MILLISECOND, 0);
-        stockHandle.setHandleDate(newHandleDate.getTime());
-    }
-
     /**
      * 获取新增的单据明细
      *

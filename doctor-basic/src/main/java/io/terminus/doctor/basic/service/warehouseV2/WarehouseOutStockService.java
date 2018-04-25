@@ -1,5 +1,6 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
+import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialApplyDao;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockOutDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialApplyType;
@@ -18,6 +19,8 @@ import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by sunbo@terminus.io on 2018/4/19.
@@ -61,6 +64,25 @@ public class WarehouseOutStockService extends AbstractWarehouseStockService<Ware
         wareHouse.setFarmId(materialHandle.getFarmId());
         wareHouse.setType(materialHandle.getWarehouseType());
         doctorWarehouseStockManager.in(materialHandle.getMaterialId(), materialHandle.getQuantity(), wareHouse);
+    }
+
+    @Override
+    public void changed(Map<WarehouseStockOutDto.WarehouseStockOutDetail, DoctorWarehouseMaterialHandle> changed, DoctorWarehouseStockHandle stockHandle, WarehouseStockOutDto stockDto, DoctorWareHouse wareHouse) {
+
+        if (!DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime())) {
+            Date newDate = warehouseOutManager.buildNewHandleDate(stockDto.getHandleDate()).getTime();
+
+            //最早一笔退料入库明细单据的事件日期
+            Date firstRefundDate = doctorWarehouseMaterialHandleDao.findFirstRefundHandleDate(changed.values().stream().map(DoctorWarehouseMaterialHandle::getId).collect(Collectors.toList()));
+
+            if (firstRefundDate != null && newDate.after(firstRefundDate)) {
+                throw new ServiceException("out.handle.date.after.refund");
+            }
+        }
+
+        changed.forEach((detail, materialHandle) -> {
+            this.changed(materialHandle, detail, stockHandle, stockDto, wareHouse);
+        });
     }
 
     @Override
@@ -170,16 +192,5 @@ public class WarehouseOutStockService extends AbstractWarehouseStockService<Ware
 
             doctorWarehouseMaterialApplyDao.update(apply);
         }
-
-
-        if (!stockDto.getSettlementDate().equals(stockHandle.getSettlementDate()) ||
-                changeHandleDate) {
-
-            stockHandle.setSettlementDate(stockDto.getSettlementDate());
-            warehouseOutManager.buildNewHandleDateForUpdate(stockHandle, stockDto.getHandleDate());
-            doctorWarehouseStockHandleDao.update(stockHandle);
-        }
-
     }
-
 }

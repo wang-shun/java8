@@ -376,6 +376,16 @@
         WHERE rel_material_handle_id=#{materialHandleId}
     </update>
 
+    <select id="findFirstRefundHandleDate" parameterType="list" resultType="Date">
+        SELECT min(handle_date)
+        FROM <include refid="tb"/>
+        WHERE
+        <foreach collection="outMaterialHandleIds" item="i" open="(" separator="or" close=")">
+            rel_material_handle_id=#{i}
+        </foreach>
+        AND type=13
+    </select>
+
     <select id="findPrevious" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>

@@ -7,6 +7,7 @@ import io.terminus.doctor.basic.manager.WarehouseReturnManager;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -38,7 +39,10 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
 
     @Override
     protected DoctorWarehouseStockHandle create(WarehouseStockRefundDto stockDto, DoctorWareHouse wareHouse) {
-        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.create(stockDto, wareHouse, getMaterialHandleType(), null);
+
+        DoctorWarehouseStockHandle outStockHandle = doctorWarehouseStockHandleDao.findById(stockDto.getOutStockHandleId());
+
+        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.create(stockDto, wareHouse, getMaterialHandleType(), outStockHandle.getId());
         warehouseReturnManager.create(stockDto.getDetails(), stockDto, stockHandle, wareHouse);
 
         stockDto.getDetails().forEach(detail -> {
@@ -64,22 +68,29 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
     }
 
     @Override
+    public void beforeUpdate(WarehouseStockRefundDto stockDto, DoctorWarehouseStockHandle stockHandle) {
+        if (!stockDto.getOutStockHandleId().equals(stockHandle.getRelStockHandleId()))
+            throw new ServiceException("refund.out.stock.handle.not.allow.change");
+    }
+
+    @Override
     protected void changed(DoctorWarehouseMaterialHandle materialHandle, WarehouseStockRefundDto.WarehouseStockRefundDetailDto detail, DoctorWarehouseStockHandle stockHandle, WarehouseStockRefundDto stockDto, DoctorWareHouse wareHouse) {
 
         materialHandle.setRemark(detail.getRemark());
 
         DoctorWarehouseMaterialHandle outMaterialHandle = doctorWarehouseMaterialHandleDao.findById(materialHandle.getRelMaterialHandleId());
 
+        boolean changeHandleDate = !DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
+
         if (detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0
-                || !DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime())) {
+                || changeHandleDate) {
 
             //更改了数量，或更改了操作日期
-
             if (detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0) {
                 //可退数量
                 BigDecimal alreadyRefundQuantity = doctorWarehouseMaterialHandleDao.countQuantityAlreadyRefund(materialHandle.getRelMaterialHandleId());
                 if (outMaterialHandle.getQuantity().subtract(alreadyRefundQuantity).compareTo(detail.getQuantity()) < 0)
-                    throw new ServiceException("");
+                    throw new InvalidException("quantity.not.enough.to.refund", outMaterialHandle.getQuantity().subtract(alreadyRefundQuantity));
 
                 BigDecimal changedQuantity = detail.getQuantity().subtract(materialHandle.getQuantity());
                 if (changedQuantity.compareTo(new BigDecimal(0)) > 0) {
@@ -91,14 +102,13 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
             }
 
             Date recalculateDate = materialHandle.getHandleDate();
-            int days = DateUtil.getDeltaDays(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
-            if (days != 0) {
-                if (DateUtil.getDeltaDays(outMaterialHandle.getHandleDate(), stockDto.getHandleDate().getTime()) < 0)
-                    throw new ServiceException("");
+            if (changeHandleDate) {
+                if (outMaterialHandle.getHandleDate().after(stockDto.getHandleDate().getTime()))
+                    throw new ServiceException("refund.date.before.out.date");
 
                 warehouseReturnManager.buildNewHandleDateForUpdate(materialHandle, stockDto.getHandleDate());
 
-                if (days < 0) {//事件日期改小了，重算日期采用新的日期
+                if (stockDto.getHandleDate().getTime().before(stockHandle.getHandleDate())) {//事件日期改小了，重算日期采用新的日期
                     recalculateDate = materialHandle.getHandleDate();
                 }
             }

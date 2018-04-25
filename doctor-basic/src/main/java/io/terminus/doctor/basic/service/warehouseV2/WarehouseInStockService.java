@@ -94,13 +94,5 @@ public class WarehouseInStockService extends AbstractWarehouseStockService<Wareh
             //只更新了备注
             doctorWarehouseMaterialHandleDao.update(materialHandle);
         }
-
-        if (!stockDto.getSettlementDate().equals(stockHandle.getSettlementDate()) ||
-                changeHandleDate) {
-            stockHandle.setSettlementDate(stockDto.getSettlementDate());
-            warehouseInManager.buildNewHandleDateForUpdate(stockHandle, stockDto.getHandleDate());
-            doctorWarehouseStockHandleDao.update(stockHandle);
-        }
-
     }
 }

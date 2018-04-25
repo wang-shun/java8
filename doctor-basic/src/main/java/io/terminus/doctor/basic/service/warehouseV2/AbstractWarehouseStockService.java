@@ -8,6 +8,7 @@ import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseStockHandleDao;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDetail;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDto;
+import io.terminus.doctor.basic.dto.warehouseV2.WarehouseFormulaDto;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockTransferDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.manager.DoctorWarehouseStockHandleManager;
@@ -15,7 +16,9 @@ import io.terminus.doctor.basic.manager.DoctorWarehouseStockManager;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
+import io.terminus.doctor.common.utils.DateUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.transaction.annotation.Transactional;
@@ -127,8 +130,25 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
         changed(changed, stockHandle, stockDto, wareHouse);
 
         //更新单据
+        buildNewHandleDateForUpdate(stockHandle, stockDto.getHandleDate());
         doctorWarehouseStockHandleManager.update(stockDto, stockHandle);
         return stockHandle;
+    }
+
+    public void buildNewHandleDateForUpdate(DoctorWarehouseStockHandle stockHandle, Calendar newHandleDate) {
+
+        if (DateUtil.inSameDate(newHandleDate.getTime(), new Date())) {
+            DateTime old = new DateTime(newHandleDate.getTime());
+            DateTime newDate = new DateTime().withDate(old.getYear(), old.getMonthOfYear(), old.getDayOfMonth());
+            stockHandle.setHandleDate(newDate.toDate());
+            return;
+        }
+
+        newHandleDate.set(Calendar.HOUR_OF_DAY, 23);
+        newHandleDate.set(Calendar.MINUTE, 59);
+        newHandleDate.set(Calendar.SECOND, 59);
+        newHandleDate.set(Calendar.MILLISECOND, 0);
+        stockHandle.setHandleDate(newHandleDate.getTime());
     }
 
     /**
@@ -184,6 +204,18 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
                 });
 
                 transferInWarehouseIds.forEach(id -> {
+                    log.info("lock for warehouse :{}", id);
+                    Lock l = lockRegistry.obtain(id);
+                    if (!l.tryLock())
+                        throw new JsonResponseException("stock.handle.in.operation");
+                    locks.add(l);
+                });
+            } else if (stockDto instanceof WarehouseFormulaDto) {
+                Set<Long> formulaOutWarehouseIds = new HashSet<>();
+                ((WarehouseFormulaDto) stockDto).getDetails().forEach(d -> {
+                    formulaOutWarehouseIds.add(d.getWarehouseId());
+                });
+                formulaOutWarehouseIds.forEach(id -> {
                     log.info("lock for warehouse :{}", id);
                     Lock l = lockRegistry.obtain(id);
                     if (!l.tryLock())

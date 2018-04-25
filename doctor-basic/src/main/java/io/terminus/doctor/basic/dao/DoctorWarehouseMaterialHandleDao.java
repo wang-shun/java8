@@ -110,6 +110,17 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectList(this.sqlId("findByOrgAndSettlementDate"), criteria);
     }
 
+    /**
+     * 获取最早一笔退料入库单据的事件日期
+     *
+     * @return
+     */
+    public Date findFirstRefundHandleDate(List<Long> outMaterialHandleIds) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("outMaterialHandleIds", outMaterialHandleIds);
+        return this.sqlSession.selectOne(this.sqlId("findFirstRefundHandleDate"), params);
+    }
+
     @Deprecated
     public void reverseSettlement(Long farmId, Integer year, Integer month) {
         Map<String, Object> criteria = Maps.newHashMap();
@@ -120,6 +131,12 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         this.sqlSession.update(this.sqlId("reverseSettlement"), criteria);
     }
 
+    /**
+     * 重置单价和金额
+     *
+     * @param orgId          公司id
+     * @param settlementDate 会计年月
+     */
     public void reverseSettlement(Long orgId, Date settlementDate) {
         Map<String, Object> criteria = Maps.newHashMap();
         criteria.put("orgId", orgId);

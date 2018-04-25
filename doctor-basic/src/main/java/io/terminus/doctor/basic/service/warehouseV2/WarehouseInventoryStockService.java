@@ -235,10 +235,6 @@ public class WarehouseInventoryStockService extends
             }
 
         }
-
-//        if (stockHandle.getSettlementDate().equals(stockDto.getSettlementDate())) {
-//
-//        }
     }
 
     @Override
