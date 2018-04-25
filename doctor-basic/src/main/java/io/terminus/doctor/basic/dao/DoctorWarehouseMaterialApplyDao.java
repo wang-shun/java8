@@ -10,6 +10,8 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPi
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -122,7 +124,21 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
      * @return
      */
     public List<DoctorWarehouseMaterialApplyPigGroup> selectPigGroupApply(Integer farmId, String pigType, String pigName, String pigGroupName,
-                                                                                      Integer skuType, String skuName, Date openAt, Date closeAt){
+                                                                                      Integer skuType, String skuName, String openAt, String closeAt){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date openAt1;
+        Date closeAt1;
+        try {
+            if(openAt != null){
+                openAt1 = sdf.parse(openAt);
+            }
+            if(closeAt != null) {
+                closeAt1 = sdf.parse(closeAt);
+            }
+        }catch (ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         Map<String,Object> map = Maps.newHashMap();
         map.put("farmId",farmId);
         map.put("pigType",pigType);
@@ -130,8 +146,8 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         map.put("pigGroupName",pigGroupName);
         map.put("skuType",skuType);
         map.put("skuName",skuName);
-        map.put("openAt",openAt);
-        map.put("closeAt",closeAt);
+        map.put("openAt1",openAt);
+        map.put("closeAt1",closeAt);
         return this.sqlSession.selectList(this.sqlId("selectPigGroupApply"),map);
     }
 

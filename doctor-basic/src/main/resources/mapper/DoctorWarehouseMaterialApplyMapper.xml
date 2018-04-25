@@ -370,7 +370,7 @@
             <if test="pigName != null"> AND e.name = #{pigName}</if>
             <if test="pigGroupName != null"> AND a.pig_group_name = #{pigGroupName}</if>
             <if test="skuType != null">  AND c.type= #{skuType}</if>
-            <if test="skuName != null"> AND c.name = #{skuName}</if>
+            <if test="skuName != null"> AND c.name like concat('%',#{skuName},'%')</if>
             <if test="openAt != null"> AND d.open_at = #{openAt}</if>
             <if test="closeAt != null">  AND d.close_at = #{closeAt}</if>
         GROUP BY
