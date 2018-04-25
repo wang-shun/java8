@@ -491,7 +491,8 @@ public class StockHandleController {
                     title.createCell(4).setCellValue("单位");
                     title.createCell(5).setCellValue("账面数量");
                     title.createCell(6).setCellValue("盘点数量");
-                    title.createCell(7).setCellValue("备注");
+                    title.createCell(7).setCellValue("单价");
+                    title.createCell(8).setCellValue("备注");
 
                     String typeName = "";
                     BigDecimal totalQuantity = new BigDecimal(0);
@@ -517,7 +518,8 @@ public class StockHandleController {
                         row.createCell(4).setCellValue(vo.getUnit());
                         row.createCell(5).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
                         row.createCell(6).setCellValue(quantity.doubleValue());
-                        row.createCell(7).setCellValue(vo.getRemark());
+                        row.createCell(7).setCellValue(vo.getUnitPrice());
+                        row.createCell(8).setCellValue(vo.getRemark());
 
                         totalQuantity = vo.getQuantity();
                     }
