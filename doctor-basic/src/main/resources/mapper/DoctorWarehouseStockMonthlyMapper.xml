@@ -207,7 +207,7 @@
 
     <select id="monthWarehouseDetail" parameterType="map" resultType="map">
         select a.material_name as materialName,b.code as code,a.vendor_name as vendorName,
-        b.specification as specification,
+        b.specification as specification,a.warehouse_type as warehouseType,
         <include refid="detail"></include>
         a.unit as unit
         from doctor_warehouse_material_handle a
