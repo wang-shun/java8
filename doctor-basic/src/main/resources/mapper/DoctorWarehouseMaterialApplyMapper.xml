@@ -386,8 +386,8 @@
             a.apply_type = 1
             <if test="farmId != null"> AND a.farm_id = #{farmId}</if>
             <if test="pigType != null"> AND a.pig_type = #{pigType}</if>
-            <if test="pigName != null"> AND e.name = #{pigName}</if>
-            <if test="pigGroupName != null"> AND a.pig_group_name = #{pigGroupName}</if>
+            <if test="pigName != null"> AND e.id = #{pigName}</if>
+            <if test="pigGroupName != null"> AND a.pig_group_id = #{pigGroupName}</if>
             <if test="skuType != null">  AND c.type= #{skuType}</if>
             <if test="skuName != null"> AND c.name like concat('%',#{skuName},'%')</if>
             <if test="openAt != null"> AND d.open_at = #{openAt}</if>
