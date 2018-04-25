@@ -46,7 +46,8 @@ public class WarehouseInventoryStockService extends
         for (WarehouseStockInventoryDto.WarehouseStockInventoryDetail detail : stockDto.getDetails()) {
             BigDecimal stockQuantity;
             if (historyBill) {
-                stockQuantity = warehouseInventoryManager.getHistoryQuantityInclude(stockDto.getHandleDate().getTime(), stockDto.getWarehouseId(), detail.getMaterialId());
+                Date newDate = warehouseInventoryManager.buildNewHandleDate(stockDto.getHandleDate()).getTime();
+                stockQuantity = warehouseInventoryManager.getHistoryQuantityInclude(newDate, stockDto.getWarehouseId(), detail.getMaterialId());
             } else
                 stockQuantity = doctorWarehouseStockManager.getStock(wareHouse.getId(), detail.getMaterialId()).orElseGet(() -> {
                     DoctorWarehouseStock stock = new DoctorWarehouseStock();
@@ -91,7 +92,7 @@ public class WarehouseInventoryStockService extends
 
     @Override
     protected List<WarehouseStockInventoryDto.WarehouseStockInventoryDetail> getDetails(WarehouseStockInventoryDto stockDto) {
-        throw new UnsupportedOperationException();
+        return stockDto.getDetails();
     }
 
     @Override
@@ -159,8 +160,10 @@ public class WarehouseInventoryStockService extends
             else
                 inventoryQuantity = materialHandle.getBeforeStockQuantity().subtract(materialHandle.getQuantity());
 
+
+            boolean changeHandleDate = !DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
             if (detail.getQuantity().compareTo(inventoryQuantity) != 0
-                    || !DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime())) {
+                    || changeHandleDate) {
 
                 //库存100，盘亏，change 3，97；盘盈 5，105=+8
                 //库存100，之前是盘亏3，现在是盘亏5=-2
@@ -223,11 +226,10 @@ public class WarehouseInventoryStockService extends
 
 
                 Date recalculateDate = materialHandle.getHandleDate();
-                int days = DateUtil.getDeltaDays(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
                 //更改了操作日期
-                if (days != 0) {
+                if (changeHandleDate) {
                     warehouseInventoryManager.buildNewHandleDateForUpdate(materialHandle, stockDto.getHandleDate());
-                    if (days < 0) {//事件日期改小了，重算日期采用新的日期
+                    if (stockDto.getHandleDate().getTime().before(stockHandle.getHandleDate())) {//事件日期改小了，重算日期采用新的日期
                         recalculateDate = materialHandle.getHandleDate();
                     }
                 }

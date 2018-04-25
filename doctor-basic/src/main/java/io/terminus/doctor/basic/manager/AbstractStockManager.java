@@ -15,6 +15,7 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.support.locks.LockRegistry;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 /**
  * Created by sunbo@terminus.io on 2018/4/8.
  */
+@Slf4j
 public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetail, F extends AbstractWarehouseStockDto> {
 
     @Autowired
@@ -88,11 +90,14 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
                     && historyQuantity.compareTo(doctorWarehouseMaterialHandle.getQuantity()) < 0)
                 throw new ServiceException("warehouse.stock.not.enough");
 
+            log.debug("set {} before stock quantity:{}", doctorWarehouseMaterialHandle.getId(), historyQuantity);
             doctorWarehouseMaterialHandle.setBeforeStockQuantity(historyQuantity);
 
             if (WarehouseMaterialHandleType.isBigIn(doctorWarehouseMaterialHandle.getType())) {
+                log.debug("add {} for history stock {}", doctorWarehouseMaterialHandle.getQuantity(), historyQuantity);
                 historyQuantity = historyQuantity.add(doctorWarehouseMaterialHandle.getQuantity());
             } else {
+                log.debug("sub {} for history stock {}", doctorWarehouseMaterialHandle.getQuantity(), historyQuantity);
                 historyQuantity = historyQuantity.subtract(doctorWarehouseMaterialHandle.getQuantity());
             }
         }

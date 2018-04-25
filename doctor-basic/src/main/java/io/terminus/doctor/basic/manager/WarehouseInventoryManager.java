@@ -2,6 +2,7 @@ package io.terminus.doctor.basic.manager;
 
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDetail;
 import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDto;
+import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockInventoryDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
@@ -19,20 +20,17 @@ import java.util.Date;
  * Created by sunbo@terminus.io on 2018/4/8.
  */
 @Component
-public class WarehouseInventoryManager extends AbstractStockManager {
+public class WarehouseInventoryManager extends AbstractStockManager<WarehouseStockInventoryDto.WarehouseStockInventoryDetail, WarehouseStockInventoryDto> {
+
 
     @Override
-    public DoctorWarehouseMaterialHandle create(AbstractWarehouseStockDetail detail,
-                                                AbstractWarehouseStockDto stockDto,
-                                                DoctorWarehouseStockHandle stockHandle,
-                                                DoctorWareHouse wareHouse) {
-
+    public DoctorWarehouseMaterialHandle create(WarehouseStockInventoryDto.WarehouseStockInventoryDetail detail, WarehouseStockInventoryDto stockDto, DoctorWarehouseStockHandle stockHandle, DoctorWareHouse wareHouse) {
         DoctorWarehouseMaterialHandle materialHandle = buildMaterialHandle(detail, stockDto, stockHandle, wareHouse);
-
 
         boolean profit = stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue());
         if (profit) {
             materialHandle.setType(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue());
+            materialHandle.setUnitPrice(detail.getUnitPrice());
         } else {
             materialHandle.setType(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue());
         }
@@ -47,9 +45,9 @@ public class WarehouseInventoryManager extends AbstractStockManager {
 
             materialHandle.setBeforeStockQuantity(historyQuantity);
             if (profit)
-                historyQuantity.add(materialHandle.getQuantity());
+                historyQuantity = historyQuantity.add(materialHandle.getQuantity());
             else
-                historyQuantity.subtract(materialHandle.getQuantity());
+                historyQuantity = historyQuantity.subtract(materialHandle.getQuantity());
 
             recalculate(stockDto.getHandleDate().getTime(), false, wareHouse.getId(), materialHandle.getMaterialId(), historyQuantity);
         } else {
@@ -63,6 +61,7 @@ public class WarehouseInventoryManager extends AbstractStockManager {
         doctorWarehouseMaterialHandleDao.create(materialHandle);
         return materialHandle;
     }
+
 
     @Override
     public void delete(DoctorWarehouseMaterialHandle materialHandle) {
