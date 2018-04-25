@@ -172,7 +172,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     }
 
     @Override
-    public Response<List<List<Map>>> companyReport(Map<String, Object> criteria) {
+    public ResponseUtil<List<List<Map>>> companyReport(Map<String, Object> criteria) {
         List<List<Map>> resultList = Lists.newArrayList();
         try {
             criteria = this.getMonth(criteria);
@@ -246,13 +246,13 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
             return ResponseUtil.isOk(resultList,farms);
         } catch (Exception e) {
             log.error("failed to list doctor warehouse material handle, cause:{}", Throwables.getStackTraceAsString(e));
-            return ResponseUtil.fail("doctor.warehouse.material.handle.list.fail");
+            return ResponseUtil.isFail("doctor.warehouse.material.handle.list.fail");
         }
 
     }
 
     @Override
-    public Response<List<List<Map>>> warehouseReport(Map<String, Object> criteria) {
+    public ResponseUtil<List<List<Map>>> warehouseReport(Map<String, Object> criteria) {
         List<List<Map>> resultList = Lists.newArrayList();
         try {
             criteria = this.getMonth(criteria);
@@ -304,6 +304,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
                             Map map = Maps.newHashMap();
                             map.put("id", lists.get(x).get("farmId"));
                             map.put("name", lists.get(x).get("farmName"));
+                            map.put("date",lists.get(x).get("settlementDate"));
                             farms.add(map);
                         }
                         size = lists.size();
@@ -318,7 +319,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
             return ResponseUtil.isOk(resultList,farms);
         }catch (Exception e) {
             log.error("failed to list doctor warehouse material handle, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("doctor.warehouse.material.handle.list.fail");
+            return ResponseUtil.isFail("doctor.warehouse.material.handle.list.fail");
         }
     }
 
