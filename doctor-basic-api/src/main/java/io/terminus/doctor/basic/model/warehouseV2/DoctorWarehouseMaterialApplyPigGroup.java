@@ -52,8 +52,8 @@ public class DoctorWarehouseMaterialApplyPigGroup implements Serializable {
     //金额
     private Double amount;
 
-    //会计年月
-    private String settlementDate;
+    //猪舍类型
+    private String pigType;
 
     //单位
     private String unit;

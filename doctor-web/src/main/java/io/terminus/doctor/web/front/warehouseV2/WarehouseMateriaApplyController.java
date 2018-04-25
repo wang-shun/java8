@@ -5,6 +5,7 @@ import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroup;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroupDetail;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialApplyReadService;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.web.core.export.Exporter;
@@ -127,20 +128,25 @@ public class WarehouseMateriaApplyController {
                     row.createCell(7).setCellValue(String.valueOf(m.getUnitPrice()));
                     row.createCell(8).setCellValue(String.valueOf(m.getAmount()));
                     row.createCell(9).setCellValue(String.valueOf(m.getPigBarnName()));
-                    /*String b=String.valueOf(m.get("material_type"));
-                    String materialType=new String();
-                    if(b.equals(String.valueOf(WareHouseType.FEED.getKey()))){
-                        materialType=WareHouseType.FEED.getDesc();
-                    }else if(b.equals(String.valueOf(WareHouseType.MATERIAL.getKey()))){
-                        materialType=WareHouseType.MATERIAL.getDesc();
-                    }else if(b.equals(String.valueOf(WareHouseType.VACCINATION.getKey()))){
-                        materialType=WareHouseType.VACCINATION.getDesc();
-                    }else if(b.equals(String.valueOf(WareHouseType.MEDICINE.getKey()))){
-                        materialType=WareHouseType.MEDICINE.getDesc();
-                    }else if(b.equals(String.valueOf(WareHouseType.CONSUME.getKey()))){
-                        materialType=WareHouseType.CONSUME.getDesc();
-                    }*/
-                    row.createCell(10).setCellValue(String.valueOf(m.getPigType()));
+
+                    String c=String.valueOf(m.getPigType());
+                    if(c.equals(String.valueOf(PigType.NURSERY_PIGLET.getValue()))){
+                        row.createCell(10).setCellValue(PigType.NURSERY_PIGLET.getDesc());
+                    }else if(c.equals(String.valueOf(PigType.FATTEN_PIG.getValue()))){
+                        row.createCell(10).setCellValue(PigType.FATTEN_PIG.getDesc());
+                    }else if(c.equals(String.valueOf(PigType.RESERVE.getValue()))){
+                        row.createCell(10).setCellValue(PigType.RESERVE.getDesc());
+                    }else if(c.equals(String.valueOf(PigType.MATE_SOW.getValue()))){
+                        row.createCell(10).setCellValue(PigType.MATE_SOW.getDesc());
+                    }else if(c.equals(String.valueOf(PigType.PREG_SOW.getValue()))){
+                        row.createCell(10).setCellValue(PigType.PREG_SOW.getDesc());
+                    }
+                    else if(c.equals(String.valueOf(PigType.DELIVER_SOW.getValue()))){
+                        row.createCell(10).setCellValue(PigType.DELIVER_SOW.getDesc());
+                    }
+                    else if(c.equals(String.valueOf(PigType.BOAR.getValue()))){
+                        row.createCell(10).setCellValue(PigType.BOAR.getDesc());
+                    }
                     row.createCell(11).setCellValue(String.valueOf(m.getPigGroupName()));
                     row.createCell(12).setCellValue(String.valueOf(m.getStaffName()));
                     row.createCell(13).setCellValue(String.valueOf(m.getFarmName()));
@@ -204,8 +210,25 @@ public class WarehouseMateriaApplyController {
                     Row  row  =  sheet.createRow(pos++);
                     row.createCell(0).setCellValue(String.valueOf(m.getPigGroupName()));
                     row.createCell(1).setCellValue(String.valueOf(m.getPigName()));
-                    row.createCell(2).setCellValue(String.valueOf(m.getStaffName()));
-                    row.createCell(3).setCellValue(String.valueOf(m.getSettlementDate()));
+                    String c=String.valueOf(m.getPigType());
+                    if(c.equals(String.valueOf(PigType.NURSERY_PIGLET.getValue()))){
+                        row.createCell(2).setCellValue(PigType.NURSERY_PIGLET.getDesc());
+                    }else if(c.equals(String.valueOf(PigType.FATTEN_PIG.getValue()))){
+                        row.createCell(2).setCellValue(PigType.FATTEN_PIG.getDesc());
+                    }else if(c.equals(String.valueOf(PigType.RESERVE.getValue()))){
+                        row.createCell(2).setCellValue(PigType.RESERVE.getDesc());
+                    }else if(c.equals(String.valueOf(PigType.MATE_SOW.getValue()))){
+                        row.createCell(2).setCellValue(PigType.MATE_SOW.getDesc());
+                    }else if(c.equals(String.valueOf(PigType.PREG_SOW.getValue()))){
+                        row.createCell(2).setCellValue(PigType.PREG_SOW.getDesc());
+                    }
+                    else if(c.equals(String.valueOf(PigType.DELIVER_SOW.getValue()))){
+                        row.createCell(2).setCellValue(PigType.DELIVER_SOW.getDesc());
+                    }
+                    else if(c.equals(String.valueOf(PigType.BOAR.getValue()))){
+                        row.createCell(2).setCellValue(PigType.BOAR.getDesc());
+                    }
+                    row.createCell(3).setCellValue(String.valueOf(m.getStaffName()));
                     row.createCell(4).setCellValue(String.valueOf(m.getCode()));
                     row.createCell(5).setCellValue(String.valueOf(m.getSkuName()));
                     row.createCell(6).setCellValue(String.valueOf(m.getUnit()));

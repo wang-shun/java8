@@ -48,7 +48,6 @@
         <result property="quantity" column="quantity"/>
         <result property="unitPrice" column="unit_price"/>
         <result property="amount" column="amount"/>
-        <result property="settlementDate" column="settlement_date"/>
         <result property="skuName" column="sku_name"/>
         <result property="unit" column="unit"/>
         <result property="skuType" column="sku_type"/>
@@ -59,6 +58,8 @@
         <result property="farmName" column="farm_name"/>
         <result property="pigGroupId" column="pig_group_id"/>
         <result property="skuId" column="sku_id"/>
+        <result property="pigType" column="pig_type"/>
+
     </resultMap>
 
     <resultMap id="DoctorWarehouseMaterialApplyPigGroupDetailMap" type="DoctorWarehouseMaterialApplyPigGroupDetail">
@@ -360,8 +361,8 @@
       SELECT
             a.pig_group_name,
             e.NAME as pig_name,
+            a.pig_type,
             e.staff_name,
-            date_format(b.settlement_date,'%Y-%m') as settlement_date,
             c.code,
             c.name as sku_name,
             c.unit,
