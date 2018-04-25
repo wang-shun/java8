@@ -11,6 +11,7 @@ import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.*;
 import io.terminus.doctor.common.utils.DateUtil;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,9 +32,9 @@ public class WarehouseOutManager extends AbstractStockManager<WarehouseStockOutD
 
     @Override
     public DoctorWarehouseMaterialHandle create(WarehouseStockOutDto.WarehouseStockOutDetail detail,
-                       WarehouseStockOutDto stockDto,
-                       DoctorWarehouseStockHandle stockHandle,
-                       DoctorWareHouse wareHouse) {
+                                                WarehouseStockOutDto stockDto,
+                                                DoctorWarehouseStockHandle stockHandle,
+                                                DoctorWareHouse wareHouse) {
         DoctorWarehouseMaterialHandle materialHandle = buildMaterialHandle(detail, stockDto, stockHandle, wareHouse);
         materialHandle.setType(WarehouseMaterialHandleType.OUT.getValue());
 
@@ -66,7 +67,24 @@ public class WarehouseOutManager extends AbstractStockManager<WarehouseStockOutD
             materialHandle.setBeforeStockQuantity(currentQuantity);
         }
         doctorWarehouseMaterialHandleDao.create(materialHandle);
+        createApply(materialHandle, detail);
+        return materialHandle;
+    }
 
+    @Override
+    public void delete(DoctorWarehouseMaterialHandle materialHandle) {
+
+        materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.DELETE.getValue());
+        doctorWarehouseMaterialHandleDao.update(materialHandle);
+
+        if (!DateUtil.inSameDate(materialHandle.getHandleDate(), new Date())) {
+            recalculate(materialHandle);
+        }
+
+        doctorWarehouseMaterialApplyDao.deleteByMaterialHandle(materialHandle.getId());
+    }
+
+    public DoctorWarehouseMaterialApply createApply(DoctorWarehouseMaterialHandle materialHandle, WarehouseStockOutDto.WarehouseStockOutDetail detail) {
         DoctorWarehouseMaterialApply apply = new DoctorWarehouseMaterialApply();
         apply.setMaterialHandleId(materialHandle.getId());
         apply.setType(materialHandle.getWarehouseType());
@@ -89,8 +107,8 @@ public class WarehouseOutManager extends AbstractStockManager<WarehouseStockOutD
         apply.setApplyStaffName(detail.getApplyStaffName());
         apply.setPigType(detail.getPigType());
         apply.setApplyDate(materialHandle.getHandleDate());
-        apply.setApplyYear(stockDto.getHandleDate().get(Calendar.YEAR));
-        apply.setApplyMonth(stockDto.getHandleDate().get(Calendar.MONTH) + 1);
+        apply.setApplyYear(materialHandle.getHandleYear());
+        apply.setApplyMonth(materialHandle.getHandleMonth());
         if (detail.getApplyPigGroupId() != null) {
             if (detail.getApplyPigGroupId().equals(-1L)) {
                 apply.setPigGroupName("母猪");
@@ -99,23 +117,17 @@ public class WarehouseOutManager extends AbstractStockManager<WarehouseStockOutD
                 apply.setPigGroupName(detail.getApplyPigGroupName());
                 apply.setApplyType(WarehouseMaterialApplyType.GROUP.getValue());
             }
+
+            DoctorWarehouseMaterialApply barnApply = new DoctorWarehouseMaterialApply();
+            BeanUtils.copyProperties(apply, barnApply);
+            barnApply.setApplyType(WarehouseMaterialApplyType.BARN.getValue());
+            barnApply.setPigGroupId(null);
+            barnApply.setPigGroupName(null);
+            doctorWarehouseMaterialApplyDao.create(barnApply);
         } else {
             apply.setApplyType(WarehouseMaterialApplyType.BARN.getValue());
         }
         doctorWarehouseMaterialApplyDao.create(apply);
-        return materialHandle;
-    }
-
-    @Override
-    public void delete(DoctorWarehouseMaterialHandle materialHandle) {
-
-        materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.DELETE.getValue());
-        doctorWarehouseMaterialHandleDao.update(materialHandle);
-
-        if (!DateUtil.inSameDate(materialHandle.getHandleDate(), new Date())) {
-            recalculate(materialHandle);
-        }
-
-        doctorWarehouseMaterialApplyDao.deleteByMaterialHandle(materialHandle.getId());
+        return apply;
     }
 }

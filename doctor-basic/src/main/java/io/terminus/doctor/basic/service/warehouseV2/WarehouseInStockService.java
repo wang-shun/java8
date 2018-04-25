@@ -81,10 +81,9 @@ public class WarehouseInStockService extends AbstractWarehouseStockService<Wareh
                 warehouseInManager.resetUnitPrice(materialHandle, detail.getQuantity());
             }
             Date recalculateDate = materialHandle.getHandleDate();
-            int days = DateUtil.getDeltaDays(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
-            if (days != 0) {
+            if (changeHandleDate) {
                 warehouseInManager.buildNewHandleDateForUpdate(materialHandle, stockDto.getHandleDate());
-                if (days < 0) {//事件日期改小了，重算日期采用新的日期
+                if (stockDto.getHandleDate().getTime().before(stockHandle.getHandleDate())) {//事件日期改小了，重算日期采用新的日期
                     recalculateDate = materialHandle.getHandleDate();
                 }
             }

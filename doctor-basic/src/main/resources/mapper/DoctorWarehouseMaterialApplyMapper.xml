@@ -323,6 +323,25 @@
         AND (apply_type=1 or apply_type=2)
     </delete>
 
+    <update id="updateBarnApply" parameterType="map">
+        UPDATE
+        <include refid="tb"/>
+        SET
+        settlement_date=#{settlementDate},
+        apply_date=#{handleDate},
+        apply_year=#{year},
+        apply_month=#{month},
+        quantity=#{quantity},
+        pig_barn_id=#{barnId},
+        pig_barn_name=#{barnName},
+        pig_type=#{pigType},
+        apply_staff_id=#{staffId},
+        apply_staff_name=#{staffName}
+        WHERE
+        material_handle_id=#{materialHandleId}
+        AND apply_type=0
+    </update>
+
     <update id="reverseSettlement" parameterType="map">
         UPDATE
         <include refid="tb"/>
