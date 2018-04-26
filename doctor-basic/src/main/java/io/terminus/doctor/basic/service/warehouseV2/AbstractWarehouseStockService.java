@@ -54,7 +54,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
     @ExceptionHandle("stock.handle.fail")
     public Response<Long> handle(T stockDto) {
 
-        List<Lock> locks = lockedIfNecessary(stockDto);
+        lockedIfNecessary(stockDto);
         try {
 
             DoctorWareHouse wareHouse = doctorWareHouseDao.findById(stockDto.getWarehouseId());
@@ -68,7 +68,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
             } else {
 
                 stockHandle = doctorWarehouseStockHandleDao.findById(stockDto.getStockHandleId());
-
+                //编辑之前，可以做一些校验等
                 beforeUpdate(stockDto, stockHandle);
                 //编辑
                 stockHandle = update(stockDto, wareHouse, stockHandle);
@@ -137,6 +137,14 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
         return stockHandle;
     }
 
+    /**
+     * 组织新的事件日期
+     * 如果是历史日期，参数提交的事件日期+23:59:59
+     * 如果是当日，时分秒采用当前时分秒
+     *
+     * @param stockHandle
+     * @param newHandleDate
+     */
     public void buildNewHandleDateForUpdate(DoctorWarehouseStockHandle stockHandle, Calendar newHandleDate) {
 
         if (DateUtil.inSameDate(newHandleDate.getTime(), new Date())) {
@@ -153,6 +161,11 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
         stockHandle.setHandleDate(newHandleDate.getTime());
     }
 
+    /**
+     * 锁定仓库
+     *
+     * @param warehouseId
+     */
     public void lockWarehouse(Long warehouseId) {
         List<Lock> locks = stockLocks.get();
         boolean isNewLocks = false;
@@ -203,48 +216,48 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
                                     DoctorWareHouse wareHouse);
 
 
-    private List<Lock> lockedIfNecessary(AbstractWarehouseStockDto stockDto) {
+    private void lockedIfNecessary(AbstractWarehouseStockDto stockDto) {
 
-        if (stockDto.getStockHandleId() != null && !stockDto.getHandleDate().equals(Calendar.getInstance())) {
+        //新增/编辑当日单据不需要重算，也就不需要锁
+        if (DateUtil.inSameDate(stockDto.getHandleDate().getTime(), new Date()))
+            return;
 
-            List<Lock> locks = new ArrayList<>();
+        List<Lock> locks = new ArrayList<>();
 
-            log.info("lock for warehouse :{}", stockDto.getWarehouseId());
-            Lock lock = lockRegistry.obtain(stockDto.getWarehouseId().toString());
-            if (!lock.tryLock())
-                throw new JsonResponseException("stock.handle.in.operation");
+        log.info("lock for warehouse :{}", stockDto.getWarehouseId());
+        Lock lock = lockRegistry.obtain(stockDto.getWarehouseId().toString());
+        if (!lock.tryLock())
+            throw new JsonResponseException("stock.handle.in.operation");
 
-            locks.add(lock);
-            if (stockDto instanceof WarehouseStockTransferDto) {
-                Set<Long> transferInWarehouseIds = new HashSet<>();
-                ((WarehouseStockTransferDto) stockDto).getDetails().forEach(d -> {
-                    transferInWarehouseIds.add(d.getTransferInWarehouseId());
-                });
+        locks.add(lock);
+        if (stockDto instanceof WarehouseStockTransferDto) {
+            Set<Long> transferInWarehouseIds = new HashSet<>();
+            ((WarehouseStockTransferDto) stockDto).getDetails().forEach(d -> {
+                transferInWarehouseIds.add(d.getTransferInWarehouseId());
+            });
 
-                transferInWarehouseIds.forEach(id -> {
-                    log.info("lock for warehouse :{}", id);
-                    Lock l = lockRegistry.obtain(id.toString());
-                    if (!l.tryLock())
-                        throw new JsonResponseException("stock.handle.in.operation");
-                    locks.add(l);
-                });
-            } else if (stockDto instanceof WarehouseFormulaDto) {
-                Set<Long> formulaOutWarehouseIds = new HashSet<>();
-                ((WarehouseFormulaDto) stockDto).getDetails().forEach(d -> {
-                    formulaOutWarehouseIds.add(d.getWarehouseId());
-                });
-                formulaOutWarehouseIds.forEach(id -> {
-                    log.info("lock for warehouse :{}", id);
-                    Lock l = lockRegistry.obtain(id.toString());
-                    if (!l.tryLock())
-                        throw new JsonResponseException("stock.handle.in.operation");
-                    locks.add(l);
-                });
-            }
-            stockLocks.set(locks);
-            return locks;
+            transferInWarehouseIds.forEach(id -> {
+                log.info("lock for warehouse :{}", id);
+                Lock l = lockRegistry.obtain(id.toString());
+                if (!l.tryLock())
+                    throw new JsonResponseException("stock.handle.in.operation");
+                locks.add(l);
+            });
+        } else if (stockDto.getStockHandleId() != null && stockDto instanceof WarehouseFormulaDto) {
+            //配方生产新增，不支持新增历史单据，所以新增就不需要锁
+            Set<Long> formulaOutWarehouseIds = new HashSet<>();
+            ((WarehouseFormulaDto) stockDto).getDetails().forEach(d -> {
+                formulaOutWarehouseIds.add(d.getWarehouseId());
+            });
+            formulaOutWarehouseIds.forEach(id -> {
+                log.info("lock for warehouse :{}", id);
+                Lock l = lockRegistry.obtain(id.toString());
+                if (!l.tryLock())
+                    throw new JsonResponseException("stock.handle.in.operation");
+                locks.add(l);
+            });
         }
-        return Collections.emptyList();
+        stockLocks.set(locks);
     }
 
     private void releaseLocks() {

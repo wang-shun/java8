@@ -119,6 +119,7 @@ public class WarehouseTransferStockService
 
             DoctorWarehouseMaterialHandle transferIn = doctorWarehouseMaterialHandleDao.findById(materialHandle.getRelMaterialHandleId());
 
+            //是否更改了入库仓库
             boolean changedTransferInWarehouse = !detail.getTransferInWarehouseId().equals(transferIn.getWarehouseId());
 
             materialHandle.setRemark(detail.getRemark());

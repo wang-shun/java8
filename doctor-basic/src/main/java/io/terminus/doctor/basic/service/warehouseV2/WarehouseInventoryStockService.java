@@ -117,7 +117,7 @@ public class WarehouseInventoryStockService extends
                         WarehouseStockInventoryDto stockDto,
                         DoctorWareHouse wareHouse) {
 
-        boolean needCreateStockHandle = false;
+        boolean needCreateStockHandle = false;//是否需要新增单据
         for (WarehouseStockInventoryDto.WarehouseStockInventoryDetail k : changed.keySet()) {
 
             DoctorWarehouseMaterialHandle v = changed.get(k);
