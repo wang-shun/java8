@@ -116,9 +116,6 @@ public class WarehouseFormulaStockService extends AbstractWarehouseStockService<
         //配方生产入库单据
         DoctorWarehouseStockHandle inStockHandle = doctorWarehouseStockHandleDao.findById(stockHandle.getRelStockHandleId());
 
-        //配方生产出库单据
-//        List<DoctorWarehouseStockHandle> outStockHandles = doctorWarehouseStockHandleDao.findRelStockHandle(inStockHandle.getId());
-
         boolean changeHandleDate = !DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
         boolean changeInWarehouse = !stockDto.getWarehouseId().equals(inStockHandle.getWarehouseId());
 
@@ -161,7 +158,7 @@ public class WarehouseFormulaStockService extends AbstractWarehouseStockService<
                     warehouseFormulaManager.buildNewHandleDateForUpdate(materialHandle, stockDto.getHandleDate());
 
                     int days = DateUtil.getDeltaDays(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
-                    if (days < 0) {//事件日期改小了，重算日期采用新的日期
+                    if (stockDto.getHandleDate().getTime().before(stockHandle.getHandleDate())) {//事件日期改小了，重算日期采用新的日期
                         recalculateDate = materialHandle.getHandleDate();
                     }
                 }
@@ -172,9 +169,10 @@ public class WarehouseFormulaStockService extends AbstractWarehouseStockService<
             }
         }
 
+        //修改对应的配方入库的单据明细
         if (changeInWarehouse || thisStockHandleChangedQuantity.compareTo(new BigDecimal(0)) != 0 || changeHandleDate) {
 
-            boolean needUpdateInStockHandle = false;
+            boolean needUpdateInStockHandle = false;//是否需要更新单据
             List<DoctorWarehouseMaterialHandle> inMaterialHandles = doctorWarehouseMaterialHandleDao.findByStockHandle(inStockHandle.getId());
             if (inMaterialHandles.isEmpty())
                 throw new ServiceException("material.handle.not.found");
@@ -182,7 +180,7 @@ public class WarehouseFormulaStockService extends AbstractWarehouseStockService<
             DoctorWareHouse oldInWarehouse = new DoctorWareHouse();
             oldInWarehouse.setId(inStockHandle.getWarehouseId());
             oldInWarehouse.setWareHouseName(inStockHandle.getWarehouseName());
-            if (!changeInWarehouse) {
+            if (!changeInWarehouse) {//如果未改变配方生产入库仓库
                 ////如果该单据明细变动了数量，并未改入库仓库，对应的入库单据的明细中的数量也要发生相应变动
                 if (thisStockHandleChangedQuantity.compareTo(new BigDecimal(0)) > 0)
                     doctorWarehouseStockManager.in(inMaterialHandles.get(0).getMaterialId(), thisStockHandleChangedQuantity, oldInWarehouse);
@@ -202,15 +200,19 @@ public class WarehouseFormulaStockService extends AbstractWarehouseStockService<
                 doctorWarehouseMaterialHandleDao.update(inMaterialHandles.get(0));
                 warehouseFormulaManager.recalculate(inMaterialHandles.get(0), recalculateDate);
 
-            } else {
+            } else {//如果改变了配方生产入库仓库
+                //原入库仓库扣减库存
                 doctorWarehouseStockManager.out(inMaterialHandles.get(0).getMaterialId(), inMaterialHandles.get(0).getQuantity(), oldInWarehouse);
+                //原入库仓库删除配方生产入库明细
                 warehouseFormulaManager.delete(inMaterialHandles.get(0));
 
                 WarehouseFormulaDto.WarehouseFormulaDetail detail = new WarehouseFormulaDto.WarehouseFormulaDetail();
                 detail.setMaterialId(inMaterialHandles.get(0).getMaterialId());
                 detail.setWarehouseId(wareHouse.getId());
                 detail.setQuantity(inMaterialHandles.get(0).getQuantity().add(thisStockHandleChangedQuantity));
+                //新的入库仓库添加配方生产入库明细
                 warehouseFormulaManager.create(detail, stockDto, stockHandle, wareHouse);
+                //新的入库仓库添加库存
                 doctorWarehouseStockManager.in(inMaterialHandles.get(0).getMaterialId(), detail.getQuantity(), wareHouse);
 
                 inStockHandle.setWarehouseId(wareHouse.getId());
