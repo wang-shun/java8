@@ -248,10 +248,10 @@ public class WarehouseMateriaApplyController {
                         row.createCell(10).setCellValue(WareHouseType.CONSUME.getDesc());
                     }
                     row.createCell(11).setCellValue(String.valueOf(m.getVendorName()));
-                    row.createCell(13).setCellValue(String.valueOf(m.getSpecification()));
-                    row.createCell(14).setCellValue(String.valueOf(m.getOpenAt()));
-                    row.createCell(15).setCellValue(String.valueOf(m.getCloseAt()));
-                    row.createCell(16).setCellValue(String.valueOf(m.getFarmName()));
+                    row.createCell(12).setCellValue(String.valueOf(m.getSpecification()));
+                    row.createCell(13).setCellValue(String.valueOf(m.getOpenAt()));
+                    row.createCell(14).setCellValue(String.valueOf(m.getCloseAt()));
+                    row.createCell(15).setCellValue(String.valueOf(m.getFarmName()));
                 }
 
                 workbook.write(response.getOutputStream());
