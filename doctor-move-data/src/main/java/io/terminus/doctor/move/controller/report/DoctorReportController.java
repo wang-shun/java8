@@ -276,6 +276,26 @@ public class DoctorReportController {
     }
 
     /**
+     * 刷新指定时间之后全维度前期分娩窝数，前期分娩率，后推分娩窝数，后推分娩率
+     * @param start
+     * @return
+     */
+    @RequestMapping(value = "/flush/all/deliver/rate")
+    public Boolean flushAllDeliverRate(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start) {
+        log.info("synchronize all deliver rate starting start:{}");
+        List<DoctorFarm> doctorFarms = RespHelper.orServEx(doctorFarmReadService.findAllFarms());
+        Set<Long> orzList = doctorFarms.stream().map(DoctorFarm::getId).collect(Collectors.toSet());
+        orzList.parallelStream().forEach(orzId ->
+                doctorDailyReportV2Service.flushDeliverRate(orzId, OrzDimension.FARM.getValue(), start));
+
+        orzList = doctorFarms.stream().map(DoctorFarm::getOrgId).collect(Collectors.toSet());
+        orzList.parallelStream().forEach(orzId ->
+                doctorDailyReportV2Service.flushDeliverRate(orzId, OrzDimension.ORG.getValue(), start));
+        log.info("synchronize all deliver rate end");
+        return Boolean.TRUE;
+    }
+
+    /**
      * 刷新指定日期后影响的日报表，并同步数据到bi
      * @param date
      * @return
