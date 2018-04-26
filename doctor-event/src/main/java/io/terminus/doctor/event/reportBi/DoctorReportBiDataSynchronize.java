@@ -309,7 +309,7 @@ public class DoctorReportBiDataSynchronize {
      * @param pigDate
      * @param type
      */
-    private void synchronizeDeliverRate(Long orzId, Integer orzType, Date pigDate, Integer type) {
+    public void synchronizeDeliverRate(Long orzId, Integer orzType, Date pigDate, Integer type) {
         List<DoctorDimensionCriteria> criteriaList = Lists.newArrayList();
         criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, pigDate, type, DateDimension.DAY.getValue(), orzType));
         criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, pigDate, type, DateDimension.WEEK.getValue(), orzType));

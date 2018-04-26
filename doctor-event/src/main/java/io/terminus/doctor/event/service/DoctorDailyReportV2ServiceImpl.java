@@ -379,6 +379,19 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
             return Response.fail("generate.deliver.rate.failed");
         }
     }
+
+    @Override
+    public Response<Boolean> flushDeliverRate(Long orzId, Integer orzType, Date start) {
+        try {
+            log.info("flush deliver rate starting, orzId:{}, orzType:{}, start:{}", orzId, orzType, start);
+            doctorReportBiDataSynchronize.synchronizeDeliverRate(orzId, orzType, start, 1);
+            log.info("flush deliver rate end");
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error(",cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("flush.deliver.rate.failed");
+        }
+    }
 }
 
 

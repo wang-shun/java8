@@ -131,4 +131,13 @@ public interface DoctorDailyReportV2Service {
      * @return
      */
     Response<Boolean> generateDeliverRate(List<Long> farmIds, Date date);
+
+    /**
+     * 刷新某一组织维度，指定日期后的各个时间维度的分娩率相关指标
+     * @param orzId 组织id
+     * @param orzType 组织类型
+     * @param start 开始日期
+     * @return
+     */
+    Response<Boolean> flushDeliverRate(Long orzId, Integer orzType, Date start);
 }
