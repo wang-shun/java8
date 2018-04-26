@@ -744,14 +744,15 @@
         order by id
     </select>
 
-    <select id="selectCompanyReportInfo" parameterType="map" resultType="io.terminus.doctor.basic.dto.warehouseV2.CompanyReportDto">
-        select temp.settlement_date,temp.farm_id,sum(temp.in_amount)as in_amount,sum(temp.out_amount)as out_amount,sum(temp.balance_amount) as balance_amount
+    <select id="selectCompanyReportInfo" parameterType="map" resultType="map">
+        select temp.settlement_date as settlementDate,
+        temp.farm_id as farmId,sum(temp.in_amount)as inAmount,sum(temp.out_amount)as outAmount,sum(temp.balance_amount) as balanceAmount
         from
         (select  b.settlement_date,b.farm_id, 0 as in_amount,0 as out_amount ,sum(b.balance_amount) as balance_amount
         from doctor_warehouse_stock_monthly b
         where <![CDATA[ b.settlement_date >= #{settlementDateStart}]]>
         and <![CDATA[ b.settlement_date <= #{settlementDateEnd}]]>
-        and b.org_id = #{orgId,BIGINT}
+        and b.org_id = #{orgId,jdbcType = BIGINT}
         GROUP by b.settlement_date,b.farm_id
         union all
         select c.settlement_date,c.farm_id,sum(c.amount) as in_amount,0 as out_amount,0 as balance_amount
@@ -760,7 +761,7 @@
         c.delete_flag = 1
         and <![CDATA[ c.settlement_date >= #{settlementDateStart}]]>
         and <![CDATA[ c.settlement_date <= #{settlementDateEnd}]]>
-        and c.org_id = #{orgId,BIGINT}
+        and c.org_id = #{orgId,jdbcType = BIGINT}
         and c.type in (
         1,7,9,11,13
         )
@@ -772,7 +773,7 @@
         d.delete_flag = 1
         and <![CDATA[ d.settlement_date >= #{settlementDateStart}]]>
         and <![CDATA[ d.settlement_date <= #{settlementDateEnd}]]>
-        and d.org_id = #{orgId,BIGINT}
+        and d.org_id = #{orgId,jdbcType = BIGINT}
         and d.type in (
         2,8,10,12
         )

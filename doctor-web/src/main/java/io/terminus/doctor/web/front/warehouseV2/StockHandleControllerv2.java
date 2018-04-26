@@ -111,6 +111,7 @@ public class StockHandleControllerv2 {
     @RequestMapping(value = "{type:\\d+}/export2", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public void export( HttpServletRequest request, HttpServletResponse response,
                        @PathVariable(value = "type")Integer type,
+                        @RequestParam(required = false,value = "orgId") Long orgId,
                        @RequestParam(required = false,value = "farmId") Long farmId,
                        @RequestParam(required = false,value = "settlementDateStart") Date settlementDateStart,
                        @RequestParam(required = false,value = "settlementDateEnd") Date settlementDateEnd,
@@ -121,7 +122,7 @@ public class StockHandleControllerv2 {
         try {
             switch (type) {
                 case 1:
-                    params.put("farmId", farmId);
+                    params.put("orgId", orgId);
                     params.put("settlementDateStart", settlementDateStart);
                     params.put("settlementDateEnd", settlementDateEnd);
                     ResponseUtil<List<List<Map>>> listResponse = doctorWarehouseMaterialHandleReadService.companyReport(params);
@@ -136,74 +137,83 @@ public class StockHandleControllerv2 {
                         sheet.addMergedRegion(new CellRangeAddress(0,0,0, 1));
 
                         int firstCol = 2;
-                        for(int x=0;x<=result.size();x++,firstCol+=2){
+                        for(int x=0;x<=listResponse.getFarms().size();x++,firstCol+=2){
                             sheet.addMergedRegion(new CellRangeAddress(0,0,firstCol, firstCol+1));
                         }
+                        int firstRow = 1;
+                        for(int x=0;x<result.size();x++,firstRow+=3){
+                            sheet.addMergedRegion(new CellRangeAddress(firstRow,firstRow+2,0,0));
+                        }
+
                         //行
                         Row head = sheet.createRow(0);
 
-                        head.createCell(1);
+                        head.createCell(0);
 
+                        firstCol = 2;
                         for(Map map:listResponse.getFarms()){
-                            short lastCellNum = head.getLastCellNum();
-                            if(map.get("farmId")!=null) {
-                                head.createCell(lastCellNum+1).setCellValue(map.get("farmName").toString());
+                            if(map.get("id")!=null) {
+                                head.createCell(firstCol).setCellValue(map.get("name").toString());
+                                firstCol+=2;
                             }
                         }
-                        short lastCellNum = head.getLastCellNum();
-                        head.createCell(lastCellNum).setCellValue("合计");
+                        head.createCell(head.getLastCellNum()+1).setCellValue("合计");
                         //第一行结束
 
                         for(int x=0;x<result.size();x++) {
                             List<Map> lists = result.get(x);
-                            int firstRow = sheet.getLastRowNum()+1;
-
-                            sheet.addMergedRegion(new CellRangeAddress(firstRow, firstRow + 2, 0, 0));
-
-                            sheet.addMergedRegion(new CellRangeAddress(firstRow, firstRow, 1, 1));
-
-                            //sheet = this.setWorkStyle(sheet,listResponse.getFarms());
-
-                            Row row = sheet.createRow(firstRow);
-                            Cell cell = row.createCell(0);
-                            if (cell.getStringCellValue() == null || cell.getStringCellValue().equals("")) {
-                                cell.setCellValue(lists.get(lists.size() - 1).get("month").toString() + "月");
-                            }
-
+                            //每一行的样式
+                            firstCol = 2;
                             for (int y=0;y<3;y++) {
-                                if(y!=0){
-                                    //sheet = this.setWorkStyle(sheet,listResponse.getFarms());
-                                    row = sheet.createRow(firstRow+y);
+                                for(int z=0;z<=listResponse.getFarms().size();z++,firstCol+=2){
+                                    sheet.addMergedRegion(new CellRangeAddress(sheet.getLastRowNum()+1,sheet.getLastRowNum()+1,firstCol, firstCol+1));
                                 }
-                                cell = row.createCell(1);
-                                if (sheet.getRow(sheet.getLastRowNum()-1).getCell(1).getStringCellValue() != null && sheet.getRow(sheet.getLastRowNum()-1).getCell(1).getStringCellValue().equals("结余")) {
-                                    cell.setCellValue("入库");
+                                Row row = null;
+                                if(y==0){
+                                    row = sheet.createRow(sheet.getLastRowNum()+1);
+                                    //月份
+                                    Cell cell = row.createCell(0);
+                                    if (cell.getStringCellValue() == null || cell.getStringCellValue().equals("")) {
+                                        cell.setCellValue(lists.get(lists.size() - 1).get("month").toString() + "月");
+                                    }
+                                }else{
+                                    row = sheet.createRow(sheet.getLastRowNum()+1);
+                                    row.createCell(0);
+                                }
+                                if (sheet.getRow(sheet.getLastRowNum()-1) != null&&sheet.getRow(sheet.getLastRowNum()-1).getCell(1)!=null &&"结余".equals(sheet.getRow(sheet.getLastRowNum()-1).getCell(1).getStringCellValue())) {
+                                    row.createCell(1).setCellValue("入库");
                                     for (Map map : lists) {
                                         short last = row.getLastCellNum();
                                         if (map.get("inAmount") != null) {
                                             row.createCell(last).setCellValue(map.get("inAmount").toString());
+                                            //row.createCell(last+1);
                                         } else if (map.get("allInAmount") != null) {
-                                            row.createCell(last+1).setCellValue(map.get("allInAmount").toString());
+                                            row.createCell(last).setCellValue(map.get("allInAmount").toString());
+                                            //row.createCell(last+1);
                                         }
                                     }
-                                } else if (sheet.getRow(sheet.getLastRowNum()-1).getCell(1).getStringCellValue() != null && sheet.getRow(sheet.getLastRowNum()-1).getCell(1).getStringCellValue().equals("入库")) {
-                                    cell.setCellValue("出库");
+                                } else if (sheet.getRow(sheet.getLastRowNum()-1) != null&&sheet.getRow(sheet.getLastRowNum()-1).getCell(1)!=null &&"入库".equals(sheet.getRow(sheet.getLastRowNum()-1).getCell(1).getStringCellValue())) {
+                                    row.createCell(1).setCellValue("出库");
                                     for (Map map : lists) {
                                         short last = row.getLastCellNum();
                                         if (map.get("outAmount") != null) {
                                             row.createCell(last).setCellValue(map.get("outAmount").toString());
+                                            //row.createCell(last+1);
                                         } else if (map.get("allOutAmount") != null) {
-                                            row.createCell(last+1).setCellValue(map.get("allOutAmount").toString());
+                                            row.createCell(last).setCellValue(map.get("allOutAmount").toString());
+                                            //row.createCell(last+1);
                                         }
                                     }
                                 } else {
-                                    cell.setCellValue("结余");
+                                    row.createCell(1).setCellValue("结余");
                                     for (Map map : lists) {
                                         short last = row.getLastCellNum();
                                         if (map.get("balanceAmount") != null) {
                                             row.createCell(last).setCellValue(map.get("balanceAmount").toString());
+                                            //row.createCell(last+1);
                                         } else if (map.get("allBalanceAmount") != null) {
-                                            row.createCell(last+1).setCellValue(map.get("allBalanceAmount").toString());
+                                            row.createCell(last).setCellValue(map.get("allBalanceAmount").toString());
+                                            //row.createCell(last+1);
                                         }
                                     }
                                 }
@@ -227,76 +237,89 @@ public class StockHandleControllerv2 {
                         //样式
                         sheet.addMergedRegion(new CellRangeAddress(0,0,0, 1));
 
-                        //sheet = this.setWorkStyle(sheet,listResponse1.getFarms());
+                        int firstCol = 2;
+                        for(int x=0;x<=listResponse1.getFarms().size();x++,firstCol+=2){
+                            sheet.addMergedRegion(new CellRangeAddress(0,0,firstCol, firstCol+1));
+                        }
+                        int firstRow = 1;
+                        for(int x=0;x<result1.size();x++,firstRow+=3){
+                            sheet.addMergedRegion(new CellRangeAddress(firstRow,firstRow+2,0,0));
+                        }
+
                         //行
                         Row head = sheet.createRow(0);
 
-                        head.createCell(1);
+                        head.createCell(0);
 
-                        for(Map map:result1.get(0)){
-                            if(map.get("warehouseId")!=null) {
-                                head.createCell(head.getLastCellNum()+1).setCellValue(map.get("warehouseName")+"");
+                        firstCol = 2;
+                        for(Map map:listResponse1.getFarms()){
+                            if(map.get("id")!=null) {
+                                head.createCell(firstCol).setCellValue(map.get("name").toString());
+                                firstCol+=2;
                             }
                         }
-
                         head.createCell(head.getLastCellNum()+1).setCellValue("合计");
                         //第一行结束
 
-                       /* for(int x=0;x<result1.size();x++) {
+                        for(int x=0;x<result1.size();x++) {
                             List<Map> lists = result1.get(x);
-                            int firstRow = sheet.getLastRowNum()+1;
-
-                            sheet.addMergedRegion(new CellRangeAddress(firstRow, firstRow + 2, 0, 0));
-
-                            sheet.addMergedRegion(new CellRangeAddress(firstRow, firstRow, 1, 1));
-
-                            sheet = this.setWorkStyle(sheet,listResponse1.getFarms());
-
-                            Row row = sheet.createRow(firstRow);
-                            Cell cell = row.createCell(0);
-                            if (cell.getStringCellValue() == null || cell.getStringCellValue().equals("")) {
-                                cell.setCellValue(lists.get(lists.size() - 1).get("month").toString() + "月");
-                            }
-
+                            //每一行的样式
+                            firstCol = 2;
                             for (int y=0;y<3;y++) {
-                                if(y!=0){
-                                    sheet = this.setWorkStyle(sheet,listResponse1.getFarms());
-                                    row = sheet.createRow(firstRow+y);
+                                for(int z=0;z<=listResponse1.getFarms().size();z++,firstCol+=2){
+                                    sheet.addMergedRegion(new CellRangeAddress(sheet.getLastRowNum()+1,sheet.getLastRowNum()+1,firstCol, firstCol+1));
                                 }
-                                cell = row.createCell(1);
-                                if (sheet.getRow(sheet.getLastRowNum()-1).getCell(1).getStringCellValue() != null && sheet.getRow(sheet.getLastRowNum()-1).getCell(1).getStringCellValue().equals("结余")) {
-                                    cell.setCellValue("入库");
+                                Row row = null;
+                                if(y==0){
+                                    row = sheet.createRow(sheet.getLastRowNum()+1);
+                                    //月份
+                                    Cell cell = row.createCell(0);
+                                    if (cell.getStringCellValue() == null || cell.getStringCellValue().equals("")) {
+                                        cell.setCellValue(lists.get(lists.size() - 1).get("month").toString() + "月");
+                                    }
+                                }else{
+                                    row = sheet.createRow(sheet.getLastRowNum()+1);
+                                    row.createCell(0);
+                                }
+                                if (sheet.getRow(sheet.getLastRowNum()-1) != null&&sheet.getRow(sheet.getLastRowNum()-1).getCell(1)!=null &&"结余".equals(sheet.getRow(sheet.getLastRowNum()-1).getCell(1).getStringCellValue())) {
+                                    row.createCell(1).setCellValue("入库");
                                     for (Map map : lists) {
                                         short last = row.getLastCellNum();
                                         if (map.get("inAmount") != null) {
                                             row.createCell(last).setCellValue(map.get("inAmount").toString());
+                                            //row.createCell(last+1);
                                         } else if (map.get("allInAmount") != null) {
-                                            row.createCell(last+1).setCellValue(map.get("allInAmount").toString());
+                                            row.createCell(last).setCellValue(map.get("allInAmount").toString());
+                                            //row.createCell(last+1);
                                         }
                                     }
-                                } else if (sheet.getRow(sheet.getLastRowNum()-1).getCell(1).getStringCellValue() != null && sheet.getRow(sheet.getLastRowNum()-1).getCell(1).getStringCellValue().equals("入库")) {
-                                    cell.setCellValue("出库");
+                                } else if (sheet.getRow(sheet.getLastRowNum()-1) != null&&sheet.getRow(sheet.getLastRowNum()-1).getCell(1)!=null &&"入库".equals(sheet.getRow(sheet.getLastRowNum()-1).getCell(1).getStringCellValue())) {
+                                    row.createCell(1).setCellValue("出库");
                                     for (Map map : lists) {
                                         short last = row.getLastCellNum();
                                         if (map.get("outAmount") != null) {
                                             row.createCell(last).setCellValue(map.get("outAmount").toString());
+                                            //row.createCell(last+1);
                                         } else if (map.get("allOutAmount") != null) {
-                                            row.createCell(last+1).setCellValue(map.get("allOutAmount").toString());
+                                            row.createCell(last).setCellValue(map.get("allOutAmount").toString());
+                                            //row.createCell(last+1);
                                         }
                                     }
                                 } else {
-                                    cell.setCellValue("结余");
+                                    row.createCell(1).setCellValue("结余");
                                     for (Map map : lists) {
                                         short last = row.getLastCellNum();
                                         if (map.get("balanceAmount") != null) {
                                             row.createCell(last).setCellValue(map.get("balanceAmount").toString());
+                                            //row.createCell(last+1);
                                         } else if (map.get("allBalanceAmount") != null) {
-                                            row.createCell(last+1).setCellValue(map.get("allBalanceAmount").toString());
+                                            row.createCell(last).setCellValue(map.get("allBalanceAmount").toString());
+                                            //row.createCell(last+1);
                                         }
                                     }
                                 }
                             }
-                        }*/
+                        }
                         workbook.write(response.getOutputStream());
                     }
                     break;

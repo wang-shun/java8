@@ -274,4 +274,10 @@
         limit #{offset},#{limit}
     </select>
 
+    <select id="findMapByFarmId" parameterType="Long" resultType="map">
+      select id as id,ware_house_name as name
+      from doctor_ware_houses
+      where farm_id = #{farmId,jdbcType=BIGINT}
+    </select>
+
 </mapper>

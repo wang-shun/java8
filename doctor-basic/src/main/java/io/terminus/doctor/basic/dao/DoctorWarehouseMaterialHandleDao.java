@@ -310,7 +310,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectList("selectFarmsByOrgId", orgId);
     }
 
-    public List<CompanyReportDto> selectCompanyReportInfo(Map<String, Object> criteria) {
+    public List<Map<String,Object>> selectCompanyReportInfo(Map<String, Object> criteria) {
         return this.sqlSession.selectList("selectCompanyReportInfo",criteria);
     }
 }

@@ -64,4 +64,8 @@ public class DoctorWareHouseDao extends MyBatisDao<DoctorWareHouse>{
             return new Paging(total, datas);
         }
     }
+
+    public List<Map<String,Object>> findMapByFarmId(Long farmId) {
+        return this.sqlSession.selectList(this.sqlId("findMapByFarmId"), farmId);
+    }
 }
