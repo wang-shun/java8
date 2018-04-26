@@ -14,10 +14,7 @@ import io.terminus.doctor.common.utils.ResponseUtil;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.web.core.export.Exporter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,13 +135,16 @@ public class StockHandleControllerv2 {
                         //样式
                         sheet.addMergedRegion(new CellRangeAddress(0,0,0, 1));
 
-                        sheet = this.setWorkStyle(sheet,listResponse.getFarms());
+                        int firstCol = 2;
+                        for(int x=0;x<=result.size();x++,firstCol+=2){
+                            sheet.addMergedRegion(new CellRangeAddress(0,0,firstCol, firstCol+1));
+                        }
                         //行
                         Row head = sheet.createRow(0);
 
                         head.createCell(1);
 
-                        for(Map map:result.get(0)){
+                        for(Map map:listResponse.getFarms()){
                             short lastCellNum = head.getLastCellNum();
                             if(map.get("farmId")!=null) {
                                 head.createCell(lastCellNum+1).setCellValue(map.get("farmName").toString());
@@ -162,7 +162,7 @@ public class StockHandleControllerv2 {
 
                             sheet.addMergedRegion(new CellRangeAddress(firstRow, firstRow, 1, 1));
 
-                            sheet = this.setWorkStyle(sheet,listResponse.getFarms());
+                            //sheet = this.setWorkStyle(sheet,listResponse.getFarms());
 
                             Row row = sheet.createRow(firstRow);
                             Cell cell = row.createCell(0);
@@ -172,7 +172,7 @@ public class StockHandleControllerv2 {
 
                             for (int y=0;y<3;y++) {
                                 if(y!=0){
-                                    sheet = this.setWorkStyle(sheet,listResponse.getFarms());
+                                    //sheet = this.setWorkStyle(sheet,listResponse.getFarms());
                                     row = sheet.createRow(firstRow+y);
                                 }
                                 cell = row.createCell(1);
@@ -226,23 +226,23 @@ public class StockHandleControllerv2 {
                         Sheet sheet = workbook.createSheet();
                         //样式
                         sheet.addMergedRegion(new CellRangeAddress(0,0,0, 1));
-                        sheet = this.setWorkStyle(sheet,listResponse1.getFarms());
+
+                        //sheet = this.setWorkStyle(sheet,listResponse1.getFarms());
                         //行
                         Row head = sheet.createRow(0);
 
                         head.createCell(1);
 
                         for(Map map:result1.get(0)){
-                            short lastCellNum = head.getLastCellNum();
                             if(map.get("warehouseId")!=null) {
-                                head.createCell(lastCellNum+1).setCellValue(map.get("warehouseName").toString());
+                                head.createCell(head.getLastCellNum()+1).setCellValue(map.get("warehouseName")+"");
                             }
                         }
-                        short lastCellNum = head.getLastCellNum();
-                        head.createCell(lastCellNum).setCellValue("合计");
+
+                        head.createCell(head.getLastCellNum()+1).setCellValue("合计");
                         //第一行结束
 
-                        for(int x=0;x<result1.size();x++) {
+                       /* for(int x=0;x<result1.size();x++) {
                             List<Map> lists = result1.get(x);
                             int firstRow = sheet.getLastRowNum()+1;
 
@@ -296,7 +296,7 @@ public class StockHandleControllerv2 {
                                     }
                                 }
                             }
-                        }
+                        }*/
                         workbook.write(response.getOutputStream());
                     }
                     break;
@@ -389,12 +389,11 @@ public class StockHandleControllerv2 {
         }
     }
 
-    private Sheet  setWorkStyle(Sheet sheet,List<Map> result){
+    private Sheet setWorkStyle(Sheet sheet,List<Map> result,Integer rowNumber){
         int firstCol = 2;
         int lastCol =  3;
-        for(int x=0;x<result.size();x++,firstCol+=2,lastCol+=2){
-            sheet.addMergedRegion(new CellRangeAddress(sheet.getLastRowNum(),sheet.getLastRowNum(),firstCol, lastCol));
-            sheet.addMergedRegion(new CellRangeAddress(sheet.getLastRowNum()+1,sheet.getLastRowNum()+1,firstCol, lastCol));
+        for(int x=0;x<=result.size();x++,firstCol+=2,lastCol+=2){
+            sheet.addMergedRegion(new CellRangeAddress(rowNumber,rowNumber,firstCol, lastCol));
         }
         return sheet;
     }

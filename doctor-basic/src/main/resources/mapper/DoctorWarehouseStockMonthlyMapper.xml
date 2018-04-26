@@ -196,10 +196,7 @@
             and a.farm_id = #{farmId,jdbcType = BIGINT}
         </if>
         <if test="handleMonth!=null">
-            and a.handle_month = #{handleMonth,jdbcType=BIGINT}
-        </if>
-        <if test="handleYear!=null">
-            and a.handle_year = #{handleYear,jdbcType=BIGINT}
+            and a.handle_date = #{handleDate,jdbcType=BIGINT}
         </if>
         GROUP BY a.warehouse_id
         order by a.warehouse_id

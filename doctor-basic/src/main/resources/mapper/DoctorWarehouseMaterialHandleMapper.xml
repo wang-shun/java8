@@ -444,23 +444,21 @@
     </select>
 
     <select id="listByFarmIdTime" parameterType="map" resultType="map">
-        select a.farm_id as farmId,ifnull(f.name,'') as farmName,a.type as type,max(a.handle_Date) as handleDate,
+        select a.farm_id as farmId,ifnull(f.name,'') as farmName,a.type as type,
         a.handle_year as handleYear,a.handle_Month as handleMonth,a.org_id as orgId,
         <include refid="inAmount"/>
         <include refid="outAmount"/>
         <include refid="balanceAmount"/>
         from doctor_warehouse_material_handle a
-        left join doctor_farms f on a.farm_id = f.number
+        left join doctor_farms f on a.farm_id = f.id
         where a.delete_flag = 1
         <if test="farmId!=null">
             and a.farm_id = #{farmId,jdbcType = BIGINT}
         </if>
-        <if test="handleMonth!=null">
-            and a.handle_month = #{handleMonth,jdbcType=BIGINT}
+        <if test="settlementDate!=null">
+            and a.settlement_date = #{settlementDate,jdbcType=BIGINT}
         </if>
-        <if test="handleYear!=null">
-            and a.handle_year = #{handleYear,jdbcType=BIGINT}
-        </if>
+
         <if test="orgId!=null">
             and a.org_id = #{orgId,jdbcType=BIGINT}
         </if>
@@ -708,8 +706,7 @@
         from doctor_warehouse_material_handle c
         where c.farm_id = a.farm_id
         and c.delete_flag = 1
-        and c.handle_year = #{handleYear,jdbcType=BIGINT}
-        and c.handle_month = #{handleMonth,jdbcType=BIGINT}
+        and c.settlement_date = a.settlement_date
         and c.type in (
            1,7,9,11,13
         )
@@ -721,8 +718,7 @@
             from doctor_warehouse_material_handle d
             where d.farm_id = a.farm_id
             and d.delete_flag = 1
-            and d.handle_year = #{handleYear,jdbcType=BIGINT}
-            and d.handle_month = #{handleMonth,jdbcType=BIGINT}
+            and d.settlement_date = a.settlement_date
             and d.type in (
                 2,8,10,12
             )
@@ -740,4 +736,50 @@
     <select id="getWareHouseDataOption" parameterType="long" resultType="map">
         select id,ware_house_name from doctor_ware_houses where farm_id=#{farmId}
     </select>
+
+    <select id="selectFarmsByOrgId" parameterType="Long" resultType="map">
+        select id,name
+        from doctor_farms
+        where org_id = #{orgId,jdbcType = BIGINT}
+        order by id
+    </select>
+
+    <select id="selectCompanyReportInfo" parameterType="map" resultType="io.terminus.doctor.basic.dto.warehouseV2.CompanyReportDto">
+        select temp.settlement_date,temp.farm_id,sum(temp.in_amount)as in_amount,sum(temp.out_amount)as out_amount,sum(temp.balance_amount) as balance_amount
+        from
+        (select  b.settlement_date,b.farm_id, 0 as in_amount,0 as out_amount ,sum(b.balance_amount) as balance_amount
+        from doctor_warehouse_stock_monthly b
+        where <![CDATA[ b.settlement_date >= #{settlementDateStart}]]>
+        and <![CDATA[ b.settlement_date <= #{settlementDateEnd}]]>
+        and b.org_id = #{orgId,BIGINT}
+        GROUP by b.settlement_date,b.farm_id
+        union all
+        select c.settlement_date,c.farm_id,sum(c.amount) as in_amount,0 as out_amount,0 as balance_amount
+        from doctor_warehouse_material_handle c
+        where
+        c.delete_flag = 1
+        and <![CDATA[ c.settlement_date >= #{settlementDateStart}]]>
+        and <![CDATA[ c.settlement_date <= #{settlementDateEnd}]]>
+        and c.org_id = #{orgId,BIGINT}
+        and c.type in (
+        1,7,9,11,13
+        )
+        GROUP by c.settlement_date,c.farm_id
+        union all
+        select d.settlement_date,d.farm_id,0 as in_amount,sum(d.amount) as out_amount,0 as balance_amount
+        from doctor_warehouse_material_handle d
+        where
+        d.delete_flag = 1
+        and <![CDATA[ d.settlement_date >= #{settlementDateStart}]]>
+        and <![CDATA[ d.settlement_date <= #{settlementDateEnd}]]>
+        and d.org_id = #{orgId,BIGINT}
+        and d.type in (
+        2,8,10,12
+        )
+        GROUP by d.settlement_date,d.farm_id
+        ) temp
+        GROUP BY temp.settlement_date,temp.farm_id
+        order by temp.settlement_date,temp.farm_id
+    </select>
+
 </mapper>

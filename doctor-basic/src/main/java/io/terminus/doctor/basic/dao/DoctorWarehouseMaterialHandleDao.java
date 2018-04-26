@@ -5,6 +5,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 
 import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
+import io.terminus.doctor.basic.dto.warehouseV2.CompanyReportDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
@@ -305,4 +306,11 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectList("getWareHouseDataOption", farmId);
     }
 
+    public List<Map<String,Object>> selectFarmsByOrgId(Long orgId) {
+        return this.sqlSession.selectList("selectFarmsByOrgId", orgId);
+    }
+
+    public List<CompanyReportDto> selectCompanyReportInfo(Map<String, Object> criteria) {
+        return this.sqlSession.selectList("selectCompanyReportInfo",criteria);
+    }
 }
