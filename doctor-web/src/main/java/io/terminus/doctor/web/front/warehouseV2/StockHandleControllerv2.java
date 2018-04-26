@@ -186,10 +186,10 @@ public class StockHandleControllerv2 {
                                         short last = row.getLastCellNum();
                                         if (map.get("inAmount") != null) {
                                             row.createCell(last).setCellValue(map.get("inAmount").toString());
-                                            //row.createCell(last+1);
+                                            row.createCell(last+1);
                                         } else if (map.get("allInAmount") != null) {
                                             row.createCell(last).setCellValue(map.get("allInAmount").toString());
-                                            //row.createCell(last+1);
+                                            row.createCell(last+1);
                                         }
                                     }
                                 } else if (sheet.getRow(sheet.getLastRowNum()-1) != null&&sheet.getRow(sheet.getLastRowNum()-1).getCell(1)!=null &&"入库".equals(sheet.getRow(sheet.getLastRowNum()-1).getCell(1).getStringCellValue())) {
@@ -198,10 +198,10 @@ public class StockHandleControllerv2 {
                                         short last = row.getLastCellNum();
                                         if (map.get("outAmount") != null) {
                                             row.createCell(last).setCellValue(map.get("outAmount").toString());
-                                            //row.createCell(last+1);
+                                            row.createCell(last+1);
                                         } else if (map.get("allOutAmount") != null) {
                                             row.createCell(last).setCellValue(map.get("allOutAmount").toString());
-                                            //row.createCell(last+1);
+                                            row.createCell(last+1);
                                         }
                                     }
                                 } else {
@@ -210,10 +210,10 @@ public class StockHandleControllerv2 {
                                         short last = row.getLastCellNum();
                                         if (map.get("balanceAmount") != null) {
                                             row.createCell(last).setCellValue(map.get("balanceAmount").toString());
-                                            //row.createCell(last+1);
+                                            row.createCell(last+1);
                                         } else if (map.get("allBalanceAmount") != null) {
                                             row.createCell(last).setCellValue(map.get("allBalanceAmount").toString());
-                                            //row.createCell(last+1);
+                                            row.createCell(last+1);
                                         }
                                     }
                                 }
@@ -287,10 +287,10 @@ public class StockHandleControllerv2 {
                                         short last = row.getLastCellNum();
                                         if (map.get("inAmount") != null) {
                                             row.createCell(last).setCellValue(map.get("inAmount").toString());
-                                            //row.createCell(last+1);
+                                            row.createCell(last+1);
                                         } else if (map.get("allInAmount") != null) {
                                             row.createCell(last).setCellValue(map.get("allInAmount").toString());
-                                            //row.createCell(last+1);
+                                            row.createCell(last+1);
                                         }
                                     }
                                 } else if (sheet.getRow(sheet.getLastRowNum()-1) != null&&sheet.getRow(sheet.getLastRowNum()-1).getCell(1)!=null &&"入库".equals(sheet.getRow(sheet.getLastRowNum()-1).getCell(1).getStringCellValue())) {
@@ -299,10 +299,10 @@ public class StockHandleControllerv2 {
                                         short last = row.getLastCellNum();
                                         if (map.get("outAmount") != null) {
                                             row.createCell(last).setCellValue(map.get("outAmount").toString());
-                                            //row.createCell(last+1);
+                                            row.createCell(last+1);
                                         } else if (map.get("allOutAmount") != null) {
                                             row.createCell(last).setCellValue(map.get("allOutAmount").toString());
-                                            //row.createCell(last+1);
+                                            row.createCell(last+1);
                                         }
                                     }
                                 } else {
@@ -311,10 +311,10 @@ public class StockHandleControllerv2 {
                                         short last = row.getLastCellNum();
                                         if (map.get("balanceAmount") != null) {
                                             row.createCell(last).setCellValue(map.get("balanceAmount").toString());
-                                            //row.createCell(last+1);
+                                            row.createCell(last+1);
                                         } else if (map.get("allBalanceAmount") != null) {
                                             row.createCell(last).setCellValue(map.get("allBalanceAmount").toString());
-                                            //row.createCell(last+1);
+                                            row.createCell(last+1);
                                         }
                                     }
                                 }
