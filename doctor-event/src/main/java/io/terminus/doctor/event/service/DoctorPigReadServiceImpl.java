@@ -12,12 +12,15 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.dao.DoctorChgFarmInfoDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigJoinDao;
@@ -32,6 +35,7 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorChgFarmInfo;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -80,13 +84,17 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
 
     private final DoctorPigJoinDao doctorPigJoinDao;
 
+    private final DoctorChgFarmInfoDao doctorChgFarmInfoDao;
+
     private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyyMM");
+
+    private static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
     @Autowired
     public DoctorPigReadServiceImpl(DoctorPigDao doctorPigDao, DoctorPigTrackDao doctorPigTrackDao,
                                     DoctorPigEventReadService doctorPigEventReadService,
                                     DoctorBarnDao doctorBarnDao, DoctorPigInfoCache doctorPigInfoCache,
-                                    DoctorPigEventDao doctorPigEventDao, DoctorPigJoinDao doctorPigJoinDao){
+                                    DoctorPigEventDao doctorPigEventDao, DoctorPigJoinDao doctorPigJoinDao, DoctorChgFarmInfoDao doctorChgFarmInfoDao){
         this.doctorPigDao = doctorPigDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorPigEventReadService = doctorPigEventReadService;
@@ -94,6 +102,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
         this.doctorPigInfoCache = doctorPigInfoCache;
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorPigJoinDao = doctorPigJoinDao;
+        this.doctorChgFarmInfoDao = doctorChgFarmInfoDao;
     }
 
     @Override
@@ -107,10 +116,17 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     }
 
     @Override
-    public RespWithEx<DoctorPigInfoDetailDto> queryPigDetailInfoByPigId(Long pigId, Integer eventSize) {
+    public RespWithEx<DoctorPigInfoDetailDto> queryPigDetailInfoByPigId(Long farmId, Long pigId, Integer eventSize) {
         try {
             Integer dayAge = null;
+            DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
             DoctorPig doctorPig = doctorPigDao.findById(pigId);
+            DoctorChgFarmInfo doctorChgFarmInfo = null;
+            if (!Objects.equals(doctorPigTrack.getFarmId(), farmId)) {
+                doctorChgFarmInfo = doctorChgFarmInfoDao.findByFarmIdAndPigId(farmId, pigId);
+                doctorPigTrack = JSON_MAPPER.fromJson(doctorChgFarmInfo.getTrack(), DoctorPigTrack.class);
+                doctorPig = JSON_MAPPER.fromJson(doctorChgFarmInfo.getPig(), DoctorPig.class);
+            }
             if (doctorPig == null) {
                 return RespWithEx.fail("pig.not.found");
             }
@@ -119,14 +135,18 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
                 dayAge = (int) (DateTime.now()
                         .minus(doctorPig.getBirthDate().getTime()).getMillis() / (1000 * 60 * 60 * 24) + 1);
             }
-            DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
             Integer targetEventSize = MoreObjects.firstNonNull(eventSize, 3);
-            List<DoctorPigEvent> doctorPigEvents = RespHelper.orServEx(
-                    doctorPigEventReadService.queryPigDoctorEvents(doctorPig.getFarmId(), doctorPig.getId(), 1, targetEventSize, null, null)).getData();
 
+            List<DoctorPigEvent> doctorPigEvents;
+            if (isNull(doctorChgFarmInfo)) {
+                doctorPigEvents = RespHelper.orServEx(
+                        doctorPigEventReadService.queryPigDoctorEvents(null, pigId, 1, targetEventSize, null, null)).getData();
+            } else {
+                doctorPigEvents = doctorPigEventDao.queryBeforeChgFarm(pigId, doctorChgFarmInfo.getEventId());
+            }
 
             return RespWithEx.ok(DoctorPigInfoDetailDto.builder().doctorPig(doctorPig).doctorPigTrack(doctorPigTrack)
-                    .doctorPigEvents(doctorPigEvents).dayAge(dayAge).build());
+                    .doctorPigEvents(doctorPigEvents).dayAge(dayAge).isChgFarm(notNull(doctorChgFarmInfo)).build());
         } catch (InvalidException e) {
             return RespWithEx.exception(e);
         } catch (Exception e){
@@ -517,6 +537,48 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
         } catch (Exception e) {
             log.error("find unremoval pigs by failed,barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
             return Response.fail("find.unremoval.pigs.by.failed");
+        }
+    }
+
+    @Override
+    public Response<DoctorChgFarmInfo> findByFarmIdAndPigId(Long farmId, Long pigId) {
+        try {
+            return Response.ok(doctorChgFarmInfoDao.findByFarmIdAndPigId(farmId, pigId));
+        } catch (Exception e) {
+            log.error("find by farmId and pigId, farmId:{}, pigId:{}, cause:{}",
+                    farmId, pigId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.by.farmId.and.pigId");
+        }
+    }
+
+    @Override
+    public Response<Paging<SearchedPig>> pagingChgFarmPig(Map<String, Object> params, Integer pageNo, Integer pageSize) {
+        try {
+            PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
+            Paging<DoctorChgFarmInfo> paging = doctorChgFarmInfoDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), params);
+            if (paging.isEmpty()) {
+                return Response.ok(Paging.empty());
+            }
+
+            List<SearchedPig> list = paging.getData().stream().map(doctorChgFarmInfo -> {
+                DoctorPig doctorPig = JSON_MAPPER.fromJson(doctorChgFarmInfo.getPig(), DoctorPig.class);
+                DoctorPigTrack doctorPigTrack = JSON_MAPPER.fromJson(doctorChgFarmInfo.getTrack(), DoctorPigTrack.class);
+                SearchedPig searchedPig = new SearchedPig();
+                BeanMapper.copy(doctorPig, searchedPig);
+                if (searchedPig.getBirthDate() != null) {
+                    searchedPig.setDayAge((int)(DateTime.now().minus(searchedPig.getBirthDate().getTime()).getMillis() / (1000 * 60 * 60 * 24) + 1));
+                }
+                searchedPig.setStatus(doctorPigTrack.getStatus());
+                searchedPig.setStatusName(PigStatus.from(doctorPigTrack.getStatus()).getName());
+                searchedPig.setCurrentBarnId(doctorPigTrack.getCurrentBarnId());
+                searchedPig.setCurrentBarnName(doctorPigTrack.getCurrentBarnName());
+                searchedPig.setCurrentParity(doctorPigTrack.getCurrentParity());
+                return searchedPig;
+            }).collect(Collectors.toList());
+            return Response.ok(new Paging<>(paging.getTotal(), list));
+        } catch (Exception e) {
+            log.error("paging chg farm pig failed,cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("paging.chg.farm.pig.failed");
         }
     }
 }

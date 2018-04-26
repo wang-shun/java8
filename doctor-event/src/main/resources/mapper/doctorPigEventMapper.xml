@@ -1366,7 +1366,7 @@
         AND pig_id = #{pigId}
         AND event_at &lt;= date_format(#{eventAt}, '%Y-%m-%d')
         AND (
-        type in (2, 6, 7, 9, 11, 14, 15, 16)
+        type in (6, 7, 9, 11, 14, 15, 16)
         OR (type = 20 AND pig_status_before != pig_status_after)
         OR (type = 19 AND pig_status_before = 9)
         )
@@ -1833,6 +1833,19 @@
             AND parity = #{parity}
             AND status = 1
             AND event_source != 5
+            order by event_at desc, id desc
+        </where>
+    </select>
+
+    <select id="queryBeforeChgFarm" parameterType="map" resultMap="DoctorPigEventMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        <where>
+            pig_id = #{pigId}
+            AND id &lt;= #{eventId}
+            AND status = 1
             order by event_at desc, id desc
         </where>
     </select>

@@ -33,6 +33,7 @@ import static io.terminus.doctor.common.utils.Checks.expectTrue;
  * Email:yaoqj@terminus.io
  * Descirbe:
  */
+@Deprecated
 @Component
 @Slf4j
 public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{

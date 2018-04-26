@@ -130,9 +130,8 @@ public class DoctorEventBaseHelper {
                     ? PigStatus.Pregnancy.getKey() : PigStatus.KongHuai.getKey();
         }
 
-        //3.如果是转场或者离场事件
-        if (Objects.equals(pigEvent.getType(), PigEvent.REMOVAL.getKey())
-                || Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM.getKey())) {
+        //3.离场事件
+        if (Objects.equals(pigEvent.getType(), PigEvent.REMOVAL.getKey())) {
             return Objects.equals(pigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())
                     ? PigStatus.Removal.getKey() : PigStatus.BOAR_LEAVE.getKey();
 
@@ -244,6 +243,10 @@ public class DoctorEventBaseHelper {
      */
     public boolean isLastPigManualEvent(DoctorPigEvent pigEvent) {
         if (IGNORE_EVENT.contains(pigEvent.getType())) {
+            return true;
+        }
+
+        if (Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM.getKey())) {
             return true;
         }
 

@@ -848,4 +848,16 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         return getSqlSession().selectList(sqlId("queryEventsForDescBy"),
                 ImmutableMap.of("pigId", pigId, "parity", parity));
     }
+
+
+    /**
+     * 查询转场之前的事件
+     * @param pigId
+     * @param eventId
+     * @return
+     */
+    public List<DoctorPigEvent> queryBeforeChgFarm(Long pigId, Long eventId){
+        return getSqlSession().selectList(sqlId("queryBeforeChgFarm"),
+                ImmutableMap.of("pigId", pigId, "eventId", eventId));
+    }
 }
