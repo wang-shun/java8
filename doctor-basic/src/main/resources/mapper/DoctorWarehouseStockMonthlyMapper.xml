@@ -300,6 +300,7 @@
          (select  ifnull(sum(c.amount),0)
             from doctor_warehouse_material_handle c
             where c.farm_id = a.farm_id
+            and c.warehouse_id = a.warehouse_id
             and c.delete_flag = 1
             and c.settlement_date = a.settlement_date
             and c.type in (
@@ -312,6 +313,7 @@
          (select  ifnull(sum(d.amount),0)
             from doctor_warehouse_material_handle d
             where d.farm_id = a.farm_id
+            and d.warehouse_id = a.warehouse_id
             and d.delete_flag = 1
             and d.settlement_date = a.settlement_date
             and d.type in (

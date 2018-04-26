@@ -163,23 +163,21 @@ public class StockHandleControllerv2 {
                         for(int x=0;x<result.size();x++) {
                             List<Map> lists = result.get(x);
                             //每一行的样式
-                            firstCol = 2;
                             for (int y=0;y<3;y++) {
+                                firstCol = 2;
                                 for(int z=0;z<=listResponse.getFarms().size();z++,firstCol+=2){
                                     sheet.addMergedRegion(new CellRangeAddress(sheet.getLastRowNum()+1,sheet.getLastRowNum()+1,firstCol, firstCol+1));
                                 }
                                 Row row = null;
-                                if(y==0){
-                                    row = sheet.createRow(sheet.getLastRowNum()+1);
-                                    //月份
-                                    Cell cell = row.createCell(0);
-                                    if (cell.getStringCellValue() == null || cell.getStringCellValue().equals("")) {
-                                        cell.setCellValue(lists.get(lists.size() - 1).get("month").toString() + "月");
-                                    }
-                                }else{
-                                    row = sheet.createRow(sheet.getLastRowNum()+1);
-                                    row.createCell(0);
+
+                                row = sheet.createRow(sheet.getLastRowNum()+1);
+                                //月份
+                                Cell cell = row.createCell(0);
+                                if (cell.getStringCellValue() == null || cell.getStringCellValue().equals("")) {
+                                    cell.setCellValue(lists.get(lists.size() - 1).get("month").toString() + "月");
                                 }
+
+
                                 if (sheet.getRow(sheet.getLastRowNum()-1) != null&&sheet.getRow(sheet.getLastRowNum()-1).getCell(1)!=null &&"结余".equals(sheet.getRow(sheet.getLastRowNum()-1).getCell(1).getStringCellValue())) {
                                     row.createCell(1).setCellValue("入库");
                                     for (Map map : lists) {
@@ -264,23 +262,21 @@ public class StockHandleControllerv2 {
                         for(int x=0;x<result1.size();x++) {
                             List<Map> lists = result1.get(x);
                             //每一行的样式
-                            firstCol = 2;
+
                             for (int y=0;y<3;y++) {
+                                firstCol = 2;
                                 for(int z=0;z<=listResponse1.getFarms().size();z++,firstCol+=2){
                                     sheet.addMergedRegion(new CellRangeAddress(sheet.getLastRowNum()+1,sheet.getLastRowNum()+1,firstCol, firstCol+1));
                                 }
                                 Row row = null;
-                                if(y==0){
-                                    row = sheet.createRow(sheet.getLastRowNum()+1);
-                                    //月份
-                                    Cell cell = row.createCell(0);
-                                    if (cell.getStringCellValue() == null || cell.getStringCellValue().equals("")) {
-                                        cell.setCellValue(lists.get(lists.size() - 1).get("month").toString() + "月");
-                                    }
-                                }else{
-                                    row = sheet.createRow(sheet.getLastRowNum()+1);
-                                    row.createCell(0);
+
+                                row = sheet.createRow(sheet.getLastRowNum()+1);
+                                //月份
+                                Cell cell = row.createCell(0);
+                                if (cell.getStringCellValue() == null || cell.getStringCellValue().equals("")) {
+                                    cell.setCellValue(lists.get(lists.size() - 1).get("month").toString() + "月");
                                 }
+
                                 if (sheet.getRow(sheet.getLastRowNum()-1) != null&&sheet.getRow(sheet.getLastRowNum()-1).getCell(1)!=null &&"结余".equals(sheet.getRow(sheet.getLastRowNum()-1).getCell(1).getStringCellValue())) {
                                     row.createCell(1).setCellValue("入库");
                                     for (Map map : lists) {
@@ -410,15 +406,6 @@ public class StockHandleControllerv2 {
             e.printStackTrace();
             throw new JsonResponseException("warehouse.stock.handle.not.found");
         }
-    }
-
-    private Sheet setWorkStyle(Sheet sheet,List<Map> result,Integer rowNumber){
-        int firstCol = 2;
-        int lastCol =  3;
-        for(int x=0;x<=result.size();x++,firstCol+=2,lastCol+=2){
-            sheet.addMergedRegion(new CellRangeAddress(rowNumber,rowNumber,firstCol, lastCol));
-        }
-        return sheet;
     }
 
 }
