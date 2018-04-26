@@ -54,7 +54,7 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
 
     @Override
     protected void create(WarehouseStockRefundDto stockDto, WarehouseStockRefundDto.WarehouseStockRefundDetailDto detail, DoctorWarehouseStockHandle stockHandle, DoctorWareHouse wareHouse) {
-        //忽略
+        throw new UnsupportedOperationException();
     }
 
     @Override

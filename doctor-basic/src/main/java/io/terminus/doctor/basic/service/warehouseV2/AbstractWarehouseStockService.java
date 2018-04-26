@@ -48,6 +48,8 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
     @Autowired
     protected DoctorWarehouseStockManager doctorWarehouseStockManager;
 
+    private static final ThreadLocal<List<Lock>> stockLocks = new ThreadLocal<>();
+
     @Transactional
     @ExceptionHandle("stock.handle.fail")
     public Response<Long> handle(T stockDto) {
@@ -75,7 +77,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
             return Response.ok(stockHandle.getId());
 
         } finally {
-            releaseLocks(locks);
+            releaseLocks();
         }
     }
 
@@ -151,6 +153,22 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
         stockHandle.setHandleDate(newHandleDate.getTime());
     }
 
+    public void lockWarehouse(Long warehouseId) {
+        List<Lock> locks = stockLocks.get();
+        boolean isNewLocks = false;
+        if (null == locks) {
+            locks = new ArrayList<>();
+            isNewLocks = true;
+        }
+        Lock lock = lockRegistry.obtain(warehouseId.toString());
+        if (!lock.tryLock())
+            throw new JsonResponseException("stock.handle.in.operation");
+        locks.add(lock);
+
+        if (isNewLocks)
+            stockLocks.set(locks);
+    }
+
     /**
      * 为了子类自定义实现一些功能
      *
@@ -205,7 +223,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
 
                 transferInWarehouseIds.forEach(id -> {
                     log.info("lock for warehouse :{}", id);
-                    Lock l = lockRegistry.obtain(id);
+                    Lock l = lockRegistry.obtain(id.toString());
                     if (!l.tryLock())
                         throw new JsonResponseException("stock.handle.in.operation");
                     locks.add(l);
@@ -217,22 +235,26 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
                 });
                 formulaOutWarehouseIds.forEach(id -> {
                     log.info("lock for warehouse :{}", id);
-                    Lock l = lockRegistry.obtain(id);
+                    Lock l = lockRegistry.obtain(id.toString());
                     if (!l.tryLock())
                         throw new JsonResponseException("stock.handle.in.operation");
                     locks.add(l);
                 });
             }
-
+            stockLocks.set(locks);
             return locks;
         }
         return Collections.emptyList();
     }
 
-    private void releaseLocks(List<Lock> locks) {
-        locks.forEach(l -> {
-            l.unlock();
-        });
+    private void releaseLocks() {
+        List<Lock> locks = stockLocks.get();
+        if (null != locks) {
+            locks.forEach(l -> {
+                l.unlock();
+            });
+            stockLocks.set(null);
+        }
     }
 
 

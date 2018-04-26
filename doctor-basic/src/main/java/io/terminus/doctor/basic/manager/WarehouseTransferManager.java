@@ -10,6 +10,7 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.common.utils.DateUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -19,6 +20,7 @@ import java.util.Date;
  * 调拨
  * Created by sunbo@terminus.io on 2018/4/8.
  */
+@Slf4j
 @Component
 public class WarehouseTransferManager extends AbstractStockManager {
 
@@ -37,7 +39,7 @@ public class WarehouseTransferManager extends AbstractStockManager {
             materialHandle.setHandleDate(this.buildNewHandleDate(stockDto.getHandleDate()).getTime());
 
             //获取该笔明细之前的库存量，包括该事件日期
-            BigDecimal historyQuantity = getHistoryQuantityInclude(stockDto.getHandleDate().getTime(), wareHouse.getId(), detail.getMaterialId());
+            BigDecimal historyQuantity = getHistoryQuantityInclude(materialHandle.getHandleDate(), wareHouse.getId(), detail.getMaterialId());
 
             materialHandle.setBeforeStockQuantity(historyQuantity);
 
@@ -53,13 +55,14 @@ public class WarehouseTransferManager extends AbstractStockManager {
             }
 
             //该笔单据明细之后单据明细需要重算
-            recalculate(stockDto.getHandleDate().getTime(), false, wareHouse.getId(), detail.getMaterialId(), historyQuantity);
+            recalculate(materialHandle.getHandleDate(), false, wareHouse.getId(), detail.getMaterialId(), historyQuantity);
         } else {
             BigDecimal currentQuantity = doctorWarehouseStockDao.findBySkuIdAndWarehouseId(detail.getMaterialId(), wareHouse.getId())
                     .orElse(DoctorWarehouseStock.builder().quantity(new BigDecimal(0)).build())
                     .getQuantity();
 
-            if (currentQuantity.compareTo(materialHandle.getQuantity()) < 0)
+            if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.TRANSFER_OUT.getValue()) &&
+                    currentQuantity.compareTo(materialHandle.getQuantity()) < 0)
                 throw new ServiceException("warehouse.stock.not.enough");
 
             materialHandle.setBeforeStockQuantity(currentQuantity);

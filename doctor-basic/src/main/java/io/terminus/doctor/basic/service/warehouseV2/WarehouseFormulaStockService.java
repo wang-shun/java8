@@ -30,12 +30,12 @@ public class WarehouseFormulaStockService extends AbstractWarehouseStockService<
 
     @Override
     protected WarehouseMaterialHandleType getMaterialHandleType() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     protected List<WarehouseFormulaDto.WarehouseFormulaDetail> getDetails(WarehouseFormulaDto stockDto) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

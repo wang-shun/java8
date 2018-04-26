@@ -12,10 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -35,7 +32,7 @@ public class WarehouseTransferStockService
 
     @Override
     protected List<WarehouseStockTransferDto.WarehouseStockTransferDetail> getDetails(WarehouseStockTransferDto stockDto) {
-        throw new UnsupportedOperationException();
+        return stockDto.getDetails();
     }
 
     @Override
@@ -116,6 +113,8 @@ public class WarehouseTransferStockService
         });
 
 
+        boolean changedHandleDate = !DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
+
         changed.forEach((detail, materialHandle) -> {
 
             DoctorWarehouseMaterialHandle transferIn = doctorWarehouseMaterialHandleDao.findById(materialHandle.getRelMaterialHandleId());
@@ -127,7 +126,7 @@ public class WarehouseTransferStockService
                 transferIn.setRemark(detail.getRemark());
 
             if (detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0
-                    || !DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime())
+                    || changedHandleDate
                     || changedTransferInWarehouse) {
 
                 DoctorWareHouse transferInWarehouse = doctorWareHouseDao.findById(transferIn.getWarehouseId());
@@ -138,9 +137,11 @@ public class WarehouseTransferStockService
                     //删除原调入明细
                     warehouseTransferManager.delete(transferIn);
 
-                    //TODO 锁
                     //新的调入仓库
                     transferInWarehouse = oldTransferInWarehouse.get(detail.getTransferInWarehouseId());
+
+                    lockWarehouse(transferInWarehouse.getId());
+
                     //创建新的调入明细
                     warehouseTransferManager.create(detail, stockDto, newTransferInStockHandle.get(detail.getTransferInWarehouseId()), transferInWarehouse);
                     //新调入仓库增加库存
@@ -151,13 +152,17 @@ public class WarehouseTransferStockService
                 if (detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0) {
                     BigDecimal changedQuantity = detail.getQuantity().subtract(materialHandle.getQuantity());
                     if (changedQuantity.compareTo(new BigDecimal(0)) > 0) {
-                        doctorWarehouseStockManager.in(detail.getMaterialId(), changedQuantity, wareHouse);
+                        //调拨出库扣减库存
+                        doctorWarehouseStockManager.out(detail.getMaterialId(), changedQuantity, wareHouse);
                         if (!changedTransferInWarehouse)
-                            doctorWarehouseStockManager.out(detail.getMaterialId(), changedQuantity, transferInWarehouse);
+                            //调补入库增加库存
+                            doctorWarehouseStockManager.in(detail.getMaterialId(), changedQuantity, transferInWarehouse);
                     } else {
-                        doctorWarehouseStockManager.out(detail.getMaterialId(), changedQuantity.negate(), wareHouse);
+                        //调拨出库增加库存
+                        doctorWarehouseStockManager.in(detail.getMaterialId(), changedQuantity.negate(), wareHouse);
                         if (!changedTransferInWarehouse)
-                            doctorWarehouseStockManager.in(detail.getMaterialId(), changedQuantity.negate(), transferInWarehouse);
+                            //调补入库扣减库存
+                            doctorWarehouseStockManager.out(detail.getMaterialId(), changedQuantity.negate(), transferInWarehouse);
                     }
                     materialHandle.setQuantity(detail.getQuantity());
                     if (!changedTransferInWarehouse)
@@ -166,9 +171,8 @@ public class WarehouseTransferStockService
 
 
                 Date recalculateDate = materialHandle.getHandleDate();
-                int days = DateUtil.getDeltaDays(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
                 //更改了操作日期
-                if (days != 0) {
+                if (changedHandleDate) {
                     warehouseTransferManager.buildNewHandleDateForUpdate(materialHandle, stockDto.getHandleDate());
                     if (!changedTransferInWarehouse) {
                         transferIn.setHandleDate(materialHandle.getHandleDate());
@@ -177,15 +181,18 @@ public class WarehouseTransferStockService
                         doctorWarehouseMaterialHandleDao.update(transferIn);
                     }
 
-                    if (days < 0) {//事件日期改小了，重算日期采用新的日期
+                    if (stockDto.getHandleDate().getTime().before(stockHandle.getHandleDate())) {//事件日期改小了，重算日期采用新的日期
                         recalculateDate = materialHandle.getHandleDate();
                     }
                 }
 
                 doctorWarehouseMaterialHandleDao.update(materialHandle);
                 warehouseTransferManager.recalculate(materialHandle, recalculateDate);
-                if (!changedTransferInWarehouse)
+                if (!changedTransferInWarehouse) {
                     warehouseTransferManager.recalculate(transferIn, recalculateDate);
+                    doctorWarehouseMaterialHandleDao.update(transferIn);
+                }
+
             } else {
                 //只更新了备注
                 doctorWarehouseMaterialHandleDao.update(materialHandle);
@@ -193,6 +200,12 @@ public class WarehouseTransferStockService
                     doctorWarehouseMaterialHandleDao.update(transferIn);
             }
         });
+
+        if (changedHandleDate) {
+            //更新调拨入库单据
+            Calendar newDate = warehouseTransferManager.buildNewHandleDate(stockDto.getHandleDate());
+            doctorWarehouseStockHandleDao.updateHandleDateAndSettlementDate(newDate, stockDto.getSettlementDate(), stockHandle.getId());
+        }
     }
 
     @Override

@@ -49,8 +49,6 @@ public class DoctorWarehouseStockHandleDao extends MyBatisDao<DoctorWarehouseSto
         Map<String, Object> params = new HashMap<>();
         params.put("stockHandleId", stockHandleId);
         params.put("handleDate", handleDate.getTime());
-        params.put("year", handleDate.get(Calendar.YEAR));
-        params.put("month", handleDate.get(Calendar.MONTH) + 1);
         params.put("settlementDate", SettlementDate);
 
         this.sqlSession.update(this.sqlId("updateHandleDateAndSettlementDate"), params);
