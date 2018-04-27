@@ -21,6 +21,7 @@
         <module>doctor-common</module>
         <module>integration-tests</module>
         <module>doctor-move-data</module>
+        <module>test</module>
         <!--<module>demo</module>-->
     </modules>
     <packaging>pom</packaging>

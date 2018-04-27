@@ -4,6 +4,7 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialApplyReadService;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSettlementService;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -13,7 +14,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,6 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +42,9 @@ public class PiggeryCollarController {
     @RpcConsumer
     private DoctorWarehouseMaterialApplyReadService doctorWarehouseMaterialApplyReadService;
 
+    @RpcConsumer
+    private DoctorWarehouseSettlementService doctorWarehouseSettlementService;
+
     /**
      * 猪舍领用报表
      * @param farmId
@@ -51,6 +57,7 @@ public class PiggeryCollarController {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/piggeryReport")
     public List<Map> piggeryReport(@RequestParam Long farmId,
+                                         @RequestParam(required = false) Long orgId,
                                          @RequestParam(required = false) String date,
                                          @RequestParam(required = false) Long pigBarnId,
                                          @RequestParam(required = false) Integer pigType,
@@ -78,6 +85,19 @@ public class PiggeryCollarController {
         }
         if (null != materialName && !materialName.equals("")){
             materialApply.setMaterialName(materialName);
+        }
+
+        //会计年月支持选择未结算过的会计年月，如果选择未结算的会计区间，则报表不显示金额和单价
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+        try {
+            boolean b = doctorWarehouseSettlementService.isSettled(orgId, sdf.parse(date));
+            if(!b){
+                BigDecimal bd=new BigDecimal("");
+                materialApply.setQuantity(bd);
+                materialApply.setAmount(bd);
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
 
         List<Map> maps = RespHelper.or500(doctorWarehouseMaterialApplyReadService.piggeryReport(materialApply));
@@ -120,6 +140,7 @@ public class PiggeryCollarController {
     //猪舍领用报表导出
     @RequestMapping(method = RequestMethod.GET, value = "/piggeryReport/export")
     public void piggeryReportExport(@RequestParam Long farmId,
+                                    @RequestParam(required = false) Long orgId,
                                     @RequestParam(required = false) String date,
                                     @RequestParam(required = false) Long pigBarnId,
                                     @RequestParam(required = false) Integer pigType,
@@ -149,6 +170,19 @@ public class PiggeryCollarController {
         }
         if (null != materialName && !materialName.equals("")){
             materialApply.setMaterialName(materialName);
+        }
+
+        //会计年月支持选择未结算过的会计年月，如果选择未结算的会计区间，则报表不显示金额和单价
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+        try {
+            boolean b = doctorWarehouseSettlementService.isSettled(orgId, sdf.parse(date));
+            if(!b){
+                BigDecimal bd=new BigDecimal("");
+                materialApply.setQuantity(bd);
+                materialApply.setAmount(bd);
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
 
         List<Map> maps = RespHelper.or500(doctorWarehouseMaterialApplyReadService.piggeryReport(materialApply));
