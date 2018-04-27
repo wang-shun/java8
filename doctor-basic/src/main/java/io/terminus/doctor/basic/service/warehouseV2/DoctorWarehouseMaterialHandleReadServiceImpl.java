@@ -391,6 +391,11 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         }
     }
 
+    @Override
+    public Response<List<Map<String,Object>>> warehouseByFarmId(Map<String, Object> criteria) {
+        return Response.ok(doctorWareHouseDao.findMapByFarmId((Long) criteria.get("farmId")));
+    }
+
     private Map<String, Object> getMonth(Map<String, Object> criteria){
         Date settlementDateStart = (Date)criteria.get("settlementDateStart");
         Date settlementDateEnd = (Date)criteria.get("settlementDateEnd");

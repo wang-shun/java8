@@ -146,4 +146,11 @@ public interface DoctorWarehouseMaterialHandleReadService {
      * @return
      */
     Response<List<Map>> monthWarehouseDetail(Map<String, Object> criteria);
+
+    /**
+     * 查仓库下的物料
+     * @param params
+     * @return
+     */
+    Response<List<Map<String,Object>>> warehouseByFarmId(Map<String, Object> params);
 }

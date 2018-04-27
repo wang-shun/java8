@@ -275,7 +275,7 @@
     </select>
 
     <select id="findMapByFarmId" parameterType="Long" resultType="map">
-      select id as id,ware_house_name as name
+      select id as id,ware_house_name as name,type as type
       from doctor_ware_houses
       where farm_id = #{farmId,jdbcType=BIGINT}
     </select>

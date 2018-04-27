@@ -109,6 +109,14 @@ public class StockHandleControllerv2 {
 
     }
 
+    //查所有仓库
+    @RequestMapping(value = "/warehouseByFarmId",method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Response<List<Map<String,Object>>> warehouseByFarmId(
+            @RequestParam(required = true,value = "farmId") Long farmId){
+        Map<String, Object> params = new HashMap<>();
+        params.put("farmId",farmId);
+        return doctorWarehouseMaterialHandleReadService.warehouseByFarmId(params);
+    }
     //报表导出
     @RequestMapping(value = "{type:\\d+}/export2", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public void export( HttpServletRequest request, HttpServletResponse response,
