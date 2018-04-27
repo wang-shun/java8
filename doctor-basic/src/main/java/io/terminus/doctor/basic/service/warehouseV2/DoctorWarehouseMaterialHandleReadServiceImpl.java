@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -380,7 +381,13 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         try {
             if(criteria.get("settlementDate")==null) {
                 Date date = new Date();
+                /*SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM");
+                String dateString = formatter.format(date);*/
                 criteria.put("settlementDate", date);
+            }else {
+                String settlementDate = (String)criteria.get("settlementDate");
+                Date date = DateUtil.formatToDate(DateUtil.YYYYMM, settlementDate);
+                criteria.put("settlementDate",date);
             }
             List<Map> resultList = doctorWarehouseStockMonthlyDao.monthWarehouseDetail(criteria);
             resultList.add(this.countInfo(resultList));
