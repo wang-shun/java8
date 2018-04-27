@@ -212,8 +212,11 @@
         on a.material_id = b.id
         where
            a.delete_flag=1
+        <if test="materialName!=null">
+            and a.material_name = #{materialName,jdbcType=VARCHAR}
+        </if>
         and a.warehouse_id = #{warehouseId,jdbcType=BIGINT}
-        and a.settlement_date = #{settlementDate,jdbcType=TIMESTAMP}
+        and DATE_FORMAT(a.settlement_date,'%Y-%M') = DATE_FORMAT(#{settlementDate,jdbcType=TIMESTAMP},'%Y-%M')
         group by a.material_id
     </select>
 

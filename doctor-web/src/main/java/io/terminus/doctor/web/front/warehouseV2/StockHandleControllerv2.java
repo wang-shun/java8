@@ -98,11 +98,13 @@ public class StockHandleControllerv2 {
     //仓库月报
     @RequestMapping(value = "/monthWarehouseDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response<List<Map>> warehouseReport(@RequestParam(required = true,value = "warehouseId") Long warehouseId,
-                                               @RequestParam(required = true,value = "settlementDate") Date settlementDate
-                                                     ){
+                                                @RequestParam(required = false,value = "settlementDate") Date settlementDate,
+                                                @RequestParam(required = false,value = "materialName") String materialName
+                                                ){
         Map<String, Object> params = new HashMap<>();
         params.put("warehouseId",warehouseId);
         params.put("settlementDate",settlementDate);
+        params.put("materialName",materialName);
         return doctorWarehouseMaterialHandleReadService.monthWarehouseDetail(params);
 
     }
@@ -111,12 +113,14 @@ public class StockHandleControllerv2 {
     @RequestMapping(value = "{type:\\d+}/export2", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public void export( HttpServletRequest request, HttpServletResponse response,
                        @PathVariable(value = "type")Integer type,
-                        @RequestParam(required = false,value = "orgId") Long orgId,
+                       @RequestParam(required = false,value = "orgId") Long orgId,
                        @RequestParam(required = false,value = "farmId") Long farmId,
                        @RequestParam(required = false,value = "settlementDateStart") Date settlementDateStart,
                        @RequestParam(required = false,value = "settlementDateEnd") Date settlementDateEnd,
                        @RequestParam(required = false,value = "warehouseId") Long warehouseId,
-                       @RequestParam(required = false,value = "settlementDate") Date settlementDate) {
+                       @RequestParam(required = false,value = "settlementDate") Date settlementDate,
+                       @RequestParam(required = false,value = "materialName")String materialName
+                        ) {
         HashMap<String, Object> params = Maps.newHashMap();
 
         try {
@@ -322,6 +326,7 @@ public class StockHandleControllerv2 {
                 case 3:
                     params.put("warehouseId", warehouseId);
                     params.put("settlementDate", settlementDate);
+                    params.put("materialName",materialName);
                     Response<List<Map>> listResponse2 = doctorWarehouseMaterialHandleReadService.monthWarehouseDetail(params);
                     List<Map> result2 = listResponse2.getResult();
                     //开始导出

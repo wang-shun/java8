@@ -378,6 +378,10 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     @Override
     public Response<List<Map>> monthWarehouseDetail(Map<String, Object> criteria) {
         try {
+            if(criteria.get("settlementDate")==null) {
+                Date date = new Date();
+                criteria.put("settlementDate", date);
+            }
             List<Map> resultList = doctorWarehouseStockMonthlyDao.monthWarehouseDetail(criteria);
             resultList.add(this.countInfo(resultList));
             return Response.ok(resultList);
