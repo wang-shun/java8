@@ -1,9 +1,11 @@
 package io.terminus.doctor.event.handler.usual;
 
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmInEventV2Handler;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -11,6 +13,10 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Objects;
+
+import static io.terminus.doctor.common.enums.PigType.PREG_SOW;
 
 /**
  * Created by xjn on 18/4/20.
@@ -24,7 +30,7 @@ public class DoctorChgFarmInV2Handler extends DoctorAbstractEventHandler {
     @Override
     public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
         DoctorPigEvent doctorPigEvent = super.buildPigEvent(basic, inputDto);
-        doctorPigEvent.setRelEventId(inputDto.getRelPigEventId());
+        doctorPigEvent.setRelPigEventId(inputDto.getRelPigEventId());
         return doctorPigEvent;
     }
 
@@ -37,6 +43,11 @@ public class DoctorChgFarmInV2Handler extends DoctorAbstractEventHandler {
         toTrack.setCurrentBarnId(doctorBarn.getId());
         toTrack.setCurrentBarnName(doctorBarn.getName());
         toTrack.setCurrentBarnType(doctorBarn.getPigType());
+        DoctorBarn fromBarn = doctorBarnDao.findById(doctorChgFarmDto.getFromBarnId());
+
+        if (Objects.equals(fromBarn.getPigType(), PREG_SOW.getValue()) && Objects.equals(doctorBarn.getPigType(), PigType.DELIVER_SOW.getValue())) {
+            toTrack.setStatus(PigStatus.Farrow.getKey());
+        }
         return toTrack;
     }
 
