@@ -84,6 +84,9 @@ public class DoctorModifyPigChgFarmEventV2Handler extends DoctorAbstractModifyPi
         oldPigTrack.setCurrentBarnId(doctorBarn.getId());
         oldPigTrack.setCurrentBarnName(doctorBarn.getName());
         oldPigTrack.setCurrentBarnType(doctorBarn.getPigType());
+        if (!Objects.equals(deletePigEvent.getPigStatusBefore(), oldPigTrack.getStatus())) {
+            oldPigTrack.setStatus(deletePigEvent.getPigStatusBefore());
+        }
         return oldPigTrack;
     }
 
