@@ -72,6 +72,8 @@ public class StockHandleController {
     @RpcConsumer
     private DoctorWarehouseStockHandleWriteService doctorWarehouseStockHandleWriteService;
     @RpcConsumer
+    private DoctorWarehouseMaterialHandleWriteService doctorWarehouseMaterialHandleWriteService;
+    @RpcConsumer
     private DoctorWarehouseMaterialHandleReadService doctorWarehouseMaterialHandleReadService;
     @RpcConsumer
     private DoctorFarmReadService doctorFarmReadService;
@@ -83,6 +85,9 @@ public class StockHandleController {
     private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
     @RpcConsumer
     private DoctorWarehouseMaterialApplyReadService doctorWarehouseMaterialApplyReadService;
+
+    @RpcConsumer
+    private DoctorWarehouseSettlementService doctorWarehouseSettlementService;
 
     @InitBinder
     public void init(WebDataBinder webDataBinder) {
@@ -284,14 +289,28 @@ public class StockHandleController {
         return vo;
     }
 
-    //删除
+    //删除单据表以及对应的单据明细表
     @RequestMapping(method = RequestMethod.DELETE, value = "{id:\\d+}")
-    public Response<String> delete(@PathVariable Long id) {
-           return doctorWarehouseStockHandleWriteService.delete(id);
+    public Response<String> delete(@PathVariable Long id,@RequestParam(required = false) Long orgId) {
+        //是否该公司正在结算中
+        if (doctorWarehouseSettlementService.isUnderSettlement(orgId))
+            throw new JsonResponseException("under.settlement");
+
+        return doctorWarehouseStockHandleWriteService.delete(id);
            /*if (!response.isSuccess())
                throw new JsonResponseException(response.getError());
            return true;*/
-   }
+    }
+
+    //删除单据明细表
+    @RequestMapping(method = RequestMethod.DELETE, value = "/deleteById/{id:\\d+}")
+    public Response<String> deleteById(@PathVariable Long id,@RequestParam(required = false) Long orgId) {
+        //是否该公司正在结算中
+        if (doctorWarehouseSettlementService.isUnderSettlement(orgId))
+            throw new JsonResponseException("under.settlement");
+
+        return doctorWarehouseMaterialHandleWriteService.delete(id);
+    }
 
     //导出
     @RequestMapping(method = RequestMethod.GET, value = "{id:\\d+}/export")

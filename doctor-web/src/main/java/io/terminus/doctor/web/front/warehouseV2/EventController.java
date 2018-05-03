@@ -168,7 +168,7 @@ public class EventController {
     public boolean delete(@PathVariable Long id) {
 
 
-        Response<Boolean> response = doctorWarehouseMaterialHandleWriteService.delete(id);
+        Response<String> response = doctorWarehouseMaterialHandleWriteService.delete(id);
         if (!response.isSuccess())
             throw new JsonResponseException(response.getError());
         return true;

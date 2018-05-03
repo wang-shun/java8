@@ -9,6 +9,7 @@ import io.terminus.doctor.basic.dto.warehouseV2.CompanyReportDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSettlementService;
 import org.springframework.stereotype.Repository;
 
@@ -23,6 +24,21 @@ import java.util.*;
  */
 @Repository
 public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouseMaterialHandle> {
+
+    //根据类型和RelMaterialHandleId得到对应的数据
+    public DoctorWarehouseMaterialHandle findByRelMaterialHandleId(Long relMaterialHandleId, int type) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("relMaterialHandleId", relMaterialHandleId);
+        criteria.put("type", type);
+        return this.sqlSession.selectOne(this.sqlId("findByRelMaterialHandleId"), criteria);
+    }
+
+    public Integer getCountByRelMaterialHandleId(Long relMaterialHandleId, int type) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("relMaterialHandleId", relMaterialHandleId);
+        criteria.put("type", type);
+        return this.sqlSession.selectOne(this.sqlId("getCountByRelMaterialHandleId"), criteria);
+    }
 
     /**
      * 支持bigType参数，对多个type的or查询
@@ -322,7 +338,8 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
 
     //<!--得到领料出库的物料名称-->
     public List<Map> getMaterialNameByID(Long id) {
-        return this.sqlSession.selectList(this.sqlId("getMaterialNameByID"),id);
+        List<Map> getMaterialNameByID = this.sqlSession.selectList(this.sqlId("getMaterialNameByID"), id);
+        return getMaterialNameByID;
     }
 
     //<!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注-->
@@ -331,7 +348,8 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         map.put("stockHandleId", stockHandleId);
         map.put("materialName", materialName);
         map.put("handleDate", handleDate);
-        return this.sqlSession.selectList(this.sqlId("getDataByMaterialName"), map);
+        List<Map> getDataByMaterialName = this.sqlSession.selectList(this.sqlId("getDataByMaterialName"), map);
+        return getDataByMaterialName;
     }
 
 }
