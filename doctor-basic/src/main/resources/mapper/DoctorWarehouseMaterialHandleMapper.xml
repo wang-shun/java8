@@ -783,4 +783,47 @@
         order by temp.settlement_date,temp.farm_id
     </select>
 
+
+    <!--退料入库-->
+    <!--得到仓库类型，仓库名称，仓库管理员，所属公司-->
+    <select id="getFarmData" parameterType="Long" resultType="map">
+        select wh.farm_id as farm_id,wh.type as ware_house_type,wh.ware_house_name as ware_house_name,wh.manager_name as manager_name,
+        f.name as farm_name,f.org_name as org_name  from doctor_ware_houses as wh
+        inner join doctor_farms as f
+        on f.id=wh.farm_id
+        inner join doctor_warehouse_stock_handle as sh
+        on sh.warehouse_id=wh.id
+        where sh.id = #{stockHandleId}
+    </select>
+
+    <!--得到领料出库的物料名称-->
+    <select id="getMaterialNameByID" parameterType="Long" resultType="map">
+        select material_name from doctor_warehouse_material_handle
+        where stock_handle_id = #{stockHandleId}
+    </select>
+
+    <!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注-->
+    <select id="getDataByMaterialName" parameterType="map" resultType="map">
+        select mh.id as material_handle_id, mh.material_name as material_name,s.code as material_code,
+        v.name as vendor_name,s.specification as specification,s.unit as unit,
+        ifnull(
+        ROUND(
+        (select ifnull(quantity,0) from doctor_warehouse_material_handle
+        where type=2 and stock_handle_id=#{stockHandleId} and material_name=#{materialName}
+        ) -
+        ( select ifnull(sum(quantity),0) from doctor_warehouse_material_handle
+        where type=13 and rel_material_handle_id=(
+        select id from doctor_warehouse_material_handle
+        where type=2 and stock_handle_id=#{stockHandleId} and material_name=#{materialName})
+        and <![CDATA[ handle_date <= #{handleDate}]]>
+        )
+        ,2),'') as refundableQuantity,mh.remark as remark
+        from doctor_warehouse_material_handle as mh
+        inner join doctor_warehouse_sku as s
+        on mh.material_id=s.id
+        inner join doctor_warehouse_vendor as v
+        on s.vendor_id=v.id
+        where material_name=#{materialName} and stock_handle_id=#{stockHandleId}
+    </select>
+
 </mapper>

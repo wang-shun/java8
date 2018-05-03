@@ -313,4 +313,25 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     public List<Map<String,Object>> selectCompanyReportInfo(Map<String, Object> criteria) {
         return this.sqlSession.selectList("selectCompanyReportInfo",criteria);
     }
+
+    //<!--退料入库-->
+    //<!--得到仓库类型，仓库名称，仓库管理员，所属公司-->
+    public List<Map> getFarmData(Long id) {
+        return this.sqlSession.selectOne(this.sqlId("getFarmData"),id);
+    }
+
+    //<!--得到领料出库的物料名称-->
+    public List<Map> getMaterialNameByID(Long id) {
+        return this.sqlSession.selectList(this.sqlId("getMaterialNameByID"),id);
+    }
+
+    //<!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注-->
+    public List<Map> getDataByMaterialName(Long stockHandleId,String materialName,String handleDate) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("stockHandleId", stockHandleId);
+        map.put("materialName", materialName);
+        map.put("handleDate", handleDate);
+        return this.sqlSession.selectList(this.sqlId("getDataByMaterialName"), map);
+    }
+
 }

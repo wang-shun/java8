@@ -403,6 +403,21 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         return Response.ok(doctorWareHouseDao.findMapByFarmId((Long) criteria.get("farmId")));
     }
 
+    @Override
+    public Response<List<Map>> getFarmData(Long id) {
+        return Response.ok(doctorWarehouseMaterialHandleDao.getFarmData(id));
+    }
+
+    @Override
+    public Response<List<Map>> getMaterialNameByID(Long id) {
+        return Response.ok(doctorWarehouseMaterialHandleDao.getMaterialNameByID(id));
+    }
+
+    @Override
+    public Response<List<Map>> getDataByMaterialName(Long stockHandleId, String materialName, String handleDate) {
+        return Response.ok(doctorWarehouseMaterialHandleDao.getDataByMaterialName(stockHandleId,materialName,handleDate));
+    }
+
     private Map<String, Object> getMonth(Map<String, Object> criteria){
         Date settlementDateStart = (Date)criteria.get("settlementDateStart");
         Date settlementDateEnd = (Date)criteria.get("settlementDateEnd");

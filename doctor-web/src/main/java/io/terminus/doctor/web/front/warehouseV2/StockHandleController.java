@@ -92,6 +92,35 @@ public class StockHandleController {
         webDataBinder.registerCustomEditor(Date.class, new CustomDateEditor(new SimpleDateFormat("yyyy-MM-dd"), true));
     }
 
+    //退料入库
+    //得到仓库类型，仓库名称，仓库管理员，所属公司
+    @RequestMapping(method = RequestMethod.GET, value = "/getFarmData")
+    public List<Map> getFarmData(@RequestParam Long id) {
+        List<Map> maps = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getFarmData(id));
+        return maps;
+    }
+
+    //得到领料出库的物料名称
+    @RequestMapping(method = RequestMethod.GET, value = "/getMaterialNameByID")
+    public List<Map> getMaterialNameByID(@RequestParam Long id) {
+        List<Map> maps = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getMaterialNameByID(id));
+        return maps;
+    }
+
+    //根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注
+    @RequestMapping(method = RequestMethod.GET, value = "/getDataByMaterialName")
+    public List<Map> getDataByMaterialName(@RequestParam(required = false) String handleDate,
+                                           @RequestParam Long stockHandleId,
+                                           @RequestParam String materialName) {
+        if(null==handleDate){
+            Date dd=new Date(System.currentTimeMillis());
+            SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+            handleDate=sdf.format(dd);
+        }
+        List<Map> maps = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getDataByMaterialName(stockHandleId,materialName,handleDate));
+        return maps;
+    }
+
     //单据数据展示
     @RequestMapping(value = "/paging", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public Paging<DoctorWarehouseStockHandle> paging(@RequestParam(required = false) Long farmId,
@@ -705,6 +734,7 @@ public class StockHandleController {
         params.put("updatedAtEnd", updatedAtEnd);
         return RespHelper.or500(doctorWarehouseStockHandleReadService.paging(pageNo, pageSize, params));
     }
+
 
 
 }

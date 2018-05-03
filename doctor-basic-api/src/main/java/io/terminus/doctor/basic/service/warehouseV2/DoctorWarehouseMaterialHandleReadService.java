@@ -1,5 +1,6 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
+import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
@@ -142,7 +143,7 @@ public interface DoctorWarehouseMaterialHandleReadService {
 
     /**
      * 仓库月度详情
-     * @param params
+     * @param
      * @return
      */
     Response<List<Map>> monthWarehouseDetail(Map<String, Object> criteria);
@@ -153,4 +154,15 @@ public interface DoctorWarehouseMaterialHandleReadService {
      * @return
      */
     Response<List<Map<String,Object>>> warehouseByFarmId(Map<String, Object> params);
+
+    //<!--退料入库-->
+    //<!--得到仓库类型，仓库名称，仓库管理员，所属公司-->
+    Response<List<Map>> getFarmData(Long id);
+
+    //<!--得到领料出库的物料名称-->
+    Response<List<Map>> getMaterialNameByID(Long id);
+
+    //<!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注-->
+    Response<List<Map>> getDataByMaterialName(Long stockHandleId,String materialName,String handleDate);
+
 }
