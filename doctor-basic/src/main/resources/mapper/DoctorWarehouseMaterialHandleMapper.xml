@@ -814,8 +814,8 @@
 
     <!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注-->
     <select id="getDataByMaterialName" parameterType="map" resultType="map">
-        select mh.id as material_handle_id, mh.material_name as material_name,s.code as material_code,
-        v.name as vendor_name,s.specification as specification,s.unit as unit,
+        select mh.id as material_handle_id, mh.material_id as material_id, mh.material_name as material_name,s.code as material_code,
+        v.name as vendor_name,s.specification as specification,s.unit as unit,mh.unit_price as unit_price,
         ifnull(
         ROUND(
         (select ifnull(quantity,0) from doctor_warehouse_material_handle
