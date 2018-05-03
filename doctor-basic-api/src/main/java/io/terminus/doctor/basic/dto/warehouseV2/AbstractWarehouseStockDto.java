@@ -39,5 +39,7 @@ public class AbstractWarehouseStockDto {
 
     private Long stockHandleId;
 
+    private Integer warehouseType;
 
+    private Long relStockHandleId;
 }
