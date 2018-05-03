@@ -115,7 +115,9 @@ public class DoctorPigCreateEvents {
     //状态转舍允许类型
     private static final List<Integer> CHG_SOW_ALLOWS = Lists.newArrayList(DELIVER_SOW.getValue(), MATE_SOW.getValue(), PREG_SOW.getValue());
 
-    private final DoctorPigEventWriteService doctorPigEventWriteService;
+    @RpcConsumer(timeout = "10000")
+    private DoctorPigEventWriteService doctorPigEventWriteService;
+
     private final DoctorFarmReadService doctorFarmReadService;
     private final DoctorPigReadService doctorPigReadService;
     private final UserReadService userReadService;
@@ -147,15 +149,13 @@ public class DoctorPigCreateEvents {
     private DoctorWarehouseSkuReadService doctorWarehouseSkuReadService;
 
     @Autowired
-    public DoctorPigCreateEvents(DoctorPigEventWriteService doctorPigEventWriteService,
-                                 DoctorFarmReadService doctorFarmReadService,
+    public DoctorPigCreateEvents(DoctorFarmReadService doctorFarmReadService,
                                  DoctorPigReadService doctorPigReadService,
                                  UserReadService userReadService,
                                  DoctorBarnReadService doctorBarnReadService,
                                  DoctorPigEventReadService doctorPigEventReadService,
                                  DoctorGroupWebService doctorGroupWebService,
                                  DoctorValidService doctorValidService) {
-        this.doctorPigEventWriteService = doctorPigEventWriteService;
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorPigReadService = doctorPigReadService;
         this.userReadService = userReadService;
