@@ -46,10 +46,7 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import io.terminus.common.model.Response;
@@ -118,6 +115,29 @@ public class StockHandleController {
             handleDate=sdf.format(dd);
         }
         List<Map> maps = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getDataByMaterialName(stockHandleId,materialName,handleDate));
+        return maps;
+    }
+
+    //退料入库前的数据展示
+    @RequestMapping(method = RequestMethod.GET, value = "/getRetreatingData")
+    public List<Map> getRetreatingData(@RequestParam Long id,
+                                        @RequestParam(required = false) String handleDate) {
+
+        //得到领料出库的物料名称
+        List<Map> map= RespHelper.or500(doctorWarehouseMaterialHandleReadService.getMaterialNameByID(id));
+        List<Map> maps=new ArrayList<Map>();
+        if(null==handleDate){
+            Date dd=new Date(System.currentTimeMillis());
+            SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+            handleDate=sdf.format(dd);
+        }
+        for(Map mm:map){
+            String materialName = String.valueOf(mm.get("material_name"));
+            //根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注
+            List<Map> mp = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getDataByMaterialName(id, materialName, handleDate));
+            maps.addAll(mp);
+        }
+
         return maps;
     }
 

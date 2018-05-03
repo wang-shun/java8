@@ -317,7 +317,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     //<!--退料入库-->
     //<!--得到仓库类型，仓库名称，仓库管理员，所属公司-->
     public List<Map> getFarmData(Long id) {
-        return this.sqlSession.selectOne(this.sqlId("getFarmData"),id);
+        return this.sqlSession.selectList(this.sqlId("getFarmData"),id);
     }
 
     //<!--得到领料出库的物料名称-->
