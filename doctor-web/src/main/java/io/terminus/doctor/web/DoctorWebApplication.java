@@ -18,7 +18,7 @@ import org.springframework.core.io.ClassPathResource;
  * Date: 2016-02-01
  */
 @SpringBootApplication
-public class DoctorWebApplication {
+public class  DoctorWebApplication {
     public static void main(String[] args) {
         SpringApplication application = new SpringApplication(DoctorWebApplication.class,
                 "classpath:/spring/doctor-web-dubbo-consumer.xml");

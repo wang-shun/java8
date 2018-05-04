@@ -17,8 +17,6 @@ public abstract class AbstractWarehouseStockDetail {
     @NotNull(message = "stock.material.id.null", groups = {StockDefaultValid.class, StockFormulaValid.class})
     private Long materialId;
 
-
-
     @NotNull(message = "stock.quantity.null", groups = {StockDefaultValid.class, StockFormulaValid.class})
     @DecimalMin.List({
             @DecimalMin(value = "0", inclusive = true, message = "stock.quantity.small.then.zero", groups = StockInventoryValid.class),
@@ -27,8 +25,6 @@ public abstract class AbstractWarehouseStockDetail {
     private BigDecimal quantity;
 
     private String remark;
-
-    private String beforeStockQuantity;
 
     public static interface StockDefaultValid {
 
