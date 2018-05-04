@@ -948,19 +948,25 @@ public class ReportController {
 
                             if(i == 12){
                                 dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(String.valueOf(lastMonthData.get("jcsl")));
+                                dataCell.setCellValue(
+                                        ObjectUtils.isEmpty(lastMonthData.get("jcsl"))
+                                                ? "" : lastMonthData.get("jcsl").toString());
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 13){
                                 dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(String.valueOf(lastMonthData.get("jcdj")));
+                                dataCell.setCellValue(
+                                        ObjectUtils.isEmpty(lastMonthData.get("jcdj"))
+                                                ? "" : lastMonthData.get("jcdj").toString());
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 14){
                                 dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(String.valueOf(lastMonthData.get("jcje")));
+                                dataCell.setCellValue(
+                                        ObjectUtils.isEmpty(lastMonthData.get("jcje"))
+                                                ? "" : lastMonthData.get("jcje").toString());
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
@@ -1069,39 +1075,57 @@ public class ReportController {
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(6);
-                            dataCell.setCellValue(String.valueOf(map.get("rksl")));
+                            dataCell.setCellValue(
+                                    ObjectUtils.isEmpty(map.get("rksl"))
+                                            ? "" : map.get("rksl").toString());
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(7);
-                            dataCell.setCellValue(String.valueOf(map.get("rkdj")));
+                            dataCell.setCellValue(
+                                    ObjectUtils.isEmpty(map.get("rkdj"))
+                                            ? "" : map.get("rkdj").toString());
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(8);
-                            dataCell.setCellValue(String.valueOf(map.get("rkje")));
+                            dataCell.setCellValue(
+                                    ObjectUtils.isEmpty(map.get("rkje"))
+                                            ? "" : map.get("rkje").toString());
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(9);
-                            dataCell.setCellValue(String.valueOf(map.get("cksl")));
+                            dataCell.setCellValue(
+                                    ObjectUtils.isEmpty(map.get("cksl"))
+                                            ? "" : map.get("cksl").toString());
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(10);
-                            dataCell.setCellValue(String.valueOf(map.get("ckdj")));
+                            dataCell.setCellValue(
+                                    ObjectUtils.isEmpty(map.get("ckdj"))
+                                            ? "" : map.get("ckdj").toString());
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(11);
-                            dataCell.setCellValue(String.valueOf(map.get("ckje")));
+                            dataCell.setCellValue(
+                                    ObjectUtils.isEmpty(map.get("ckje"))
+                                            ? "" : map.get("ckje").toString());
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(12);
-                            dataCell.setCellValue(String.valueOf(map.get("jcsl")));
+                            dataCell.setCellValue(
+                                    ObjectUtils.isEmpty(map.get("jcsl"))
+                                            ? "" : map.get("jcsl").toString());
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(13);
-                            dataCell.setCellValue(String.valueOf(map.get("jcdj")));
+                            dataCell.setCellValue(
+                                    ObjectUtils.isEmpty(map.get("jcdj"))
+                                            ? "" : map.get("jcdj").toString());
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(14);
-                            dataCell.setCellValue(String.valueOf(map.get("jcje")));
+                            dataCell.setCellValue(
+                                    ObjectUtils.isEmpty(map.get("jcje"))
+                                            ? "" : map.get("jcje").toString());
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(15);
@@ -1205,55 +1229,73 @@ public class ReportController {
 
                             if(i == 6){
                                 dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(String.valueOf(thisMonthHZData.get("rksl")));
+                                dataCell.setCellValue(
+                                        ObjectUtils.isEmpty(thisMonthHZData.get("rksl"))
+                                                ? "" : thisMonthHZData.get("rksl").toString());
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 7){
                                 dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(String.valueOf(thisMonthHZData.get("rkdj")));
+                                dataCell.setCellValue(
+                                        ObjectUtils.isEmpty(thisMonthHZData.get("rkdj"))
+                                                ? "" : thisMonthHZData.get("rkdj").toString());
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 8){
                                 dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(String.valueOf(thisMonthHZData.get("rkje")));
+                                dataCell.setCellValue(
+                                        ObjectUtils.isEmpty(thisMonthHZData.get("rkje"))
+                                                ? "" : thisMonthHZData.get("rkje").toString());
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 9){
                                 dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(String.valueOf(thisMonthHZData.get("cksl")));
+                                dataCell.setCellValue(
+                                        ObjectUtils.isEmpty(thisMonthHZData.get("cksl"))
+                                                ? "" : thisMonthHZData.get("cksl").toString());
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 10){
                                 dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(String.valueOf(thisMonthHZData.get("ckdj")));
+                                dataCell.setCellValue(
+                                        ObjectUtils.isEmpty(thisMonthHZData.get("ckdj"))
+                                                ? "" : thisMonthHZData.get("ckdj").toString());
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 11){
                                 dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(String.valueOf(thisMonthHZData.get("ckje")));
+                                dataCell.setCellValue(
+                                        ObjectUtils.isEmpty(thisMonthHZData.get("ckje"))
+                                                ? "" : thisMonthHZData.get("ckje").toString());
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 12){
                                 dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(String.valueOf(thisMonthHZData.get("jcsl")));
+                                dataCell.setCellValue(
+                                        ObjectUtils.isEmpty(thisMonthHZData.get("jcsl"))
+                                                ? "" : thisMonthHZData.get("jcsl").toString());
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 13){
                                 dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(String.valueOf(thisMonthHZData.get("jcdj")));
+                                dataCell.setCellValue(
+                                        ObjectUtils.isEmpty(thisMonthHZData.get("jcdj"))
+                                                ? "" : thisMonthHZData.get("jcdj").toString());
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 14){
                                 dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(String.valueOf(thisMonthHZData.get("jcje")));
+                                dataCell.setCellValue(
+                                        ObjectUtils.isEmpty(thisMonthHZData.get("jcje"))
+                                                ? "" : thisMonthHZData.get("jcje").toString());
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
