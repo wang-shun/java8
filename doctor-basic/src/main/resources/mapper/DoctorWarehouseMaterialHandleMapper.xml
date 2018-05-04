@@ -205,12 +205,12 @@
 
     <select id="findByRelMaterialHandleId" parameterType="map"  resultType="DoctorWarehouseMaterialHandle">
         select * from  doctor_warehouse_material_handle
-        where  rel_material_handle_id = #{relMaterialHandleId} and type = #{type}
+        where  rel_material_handle_id = #{relMaterialHandleId} and type = #{type} and delete_flag=1
     </select>
 
     <select id="getCountByRelMaterialHandleId" parameterType="map" resultType="Integer">
         select count(*) from  doctor_warehouse_material_handle
-        where  rel_material_handle_id = #{relMaterialHandleId} and type = #{type}
+        where  rel_material_handle_id = #{relMaterialHandleId} and type = #{type} and delete_flag=1
     </select>
     
     <select id="count" parameterType="map" resultType="long">

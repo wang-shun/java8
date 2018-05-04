@@ -95,11 +95,11 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
             }
             //配方生产
             if (type == 5) {
-                return Response.fail("配方生产不支持删除");
+                return Response.fail("删除失败，配方生产不支持删除");
             }
             //调拨入库
             if (type == 9) {
-                return Response.fail("调拨入库不支持删除");
+                return Response.fail("删除失败，调拨入库不支持删除");
             }
             //采购入库,退料入库,盘盈入库
             if (type == 1 || type == 13 || type == 7) {
@@ -112,7 +112,7 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
             }
             //领料出库
             if (type == 2) {
-                Integer countByRelMaterialHandleId = doctorWarehouseMaterialHandleDao.getCountByRelMaterialHandleId(handle.getRelMaterialHandleId(), 13);
+                Integer countByRelMaterialHandleId = doctorWarehouseMaterialHandleDao.getCountByRelMaterialHandleId(handle.getId(), 13);
                 if (countByRelMaterialHandleId > 0) {
                     return Response.fail("此物料存在退料,不支持删除");
                 } else {
@@ -127,7 +127,7 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
                 }else if(type==10){
                     tt=9;
                 }
-                DoctorWarehouseMaterialHandle byRelMaterialHandleId = doctorWarehouseMaterialHandleDao.findByRelMaterialHandleId(handle.getRelMaterialHandleId(), tt);
+                DoctorWarehouseMaterialHandle byRelMaterialHandleId = doctorWarehouseMaterialHandleDao.findByRelMaterialHandleId(handle.getId(), tt);
                 if (byRelMaterialHandleId != null) {
                     warehouseInManager.recalculate(byRelMaterialHandleId);//校验被入库是否为正
                     warehouseInManager.delete(byRelMaterialHandleId);//删除被入库的单据明细表
