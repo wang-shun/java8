@@ -106,7 +106,7 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
 
                 warehouseReturnManager.buildNewHandleDateForUpdate(materialHandle, stockDto.getHandleDate());
 
-                if (outMaterialHandle.getHandleDate().after(materialHandle.getHandleDate()) ||
+                if (outMaterialHandle.getHandleDate().after(materialHandle.getHandleDate()) &&
                         !outMaterialHandle.getHandleDate().equals(materialHandle.getHandleDate()))
                     throw new ServiceException("refund.date.before.out.date");
 
