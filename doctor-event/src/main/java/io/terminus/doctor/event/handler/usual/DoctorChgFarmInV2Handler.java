@@ -17,6 +17,8 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 import static io.terminus.doctor.common.enums.PigType.PREG_SOW;
+import static io.terminus.doctor.common.utils.Checks.expectTrue;
+import static java.util.Objects.isNull;
 
 /**
  * Created by xjn on 18/4/20.
@@ -26,6 +28,13 @@ import static io.terminus.doctor.common.enums.PigType.PREG_SOW;
 public class DoctorChgFarmInV2Handler extends DoctorAbstractEventHandler {
     @Autowired
     private DoctorModifyPigChgFarmInEventV2Handler modifyPigChgFarmInEventHandler;
+
+    @Override
+    public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
+        super.handleCheck(executeEvent, fromTrack);
+        expectTrue(isNull(doctorPigDao.findPigByFarmIdAndPigCodeAndSex(executeEvent.getFarmId(), executeEvent.getPigCode(), executeEvent.getKind())), "pigCode.have.existed");
+
+    }
 
     @Override
     public DoctorPigEvent buildPigEvent(DoctorBasicInputInfoDto basic, BasePigEventInputDto inputDto) {
