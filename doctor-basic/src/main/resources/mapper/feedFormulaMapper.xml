@@ -101,7 +101,7 @@
         <where>
             <include refid="criteria"/>
         </where>
-        order by created_at
+        order by created_at desc
         LIMIT #{offset}, #{limit}
     </select>
 
