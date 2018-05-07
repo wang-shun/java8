@@ -206,6 +206,8 @@
     <!--  按照仓库类型进行tab分页筛选，仓库按照创建时间进行排列 -->
     <select id="listDetailTypeCount" parameterType="Map" resultType="long">
         select count(1) as ct
+        from
+        (select a.id
         from doctor_warehouse_material_handle a
         left join doctor_warehouse_sku b on a.material_id=b.id
         left join doctor_warehouse_vendor c on b.vendor_id=c.id
@@ -213,6 +215,8 @@
         <if test="type != null" > and a.warehouse_type=#{type}</if>
         <if test="materialName != null" > and b.`name` like CONCAT('%', #{materialName}, '%')</if>
         <if test="warehouseId != null" > and a.warehouse_id=#{warehouseId}</if>
+        group by a.material_id
+        ) temp
     </select>
 
     <select id="listDetailTypeMap" parameterType="Map" resultType="map">
@@ -270,6 +274,7 @@
         <if test="type != null" > and a.warehouse_type=#{type}</if>
         <if test="materialName != null" > and b.`name` like CONCAT('%', #{materialName}, '%')</if>
         <if test="warehouseId != null" > and a.warehouse_id=#{warehouseId}</if>
+        group by  a.material_id
         order by a.id
         limit #{offset},#{limit}
     </select>
