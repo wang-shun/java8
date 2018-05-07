@@ -153,4 +153,11 @@
         </where>
     </select>
 
+    <select id="findByPigId" parameterType="long" resultMap="DoctorChgFarmInfoMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            pig_id = #{pigId}
+        </where>
+    </select>
 </mapper>

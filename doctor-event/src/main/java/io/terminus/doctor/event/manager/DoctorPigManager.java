@@ -2,12 +2,16 @@ package io.terminus.doctor.event.manager;
 
 import com.google.common.base.Strings;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.common.utils.ToJsonMapper;
+import io.terminus.doctor.event.dao.DoctorChgFarmInfoDao;
 import io.terminus.doctor.event.dao.DoctorMessageDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.msg.DoctorMessageSearchDto;
+import io.terminus.doctor.event.model.DoctorChgFarmInfo;
 import io.terminus.doctor.event.model.DoctorMessage;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -27,10 +31,12 @@ import java.util.List;
 public class DoctorPigManager {
     private static final JsonMapperUtil MAPPER = JsonMapperUtil.nonDefaultMapperWithFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
     private static final JsonMapperUtil IN_JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
+    private static final ToJsonMapper TO_JSON = ToJsonMapper.JSON_NON_DEFAULT_MAPPER;
 
     private final DoctorPigDao doctorPigDao;
     private final DoctorPigEventDao doctorPigEventDao;
     private final DoctorPigTrackDao doctorPigTrackDao;
+    private final DoctorChgFarmInfoDao doctorChgFarmInfoDao;
 
     @Autowired
     private DoctorMessageDao doctorMessageDao;
@@ -38,10 +44,11 @@ public class DoctorPigManager {
     @Autowired
     public DoctorPigManager(DoctorPigDao doctorPigDao,
                             DoctorPigEventDao doctorPigEventDao,
-                            DoctorPigTrackDao doctorPigTrackDao) {
+                            DoctorPigTrackDao doctorPigTrackDao, DoctorChgFarmInfoDao doctorChgFarmInfoDao) {
         this.doctorPigDao = doctorPigDao;
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
+        this.doctorChgFarmInfoDao = doctorChgFarmInfoDao;
     }
 
     /**
@@ -78,10 +85,24 @@ public class DoctorPigManager {
         }
         doctorPigDao.update(updatePig);
 
+        //更新转场记录中的猪号，如果有的话
+        List<DoctorChgFarmInfo> doctorChgFarmInfos = doctorChgFarmInfoDao.findByPigId(pigId);
+        if (!Arguments.isNullOrEmpty(doctorChgFarmInfos)) {
+            DoctorChgFarmInfo updateChgFarmInfo = new DoctorChgFarmInfo();
+            doctorChgFarmInfos.forEach(doctorChgFarmInfo -> {
+                updateChgFarmInfo.setId(doctorChgFarmInfo.getId());
+                updateChgFarmInfo.setPigCode(pigCode);
+                DoctorPig doctorPig = IN_JSON_MAPPER.fromJson(doctorChgFarmInfo.getPig(), DoctorPig.class);
+                doctorPig.setPigCode(pigCode);
+                updateChgFarmInfo.setPig(TO_JSON.toJson(doctorPig));
+                doctorChgFarmInfoDao.update(updateChgFarmInfo);
+            });
+        }
         if (Strings.isNullOrEmpty(pigCode)) {
             return;
         }
         doctorPigEventDao.updatePigCode(pigId, pigCode);
+
         //更新消息
         DoctorMessageSearchDto msgSearch = new DoctorMessageSearchDto();
         msgSearch.setBusinessId(pigId);
