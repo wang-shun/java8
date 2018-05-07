@@ -126,6 +126,7 @@ public class FormulaController {
         feedFormula.setFeedName(feed.getName());
         feedFormula.setFarmId(dto.getFarmId());
         feedFormula.setFarmName(RespHelper.or500(doctorFarmReadService.findFarmById(dto.getFarmId())).getName());
+        feedFormula.setFormulaName(dto.getFormulalName());
         feedFormula.setFormulaMap(ImmutableMap.of("materialProduce", ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(dto.getProduce())));
 
         //更新
