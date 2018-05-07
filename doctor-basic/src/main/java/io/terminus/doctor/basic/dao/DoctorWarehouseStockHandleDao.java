@@ -24,14 +24,17 @@ public class DoctorWarehouseStockHandleDao extends MyBatisDao<DoctorWarehouseSto
 
     public DoctorWarehouseStockHandle findByRelStockHandleId(Long id, int type) {
         int handle_sub_type = 0;
-        if (type == 6) {
-            handle_sub_type = 2;
+        //领料出库
+        if (type == 2) {
+            handle_sub_type = 13;
         }
-        if (type == 8) {
-            handle_sub_type = 3;
+        //配方出库
+        if (type == 12) {
+            handle_sub_type = 11;
         }
-        if (type == 9) {
-            handle_sub_type = 5;
+        //调拨出库
+        if (type == 10) {
+            handle_sub_type = 9;
         }
         Map<String, Object> criteria = Maps.newHashMap();
         criteria.put("id", id);

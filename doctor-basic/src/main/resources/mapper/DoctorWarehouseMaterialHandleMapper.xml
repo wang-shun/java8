@@ -202,6 +202,16 @@
         DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
+
+    <select id="findByRelMaterialHandleId" parameterType="map"  resultType="DoctorWarehouseMaterialHandle">
+        select * from  doctor_warehouse_material_handle
+        where  rel_material_handle_id = #{relMaterialHandleId} and type = #{type} and delete_flag=1
+    </select>
+
+    <select id="getCountByRelMaterialHandleId" parameterType="map" resultType="Integer">
+        select count(*) from  doctor_warehouse_material_handle
+        where  rel_material_handle_id = #{relMaterialHandleId} and type = #{type} and delete_flag=1
+    </select>
     
     <select id="count" parameterType="map" resultType="long">
         SELECT COUNT(1)
@@ -488,16 +498,17 @@
         join  doctor_warehouse_sku b on a.material_id=b.id
         where 1=1
         <if test="settlementDate != null">
-          and date_format(a.settlement_date,'%Y-%m')=date_format(DATE_SUB(CONCAT(#{settlementDate},'-01'), INTERVAL 1 MONTH),'%Y-%m')
+            and date_format(a.settlement_date,'%Y-%m')
+            = date_format(DATE_SUB(CONCAT(#{settlementDate},'-01'), INTERVAL 1 MONTH),'%Y-%m')
         </if>
         <if test="farmId != null">
-          and a.farm_id=#{farmId}
+            and a.farm_id=#{farmId}
         </if>
         <if test="warehouseId != null">
-          and a.warehouse_id=#{warehouseId}
+            and a.warehouse_id=#{warehouseId}
         </if>
         <if test="materialName != null">
-          and b.`name` like CONCAT('%',#{materialName},'%')
+            and b.`name` like CONCAT('%',#{materialName},'%')
         </if>
         union all
         select * from (
@@ -505,56 +516,123 @@
         date_format(b.handle_date,'%Y-%m-%d') as handle_date,
         date_format(b.settlement_date,'%Y-%m') as settlement_date,
         b.type as handler_type,
-        ifnull(case when b.type in (1,2,3,4,5)
-        then ROUND(b.quantity,2) end,'') as rksl,
-        ifnull(case when b.type in (1,2,3,4,5)
-        then  ROUND(b.unit_price,4) end,'') as rkdj,
-        ifnull(case when b.type in (1,2,3,4,5)
-        then ROUND(b.amount,4) end,'') as rkje,
-        ifnull(case when b.type in (6,7,8,9)
-        then ROUND(b.quantity,2) end,'') as cksl,
-        ifnull(case when b.type in (6,7,8,9)
-        then ROUND(b.unit_price,4) end,'') as ckdj,
-        ifnull(case when b.type in (6,7,8,9)
-        then ROUND(b.amount,4) end,'') as ckje,
-        ifnull(
-        ROUND(
-        (select sum(c.balance_quantity)
+        case when
+        b.type in (1,2,3,4,5)
+        then ifnull(round(b.quantity,2),'') else '' end as rksl,
+        case when
+        b.type in (1,2,3,4,5)
+        then ifnull(round(b.unit_price,4),'') else '' end as rkdj,
+        case when
+        b.type in (1,2,3,4,5)
+        then ifnull(round(b.amount,4),'') else '' end as rkje,
+        case when
+        b.type in (6,7,8,9)
+        then ifnull(round(b.quantity,2),'') else '' end as cksl,
+        case when
+        b.type in (6,7,8,9)
+        then ifnull(round(b.unit_price,4),'') else '' end as ckdj,
+        case when
+        b.type in (6,7,8,9)
+        then ifnull(round(b.amount,4),'') else '' end as ckje,
+        (select ifnull(sum(c.balance_quantity),0)
         from doctor_warehouse_stock_monthly c
-        where c.material_id=b.material_id and c.warehouse_id=b.warehouse_id
+        where c.material_id=b.material_id
+        and c.warehouse_id=b.warehouse_id
+        <if test="settlementDate != null">
+            and date_format(c.settlement_date,'%Y-%m') = #{settlementDate}
+        </if>
+        <if test="farmId != null">
+            and c.farm_id=#{farmId}
+        </if>
+        <if test="warehouseId != null">
+            and c.warehouse_id=#{warehouseId}
+        </if>
         ) +
-        ((case when b.type in (6,7,8,9) then b.quantity end)
+        (
+        (case when
+        b.type in (6,7,8,9)
+        then ifnull(b.quantity,0) else 0 end)
         -
-        (case when b.type in (1,2,3,4,5) then b.quantity end))
-        ,2),'') as jcsl,
+        (case when
+        b.type in (1,2,3,4,5)
+        then ifnull(b.quantity,0) else 0 end)
+        )
+        as jcsl,
         ifnull(
-        ROUND(
-        ((select sum(c.balance_amount)
+        (
+        (select ifnull(sum(c.balance_amount),0)
         from doctor_warehouse_stock_monthly c
-        where c.material_id=b.material_id and c.warehouse_id=b.warehouse_id
+        where c.material_id=b.material_id
+        and c.warehouse_id=b.warehouse_id
+        <if test="settlementDate != null">
+            and date_format(c.settlement_date,'%Y-%m') = #{settlementDate}
+        </if>
+        <if test="farmId != null">
+            and c.farm_id=#{farmId}
+        </if>
+        <if test="warehouseId != null">
+            and c.warehouse_id=#{warehouseId}
+        </if>
         ) +
-        ((case when b.type in (6,7,8,9) then b.amount end)
+        (
+        (case when
+        b.type in (6,7,8,9)
+        then ifnull(b.amount,0) else 0 end)
         -
-        (case when b.type in (1,2,3,4,5) then b.amount end))
+        (case when
+        b.type in (1,2,3,4,5)
+        then ifnull(b.amount,0) else 0 end)
+        )
         )
         /
-        ((select sum(c.balance_quantity)
+        (
+        (select ifnull(sum(c.balance_quantity),0)
         from doctor_warehouse_stock_monthly c
-        where c.material_id=b.material_id and c.warehouse_id=b.warehouse_id
+        where c.material_id=b.material_id
+        and c.warehouse_id=b.warehouse_id
+        <if test="settlementDate != null">
+            and date_format(c.settlement_date,'%Y-%m') = #{settlementDate}
+        </if>
+        <if test="farmId != null">
+            and c.farm_id=#{farmId}
+        </if>
+        <if test="warehouseId != null">
+            and c.warehouse_id=#{warehouseId}
+        </if>
         ) +
-        ((case when b.type in (6,7,8,9) then b.quantity end)
+        (
+        (case when
+        b.type in (6,7,8,9)
+        then ifnull(b.quantity,0) else 0 end)
         -
-        (case when b.type in (1,2,3,4,5) then b.quantity end))
-        ),4),'') as jcdj,
-        ifnull(
-        ROUND((select sum(c.balance_amount)
+        (case when
+        b.type in (1,2,3,4,5)
+        then ifnull(b.quantity,0) else 0 end)
+        )
+        ),0) as jcdj,
+        (select ifnull(sum(c.balance_amount),0)
         from doctor_warehouse_stock_monthly c
-        where c.material_id=b.material_id and c.warehouse_id=b.warehouse_id
+        where c.material_id=b.material_id
+        and c.warehouse_id=b.warehouse_id
+        <if test="settlementDate != null">
+            and date_format(c.settlement_date,'%Y-%m') = #{settlementDate}
+        </if>
+        <if test="farmId != null">
+            and c.farm_id=#{farmId}
+        </if>
+        <if test="warehouseId != null">
+            and c.warehouse_id=#{warehouseId}
+        </if>
         ) +
-        ((case when b.type in (6,7,8,9) then b.amount end)
+        (
+        (case when
+        b.type in (6,7,8,9)
+        then ifnull(b.amount,0) else 0 end)
         -
-        (case when b.type in (1,2,3,4,5) then b.amount end))
-        ,4),'') as jcje,
+        (case when
+        b.type in (1,2,3,4,5)
+        then ifnull(b.amount,0) else 0 end)
+        ) as jcje,
         f.pig_barn_name,
         f.pig_type,
         f.pig_group_name,
@@ -576,13 +654,13 @@
         on d.vendor_id=e.id
         where b.delete_flag=1
         <if test="farmId != null">
-          and b.farm_id=#{farmId}
+            and b.farm_id=#{farmId}
         </if>
         <if test="settlementDate != null">
-          and date_format(b.settlement_date,'%Y-%m')=#{settlementDate}
+            and date_format(b.settlement_date,'%Y-%m') = #{settlementDate}
         </if>
         <if test="warehouseId != null">
-          and b.warehouse_id=#{warehouseId}
+            and b.warehouse_id=#{warehouseId}
         </if>
         <if test="materialName != null">
             and d.`name` like CONCAT('%',#{materialName},'%')
@@ -602,63 +680,21 @@
         <if test="type != null">
             and d.type=#{type}
         </if>
-        order by b.settlement_date,b.id
-        ) as bjdata
+        order by b.settlement_date,b.id) as ccc
         union all
         select
         '' as id,'本月结存' as material_name,
         '' as material_type,'' as ware_house_name,'' as handle_date,
         '' as settlement_date,'' as 	handler_type,
-        ifnull(case when b.type in (1,2,3,4,5)
-        then ROUND(SUM(b.quantity),2) end,'') as rksl,
-        ifnull(case when b.type in (1,2,3,4,5)
-        then  ROUND(SUM(b.amount) / SUM(b.quantity),4) end,'') as rkdj,
-        ifnull(case when b.type in (1,2,3,4,5)
-        then ROUND(SUM(b.amount),4) end,'') as rkje,
-        ifnull(case when b.type in (6,7,8,9)
-        then ROUND(SUM(b.quantity),2) end,'') as cksl,
-        ifnull(case when b.type in (6,7,8,9)
-        then ROUND(SUM(b.amount) / SUM(b.quantity),4) end,'') as ckdj,
-        ifnull(case when b.type in (6,7,8,9)
-        then ROUND(SUM(b.amount),4) end,'') as ckje,
-        ifnull(
-        ROUND((
-        (select sum(c.balance_quantity)
-        from doctor_warehouse_stock_monthly c
-        where c.warehouse_id=b.warehouse_id
-        )
-        +
-        (ifnull(case when b.type in (6,7,8,9) then sum(b.quantity) end,0)
-        -
-        ifnull(case when b.type in (1,2,3,4,5) then sum(b.quantity) end,0)))
-        ,2),'') as jcsl,
-        ifnull(
-        ROUND(((select sum(c.balance_amount)
-        from doctor_warehouse_stock_monthly c
-        where c.material_id=b.material_id and c.warehouse_id=b.warehouse_id
-        ) +
-        ((case when b.type in (6,7,8,9) then sum(b.amount) end)
-        -
-        (case when b.type in (1,2,3,4,5) then sum(b.amount) end))
-        )
-        /
-        ((select sum(c.balance_quantity)
-        from doctor_warehouse_stock_monthly c
-        where c.material_id=b.material_id and c.warehouse_id=b.warehouse_id
-        ) +
-        ((case when b.type in (6,7,8,9) then sum(b.quantity) end)
-        -
-        (case when b.type in (1,2,3,4,5) then sum(b.quantity) end))
-        ),4),'') as jcdj,
-        ifnull(
-        ROUND((select sum(c.balance_amount)
-        from doctor_warehouse_stock_monthly c
-        where c.material_id=b.material_id and c.warehouse_id=b.warehouse_id
-        ) +
-        ((case when b.type in (6,7,8,9) then sum(b.amount) end)
-        -
-        (case when b.type in (1,2,3,4,5) then sum(b.amount) end))
-        ,4),'') as jcje,
+        ifnull(sum(rksl),'') as rksl,
+        ifnull(sum(rkdj),'') as rkdj,
+        ifnull(sum(rkje),'') as rkje,
+        ifnull(sum(cksl),'') as cksl,
+        ifnull(sum(ckdj),'') as ckdj,
+        ifnull(sum(ckje),'') as ckje,
+        ifnull(sum(jcsl),'') as jcsl,
+        ifnull(sum(jcdj),'') as jcdj,
+        ifnull(sum(jcje),'') as jcje,
         '' as pig_barn_name,
         '' as pig_type,
         '' as pig_group_name,
@@ -667,7 +703,126 @@
         '' as unit,
         '' as provider_name,
         '' as specification
-        from  doctor_warehouse_material_handle b
+        from (
+        select
+        case when
+        b.type in (1,2,3,4,5)
+        then ifnull(round(b.quantity,2),'') else '' end as rksl,
+        case when
+        b.type in (1,2,3,4,5)
+        then ifnull(round(b.unit_price,4),'') else '' end as rkdj,
+        case when
+        b.type in (1,2,3,4,5)
+        then ifnull(round(b.amount,4),'') else '' end as rkje,
+        case when
+        b.type in (6,7,8,9)
+        then ifnull(round(b.quantity,2),'') else '' end as cksl,
+        case when
+        b.type in (6,7,8,9)
+        then ifnull(round(b.unit_price,4),'') else '' end as ckdj,
+        case when
+        b.type in (6,7,8,9)
+        then ifnull(round(b.amount,4),'') else '' end as ckje,
+        (select ifnull(sum(c.balance_quantity),0)
+        from doctor_warehouse_stock_monthly c
+        where c.material_id=b.material_id
+        and c.warehouse_id=b.warehouse_id
+        <if test="settlementDate != null">
+            and date_format(c.settlement_date,'%Y-%m') = #{settlementDate}
+        </if>
+        <if test="farmId != null">
+            and c.farm_id=#{farmId}
+        </if>
+        <if test="warehouseId != null">
+            and c.warehouse_id=#{warehouseId}
+        </if>
+        ) +
+        (
+        (case when
+        b.type in (6,7,8,9)
+        then ifnull(b.quantity,0) else 0 end)
+        -
+        (case when
+        b.type in (1,2,3,4,5)
+        then ifnull(b.quantity,0) else 0 end)
+        )
+        as jcsl,
+        ifnull(
+        (
+        (select ifnull(sum(c.balance_amount),0)
+        from doctor_warehouse_stock_monthly c
+        where c.material_id=b.material_id
+        and c.warehouse_id=b.warehouse_id
+        <if test="settlementDate != null">
+            and date_format(c.settlement_date,'%Y-%m') = #{settlementDate}
+        </if>
+        <if test="farmId != null">
+            and c.farm_id=#{farmId}
+        </if>
+        <if test="warehouseId != null">
+            and c.warehouse_id=#{warehouseId}
+        </if>
+        ) +
+        (
+        (case when
+        b.type in (6,7,8,9)
+        then ifnull(b.amount,0) else 0 end)
+        -
+        (case when
+        b.type in (1,2,3,4,5)
+        then ifnull(b.amount,0) else 0 end)
+        )
+        )
+        /
+        (
+        (select ifnull(sum(c.balance_quantity),0)
+        from doctor_warehouse_stock_monthly c
+        where c.material_id=b.material_id
+        and c.warehouse_id=b.warehouse_id
+        <if test="settlementDate != null">
+            and date_format(c.settlement_date,'%Y-%m') = #{settlementDate}
+        </if>
+        <if test="farmId != null">
+            and c.farm_id=#{farmId}
+        </if>
+        <if test="warehouseId != null">
+            and c.warehouse_id=#{warehouseId}
+        </if>
+        ) +
+        (
+        (case when
+        b.type in (6,7,8,9)
+        then ifnull(b.quantity,0) else 0 end)
+        -
+        (case when
+        b.type in (1,2,3,4,5)
+        then ifnull(b.quantity,0) else 0 end)
+        )
+        ),0) as jcdj,
+        (select ifnull(sum(c.balance_amount),0)
+        from doctor_warehouse_stock_monthly c
+        where c.material_id=b.material_id
+        and c.warehouse_id=b.warehouse_id
+        <if test="settlementDate != null">
+            and date_format(c.settlement_date,'%Y-%m') = #{settlementDate}
+        </if>
+        <if test="farmId != null">
+            and c.farm_id=#{farmId}
+        </if>
+        <if test="warehouseId != null">
+            and c.warehouse_id=#{warehouseId}
+        </if>
+        ) +
+        (
+        (case when
+        b.type in (6,7,8,9)
+        then ifnull(b.amount,0) else 0 end)
+        -
+        (case when
+        b.type in (1,2,3,4,5)
+        then ifnull(b.amount,0) else 0 end)
+        ) as jcje
+        from doctor_warehouse_material_handle b
         join doctor_ware_houses a
         on b.warehouse_id=a.id
         left join doctor_warehouse_material_apply f
@@ -680,17 +835,33 @@
         on d.vendor_id=e.id
         where b.delete_flag=1
         <if test="farmId != null">
-          and b.farm_id=#{farmId}
+            and b.farm_id=#{farmId}
         </if>
         <if test="settlementDate != null">
-          and date_format(b.settlement_date,'%Y-%m')=#{settlementDate}
+            and date_format(b.settlement_date,'%Y-%m') = #{settlementDate}
         </if>
         <if test="warehouseId != null">
-          and b.warehouse_id=#{warehouseId}
+            and b.warehouse_id=#{warehouseId}
         </if>
         <if test="materialName != null">
-          and d.`name` like CONCAT('%',#{materialName},'%')
+            and d.`name` like CONCAT('%',#{materialName},'%')
         </if>
+        <if test="pigBarnType != null">
+            and f.pig_type=#{pigBarnType}
+        </if>
+        <if test="pigBarnId != null">
+            and f.pig_barn_id=#{pigBarnId}
+        </if>
+        <if test="pigGroupId != null">
+            and f.pig_group_id=#{pigGroupId}
+        </if>
+        <if test="handlerType != null">
+            and b.type=#{handlerType}
+        </if>
+        <if test="type != null">
+            and d.type=#{type}
+        </if>
+        ) as ddd
     </select>
 
     <sql id ="balanceAmount">
@@ -793,19 +964,19 @@
         on f.id=wh.farm_id
         inner join doctor_warehouse_stock_handle as sh
         on sh.warehouse_id=wh.id
-        where sh.id = #{stockHandleId}
+        where sh.id = #{id}
     </select>
 
     <!--得到领料出库的物料名称-->
     <select id="getMaterialNameByID" parameterType="Long" resultType="map">
         select material_name from doctor_warehouse_material_handle
-        where stock_handle_id = #{stockHandleId}
+        where stock_handle_id = #{id}
     </select>
 
     <!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注-->
     <select id="getDataByMaterialName" parameterType="map" resultType="map">
-        select mh.id as material_handle_id, mh.material_name as material_name,s.code as material_code,
-        v.name as vendor_name,s.specification as specification,s.unit as unit,
+        select mh.id as material_handle_id, mh.material_id as material_id, mh.material_name as material_name,s.code as material_code,
+        v.name as vendor_name,s.specification as specification,s.unit as unit,mh.unit_price as unit_price,
         ifnull(
         ROUND(
         (select ifnull(quantity,0) from doctor_warehouse_material_handle
@@ -815,7 +986,7 @@
         where type=13 and rel_material_handle_id=(
         select id from doctor_warehouse_material_handle
         where type=2 and stock_handle_id=#{stockHandleId} and material_name=#{materialName})
-        and <![CDATA[ handle_date <= #{handleDate}]]>
+        <!--and <![CDATA[ date(handle_date) <= STR_TO_DATE(#{handleDate},"%Y-%m-%d")]]>-->
         )
         ,2),'') as refundableQuantity,mh.remark as remark
         from doctor_warehouse_material_handle as mh
@@ -824,6 +995,7 @@
         inner join doctor_warehouse_vendor as v
         on s.vendor_id=v.id
         where material_name=#{materialName} and stock_handle_id=#{stockHandleId}
+
     </select>
 
 </mapper>

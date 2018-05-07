@@ -84,28 +84,29 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
         List<DoctorWarehouseMaterialHandle> handles = doctorWarehouseMaterialHandleDao.findByStockHandle(id);
         for (DoctorWarehouseMaterialHandle handle : handles) {
             int type = handle.getType();
-            if(type != 1 && type != 2 && type != 3 && type != 4 && type != 5 && type != 6 && type != 7 && type != 8 && type != 9){
+            if(type != 1 && type != 2 && type != 3 && type != 4 && type != 5 && type != 10 && type != 7 && type != 8 && type != 9
+                    && type != 11 && type != 12 && type != 13){
                 return Response.fail("未知类型");
             }
             //配方生产
-            if (type == 3) {
+            if (type == 5) {
                 return Response.fail("配方生产不支持删除");
             }
             //调拨入库
-            if (type == 5) {
+            if (type == 9) {
                 return Response.fail("调拨入库不支持删除");
             }
             //采购入库,退料入库,盘盈入库
-            if(type==1 || type == 2 || type==4){
+            if(type==1 || type == 13 || type==7){
                 warehouseInManager.recalculate(handle);
                 warehouseInManager.delete(handle);
             }
             //盘亏出库
-            if(type==7){
+            if(type==8){
                 warehouseOutManager.delete(handle);
             }
             //领料出库
-            if(type == 6){
+            if(type == 2){
                 DoctorWarehouseStockHandle a = doctorWarehouseStockHandleDao.findByRelStockHandleId(id,type);
                 if(a != null){
                     return Response.fail("此物料存在退料,不支持删除");
@@ -113,7 +114,7 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
                 warehouseOutManager.delete(handle);
             }
             //配方出库,调拨出库
-            if (type == 8 || type == 9) {
+            if (type == 12 || type == 10) {
                 DoctorWarehouseStockHandle a = doctorWarehouseStockHandleDao.findByRelStockHandleId(id,type);//被入库的单据表
                 if(a != null) {
                     DoctorWarehouseMaterialHandle b = doctorWarehouseMaterialHandleDao.findByStockHandleId(a.getId());//被入库的单据明细表

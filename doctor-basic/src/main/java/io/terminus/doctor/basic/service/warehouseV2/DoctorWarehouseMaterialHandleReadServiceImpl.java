@@ -414,8 +414,8 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     }
 
     @Override
-    public Response<List<Map>> getDataByMaterialName(Long stockHandleId, String materialName, String handleDate) {
-        return Response.ok(doctorWarehouseMaterialHandleDao.getDataByMaterialName(stockHandleId,materialName,handleDate));
+    public Response<List<Map>> getDataByMaterialName(Long stockHandleId, String materialName) {
+        return Response.ok(doctorWarehouseMaterialHandleDao.getDataByMaterialName(stockHandleId,materialName));
     }
 
     private Map<String, Object> getMonth(Map<String, Object> criteria){

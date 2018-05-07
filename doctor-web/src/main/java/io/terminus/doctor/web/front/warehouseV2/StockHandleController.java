@@ -72,6 +72,8 @@ public class StockHandleController {
     @RpcConsumer
     private DoctorWarehouseStockHandleWriteService doctorWarehouseStockHandleWriteService;
     @RpcConsumer
+    private DoctorWarehouseMaterialHandleWriteService doctorWarehouseMaterialHandleWriteService;
+    @RpcConsumer
     private DoctorWarehouseMaterialHandleReadService doctorWarehouseMaterialHandleReadService;
     @RpcConsumer
     private DoctorFarmReadService doctorFarmReadService;
@@ -83,6 +85,9 @@ public class StockHandleController {
     private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
     @RpcConsumer
     private DoctorWarehouseMaterialApplyReadService doctorWarehouseMaterialApplyReadService;
+
+    @RpcConsumer
+    private DoctorWarehouseSettlementService doctorWarehouseSettlementService;
 
     @InitBinder
     public void init(WebDataBinder webDataBinder) {
@@ -106,35 +111,33 @@ public class StockHandleController {
 
     //根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注
     @RequestMapping(method = RequestMethod.GET, value = "/getDataByMaterialName")
-    public List<Map> getDataByMaterialName(@RequestParam(required = false) String handleDate,
-                                           @RequestParam Long stockHandleId,
+    public List<Map> getDataByMaterialName(@RequestParam Long stockHandleId,
                                            @RequestParam String materialName) {
-        if(null==handleDate){
-            Date dd=new Date(System.currentTimeMillis());
-            SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
-            handleDate=sdf.format(dd);
-        }
-        List<Map> maps = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getDataByMaterialName(stockHandleId,materialName,handleDate));
+//        if(null==handleDate){
+//            Date dd=new Date(System.currentTimeMillis());
+//            SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+//            handleDate=sdf.format(dd);
+//        }
+        List<Map> maps = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getDataByMaterialName(stockHandleId,materialName));
         return maps;
     }
 
     //退料入库前的数据展示
     @RequestMapping(method = RequestMethod.GET, value = "/getRetreatingData")
-    public List<Map> getRetreatingData(@RequestParam Long id,
-                                        @RequestParam(required = false) String handleDate) {
+    public List<Map> getRetreatingData(@RequestParam Long id) {
 
         //得到领料出库的物料名称
         List<Map> map= RespHelper.or500(doctorWarehouseMaterialHandleReadService.getMaterialNameByID(id));
         List<Map> maps=new ArrayList<Map>();
-        if(null==handleDate){
-            Date dd=new Date(System.currentTimeMillis());
-            SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
-            handleDate=sdf.format(dd);
-        }
+//        if(null==handleDate){
+//            Date dd=new Date(System.currentTimeMillis());
+//            SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+//            handleDate=sdf.format(dd);
+//        }
         for(Map mm:map){
             String materialName = String.valueOf(mm.get("material_name"));
             //根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注
-            List<Map> mp = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getDataByMaterialName(id, materialName, handleDate));
+            List<Map> mp = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getDataByMaterialName(id, materialName));
             maps.addAll(mp);
         }
 
@@ -284,14 +287,28 @@ public class StockHandleController {
         return vo;
     }
 
-    //删除
+    //删除单据表以及对应的单据明细表
     @RequestMapping(method = RequestMethod.DELETE, value = "{id:\\d+}")
-    public Response<String> delete(@PathVariable Long id) {
-           return doctorWarehouseStockHandleWriteService.delete(id);
+    public Response<String> delete(@PathVariable Long id,@RequestParam(required = false) Long orgId) {
+        //是否该公司正在结算中
+        if (doctorWarehouseSettlementService.isUnderSettlement(orgId))
+            throw new JsonResponseException("under.settlement");
+
+        return doctorWarehouseStockHandleWriteService.delete(id);
            /*if (!response.isSuccess())
                throw new JsonResponseException(response.getError());
            return true;*/
-   }
+    }
+
+    //删除单据明细表
+    @RequestMapping(method = RequestMethod.DELETE, value = "/deleteById/{id:\\d+}")
+    public Response<String> deleteById(@PathVariable Long id,@RequestParam(required = false) Long orgId) {
+        //是否该公司正在结算中
+        if (doctorWarehouseSettlementService.isUnderSettlement(orgId))
+            throw new JsonResponseException("under.settlement");
+
+        return doctorWarehouseMaterialHandleWriteService.delete(id);
+    }
 
     //导出
     @RequestMapping(method = RequestMethod.GET, value = "{id:\\d+}/export")
