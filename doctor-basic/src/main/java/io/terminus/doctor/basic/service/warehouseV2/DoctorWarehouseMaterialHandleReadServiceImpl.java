@@ -198,8 +198,6 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
             int startMonth =(int)criteria.get("startMonth");
             int startYear =(int)criteria.get("startYear");
 
-            int size = 0;
-
             for(;count>=0;count--,startMonth++){
                 if(startMonth>12) {
                     startMonth = 1;
@@ -425,11 +423,11 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         Calendar c = Calendar.getInstance();
         c.setTime(settlementDateStart);
         int startYear = c.get(Calendar.YEAR);
-        int startMonth = c.get(Calendar.MONTH);
+        int startMonth = c.get(Calendar.MONTH)+1;
 
         c.setTime(settlementDateEnd);
         int endYear = c.get(Calendar.YEAR);
-        int endMonth = c.get(Calendar.MONTH);
+        int endMonth = c.get(Calendar.MONTH)+1;
 
         int count = endMonth-startMonth;
         if(endYear>startYear){
