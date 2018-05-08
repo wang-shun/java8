@@ -163,11 +163,36 @@ public interface DoctorWarehouseReportReadService {
             WarehouseMaterialHandleType... types
     );
 
+    /**
+     * 按照仓库类型进行tab分页筛选，仓库按照创建时间进行排列
+     */
+    Map<String,Object> lastWlbdReport(
+            Long farmId,
+            String settlementDate,
+            Integer pigBarnType,
+            Long pigBarnId,
+            Long pigGroupId,
+            Integer handlerType,
+            Integer type,
+            Long warehouseId,
+            String materialName);
+
 
     /**
      * 按照仓库类型进行tab分页筛选，仓库按照创建时间进行排列
      */
-    Response<List<Map<String,Object>>> wlbdReport(
+    List<Map<String,Object>> wlbdReport(
+            Long farmId,
+            String settlementDate,
+            Integer pigBarnType,
+            Long pigBarnId,
+            Long pigGroupId,
+            Integer handlerType,
+            Integer type,
+            Long warehouseId,
+            String materialName);
+
+    Map<String,Object> endWlbdReport(
             Long farmId,
             String settlementDate,
             Integer pigBarnType,

@@ -477,64 +477,77 @@
         order by a.farm_id
     </select>
 
-    <select id="wlbdReport" parameterType="Map" resultType="map">
+    <select id="lastWlbdReport" parameterType="Map" resultType="java.util.LinkedHashMap">
+    select
+    '' as id,
+    '上月结存' as material_name,
+    '' as material_type,
+    '' as ware_house_name,
+    '' as handle_date,
+    '' as settlement_date,
+    '' as handler_type,
+    '' as rksl,
+    '' as rkdj,
+    '' as rkje,
+    '' as cksl,
+    '' as ckdj,
+    '' as ckje,
+    sum(a.balance_quantity) as jcsl,
+    sum(a.balance_amount) / sum(a.balance_quantity) as jcdj,
+    sum(a.balance_amount) as jcje,
+    '' as pig_barn_name,
+    '' as pig_type,
+    '' as pig_group_name,
+    '' as apply_staff_name,
+    '' as farm_name,
+    '' as unit,
+    '' as provider_name,
+    '' as specification
+    from  doctor_warehouse_stock_monthly  a
+    join  doctor_warehouse_sku b on a.material_id=b.id
+    where 1=1
+    <if test="settlementDate != null">
+        and date_format(a.settlement_date,'%Y-%m')
+        = date_format(DATE_SUB(CONCAT(#{settlementDate},'-01'), INTERVAL 1 MONTH),'%Y-%m')
+    </if>
+    <if test="farmId != null">
+        and a.farm_id=#{farmId}
+    </if>
+    <if test="warehouseId != null">
+        and a.warehouse_id=#{warehouseId}
+    </if>
+    <if test="materialName != null">
+        and b.`name` like CONCAT('%',#{materialName},'%')
+    </if>
+    </select>
+
+    <select id="wlbdReport" parameterType="Map" resultType="java.util.LinkedHashMap">
         select
-        '' as id,'上月结存' as material_name,
-        '' as material_type,'' as ware_house_name,'' as handle_date,
-        '' as settlement_date,'' as handler_type,
-        '' as rksl,'' as rkdj,'' as rkje,
-        '' as cksl,'' as ckdj,'' as ckje,
-        ifnull(ROUND(sum(a.balance_quantity),2),'') as jcsl,
-        ifnull(ROUND(sum(a.balance_amount) / sum(a.balance_quantity),4),'') as jcdj,
-        ifnull(ROUND(sum(a.balance_amount),4),'') as jcje,
-        '' as pig_barn_name,
-        '' as pig_type,
-        '' as pig_group_name,
-        '' as apply_staff_name,
-        '' as farm_name,
-        '' as unit,
-        '' as provider_name,
-        '' as specification
-        from  doctor_warehouse_stock_monthly  a
-        join  doctor_warehouse_sku b on a.material_id=b.id
-        where 1=1
-        <if test="settlementDate != null">
-            and date_format(a.settlement_date,'%Y-%m')
-            = date_format(DATE_SUB(CONCAT(#{settlementDate},'-01'), INTERVAL 1 MONTH),'%Y-%m')
-        </if>
-        <if test="farmId != null">
-            and a.farm_id=#{farmId}
-        </if>
-        <if test="warehouseId != null">
-            and a.warehouse_id=#{warehouseId}
-        </if>
-        <if test="materialName != null">
-            and b.`name` like CONCAT('%',#{materialName},'%')
-        </if>
-        union all
-        select * from (
-        select b.id,b.material_name,d.type as material_type,a.ware_house_name,
+        ifnull(b.id,'') as id,
+        ifnull(b.material_name,'') as material_name,
+        ifnull(d.type,'') as material_type,
+        ifnull(a.ware_house_name,'') as ware_house_name,
         date_format(b.handle_date,'%Y-%m-%d') as handle_date,
         date_format(b.settlement_date,'%Y-%m') as settlement_date,
-        b.type as handler_type,
+        ifnull(b.type,'') as handler_type,
         case when
         b.type in (1,2,3,4,5)
-        then ifnull(round(b.quantity,2),'') else '' end as rksl,
+        then ifnull(b.quantity,0) else '' end as rksl,
         case when
         b.type in (1,2,3,4,5)
-        then ifnull(round(b.unit_price,4),'') else '' end as rkdj,
+        then ifnull(b.unit_price,0) else '' end as rkdj,
         case when
         b.type in (1,2,3,4,5)
-        then ifnull(round(b.amount,4),'') else '' end as rkje,
+        then ifnull(b.amount,0) else '' end as rkje,
         case when
         b.type in (6,7,8,9)
-        then ifnull(round(b.quantity,2),'') else '' end as cksl,
+        then ifnull(b.quantity,0) else '' end as cksl,
         case when
         b.type in (6,7,8,9)
-        then ifnull(round(b.unit_price,4),'') else '' end as ckdj,
+        then ifnull(b.unit_price,0) else '' end as ckdj,
         case when
         b.type in (6,7,8,9)
-        then ifnull(round(b.amount,4),'') else '' end as ckje,
+        then ifnull(b.amount,0) else '' end as ckje,
         (select ifnull(sum(c.balance_quantity),0)
         from doctor_warehouse_stock_monthly c
         where c.material_id=b.material_id
@@ -559,7 +572,6 @@
         then ifnull(b.quantity,0) else 0 end)
         )
         as jcsl,
-        ifnull(
         (
         (select ifnull(sum(c.balance_amount),0)
         from doctor_warehouse_stock_monthly c
@@ -610,7 +622,7 @@
         b.type in (1,2,3,4,5)
         then ifnull(b.quantity,0) else 0 end)
         )
-        ),0) as jcdj,
+        ) as jcdj,
         (select ifnull(sum(c.balance_amount),0)
         from doctor_warehouse_stock_monthly c
         where c.material_id=b.material_id
@@ -634,14 +646,14 @@
         b.type in (1,2,3,4,5)
         then ifnull(b.amount,0) else 0 end)
         ) as jcje,
-        f.pig_barn_name,
-        f.pig_type,
-        f.pig_group_name,
-        f.apply_staff_name,
-        c.`name` as farm_name,
-        b.unit,
-        e.`name` as provider_name,
-        d.specification
+        ifnull(f.pig_barn_name,'') as pig_barn_name,
+        ifnull(f.pig_type,'') as pig_type,
+        ifnull(f.pig_group_name,'') as pig_group_name,
+        ifnull(f.apply_staff_name,'') as apply_staff_name,
+        ifnull(c.`name`,'') as farm_name,
+        ifnull(b.unit,'') as unit,
+        ifnull(e.`name`,'') as provider_name,
+        ifnull(d.specification,'') as specification
         from doctor_warehouse_material_handle b
         join doctor_ware_houses a
         on b.warehouse_id=a.id
@@ -681,21 +693,27 @@
         <if test="type != null">
             and d.type=#{type}
         </if>
-        order by b.settlement_date,b.id) as ccc
-        union all
+        order by b.settlement_date,b.id
+    </select>
+
+    <select id="endWlbdReport" parameterType="Map" resultType="java.util.LinkedHashMap">
         select
-        '' as id,'本月结存' as material_name,
-        '' as material_type,'' as ware_house_name,'' as handle_date,
-        '' as settlement_date,'' as 	handler_type,
-        ifnull(sum(rksl),'') as rksl,
-        ifnull(sum(rkdj),'') as rkdj,
-        ifnull(sum(rkje),'') as rkje,
-        ifnull(sum(cksl),'') as cksl,
-        ifnull(sum(ckdj),'') as ckdj,
-        ifnull(sum(ckje),'') as ckje,
-        ifnull(sum(jcsl),'') as jcsl,
-        ifnull(sum(jcdj),'') as jcdj,
-        ifnull(sum(jcje),'') as jcje,
+        '' as id,
+        '本月结存' as material_name,
+        '' as material_type,
+        '' as ware_house_name,
+        '' as handle_date,
+        '' as settlement_date,
+        '' as 	handler_type,
+        sum(rksl) as rksl,
+        sum(rkdj) as rkdj,
+        sum(rkje) as rkje,
+        sum(cksl) as cksl,
+        sum(ckdj) as ckdj,
+        sum(ckje) as ckje,
+        sum(jcsl) as jcsl,
+        sum(jcdj) as jcdj,
+        sum(jcje) as jcje,
         '' as pig_barn_name,
         '' as pig_type,
         '' as pig_group_name,
@@ -708,22 +726,22 @@
         select
         case when
         b.type in (1,2,3,4,5)
-        then ifnull(round(b.quantity,2),'') else '' end as rksl,
+        then ifnull(b.quantity,0) else 0 end as rksl,
         case when
         b.type in (1,2,3,4,5)
-        then ifnull(round(b.unit_price,4),'') else '' end as rkdj,
+        then ifnull(b.unit_price,0) else 0 end as rkdj,
         case when
         b.type in (1,2,3,4,5)
-        then ifnull(round(b.amount,4),'') else '' end as rkje,
+        then ifnull(b.amount,0) else 0 end as rkje,
         case when
         b.type in (6,7,8,9)
-        then ifnull(round(b.quantity,2),'') else '' end as cksl,
+        then ifnull(b.quantity,0) else 0 end as cksl,
         case when
         b.type in (6,7,8,9)
-        then ifnull(round(b.unit_price,4),'') else '' end as ckdj,
+        then ifnull(b.unit_price,0) else 0 end as ckdj,
         case when
         b.type in (6,7,8,9)
-        then ifnull(round(b.amount,4),'') else '' end as ckje,
+        then ifnull(b.amount,0) else 0 end as ckje,
         (select ifnull(sum(c.balance_quantity),0)
         from doctor_warehouse_stock_monthly c
         where c.material_id=b.material_id
@@ -748,7 +766,6 @@
         then ifnull(b.quantity,0) else 0 end)
         )
         as jcsl,
-        ifnull(
         (
         (select ifnull(sum(c.balance_amount),0)
         from doctor_warehouse_stock_monthly c
@@ -799,7 +816,7 @@
         b.type in (1,2,3,4,5)
         then ifnull(b.quantity,0) else 0 end)
         )
-        ),0) as jcdj,
+        ) as jcdj,
         (select ifnull(sum(c.balance_amount),0)
         from doctor_warehouse_stock_monthly c
         where c.material_id=b.material_id

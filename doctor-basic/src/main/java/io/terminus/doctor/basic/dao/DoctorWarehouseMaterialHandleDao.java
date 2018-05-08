@@ -285,6 +285,25 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return resultList;
     }
 
+    public Map<String, Object> lastWlbdReport(
+            Long farmId,
+            String settlementDate, Integer pigBarnType,
+            Long pigBarnId, Long pigGroupId, Integer handlerType,
+            Integer type, Long warehouseId, String materialName
+    ) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("farmId", farmId);
+        params.put("settlementDate", settlementDate);
+        params.put("pigBarnType", pigBarnType);
+        params.put("pigBarnId", pigBarnId);
+        params.put("pigGroupId", pigGroupId);
+        params.put("handlerType", handlerType);
+        params.put("type", type);
+        params.put("warehouseId", warehouseId);
+        params.put("materialName", materialName);
+        return this.sqlSession.selectOne("lastWlbdReport", params);
+    }
+
     public List<Map<String, Object>> wlbdReport(
             Long farmId,
             String settlementDate, Integer pigBarnType,
@@ -302,6 +321,25 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         params.put("warehouseId", warehouseId);
         params.put("materialName", materialName);
         return this.sqlSession.selectList("wlbdReport", params);
+    }
+
+    public Map<String, Object> endWlbdReport(
+            Long farmId,
+            String settlementDate, Integer pigBarnType,
+            Long pigBarnId, Long pigGroupId, Integer handlerType,
+            Integer type, Long warehouseId, String materialName
+    ) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("farmId", farmId);
+        params.put("settlementDate", settlementDate);
+        params.put("pigBarnType", pigBarnType);
+        params.put("pigBarnId", pigBarnId);
+        params.put("pigGroupId", pigGroupId);
+        params.put("handlerType", handlerType);
+        params.put("type", type);
+        params.put("warehouseId", warehouseId);
+        params.put("materialName", materialName);
+        return this.sqlSession.selectOne("endWlbdReport", params);
     }
 
     public List<Map<String, Object>> getPigBarnNameOption(Long farmId, Integer pigType) {

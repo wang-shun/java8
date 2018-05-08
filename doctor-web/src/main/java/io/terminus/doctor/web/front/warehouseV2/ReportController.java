@@ -2,6 +2,7 @@ package io.terminus.doctor.web.front.warehouseV2;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
@@ -48,9 +49,17 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+import java.sql.Blob;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -677,6 +686,26 @@ public class ReportController {
         return vos;
     }
 
+//    public static void main(String[] args) {
+////        System.out.println(isDecimal("aaa"));
+////         System.out.println(isWholeNumber("0"));
+////         System.out.println(isDecimal("0.00"));
+////         System.out.println(Double.parseDouble("0.00") == 0d);
+////         System.out.println(Double.parseDouble("0") == 0d);
+////        System.out.println(Double.parseDouble("0.00000") == 0d);
+////        System.out.println(Double.parseDouble("-90.78"));
+////        BigDecimal   b   =   new   BigDecimal(-90.053d);
+////        double   f1   =   b.setScale(2,   RoundingMode.HALF_UP).doubleValue();
+////        System.out.println(f1);
+////        System.out.println(isNumeric("-10.00"));
+////        System.out.println(isNumeric("0.00"));
+////        System.out.println(isNumeric(""));
+////        System.out.println(isValidDate(""));
+////        System.out.println(isNumeric(null));
+////        System.out.println(isValidDate(null));
+////        System.out.println(Double.parseDouble("0") == 0);
+//    }
+
     /**
      * 物料变动报表
      */
@@ -708,12 +737,162 @@ public class ReportController {
             throw new JsonResponseException("stock.warehouseId.null");
         }
 
-        return doctorWarehouseReportReadService.wlbdReport(
+        List<Map<String,Object>> resultNewMap = Lists.newArrayList();
+
+        List<Map<String,Object>> resultCusMap = Lists.newArrayList();
+
+        Map<String,Object> lastMap = doctorWarehouseReportReadService.lastWlbdReport(farmId,settlementDate,pigBarnType,
+                pigBarnId,pigGroupId,handlerType,
+                type,warehouseId,materialName);
+        if(lastMap != null)
+            resultCusMap.add(lastMap);
+
+        List<Map<String,Object>> resultMap = doctorWarehouseReportReadService.wlbdReport(
                 farmId,settlementDate,pigBarnType,
                 pigBarnId,pigGroupId,handlerType,
                 type,warehouseId,materialName
-        ).getResult();
+        );
+        if(resultMap.size() > 0)
+            resultCusMap.addAll(resultMap);
+
+        Map<String,Object> endMap = doctorWarehouseReportReadService.endWlbdReport(farmId,settlementDate,pigBarnType,
+                pigBarnId,pigGroupId,handlerType,
+                type,warehouseId,materialName);
+        if(endMap != null)
+            resultCusMap.add(endMap);
+
+        if(resultCusMap.size() > 0) {
+            for (Map<String, Object> map : resultCusMap) {
+                Map<String,Object> submap = Maps.newHashMap();
+                Set<String> keys = map.keySet();
+                Iterator<String> its =  keys.iterator();
+                while (its.hasNext()){
+                    String key = its.next();
+                    if(isNull(map.get(key))) {
+                        submap.put(key,"");
+                    } else {
+                        Object numvalueo = map.get(key);
+                        String numvaluer = numvalueo.toString();
+                        if(!isNumeric(numvaluer)){
+                            submap.put(key, map.get(key).toString());
+                        } else {
+                            if(key.equals("rksl") || key.equals("cksl")
+                                    || key.equals("jcsl") ){
+                                numvaluer = translateNum(numvaluer,2);
+                                submap.put(key, numvaluer);
+                            }
+                            else if (key.equals("rkdj") || key.equals("rkje")
+                                    || key.equals("ckdj") || key.equals("ckje")
+                                    || key.equals("jcdj") || key.equals("jcje")){
+                                numvaluer = translateNum(numvaluer,4);
+                                submap.put(key, numvaluer);
+                            }
+                            else {
+                                submap.put(key, numvaluer);
+                            }
+                        }
+                    }
+                }
+                resultNewMap.add(submap);
+            }
+        }
+        return resultNewMap;
     }
+
+    public static boolean isNull(Object str){
+        try {
+            if (str == null
+                    || str.toString().trim().equals("")
+                    || "[B".equals(str.getClass().getName())
+                    || Double.parseDouble(str.toString().trim()) == 0d
+                    ) return true;
+        }
+        catch (Exception e){
+            return false;
+        }
+        return false;
+    }
+
+    public static boolean isNumeric(String str){
+        if(str == null || str.trim().equals("")) return  false;
+        try {
+            double b = Double.parseDouble(str);
+            return true;
+        }
+        catch (Exception e){
+            return  false;
+        }
+    }
+
+    /**
+     * 数字处理 start
+     * @param regex
+     * @param orginal
+     * @return
+     */
+    private static boolean isMatch(String regex, String orginal){
+        if (orginal == null || orginal.trim().equals("")) {
+            return false;
+        }
+        Pattern pattern = Pattern.compile(regex);
+        Matcher isNum = pattern.matcher(orginal);
+        return isNum.matches();
+    }
+
+    public static boolean isPositiveInteger(String orginal) {
+        return isMatch("^\\+{0,1}[1-9]\\d*", orginal);
+    }
+
+    public static boolean isNegativeInteger(String orginal) {
+        return isMatch("^-[1-9]\\d*", orginal);
+    }
+
+    public static boolean isWholeNumber(String orginal) {
+        return isMatch("[+-]{0,1}0", orginal) || isPositiveInteger(orginal) || isNegativeInteger(orginal);
+    }
+
+    public static boolean isDecimal(String orginal){
+        return isMatch("[-+]{0,1}\\d+\\.\\d*|[-+]{0,1}\\d*\\.\\d+", orginal);
+    }
+
+    private static String translateNum(String numvalue,int seq){
+        if(null == numvalue || "".equals(numvalue.trim()) || Double.parseDouble(numvalue) == 0d) return "";
+
+        if(isPositiveInteger(numvalue) && Double.parseDouble(numvalue) != 0d){
+            if(seq == 2) {
+                numvalue = numvalue + ".00";
+            } else {
+                numvalue = numvalue + ".0000";
+            }
+        } else if(isDecimal(numvalue) && Double.parseDouble(numvalue) != 0d){
+            BigDecimal b = new BigDecimal(Double.parseDouble(numvalue));
+            double f1 = b.setScale(seq, RoundingMode.HALF_UP).doubleValue();
+            numvalue = f1 + "";
+            if(numvalue.contains(".")){
+                String prex = numvalue.substring(0,numvalue.indexOf(".") + 1);
+                String sk = numvalue.substring(numvalue.indexOf(".") + 1);
+                if(sk.length() < seq){
+                    int diff = seq - sk.length();
+                    String end = "";
+                    for(int i = 0;i < diff;i++){
+                        end += "0";
+                    }
+                    numvalue = prex + sk + end;
+                }
+            }
+            else {
+                if(seq == 2) {
+                    numvalue = numvalue + ".00";
+                } else {
+                    numvalue = numvalue + ".0000";
+                }
+            }
+        }
+        return numvalue;
+    }
+    /**
+     * end
+     */
 
     @Autowired
     private Exporter exporter;
@@ -757,12 +936,28 @@ public class ReportController {
             String farmName = farm.getName();
             String fileName = "物料变动报表" + new Date().getTime();
 
-            List<Map<String,Object>> exportVos = RespHelper.or500(
-                    doctorWarehouseReportReadService.wlbdReport(
-                            farmId,settlementDate,pigBarnType,
-                            pigBarnId,pigGroupId,handlerType,
-                            type,warehouseId,materialName
-                    ));
+
+            List<Map<String,Object>> exportVos = Lists.newArrayList();
+
+            Map<String,Object> lastMap = doctorWarehouseReportReadService.lastWlbdReport(farmId,settlementDate,pigBarnType,
+                    pigBarnId,pigGroupId,handlerType,
+                    type,warehouseId,materialName);
+            if(lastMap != null)
+                exportVos.add(lastMap);
+
+            List<Map<String,Object>> resultMap = doctorWarehouseReportReadService.wlbdReport(
+                    farmId,settlementDate,pigBarnType,
+                    pigBarnId,pigGroupId,handlerType,
+                    type,warehouseId,materialName
+            );
+            if(resultMap.size() > 0)
+                exportVos.addAll(resultMap);
+
+            Map<String,Object> endMap = doctorWarehouseReportReadService.endWlbdReport(farmId,settlementDate,pigBarnType,
+                    pigBarnId,pigGroupId,handlerType,
+                    type,warehouseId,materialName);
+            if(endMap != null)
+                exportVos.add(endMap);
 
             //导出名称
             exporter.setHttpServletResponse(request, response, fileName);
@@ -949,24 +1144,24 @@ public class ReportController {
                             if(i == 12){
                                 dataCell = dataRow.createCell(i);
                                 dataCell.setCellValue(
-                                        ObjectUtils.isEmpty(lastMonthData.get("jcsl"))
-                                                ? "" : lastMonthData.get("jcsl").toString());
+                                        isNull(lastMonthData.get("jcsl"))
+                                                ? "" : translateNum(lastMonthData.get("jcsl").toString(),2));
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 13){
                                 dataCell = dataRow.createCell(i);
                                 dataCell.setCellValue(
-                                        ObjectUtils.isEmpty(lastMonthData.get("jcdj"))
-                                                ? "" : lastMonthData.get("jcdj").toString());
+                                        isNull(lastMonthData.get("jcdj"))
+                                                ? "" : translateNum(lastMonthData.get("jcdj").toString(),4));
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 14){
                                 dataCell = dataRow.createCell(i);
                                 dataCell.setCellValue(
-                                        ObjectUtils.isEmpty(lastMonthData.get("jcje"))
-                                                ? "" : lastMonthData.get("jcje").toString());
+                                        isNull(lastMonthData.get("jcje"))
+                                                ? "" : translateNum(lastMonthData.get("jcje").toString(),4));
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
@@ -1076,56 +1271,56 @@ public class ReportController {
 
                             dataCell = dataRow.createCell(6);
                             dataCell.setCellValue(
-                                    ObjectUtils.isEmpty(map.get("rksl"))
-                                            ? "" : map.get("rksl").toString());
+                                    isNull(map.get("rksl"))
+                                            ? "" : translateNum(map.get("rksl").toString(),2));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(7);
                             dataCell.setCellValue(
-                                    ObjectUtils.isEmpty(map.get("rkdj"))
-                                            ? "" : map.get("rkdj").toString());
+                                    isNull(map.get("rkdj"))
+                                            ? "" : translateNum(map.get("rkdj").toString(),4));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(8);
                             dataCell.setCellValue(
-                                    ObjectUtils.isEmpty(map.get("rkje"))
-                                            ? "" : map.get("rkje").toString());
+                                    isNull(map.get("rkje"))
+                                            ? "" : translateNum(map.get("rkje").toString(),4));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(9);
                             dataCell.setCellValue(
-                                    ObjectUtils.isEmpty(map.get("cksl"))
-                                            ? "" : map.get("cksl").toString());
+                                    isNull(map.get("cksl"))
+                                            ? "" : translateNum(map.get("cksl").toString(),2));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(10);
                             dataCell.setCellValue(
-                                    ObjectUtils.isEmpty(map.get("ckdj"))
-                                            ? "" : map.get("ckdj").toString());
+                                    isNull(map.get("ckdj"))
+                                            ? "" : translateNum(map.get("ckdj").toString(),4));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(11);
                             dataCell.setCellValue(
-                                    ObjectUtils.isEmpty(map.get("ckje"))
-                                            ? "" : map.get("ckje").toString());
+                                    isNull(map.get("ckje"))
+                                            ? "" : translateNum(map.get("ckje").toString(),4));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(12);
                             dataCell.setCellValue(
-                                    ObjectUtils.isEmpty(map.get("jcsl"))
-                                            ? "" : map.get("jcsl").toString());
+                                    isNull(map.get("jcsl"))
+                                            ? "" : translateNum(map.get("jcsl").toString(),2));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(13);
                             dataCell.setCellValue(
-                                    ObjectUtils.isEmpty(map.get("jcdj"))
-                                            ? "" : map.get("jcdj").toString());
+                                    isNull(map.get("jcdj"))
+                                            ? "" : translateNum(map.get("jcdj").toString(),4));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(14);
                             dataCell.setCellValue(
-                                    ObjectUtils.isEmpty(map.get("jcje"))
-                                            ? "" : map.get("jcje").toString());
+                                    isNull(map.get("jcje"))
+                                            ? "" : translateNum(map.get("jcje").toString(),4));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(15);
@@ -1230,72 +1425,72 @@ public class ReportController {
                             if(i == 6){
                                 dataCell = dataRow.createCell(i);
                                 dataCell.setCellValue(
-                                        ObjectUtils.isEmpty(thisMonthHZData.get("rksl"))
-                                                ? "" : thisMonthHZData.get("rksl").toString());
+                                        isNull(thisMonthHZData.get("rksl"))
+                                                ? "" : translateNum(thisMonthHZData.get("rksl").toString(),2));
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 7){
                                 dataCell = dataRow.createCell(i);
                                 dataCell.setCellValue(
-                                        ObjectUtils.isEmpty(thisMonthHZData.get("rkdj"))
-                                                ? "" : thisMonthHZData.get("rkdj").toString());
+                                        isNull(thisMonthHZData.get("rkdj"))
+                                                ? "" : translateNum(thisMonthHZData.get("rkdj").toString(),4));
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 8){
                                 dataCell = dataRow.createCell(i);
                                 dataCell.setCellValue(
-                                        ObjectUtils.isEmpty(thisMonthHZData.get("rkje"))
-                                                ? "" : thisMonthHZData.get("rkje").toString());
+                                        isNull(thisMonthHZData.get("rkje"))
+                                                ? "" : translateNum(thisMonthHZData.get("rkje").toString(),4));
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 9){
                                 dataCell = dataRow.createCell(i);
                                 dataCell.setCellValue(
-                                        ObjectUtils.isEmpty(thisMonthHZData.get("cksl"))
-                                                ? "" : thisMonthHZData.get("cksl").toString());
+                                        isNull(thisMonthHZData.get("cksl"))
+                                                ? "" : translateNum(thisMonthHZData.get("cksl").toString(),2));
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 10){
                                 dataCell = dataRow.createCell(i);
                                 dataCell.setCellValue(
-                                        ObjectUtils.isEmpty(thisMonthHZData.get("ckdj"))
-                                                ? "" : thisMonthHZData.get("ckdj").toString());
+                                        isNull(thisMonthHZData.get("ckdj"))
+                                                ? "" : translateNum(thisMonthHZData.get("ckdj").toString(),4));
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 11){
                                 dataCell = dataRow.createCell(i);
                                 dataCell.setCellValue(
-                                        ObjectUtils.isEmpty(thisMonthHZData.get("ckje"))
-                                                ? "" : thisMonthHZData.get("ckje").toString());
+                                        isNull(thisMonthHZData.get("ckje"))
+                                                ? "" : translateNum(thisMonthHZData.get("ckje").toString(),4));
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 12){
                                 dataCell = dataRow.createCell(i);
                                 dataCell.setCellValue(
-                                        ObjectUtils.isEmpty(thisMonthHZData.get("jcsl"))
-                                                ? "" : thisMonthHZData.get("jcsl").toString());
+                                        isNull(thisMonthHZData.get("jcsl"))
+                                                ? "" : translateNum(thisMonthHZData.get("jcsl").toString(),2));
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 13){
                                 dataCell = dataRow.createCell(i);
                                 dataCell.setCellValue(
-                                        ObjectUtils.isEmpty(thisMonthHZData.get("jcdj"))
-                                                ? "" : thisMonthHZData.get("jcdj").toString());
+                                        isNull(thisMonthHZData.get("jcdj"))
+                                                ? "" : translateNum(thisMonthHZData.get("jcdj").toString(),4));
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 
                             if(i == 14){
                                 dataCell = dataRow.createCell(i);
                                 dataCell.setCellValue(
-                                        ObjectUtils.isEmpty(thisMonthHZData.get("jcje"))
-                                                ? "" : thisMonthHZData.get("jcje").toString());
+                                        isNull(thisMonthHZData.get("jcje"))
+                                                ? "" : translateNum(thisMonthHZData.get("jcje").toString(),4));
                                 dataCell.setCellStyle(normalCellStyle);
                             }
 

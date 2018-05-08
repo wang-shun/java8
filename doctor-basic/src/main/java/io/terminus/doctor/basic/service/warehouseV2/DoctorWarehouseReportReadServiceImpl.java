@@ -472,7 +472,20 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
     }
 
     @Override
-    public Response<List<Map<String, Object>>> wlbdReport(
+    public Map<String, Object> lastWlbdReport(
+            Long farmId,
+            String settlementDate, Integer pigBarnType,
+            Long pigBarnId, Long pigGroupId, Integer handlerType,
+            Integer type, Long warehouseId, String materialName) {
+        Map<String,Object> lists = doctorWarehouseMaterialHandleDao.lastWlbdReport(
+                farmId, settlementDate, pigBarnType,
+                pigBarnId, pigGroupId, handlerType,
+                type, warehouseId, materialName);
+        return lists;
+    }
+
+    @Override
+    public List<Map<String, Object>> wlbdReport(
             Long farmId,
             String settlementDate, Integer pigBarnType,
             Long pigBarnId, Long pigGroupId, Integer handlerType,
@@ -481,7 +494,20 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
                 farmId, settlementDate, pigBarnType,
                 pigBarnId, pigGroupId, handlerType,
                 type, warehouseId, materialName);
-        return Response.ok(lists);
+        return lists;
+    }
+
+    @Override
+    public Map<String, Object> endWlbdReport(
+            Long farmId,
+            String settlementDate, Integer pigBarnType,
+            Long pigBarnId, Long pigGroupId, Integer handlerType,
+            Integer type, Long warehouseId, String materialName) {
+        Map<String,Object> lists = doctorWarehouseMaterialHandleDao.endWlbdReport(
+                farmId, settlementDate, pigBarnType,
+                pigBarnId, pigGroupId, handlerType,
+                type, warehouseId, materialName);
+        return lists;
     }
 
 }
