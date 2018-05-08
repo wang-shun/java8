@@ -761,7 +761,9 @@ public class StockHandleController {
             throw new JsonResponseException("start.date.after.end.date");
 
         Map<String, Object> params = new HashMap<>();
+        if(warehouseId!=null&&!"".equals(warehouseId))
         params.put("warehouseId", warehouseId);
+        if(operatorId!=null&&!"".equals(operatorId))
         params.put("operatorId", operatorId);
         params.put("handleSubType", handleSubType);
         params.put("handleDateStart", handleDateStart);
