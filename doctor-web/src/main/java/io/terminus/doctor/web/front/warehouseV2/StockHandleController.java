@@ -745,8 +745,8 @@ public class StockHandleController {
             @RequestParam(required = false) Integer pageNo,
             @RequestParam(required = false) Integer pageSize,
             @RequestParam(required = false) Integer farmId,
-            @RequestParam(required = false,value = "warehouseName") String warehouseName,
-            @RequestParam(required = false,value = "operatorName") String operatorName,
+            @RequestParam(required = false,value = "warehouseId") String warehouseId,
+            @RequestParam(required = false,value = "operatorId") String operatorId,
             @RequestParam(required = false,value = "handleSubType") Integer handleSubType,
             @RequestParam(required = false,value = "handleDateStart") Date handleDateStart,
             @RequestParam(required = false,value = "handleDateEnd") Date handleDateEnd,
@@ -761,8 +761,8 @@ public class StockHandleController {
             throw new JsonResponseException("start.date.after.end.date");
 
         Map<String, Object> params = new HashMap<>();
-        params.put("warehouseName", warehouseName);
-        params.put("operatorName", operatorName);
+        params.put("warehouseId", warehouseId);
+        params.put("operatorId", operatorId);
         params.put("handleSubType", handleSubType);
         params.put("handleDateStart", handleDateStart);
         params.put("handleDateEnd", handleDateEnd);

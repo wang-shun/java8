@@ -255,6 +255,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
                     if(orgId!=null) {
                          settleDate = orgId.getLastSettlementDate();
                     }
+                    infoMap.put("year",startYear);
                     infoMap.put("month",startMonth);
                     infoMap.put("handleDate",settleDate);
                     infoMap.put("settled", settled);
@@ -354,6 +355,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
                         if(lists.get(x).get("balanceAmount")!=null)
                             allBalanceAmount = allBalanceAmount.add(new BigDecimal(lists.get(x).get("balanceAmount").toString()));
                     }
+                    infoMap.put("year",startYear);
                     infoMap.put("month",startMonth);
                     infoMap.put("settled", settled);
                     infoMap.put("allInAmount",allInAmount);
