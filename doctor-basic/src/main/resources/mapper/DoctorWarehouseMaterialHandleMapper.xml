@@ -456,6 +456,7 @@
     <select id="listByFarmIdTime" parameterType="map" resultType="map">
         select a.farm_id as farmId,ifnull(f.name,'') as farmName,a.type as type,
         a.handle_year as handleYear,a.handle_Month as handleMonth,a.org_id as orgId,
+        a.settlement_date as settlementDate,
         <include refid="inAmount"/>
         <include refid="outAmount"/>
         <include refid="balanceAmount"/>

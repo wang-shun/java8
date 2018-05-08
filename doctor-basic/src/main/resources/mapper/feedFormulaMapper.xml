@@ -30,7 +30,7 @@
     </sql>
 
     <sql id="vals">
-        #{feedId}, #{feedName}, #{farmId}, #{farmName}, #{formula}, now(), now(), formula_name
+        #{feedId}, #{feedName}, #{farmId}, #{farmName}, #{formula}, now(), now(), #{formulaName,jdbcType=VARCHAR}
     </sql>
 
     <insert id="create" parameterType="FeedFormula" keyProperty="id" useGeneratedKeys="true">
