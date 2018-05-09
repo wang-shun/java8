@@ -111,14 +111,14 @@ public class StockHandleController {
 
     //根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注
     @RequestMapping(method = RequestMethod.GET, value = "/getDataByMaterialName")
-    public List<Map> getDataByMaterialName(@RequestParam Long stockHandleId,
+    public List<Map> getDataByMaterialName(@RequestParam Long id,
                                            @RequestParam String materialName) {
 //        if(null==handleDate){
 //            Date dd=new Date(System.currentTimeMillis());
 //            SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
 //            handleDate=sdf.format(dd);
 //        }
-        List<Map> maps = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getDataByMaterialName(stockHandleId,materialName));
+        List<Map> maps = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getDataByMaterialName(id,materialName));
         return maps;
     }
 
