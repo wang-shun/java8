@@ -987,7 +987,7 @@
 
     <!--得到领料出库的物料名称-->
     <select id="getMaterialNameByID" parameterType="Long" resultType="map">
-        select material_name from doctor_warehouse_material_handle
+        select material_id,material_name from doctor_warehouse_material_handle
         where stock_handle_id = #{id}
     </select>
 
