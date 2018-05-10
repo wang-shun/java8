@@ -145,7 +145,7 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
         Map<Long, AmountAndQuantityDto> eachWarehouseBalance = new HashMap<>();
         doctorWareHouseDao.list(DoctorWareHouse.builder().farmId(farmId).type(warehouseType).build()).stream().forEach(w -> {
             Map<String, Object> params = new HashMap<>();
-            params.put("warehouseId", w.getId());
+                params.put("warehouseId", w.getId());
             eachWarehouseBalance.put(w.getId(), doctorWarehouseStockMonthlyDao.statistics(params));
         });
         return Response.ok(eachWarehouseBalance);

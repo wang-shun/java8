@@ -26,8 +26,10 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
         BigDecimal amount = new BigDecimal(0);
         BigDecimal quantity = new BigDecimal(0);
         for (DoctorWarehouseStockMonthly monthly : monthlies) {
-            amount = amount.add(monthly.getBalanceAmount());
-            quantity = quantity.add(monthly.getBalanceQuantity());
+            if(monthly.getBalanceAmount() != null) {
+                amount = amount.add(monthly.getBalanceAmount());
+                quantity = quantity.add(monthly.getBalanceQuantity());
+            }
         }
         return new AmountAndQuantityDto(amount, quantity);
     }

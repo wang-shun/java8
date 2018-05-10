@@ -444,7 +444,6 @@
     <select id="findRetreatingById" parameterType="DoctorWarehouseMaterialHandle" resultType="BigDecimal">
         select ifnull(sum(quantity),0) from <include refid="tb"/>
         where type=13 and rel_material_handle_id=#{relMaterialHandleId}
-        and <![CDATA[ settlement_date <= #{settlementDate}]]>
         order by settlement_date ,id desc;
     </select>
 

@@ -28,10 +28,10 @@ public interface DoctorWarehouseMaterialHandleReadService {
 
     /**
      * 得到在此之前退料入库的数量和
-     * @param materialHandle
+     * @param relMaterialHandleId
      * @return
      */
-    Response<BigDecimal> findRetreatingById(DoctorWarehouseMaterialHandle materialHandle);
+    Response<BigDecimal> findRetreatingById(Long relMaterialHandleId);
 
     /**
      * 查询

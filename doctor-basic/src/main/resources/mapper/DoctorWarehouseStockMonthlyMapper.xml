@@ -125,7 +125,7 @@
 
     <select id="statistics" parameterType="map" resultMap="DoctorWarehouseStockMonthlyMap">
         SELECT
-        sum(balance_quantity) as balanceQuantity,sum(balacne_amount) as balacneAmount,warehouse_id,material_id
+        sum(balance_quantity) as balanceQuantity,sum(balance_amount) as balanceAmount,warehouse_id,material_id
         FROM
         <include refid="tb"/>
         <where>
@@ -147,7 +147,7 @@
 
     <select id="statisticsGroupBySku" parameterType="map" resultMap="DoctorWarehouseStockMonthlyMap">
         SELECT
-        material_id,sum(balacne_amount) as balacneAmount,sum(balance_quantity) as balanceQuantity
+        material_id,sum(balance_amount) as balanceAmount,sum(balance_quantity) as balanceQuantity
         FROM
         <include refid="tb"/>
         where warehouse_id =#{warehouseId}
@@ -157,7 +157,7 @@
 
     <select id="statisticsWarehouse" parameterType="map" resultMap="DoctorWarehouseStockMonthlyMap">
         SELECT
-        warehouse_id,sum(balacne_amount) as balacneAmount,sum(balance_quantity) as balanceQuantity
+        warehouse_id,sum(balance_amount) as balanceAmount,sum(balance_quantity) as balanceQuantity
         FROM
         <include refid="tb"/>
         WHERE warehouse_id=#{warehouseId}
