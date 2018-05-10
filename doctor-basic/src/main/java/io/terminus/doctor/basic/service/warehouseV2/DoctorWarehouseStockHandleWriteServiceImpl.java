@@ -107,22 +107,20 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
             }
             //领料出库
             if(type == 2){
-                DoctorWarehouseStockHandle a = doctorWarehouseStockHandleDao.findByRelStockHandleId(id,type);
-                if(a != null){
+                List<DoctorWarehouseStockHandle> a = doctorWarehouseStockHandleDao.findByRelStockHandleId(id,type);
+                if(a.size() == 0){
                     return Response.fail("此物料存在退料,不支持删除");
                 }
                 warehouseOutManager.delete(handle);
             }
             //配方出库,调拨出库
             if (type == 12 || type == 10) {
-                DoctorWarehouseStockHandle a = doctorWarehouseStockHandleDao.findByRelStockHandleId(id,type);//被入库的单据表
-                if(a != null) {
-                    DoctorWarehouseMaterialHandle b = doctorWarehouseMaterialHandleDao.findByStockHandleId(a.getId());//被入库的单据明细表
-                    if(b != null) {
-                        warehouseInManager.recalculate(b);//校验被入库是否为正
-                        warehouseInManager.delete(b);//删除被入库的单据明细表
-                    }
-                    doctorWarehouseStockHandleDao.delete(a.getId());//删除被入库的单据表
+                List<DoctorWarehouseStockHandle> a = doctorWarehouseStockHandleDao.findByRelStockHandleId(id,type);//被入库的单据表
+                for(int i = 0;i<a.size();i++) {
+                        DoctorWarehouseMaterialHandle b = doctorWarehouseMaterialHandleDao.findByStockHandleId(a.get(i).getId());//被入库的单据明细表
+                            warehouseInManager.recalculate(b);//校验被入库是否为正
+                            warehouseInManager.delete(b);//删除被入库的单据明细表
+                        doctorWarehouseStockHandleDao.delete(a.get(i).getId());//删除被入库的单据
                 }
                 warehouseOutManager.delete(handle);//删除出库单的单据明细
             }
