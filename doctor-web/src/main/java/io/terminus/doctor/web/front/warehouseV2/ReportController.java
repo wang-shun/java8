@@ -737,73 +737,218 @@ public class ReportController {
             throw new JsonResponseException("stock.warehouseId.null");
         }
 
-        List<Map<String,Object>> resultNewMap = Lists.newArrayList();
+        List<String> materials = Lists.newArrayList();
+        if(StringUtils.isBlank(materialName))
+        {
+            List<Map<String,Object>> resultMap = doctorWarehouseReportReadService.getMeterails(
+                    farmId,settlementDate,pigBarnType,
+                    pigBarnId,pigGroupId,handlerType,
+                    type,warehouseId,materialName
+            );
+            if(resultMap.size() > 0)
+            {
+                for(Map<String,Object> map:resultMap){
+                    materials.add(String.valueOf(map.get("material_name")));
+                }
+            }
+            else {
+                return null;
+            }
+        } else {
+            materials.add(materialName);
+        }
 
-        List<Map<String,Object>> resultCusMap = Lists.newArrayList();
+        if(materials.size() > 0) {
 
-        Map<String,Object> lastMap = doctorWarehouseReportReadService.lastWlbdReport(farmId,settlementDate,pigBarnType,
-                pigBarnId,pigGroupId,handlerType,
-                type,warehouseId,materialName);
-        if(lastMap != null)
-            resultCusMap.add(lastMap);
+            // 最终结果集数据集合
+            List<Map<String, Object>> resultNewMap = Lists.newArrayList();
 
-        List<Map<String,Object>> resultMap = doctorWarehouseReportReadService.wlbdReport(
-                farmId,settlementDate,pigBarnType,
-                pigBarnId,pigGroupId,handlerType,
-                type,warehouseId,materialName
-        );
-        if(resultMap.size() > 0)
-            resultCusMap.addAll(resultMap);
+            for(String str : materials) {
 
-        Map<String,Object> endMap = doctorWarehouseReportReadService.endWlbdReport(farmId,settlementDate,pigBarnType,
-                pigBarnId,pigGroupId,handlerType,
-                type,warehouseId,materialName);
-        if(endMap != null)
-            resultCusMap.add(endMap);
-
-        if(resultCusMap.size() > 0) {
-            for (Map<String, Object> map : resultCusMap) {
-                Map<String,Object> submap = Maps.newHashMap();
-                Set<String> keys = map.keySet();
-                Iterator<String> its =  keys.iterator();
-                while (its.hasNext()){
-                    String key = its.next();
-                    if(isNull(map.get(key))) {
-                        submap.put(key,"");
+                // 查出上月结存数据
+                Map<String, Object> lastMap = doctorWarehouseReportReadService.lastWlbdReport(farmId, settlementDate, pigBarnType,
+                        pigBarnId, pigGroupId, handlerType,
+                        type, warehouseId, str);
+                if (lastMap == null) {
+                    // 构造上月结存新map数据
+                    lastMap = Maps.newHashMap();
+                    lastMap.put("id","");
+                    lastMap.put("material_name","上月结存");
+                    lastMap.put("material_type","");
+                    lastMap.put("ware_house_name","");
+                    lastMap.put("handle_date","");
+                    lastMap.put("settlement_date","");
+                    lastMap.put("handler_type","");
+                    lastMap.put("rksl","");
+                    lastMap.put("rkdj","");
+                    lastMap.put("rkje","");
+                    lastMap.put("cksl","");
+                    lastMap.put("ckdj","");
+                    lastMap.put("ckje","");
+                    lastMap.put("jcsl","");
+                    lastMap.put("jcdj","");
+                    lastMap.put("jcje","");
+                    lastMap.put("pig_barn_name","");
+                    lastMap.put("pig_type","");
+                    lastMap.put("pig_group_name","");
+                    lastMap.put("apply_staff_name","");
+                    lastMap.put("farm_name","");
+                    lastMap.put("unit","");
+                    lastMap.put("provider_name","");
+                    lastMap.put("specification","");
+                } else {
+                    Object ljcsl = lastMap.get("jcsl");
+                    Object ljcdj = lastMap.get("jcdj");
+                    Object ljcje = lastMap.get("jcje");
+                    if(isNull(ljcsl)){
+                        lastMap.put("jcsl","");
                     } else {
-                        Object numvalueo = map.get(key);
-                        String numvaluer = numvalueo.toString();
-                        if(!isNumeric(numvaluer)){
-                            submap.put(key, map.get(key).toString());
-                        } else {
-                            if(key.equals("rksl") || key.equals("cksl")
-                                    || key.equals("jcsl") ){
-                                numvaluer = translateNum(numvaluer,2);
-                                submap.put(key, numvaluer);
-                            }
-                            else if (key.equals("rkdj") || key.equals("rkje")
-                                    || key.equals("ckdj") || key.equals("ckje")
-                                    || key.equals("jcdj") || key.equals("jcje")){
-                                numvaluer = translateNum(numvaluer,4);
-                                submap.put(key, numvaluer);
-                            }
-                            else {
-                                submap.put(key, numvaluer);
-                            }
-                        }
+                        lastMap.put("jcsl",translateNum(ljcsl.toString(),2));
+                    }
+                    if(isNull(ljcdj)){
+                        lastMap.put("jcdj","");
+                    } else {
+                        lastMap.put("jcdj",translateNum(ljcdj.toString(),4));
+                    }
+                    if(isNull(ljcje)){
+                        lastMap.put("jcje","");
+                    } else {
+                        lastMap.put("jcje",translateNum(ljcje.toString(),4));
                     }
                 }
-                resultNewMap.add(submap);
+                resultNewMap.add(lastMap);
+
+                List<Map<String, Object>> resultMap = doctorWarehouseReportReadService.wlbdReport(
+                        farmId, settlementDate, pigBarnType,
+                        pigBarnId, pigGroupId, handlerType,
+                        type, warehouseId, str
+                );
+                // 计算这条物料的结存数据与汇总数据
+                if (resultMap.size() > 0) {
+
+                    //本月汇总变量定义
+                    List<Map<String, Object>> resultEndMap = Lists.newArrayList();
+                    // 入库
+                    double thisMonthTotalRksl = 0d;
+                    double thisMonthTotalRkje = 0d;
+                    // 出库
+                    double thisMonthTotalCksl = 0d;
+                    double thisMonthTotalCkje = 0d;
+                    // 结存
+                    double thisMonthTotalJcsl = 0d;
+                    double thisMonthTotalJcje = 0d;
+
+                    // 上月结存数据、金额
+                    double lastMonthTotalJcsl = isNull(lastMap.get("jcsl")) ? 0d :
+                                                    Double.parseDouble(lastMap.get("jcsl").toString());
+                    double lastMonthTotalJcje = isNull(lastMap.get("jcje")) ? 0d :
+                                                    Double.parseDouble(lastMap.get("jcje").toString());
+
+                    // 临时变量
+                    double tempsinglejcsl = lastMonthTotalJcsl;
+                    double tempsinglejcje = lastMonthTotalJcje;
+
+                    for(int i = 0;i < resultMap.size();i++){
+
+                        Map<String, Object> thismap = resultMap.get(i);
+                        Map<String, Object> tempmap = thismap;
+
+                        // 计算每一条明细的结存数据
+                        Object rksl = thismap.get("rksl");
+                        Object rkje = thismap.get("rkje");
+                        Object cksl = thismap.get("cksl");
+                        Object ckje = thismap.get("ckje");
+
+                        double drksl = isNull(rksl) ? 0d :  Double.parseDouble(rksl.toString());
+                        double drkje = isNull(rkje) ? 0d :  Double.parseDouble(rkje.toString());
+                        double dcksl = isNull(cksl) ? 0d :  Double.parseDouble(cksl.toString());
+                        double dckje = isNull(ckje) ? 0d :  Double.parseDouble(ckje.toString());
+
+                        thisMonthTotalRksl += drksl; //入库数量累加
+                        thisMonthTotalRkje += drkje; //入库金额累加
+                        thisMonthTotalCksl += dcksl; //出库数量累加
+                        thisMonthTotalCkje += dckje; //出库金额累加
+
+                        double singleJcsl = 0d;
+                        double singleJcje = 0d;
+
+                        if(drksl > 0d) {
+                            singleJcsl = tempsinglejcsl + drksl;
+                        }
+                        else if(dcksl > 0d) {
+                            singleJcsl = tempsinglejcsl - dcksl;
+                        }
+                        else {
+                            singleJcsl = tempsinglejcsl;
+                        }
+
+                        if(drkje > 0d) {
+                            singleJcje = tempsinglejcje + drkje;
+                        }
+                        else if(dckje > 0d) {
+                            singleJcje = tempsinglejcje - dckje;
+                        }
+                        else {
+                            singleJcje = tempsinglejcje;
+                        }
+
+                        tempmap.put("jcsl",singleJcsl == 0d ? "" : translateNum(singleJcsl + "",2)); //单笔记录的结存数量
+                        tempmap.put("jcje",singleJcje == 0d ? "" : translateNum(singleJcje + "",4)); //单笔记录的结存金额
+
+                        if(singleJcsl == 0 || singleJcje == 0d){
+                            tempmap.put("jcdj","");
+                        } else {
+                            tempmap.put("jcdj", translateNum((singleJcje / singleJcsl) + "",4));
+                        }
+                        resultNewMap.add(tempmap);
+                        tempsinglejcsl = singleJcsl;
+                        tempsinglejcje = singleJcje;
+                    }
+
+                    // 结存数量、金额等于最后一笔
+                    thisMonthTotalJcsl = tempsinglejcsl;
+                    thisMonthTotalJcje = tempsinglejcje;
+
+                    Map thisMap = Maps.newHashMap();
+                    thisMap.put("id","");
+                    thisMap.put("material_name","本月结存");
+                    thisMap.put("material_type","");
+                    thisMap.put("ware_house_name","");
+                    thisMap.put("handle_date","");
+                    thisMap.put("settlement_date","");
+                    thisMap.put("handler_type","");
+                    thisMap.put("rksl",thisMonthTotalRksl == 0d ? "" : translateNum(thisMonthTotalRksl + "",2));
+                    thisMap.put("rkdj",thisMonthTotalRksl == 0d || thisMonthTotalRkje ==0d ? "":
+                            translateNum((thisMonthTotalRkje / thisMonthTotalRksl) + "",4));
+                    thisMap.put("rkje",thisMonthTotalRkje == 0d ? "" : translateNum(thisMonthTotalRkje + "",4));
+                    thisMap.put("cksl",thisMonthTotalCksl == 0d ? "" : translateNum(thisMonthTotalCksl + "",2));
+                    thisMap.put("ckdj",thisMonthTotalCksl == 0d || thisMonthTotalCkje ==0d ? "":
+                            translateNum((thisMonthTotalCkje / thisMonthTotalCksl) + "",4));
+                    thisMap.put("ckje", thisMonthTotalCkje == 0d ? "" : translateNum(thisMonthTotalCkje + "",4));
+                    thisMap.put("jcsl", thisMonthTotalJcsl == 0d ? "" : translateNum(thisMonthTotalJcsl + "",2));
+                    thisMap.put("jcdj",thisMonthTotalJcsl == 0d || thisMonthTotalJcje ==0d ? "":
+                                translateNum((thisMonthTotalJcje / thisMonthTotalJcsl) + "",4));
+                    thisMap.put("jcje",thisMonthTotalJcje == 0d ? "" : translateNum(thisMonthTotalJcje+"",4));
+                    thisMap.put("pig_barn_name","");
+                    thisMap.put("pig_type","");
+                    thisMap.put("pig_group_name","");
+                    thisMap.put("apply_staff_name","");
+                    thisMap.put("farm_name","");
+                    thisMap.put("unit","");
+                    thisMap.put("provider_name","");
+                    thisMap.put("specification","");
+                    resultNewMap.add(thisMap);
+                }
             }
+            return resultNewMap;
         }
-        return resultNewMap;
+        return null;
     }
 
     public static boolean isNull(Object str){
         try {
             if (str == null
                     || str.toString().trim().equals("")
-                    || "[B".equals(str.getClass().getName())
                     || Double.parseDouble(str.toString().trim()) == 0d
                     ) return true;
         }
@@ -911,21 +1056,6 @@ public class ReportController {
             String materialName,
             HttpServletRequest request, HttpServletResponse response) {
 
-        if(ObjectUtils.isEmpty(farmId))
-        {
-            throw new JsonResponseException("stock.farmId.null");
-        }
-
-        if(ObjectUtils.isEmpty(settlementDate))
-        {
-            throw new JsonResponseException("stock.settlementDate.null");
-        }
-
-        if(ObjectUtils.isEmpty(warehouseId))
-        {
-            throw new JsonResponseException("stock.warehouseId.null");
-        }
-
         //开始导出
         try {
 
@@ -933,31 +1063,16 @@ public class ReportController {
             if (null == farm)
                 throw new JsonResponseException("farm.not.found");
 
+            List<Map<String,Object>> exportVos = wlbdReport(farmId,settlementDate,pigBarnType,
+                    pigBarnId,pigGroupId,handlerType,
+                    type,warehouseId,materialName);
+            if(exportVos == null || exportVos.size() == 0)
+            {
+                return;
+            }
+
             String farmName = farm.getName();
             String fileName = "物料变动报表" + new Date().getTime();
-
-
-            List<Map<String,Object>> exportVos = Lists.newArrayList();
-
-            Map<String,Object> lastMap = doctorWarehouseReportReadService.lastWlbdReport(farmId,settlementDate,pigBarnType,
-                    pigBarnId,pigGroupId,handlerType,
-                    type,warehouseId,materialName);
-            if(lastMap != null)
-                exportVos.add(lastMap);
-
-            List<Map<String,Object>> resultMap = doctorWarehouseReportReadService.wlbdReport(
-                    farmId,settlementDate,pigBarnType,
-                    pigBarnId,pigGroupId,handlerType,
-                    type,warehouseId,materialName
-            );
-            if(resultMap.size() > 0)
-                exportVos.addAll(resultMap);
-
-            Map<String,Object> endMap = doctorWarehouseReportReadService.endWlbdReport(farmId,settlementDate,pigBarnType,
-                    pigBarnId,pigGroupId,handlerType,
-                    type,warehouseId,materialName);
-            if(endMap != null)
-                exportVos.add(endMap);
 
             //导出名称
             exporter.setHttpServletResponse(request, response, fileName);
@@ -1117,68 +1232,151 @@ public class ReportController {
                     sheet.addMergedRegion(cra);
                 }
 
+                //往excel表中写入数据
                 if(!CollectionUtils.isEmpty(exportVos)) {
-                    Map<String,Object> lastMonthData = exportVos.get(0);
-                    String tName = String.valueOf(lastMonthData.get("material_name"));
                     Row dataRow = null;
                     Cell dataCell = null;
                     int startRowIndex = 2;
-                    if("上月结存".equals(tName))
-                    {
-                        //只显示结存数据,从第二行开始创建起
-                        dataRow = sheet.createRow(startRowIndex);
-                        for(int i = 0;i <= 22; i++) {
 
-                            if(i == 0)
-                            {
-                                dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(tName);
-                                dataCell.setCellStyle(leftCellStyle);
-                            }
-
-                            if((i > 0 && i < 12) || (i > 14 && i <= 22))
-                            {
-                                dataCell = dataRow.createCell(i);
-                            }
-
-                            if(i == 12){
-                                dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(
-                                        isNull(lastMonthData.get("jcsl"))
-                                                ? "" : translateNum(lastMonthData.get("jcsl").toString(),2));
-                                dataCell.setCellStyle(normalCellStyle);
-                            }
-
-                            if(i == 13){
-                                dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(
-                                        isNull(lastMonthData.get("jcdj"))
-                                                ? "" : translateNum(lastMonthData.get("jcdj").toString(),4));
-                                dataCell.setCellStyle(normalCellStyle);
-                            }
-
-                            if(i == 14){
-                                dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(
-                                        isNull(lastMonthData.get("jcje"))
-                                                ? "" : translateNum(lastMonthData.get("jcje").toString(),4));
-                                dataCell.setCellStyle(normalCellStyle);
-                            }
-
-                        }
-
-                        //合并单元格
-                        cra = new CellRangeAddress(startRowIndex, startRowIndex, 0, 11);
-                        sheet.addMergedRegion(cra);
-                        cra = new CellRangeAddress(startRowIndex, startRowIndex, 15, 22);
-                        sheet.addMergedRegion(cra);
-                        startRowIndex++;
-                    }
-
-                    //表数据
                     for (Map<String, Object> map : exportVos) {
-                        String vId = String.valueOf(map.get("id"));
-                        if(StringUtils.isNotBlank(vId)){ // id不为空
+                        String tName = String.valueOf(map.get("material_name"));
+                        if ("上月结存".equals(tName)) {
+                            //只显示结存数据,从第二行开始创建起
+                            dataRow = sheet.createRow(startRowIndex);
+                            for (int i = 0; i <= 22; i++) {
+                                if (i == 0) {
+                                    dataCell = dataRow.createCell(i);
+                                    dataCell.setCellValue(tName);
+                                    dataCell.setCellStyle(leftCellStyle);
+                                }
+                                if ((i > 0 && i < 12) || (i > 14 && i <= 22)) {
+                                    dataCell = dataRow.createCell(i);
+                                }
+
+                                if (i == 12) {
+                                    dataCell = dataRow.createCell(i);
+                                    dataCell.setCellValue(
+                                            isNull(map.get("jcsl"))
+                                                    ? "" : translateNum(map.get("jcsl").toString(), 2));
+                                    dataCell.setCellStyle(normalCellStyle);
+                                }
+
+                                if (i == 13) {
+                                    dataCell = dataRow.createCell(i);
+                                    dataCell.setCellValue(
+                                            isNull(map.get("jcdj"))
+                                                    ? "" : translateNum(map.get("jcdj").toString(), 4));
+                                    dataCell.setCellStyle(normalCellStyle);
+                                }
+
+                                if (i == 14) {
+                                    dataCell = dataRow.createCell(i);
+                                    dataCell.setCellValue(
+                                            isNull(map.get("jcje"))
+                                                    ? "" : translateNum(map.get("jcje").toString(), 4));
+                                    dataCell.setCellStyle(normalCellStyle);
+                                }
+                            }
+
+                            //合并单元格
+                            cra = new CellRangeAddress(startRowIndex, startRowIndex, 0, 11);
+                            sheet.addMergedRegion(cra);
+                            cra = new CellRangeAddress(startRowIndex, startRowIndex, 15, 22);
+                            sheet.addMergedRegion(cra);
+                        } else if ("本月结存".equals(tName)) {
+                            dataRow = sheet.createRow(startRowIndex);
+                            for (int i = 0; i <= 22; i++) {
+
+                                if (i == 0) {
+                                    dataCell = dataRow.createCell(i);
+                                    dataCell.setCellValue(tName);
+                                    dataCell.setCellStyle(leftCellStyle);
+                                }
+
+                                if ((i > 0 && i < 6) || (i > 14 && i <= 22)) {
+                                    dataCell = dataRow.createCell(i);
+                                }
+
+                                if (i == 6) {
+                                    dataCell = dataRow.createCell(i);
+                                    dataCell.setCellValue(
+                                            isNull(map.get("rksl"))
+                                                    ? "" : translateNum(map.get("rksl").toString(), 2));
+                                    dataCell.setCellStyle(normalCellStyle);
+                                }
+
+                                if (i == 7) {
+                                    dataCell = dataRow.createCell(i);
+                                    dataCell.setCellValue(
+                                            isNull(map.get("rkdj"))
+                                                    ? "" : translateNum(map.get("rkdj").toString(), 4));
+                                    dataCell.setCellStyle(normalCellStyle);
+                                }
+
+                                if (i == 8) {
+                                    dataCell = dataRow.createCell(i);
+                                    dataCell.setCellValue(
+                                            isNull(map.get("rkje"))
+                                                    ? "" : translateNum(map.get("rkje").toString(), 4));
+                                    dataCell.setCellStyle(normalCellStyle);
+                                }
+
+                                if (i == 9) {
+                                    dataCell = dataRow.createCell(i);
+                                    dataCell.setCellValue(
+                                            isNull(map.get("cksl"))
+                                                    ? "" : translateNum(map.get("cksl").toString(), 2));
+                                    dataCell.setCellStyle(normalCellStyle);
+                                }
+
+                                if (i == 10) {
+                                    dataCell = dataRow.createCell(i);
+                                    dataCell.setCellValue(
+                                            isNull(map.get("ckdj"))
+                                                    ? "" : translateNum(map.get("ckdj").toString(), 4));
+                                    dataCell.setCellStyle(normalCellStyle);
+                                }
+
+                                if (i == 11) {
+                                    dataCell = dataRow.createCell(i);
+                                    dataCell.setCellValue(
+                                            isNull(map.get("ckje"))
+                                                    ? "" : translateNum(map.get("ckje").toString(), 4));
+                                    dataCell.setCellStyle(normalCellStyle);
+                                }
+
+                                if (i == 12) {
+                                    dataCell = dataRow.createCell(i);
+                                    dataCell.setCellValue(
+                                            isNull(map.get("jcsl"))
+                                                    ? "" : translateNum(map.get("jcsl").toString(), 2));
+                                    dataCell.setCellStyle(normalCellStyle);
+                                }
+
+                                if (i == 13) {
+                                    dataCell = dataRow.createCell(i);
+                                    dataCell.setCellValue(
+                                            isNull(map.get("jcdj"))
+                                                    ? "" : translateNum(map.get("jcdj").toString(), 4));
+                                    dataCell.setCellStyle(normalCellStyle);
+                                }
+
+                                if (i == 14) {
+                                    dataCell = dataRow.createCell(i);
+                                    dataCell.setCellValue(
+                                            isNull(map.get("jcje"))
+                                                    ? "" : translateNum(map.get("jcje").toString(), 4));
+                                    dataCell.setCellStyle(normalCellStyle);
+                                }
+                            }
+
+                            //合并单元格
+                            cra = new CellRangeAddress(startRowIndex, startRowIndex, 0, 5);
+                            sheet.addMergedRegion(cra);
+                            cra = new CellRangeAddress(startRowIndex, startRowIndex, 15, 22);
+                            sheet.addMergedRegion(cra);
+                        } else {
+                            // 写入表数据
                             dataRow = sheet.createRow(startRowIndex);
 
                             dataCell = dataRow.createCell(0);
@@ -1190,8 +1388,7 @@ public class ReportController {
                             dataCell = dataRow.createCell(1);
                             String mtype = String.valueOf(map.get("material_type"));
                             mtype = null == mtype || "".equals(mtype.trim()) || "null".equals(mtype.trim().toLowerCase()) ? "" : mtype.trim();
-                            switch (mtype)
-                            {
+                            switch (mtype) {
                                 case "1":
                                     dataCell.setCellValue("饲料");
                                     break;
@@ -1215,53 +1412,52 @@ public class ReportController {
 
                             dataCell = dataRow.createCell(2);
                             String housename = String.valueOf(map.get("ware_house_name"));
-                            housename = null == housename || "".equals(housename.trim()) || "null".equals(housename.trim().toLowerCase())  ? "" : housename.trim();
+                            housename = null == housename || "".equals(housename.trim()) || "null".equals(housename.trim().toLowerCase()) ? "" : housename.trim();
                             dataCell.setCellValue(housename);
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(3);
                             String housedate = String.valueOf(map.get("handle_date"));
-                            housedate = null == housedate || "".equals(housedate.trim()) || "null".equals(housedate.trim().toLowerCase())  ? "" : housedate.trim();
+                            housedate = null == housedate || "".equals(housedate.trim()) || "null".equals(housedate.trim().toLowerCase()) ? "" : housedate.trim();
                             dataCell.setCellValue(housedate);
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(4);
                             String settlementdate = String.valueOf(map.get("settlement_date"));
-                            settlementdate = null == settlementdate || "".equals(settlementdate.trim()) || "null".equals(settlementdate.trim().toLowerCase())   ? "" : settlementdate.trim();
+                            settlementdate = null == settlementdate || "".equals(settlementdate.trim()) || "null".equals(settlementdate.trim().toLowerCase()) ? "" : settlementdate.trim();
                             dataCell.setCellValue(settlementdate);
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(5);
                             String handler_type = String.valueOf(map.get("handler_type"));
-                            handler_type = null == handler_type || "".equals(handler_type.trim()) || "null".equals(handler_type.trim().toLowerCase())  ? "" : handler_type.trim();
-                            switch (handler_type)
-                            {
+                            handler_type = null == handler_type || "".equals(handler_type.trim()) || "null".equals(handler_type.trim().toLowerCase()) ? "" : handler_type.trim();
+                            switch (handler_type) {
                                 case "1":
                                     dataCell.setCellValue("采购入库");
                                     break;
                                 case "2":
-                                    dataCell.setCellValue("退料入库");
-                                    break;
-                                case "3":
-                                    dataCell.setCellValue("配方入库");
-                                    break;
-                                case "4":
-                                    dataCell.setCellValue("盘盈入库");
-                                    break;
-                                case "5":
-                                    dataCell.setCellValue("调拨入库");
-                                    break;
-                                case "6":
                                     dataCell.setCellValue("领料出库");
                                     break;
                                 case "7":
-                                    dataCell.setCellValue("盘亏出库");
+                                    dataCell.setCellValue("盘盈");
                                     break;
                                 case "8":
-                                    dataCell.setCellValue("配方出库");
+                                    dataCell.setCellValue("盘亏");
                                     break;
                                 case "9":
-                                    dataCell.setCellValue("调拨出库");
+                                    dataCell.setCellValue("调入");
+                                    break;
+                                case "10":
+                                    dataCell.setCellValue("调出");
+                                    break;
+                                case "11":
+                                    dataCell.setCellValue("配方生产入库");
+                                    break;
+                                case "12":
+                                    dataCell.setCellValue("配方生产出库");
+                                    break;
+                                case "13":
+                                    dataCell.setCellValue("退料入库");
                                     break;
                                 default:
                                     dataCell.setCellValue("");
@@ -1272,68 +1468,67 @@ public class ReportController {
                             dataCell = dataRow.createCell(6);
                             dataCell.setCellValue(
                                     isNull(map.get("rksl"))
-                                            ? "" : translateNum(map.get("rksl").toString(),2));
+                                            ? "" : translateNum(map.get("rksl").toString(), 2));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(7);
                             dataCell.setCellValue(
                                     isNull(map.get("rkdj"))
-                                            ? "" : translateNum(map.get("rkdj").toString(),4));
+                                            ? "" : translateNum(map.get("rkdj").toString(), 4));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(8);
                             dataCell.setCellValue(
                                     isNull(map.get("rkje"))
-                                            ? "" : translateNum(map.get("rkje").toString(),4));
+                                            ? "" : translateNum(map.get("rkje").toString(), 4));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(9);
                             dataCell.setCellValue(
                                     isNull(map.get("cksl"))
-                                            ? "" : translateNum(map.get("cksl").toString(),2));
+                                            ? "" : translateNum(map.get("cksl").toString(), 2));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(10);
                             dataCell.setCellValue(
                                     isNull(map.get("ckdj"))
-                                            ? "" : translateNum(map.get("ckdj").toString(),4));
+                                            ? "" : translateNum(map.get("ckdj").toString(), 4));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(11);
                             dataCell.setCellValue(
                                     isNull(map.get("ckje"))
-                                            ? "" : translateNum(map.get("ckje").toString(),4));
+                                            ? "" : translateNum(map.get("ckje").toString(), 4));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(12);
                             dataCell.setCellValue(
                                     isNull(map.get("jcsl"))
-                                            ? "" : translateNum(map.get("jcsl").toString(),2));
+                                            ? "" : translateNum(map.get("jcsl").toString(), 2));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(13);
                             dataCell.setCellValue(
                                     isNull(map.get("jcdj"))
-                                            ? "" : translateNum(map.get("jcdj").toString(),4));
+                                            ? "" : translateNum(map.get("jcdj").toString(), 4));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(14);
                             dataCell.setCellValue(
                                     isNull(map.get("jcje"))
-                                            ? "" : translateNum(map.get("jcje").toString(),4));
+                                            ? "" : translateNum(map.get("jcje").toString(), 4));
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(15);
                             String pig_barn_name = String.valueOf(map.get("pig_barn_name"));
-                            pig_barn_name = null == pig_barn_name || "".equals(pig_barn_name.trim()) || "null".equals(pig_barn_name.trim().toLowerCase())  ? "" : pig_barn_name.trim();
+                            pig_barn_name = null == pig_barn_name || "".equals(pig_barn_name.trim()) || "null".equals(pig_barn_name.trim().toLowerCase()) ? "" : pig_barn_name.trim();
                             dataCell.setCellValue(pig_barn_name);
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(16);
                             String pig_type = String.valueOf(map.get("pig_type"));
-                            pig_type = null == pig_type || "".equals(pig_type.trim()) || "null".equals(pig_type.trim().toLowerCase())  ? "" : pig_type.trim();
-                            switch (pig_type)
-                            {
+                            pig_type = null == pig_type || "".equals(pig_type.trim()) || "null".equals(pig_type.trim().toLowerCase()) ? "" : pig_type.trim();
+                            switch (pig_type) {
                                 case "2":
                                     dataCell.setCellValue("保育猪");
                                     break;
@@ -1363,13 +1558,13 @@ public class ReportController {
 
                             dataCell = dataRow.createCell(17);
                             String pig_group_name = String.valueOf(map.get("pig_group_name"));
-                            pig_group_name = null == pig_group_name || "".equals(pig_group_name.trim())  || "null".equals(pig_group_name.trim().toLowerCase()) ? "" : pig_group_name.trim();
+                            pig_group_name = null == pig_group_name || "".equals(pig_group_name.trim()) || "null".equals(pig_group_name.trim().toLowerCase()) ? "" : pig_group_name.trim();
                             dataCell.setCellValue(pig_group_name);
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(18);
                             String apply_staff_name = String.valueOf(map.get("apply_staff_name"));
-                            apply_staff_name = null == apply_staff_name || "".equals(apply_staff_name.trim()) || "null".equals(apply_staff_name.trim().toLowerCase())  ? "" : apply_staff_name.trim();
+                            apply_staff_name = null == apply_staff_name || "".equals(apply_staff_name.trim()) || "null".equals(apply_staff_name.trim().toLowerCase()) ? "" : apply_staff_name.trim();
                             dataCell.setCellValue(apply_staff_name);
                             dataCell.setCellStyle(normalCellStyle);
 
@@ -1387,125 +1582,19 @@ public class ReportController {
 
                             dataCell = dataRow.createCell(21);
                             String provider_name = String.valueOf(map.get("provider_name"));
-                            provider_name = null == provider_name || "".equals(provider_name.trim()) || "null".equals(provider_name.trim().toLowerCase())  ? "" : provider_name.trim();
+                            provider_name = null == provider_name || "".equals(provider_name.trim()) || "null".equals(provider_name.trim().toLowerCase()) ? "" : provider_name.trim();
                             dataCell.setCellValue(provider_name);
                             dataCell.setCellStyle(normalCellStyle);
 
                             dataCell = dataRow.createCell(22);
                             String specification = String.valueOf(map.get("specification"));
-                            specification = null == specification || "".equals(specification.trim()) || "null".equals(specification.trim().toLowerCase())  ? "" : specification.trim();
+                            specification = null == specification || "".equals(specification.trim()) || "null".equals(specification.trim().toLowerCase()) ? "" : specification.trim();
                             dataCell.setCellValue(specification);
                             dataCell.setCellStyle(normalCellStyle);
-
-                            startRowIndex++;
                         }
-
+                        startRowIndex++;
                     }
-
-                    //最后一行数据
-                    Map<String,Object> thisMonthHZData = exportVos.get(exportVos.size() - 1);
-                    tName = String.valueOf(thisMonthHZData.get("material_name"));
-                    if("本月结存".equals(tName)) {
-
-                        dataRow = sheet.createRow(startRowIndex);
-                        for(int i = 0;i <= 22; i++) {
-
-                            if(i == 0)
-                            {
-                                dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(tName);
-                                dataCell.setCellStyle(leftCellStyle);
-                            }
-
-                            if((i > 0 && i < 6) || (i > 14 && i <= 22))
-                            {
-                                dataCell = dataRow.createCell(i);
-                            }
-
-                            if(i == 6){
-                                dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(
-                                        isNull(thisMonthHZData.get("rksl"))
-                                                ? "" : translateNum(thisMonthHZData.get("rksl").toString(),2));
-                                dataCell.setCellStyle(normalCellStyle);
-                            }
-
-                            if(i == 7){
-                                dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(
-                                        isNull(thisMonthHZData.get("rkdj"))
-                                                ? "" : translateNum(thisMonthHZData.get("rkdj").toString(),4));
-                                dataCell.setCellStyle(normalCellStyle);
-                            }
-
-                            if(i == 8){
-                                dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(
-                                        isNull(thisMonthHZData.get("rkje"))
-                                                ? "" : translateNum(thisMonthHZData.get("rkje").toString(),4));
-                                dataCell.setCellStyle(normalCellStyle);
-                            }
-
-                            if(i == 9){
-                                dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(
-                                        isNull(thisMonthHZData.get("cksl"))
-                                                ? "" : translateNum(thisMonthHZData.get("cksl").toString(),2));
-                                dataCell.setCellStyle(normalCellStyle);
-                            }
-
-                            if(i == 10){
-                                dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(
-                                        isNull(thisMonthHZData.get("ckdj"))
-                                                ? "" : translateNum(thisMonthHZData.get("ckdj").toString(),4));
-                                dataCell.setCellStyle(normalCellStyle);
-                            }
-
-                            if(i == 11){
-                                dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(
-                                        isNull(thisMonthHZData.get("ckje"))
-                                                ? "" : translateNum(thisMonthHZData.get("ckje").toString(),4));
-                                dataCell.setCellStyle(normalCellStyle);
-                            }
-
-                            if(i == 12){
-                                dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(
-                                        isNull(thisMonthHZData.get("jcsl"))
-                                                ? "" : translateNum(thisMonthHZData.get("jcsl").toString(),2));
-                                dataCell.setCellStyle(normalCellStyle);
-                            }
-
-                            if(i == 13){
-                                dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(
-                                        isNull(thisMonthHZData.get("jcdj"))
-                                                ? "" : translateNum(thisMonthHZData.get("jcdj").toString(),4));
-                                dataCell.setCellStyle(normalCellStyle);
-                            }
-
-                            if(i == 14){
-                                dataCell = dataRow.createCell(i);
-                                dataCell.setCellValue(
-                                        isNull(thisMonthHZData.get("jcje"))
-                                                ? "" : translateNum(thisMonthHZData.get("jcje").toString(),4));
-                                dataCell.setCellStyle(normalCellStyle);
-                            }
-
-                        }
-
-                        //合并单元格
-                        cra = new CellRangeAddress(startRowIndex, startRowIndex, 0, 5);
-                        sheet.addMergedRegion(cra);
-                        cra = new CellRangeAddress(startRowIndex, startRowIndex, 15, 22);
-                        sheet.addMergedRegion(cra);
-
-                    }
-
                 }
-
                 workbook.write(response.getOutputStream());
             }
         } catch (Exception e) {

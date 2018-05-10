@@ -27,7 +27,6 @@ import java.util.stream.Stream;
 @RpcProvider
 public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseReportReadService {
 
-
     private static final WarehouseMaterialHandleType[] ALL_KIND_OF_HANDLE = new WarehouseMaterialHandleType[]{
             WarehouseMaterialHandleType.IN,
             WarehouseMaterialHandleType.OUT,
@@ -497,13 +496,31 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
         return lists;
     }
 
+    /**
+     * 获取会计年月里面所有物料数据
+     * @param farmId
+     * @param settlementDate
+     * @param pigBarnType
+     * @param pigBarnId
+     * @param pigGroupId
+     * @param handlerType
+     * @param type
+     * @param warehouseId
+     * @param materialName
+     * @return
+     */
     @Override
-    public Map<String, Object> endWlbdReport(
+    public List<Map<String,Object>> getMeterails(
             Long farmId,
-            String settlementDate, Integer pigBarnType,
-            Long pigBarnId, Long pigGroupId, Integer handlerType,
-            Integer type, Long warehouseId, String materialName) {
-        Map<String,Object> lists = doctorWarehouseMaterialHandleDao.endWlbdReport(
+            String settlementDate,
+            Integer pigBarnType,
+            Long pigBarnId,
+            Long pigGroupId,
+            Integer handlerType,
+            Integer type,
+            Long warehouseId,
+            String materialName){
+        List<Map<String,Object>> lists = doctorWarehouseMaterialHandleDao.getMeterails(
                 farmId, settlementDate, pigBarnType,
                 pigBarnId, pigGroupId, handlerType,
                 type, warehouseId, materialName);
