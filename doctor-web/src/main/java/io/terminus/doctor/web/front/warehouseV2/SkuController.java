@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.front.warehouseV2;
 
+import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
@@ -56,6 +57,8 @@ public class SkuController {
                                          @RequestParam(required = false) String srm,
                                          @RequestParam(required = false) String srmOrName,
                                          @RequestParam(required = false) Integer status,
+                                         @RequestParam(required = false) String materialIds,
+                                         @RequestParam(required = false) String drugIds,
                                          @RequestParam(required = false) Integer pageNo,
                                          @RequestParam(required = false) Integer pageSize) {
 
@@ -80,6 +83,11 @@ public class SkuController {
             params.put("nameOrSrmLike", srmOrName);
         if (null != status)
             params.put("status", status);
+        if (null != materialIds)
+            params.put("materialIds", Lists.newArrayList(materialIds.split(",")));
+        if (null != drugIds)
+            params.put("drugIds", Lists.newArrayList(drugIds.split(",")));
+
 
         Paging<DoctorWarehouseSku> skuPaging = RespHelper.or500(doctorWarehouseSkuReadService.paging(pageNo, pageSize, params));
 
