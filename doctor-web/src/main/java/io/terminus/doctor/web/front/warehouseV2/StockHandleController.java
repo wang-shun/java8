@@ -302,12 +302,12 @@ public class StockHandleController {
 
     //删除单据明细表
     @RequestMapping(method = RequestMethod.DELETE, value = "/deleteById/{id:\\d+}")
-    public String deleteById(@PathVariable Long id,@RequestParam(required = false) Long orgId) {
+    public Response<String> deleteById(@PathVariable Long id,@RequestParam(required = false) Long orgId) {
         //是否该公司正在结算中
         if (doctorWarehouseSettlementService.isUnderSettlement(orgId))
             throw new JsonResponseException("under.settlement");
 
-        return RespHelper.or500(doctorWarehouseMaterialHandleWriteService.delete(id));
+        return doctorWarehouseMaterialHandleWriteService.delete(id);
     }
 
     //导出
