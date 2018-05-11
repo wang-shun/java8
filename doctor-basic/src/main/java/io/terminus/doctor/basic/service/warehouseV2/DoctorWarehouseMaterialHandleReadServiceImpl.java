@@ -258,6 +258,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
                     infoMap.put("year",startYear);
                     infoMap.put("month",startMonth);
                     infoMap.put("handleDate",settleDate);
+                    infoMap.put("settlementDate",criteria.get("settlementDate"));
                     infoMap.put("settled", settled);
                     infoMap.put("allInAmount",allInAmount);
                     infoMap.put("allOutAmount",allOutAmount);
