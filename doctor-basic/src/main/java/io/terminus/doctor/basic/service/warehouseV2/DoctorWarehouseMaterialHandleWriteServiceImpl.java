@@ -114,7 +114,7 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
             if (type == 2) {
                 Integer countByRelMaterialHandleId = doctorWarehouseMaterialHandleDao.getCountByRelMaterialHandleId(handle.getId(), 13);
                 if (countByRelMaterialHandleId > 0) {
-                    return Response.fail("doctor.warehouse.material.handle.update.fail");
+                    return Response.fail("此物料存在退料,不支持删除");
                 } else {
                     warehouseOutManager.delete(handle);
                 }
