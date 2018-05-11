@@ -20,7 +20,7 @@ public class StockHandleVo extends DoctorWarehouseStockHandle {
 
     private String warehouseManagerName;
 
-    private String storageWarehouseName;
+//    private String storageWarehouseName;
 
     private Double totalAmount;
 
@@ -57,6 +57,9 @@ public class StockHandleVo extends DoctorWarehouseStockHandle {
 
         //可退数量
         private Double refundableQuantity;
+
+        //配方入库仓库名称
+        private String storageWarehouseName;
 
     }
 }

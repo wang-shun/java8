@@ -250,15 +250,15 @@ public class StockHandleController {
                                     log.warn("other transfer in handle not found,{}", mh.getRelMaterialHandleId());
                             }
 
+                            //配方生产出库
+                            if (stockHandle.getHandleSubType().equals( WarehouseMaterialHandleType.FORMULA_OUT.getValue())) {
+                                String warehouseName = RespHelper.or500(doctorWarehouseStockHandleReadService.findwarehouseName(stockHandle.getRelStockHandleId()));
+                                detail.setStorageWarehouseName(warehouseName);
+                            }
+
                             return detail;
                         })
                         .collect(Collectors.toList()));
-
-        //配方生产出库
-        if (stockHandle.getHandleSubType().equals( WarehouseMaterialHandleType.FORMULA_OUT.getValue())) {
-            String warehouseName = RespHelper.or500(doctorWarehouseStockHandleReadService.findwarehouseName(stockHandle.getRelStockHandleId()));
-            vo.setStorageWarehouseName(warehouseName);
-        }
 
         DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(vo.getFarmId()));
         if (farm != null) {
