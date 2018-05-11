@@ -549,16 +549,10 @@
         then ifnull(b.quantity,0) else '' end as rksl,
         case when
         b.type in (1,7,9,11,13)
-        then ifnull(b.amount,0) / ifnull(b.quantity,0) else '' end as rkdj,
-        case when
-        b.type in (1,7,9,11,13)
         then ifnull(b.amount,0) else '' end as rkje,
         case when
         b.type in (2,8,10,12)
         then ifnull(b.quantity,0) else '' end as cksl,
-        case when
-        b.type in (2,8,10,12)
-        then ifnull(b.amount,0) / ifnull(b.quantity,0) else '' end as ckdj,
         case when
         b.type in (2,8,10,12)
         then ifnull(b.amount,0) else '' end as ckje,
@@ -575,6 +569,12 @@
         on b.warehouse_id=a.id
         left join doctor_warehouse_material_apply f
         on b.id=f.material_handle_id
+        <if test="farmId != null">
+            and f.farm_id=#{farmId}
+        </if>
+        <if test="warehouseId != null">
+            and f.warehouse_id=#{warehouseId}
+        </if>
         join doctor_farms c
         on a.farm_id=c.id
         join doctor_warehouse_sku d
