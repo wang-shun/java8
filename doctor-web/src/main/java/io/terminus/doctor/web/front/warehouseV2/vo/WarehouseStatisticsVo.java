@@ -21,13 +21,13 @@ public class WarehouseStatisticsVo {
 
     private BigDecimal balanceQuantity;
 
-    private long balanceAmount;
+    private BigDecimal balanceAmount;
 
     private BigDecimal inQuantity;
 
-    private long inAmount;
+    private BigDecimal inAmount;
 
     private BigDecimal outQuantity;
 
-    private long outAmount;
+    private BigDecimal outAmount;
 }

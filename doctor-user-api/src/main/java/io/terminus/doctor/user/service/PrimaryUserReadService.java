@@ -5,6 +5,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
+import io.terminus.parana.user.model.User;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -118,5 +119,19 @@ public interface PrimaryUserReadService {
     Response<Map<Long, String>> findFarmIdToUserName();
 
     Response<PrimaryUser> findByUserId(@NotNull(message = "user.id.not.null") Long userId);
+
+    /**
+     * 分页查询开通猪博士服务的用户
+     * @param id
+     * @param name
+     * @param email
+     * @param mobile
+     * @param status
+     * @param type
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    Response<Paging<User>> pagingOpenDoctorServiceUser(Long id, String name, String email, String mobile, Integer status, Integer type, Integer pageNo, Integer pageSize);
 
 }

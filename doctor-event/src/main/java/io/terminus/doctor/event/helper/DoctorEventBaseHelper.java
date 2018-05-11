@@ -1,10 +1,13 @@
 package io.terminus.doctor.event.helper;
 
 import com.google.common.collect.Maps;
+import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
+import io.terminus.doctor.event.dto.event.DoctorEventInfo;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -13,31 +16,40 @@ import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.reportBi.DoctorReportBiDataSynchronize;
 import io.terminus.doctor.event.reportBi.listener.DoctorReportBiReaTimeEvent;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
+import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.IGNORE_EVENT;
 
 /**
  * Created by xjn on 18/3/6.
  * email:xiaojiannan@terminus.io
- * 依据事件获取猪群当前信息
+ * 事件相关处理方法
  */
+@Slf4j
 @Component
 public class DoctorEventBaseHelper {
 
     private final DoctorPigEventDao doctorPigEventDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final Date START_DATE = DateUtil.toDate("2018-03-13");
+    private final DoctorReportBiDataSynchronize synchronize;
     private final CoreEventDispatcher coreEventDispatcher;
+
 
     private static  final Map<Integer, Integer> EVENT_TO_STATUS = Maps.newHashMap();
 
@@ -51,9 +63,10 @@ public class DoctorEventBaseHelper {
     }
 
     @Autowired
-    public DoctorEventBaseHelper(DoctorPigEventDao doctorPigEventDao, DoctorGroupEventDao doctorGroupEventDao, CoreEventDispatcher coreEventDispatcher) {
+    public DoctorEventBaseHelper(DoctorPigEventDao doctorPigEventDao, DoctorGroupEventDao doctorGroupEventDao, DoctorReportBiDataSynchronize synchronize, CoreEventDispatcher coreEventDispatcher) {
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
+        this.synchronize = synchronize;
         this.coreEventDispatcher = coreEventDispatcher;
     }
 
@@ -188,13 +201,90 @@ public class DoctorEventBaseHelper {
     }
 
     /**
-     * 事件增删改后发送同步数据事件
+     * 事件删改后发送同步数据事件
      * @param farmIds 需要同步猪场id列表
      */
-    public void synchronizeReportPublish(List<Long> farmIds) {
+    public void synchronizeReportPublish(Collection<Long> farmIds) {
+        log.info("synchronize report data, farmIds:{}", farmIds);
         farmIds.forEach(farmId -> {
+            //异步
             String messageId = UUID.randomUUID().toString().replace("-", "");
             coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(messageId, farmId, OrzDimension.FARM.getValue()));
+
+            //同步
+//            try {
+//                synchronize.synchronizeRealTimeBiData(farmId, OrzDimension.FARM.getValue());
+//            } catch (Exception e) {
+//                log.error("synchronize real time bi data error, farmId:{}, date:{}, cause:{}",
+//                        farmId, new Date(), Throwables.getStackTraceAsString(e));
+//            }
         });
+    }
+
+    /**
+     * 新建事件同步数据
+     * @param infos
+     */
+    public void synchronizeReportPublishForCreate(List<DoctorEventInfo> infos){
+        try {
+            if (Arguments.isNullOrEmpty(infos)) {
+                return;
+            }
+            Map<Long, List<DoctorEventInfo>> farmIdToMap = infos.stream().collect(Collectors.groupingBy(DoctorEventInfo::getFarmId));
+            synchronizeReportPublish(farmIdToMap.keySet());
+        } catch (Exception e) {
+            log.info("synchronize report publish for create error");
+        }
+    }
+
+    /**
+     * 是否是最新事件
+     *
+     * @param pigEvent 猪事件
+     */
+    public boolean isLastPigManualEvent(DoctorPigEvent pigEvent) {
+        if (IGNORE_EVENT.contains(pigEvent.getType())) {
+            return true;
+        }
+
+        if (Objects.equals(pigEvent.getIsAuto(), IsOrNot.YES.getValue())) {
+            return false;
+        }
+
+        DoctorPigEvent lastEvent = doctorPigEventDao.findLastEventExcludeTypes(pigEvent.getPigId(), IGNORE_EVENT);
+
+        if (isNull(lastEvent)) {
+            return false;
+        }
+
+        //手动事件，比较是否是最新事件
+        if (!Objects.equals(lastEvent.getIsAuto(), IsOrNot.YES.getValue())) {
+            return Objects.equals(lastEvent.getId(), pigEvent.getId());
+        }
+
+        //自动事件
+        return lastManual(lastEvent, pigEvent.getId());
+    }
+
+    /**
+     * 当最新事件是自动事件时，则向上追溯到上一个手动事件，在与原事件id比较
+     * @param autoEvent 自动事件
+     * @param eventId 原事件id
+     * @return
+     */
+    private Boolean lastManual(DoctorPigEvent autoEvent, Long eventId) {
+        if (isNull(autoEvent.getRelPigEventId())) {
+            return false;
+        }
+
+        DoctorPigEvent preEvent = doctorPigEventDao.findById(autoEvent.getRelPigEventId());
+        if (isNull(preEvent)) {
+            return false;
+        }
+
+        if (!Objects.equals(preEvent.getIsAuto(), IsOrNot.YES.getValue())) {
+            return Objects.equals(preEvent.getId(), eventId);
+        }
+        return lastManual(preEvent, eventId);
     }
 }

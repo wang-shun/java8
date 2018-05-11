@@ -29,7 +29,7 @@ public class WarehouseMonthlyReportVo {
     /**
      * 月初余额
      */
-    private Long initialAmount;
+    private BigDecimal initialAmount;
 
     /**
      * 月度入库数量
@@ -39,7 +39,7 @@ public class WarehouseMonthlyReportVo {
     /**
      * 月度入库金额
      */
-    private Long inAmount;
+    private BigDecimal inAmount;
 
     /**
      * 月度出库数量
@@ -49,7 +49,7 @@ public class WarehouseMonthlyReportVo {
     /**
      * 月度出库金额
      */
-    private Long outAmount;
+    private BigDecimal outAmount;
 
     /**
      * 月末余量
@@ -59,6 +59,6 @@ public class WarehouseMonthlyReportVo {
     /**
      * 月末余额
      */
-    private Long balanceAmount;
+    private BigDecimal balanceAmount;
 
 }

@@ -30,6 +30,6 @@ public interface DoctorWarehouseStockHandleWriteService {
      * @param id
      * @return Boolean
      */
-    Response<Boolean> delete(Long id);
+    Response<String> delete(Long id);
 
 }

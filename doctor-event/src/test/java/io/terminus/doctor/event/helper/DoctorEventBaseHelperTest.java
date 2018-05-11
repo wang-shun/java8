@@ -6,6 +6,7 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import org.junit.Assert;
 import org.junit.Test;
@@ -48,5 +49,12 @@ public class DoctorEventBaseHelperTest extends BaseDaoTest {
     public void validGroupTrackTest() {
         DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(25771L);
         doctorEventBaseHelper.validTrackAfterUpdate(groupTrack);
+    }
+
+    @Test
+    public void isLastPigManualEventTest() {
+        DoctorPigEvent pigEvent = doctorPigEventDao.findEventById(1203423L);
+        Boolean b = doctorEventBaseHelper.isLastPigManualEvent(pigEvent);
+        Assert.assertTrue(b);
     }
 }

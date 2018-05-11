@@ -139,4 +139,10 @@
         <if test="type == 4"> and pigtrade_status = 1 </if>
         <if test="userId != null"> and user_id = #{userId} </if>
     </sql>
+
+    <select id="listAllOpenDoctorService" resultMap="DoctorServiceStatusMap">
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE pigdoctor_status = 1
+    </select>
 </mapper>

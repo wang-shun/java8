@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
+ * 物料厂家
  * Created by sunbo@terminus.io on 2017/10/26.
  */
 @RestController

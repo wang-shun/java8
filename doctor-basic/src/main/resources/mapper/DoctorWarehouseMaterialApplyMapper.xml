@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2018-01-18 20:10:26
+ ~ Date: 2018-04-21 12:22:21
  ~ Created by [ your name ]
 -->
 
@@ -33,8 +33,54 @@
         <result property="quantity" column="quantity"/>
         <result property="unitPrice" column="unit_price"/>
         <result property="applyType" column="apply_type"/>
+        <result property="amount" column="amount"/>
+        <result property="settlementDate" column="settlement_date"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <resultMap id="DoctorWarehouseMaterialApplyPigGroupMap" type="DoctorWarehouseMaterialApplyPigGroup">
+    <id property="id" column="id"/>
+        <result property="staffName" column="staff_name"/>
+        <result property="pigGroupName" column="pig_group_name"/>
+        <result property="pigName" column="pig_name"/>
+        <result property="code" column="code"/>
+        <result property="quantity" column="quantity"/>
+        <result property="unitPrice" column="unit_price"/>
+        <result property="amount" column="amount"/>
+        <result property="skuName" column="sku_name"/>
+        <result property="unit" column="unit"/>
+        <result property="skuType" column="sku_type"/>
+        <result property="specification" column="specification"/>
+        <result property="vendorName" column="vendor_name"/>
+        <result property="openAt" column="open_at"/>
+        <result property="closeAt" column="close_at"/>
+        <result property="farmName" column="farm_name"/>
+        <result property="pigGroupId" column="pig_group_id"/>
+        <result property="skuId" column="sku_id"/>
+        <result property="pigType" column="pig_type"/>
+
+    </resultMap>
+
+    <resultMap id="DoctorWarehouseMaterialApplyPigGroupDetailMap" type="DoctorWarehouseMaterialApplyPigGroupDetail">
+        <id property="id" column="id"/>
+        <result property="skuName" column="sku_name"/>
+        <result property="skuType" column="sku_type"/>
+        <result property="warehouseName" column="warehouse_name"/>
+        <result property="applyDate" column="apply_date"/>
+        <result property="settlementDate" column="settlement_date"/>
+        <result property="type" column="type"/>
+        <result property="quantity" column="quantity"/>
+        <result property="unitPrice" column="unit_price"/>
+        <result property="amount" column="amount"/>
+        <result property="pigBarnName" column="pig_barn_name"/>
+        <result property="pigType" column="pig_type"/>
+        <result property="pigGroupName" column="pig_group_name"/>
+        <result property="staffName" column="staff_name"/>
+        <result property="farmName" column="farm_name"/>
+        <result property="unit" column="unit"/>
+        <result property="vendorName" column="vendor_name"/>
+        <result property="specification" column="specification"/>
     </resultMap>
 
     <sql id="tb">
@@ -47,12 +93,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `material_handle_id`, `org_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `pig_barn_id`, `pig_barn_name`, `pig_type`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_id`, `apply_staff_name`, `apply_year`, `apply_month`, `material_name`, `type`, `unit`, `quantity`, `unit_price`, `apply_type`, 
+        `material_handle_id`, `org_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `pig_barn_id`, `pig_barn_name`, `pig_type`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_id`, `apply_staff_name`, `apply_year`, `apply_month`, `material_name`, `type`, `unit`, `quantity`, `unit_price`, `apply_type`, `amount`, `settlement_date`,
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{materialHandleId}, #{orgId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{pigBarnId}, #{pigBarnName}, #{pigType}, #{pigGroupId}, #{pigGroupName}, #{materialId}, #{applyDate}, #{applyStaffId}, #{applyStaffName}, #{applyYear}, #{applyMonth}, #{materialName}, #{type}, #{unit}, #{quantity}, #{unitPrice}, #{applyType}, 
+        #{materialHandleId}, #{orgId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{pigBarnId}, #{pigBarnName}, #{pigType}, #{pigGroupId}, #{pigGroupName}, #{materialId}, #{applyDate}, #{applyStaffId}, #{applyStaffName}, #{applyYear}, #{applyMonth}, #{materialName}, #{type}, #{unit}, #{quantity}, #{unitPrice}, #{applyType}, #{amount}, #{settlementDate}, 
         now(), now()
     </sql>
 
@@ -81,11 +127,13 @@
             <if test="quantity != null">AND `quantity` = #{quantity}</if>
             <if test="unitPrice != null">AND `unit_price` = #{unitPrice}</if>
             <if test="applyType != null">AND `apply_type` = #{applyType}</if>
+            <if test="amount != null">AND `amount` = #{amount}</if>
+            <if test="settlementDate != null">AND `settlement_date` = #{settlementDate}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
         </where>
     </sql>
-
+    
     <sql id="advCriteria">
         <where>
             <if test="materialHandleId != null">AND `material_handle_id` = #{materialHandleId}</if>
@@ -111,8 +159,11 @@
             <if test="quantity != null">AND `quantity` = #{quantity}</if>
             <if test="unitPrice != null">AND `unit_price` = #{unitPrice}</if>
             <if test="applyType != null">AND `apply_type` = #{applyType}</if>
+            <if test="amount != null">AND `amount` = #{amount}</if>
+            <if test="settlementDate != null">AND `settlement_date` = #{settlementDate}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
+
             <if test="materialNameLike != null">AND `material_name` like CONCAT('%',#{materialNameLike},'%')</if>
             <if test="skuIds != null and skuIds.size() > 0">
                 AND
@@ -126,12 +177,6 @@
                     pig_group_id =#{t}
                 </foreach>
             </if>
-            <!--<if test="groupOrBarn !=null and groupOrBarn=='barn'">-->
-            <!--AND `pig_group_id` is null-->
-            <!--</if>-->
-            <!--<if test="groupOrBarn !=null and groupOrBarn=='group'">-->
-            <!--AND `pig_group_id` is not null AND `pig_group_id` != -1-->
-            <!--</if>-->
             <if test="startDate !=null">
                 AND <![CDATA[apply_date >= #{startDate}]]>
             </if>
@@ -195,6 +240,8 @@
             <if test="quantity != null">`quantity` = #{quantity},</if>
             <if test="unitPrice != null">`unit_price` = #{unitPrice},</if>
             <if test="applyType != null">`apply_type` = #{applyType},</if>
+            <if test="amount != null">`amount` = #{amount},</if>
+            <if test="settlementDate != null">`settlement_date` = #{settlementDate},</if>
             updated_at = now()
         </set>
         WHERE id = #{id}
@@ -269,4 +316,320 @@
         ORDER BY id DESC LIMIT 1
     </select>
 
+    <delete id="deleteGroupApply" parameterType="long">
+        DELETE FROM
+        <include refid="tb"/>
+        WHERE
+        material_handle_id=#{materialHandleId}
+        AND (apply_type=1 or apply_type=2)
+    </delete>
+
+    <update id="updateBarnApply" parameterType="map">
+        UPDATE
+        <include refid="tb"/>
+        SET
+        settlement_date=#{settlementDate},
+        apply_date=#{handleDate},
+        apply_year=#{year},
+        apply_month=#{month},
+        quantity=#{quantity},
+        pig_barn_id=#{barnId},
+        pig_barn_name=#{barnName},
+        pig_type=#{pigType},
+        apply_staff_id=#{staffId},
+        apply_staff_name=#{staffName}
+        WHERE
+        material_handle_id=#{materialHandleId}
+        AND apply_type=0
+    </update>
+
+    <update id="reverseSettlement" parameterType="map">
+        UPDATE
+        <include refid="tb"/>
+        set unit_price=0,amount=0
+        where org_id=#{orgId} and settlement_date=#{settlementDate}
+    </update>
+
+    <update id="updateUnitPriceAndAmountByMaterialHandle" parameterType="map">
+        UPDATE
+        <include refid="tb"/>
+        set unit_price=#{unitPrice},amount=#{amount}
+        where material_handle_id=#{materialHandleId}
+    </update>
+
+    <select id="selectPigGroupApply" parameterType="map" resultMap="DoctorWarehouseMaterialApplyPigGroupMap">
+      SELECT
+            a.pig_group_name,
+            e.NAME as pig_name,
+            a.pig_type,
+            e.staff_name,
+            c.code,
+            c.name as sku_name,
+            c.unit,
+            sum( a.quantity ) AS quantity,
+            ifnull(sum( a.unit_price * a.quantity ) / sum( a.quantity ),0) AS unit_price,
+            sum(a.amount) AS amount,
+            c.type as sku_type,
+            b.vendor_name,
+            c.specification,
+            date_format(d.open_at,'%Y-%m-%d') as open_at,
+            date_format(d.close_at,'%Y-%m-%d') as close_at,
+            d.farm_name,
+            a.pig_group_id,
+            a.material_id as sku_id
+        FROM
+            doctor_warehouse_material_apply a
+          JOIN doctor_warehouse_material_handle b ON a.material_handle_id = b.id
+            JOIN doctor_warehouse_sku c ON a.material_id = c.id
+            JOIN doctor_groups d ON d.id = a.pig_group_id
+            JOIN doctor_barns e ON e.id = a.pig_barn_id
+        WHERE
+            a.apply_type = 1
+            <if test="farmId != null"> AND a.farm_id = #{farmId}</if>
+            <if test="pigType != null"> AND a.pig_type = #{pigType}</if>
+            <if test="pigName != null"> AND e.id = #{pigName}</if>
+            <if test="pigGroupName != null"> AND a.pig_group_id = #{pigGroupName}</if>
+            <if test="skuType != null">  AND c.type= #{skuType}</if>
+            <if test="skuName != null"> AND c.name like concat('%',#{skuName},'%')</if>
+            <if test="openAt != null"> AND d.open_at = #{openAt}</if>
+            <if test="closeAt != null">  AND d.close_at = #{closeAt}</if>
+        GROUP BY
+            a.material_id,
+            a.pig_group_id,
+            a.pig_barn_id,
+            a.material_handle_id
+    </select>
+
+    <!--猪群Start-->
+    <select id="piggeryReport" parameterType="DoctorWarehouseMaterialApply" resultType="map">
+
+        select ma.pig_barn_id as pig_barn_id,
+        ma.pig_barn_name as pig_barn_name,
+        ma.pig_type as pig_type,
+        b.staff_name as staff_name,
+        year(mh.settlement_date) as settlement_year,
+        month(mh.settlement_date) as settlement_month,
+        s.`code` as material_code,
+        s.`name` as material_name,
+        ma.unit as unit,
+        format(ifnull(sum(ma.quantity)+'',0),2) as sum_quantity,
+        format(ifnull(sum(ma.unit_price*ma.quantity)+''/sum(ma.quantity),0)+'',4) as sum_unit_price,
+        format(ifnull(sum(ma.amount),0)+'',4) as sum_amount,
+        s.type as material_type,
+        mh.vendor_name as vendor_name,
+        s.specification as specification,
+        f.`name` as farm_name
+        from  doctor_warehouse_material_apply as ma
+        inner join doctor_warehouse_material_handle as mh
+        on ma.material_handle_id=mh.id
+        inner join doctor_barns as b
+        on b.id=ma.pig_barn_id
+        inner join doctor_warehouse_sku as s
+        on s.id=mh.material_id
+        inner join doctor_farms as f
+        on f.id=ma.farm_id
+        where mh.type=2 and ma.apply_type=0
+        <if test="farmId != null">
+            and ma.farm_id = #{farmId}
+        </if>
+        <if test="applyYear != null">
+            and year(mh.settlement_date) = #{applyYear}
+        </if>
+        <if test="applyMonth != null">
+            and month(mh.settlement_date) = #{applyMonth}
+        </if>
+        <if test="pigBarnId != null">
+            and ma.pig_barn_id = #{pigBarnId}
+        </if>
+        <if test="pigType != null">
+            and ma.pig_type = #{pigType}
+        </if>
+        <if test="type != null">
+            and s.type = #{type}
+        </if>
+        <if test="materialName != null">
+            and mh.material_name like concat('%',#{materialName},'%')
+        </if>
+        group by b.id,mh.vendor_name,mh.material_id,mh.material_name
+
+        union all
+
+        <if test="type == null or type == '' ">
+            select '' as pig_barn_id,
+            '合计' as pig_barn_name,
+            '' as pig_type,
+            '' as staff_name,
+            '' as settlement_year,
+            '' as settlement_month,
+            '' as material_code,
+            '' as material_name,
+            '' as unit,
+            '' as sum_quantity,
+            '' as sum_unit_price,
+            format(ifnull(sum(ma.amount)+'',0),4) as sum_amount,
+            '' as material_type,
+            '' as vendor_name,
+            '' as specification,
+            '' as farm_name
+            from  doctor_warehouse_material_apply as ma
+            inner join doctor_warehouse_material_handle as mh
+            on ma.material_handle_id=mh.id
+            inner join doctor_barns as b
+            on b.id=ma.pig_barn_id
+            inner join doctor_warehouse_sku as s
+            on s.id=mh.material_id
+            inner join doctor_farms as f
+            on f.id=ma.farm_id
+            where mh.type=2 and ma.apply_type=0
+            <if test="farmId != null">
+                and ma.farm_id = #{farmId}
+            </if>
+            <if test="applyYear != null">
+                and year(mh.settlement_date) = #{applyYear}
+            </if>
+            <if test="applyMonth != null">
+                and month(mh.settlement_date) = #{applyMonth}
+            </if>
+            <if test="pigBarnId != null">
+                and ma.pig_barn_id = #{pigBarnId}
+            </if>
+            <if test="pigType != null">
+                and ma.pig_type = #{pigType}
+            </if>
+            <if test="type != null">
+                and s.type = #{type}
+            </if>
+            <if test="materialName != null">
+                and mh.material_name like concat('%',#{materialName},'%')
+            </if>
+        </if>
+
+        <if test="type != null and type != '' ">
+            select '' as pig_barn_id,
+            '合计' as pig_barn_name,
+            '' as pig_type,
+            '' as staff_name,
+            '' as settlement_year,
+            '' as settlement_month,
+            '' as material_code,
+            '' as material_name,
+            '' as unit,
+            format(ifnull(sum(ma.quantity)+'',0),2) as sum_quantity,
+            '' as sum_unit_price,
+            format(ifnull(sum(ma.amount)+'',0),4) as sum_amount,
+            '' as material_type,
+            '' as vendor_name,
+            '' as specification,
+            '' as farm_name
+            from  doctor_warehouse_material_apply as ma
+            inner join doctor_warehouse_material_handle as mh
+            on ma.material_handle_id=mh.id
+            inner join doctor_barns as b
+            on b.id=ma.pig_barn_id
+            inner join doctor_warehouse_sku as s
+            on s.id=mh.material_id
+            inner join doctor_farms as f
+            on f.id=ma.farm_id
+            where mh.type=2 and ma.apply_type=0
+            <if test="farmId != null">
+                and ma.farm_id = #{farmId}
+            </if>
+            <if test="applyYear != null">
+                and year(mh.settlement_date) = #{applyYear}
+            </if>
+            <if test="applyMonth != null">
+                and month(mh.settlement_date) = #{applyMonth}
+            </if>
+            <if test="pigBarnId != null">
+                and ma.pig_barn_id = #{pigBarnId}
+            </if>
+            <if test="pigType != null">
+                and ma.pig_type = #{pigType}
+            </if>
+            <if test="type != null">
+                and s.type = #{type}
+            </if>
+            <if test="materialName != null">
+                and mh.material_name like concat('%',#{materialName},'%')
+            </if>
+        </if>
+
+    </select>
+
+    <select id="piggeryDetails" parameterType="DoctorWarehouseMaterialApply" resultType="map">
+        select s.`code` as material_code,
+        s.`name` as material_name,
+        s.type as material_type,
+        ma.warehouse_name as warehouse_name,
+        mh.handle_date as handle_date,
+        year(mh.settlement_date) as settlement_year,
+        month(mh.settlement_date) as settlement_month,
+        mh.type as material_handle_type,
+        format(ifnull(ma.quantity,0),2) as quantity,
+        format(ma.unit_price,4) as unit_price,
+        format(ifnull(ma.amount,0),4) as amount,
+        ma.pig_barn_name as pig_barn_name,
+        ma.pig_type as pig_type,
+        ifnull(ma.pig_group_name,'无') as pig_group_name,
+        b.staff_name as staff_name,
+        f.`name` as farm_name,
+        mh.unit as unit ,
+        mh.vendor_name as vendor_name,
+        s.specification as specification
+        from doctor_warehouse_material_apply as ma
+        inner join doctor_warehouse_material_handle as mh
+        on mh.id=ma.material_handle_id
+        inner join doctor_warehouse_sku as s
+        on s.id=mh.material_id
+        inner join doctor_barns as b
+        on b.id=ma.pig_barn_id
+        inner join doctor_farms as f
+        on f.id=ma.farm_id
+        where mh.type=2 and ma.apply_type=0
+        <if test="pigBarnId != null">
+            and ma.pig_barn_id = #{pigBarnId}
+        </if>
+        <if test="materialName != null">
+            and s.`name` like concat('%',#{materialName},'%')
+        </if>
+        <if test="applyYear != null">
+            and year(mh.settlement_date) = #{applyYear}
+        </if>
+        <if test="applyMonth != null">
+            and month(mh.settlement_date) = #{applyMonth}
+        </if>
+    </select>
+
+    <!--猪群Start-->
+
+    <select id="selectPigGroupApplyDetail" parameterType="map" resultMap="DoctorWarehouseMaterialApplyPigGroupDetailMap">
+        SELECT
+        c.name as sku_name,
+        a.type as sku_type,
+        a.warehouse_name,
+        date_format( a.apply_date,'%Y-%m-%d') as apply_date,
+        date_format(b.settlement_date,'%Y-%m') as settlement_date,
+        b.type,
+        a.quantity,
+        a.unit_price,
+        b.amount,
+        a.pig_barn_name,
+        a.pig_type,
+        a.pig_group_name,
+        e.staff_name,
+        d.farm_name,
+        c.unit,
+        b.vendor_name,
+        c.specification
+        FROM
+        doctor_warehouse_material_apply a
+        JOIN doctor_warehouse_material_handle b ON a.material_handle_id = b.id
+        JOIN doctor_warehouse_sku c ON a.material_id = c.id
+        JOIN doctor_groups d ON d.id = a.pig_group_id
+        JOIN doctor_barns e ON e.id = a.pig_barn_id
+        WHERE
+        a.apply_type = 1
+        <if test="pigGroupId != null"> AND a.pig_group_id = #{pigGroupId}</if>
+        <if test="materiaId != null"> AND a.material_id = #{materiaId}</if>
+    </select>
 </mapper>

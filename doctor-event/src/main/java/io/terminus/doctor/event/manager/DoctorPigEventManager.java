@@ -22,7 +22,6 @@ import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
 import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEventHandlers;
 import io.terminus.doctor.event.enums.EventStatus;
 import io.terminus.doctor.event.enums.GroupEventType;
-import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.event.MsgGroupPublishDto;
@@ -42,7 +41,6 @@ import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.reportBi.listener.DoctorReportBiReaTimeEvent;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +50,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
@@ -242,11 +239,6 @@ public class DoctorPigEventManager {
         try {
             if (notEmpty(dtos)) {
                 //checkFarmIdAndEventAt(dtos);
-                Map<Long, List<DoctorEventInfo>> farmIdToMap = dtos.stream().collect(Collectors.groupingBy(DoctorEventInfo::getFarmId));
-                farmIdToMap.keySet().forEach(farmId -> {
-                    String messageId = UUID.randomUUID().toString().replace("-", "");
-                    coreEventDispatcher.publish(new DoctorReportBiReaTimeEvent(messageId, farmId, OrzDimension.FARM.getValue()));
-                });
                 publishPigEvent(dtos, coreEventDispatcher, publisher);
             }
         } catch (Exception e) {

@@ -1,10 +1,13 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
+import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
+import io.terminus.doctor.common.utils.ResponseUtil;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.List;
 
@@ -15,6 +18,20 @@ import java.util.List;
  * Created by [ your name ]
  */
 public interface DoctorWarehouseMaterialHandleReadService {
+
+    /**
+     * 得到领料出库的数量
+     * @param id
+     * @return
+     */
+    Response<BigDecimal> findLibraryById(Long id);
+
+    /**
+     * 得到在此之前退料入库的数量和
+     * @param relMaterialHandleId
+     * @return
+     */
+    Response<BigDecimal> findRetreatingById(Long relMaterialHandleId);
 
     /**
      * 查询
@@ -98,7 +115,7 @@ public interface DoctorWarehouseMaterialHandleReadService {
      * @param data
      * @return
      */
-    Response<Map<Long/*warehouseId*/, Long>> countWarehouseAmount(List<DoctorWarehouseMaterialHandle> data);
+    Response<Map<Long/*warehouseId*/, BigDecimal>> countWarehouseAmount(List<DoctorWarehouseMaterialHandle> data);
 
 
     /**
@@ -108,7 +125,44 @@ public interface DoctorWarehouseMaterialHandleReadService {
      * @param types
      * @return
      */
-    Response<Map<WarehouseMaterialHandleType, Map<Long, Long>>> countWarehouseAmount(DoctorWarehouseMaterialHandle criteria, WarehouseMaterialHandleType... types);
+    Response<Map<WarehouseMaterialHandleType, Map<Long, BigDecimal>>> countWarehouseAmount(DoctorWarehouseMaterialHandle criteria, WarehouseMaterialHandleType... types);
 
+    /**
+     * 公司结算报表
+     * @param criteria
+     * @return
+     */
+    ResponseUtil<List<List<Map>>> companyReport(Map<String, Object> criteria);
+
+    /**
+     * 仓库结算报表
+     * @param criteria
+     * @return
+     */
+    ResponseUtil<List<List<Map>>> warehouseReport(Map<String,Object> criteria);
+
+    /**
+     * 仓库月度详情
+     * @param
+     * @return
+     */
+    Response<List<Map>> monthWarehouseDetail(Map<String, Object> criteria);
+
+    /**
+     * 查仓库下的物料
+     * @param params
+     * @return
+     */
+    Response<List<Map<String,Object>>> warehouseByFarmId(Map<String, Object> params);
+
+    //<!--退料入库-->
+    //<!--得到仓库类型，仓库名称，仓库管理员，所属公司-->
+    Response<List<Map>> getFarmData(Long id);
+
+    //<!--得到领料出库的物料名称-->
+    Response<List<Map>> getMaterialNameByID(Long id);
+
+    //<!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注-->
+    Response<List<Map>> getDataByMaterialName(Long stockHandleId,String materialName);
 
 }

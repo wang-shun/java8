@@ -106,6 +106,7 @@ public class DoctorReportBiDataSynchronize {
     /**
      * 全量同步数据
      */
+    @Deprecated
     public void synchronizeFullBiData() {
         log.info("synchronize full bi data starting");
         Stopwatch stopwatch = Stopwatch.createStarted();

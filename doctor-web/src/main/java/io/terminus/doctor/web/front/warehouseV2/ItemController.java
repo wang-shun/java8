@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * 物料类目
  * Created by sunbo@terminus.io on 2017/11/2.
  */
 @RestController

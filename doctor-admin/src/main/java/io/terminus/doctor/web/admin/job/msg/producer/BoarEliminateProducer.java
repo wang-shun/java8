@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -59,9 +60,10 @@ public class BoarEliminateProducer extends AbstractJobProducer {
         Long page = getPageSize(total, 100L);
         for (int i = 1; i <= page; i++) {
             List<DoctorPigInfoDto> boarPigs = RespHelper.orServEx(doctorPigReadService.pagingDoctorInfoDtoByPig(pig, i, 100)).getData();
-            // 过滤出未离场的公猪
+            // 过滤出未离场的活公猪
             boarPigs = boarPigs.stream().filter(pigDto ->
-                    !Objects.equals(PigStatus.Removal.getKey(), pigDto.getStatus())
+                    !Objects.equals(pigDto.getStatus(), PigStatus.BOAR_LEAVE.getKey())
+                            && Objects.equals(pigDto.getBoarType(), BoarEntryType.HGZ.getKey())
             ).collect(Collectors.toList());
             // 处理每个猪
             for (int j = 0; boarPigs != null && j < boarPigs.size(); j++) {

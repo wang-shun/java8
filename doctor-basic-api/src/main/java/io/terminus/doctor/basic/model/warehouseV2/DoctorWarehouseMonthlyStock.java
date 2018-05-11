@@ -12,6 +12,7 @@ import java.util.Date;
  * Created by [ your name ]
  */
 @Data
+@Deprecated
 public class DoctorWarehouseMonthlyStock implements Serializable {
 
     private static final long serialVersionUID = -8405985068049793556L;

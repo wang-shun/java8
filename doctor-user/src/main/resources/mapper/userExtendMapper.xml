@@ -61,6 +61,14 @@
         </if>
         <if test="createdFrom">AND `created_at` &gt;= #{createdFrom}</if>
         <if test="createdTo">AND `created_at` &lt; #{createdTo}</if>
+
+        <if test="ids != null &amp;&amp; ids.size > 0" >
+            AND `id` IN
+            <foreach collection="ids" item="userId"
+                     open="(" separator="," close=")">
+                #{userId}
+            </foreach>
+        </if>
     </sql>
 
     <select id="list" resultMap="UserMap" parameterType="map">

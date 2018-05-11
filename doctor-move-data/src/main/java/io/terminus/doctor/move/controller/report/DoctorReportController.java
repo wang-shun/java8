@@ -80,23 +80,6 @@ public class DoctorReportController {
         return Boolean.TRUE;
     }
 
-    @RequestMapping(value = "/flush/all/daily")
-    public Boolean flushAllDaily() {
-        log.info("flush.all.daily.starting");
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        List<DoctorFarmEarlyEventAtDto> list = RespHelper.or500(doctorDailyReportV2Service.findEarLyAt());
-        String end = DateUtil.toDateString(new Date());
-        list.forEach(doctorFarmEarlyEventAtDto -> {
-            doctorDailyReportV2Service.flushFarmDaily(doctorFarmEarlyEventAtDto.getFarmId(), DateUtil.toDateString(doctorFarmEarlyEventAtDto.getEventAt()), end);
-        });
-        log.info("flush.all.daily.end, consume:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
-
-        log.info("synchronize.all.daily.starting");
-        RespHelper.or500(doctorDailyReportV2Service.synchronizeFullBiData());
-        log.info("synchronize.all.daily.end, consume:{}m", stopwatch.elapsed(TimeUnit.MINUTES));
-
-        return Boolean.TRUE;
-    }
 
     @RequestMapping(value = "/flush/daily/after")
     public Boolean flushDailyAfter(@RequestParam String startAt, @RequestParam(required = false) String end) {
@@ -176,16 +159,6 @@ public class DoctorReportController {
         return Boolean.TRUE;
     }
 
-    /**
-     * 全量同步报表数据
-     *
-     * @return
-     */
-    @RequestMapping(value = "/synchronize/full/bi/data", method = RequestMethod.GET)
-    public Boolean synchronizeFullBiData() {
-        return RespHelper.or500(doctorDailyReportV2Service.synchronizeFullBiData());
-    }
-
     @RequestMapping(method = RequestMethod.GET, value = "/flush/warehouse")
     public void flushWarehouse(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyyMMdd") Date date) {
         if (null == date)
@@ -227,9 +200,10 @@ public class DoctorReportController {
     }
 
     /**
-     * 增量同步
+     * 增量同步某组织维度下从指定时间开始数据
+     * 仅同步指定维度的数据
      *
-     * @param orzId 猪场id
+     * @param orzId 组织id
      * @param start 开始的同步日期 与日报中sumAt比较
      */
     @RequestMapping(value = "/synchronize/delta/bi/data/{orzId}", method = RequestMethod.GET)
@@ -240,9 +214,10 @@ public class DoctorReportController {
     }
 
     /**
-     * 增量同步一个公司以及公司下的所有猪场
+     * 增量同步某组织维度下从指定时间开始数据
+     * 当组织维度公司时，同步公司以及公司下所有猪场数据
      *
-     * @param orzId 猪场id
+     * @param orzId 组织id
      * @param start 开始的同步日期 与日报中sumAt比较
      */
     @RequestMapping(value = "/synchronize/delta/{orzId}", method = RequestMethod.GET)
@@ -254,7 +229,7 @@ public class DoctorReportController {
 
 
     /**
-     * 增量同步
+     * 同步指定时间开始，所有维度的数据
      *
      * @param start 开始的同步日期 与日报中sumAt比较
      */
@@ -272,17 +247,27 @@ public class DoctorReportController {
         return Boolean.TRUE;
     }
 
-    @RequestMapping(value = "/yesterday/and/today", method = RequestMethod.GET)
-    public Boolean yesterdayAndToday(@RequestParam String date) {
+    /**
+     * 刷新指定日期后影响的日报表，并同步数据到bi
+     * @param date
+     * @return
+     */
+    @RequestMapping(value = "/generate/and/synchronize", method = RequestMethod.GET)
+    public Boolean generateAndSynchronize(@RequestParam String date) {
         List<Long> farmList = RespHelper.orServEx(doctorFarmReadService.findAllFarms()).stream().map(DoctorFarm::getId).collect(Collectors.toList());
         doctorDailyReportV2Service.generateYesterdayAndToday(farmList, new DateTime(DateUtil.toDate(date)).withTimeAtStartOfDay().toDate());
         return Boolean.TRUE;
     }
 
-    @RequestMapping(value = "/synchronize/yesterday/and/today", method = RequestMethod.GET)
-    public Boolean synchonizeYesterdayAndToday(@RequestParam String date) {
+    /**
+     * 同步从指定日期开始到当前变化的日报表
+     * @param date
+     * @return
+     */
+    @RequestMapping(value = "/synchronize", method = RequestMethod.GET)
+    public Boolean synchronize(@RequestParam String date) {
         List<Long> farmList = RespHelper.orServEx(doctorFarmReadService.findAllFarms()).stream().map(DoctorFarm::getId).collect(Collectors.toList());
-        doctorDailyReportV2Service.synchronizeYesterdayAndToday(farmList, new DateTime(DateUtil.toDate(date)).withTimeAtStartOfDay().toDate());
+        doctorDailyReportV2Service.synchronize(farmList, new DateTime(DateUtil.toDate(date)).withTimeAtStartOfDay().toDate());
         return Boolean.TRUE;
     }
 

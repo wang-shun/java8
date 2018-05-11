@@ -64,7 +64,7 @@ public interface DoctorDailyReportV2Service {
      * 同步数据
      * @param farmIds 猪场ids
      */
-    Response<Boolean> synchronizeYesterdayAndToday(List<Long> farmIds, Date date);
+    Response<Boolean> synchronize(List<Long> farmIds, Date date);
 
     /**
      * 全量同步报表数据

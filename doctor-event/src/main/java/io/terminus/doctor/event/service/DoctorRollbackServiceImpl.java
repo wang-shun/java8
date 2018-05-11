@@ -44,6 +44,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import static io.terminus.doctor.event.enums.GroupEventType.REPORT_GROUP_EVENT;
+import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.IGNORE_EVENT;
+
 /**
  * Desc:
  * Mail: yangzl@terminus.io
@@ -94,12 +97,14 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             }
             doctorRollbackManager.rollbackGroup(groupEvent, operatorId, operatorName);
 
-            List<Long> farmIds = Lists.newArrayList(groupEvent.getFarmId());
-            if (Objects.equals(groupEvent.getType(), GroupEventType.TRANS_FARM.getValue())) {
-                DoctorTransFarmGroupInput groupInput = jsonMapper.fromJson(groupEvent.getExtra(), DoctorTransFarmGroupInput.class);
-                farmIds.add(groupInput.getToFarmId());
+            if (REPORT_GROUP_EVENT.contains(groupEvent.getType())) {
+                List<Long> farmIds = Lists.newArrayList(groupEvent.getFarmId());
+                if (Objects.equals(groupEvent.getType(), GroupEventType.TRANS_FARM.getValue())) {
+                    DoctorTransFarmGroupInput groupInput = jsonMapper.fromJson(groupEvent.getExtra(), DoctorTransFarmGroupInput.class);
+                    farmIds.add(groupInput.getToFarmId());
+                }
+                doctorEventBaseHelper.synchronizeReportPublish(farmIds);
             }
-            doctorEventBaseHelper.synchronizeReportPublish(farmIds);
             return RespWithEx.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             return RespWithEx.fail(e.getMessage());
@@ -120,12 +125,15 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             }
             doctorRollbackManager.rollbackPig(pigEvent, operatorId, operatorName);
 
-            List<Long> farmIds = Lists.newArrayList(pigEvent.getFarmId());
-            if (Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM.getKey())) {
-                DoctorChgFarmDto doctorChgFarmDto = jsonMapper.fromJson(pigEvent.getExtra(), DoctorChgFarmDto.class);
-                farmIds.add(doctorChgFarmDto.getToFarmId());
+            //同步数据
+            if (!IGNORE_EVENT.contains(pigEvent.getType())) {
+                List<Long> farmIds = Lists.newArrayList(pigEvent.getFarmId());
+                if (Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM.getKey())) {
+                    DoctorChgFarmDto doctorChgFarmDto = jsonMapper.fromJson(pigEvent.getExtra(), DoctorChgFarmDto.class);
+                    farmIds.add(doctorChgFarmDto.getToFarmId());
+                }
+                doctorEventBaseHelper.synchronizeReportPublish(farmIds);
             }
-            doctorEventBaseHelper.synchronizeReportPublish(farmIds);
             return RespWithEx.ok(Boolean.TRUE);
         } catch (InvalidException e) {
             return RespWithEx.exception(e);
