@@ -170,14 +170,14 @@
         from doctor_warehouse_material_handle b
         where b.warehouse_id=a.id and b.delete_flag=1 and b.farm_id=#{farmId}
         and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
-        and b.type in (1,2,3,4,5)
+        and b.type in (1,7,9,11,13)
         ),2),'') as thismonth_sum_rk_quantity,
         ifnull(
         ROUND((select sum(b.quantity)
         from doctor_warehouse_material_handle b
         where b.warehouse_id=a.id and b.delete_flag=1 and b.farm_id=#{farmId}
         and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
-        and b.type in (6,7,8,9)
+        and b.type in (2,8,10,12)
         ),2),'') as thismonth_sum_ck_quantity,
         ifnull(
         ROUND(((select sum(b.balance_quantity)
@@ -189,13 +189,13 @@
         from doctor_warehouse_material_handle b
         where b.warehouse_id=a.id and b.delete_flag=1 and b.farm_id=1
         and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
-        and b.type in (6,7,8,9))
+        and b.type in (2,8,10,12))
         -
         (select sum(b.quantity)
         from doctor_warehouse_material_handle b
         where b.warehouse_id=a.id and b.delete_flag=1 and b.farm_id=1
         and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
-        and b.type in (1,2,3,4,5))
+        and b.type in (1,7,9,11,13))
         )),2),'') as now_sum_quantity
         from doctor_ware_houses a
         where a.farm_id=#{farmId}
@@ -238,14 +238,14 @@
         from doctor_warehouse_material_handle b
         where b.warehouse_id=a.id and b.delete_flag=1 and b.material_id=a.material_id
         and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
-        and b.type in (1,2,3,4,5)
+        and b.type in (1,7,9,11,13)
         ),2),'') as thismonth_sum_rk_quantity,
         ifnull(
         ROUND((select sum(b.quantity)
         from doctor_warehouse_material_handle b
         where b.warehouse_id=a.id and b.delete_flag=1 and b.material_id=a.material_id
         and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
-        and b.type in (6,7,8,9)
+        and b.type in (2,8,10,12)
         ),2),'') as thismonth_sum_ck_quantity,
         ifnull(
         ROUND(
@@ -259,13 +259,13 @@
         from doctor_warehouse_material_handle b
         where b.warehouse_id=a.id and b.delete_flag=1 and b.material_id=a.material_id
         and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
-        and b.type in (6,7,8,9))
+        and b.type in (2,8,10,12))
         -
         (select sum(b.quantity)
         from doctor_warehouse_material_handle b
         where b.warehouse_id=a.id and b.delete_flag=1 and b.material_id=a.material_id
         and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
-        and b.type in (1,2,3,4,5))
+        and b.type in (1,7,9,11,13))
         )),2),'') as now_sum_quantity
         from doctor_warehouse_material_handle a
         left join doctor_warehouse_sku b on a.material_id=b.id
