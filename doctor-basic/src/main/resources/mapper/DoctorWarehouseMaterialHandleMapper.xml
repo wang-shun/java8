@@ -746,4 +746,19 @@
 
     </select>
 
+    <!-- 得到所有的物料 -->
+    <select id="getMeterails" parameterType="Map" resultType="java.util.LinkedHashMap">
+        select distinct material_name from doctor_warehouse_material_handle
+        where 1=1
+        <if test="farmId != null">
+            and farm_id=#{farmId}
+        </if>
+        <if test="settlementDate != null">
+            and date_format(settlement_date,'%Y-%m') = #{settlementDate}
+        </if>
+        <if test="warehouseId != null">
+            and warehouse_id=#{warehouseId}
+        </if>
+        order by id;
+    </select>
 </mapper>
