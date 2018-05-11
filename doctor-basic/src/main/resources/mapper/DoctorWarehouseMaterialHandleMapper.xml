@@ -436,14 +436,14 @@
         where  warehouse_id = #{id}
     </select>
 
-    <select id="findLibraryById" parameterType="long" resultType="BigDecimal">
+    <select id="findLibraryById" parameterType="map" resultType="BigDecimal">
         select quantity from <include refid="tb"/>
-        where id=#{id} and type=2
+        where type=2 and id=#{id}  and material_name=#{materialName}
     </select>
 
-    <select id="findRetreatingById" parameterType="DoctorWarehouseMaterialHandle" resultType="BigDecimal">
+    <select id="findRetreatingById" parameterType="map" resultType="BigDecimal">
         select ifnull(sum(quantity),0) from <include refid="tb"/>
-        where type=13 and rel_material_handle_id=#{relMaterialHandleId}
+        where type=13 and rel_material_handle_id=#{relMaterialHandleId} and material_name=#{materialName} and stock_handle_id!=#{stockHandleId}
         order by settlement_date ,id desc;
     </select>
 

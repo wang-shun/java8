@@ -247,15 +247,22 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     }
 
     //得到领料出库的数量
-    public BigDecimal findLibraryById(Long id) {
-        BigDecimal quantity = this.sqlSession.selectOne(this.sqlId("findLibraryById"), id);
+    public BigDecimal findLibraryById(Long id,String materialName) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("id", id);
+        map.put("materialName", materialName);
+        BigDecimal quantity = this.sqlSession.selectOne(this.sqlId("findLibraryById"), map);
         return quantity;
     }
 
 
     //得到在此之前退料入库的数量和
-    public BigDecimal findRetreatingById(Long relMaterialHandleId) {
-        BigDecimal quantity = this.sqlSession.selectOne(this.sqlId("findRetreatingById"), relMaterialHandleId);
+    public BigDecimal findRetreatingById(Long relMaterialHandleId,String materialName,Long stockHandleId) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("relMaterialHandleId", relMaterialHandleId);
+        map.put("materialName", materialName);
+        map.put("stockHandleId", stockHandleId);
+        BigDecimal quantity = this.sqlSession.selectOne(this.sqlId("findRetreatingById"), map);
         return quantity;
     }
 

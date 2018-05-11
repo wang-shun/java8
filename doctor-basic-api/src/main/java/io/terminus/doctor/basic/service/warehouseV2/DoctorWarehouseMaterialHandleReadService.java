@@ -24,14 +24,14 @@ public interface DoctorWarehouseMaterialHandleReadService {
      * @param id
      * @return
      */
-    Response<BigDecimal> findLibraryById(Long id);
+    Response<BigDecimal> findLibraryById(Long id,String materialName);
 
     /**
      * 得到在此之前退料入库的数量和
      * @param relMaterialHandleId
      * @return
      */
-    Response<BigDecimal> findRetreatingById(Long relMaterialHandleId);
+    Response<BigDecimal> findRetreatingById(Long relMaterialHandleId,String materialName,Long stockHandleId);
 
     /**
      * 查询
