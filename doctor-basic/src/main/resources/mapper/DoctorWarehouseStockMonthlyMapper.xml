@@ -206,10 +206,12 @@
         select a.material_name as materialName,b.code as code,a.vendor_name as vendorName,
         b.specification as specification,a.warehouse_type as warehouseType,
         <include refid="detail"></include>
-        a.unit as unit
+        db.name as unit
         from doctor_warehouse_material_handle a
         left join doctor_warehouse_sku b
         on a.material_id = b.id
+        left join doctor_basics db
+        on a.unit = db.id
         where
            a.delete_flag=1
         <if test="materialName!=null">
