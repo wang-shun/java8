@@ -428,7 +428,7 @@
     </update>
 
     <select id="countQuantityAlreadyRefund" parameterType="long" resultType="BigDecimal">
-        select ifnull(sum(quantity),0) from doctor_warehouse_material_handle where rel_material_handle_id=#{countQuantityAlreadyRefund}
+        select ifnull(sum(quantity),0) from doctor_warehouse_material_handle where rel_material_handle_id=#{materialHandleId} and delete_flag=1
     </select>
 
     <select id="getWarehouseMaterialHandleCount" resultType="int">
