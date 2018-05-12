@@ -226,7 +226,7 @@
     <select id="listDetailTypeMap" parameterType="Map" resultType="map">
         select  a.id,b.`code`,b.`name` as material_name,
         c.`name` as vendor_name,
-        b.specification,b.unit,
+        b.specification,db.name as unit,
         case when (select sum(b.balance_amount)
         from doctor_warehouse_stock_monthly b
         where date_format(b.settlement_date,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
@@ -280,6 +280,7 @@
         from doctor_warehouse_material_handle a
         join doctor_warehouse_sku b on a.material_id=b.id
         join doctor_warehouse_vendor c on b.vendor_id=c.id
+        left join doctor_basics db on db.id = b.unit
         where a.delete_flag=1
         <if test="type != null" > and a.warehouse_type=#{type}</if>
         <if test="materialName != null" > and b.`name` like CONCAT('%', #{materialName}, '%')</if>
