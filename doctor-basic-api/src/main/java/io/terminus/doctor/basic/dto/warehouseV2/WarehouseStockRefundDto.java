@@ -17,8 +17,6 @@ public class WarehouseStockRefundDto extends AbstractWarehouseStockDto implement
 
     private static final long serialVersionUID = 1123295408988897660L;
 
-
-    @NotNull(message = "out.material.handle.id.null", groups = AbstractWarehouseStockDetail.StockDefaultValid.class)
     private Long outStockHandleId;
 
     @Valid
