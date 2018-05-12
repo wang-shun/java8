@@ -199,7 +199,9 @@ public class StockHandleController {
                             if (null != sku) {
                                 detail.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())));
                                 detail.setMaterialCode(sku.getCode());
-                                detail.setUnit(sku.getUnit());
+                                //得到单位名称
+                                String nameByUnit = RespHelper.or500(doctorWarehouseStockHandleReadService.getNameByUnit(Long.parseLong(sku.getUnit())));
+                                detail.setUnit(nameByUnit);
                                 detail.setMaterialSpecification(sku.getSpecification());
                             } else {
                                 log.warn("sku not found,{}", mh.getMaterialId());
@@ -355,6 +357,9 @@ public class StockHandleController {
                     if (null != sku) {
                         vo.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())));
                         vo.setMaterialCode(sku.getCode());
+                        //得到单位名称
+                        String nameByUnit = RespHelper.or500(doctorWarehouseStockHandleReadService.getNameByUnit(Long.parseLong(sku.getUnit())));
+                        vo.setUnit(nameByUnit);
                         vo.setMaterialSpecification(sku.getSpecification());
                     }else
                         log.warn("DoctorWarehouseSku found", mh.getMaterialId());

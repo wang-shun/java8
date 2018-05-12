@@ -561,7 +561,7 @@
         ifnull(f.pig_group_name,'') as pig_group_name,
         ifnull(f.apply_staff_name,'') as apply_staff_name,
         ifnull(c.`name`,'') as farm_name,
-        ifnull(b.unit,'') as unit,
+        ifnull(db.name,'') as unit,
         ifnull(e.`name`,'') as provider_name,
         ifnull(d.specification,'') as specification
         from doctor_warehouse_material_handle b
@@ -581,6 +581,8 @@
         on b.material_id=d.id
         join doctor_warehouse_vendor e
         on d.vendor_id=e.id
+        inner join doctor_basics as db
+        on db.id=b.unit
         where b.delete_flag=1
         <if test="farmId != null">
             and b.farm_id=#{farmId}
@@ -724,7 +726,7 @@
     <!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注-->
     <select id="getDataByMaterialName" parameterType="map" resultType="map">
         select mh.id as material_handle_id, mh.material_id as material_id, mh.material_name as material_name,s.code as material_code,
-        v.name as vendor_name,s.specification as specification,s.unit as unit,mh.unit_price as unit_price,
+        v.name as vendor_name,s.specification as specification,db.name as unit,mh.unit_price as unit_price,
         ifnull(
         ROUND(
         (select ifnull(quantity,0) from doctor_warehouse_material_handle
@@ -742,6 +744,8 @@
         on mh.material_id=s.id
         inner join doctor_warehouse_vendor as v
         on s.vendor_id=v.id
+        inner join doctor_basics as db
+        on db.id=s.unit
         where material_name=#{materialName} and stock_handle_id=#{stockHandleId}
 
     </select>

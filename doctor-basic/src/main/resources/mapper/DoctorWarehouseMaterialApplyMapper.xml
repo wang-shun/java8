@@ -365,7 +365,7 @@
             e.staff_name,
             c.code,
             c.name as sku_name,
-            c.unit,
+            db.name as c.unit,
             sum( a.quantity ) AS quantity,
             ifnull(sum( a.unit_price * a.quantity ) / sum( a.quantity ),0) AS unit_price,
             sum(a.amount) AS amount,
@@ -379,10 +379,11 @@
             a.material_id as sku_id
         FROM
             doctor_warehouse_material_apply a
-          JOIN doctor_warehouse_material_handle b ON a.material_handle_id = b.id
+            JOIN doctor_warehouse_material_handle b ON a.material_handle_id = b.id
             JOIN doctor_warehouse_sku c ON a.material_id = c.id
             JOIN doctor_groups d ON d.id = a.pig_group_id
             JOIN doctor_barns e ON e.id = a.pig_barn_id
+            JOIN doctor_basics as db on db.id=c.unit
         WHERE
             a.apply_type = 1
             <if test="farmId != null"> AND a.farm_id = #{farmId}</if>
@@ -411,7 +412,7 @@
         month(mh.settlement_date) as settlement_month,
         s.`code` as material_code,
         s.`name` as material_name,
-        ma.unit as unit,
+        db.name as unit,
         format(ifnull(sum(ma.quantity)+'',0),2) as sum_quantity,
         format(ifnull(sum(ma.unit_price*ma.quantity)+''/sum(ma.quantity),0)+'',4) as sum_unit_price,
         format(ifnull(sum(ma.amount),0)+'',4) as sum_amount,
@@ -428,6 +429,8 @@
         on s.id=mh.material_id
         inner join doctor_farms as f
         on f.id=ma.farm_id
+        inner join doctor_basics as db
+        on db.id=ma.unit
         where mh.type=2 and ma.apply_type=0
         <if test="farmId != null">
             and ma.farm_id = #{farmId}
@@ -573,7 +576,7 @@
         ifnull(ma.pig_group_name,'无') as pig_group_name,
         b.staff_name as staff_name,
         f.`name` as farm_name,
-        mh.unit as unit ,
+        db.name as unit ,
         mh.vendor_name as vendor_name,
         s.specification as specification
         from doctor_warehouse_material_apply as ma
@@ -585,6 +588,8 @@
         on b.id=ma.pig_barn_id
         inner join doctor_farms as f
         on f.id=ma.farm_id
+        inner join doctor_basics as db
+        on db.id=mh.unit
         where mh.type=2 and ma.apply_type=0
         <if test="pigBarnId != null">
             and ma.pig_barn_id = #{pigBarnId}
@@ -618,7 +623,7 @@
         a.pig_group_name,
         e.staff_name,
         d.farm_name,
-        c.unit,
+        db.name as c.unit,
         b.vendor_name,
         c.specification
         FROM
@@ -627,6 +632,7 @@
         JOIN doctor_warehouse_sku c ON a.material_id = c.id
         JOIN doctor_groups d ON d.id = a.pig_group_id
         JOIN doctor_barns e ON e.id = a.pig_barn_id
+        JOIN doctor_basics as db on db.id=c.unit
         WHERE
         a.apply_type = 1
         <if test="pigGroupId != null"> AND a.pig_group_id = #{pigGroupId}</if>
