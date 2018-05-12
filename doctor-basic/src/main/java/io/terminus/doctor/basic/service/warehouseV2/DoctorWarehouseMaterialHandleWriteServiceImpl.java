@@ -136,7 +136,7 @@ public class DoctorWarehouseMaterialHandleWriteServiceImpl implements DoctorWare
             }
             flag=true;
         }
-//        doctorWarehouseMaterialHandleManager.delete(handle);
+       doctorWarehouseMaterialHandleManager.delete(handle);
 
         if(flag==true){
             return Response.ok("删除成功");
