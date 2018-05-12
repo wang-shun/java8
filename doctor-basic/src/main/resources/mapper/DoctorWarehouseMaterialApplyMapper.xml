@@ -365,7 +365,7 @@
             e.staff_name,
             c.code,
             c.name as sku_name,
-            db.name as c.unit,
+            db.name as unit,
             sum( a.quantity ) AS quantity,
             ifnull(sum( a.unit_price * a.quantity ) / sum( a.quantity ),0) AS unit_price,
             sum(a.amount) AS amount,
@@ -623,7 +623,7 @@
         a.pig_group_name,
         e.staff_name,
         d.farm_name,
-        db.name as c.unit,
+        db.name as unit,
         b.vendor_name,
         c.specification
         FROM
