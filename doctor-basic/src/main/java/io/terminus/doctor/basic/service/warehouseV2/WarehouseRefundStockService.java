@@ -69,8 +69,8 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
 
     @Override
     public void beforeUpdate(WarehouseStockRefundDto stockDto, DoctorWarehouseStockHandle stockHandle) {
-        if (!stockDto.getOutStockHandleId().equals(stockHandle.getRelStockHandleId()))
-            throw new ServiceException("refund.out.stock.handle.not.allow.change");
+//        if (!stockDto.getOutStockHandleId().equals(stockHandle.getRelStockHandleId()))
+//            throw new ServiceException("refund.out.stock.handle.not.allow.change");
     }
 
     @Override
