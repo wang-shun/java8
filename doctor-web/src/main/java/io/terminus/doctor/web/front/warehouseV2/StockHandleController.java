@@ -301,7 +301,7 @@ public class StockHandleController {
             e.printStackTrace();
         }
         if (doctorWarehouseSettlementService.isSettled(orgId,date))
-            throw new JsonResponseException("under.settlement");
+            throw new JsonResponseException("already.settlement");
         return doctorWarehouseStockHandleWriteService.delete(id);
            /*if (!response.isSuccess())
                throw new JsonResponseException(response.getError());
