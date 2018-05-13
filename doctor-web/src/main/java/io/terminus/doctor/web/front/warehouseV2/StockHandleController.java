@@ -45,6 +45,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -288,11 +289,19 @@ public class StockHandleController {
 
     //删除单据表以及对应的单据明细表
     @RequestMapping(method = RequestMethod.DELETE, value = "{id:\\d+}")
-    public Response<String> delete(@PathVariable Long id,@RequestParam(required = false) Long orgId) {
+    public Response<String> delete(@PathVariable Long id,@RequestParam(required = false) Long orgId,@RequestParam(required = false) String settlementDate) {
         //是否该公司正在结算中
         if (doctorWarehouseSettlementService.isUnderSettlement(orgId))
             throw new JsonResponseException("under.settlement");
-
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM");
+        Date date = null;
+        try {
+           date  = sdf.parse(settlementDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        if (doctorWarehouseSettlementService.isSettled(orgId,date))
+            throw new JsonResponseException("under.settlement");
         return doctorWarehouseStockHandleWriteService.delete(id);
            /*if (!response.isSuccess())
                throw new JsonResponseException(response.getError());

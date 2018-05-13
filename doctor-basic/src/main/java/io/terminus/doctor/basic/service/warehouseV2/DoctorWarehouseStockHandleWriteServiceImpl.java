@@ -6,10 +6,7 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.*;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
-import io.terminus.doctor.basic.manager.AbstractStockManager;
-import io.terminus.doctor.basic.manager.DoctorWarehouseMaterialHandleManager;
-import io.terminus.doctor.basic.manager.WarehouseInManager;
-import io.terminus.doctor.basic.manager.WarehouseOutManager;
+import io.terminus.doctor.basic.manager.*;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
@@ -51,6 +48,14 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
     private WarehouseOutManager warehouseOutManager;
     @Autowired
     private WarehouseInManager warehouseInManager;
+    @Autowired
+    private WarehouseFormulaManager warehouseFormulaManager;
+    @Autowired
+    private WarehouseReturnManager warehouseReturnManager;
+    @Autowired
+    private WarehouseTransferManager warehouseTransferManager;
+    @Autowired
+    private WarehouseInventoryManager warehouseInventoryManager;
     @Autowired
     private DoctorWarehouseSkuDao doctorWarehouseSkuDao;
     @RpcConsumer
@@ -96,14 +101,21 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
             if (type == 9) {
                 return Response.fail("调拨入库不支持删除");
             }
-            //采购入库,退料入库,盘盈入库
-            if(type==1 || type == 13 || type==7){
-                warehouseInManager.recalculate(handle);
+            //采购入库
+            if(type == 1){
                 warehouseInManager.delete(handle);
+            }
+            //退料入库
+            if(type == 13){
+                warehouseReturnManager.delete(handle);
+            }
+            //盘盈入库
+            if(type==7) {
+                warehouseInventoryManager.delete(handle);
             }
             //盘亏出库
             if(type==8){
-                warehouseOutManager.delete(handle);
+                warehouseInventoryManager.delete(handle);
             }
             //领料出库
             if(type == 2){
@@ -118,11 +130,20 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
                 List<DoctorWarehouseStockHandle> a = doctorWarehouseStockHandleDao.findByRelStockHandleId(id,type);//被入库的单据表
                 for(int i = 0;i<a.size();i++) {
                         DoctorWarehouseMaterialHandle b = doctorWarehouseMaterialHandleDao.findByStockHandleId(a.get(i).getId());//被入库的单据明细表
-                            warehouseInManager.recalculate(b);//校验被入库是否为正
-                            warehouseInManager.delete(b);//删除被入库的单据明细表
+                       if(type == 12){
+                           warehouseFormulaManager.delete(b);//删除被入库的单据明细表
+                       }
+                        if(type == 10){
+                            warehouseTransferManager.delete(b);//删除被入库的单据明细表
+                        }
                         doctorWarehouseStockHandleDao.delete(a.get(i).getId());//删除被入库的单据
                 }
-                warehouseOutManager.delete(handle);//删除出库单的单据明细
+                if(type == 12){
+                    warehouseFormulaManager.delete(handle);//删除出库单的单据明细
+                }
+                if(type == 10){
+                    warehouseTransferManager.delete(handle);//删除出库单的单据明细
+                }
             }
         }
             /*Map<Long*//*skuId*//*, List<DoctorWarehouseMaterialHandle>> needValidSkuHandle = handles.stream()
