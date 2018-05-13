@@ -264,23 +264,23 @@
         case when ifnull((select sum(b.balance_amount)
         from doctor_warehouse_stock_monthly b
         where date_format(b.settlement_date,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
-        and b.warehouse_id=a.id and b.material_id=a.material_id),0) = 0 then ''
+        and b.warehouse_id=a.warehouse_id and b.material_id=a.material_id),0) = 0 then ''
         else ifnull(round((select sum(b.balance_amount)
         from doctor_warehouse_stock_monthly b
         where date_format(b.settlement_date,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
-        and b.warehouse_id=a.id and b.material_id=a.material_id),4),'') end as lastmonth_sum_amount,
+        and b.warehouse_id=a.warehouse_id and b.material_id=a.material_id),4),'') end as lastmonth_sum_amount,
         case when ifnull((select sum(b.balance_quantity)
         from doctor_warehouse_stock_monthly b
         where date_format(b.settlement_date,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
-        and b.warehouse_id=a.id and b.material_id=a.material_id),0) = 0 then ''
+        and b.warehouse_id=a.warehouse_id and b.material_id=a.material_id),0) = 0 then ''
         else ifnull(round((select sum(b.balance_quantity)
         from doctor_warehouse_stock_monthly b
         where date_format(b.settlement_date,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
-        and b.warehouse_id=a.id and b.material_id=a.material_id),2),'') end as lastmonth_sum_quantity,
+        and b.warehouse_id=a.warehouse_id and b.material_id=a.material_id),2),'') end as lastmonth_sum_quantity,
         case when
         ifnull((select sum(b.quantity)
         from doctor_warehouse_material_handle b
-        where b.warehouse_id=a.id and b.delete_flag=1 and b.material_id=a.material_id
+        where b.warehouse_id=a.warehouse_id and b.delete_flag=1 and b.material_id=a.material_id
         and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
         and b.type in (1,7,9,11,13)
         ),0) = 0 then ''
@@ -288,14 +288,14 @@
         ifnull(
         ROUND((select sum(b.quantity)
         from doctor_warehouse_material_handle b
-        where b.warehouse_id=a.id and b.delete_flag=1 and b.material_id=a.material_id
+        where b.warehouse_id=a.warehouse_id and b.delete_flag=1 and b.material_id=a.material_id
         and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
         and b.type in (1,7,9,11,13)
         ),2),'') end as thismonth_sum_rk_quantity,
         case when
         ifnull((select sum(b.quantity)
         from doctor_warehouse_material_handle b
-        where b.warehouse_id=a.id and b.delete_flag=1 and b.material_id=a.material_id
+        where b.warehouse_id=a.warehouse_id and b.delete_flag=1 and b.material_id=a.material_id
         and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
         and b.type in (2,8,10,12)
         ),0) = 0 then ''
@@ -303,7 +303,7 @@
         ifnull(
         ROUND((select sum(b.quantity)
         from doctor_warehouse_material_handle b
-        where b.warehouse_id=a.id and b.delete_flag=1 and b.material_id=a.material_id
+        where b.warehouse_id=a.warehouse_id and b.delete_flag=1 and b.material_id=a.material_id
         and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
         and b.type in (2,8,10,12)
         ),2),'') end as thismonth_sum_ck_quantity,
@@ -312,17 +312,17 @@
         from doctor_warehouse_stock_monthly b
         where date_format(b.settlement_date,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
         and b.material_id=a.material_id
-        and b.warehouse_id=a.id),0)
+        and b.warehouse_id=a.warehouse_id),0)
         +
         ifnull((select sum(b.quantity)
         from doctor_warehouse_material_handle b
-        where b.warehouse_id=a.id and b.delete_flag=1 and b.material_id=a.material_id
+        where b.warehouse_id=a.warehouse_id and b.delete_flag=1 and b.material_id=a.material_id
         and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
         and b.type in (1,7,9,11,13)),0)
         -
         ifnull((select sum(b.quantity)
         from doctor_warehouse_material_handle b
-        where b.warehouse_id=a.id and b.delete_flag=1 and b.material_id=a.material_id
+        where b.warehouse_id=a.warehouse_id and b.delete_flag=1 and b.material_id=a.material_id
         and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
         and b.type in (2,8,10,12)),0)) = 0 then ''
         else
@@ -332,17 +332,17 @@
         from doctor_warehouse_stock_monthly b
         where date_format(b.settlement_date,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
         and b.material_id=a.material_id
-        and b.warehouse_id=a.id),0)
+        and b.warehouse_id=a.warehouse_id),0)
         +
         ifnull((select sum(b.quantity)
         from doctor_warehouse_material_handle b
-        where b.warehouse_id=a.id and b.delete_flag=1 and b.material_id=a.material_id
+        where b.warehouse_id=a.warehouse_id and b.delete_flag=1 and b.material_id=a.material_id
         and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
         and b.type in (1,7,9,11,13)),0)
         -
         ifnull((select sum(b.quantity)
         from doctor_warehouse_material_handle b
-        where b.warehouse_id=a.id and b.delete_flag=1 and b.material_id=a.material_id
+        where b.warehouse_id=a.warehouse_id and b.delete_flag=1 and b.material_id=a.material_id
         and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
         and b.type in (2,8,10,12)),0)
         ),2),'') end as now_sum_quantity
