@@ -433,7 +433,7 @@
 
     <select id="getWarehouseMaterialHandleCount" resultType="int">
         select count(1) as count from  doctor_warehouse_material_handle
-        where  warehouse_id = #{id}
+        where  warehouse_id = #{id} and delete_flag = 1
     </select>
 
     <select id="findLibraryById" parameterType="map" resultType="BigDecimal">
