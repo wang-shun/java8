@@ -566,7 +566,8 @@ public class StockHandleController {
                     title.createCell(5).setCellValue("账面数量");
                     title.createCell(6).setCellValue("盘点数量");
                     title.createCell(7).setCellValue("单价");
-                    title.createCell(8).setCellValue("备注");
+                    title.createCell(8).setCellValue("金额（元）");
+                    title.createCell(9).setCellValue("备注");
 
                     String typeName = "";
                     BigDecimal totalQuantity = new BigDecimal(0);
@@ -593,7 +594,8 @@ public class StockHandleController {
                         row.createCell(5).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
                         row.createCell(6).setCellValue(quantity.doubleValue());
                         row.createCell(7).setCellValue(vo.getUnitPrice());
-                        row.createCell(8).setCellValue(vo.getRemark());
+                        row.createCell(8).setCellValue(vo.getAmount());
+                        row.createCell(9).setCellValue(vo.getRemark());
 
                         totalQuantity = vo.getQuantity();
                     }
@@ -625,7 +627,9 @@ public class StockHandleController {
                     title.createCell(6).setCellValue("调入猪场");
                     title.createCell(7).setCellValue("调入仓库");
                     title.createCell(8).setCellValue("数量");
-                    title.createCell(9).setCellValue("备注");
+                    title.createCell(9).setCellValue("单价");
+                    title.createCell(10).setCellValue("金额（元）");
+                    title.createCell(11).setCellValue("备注");
 
                     for (StockHandleExportVo vo : exportVos) {
                         Row row = sheet.createRow(pos++);
@@ -638,7 +642,9 @@ public class StockHandleController {
                         row.createCell(6).setCellValue(vo.getTransferInFarmName());
                         row.createCell(7).setCellValue(vo.getTransferInWarehouseName());
                         row.createCell(8).setCellValue(vo.getQuantity().doubleValue());
-                        row.createCell(9).setCellValue(vo.getRemark());
+                        row.createCell(9).setCellValue(vo.getUnitPrice());
+                        row.createCell(10).setCellValue(vo.getAmount());
+                        row.createCell(11).setCellValue(vo.getRemark());
                     }
                 }
                 //配方生成出库
@@ -648,9 +654,10 @@ public class StockHandleController {
                     title.createCell(2).setCellValue("厂家");
                     title.createCell(3).setCellValue("规格");
                     title.createCell(4).setCellValue("单位");
-                    title.createCell(5).setCellValue("入库仓库");
-                    title.createCell(6).setCellValue("出库数量");
-                    title.createCell(7).setCellValue("备注");
+                    title.createCell(5).setCellValue("出库数量");
+                    title.createCell(6).setCellValue("单价");
+                    title.createCell(1).setCellValue("金额（元）");
+                    title.createCell(8).setCellValue("备注");
 
                     for (StockHandleExportVo vo : exportVos) {
                         Row row = sheet.createRow(pos++);
@@ -659,9 +666,10 @@ public class StockHandleController {
                         row.createCell(2).setCellValue(vo.getVendorName());
                         row.createCell(3).setCellValue(vo.getMaterialSpecification());
                         row.createCell(4).setCellValue(vo.getUnit());
-                        row.createCell(5).setCellValue(vo.getTransferInWarehouseName());
-                        row.createCell(6).setCellValue(vo.getQuantity().doubleValue());
-                        row.createCell(7).setCellValue(vo.getRemark());
+                        row.createCell(5).setCellValue(vo.getQuantity().doubleValue());
+                        row.createCell(6).setCellValue(vo.getUnitPrice());
+                        row.createCell(7).setCellValue(vo.getAmount());
+                        row.createCell(8).setCellValue(vo.getRemark());
                     }
                 }
                 //配方生产入库
@@ -672,7 +680,9 @@ public class StockHandleController {
                     title.createCell(3).setCellValue("规格");
                     title.createCell(4).setCellValue("单位");
                     title.createCell(5).setCellValue("入库数量");
-                    title.createCell(6).setCellValue("备注");
+                    title.createCell(6).setCellValue("单价");
+                    title.createCell(7).setCellValue("金额（元）");
+                    title.createCell(8).setCellValue("备注");
 
                     for (StockHandleExportVo vo : exportVos) {
                         Row row = sheet.createRow(pos++);
@@ -682,7 +692,9 @@ public class StockHandleController {
                         row.createCell(3).setCellValue(vo.getMaterialSpecification());
                         row.createCell(4).setCellValue(vo.getUnit());
                         row.createCell(5).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
-                        row.createCell(6).setCellValue(vo.getRemark());
+                        row.createCell(6).setCellValue(vo.getUnitPrice());
+                        row.createCell(7).setCellValue(vo.getAmount());
+                        row.createCell(8).setCellValue(vo.getRemark());
                     }
                 }
                 //退料入库

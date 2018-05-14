@@ -297,8 +297,9 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     }
 
     @Override
-    public Response<Long> formula(WarehouseFormulaDto formulaDto) {
-        return warehouseFormulaStockService.handle(formulaDto);
+    public Response<Boolean> formula(WarehouseFormulaDto formulaDto) {
+        warehouseFormulaStockService.handle(formulaDto);
+        return Response.ok(true);
     }
 
     @Override
