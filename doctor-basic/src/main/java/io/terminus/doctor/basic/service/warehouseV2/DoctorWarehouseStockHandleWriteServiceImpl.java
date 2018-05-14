@@ -8,6 +8,7 @@ import io.terminus.doctor.basic.dao.*;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.manager.*;
 import io.terminus.doctor.basic.model.DoctorBasic;
+import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
@@ -60,6 +61,8 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
     private DoctorWarehouseSkuDao doctorWarehouseSkuDao;
     @RpcConsumer
     private DoctorBasicDao doctorBasicDao;
+    @Autowired
+    private DoctorWarehouseStockManager doctorWarehouseStockManager;
 
     @Override
     public Response<Long> create(DoctorWarehouseStockHandle doctorWarehouseStockHandle) {
@@ -88,6 +91,11 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
     public Response<String> delete(Long id) {
         List<DoctorWarehouseMaterialHandle> handles = doctorWarehouseMaterialHandleDao.findByStockHandle(id);
         for (DoctorWarehouseMaterialHandle handle : handles) {
+            DoctorWareHouse wareHouse = new DoctorWareHouse();
+            wareHouse.setId(handle.getMaterialId());
+            wareHouse.setWareHouseName(handle.getWarehouseName());
+            wareHouse.setFarmId(handle.getFarmId());
+            wareHouse.setType(handle.getWarehouseType());
             int type = handle.getType();
             if(type != 1 && type != 2 && type != 3 && type != 4 && type != 5 && type != 10 && type != 7 && type != 8 && type != 9
                     && type != 11 && type != 12 && type != 13){
@@ -104,18 +112,22 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
             //采购入库
             if(type == 1){
                 warehouseInManager.delete(handle);
+                doctorWarehouseStockManager.out(handle.getRelMaterialHandleId(),handle.getQuantity(),wareHouse);
             }
             //退料入库
             if(type == 13){
                 warehouseReturnManager.delete(handle);
+                doctorWarehouseStockManager.out(handle.getRelMaterialHandleId(),handle.getQuantity(),wareHouse);
             }
             //盘盈入库
             if(type==7) {
                 warehouseInventoryManager.delete(handle);
+                doctorWarehouseStockManager.out(handle.getRelMaterialHandleId(),handle.getQuantity(),wareHouse);
             }
             //盘亏出库
             if(type==8){
                 warehouseInventoryManager.delete(handle);
+                doctorWarehouseStockManager.in(handle.getRelMaterialHandleId(),handle.getQuantity(),wareHouse);
             }
             //领料出库
             if(type == 2){
@@ -124,6 +136,7 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
                     return Response.fail("此物料存在退料,不支持删除");
                 }
                 warehouseOutManager.delete(handle);
+                doctorWarehouseStockManager.in(handle.getRelMaterialHandleId(),handle.getQuantity(),wareHouse);
             }
             //配方出库,调拨出库
             if (type == 12 || type == 10) {
@@ -132,17 +145,21 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
                         DoctorWarehouseMaterialHandle b = doctorWarehouseMaterialHandleDao.findByStockHandleId(a.get(i).getId());//被入库的单据明细表
                        if(type == 12){
                            warehouseFormulaManager.delete(b);//删除被入库的单据明细表
+                           doctorWarehouseStockManager.out(handle.getRelMaterialHandleId(),handle.getQuantity(),wareHouse);
                        }
                         if(type == 10){
                             warehouseTransferManager.delete(b);//删除被入库的单据明细表
+                            doctorWarehouseStockManager.out(handle.getRelMaterialHandleId(),handle.getQuantity(),wareHouse);
                         }
                         doctorWarehouseStockHandleDao.delete(a.get(i).getId());//删除被入库的单据
                 }
                 if(type == 12){
                     warehouseFormulaManager.delete(handle);//删除出库单的单据明细
+                    doctorWarehouseStockManager.in(handle.getRelMaterialHandleId(),handle.getQuantity(),wareHouse);
                 }
                 if(type == 10){
                     warehouseTransferManager.delete(handle);//删除出库单的单据明细
+                    doctorWarehouseStockManager.in(handle.getRelMaterialHandleId(),handle.getQuantity(),wareHouse);
                 }
             }
         }
