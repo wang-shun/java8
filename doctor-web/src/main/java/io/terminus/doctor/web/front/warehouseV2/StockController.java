@@ -314,7 +314,7 @@ public class StockController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "formula")
-    public boolean produce(
+    public Long produce(
                            @RequestParam("orgId") Long orgId,
                            @RequestParam("warehouseId") Long warehouseId,
                            @RequestParam("feedFormulaId") Long feedFormulaId,

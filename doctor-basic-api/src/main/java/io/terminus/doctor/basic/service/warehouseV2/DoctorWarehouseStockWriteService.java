@@ -93,7 +93,7 @@ public interface DoctorWarehouseStockWriteService {
      * @param formulaDto
      * @return
      */
-    Response<Boolean> formula(WarehouseFormulaDto formulaDto);
+    Response<Long> formula(WarehouseFormulaDto formulaDto);
 
     Response<Long> updateFormula(WarehouseFormulaDto formulaDto);
 

@@ -76,6 +76,8 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
 
             return Response.ok(stockHandle.getId());
 
+        } catch (Throwable e) {
+            throw e;
         } finally {
             releaseLocks();
         }
