@@ -77,8 +77,8 @@ public class WarehouseTransferManager extends AbstractStockManager {
         materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.DELETE.getValue());
         doctorWarehouseMaterialHandleDao.update(materialHandle);
 
-        if (!DateUtil.inSameDate(materialHandle.getHandleDate(), new Date())) {
+//        if (!DateUtil.inSameDate(materialHandle.getHandleDate(), new Date())) {
             recalculate(materialHandle);
-        }
+//        }
     }
 }

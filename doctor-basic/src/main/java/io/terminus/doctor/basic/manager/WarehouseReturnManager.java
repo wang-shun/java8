@@ -102,9 +102,9 @@ public class WarehouseReturnManager extends AbstractStockManager<WarehouseStockR
         materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.DELETE.getValue());
         doctorWarehouseMaterialHandleDao.update(materialHandle);
 
-        if (!DateUtil.inSameDate(materialHandle.getHandleDate(), new Date())) {
+//        if (!DateUtil.inSameDate(materialHandle.getHandleDate(), new Date())) {
             //删除历史单据明细
             recalculate(materialHandle);
-        }
+//        }
     }
 }

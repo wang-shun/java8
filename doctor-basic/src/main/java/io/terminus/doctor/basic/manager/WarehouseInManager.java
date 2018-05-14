@@ -65,10 +65,10 @@ public class WarehouseInManager extends AbstractStockManager<WarehouseStockInDto
         materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.DELETE.getValue());
         doctorWarehouseMaterialHandleDao.update(materialHandle);
 
-        if (!DateUtil.inSameDate(materialHandle.getHandleDate(), new Date())) {
-            //删除历史单据明细
+//        if (!DateUtil.inSameDate(materialHandle.getHandleDate(), new Date())) {
+//            删除历史单据明细
             recalculate(materialHandle);
-        }
+//        }
     }
 
     public void resetUnitPrice(DoctorWarehouseMaterialHandle materialHandle, BigDecimal newQuantity) {
