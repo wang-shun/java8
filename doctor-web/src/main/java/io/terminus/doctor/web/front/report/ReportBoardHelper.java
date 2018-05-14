@@ -47,10 +47,15 @@ public class ReportBoardHelper {
     private DoctorReportFieldCustomizesReadService doctorReportFieldCustomizesReadService;
     @RpcConsumer
     private DoctorDailyReportV2Service doctorDailyReportV2Service;
-    @Autowired
-    private ApplicationContext applicationContext;
+
+    private final ApplicationContext applicationContext;
     private Map<String, Method> methodMap;
     private Map<String, DataFormatter> dataFormatterMap;
+
+    @Autowired
+    public ReportBoardHelper(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
 
 
     @PostConstruct
@@ -68,34 +73,52 @@ public class ReportBoardHelper {
         map(DoctorReportEfficiency.class.getSimpleName(),DoctorReportEfficiency.class.getMethods(), methodMap);
     }
 
+    /**
+     * 获取指定条件下所有分区的报表数据
+     * @param dimensionCriteria 查询条件
+     * @return 报表数据
+     */
     List<DoctorReportFieldTypeDto> fieldWithHidden(DoctorDimensionCriteria dimensionCriteria) {
         List<DoctorReportFieldTypeDto> reportFieldTypeDtoList = RespHelper.or500(doctorReportFieldCustomizesReadService.getAllWithSelected(dimensionCriteria.getOrzId()));
         DoctorDimensionReport report = RespHelper.or500(doctorDailyReportV2Service.dimensionReport(dimensionCriteria));
-        reportFieldTypeDtoList.forEach(doctorReportFieldTypeDto -> {
-            DoctorReportRegion region = DoctorReportRegion.from(doctorReportFieldTypeDto.getName());
-            switch (region) {
-                case RESERVE: subField(doctorReportFieldTypeDto, report.getReportReserve()); break;
-                case SOW: subField(doctorReportFieldTypeDto, report.getReportSow()); break;
-                case MATING: subField(doctorReportFieldTypeDto, report.getReportMating()); break;
-                case DELIVER: subField(doctorReportFieldTypeDto, report.getReportDeliver()); break;
-                case NURSERY: subField(doctorReportFieldTypeDto, report.getReportNursery()); break;
-                case FATTEN: subField(doctorReportFieldTypeDto, report.getReportFatten()); break;
-                case BOAR: subField(doctorReportFieldTypeDto, report.getReportBoar()); break;
-                case MATERIAL:
-                    subField(doctorReportFieldTypeDto, report.getReportMaterial());
-                    break;
-                case EFFICIENCY:
-                    if (DateDimension.YEARLY.contains(dimensionCriteria.getDateType())) {
-                        subField(doctorReportFieldTypeDto, report.getReportEfficiency());
-                    } else {
-                        subFieldDefault(doctorReportFieldTypeDto);
-                    }
-                    break;
-                default:
-                    throw new JsonResponseException("region.is.illegal");
-            }
-        });
+        reportFieldTypeDtoList.forEach(doctorReportFieldTypeDto -> fillRegionReport(doctorReportFieldTypeDto, report, dimensionCriteria));
         return reportFieldTypeDtoList;
+    }
+
+
+    /**
+     * 生成指定分区报表
+     * @param doctorReportFieldTypeDto 分区显示字段
+     * @param report 分区数据
+     * @param dimensionCriteria 查询条件
+     */
+    private void fillRegionReport(DoctorReportFieldTypeDto doctorReportFieldTypeDto, DoctorDimensionReport report, DoctorDimensionCriteria dimensionCriteria) {
+        DoctorReportRegion region = DoctorReportRegion.from(doctorReportFieldTypeDto.getName());
+
+        if (isNull(region)) {
+            throw new JsonResponseException("region.is.null");
+        }
+        switch (region) {
+            case RESERVE: subField(doctorReportFieldTypeDto, report.getReportReserve()); break;
+            case SOW: subField(doctorReportFieldTypeDto, report.getReportSow()); break;
+            case MATING: subField(doctorReportFieldTypeDto, report.getReportMating()); break;
+            case DELIVER: subField(doctorReportFieldTypeDto, report.getReportDeliver()); break;
+            case NURSERY: subField(doctorReportFieldTypeDto, report.getReportNursery()); break;
+            case FATTEN: subField(doctorReportFieldTypeDto, report.getReportFatten()); break;
+            case BOAR: subField(doctorReportFieldTypeDto, report.getReportBoar()); break;
+            case MATERIAL:
+                subField(doctorReportFieldTypeDto, report.getReportMaterial());
+                break;
+            case EFFICIENCY:
+                if (DateDimension.YEARLY.contains(dimensionCriteria.getDateType())) {
+                    subField(doctorReportFieldTypeDto, report.getReportEfficiency());
+                } else {
+                    subFieldDefault(doctorReportFieldTypeDto);
+                }
+                break;
+            default:
+                throw new JsonResponseException("region.is.illegal");
+        }
     }
 
     private void subFieldDefault(DoctorReportFieldTypeDto doctorReportFieldTypeDto) {
