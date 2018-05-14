@@ -92,7 +92,7 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
         List<DoctorWarehouseMaterialHandle> handles = doctorWarehouseMaterialHandleDao.findByStockHandle(id);
         for (DoctorWarehouseMaterialHandle handle : handles) {
             DoctorWareHouse wareHouse = new DoctorWareHouse();
-            wareHouse.setId(handle.getMaterialId());
+            wareHouse.setId(handle.getWarehouseId());
             wareHouse.setWareHouseName(handle.getWarehouseName());
             wareHouse.setFarmId(handle.getFarmId());
             wareHouse.setType(handle.getWarehouseType());
