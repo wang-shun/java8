@@ -759,15 +759,19 @@ public class WarehouseController {
             if (NumberUtils.isNumber(sku.getUnit()))
                 unit = RespHelper.or500(doctorBasicReadService.findBasicById(Long.parseLong(sku.getUnit())));
 
-            data.add(WarehouseStockVo.builder()
-                    .materialId(stock.getSkuId())
-                    .materialName(stock.getSkuName())
-                    .quantity(stock.getQuantity())
-                    .unit(null == unit ? "" : unit.getName())
-                    .code(sku.getCode())
-                    .specification(sku.getSpecification())
-                    .vendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())))
-                    .build());
+            if(!stock.getQuantity().equals(0)){
+                if(stock.getQuantity().compareTo(BigDecimal.ZERO)!=0){
+                data.add(WarehouseStockVo.builder()
+                        .materialId(stock.getSkuId())
+                        .materialName(stock.getSkuName())
+                        .quantity(stock.getQuantity())
+                        .unit(null == unit ? "" : unit.getName())
+                        .code(sku.getCode())
+                        .specification(sku.getSpecification())
+                        .vendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())))
+                        .build());
+                }
+            }
         }
         vo.setData(data);
         vo.setTotal(stockResponse.getResult().getTotal());

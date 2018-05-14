@@ -384,6 +384,7 @@ public class StockController {
         return RespHelper.or500(doctorWarehouseStockWriteService.formula(formulaDto));
     }
 
+    //配方
     @RequestMapping(method = RequestMethod.PUT, value = "formula")
     public Long formula(@RequestBody @Validated(AbstractWarehouseStockDetail.StockFormulaValid.class) WarehouseFormulaDto formulaDto, Errors errors) {
         if (errors.hasErrors())
