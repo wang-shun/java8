@@ -11,8 +11,11 @@ import io.terminus.doctor.event.dao.reportBi.DoctorReportReserveDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportSowDao;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.reportBi.DoctorDimensionReport;
+import io.terminus.doctor.event.model.DoctorReportSow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * Created by xjn on 18/1/18.
@@ -64,5 +67,11 @@ public class DoctorReportBiDataQuery {
         dimensionReport.setReportReserve(doctorReportReserveDao.findByDimension(dimensionCriteria));
         dimensionReport.setReportSow(doctorReportSowDao.findByDimension(dimensionCriteria));
         return dimensionReport;
+    }
+
+    public List<DoctorReportSow> findSowReportBy(DoctorDimensionCriteria dimensionCriteria) {
+        List<DoctorReportSow> reportSows = doctorReportSowDao.findBy(dimensionCriteria);
+        reportSows.add(doctorReportSowDao.sumBy(dimensionCriteria));
+        return reportSows;
     }
 }
