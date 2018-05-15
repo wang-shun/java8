@@ -3,10 +3,10 @@ package io.terminus.doctor.event.dao.reportBi;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.model.DoctorReportMaterial;
-import org.springframework.cache.support.AbstractCacheManager;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * Desc:
@@ -82,6 +82,14 @@ public class DoctorReportMaterialDao extends MyBatisDao<DoctorReportMaterial> {
             material.setBoarMedicineAmount(new BigDecimal(0));
         }
         return material;
+    }
+
+    public List<DoctorReportMaterial> findBy(DoctorDimensionCriteria dimensionCriteria) {
+        return getSqlSession().selectList(sqlId("findBy"), dimensionCriteria);
+    }
+
+    public DoctorReportMaterial sumBy(DoctorDimensionCriteria dimensionCriteria) {
+        return getSqlSession().selectOne(sqlId("sumBy"), dimensionCriteria);
     }
 
     public void delete() {

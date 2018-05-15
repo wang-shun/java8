@@ -3,6 +3,7 @@ package io.terminus.doctor.event.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -43,9 +44,24 @@ public class DoctorDimensionCriteria implements Serializable{
 
     private Integer pigType;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date startAt;
 
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date endAt;
+
+    /**
+     * 分区类型
+     * @see io.terminus.doctor.event.enums.DoctorReportRegion
+     */
+    private Integer regionType;
+
+    /**
+     * 是否需要合计
+     * @see io.terminus.doctor.common.enums.IsOrNot
+     */
+    private Integer isNecessaryTotal;
+
 
     private Integer isRealTime;
 

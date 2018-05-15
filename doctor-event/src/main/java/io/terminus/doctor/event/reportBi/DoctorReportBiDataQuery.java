@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.reportBi;
 
+import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportBoarDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportDeliverDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportEfficiencyDao;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by xjn on 18/1/18.
@@ -71,7 +73,9 @@ public class DoctorReportBiDataQuery {
 
     public List<DoctorReportSow> findSowReportBy(DoctorDimensionCriteria dimensionCriteria) {
         List<DoctorReportSow> reportSows = doctorReportSowDao.findBy(dimensionCriteria);
-        reportSows.add(doctorReportSowDao.sumBy(dimensionCriteria));
+        if (Objects.equals(dimensionCriteria.getIsNecessaryTotal(), IsOrNot.YES.getKey())) {
+            reportSows.add(doctorReportSowDao.sumBy(dimensionCriteria));
+        }
         return reportSows;
     }
 }
