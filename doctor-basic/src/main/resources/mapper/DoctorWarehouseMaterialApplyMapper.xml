@@ -398,7 +398,6 @@
             a.material_id,
             a.pig_group_id,
             a.pig_barn_id,
-            a.material_handle_id
     </select>
 
     <!--猪群Start-->
