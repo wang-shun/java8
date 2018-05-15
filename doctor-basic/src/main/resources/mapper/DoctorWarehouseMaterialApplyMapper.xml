@@ -635,6 +635,6 @@
         WHERE
         a.apply_type = 1
         <if test="pigGroupId != null"> AND a.pig_group_id = #{pigGroupId}</if>
-        <if test="materiaId != null"> AND a.material_id = #{materiaId}</if>
+        <if test="skuId != null"> AND a.material_id = #{skuId}</if>
     </select>
 </mapper>
