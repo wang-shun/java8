@@ -194,6 +194,7 @@ public class StockHandleController {
                             StockHandleVo.Detail detail = new StockHandleVo.Detail();
                             //单据明细里面的值全部复制到detail里面去
                             BeanUtils.copyProperties(mh, detail);
+                            detail.setUnitId(mh.getUnit());
 
                             //物料表
                             DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(mh.getMaterialId()));
