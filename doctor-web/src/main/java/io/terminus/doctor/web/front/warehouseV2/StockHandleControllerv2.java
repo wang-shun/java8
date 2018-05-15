@@ -126,7 +126,7 @@ public class StockHandleControllerv2 {
                        @RequestParam(required = false,value = "settlementDateStart") Date settlementDateStart,
                        @RequestParam(required = false,value = "settlementDateEnd") Date settlementDateEnd,
                        @RequestParam(required = false,value = "warehouseId") Long warehouseId,
-                       @RequestParam(required = false,value = "settlementDate") Date settlementDate,
+                       @RequestParam(required = false,value = "settlementDate") String settlementDate,
                        @RequestParam(required = false,value = "materialName")String materialName
                         ) {
         HashMap<String, Object> params = Maps.newHashMap();
