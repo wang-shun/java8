@@ -194,7 +194,6 @@ public class StockHandleController {
                             StockHandleVo.Detail detail = new StockHandleVo.Detail();
                             //单据明细里面的值全部复制到detail里面去
                             BeanUtils.copyProperties(mh, detail);
-                            detail.setUnitId(mh.getUnit());
 
                             //物料表
                             DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(mh.getMaterialId()));
@@ -204,6 +203,7 @@ public class StockHandleController {
                                 //得到单位名称
                                 String nameByUnit = RespHelper.or500(doctorWarehouseStockHandleReadService.getNameByUnit(Long.parseLong(sku.getUnit())));
                                 detail.setUnit(nameByUnit);
+                                detail.setUnitId(sku.getUnit());
                                 detail.setMaterialSpecification(sku.getSpecification());
                             } else {
                                 log.warn("sku not found,{}", mh.getMaterialId());
