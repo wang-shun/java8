@@ -379,22 +379,22 @@ public class StockHandleControllerv2 {
                         //第二行结束
 
                         for(Map map:result2){
-                            sheet.addMergedRegion(new CellRangeAddress(sheet.getLastRowNum(), sheet.getLastRowNum(), 0, 1));
-                            Row row = sheet.createRow(sheet.getLastRowNum() + 1);
                             if(map.get("materialName")!=null) {
-                                row.createCell(0).setCellValue(map.get("materialName").toString());
-                                row.createCell(2).setCellValue(map.get("code").toString());
-                                row.createCell(3).setCellValue(map.get("vendorName").toString());
-                                row.createCell(4).setCellValue(map.get("specification").toString());
-                                row.createCell(5).setCellValue(map.get("unit").toString());
-                                row.createCell(6).setCellValue(map.get("lastQuantity").toString());
-                                row.createCell(7).setCellValue(map.get("lastAmount").toString());
-                                row.createCell(8).setCellValue(map.get("inQuantity").toString());
-                                row.createCell(9).setCellValue(map.get("inAmount").toString());
-                                row.createCell(10).setCellValue(map.get("outQuantity").toString());
-                                row.createCell(11).setCellValue(map.get("outAmount").toString());
-                                row.createCell(12).setCellValue(map.get("balanceQuantity").toString());
-                                row.createCell(13).setCellValue(map.get("balanceAmount").toString());
+                                sheet.addMergedRegion(new CellRangeAddress(sheet.getLastRowNum()+1, sheet.getLastRowNum()+1, 0, 1));
+                                Row row = sheet.createRow(sheet.getLastRowNum() + 1);
+                                row.createCell(0).setCellValue(map.get("materialName")==null?"":map.get("materialName").toString());
+                                row.createCell(2).setCellValue(map.get("code")==null?"":map.get("code").toString());
+                                row.createCell(3).setCellValue(map.get("vendorName")==null?"":map.get("vendorName").toString());
+                                row.createCell(4).setCellValue(map.get("specification")==null?"":map.get("specification").toString());
+                                row.createCell(5).setCellValue(map.get("unit")==null?"":map.get("unit").toString());
+                                row.createCell(6).setCellValue(map.get("lastQuantity")==null?"":map.get("lastQuantity").toString());
+                                row.createCell(7).setCellValue(map.get("lastAmount")==null?"":map.get("lastAmount").toString());
+                                row.createCell(8).setCellValue(map.get("inQuantity")==null?"":map.get("inQuantity").toString());
+                                row.createCell(9).setCellValue(map.get("inAmount")==null?"":map.get("inAmount").toString());
+                                row.createCell(10).setCellValue(map.get("outQuantity")==null?"":map.get("outQuantity").toString());
+                                row.createCell(11).setCellValue(map.get("outAmount")==null?"":map.get("outAmount").toString());
+                                row.createCell(12).setCellValue(map.get("balanceQuantity")==null?"":map.get("balanceQuantity").toString());
+                                row.createCell(13).setCellValue(map.get("balanceAmount")==null?"":map.get("balanceAmount").toString());
                             }
                         }
                         sheet.addMergedRegion(new CellRangeAddress(sheet.getLastRowNum()+1, sheet.getLastRowNum()+1, 0, 5));
