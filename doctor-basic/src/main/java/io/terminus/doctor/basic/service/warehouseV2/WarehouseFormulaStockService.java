@@ -76,12 +76,18 @@ public class WarehouseFormulaStockService extends AbstractWarehouseStockService<
 
         stockDto.getDetails().forEach(detail -> {
 
+            //出库仓库
+            DoctorWareHouse outWarehouse = outWarehouses.get(detail.getWarehouseId());
+
+            if (null == outWarehouse)
+                throw new ServiceException("warehouse.not.found");
+
             //创建配方生产出库明细单
-            DoctorWarehouseMaterialHandle outMaterialHandle = warehouseFormulaManager.create(detail, stockDto, eachWarehouseStockHandles.get(detail.getWarehouseId()), outWarehouses.get(detail.getWarehouseId()));
+            DoctorWarehouseMaterialHandle outMaterialHandle = warehouseFormulaManager.create(detail, stockDto, eachWarehouseStockHandles.get(detail.getWarehouseId()), outWarehouse);
             outMaterialHandle.setRelMaterialHandleId(inMaterialHandle.getId());
             doctorWarehouseMaterialHandleDao.update(outMaterialHandle);
             //扣减库存
-            doctorWarehouseStockManager.out(detail.getMaterialId(), detail.getQuantity(), outWarehouses.get(detail.getWarehouseId()));
+            doctorWarehouseStockManager.out(detail.getMaterialId(), detail.getQuantity(), outWarehouse);
         });
 
 

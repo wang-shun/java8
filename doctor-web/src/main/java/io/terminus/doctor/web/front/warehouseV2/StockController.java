@@ -315,10 +315,10 @@ public class StockController {
 
     @RequestMapping(method = RequestMethod.POST, value = "formula")
     public Long produce(
-                           @RequestParam("orgId") Long orgId,
-                           @RequestParam("warehouseId") Long warehouseId,
-                           @RequestParam("feedFormulaId") Long feedFormulaId,
-                           @RequestParam("materialProduceJson") String materialProduceJson) {
+            @RequestParam("orgId") Long orgId,
+            @RequestParam("warehouseId") Long warehouseId,
+            @RequestParam("feedFormulaId") Long feedFormulaId,
+            @RequestParam("materialProduceJson") String materialProduceJson) {
 
 
         //是否该公司正在结算中
@@ -367,6 +367,11 @@ public class StockController {
         formulaDto.setFeedMaterialQuantity(new BigDecimal(feedProduce.getTotal()));
         List<WarehouseFormulaDto.WarehouseFormulaDetail> details = new ArrayList<>();
         for (FeedFormula.MaterialProduceEntry entry : totalOut) {
+
+
+            if (entry.getWarehouseId() == null)
+                throw new JsonResponseException("warehouse.formula.out.warehouse.id.not.null");
+
             WarehouseFormulaDto.WarehouseFormulaDetail detail = new WarehouseFormulaDto.WarehouseFormulaDetail();
             detail.setMaterialId(entry.getMaterialId());
             detail.setMaterialName(entry.getMaterialName());
