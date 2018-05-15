@@ -61,5 +61,7 @@ public class StockHandleVo extends DoctorWarehouseStockHandle {
         //单位ID
         private String unitId;
 
+        //入库仓库
+        private String storageWarehouseNames;
     }
 }

@@ -251,6 +251,12 @@ public class StockHandleController {
                                     log.warn("other transfer in handle not found,{}", mh.getRelMaterialHandleId());
                             }
 
+                            //配方生产出库
+                            if (stockHandle.getHandleSubType().equals( WarehouseMaterialHandleType.FORMULA_OUT.getValue())) {
+                                String warehouseName = RespHelper.or500(doctorWarehouseStockHandleReadService.findwarehouseName(stockHandle.getRelStockHandleId()));
+                                detail.setStorageWarehouseNames(warehouseName);
+                            }
+
                             return detail;
                         })
                         .collect(Collectors.toList()));
