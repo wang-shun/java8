@@ -362,6 +362,7 @@ public class StockController {
 //        formulaDto.setFarmName(farm.getName());
         formulaDto.setWarehouseId(warehouseId);
         formulaDto.setHandleDate(Calendar.getInstance());
+        formulaDto.setSettlementDate(settlementDate);
         formulaDto.setFeedMaterial(feed);
         formulaDto.setFeedMaterialId(feed.getId());
         formulaDto.setFeedMaterialQuantity(new BigDecimal(feedProduce.getTotal()));
