@@ -766,6 +766,7 @@ public class WarehouseController {
                         .materialName(stock.getSkuName())
                         .quantity(stock.getQuantity())
                         .unit(null == unit ? "" : unit.getName())
+                        .unitId(Long.parseLong(sku.getUnit()))
                         .code(sku.getCode())
                         .specification(sku.getSpecification())
                         .vendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())))
