@@ -288,4 +288,27 @@
         </where>
     </select>
 
+    <select id="findBy" parameterType="map" resultMap="DoctorReportDeliverMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            orz_id = #{orzId}
+            AND orz_type = #{orzType}
+            AND date_type = #{dateType}
+            AND sum_at &gt;= date_format(#{startAt}, '%y-%m-%d')
+            AND sum_at &lt;= date_format(#{endAt}, '%y-%m-%d')
+        </where>
+    </select>
+
+    <select id="sumBy" parameterType="map" resultMap="DoctorReportDeliverMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            orz_id = #{orzId}
+            AND orz_type = #{orzType}
+            AND date_type = #{dateType}
+            AND sum_at &gt;= date_format(#{startAt}, '%y-%m-%d')
+            AND sum_at &lt;= date_format(#{endAt}, '%y-%m-%d')
+        </where>
+    </select>
 </mapper>

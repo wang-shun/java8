@@ -21,6 +21,7 @@ import io.terminus.doctor.event.model.DoctorReportMating;
 import io.terminus.doctor.event.model.DoctorReportNursery;
 import io.terminus.doctor.event.model.DoctorReportReserve;
 import io.terminus.doctor.event.model.DoctorReportSow;
+import io.terminus.doctor.event.service.DoctorDailyReportV2ReadService;
 import io.terminus.doctor.event.service.DoctorDailyReportV2Service;
 import io.terminus.doctor.web.front.report.DataFormatter.DataFormatter;
 import lombok.extern.slf4j.Slf4j;
@@ -29,9 +30,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 
@@ -47,6 +50,8 @@ public class ReportBoardHelper {
     private DoctorReportFieldCustomizesReadService doctorReportFieldCustomizesReadService;
     @RpcConsumer
     private DoctorDailyReportV2Service doctorDailyReportV2Service;
+    @RpcConsumer
+    private DoctorDailyReportV2ReadService doctorDailyReportV2ReadService;
 
     private final ApplicationContext applicationContext;
     private Map<String, Method> methodMap;
@@ -121,6 +126,47 @@ public class ReportBoardHelper {
         }
     }
 
+    public List<Map<String, String>> fillRegionReport(DoctorDimensionCriteria dimensionCriteria) {
+
+        DoctorReportRegion region = DoctorReportRegion.from(dimensionCriteria.getRegionType());
+
+        if (isNull(region)) {
+            throw new JsonResponseException("region.is.null");
+        }
+
+        switch (region) {
+            case RESERVE:
+                return RespHelper.or500(doctorDailyReportV2ReadService.reserveReport(dimensionCriteria))
+                        .stream().map(this::objToMap).collect(Collectors.toList());
+            case SOW:
+                return RespHelper.or500(doctorDailyReportV2ReadService.sowReport(dimensionCriteria))
+                        .stream().map(this::objToMap).collect(Collectors.toList());
+            case MATING:
+                return RespHelper.or500(doctorDailyReportV2ReadService.matingReport(dimensionCriteria))
+                        .stream().map(this::objToMap).collect(Collectors.toList());
+            case DELIVER:
+                return RespHelper.or500(doctorDailyReportV2ReadService.deliverReport(dimensionCriteria))
+                        .stream().map(this::objToMap).collect(Collectors.toList());
+            case NURSERY:
+                return RespHelper.or500(doctorDailyReportV2ReadService.nurseryReport(dimensionCriteria))
+                        .stream().map(this::objToMap).collect(Collectors.toList());
+            case FATTEN:
+                return RespHelper.or500(doctorDailyReportV2ReadService.fattenReport(dimensionCriteria))
+                        .stream().map(this::objToMap).collect(Collectors.toList());
+            case BOAR:
+                return RespHelper.or500(doctorDailyReportV2ReadService.boarReport(dimensionCriteria))
+                        .stream().map(this::objToMap).collect(Collectors.toList());
+            case MATERIAL:
+                return RespHelper.or500(doctorDailyReportV2ReadService.materialReport(dimensionCriteria))
+                        .stream().map(this::objToMap).collect(Collectors.toList());
+            case EFFICIENCY:
+                return RespHelper.or500(doctorDailyReportV2ReadService.efficiencyReport(dimensionCriteria))
+                        .stream().map(this::objToMap).collect(Collectors.toList());
+            default:
+                throw new JsonResponseException("region.is.illegal");
+        }
+    }
+
     private void subFieldDefault(DoctorReportFieldTypeDto doctorReportFieldTypeDto) {
         doctorReportFieldTypeDto.getFields().forEach(subField -> subField.setValue("-"));
     }
@@ -138,6 +184,23 @@ public class ReportBoardHelper {
                 throw new JsonResponseException("method.invoke.error");
             }
         });
+    }
+
+
+    private Map<String, String> objToMap(Object obj){
+        Class clazz= obj.getClass();
+        Map<String, String> map = Maps.newHashMap();
+        Field[] fields = clazz.getDeclaredFields();
+
+        for (Field field: fields) {
+            try {
+                field.setAccessible(true);
+                map.put(field.getName(), getValue(field.get(obj), null));
+            } catch (Exception e) {
+                log.error("field name error, fieldName:{}, cause:{}", field.getName(), Throwables.getStackTraceAsString(e));
+            }
+        }
+        return map;
     }
 
     private static String getMethodName(String regionName, String reportFiled) {

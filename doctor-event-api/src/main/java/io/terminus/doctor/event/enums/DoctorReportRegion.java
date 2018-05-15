@@ -37,4 +37,13 @@ public enum DoctorReportRegion {
         }
         return null;
     }
+
+    public static DoctorReportRegion from(Integer value){
+        for(DoctorReportRegion reportRegion : DoctorReportRegion.values()){
+            if(Objects.equals(reportRegion.getValue(), value)){
+                return reportRegion;
+            }
+        }
+        return null;
+    }
 }
