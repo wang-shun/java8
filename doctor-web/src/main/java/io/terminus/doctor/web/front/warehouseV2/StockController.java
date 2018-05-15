@@ -318,6 +318,7 @@ public class StockController {
             @RequestParam("orgId") Long orgId,
             @RequestParam("warehouseId") Long warehouseId,
             @RequestParam("feedFormulaId") Long feedFormulaId,
+            @RequestParam("operatorId") Long operatorId,
             @RequestParam("materialProduceJson") String materialProduceJson) {
 
 
@@ -363,6 +364,7 @@ public class StockController {
         formulaDto.setWarehouseId(warehouseId);
         formulaDto.setHandleDate(Calendar.getInstance());
         formulaDto.setSettlementDate(settlementDate);
+        formulaDto.setOperatorId(operatorId);
         formulaDto.setFeedMaterial(feed);
         formulaDto.setFeedMaterialId(feed.getId());
         formulaDto.setFeedMaterialQuantity(new BigDecimal(feedProduce.getTotal()));
