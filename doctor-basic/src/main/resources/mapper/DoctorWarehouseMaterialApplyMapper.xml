@@ -365,12 +365,12 @@
             e.staff_name,
             c.code,
             c.name as sku_name,
-            c.unit as unit,
+            db.name as unit,
             sum( a.quantity ) AS quantity,
             ifnull(sum( a.unit_price * a.quantity ) / sum( a.quantity ),0) AS unit_price,
             sum(a.amount) AS amount,
             c.type as sku_type,
-            b.vendor_name,
+            b.name as vendor_name,
             c.specification,
             date_format(d.open_at,'%Y-%m-%d') as open_at,
             date_format(d.close_at,'%Y-%m-%d') as close_at,
@@ -379,10 +379,11 @@
             a.material_id as sku_id
         FROM
             doctor_warehouse_material_apply a
-            JOIN doctor_warehouse_material_handle b ON a.material_handle_id = b.id
             JOIN doctor_warehouse_sku c ON a.material_id = c.id
+            JOIN doctor_warehouse_vendor b ON c.vendor_id = b.id
             JOIN doctor_groups d ON d.id = a.pig_group_id
             JOIN doctor_barns e ON e.id = a.pig_barn_id
+            JOIN doctor_basics as db on db.id=c.unit
         WHERE
             a.apply_type = 1
             <if test="farmId != null"> AND a.farm_id = #{farmId}</if>
@@ -396,8 +397,7 @@
         GROUP BY
             a.material_id,
             a.pig_group_id,
-            a.pig_barn_id,
-            a.material_handle_id
+            a.pig_barn_id
     </select>
 
     <!--猪群Start-->
