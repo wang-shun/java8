@@ -278,6 +278,10 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectOne(this.sqlId("findByStockHandleId"), id);
     }
 
+    public List<DoctorWarehouseMaterialHandle> findByStockHandleIds(Long id) {
+        return this.sqlSession.selectList(this.sqlId("findByStockHandleIds"), id);
+    }
+
     //查公司结算列表
     public List<Map> listByFarmIdTime(Map<String, Object> criteria) {
         List<Map> resultList = this.sqlSession.selectList("listByFarmIdTime", criteria);

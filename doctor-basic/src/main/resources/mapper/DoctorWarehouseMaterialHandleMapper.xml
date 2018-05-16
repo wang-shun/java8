@@ -453,9 +453,14 @@
         order by settlement_date ,id desc;
     </select>
 
-    <select id="findByStockHandleId" parameterType="long" resultType="DoctorWarehouseMaterialHandle">
+    <select id="findByStockHandleId" parameterType="long" resultMap="DoctorWarehouseMaterialHandleMap">
         select * from  doctor_warehouse_material_handle
-        where  stock_handle_id = #{id}
+        where  stock_handle_id = #{id} and delete_flag = 1
+    </select>
+
+    <select id="findByStockHandleIds" parameterType="long" resultMap="DoctorWarehouseMaterialHandleMap">
+        select * from  doctor_warehouse_material_handle
+        where  stock_handle_id = #{id} and delete_flag = 1
     </select>
 
     <select id="listByFarmIdTime" parameterType="map" resultType="map">
