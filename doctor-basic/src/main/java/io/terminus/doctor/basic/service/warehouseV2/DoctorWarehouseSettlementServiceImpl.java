@@ -222,7 +222,11 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                 if (null == formulaInStockHandle)
                     throw new ServiceException("stock.handle.not.found");
                 //根据配方入库单据获取对应配方出库单据，再根据配方出库单据获取明细
-                List<DoctorWarehouseMaterialHandle> formulaOutMaterialHandles = doctorWarehouseMaterialHandleDao.findByStockHandles(doctorWarehouseStockHandleDao.findRelStockHandle(formulaInStockHandle.getId()).stream().map(DoctorWarehouseStockHandle::getId).collect(Collectors.toList()));
+                log.info("find formula out stock handle for in stock handle :{}", formulaInStockHandle.getId());
+
+                List<Long> formulaOutStockHandleIds = doctorWarehouseStockHandleDao.findRelStockHandle(formulaInStockHandle.getId()).stream().map(DoctorWarehouseStockHandle::getId).collect(Collectors.toList());
+                log.info("formula out stock handle is {}", formulaOutStockHandleIds);
+                List<DoctorWarehouseMaterialHandle> formulaOutMaterialHandles = doctorWarehouseMaterialHandleDao.findByStockHandles(formulaOutStockHandleIds);
                 if (formulaOutMaterialHandles.isEmpty())
                     throw new ServiceException("formula.out.material.handle.not.found");
 

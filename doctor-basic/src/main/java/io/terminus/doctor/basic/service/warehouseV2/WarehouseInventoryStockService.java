@@ -14,7 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by sunbo@terminus.io on 2018/4/21.
@@ -56,9 +59,13 @@ public class WarehouseInventoryStockService extends
                 }).getQuantity();
 
             int c = detail.getQuantity().compareTo(stockQuantity);
-            if (c > 0)
+            if (c > 0) {
+                //盘盈单
+                if (detail.getUnitPrice() == null)
+                    throw new ServiceException("inventory.material.handle.unit.price.not.null");
+
                 profitInventory.put(detail, detail.getQuantity().subtract(stockQuantity));
-            else if (c < 0)
+            } else if (c < 0)
                 deficitInventory.put(detail, stockQuantity.subtract(detail.getQuantity()));
             else
                 log.info("material[{}] at {} have same quantity with stock", detail.getMaterialId(), stockDto.getHandleDate(), detail.getQuantity());
@@ -175,8 +182,12 @@ public class WarehouseInventoryStockService extends
                 if (materialHandle.getType().equals(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue())
                         && detail.getQuantity().compareTo(materialHandle.getBeforeStockQuantity()) > 0) {
                     //盘亏改盘盈
+                    if (detail.getUnitPrice() == null)
+                        throw new ServiceException("inventory.material.handle.unit.price.not.null");
+
                     materialHandle.setType(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue());
                     materialHandle.setStockHandleId(newStockHandle.getId());
+                    materialHandle.setUnitPrice(detail.getUnitPrice());
 
                     stockChangedQuantity = materialHandle.getQuantity().add(detail.getQuantity().subtract(materialHandle.getBeforeStockQuantity()));
 
