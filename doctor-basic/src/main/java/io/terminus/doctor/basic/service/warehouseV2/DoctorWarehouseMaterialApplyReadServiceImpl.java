@@ -136,8 +136,8 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
     @Override
     public Response<Map<String,Object>> selectPigGroupApply(Integer farmId, String pigType, String pigName, String pigGroupName,
-                                                                                                Integer skuType, String skuName, String openAt, String closeAt){
-        List<DoctorWarehouseMaterialApplyPigGroup> pigGroupList =doctorWarehouseMaterialApplyDao.selectPigGroupApply(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAt,closeAt);
+                                                                                                Integer skuType, String skuName, String openAtStart,String openAtEnd, String closeAtStart,String closeAtEnd){
+        List<DoctorWarehouseMaterialApplyPigGroup> pigGroupList =doctorWarehouseMaterialApplyDao.selectPigGroupApply1(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAtStart,openAtEnd,closeAtStart,closeAtEnd);
         Double allQuantity = 0.0;
         Double allAmount = 0.0;
         for(int i = 0;i<pigGroupList.size(); i++){

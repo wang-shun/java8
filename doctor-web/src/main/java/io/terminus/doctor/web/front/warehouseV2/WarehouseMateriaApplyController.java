@@ -52,9 +52,11 @@ public class WarehouseMateriaApplyController {
                                                                                @RequestParam(required = false) String pigGroupName,
                                                                                @RequestParam(required = false) Integer skuType,
                                                                                @RequestParam(required = false) String skuName,
-                                                                               @RequestParam(required = false) String openAt,
-                                                                               @RequestParam(required = false) String closeAt){
-        Map<String,Object> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApply(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAt,closeAt));
+                                                                               @RequestParam(required = false) String openAtStart,
+                                                                               @RequestParam(required = false) String openAtEnd,
+                                                                               @RequestParam(required = false) String closeAtStart,
+                                                                               @RequestParam(required = false) String closeAtEnd){
+        Map<String,Object> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApply(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAtStart,openAtEnd,closeAtStart,closeAtEnd));
         return a;
     }
     @RequestMapping(method = RequestMethod.GET, value = "piggroup/detail")

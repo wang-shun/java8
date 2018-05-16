@@ -67,7 +67,7 @@ public interface DoctorWarehouseMaterialApplyReadService {
     Response<List<DoctorWarehouseMaterialApply>> month(Long warehouseId, Integer applyYear, Integer applyMonth, String skuName);
 
     Response<Map<String,Object>> selectPigGroupApply(Integer farmId, String pigType, String pigName, String pigGroupName,
-                                                                                         Integer skuType, String skuName, String openAt, String closeAt);
+                                                                                         Integer skuType, String skuName, String openAtStart,String openAtEnd, String closeAtStart,String closeAtEnd);
 
     /**
      * 猪舍领用报表
