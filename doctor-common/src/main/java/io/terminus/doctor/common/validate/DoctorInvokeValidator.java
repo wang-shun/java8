@@ -2,7 +2,6 @@ package io.terminus.doctor.common.validate;
 
 import io.terminus.common.exception.ServiceException;
 import lombok.extern.slf4j.Slf4j;
-
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.executable.ExecutableValidator;

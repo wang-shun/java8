@@ -26,6 +26,7 @@ import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.web.front.warehouseV2.dto.WarehouseDto;
 import io.terminus.doctor.web.front.warehouseV2.vo.*;
 import io.terminus.pampas.common.UserUtil;
+import io.terminus.pampas.design.model.Page;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
@@ -34,6 +35,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
@@ -54,6 +56,7 @@ public class WarehouseController {
 
     @Autowired
     private DoctorFarmReadService doctorFarmReadService;
+
     @RpcConsumer
     private DoctorWareHouseReadService doctorWareHouseReadService;
 
@@ -65,12 +68,10 @@ public class WarehouseController {
     @Autowired
     private DoctorWareHouseWriteService doctorWareHouseWriteService;
 
-
     @Autowired
     private DoctorUserProfileReadService doctorUserProfileReadService;
     @RpcConsumer
     private NewDoctorWarehouseReaderService doctorWarehouseReaderService;
-
 
     @RpcConsumer
     private DoctorWarehouseMaterialHandleReadService doctorWarehouseMaterialHandleReadService;
@@ -106,7 +107,6 @@ public class WarehouseController {
     @RpcConsumer
     private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
 
-
     @Autowired
     private MessageSource messageSource;
 
@@ -122,16 +122,20 @@ public class WarehouseController {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
+        //判断是否有猪场ID
         Response<DoctorFarm> farmResponse = doctorFarmReadService.findFarmById(warehouseDto.getFarmId());
         checkState(farmResponse.isSuccess(), "read.farmInfo.fail");
+        //得到farmName
         DoctorFarm doctorFarm = farmResponse.getResult();
 
         if (doctorFarm == null)
             throw new JsonResponseException("farm.not.found");
 
+        //得到managerName
         UserProfile userProfile = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserId(warehouseDto.getManagerId()));
 
         Response<User> currentUserResponse = userReadService.findById(UserUtil.getUserId());
+        //得到creatorId,creatorName
         User currentUser = currentUserResponse.getResult();
         if (null == currentUser)
             throw new JsonResponseException("user.not.login");
@@ -143,10 +147,71 @@ public class WarehouseController {
                 .address(warehouseDto.getAddress()).type(warehouseDto.getType())
                 .creatorId(currentUser.getId()).creatorName(currentUser.getName())
                 .build();
+        //调创建仓库的方法
         Response<Long> warehouseCreateResponse = doctorWareHouseWriteService.createWareHouse(doctorWareHouse);
         if (!warehouseCreateResponse.isSuccess())
             throw new JsonResponseException(warehouseCreateResponse.getError());
         return true;
+    }
+
+
+    /**
+     * 修改仓库
+     *
+     * @param warehouseDto
+     * @param errors
+     */
+    @RequestMapping(value = "/update", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
+    public boolean update(@RequestBody @Valid WarehouseDto warehouseDto, Errors errors) {
+
+        if (errors.hasErrors())
+            throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
+
+        // 判断是否有猪场ID
+        Response<DoctorFarm> farmResponse = doctorFarmReadService.findFarmById(warehouseDto.getFarmId());
+        checkState(farmResponse.isSuccess(), "read.farmInfo.fail");
+        // 得到farmName
+        DoctorFarm doctorFarm = farmResponse.getResult();
+
+        if (doctorFarm == null)
+            throw new JsonResponseException("farm.not.found");
+
+        // 得到managerName
+        UserProfile userProfile = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserId(warehouseDto.getManagerId()));
+
+        Response<User> currentUserResponse = userReadService.findById(UserUtil.getUserId());
+        // 得到creatorId,creatorName
+        User currentUser = currentUserResponse.getResult();
+        if (null == currentUser)
+            throw new JsonResponseException("user.not.login");
+
+        // warehouse 信息, 修改ManagerId, ManagerName, address 地址信息， WareHouseName 仓库名称
+        DoctorWareHouse doctorWareHouse = DoctorWareHouse.builder()
+                .id(warehouseDto.getId())
+                .type(warehouseDto.getType())
+                .farmId(warehouseDto.getFarmId())
+                .wareHouseName(warehouseDto.getName())
+                .managerId(warehouseDto.getManagerId()).managerName(userProfile.getRealName())
+                .address(warehouseDto.getAddress())
+                .updatorId(currentUser.getId()).updatorName(currentUser.getName())
+                .build();
+
+        //调修改仓库的方法
+        return RespHelper.or500(doctorWareHouseWriteService.updateWareHouse(doctorWareHouse));
+    }
+
+    /**
+     * 删除仓库
+     *
+     * @param warehouseDto
+     */
+    @RequestMapping(value = "/delete", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public boolean delete(@RequestBody WarehouseDto warehouseDto) {
+        DoctorWareHouse doctorWareHouse = DoctorWareHouse.builder()
+                .id(warehouseDto.getId())
+                .build();
+        // 调删除仓库的方法
+        return RespHelper.or500(doctorWareHouseWriteService.deleteWareHouse(doctorWareHouse));
     }
 
 
@@ -159,7 +224,6 @@ public class WarehouseController {
     /**
      * 猪厂下同类型的仓库列表
      *
-     * @param type
      * @param farmId
      * @return
      */
@@ -170,7 +234,6 @@ public class WarehouseController {
                                                @RequestParam(required = false) Long farmId) {
         if (null == orgId && null == farmId)
             throw new JsonResponseException("missing parameter,orgId or farmId must pick one");
-
 
         List<DoctorWareHouse> wareHouses;
         if (null != orgId) {
@@ -194,6 +257,41 @@ public class WarehouseController {
         });
         return vos;
     }
+
+
+    /*************************     2018/04/18  start       ******************************/
+    /**
+     * 按照仓库类型进行tab分页筛选，仓库按照创建时间进行排列
+     *
+     * @param farmId
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/sameTypeWarehouse")
+    public Response<List<Map<String, Object>>> sameTypeWarehouse(Integer type, Long farmId) {
+        if (null == farmId)
+            throw new JsonResponseException("missing parameter,farmId must pick one");
+        return doctorWarehouseReaderService.listTypeMap(farmId, type);
+    }
+
+    /**
+     * 展示该仓库所有物料结存数量和结存金额明细
+     *
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/sameDetailTypeWarehouse")
+    public Response<Paging<Map<String,Object>>> sameDetailTypeWarehouse(Integer type,
+                                                                      String materialName,
+                                                                      Long warehouseId,
+                                                                      Integer pageNo,
+                                                                      Integer pageSize) {
+
+//        if (null == farmId)
+//            throw new JsonResponseException("missing parameter,farmId must pick one");
+        return doctorWarehouseReaderService.listDetailTypeMap(type,materialName,warehouseId,pageNo,pageSize);
+    }
+
+    /*************************    2018/04/18  end         ******************************/
+
 
     @RequestMapping(method = RequestMethod.GET, value = "type/statistics")
     @JsonView(WarehouseVo.WarehouseStatisticsView.class)
@@ -355,24 +453,24 @@ public class WarehouseController {
 
             WarehouseStockStatisticsDto warehouseStatistics = statistics.get(wareHouse.getId());
             if (null == warehouseStatistics) {
-                vo.setInAmount(0);
+                vo.setInAmount(new BigDecimal(0));
                 vo.setInQuantity(new BigDecimal(0));
-                vo.setOutAmount(0);
+                vo.setOutAmount(new BigDecimal(0));
                 vo.setOutQuantity(new BigDecimal(0));
-                vo.setTransferInAmount(0);
+                vo.setTransferInAmount(new BigDecimal(0));
                 vo.setTransferInQuantity(new BigDecimal(0));
-                vo.setTransferOutAmount(0);
+                vo.setTransferOutAmount(new BigDecimal(0));
                 vo.setTransferOutQuantity(new BigDecimal(0));
             } else {
                 vo.setInAmount(warehouseStatistics.getIn().getAmount()
-                        + warehouseStatistics.getInventoryProfit().getAmount()
-                        + warehouseStatistics.getFormulaIn().getAmount());
+                        .add(warehouseStatistics.getInventoryProfit().getAmount())
+                        .add(warehouseStatistics.getFormulaIn().getAmount()));
                 vo.setInQuantity(warehouseStatistics.getIn().getQuantity()
                         .add(warehouseStatistics.getInventoryProfit().getQuantity())
                         .add(warehouseStatistics.getFormulaIn().getQuantity()));
                 vo.setOutAmount(warehouseStatistics.getOut().getAmount()
-                        + warehouseStatistics.getInventoryDeficit().getAmount()
-                        + warehouseStatistics.getFormulaOut().getAmount());
+                        .add(warehouseStatistics.getInventoryDeficit().getAmount())
+                        .add(warehouseStatistics.getFormulaOut().getAmount()));
                 vo.setOutQuantity(warehouseStatistics.getOut().getQuantity()
                         .add(warehouseStatistics.getInventoryDeficit().getQuantity())
                         .add(warehouseStatistics.getFormulaOut().getQuantity()));
@@ -385,7 +483,7 @@ public class WarehouseController {
             AmountAndQuantityDto balance = warehouseBalance.get(wareHouse.getId());
             if (null == balance) {
 //                vo.setBalanceQuantity(new BigDecimal(0));
-                vo.setBalanceAmount(0);
+                vo.setBalanceAmount(new BigDecimal(0));
             } else {
                 vo.setBalanceAmount(balance.getAmount());
 //                vo.setBalanceQuantity(balance.getQuantity());
@@ -466,18 +564,18 @@ public class WarehouseController {
             DoctorWarehouseSku sku = skuMap.containsKey(stock.getSkuId()) ? skuMap.get(stock.getSkuId()).get(0) : null;
 
             vo.setInAmount(statisticsResponse.getResult().getIn().getAmount()
-                    + statisticsResponse.getResult().getInventoryProfit().getAmount()
-                    + statisticsResponse.getResult().getTransferIn().getAmount()
-                    + statisticsResponse.getResult().getFormulaIn().getAmount());
+                    .add(statisticsResponse.getResult().getInventoryProfit().getAmount())
+                    .add(statisticsResponse.getResult().getTransferIn().getAmount())
+                    .add(statisticsResponse.getResult().getFormulaIn().getAmount()));
             vo.setInQuantity(statisticsResponse.getResult().getIn().getQuantity()
                     .add(statisticsResponse.getResult().getInventoryProfit().getQuantity())
                     .add(statisticsResponse.getResult().getTransferIn().getQuantity())
                     .add(statisticsResponse.getResult().getFormulaIn().getQuantity()));
 
             vo.setOutAmount(statisticsResponse.getResult().getOut().getAmount()
-                    + statisticsResponse.getResult().getInventoryDeficit().getAmount()
-                    + statisticsResponse.getResult().getTransferOut().getAmount()
-                    + statisticsResponse.getResult().getFormulaOut().getAmount());
+                    .add(statisticsResponse.getResult().getInventoryDeficit().getAmount())
+                    .add(statisticsResponse.getResult().getTransferOut().getAmount())
+                    .add(statisticsResponse.getResult().getFormulaOut().getAmount()));
             vo.setOutQuantity(statisticsResponse.getResult().getOut().getQuantity()
                     .add(statisticsResponse.getResult().getInventoryDeficit().getQuantity())
                     .add(statisticsResponse.getResult().getTransferOut().getQuantity())
@@ -519,6 +617,10 @@ public class WarehouseController {
         vo.setType(wareHouseResponse.getResult().getType());
         vo.setManagerId(wareHouseResponse.getResult().getManagerId());
         vo.setManagerName(wareHouseResponse.getResult().getManagerName());
+        vo.setFarmId(wareHouseResponse.getResult().getFarmId());
+        vo.setFarmName(wareHouseResponse.getResult().getFarmName());
+        vo.setAddress(wareHouseResponse.getResult().getAddress());
+
 
         if (null != applyResponse && !applyResponse.getResult().isEmpty())
             vo.setLastApplyDate(applyResponse.getResult().get(0).getApplyDate());
@@ -573,15 +675,15 @@ public class WarehouseController {
                 .balanceAmount(amountAndQuantity.getAmount())
                 .balanceQuantity(new BigDecimal(quantity))
                 .inAmount(statistics.getIn().getAmount()
-                        + statistics.getFormulaIn().getAmount()
-                        + statistics.getInventoryProfit().getAmount())
+                        .add(statistics.getFormulaIn().getAmount())
+                        .add(statistics.getInventoryProfit().getAmount()))
                 .inQuantity(statistics.getIn().getQuantity()
                         .add(statistics.getFormulaIn().getQuantity())
                         .add(statistics.getInventoryProfit().getQuantity()))
 
-                .outAmount(statistics.getOut().getAmount() +
-                        statistics.getFormulaOut().getAmount() +
-                        statistics.getInventoryDeficit().getAmount())
+                .outAmount(statistics.getOut().getAmount().add(
+                        statistics.getFormulaOut().getAmount()).add(
+                        statistics.getInventoryDeficit().getAmount()))
                 .outQuantity(statistics.getOut().getQuantity()
                         .add(statistics.getFormulaOut().getQuantity())
                         .add(statistics.getInventoryDeficit().getQuantity()))
@@ -657,15 +759,20 @@ public class WarehouseController {
             if (NumberUtils.isNumber(sku.getUnit()))
                 unit = RespHelper.or500(doctorBasicReadService.findBasicById(Long.parseLong(sku.getUnit())));
 
-            data.add(WarehouseStockVo.builder()
-                    .materialId(stock.getSkuId())
-                    .materialName(stock.getSkuName())
-                    .quantity(stock.getQuantity())
-                    .unit(null == unit ? "" : unit.getName())
-                    .code(sku.getCode())
-                    .specification(sku.getSpecification())
-                    .vendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())))
-                    .build());
+            if(!stock.getQuantity().equals(0)){
+                if(stock.getQuantity().compareTo(BigDecimal.ZERO)!=0){
+                data.add(WarehouseStockVo.builder()
+                        .materialId(stock.getSkuId())
+                        .materialName(stock.getSkuName())
+                        .quantity(stock.getQuantity())
+                        .unit(null == unit ? "" : unit.getName())
+                        .unitId(Long.parseLong(sku.getUnit()))
+                        .code(sku.getCode())
+                        .specification(sku.getSpecification())
+                        .vendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())))
+                        .build());
+                }
+            }
         }
         vo.setData(data);
         vo.setTotal(stockResponse.getResult().getTotal());
@@ -969,7 +1076,7 @@ public class WarehouseController {
 
                     AmountAndQuantityDto balance = balanceResponse.getResult().get(type.getKey());
                     if (null == balance) {
-                        vo.setBalanceAmount(0);
+                        vo.setBalanceAmount(new BigDecimal(0));
                         vo.setBalanceQuantity(new BigDecimal(0));
                     } else {
                         vo.setBalanceAmount(balance.getAmount());
@@ -978,17 +1085,17 @@ public class WarehouseController {
                     WarehouseStockStatisticsDto statistics = statisticsDtoResponse.getResult().get(type.getKey());
                     if (null == statistics) {
                         vo.setInQuantity(new BigDecimal(0));
-                        vo.setInAmount(0);
-                        vo.setOutAmount(0);
+                        vo.setInAmount(new BigDecimal(0));
+                        vo.setOutAmount(new BigDecimal(0));
                         vo.setOutQuantity(new BigDecimal(0));
-                        vo.setInventoryDeficitAmount(0);
+                        vo.setInventoryDeficitAmount(new BigDecimal(0));
                         vo.setInventoryDeficitQuantity(new BigDecimal(0));
-                        vo.setInventoryProfitAmount(0);
+                        vo.setInventoryProfitAmount(new BigDecimal(0));
                         vo.setInventoryProfitQuantity(new BigDecimal(0));
                         vo.setTransferOutQuantity(new BigDecimal(0));
-                        vo.setTransferOutAmount(0);
+                        vo.setTransferOutAmount(new BigDecimal(0));
                         vo.setTransferInQuantity(new BigDecimal(0));
-                        vo.setTransferInAmount(0);
+                        vo.setTransferInAmount(new BigDecimal(0));
                     } else {
                         vo.setInQuantity(statistics.getIn().getQuantity());
                         vo.setInAmount(statistics.getIn().getAmount());
@@ -1029,7 +1136,7 @@ public class WarehouseController {
 
                     AmountAndQuantityDto balance = balanceResponse.getResult().get(warehouse.getId());
                     if (null == balance) {
-                        vo.setBalanceAmount(0);
+                        vo.setBalanceAmount(new BigDecimal(0));
                         vo.setBalanceQuantity(new BigDecimal(0));
                     } else {
                         vo.setBalanceAmount(balance.getAmount());
@@ -1038,17 +1145,17 @@ public class WarehouseController {
                     WarehouseStockStatisticsDto statistics = statisticsDtoResponse.getResult().get(warehouse.getId());
                     if (null == statistics) {
                         vo.setInQuantity(new BigDecimal(0));
-                        vo.setInAmount(0);
-                        vo.setOutAmount(0);
+                        vo.setInAmount(new BigDecimal(0));
+                        vo.setOutAmount(new BigDecimal(0));
                         vo.setOutQuantity(new BigDecimal(0));
-                        vo.setInventoryDeficitAmount(0);
+                        vo.setInventoryDeficitAmount(new BigDecimal(0));
                         vo.setInventoryDeficitQuantity(new BigDecimal(0));
-                        vo.setInventoryProfitAmount(0);
+                        vo.setInventoryProfitAmount(new BigDecimal(0));
                         vo.setInventoryProfitQuantity(new BigDecimal(0));
                         vo.setTransferOutQuantity(new BigDecimal(0));
-                        vo.setTransferOutAmount(0);
+                        vo.setTransferOutAmount(new BigDecimal(0));
                         vo.setTransferInQuantity(new BigDecimal(0));
-                        vo.setTransferInAmount(0);
+                        vo.setTransferInAmount(new BigDecimal(0));
                     } else {
                         vo.setInQuantity(statistics.getIn().getQuantity());
                         vo.setInAmount(statistics.getIn().getAmount());
@@ -1091,7 +1198,7 @@ public class WarehouseController {
 //                    vo.setUnit(stock.getUnit());
                     AmountAndQuantityDto balance = balanceResponse.getResult().get(stock.getSkuId());
                     if (null == balance) {
-                        vo.setBalanceAmount(0);
+                        vo.setBalanceAmount(new BigDecimal(0));
                         vo.setBalanceQuantity(new BigDecimal(0));
                     } else {
                         vo.setBalanceAmount(balance.getAmount());
@@ -1100,17 +1207,17 @@ public class WarehouseController {
                     WarehouseStockStatisticsDto statistics = statisticsDtoResponse.getResult().get(stock.getSkuId());
                     if (null == statistics) {
                         vo.setInQuantity(new BigDecimal(0));
-                        vo.setInAmount(0);
-                        vo.setOutAmount(0);
+                        vo.setInAmount(new BigDecimal(0));
+                        vo.setOutAmount(new BigDecimal(0));
                         vo.setOutQuantity(new BigDecimal(0));
-                        vo.setInventoryDeficitAmount(0);
+                        vo.setInventoryDeficitAmount(new BigDecimal(0));
                         vo.setInventoryDeficitQuantity(new BigDecimal(0));
-                        vo.setInventoryProfitAmount(0);
+                        vo.setInventoryProfitAmount(new BigDecimal(0));
                         vo.setInventoryProfitQuantity(new BigDecimal(0));
                         vo.setTransferOutQuantity(new BigDecimal(0));
-                        vo.setTransferOutAmount(0);
+                        vo.setTransferOutAmount(new BigDecimal(0));
                         vo.setTransferInQuantity(new BigDecimal(0));
-                        vo.setTransferInAmount(0);
+                        vo.setTransferInAmount(new BigDecimal(0));
                     } else {
                         vo.setInQuantity(statistics.getIn().getQuantity());
                         vo.setInAmount(statistics.getIn().getAmount());
@@ -1169,4 +1276,37 @@ public class WarehouseController {
         return unitPriceResponse.getResult();
     }
 
+    /**
+     * 猪厂下同类型的仓库列表
+     *
+     * @param type
+     * @param farmId
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "types/{type}")
+    @JsonView(WarehouseVo.WarehouseWithOutStatisticsView.class)
+    public List<WarehouseVo> getWarehouseByType(@PathVariable Integer type,
+                                                @RequestParam(required = false) Long orgId,
+                                                @RequestParam(required = false) Long farmId,
+                                                int currentPage) {
+        if (null == orgId && null == farmId)
+            throw new JsonResponseException("missing parameter,orgId or farmId must pick one");
+
+        DoctorWareHouse criteria = new DoctorWareHouse();
+        criteria.setType(type);
+        criteria.setFarmId(farmId);
+        List<DoctorWareHouse> wareHouses = RespHelper.or500(doctorWarehouseReaderService.getWarehouseByType(criteria, currentPage));
+
+        List<WarehouseVo> vos = new ArrayList<>(wareHouses.size());
+        wareHouses.forEach(wareHouse -> {
+            WarehouseVo vo = new WarehouseVo();
+            vo.setId(wareHouse.getId());
+            vo.setName(wareHouse.getWareHouseName());
+            vo.setType(wareHouse.getType());
+            vo.setManagerName(wareHouse.getManagerName());
+            vo.setManagerId(wareHouse.getManagerId());
+            vos.add(vo);
+        });
+        return vos;
+    }
 }

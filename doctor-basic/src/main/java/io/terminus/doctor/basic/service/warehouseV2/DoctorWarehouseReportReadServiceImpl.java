@@ -27,7 +27,6 @@ import java.util.stream.Stream;
 @RpcProvider
 public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseReportReadService {
 
-
     private static final WarehouseMaterialHandleType[] ALL_KIND_OF_HANDLE = new WarehouseMaterialHandleType[]{
             WarehouseMaterialHandleType.IN,
             WarehouseMaterialHandleType.OUT,
@@ -102,12 +101,12 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
 
         doctorWareHouseDao.findByFarmId(farmId).stream().collect(Collectors.groupingBy(DoctorWareHouse::getType)).forEach((k, v) -> {
             Map<String, Object> params = new HashMap<>();
-            long amount = 0;
+            BigDecimal amount = new BigDecimal(0);
             BigDecimal quantity = new BigDecimal(0);
             for (DoctorWareHouse w : v) {
                 params.put("warehouseId", w.getId());
                 AmountAndQuantityDto amountAndQuantityDto = doctorWarehouseStockMonthlyDao.statistics(params);
-                amount += amountAndQuantityDto.getAmount();
+                amount = amount.add(amountAndQuantityDto.getAmount());
                 quantity = quantity.add(amountAndQuantityDto.getQuantity());
             }
             eachWarehouseTypeBalance.put(k, new AmountAndQuantityDto(amount, quantity));
@@ -146,7 +145,7 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
         Map<Long, AmountAndQuantityDto> eachWarehouseBalance = new HashMap<>();
         doctorWareHouseDao.list(DoctorWareHouse.builder().farmId(farmId).type(warehouseType).build()).stream().forEach(w -> {
             Map<String, Object> params = new HashMap<>();
-            params.put("warehouseId", w.getId());
+                params.put("warehouseId", w.getId());
             eachWarehouseBalance.put(w.getId(), doctorWarehouseStockMonthlyDao.statistics(params));
         });
         return Response.ok(eachWarehouseBalance);
@@ -212,7 +211,7 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
     public Response<AmountAndQuantityDto> countBalance(Long farmId, Integer warehouseType, Long warehouseId, Long materialId, String vendorName) {
 
 
-        long amount = 0;
+        BigDecimal amount = new BigDecimal(0);
         BigDecimal quantity = new BigDecimal(0);
         List<DoctorWareHouse> wareHouses;
         if (null != warehouseId)
@@ -224,7 +223,7 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
             params.put("warehouseId", wareHouse.getId());
             params.put("skuId", materialId);
             AmountAndQuantityDto a = doctorWarehouseStockMonthlyDao.statistics(params);
-            amount += a.getAmount();
+            amount = amount.add(a.getAmount());
             quantity = quantity.add(a.getQuantity());
 
         }
@@ -367,25 +366,25 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
 
         if (null == handles || handles.isEmpty())
             return WarehouseStockStatisticsDto.builder()
-                    .in(new AmountAndQuantityDto(0, new BigDecimal(0)))
-                    .out(new AmountAndQuantityDto(0, new BigDecimal(0)))
-                    .inventoryDeficit(new AmountAndQuantityDto(0, new BigDecimal(0)))
-                    .inventoryProfit(new AmountAndQuantityDto(0, new BigDecimal(0)))
-                    .transferIn(new AmountAndQuantityDto(0, new BigDecimal(0)))
-                    .transferOut(new AmountAndQuantityDto(0, new BigDecimal(0)))
-                    .formulaIn(new AmountAndQuantityDto(0, new BigDecimal(0)))
-                    .formulaOut(new AmountAndQuantityDto(0, new BigDecimal(0)))
+                    .in(new AmountAndQuantityDto())
+                    .out(new AmountAndQuantityDto())
+                    .inventoryDeficit(new AmountAndQuantityDto())
+                    .inventoryProfit(new AmountAndQuantityDto())
+                    .transferIn(new AmountAndQuantityDto())
+                    .transferOut(new AmountAndQuantityDto())
+                    .formulaIn(new AmountAndQuantityDto())
+                    .formulaOut(new AmountAndQuantityDto())
                     .build();
 
 
-        long totalInAmount = 0;
-        long totalOutAmount = 0;
-        long totalTransferInAmount = 0;
-        long totalTransferOutAmount = 0;
-        long totalInventoryDeficitAmount = 0;
-        long totalInventoryProfitAmount = 0;
-        long totalFormulaInAmount = 0;
-        long totalFormulaOutAmount = 0;
+        BigDecimal totalInAmount = new BigDecimal(0);
+        BigDecimal totalOutAmount = new BigDecimal(0);
+        BigDecimal totalTransferInAmount = new BigDecimal(0);
+        BigDecimal totalTransferOutAmount = new BigDecimal(0);
+        BigDecimal totalInventoryDeficitAmount = new BigDecimal(0);
+        BigDecimal totalInventoryProfitAmount = new BigDecimal(0);
+        BigDecimal totalFormulaInAmount = new BigDecimal(0);
+        BigDecimal totalFormulaOutAmount = new BigDecimal(0);
         BigDecimal totalInQuantity = new BigDecimal(0);
         BigDecimal totalOutQuantity = new BigDecimal(0);
         BigDecimal totalInventoryDeficitQuantity = new BigDecimal(0);
@@ -397,32 +396,32 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
 
         for (DoctorWarehouseMaterialHandle handle : handles) {
 
-            long amount = handle.getQuantity().multiply(new BigDecimal(handle.getUnitPrice())).longValue();
+            BigDecimal amount = handle.getQuantity().multiply(handle.getUnitPrice());
             BigDecimal quantity = handle.getQuantity();
 
             if (WarehouseMaterialHandleType.IN.getValue() == handle.getType()) {
-                totalInAmount += amount;
+                totalInAmount = totalInAmount.add(amount);
                 totalInQuantity = totalInQuantity.add(quantity);
             } else if (WarehouseMaterialHandleType.OUT.getValue() == handle.getType()) {
-                totalOutAmount += amount;
+                totalOutAmount = totalOutAmount.add(amount);
                 totalOutQuantity = totalOutQuantity.add(quantity);
             } else if (WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue() == handle.getType()) {
-                totalInventoryDeficitAmount += amount;
+                totalInventoryDeficitAmount = totalInventoryDeficitAmount.add(amount);
                 totalInventoryDeficitQuantity = totalInventoryDeficitQuantity.add(quantity);
             } else if (WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue() == handle.getType()) {
-                totalInventoryProfitAmount += amount;
+                totalInventoryProfitAmount = totalInventoryProfitAmount.add(amount);
                 totalInventoryProfitQuantity = totalInventoryProfitQuantity.add(quantity);
             } else if (WarehouseMaterialHandleType.TRANSFER_IN.getValue() == handle.getType()) {
-                totalTransferInAmount += amount;
+                totalTransferInAmount = totalTransferInAmount.add(amount);
                 totalTransferInQuantity = totalTransferInQuantity.add(quantity);
             } else if (WarehouseMaterialHandleType.TRANSFER_OUT.getValue() == handle.getType()) {
-                totalTransferOutAmount += amount;
+                totalTransferOutAmount = totalTransferOutAmount.add(amount);
                 totalTransferOutQuantity = totalTransferOutQuantity.add(quantity);
             } else if (WarehouseMaterialHandleType.FORMULA_IN.getValue() == handle.getType()) {
-                totalFormulaInAmount += amount;
+                totalFormulaInAmount = totalFormulaInAmount.add(amount);
                 totalFormulaInQuantity = totalFormulaInQuantity.add(quantity);
             } else if (WarehouseMaterialHandleType.FORMULA_OUT.getValue() == handle.getType()) {
-                totalFormulaOutAmount += amount;
+                totalFormulaOutAmount = totalFormulaOutAmount.add(amount);
                 totalFormulaOutQuantity = totalFormulaOutQuantity.add(quantity);
             }
         }
@@ -469,6 +468,63 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
             criteria.put("bigType", Stream.of(types).map(WarehouseMaterialHandleType::getValue).collect(Collectors.toList()));
 
         return doctorWarehouseMaterialHandleDao.advList(criteria);
+    }
+
+    @Override
+    public Map<String, Object> lastWlbdReport(
+            Long farmId,
+            String settlementDate, Integer pigBarnType,
+            Long pigBarnId, Long pigGroupId, Integer handlerType,
+            Integer type, Long warehouseId, String materialName) {
+        Map<String,Object> lists = doctorWarehouseMaterialHandleDao.lastWlbdReport(
+                farmId, settlementDate, pigBarnType,
+                pigBarnId, pigGroupId, handlerType,
+                type, warehouseId, materialName);
+        return lists;
+    }
+
+    @Override
+    public List<Map<String, Object>> wlbdReport(
+            Long farmId,
+            String settlementDate, Integer pigBarnType,
+            Long pigBarnId, Long pigGroupId, Integer handlerType,
+            Integer type, Long warehouseId, String materialName) {
+        List<Map<String,Object>> lists = doctorWarehouseMaterialHandleDao.wlbdReport(
+                farmId, settlementDate, pigBarnType,
+                pigBarnId, pigGroupId, handlerType,
+                type, warehouseId, materialName);
+        return lists;
+    }
+
+    /**
+     * 获取会计年月里面所有物料数据
+     * @param farmId
+     * @param settlementDate
+     * @param pigBarnType
+     * @param pigBarnId
+     * @param pigGroupId
+     * @param handlerType
+     * @param type
+     * @param warehouseId
+     * @param materialName
+     * @return
+     */
+    @Override
+    public List<Map<String,Object>> getMeterails(
+            Long farmId,
+            String settlementDate,
+            Integer pigBarnType,
+            Long pigBarnId,
+            Long pigGroupId,
+            Integer handlerType,
+            Integer type,
+            Long warehouseId,
+            String materialName){
+        List<Map<String,Object>> lists = doctorWarehouseMaterialHandleDao.getMeterails(
+                farmId, settlementDate, pigBarnType,
+                pigBarnId, pigGroupId, handlerType,
+                type, warehouseId, materialName);
+        return lists;
     }
 
 }

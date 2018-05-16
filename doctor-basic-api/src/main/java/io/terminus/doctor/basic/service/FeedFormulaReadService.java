@@ -28,6 +28,19 @@ public interface FeedFormulaReadService {
     Response<FeedFormula> findFeedFormulaById(Long feedId, Long farmId);
 
     /**
+     * 分页查询配方列表数据
+     * @param formulaName
+     * @param feedName
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    Response<Paging<FeedFormula>> pagingFormulaList(Long farmId,String formulaName,
+                                                    String feedName,
+                                                    Integer pageNo,
+                                                    Integer pageSize);
+
+    /**
      * 分页查询配方
      * @param feedId
      * @param farmId

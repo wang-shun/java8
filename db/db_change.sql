@@ -2165,3 +2165,64 @@ CREATE TABLE `doctor_chg_farm_infos` (
 
 -- 转场事件名 改为转场转出
 UPDATE doctor_pig_events set name = '转场转出' where type = 2;
+-- 修改单据明细中的盘点之前库存数量字段 2018-04-09
+ALTER TABLE doctor_warehouse_material_handle CHANGE before_inventory_quantity before_stock_quantity DECIMAL(23,2) COMMENT '之前库存数量';
+
+
+--添加公司结算记录表 2018-04-16
+CREATE TABLE `doctor_warehouse_org_settlement` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司id',
+  `last_settlement_date` datetime DEFAULT NULL COMMENT '上一次结算的会计年月',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='公司结算记录表';
+
+--单据表添加关联单据id字段 2018-04-16
+ALTER TABLE doctor_warehouse_stock_handle ADD rel_stock_handle_id BIGINT NULL COMMENT '关联单据id';
+
+--单据明细表添加公司ID 2018-04-17
+ALTER TABLE doctor_warehouse_material_handle ADD org_id BIGINT NULL COMMENT '公司id';
+ALTER TABLE doctor_warehouse_material_handle
+  MODIFY COLUMN org_id BIGINT COMMENT '公司id' AFTER stock_handle_id;
+
+-- 单据明细添加金额 2018-04-18
+ALTER TABLE doctor_warehouse_material_handle ADD amount decimal(23,2) NULL COMMENT '金额';
+
+-- 单据添加会计年月 2018-04-18
+ALTER TABLE doctor_warehouse_stock_handle ADD settlement_date date NULL COMMENT '会计年月';
+
+--单据明细修改other_transfer_handle_id字段名称 2018-04-19
+ALTER TABLE doctor_warehouse_material_handle CHANGE other_transfer_handle_id rel_material_handle_id bigint(20) COMMENT '关联明细单据id';
+
+-- 修改doctor_warehouse_stock_monthly 2018-04-19
+ALTER TABLE doctor_warehouse_stock_monthly DROP handle_year;
+ALTER TABLE doctor_warehouse_stock_monthly DROP handle_month;
+ALTER TABLE doctor_warehouse_stock_monthly CHANGE handle_date settlement_date date COMMENT '会计年月';
+ALTER TABLE doctor_warehouse_stock_monthly CHANGE balacne_amount balance_amount decimal(23,2) NOT NULL DEFAULT '0' COMMENT '余额';
+ALTER TABLE doctor_warehouse_stock_monthly ADD farm_id bigint NULL COMMENT '猪场id';
+ALTER TABLE doctor_warehouse_stock_monthly ADD org_id bigint NULL COMMENT '公司id';
+ALTER TABLE doctor_warehouse_stock_monthly
+  MODIFY COLUMN org_id bigint COMMENT '公司id' AFTER id,
+  MODIFY COLUMN farm_id bigint COMMENT '猪场id' AFTER org_id,
+  MODIFY COLUMN settlement_date date COMMENT '会计年月' AFTER balance_amount;
+
+-- 修改单据明细中的unit_price字段 2018-04-19
+ALTER TABLE doctor_warehouse_material_handle MODIFY unit_price decimal(23,4) COMMENT '单价'
+
+-- 修改出库领用单的unit_price字段 2018-04-19
+ALTER TABLE doctor_warehouse_material_apply MODIFY unit_price decimal(23,4) NOT NULL COMMENT '单价';
+
+-- 配方表添加配方名称 2018-04-20
+ALTER TABLE doctor_feed_formulas ADD formula_name VARCHAR(64) NOT NULL COMMENT '配方名称';
+
+-- 领用表添加金额,会计年月字段 2018-04-21
+ALTER TABLE doctor_warehouse_material_apply ADD amount decimal(23,2) NULL COMMENT '金额';
+ALTER TABLE doctor_warehouse_material_apply ADD settlementDate date NULL COMMENT '会计年月';
+
+--修改领用表的会计年月字段名称 2018-04-23
+ALTER TABLE doctor_warehouse_material_apply CHANGE settlementDate settlement_date date COMMENT '会计年月';
+
+--领用表单价改为可为null 2018-04-23
+ALTER TABLE doctor_warehouse_material_apply MODIFY unit_price decimal(23,4) COMMENT '单价';

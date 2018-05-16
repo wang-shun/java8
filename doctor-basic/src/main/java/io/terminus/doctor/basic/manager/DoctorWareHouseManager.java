@@ -40,11 +40,25 @@ public class DoctorWareHouseManager {
         Preconditions.checkState(doctorWareHouseDao.update(doctorWareHouse),
                 "update.doctorWareHouse.error");
 
-        DoctorWareHouseTrack doctorWareHouseTrack = DoctorWareHouseTrack.builder().wareHouseId(doctorWareHouse.getId())
-                .managerId(doctorWareHouse.getManagerId()).managerName(doctorWareHouse.getManagerName())
-                .build();
+//        DoctorWareHouseTrack doctorWareHouseTrack = DoctorWareHouseTrack.builder().wareHouseId(doctorWareHouse.getId())
+//                .managerId(doctorWareHouse.getManagerId()).managerName(doctorWareHouse.getManagerName())
+//                .build();
+//
+//        Preconditions.checkState(doctorWareHouseTrackDao.update(doctorWareHouseTrack), "update.doctorWarehouseTrack.fail");
 
-        Preconditions.checkState(doctorWareHouseTrackDao.update(doctorWareHouseTrack), "update.doctorWarehouseTrack.fail");
+        return Boolean.TRUE;
+    }
+
+    @Transactional
+    public boolean deleteWareHouseInfo(DoctorWareHouse doctorWareHouse){
+
+        Preconditions.checkState(doctorWareHouseDao.delete(doctorWareHouse.getId()),
+                "delete.doctorWareHouse.error");
+
+//        DoctorWareHouseTrack doctorWareHouseTrack = DoctorWareHouseTrack.builder().wareHouseId(doctorWareHouse.getId())
+//                .managerId(doctorWareHouse.getManagerId()).managerName(doctorWareHouse.getManagerName())
+//                .build();
+//        Preconditions.checkState(doctorWareHouseTrackDao.delete(doctorWareHouseTrack.getWareHouseId()), "delete.doctorWarehouseTrack.fail");
 
         return Boolean.TRUE;
     }

@@ -60,6 +60,7 @@
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
             <if test="nameOrSrmLike != null">AND (`name` like CONCAT('%',#{nameOrSrmLike},'%') OR `srm` like CONCAT('%',#{nameOrSrmLike},'%') )</if>
+            <!--<if test="materialIds!=null">AND `id` not in(#{materialIds})</if>-->
         </where>
     </sql>
 
@@ -125,6 +126,20 @@
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
+        <if test="materialIds!=null">
+            and id not in
+            <foreach item="item" index="index" collection="materialIds"
+                     open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="drugIds!=null">
+            and id not in
+            <foreach item="item" index="index" collection="drugIds"
+                     open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
         ORDER BY `id` DESC
         LIMIT #{offset}, #{limit}
     </select>

@@ -20,8 +20,6 @@ public class WarehouseStockOutDto extends AbstractWarehouseStockDto implements S
 
     private static final long serialVersionUID = 9222667660305355019L;
 
-    private Long orgId;
-
     @Valid
     @NotEmpty(message = "stock.detail.empty", groups = AbstractWarehouseStockDetail.StockDefaultValid.class)
     private List<WarehouseStockOutDetail> details;

@@ -17,12 +17,12 @@ public class WarehouseEventExportVo {
 
     private String unitName;
 
-    private Long unitPrice;
+    private BigDecimal unitPrice;
 
     private String wareHouseName;
 
     private Date eventTime;
 
-    private Long amount;
+    private BigDecimal amount;
 
 }

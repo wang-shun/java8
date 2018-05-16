@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2017-11-06 15:19:42
+ ~ Date: 2018-04-18 23:12:59
  ~ Created by [ your name ]
 -->
 
@@ -13,13 +13,15 @@
         <result property="farmId" column="farm_id"/>
         <result property="warehouseId" column="warehouse_id"/>
         <result property="warehouseName" column="warehouse_name"/>
-        <result property="warehouseType" column="warehouse_type"/>
         <result property="serialNo" column="serial_no"/>
         <result property="handleDate" column="handle_date"/>
         <result property="handleSubType" column="handle_sub_type"/>
         <result property="handleType" column="handle_type"/>
         <result property="operatorName" column="operator_name"/>
         <result property="operatorId" column="operator_id"/>
+        <result property="warehouseType" column="warehouse_type"/>
+        <result property="relStockHandleId" column="rel_stock_handle_id"/>
+        <result property="settlementDate" column="settlement_date"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
@@ -34,12 +36,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`, `warehouse_id`, `warehouse_name`, `warehouse_type`, `serial_no`, `handle_date`, `handle_sub_type`, `handle_type`, `operator_name`, `operator_id`, 
+        `farm_id`, `warehouse_id`, `warehouse_name`, `serial_no`, `handle_date`, `handle_sub_type`, `handle_type`, `operator_name`, `operator_id`, `warehouse_type`, `rel_stock_handle_id`, `settlement_date`, 
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{warehouseId}, #{warehouseName}, #{warehouseType}, #{serialNo}, #{handleDate}, #{handleSubType}, #{handleType}, #{operatorName}, #{operatorId}, 
+        #{farmId}, #{warehouseId}, #{warehouseName}, #{serialNo}, #{handleDate}, #{handleSubType}, #{handleType}, #{operatorName}, #{operatorId}, #{warehouseType}, #{relStockHandleId}, #{settlementDate}, 
         now(), now()
     </sql>
 
@@ -48,17 +50,21 @@
             <if test="farmId != null">AND `farm_id` = #{farmId}</if>
             <if test="warehouseId != null">AND `warehouse_id` = #{warehouseId}</if>
             <if test="warehouseName != null">AND `warehouse_name` = #{warehouseName}</if>
-            <if test="warehouseType != null">AND `warehouse_type` = #{warehouseType}</if>
             <if test="serialNo != null">AND `serial_no` = #{serialNo}</if>
             <if test="handleDate != null">AND `handle_date` = #{handleDate}</if>
             <if test="handleSubType != null">AND `handle_sub_type` = #{handleSubType}</if>
             <if test="handleType != null">AND `handle_type` = #{handleType}</if>
             <if test="operatorName != null">AND `operator_name` = #{operatorName}</if>
             <if test="operatorId != null">AND `operator_id` = #{operatorId}</if>
+            <if test="warehouseType != null">AND `warehouse_type` = #{warehouseType}</if>
+            <if test="relStockHandleId != null">AND `rel_stock_handle_id` = #{relStockHandleId}</if>
+            <if test="settlementDate != null">AND `settlement_date` = #{settlementDate}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
-            <if test="startDate !=null">AND <![CDATA[handle_date >= #{startDate}]]></if>
-            <if test="endDate !=null">AND <![CDATA[handle_date <= #{endDate}]]></if>
+            <if test="handleDateStart != null">AND DATE_FORMAT(handle_date,'%Y-%m-%d') &gt;= DATE_FORMAT(#{handleDateStart,jdbcType=TIMESTAMP},'%Y-%m-%d')</if>
+            <if test="handleDateEnd != null">AND DATE_FORMAT(handle_date,'%Y-%m-%d') &lt;= DATE_FORMAT(#{handleDateEnd,jdbcType=TIMESTAMP},'%Y-%m-%d')</if>
+            <if test="updatedAtStart != null">AND DATE_FORMAT(updated_At,'%Y-%m-%d') &gt;= DATE_FORMAT(#{updatedAtStart,jdbcType=TIMESTAMP},'%Y-%m-%d')</if>
+            <if test="updatedAtEnd != null">AND DATE_FORMAT(updated_At,'%Y-%m-%d') &lt;= DATE_FORMAT(#{updatedAtEnd,jdbcType=TIMESTAMP},'%Y-%m-%d')</if>
         </where>
     </sql>
 
@@ -76,6 +82,17 @@
         FROM
         <include refid="tb"/>
         WHERE id = #{id} LIMIT 1
+    </select>
+
+    <!--得到单位名称-->
+    <select id="getNameByUnit" parameterType="long" resultType="String" >
+        select name as unit from doctor_basics
+        where id= #{relStockHandleId}
+    </select>
+
+    <select id="findwarehouseName" parameterType="long" resultType="String">
+        SELECT warehouse_name FROM <include refid="tb"/>
+        where id = #{relStockHandleId}
     </select>
 
     <select id="findByIds" parameterType="list" resultMap="DoctorWarehouseStockHandleMap">
@@ -96,13 +113,15 @@
             <if test="farmId != null">`farm_id` = #{farmId},</if>
             <if test="warehouseId != null">`warehouse_id` = #{warehouseId},</if>
             <if test="warehouseName != null">`warehouse_name` = #{warehouseName},</if>
-            <if test="warehouseType != null">`warehouse_type` = #{warehouseType},</if>
             <if test="serialNo != null">`serial_no` = #{serialNo},</if>
             <if test="handleDate != null">`handle_date` = #{handleDate},</if>
             <if test="handleSubType != null">`handle_sub_type` = #{handleSubType},</if>
             <if test="handleType != null">`handle_type` = #{handleType},</if>
             <if test="operatorName != null">`operator_name` = #{operatorName},</if>
             <if test="operatorId != null">`operator_id` = #{operatorId},</if>
+            <if test="warehouseType != null">`warehouse_type` = #{warehouseType},</if>
+            <if test="relStockHandleId != null">`rel_stock_handle_id` = #{relStockHandleId},</if>
+            <if test="settlementDate != null">`settlement_date` = #{settlementDate},</if>
             updated_at = now()
         </set>
         WHERE id = #{id}
@@ -134,4 +153,23 @@
         ORDER BY `id` DESC
     </select>
 
+    <select id="findByRelStockHandleId" resultType="DoctorWarehouseStockHandle">
+        select * from  doctor_warehouse_stock_handle
+        where  rel_stock_handle_id = #{id} and handle_sub_type = #{handle_sub_type};
+    </select>
+    
+    <select id="findRelStockHandle" parameterType="long" resultMap="DoctorWarehouseStockHandleMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE rel_stock_handle_id=#{stockHandleId}
+    </select>
+    
+    <update id="updateHandleDateAndSettlementDate" parameterType="map">
+        UPDATE
+        <include refid="tb"/>
+        SET handle_date=#{handleDate},
+        settlement_date=#{settlementDate}
+        WHERE
+        rel_stock_handle_id=#{stockHandleId}
+    </update>
 </mapper>

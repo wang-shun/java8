@@ -1,5 +1,6 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
@@ -7,12 +8,17 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialApplyDao;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroup;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroupDetail;
 import io.terminus.doctor.common.enums.WareHouseType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -126,5 +132,48 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
                 .applyYear(applyYear)
                 .applyMonth(applyMonth)
                 .build()));
+    }
+
+    @Override
+    public Response<Map<String,Object>> selectPigGroupApply(Integer farmId, String pigType, String pigName, String pigGroupName,
+                                                                                                Integer skuType, String skuName, String openAt, String closeAt){
+        List<DoctorWarehouseMaterialApplyPigGroup> pigGroupList =doctorWarehouseMaterialApplyDao.selectPigGroupApply(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAt,closeAt);
+        Double allQuantity = 0.0;
+        Double allAmount = 0.0;
+        for(int i = 0;i<pigGroupList.size(); i++){
+            if(pigGroupList.get(i).getQuantity() != null){
+                allQuantity =pigGroupList.get(i).getQuantity() + allQuantity;
+            }
+            if(pigGroupList.get(i).getAmount() != null) {
+                allAmount = pigGroupList.get(i).getAmount() + allAmount;
+            }
+        }
+        Map<String,Object> map = new HashMap<>();
+        map.put("pigGroupList",pigGroupList);
+        map.put("allQuantity",allQuantity);
+        map.put("allAmount",allAmount);
+        return Response.ok(map);
+    }
+
+    @Override
+    public Response<List<Map>> piggeryReport(DoctorWarehouseMaterialApply criteria) {
+        return Response.ok(doctorWarehouseMaterialApplyDao.piggeryReport(criteria));
+    }
+
+    @Override
+    public Response<List<Map>> piggeryDetails(DoctorWarehouseMaterialApply criteria) {
+        return Response.ok(doctorWarehouseMaterialApplyDao.piggeryDetails(criteria));
+    }
+
+    @Override
+    public Response<List<DoctorWarehouseMaterialApplyPigGroupDetail>> selectPigGroupApplyDetail(Long pigGroupId, Long skuId) {
+        return Response.ok(doctorWarehouseMaterialApplyDao.selectPigGroupApplyDetail(pigGroupId, skuId));
+    }
+
+    @Override
+    public List<DoctorWarehouseMaterialApplyPigGroup> selectPigGroupApplys(Integer farmId, String pigType, String pigName, String pigGroupName,
+                                                            Integer skuType, String skuName, String openAt, String closeAt) {
+
+        return  doctorWarehouseMaterialApplyDao.selectPigGroupApply(farmId, pigType, pigName, pigGroupName, skuType, skuName, openAt, closeAt);
     }
 }

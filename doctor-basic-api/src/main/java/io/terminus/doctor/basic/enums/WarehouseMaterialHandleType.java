@@ -22,13 +22,13 @@ public enum WarehouseMaterialHandleType {
     UNKNOWN(0),
 
     /**
-     * 入库
+     * 采购入库
      */
     IN(1),
 
 
     /**
-     * 出库
+     * 领料出库
      */
     OUT(2),
 
@@ -79,7 +79,13 @@ public enum WarehouseMaterialHandleType {
     /**
      * 配方生产导致的出库，药品和原料
      */
-    FORMULA_OUT(12);
+    FORMULA_OUT(12),
+
+
+    /**
+     * 退料入库
+     */
+    RETURN(13);
 
 
     @Getter
@@ -106,7 +112,8 @@ public enum WarehouseMaterialHandleType {
         return WarehouseMaterialHandleType.IN.getValue() == value
                 || WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue() == value
                 || WarehouseMaterialHandleType.TRANSFER_IN.getValue() == value
-                || WarehouseMaterialHandleType.FORMULA_IN.getValue() == value;
+                || WarehouseMaterialHandleType.FORMULA_IN.getValue() == value
+                || WarehouseMaterialHandleType.RETURN.getValue() == value;
     }
 
     public static List<Integer> getGroupType(Integer type) {

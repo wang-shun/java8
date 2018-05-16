@@ -1,21 +1,18 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
-import io.terminus.doctor.basic.dao.DoctorWarehouseStockHandleDao;
-
+import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.boot.rpc.common.annotation.RpcProvider;
-
-import com.google.common.base.Throwables;
+import io.terminus.doctor.basic.dao.DoctorWarehouseStockHandleDao;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc:
@@ -30,6 +27,16 @@ public class DoctorWarehouseStockHandleReadServiceImpl implements DoctorWarehous
 
     @Autowired
     private DoctorWarehouseStockHandleDao doctorWarehouseStockHandleDao;
+
+    @Override
+    public Response<String> getNameByUnit(Long relStockHandleId) {
+        return Response.ok(doctorWarehouseStockHandleDao.getNameByUnit(relStockHandleId));
+    }
+
+    @Override
+    public Response<String> findwarehouseName(Long RelId) {
+        return Response.ok(doctorWarehouseStockHandleDao.findwarehouseName(RelId));
+    }
 
     @Override
     public Response<DoctorWarehouseStockHandle> findById(Long id) {
