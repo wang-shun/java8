@@ -452,7 +452,8 @@
         <if test="materialName != null">
             and mh.material_name like concat('%',#{materialName},'%')
         </if>
-        group by b.id,mh.vendor_name,mh.material_id,mh.material_name
+        <!--group by b.id,mh.vendor_name,mh.material_id,mh.material_name-->
+        group by ma.pig_barn_id,ma.pig_barn_name,ma.pig_type,b.staff_name,mh.material_id,s.`code`,s.`name`,s.type,mh.vendor_name,s.specification,f.`name`
 
         union all
 
