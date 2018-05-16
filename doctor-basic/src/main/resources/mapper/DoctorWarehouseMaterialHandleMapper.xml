@@ -132,6 +132,12 @@
                     material_id =#{t}
                 </foreach>
             </if>
+            <if test="stockHandleIds !=null and stockHandleIds.size() >0">
+                AND
+                <foreach collection="stockHandleIds" item="t" open="(" separator="or" close=")">
+                    stock_handle_id =#{t}
+                </foreach>
+            </if>
 
             <if test="settlementDateStart">AND <![CDATA[settlement_date >= #{settlementDateStart}]]></if>
             <if test="settlementDateEnd">AND <![CDATA[settlement_date <= #{settlementDateEnd}]]></if>
