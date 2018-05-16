@@ -293,7 +293,7 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
         if (!wareHouse.getType().equals(sku.getType()))
             throw new InvalidException("material.not.allow.warehouse", WareHouseType.from(sku.getType()).getDesc(), WareHouseType.from(wareHouse.getType()).getDesc());
 
-        DoctorBasic unit = doctorBasicDao.findById(Long.parseLong(sku.getUnit()));
+//        DoctorBasic unit = doctorBasicDao.findById(Long.parseLong(sku.getUnit()));
 
         DoctorWarehouseMaterialHandle materialHandle = new DoctorWarehouseMaterialHandle();
         materialHandle.setStockHandleId(stockHandle.getId());
@@ -305,7 +305,7 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
         materialHandle.setMaterialId(detail.getMaterialId());
         materialHandle.setMaterialName(sku.getName());
         materialHandle.setType(stockHandle.getHandleSubType());
-        materialHandle.setUnit(null == unit ? "" : unit.getName());
+        materialHandle.setUnit(sku.getUnit());
 
         if (WarehouseMaterialHandleType.IN.getValue() == stockHandle.getHandleSubType().longValue()) {
             DoctorWarehouseVendor vendor = doctorWarehouseVendorDao.findById(sku.getVendorId());
