@@ -184,7 +184,15 @@
     </select>
 
     <select id="sumBy" parameterType="map" resultMap="DoctorReportReserveMap">
-        SELECT <include refid="cols_all"/>
+        SELECT
+        sum(turn_into) AS turnInfo,
+        sum(turn_seed) AS turnSeed,
+        sum(dead) AS dead,
+        sum(weed_out) AS weedOut,
+        sum(to_fatten) AS toFatten,
+        sum(sale) AS sale,
+        sum(chg_farm_out) AS chgFarmOut,
+        sum(other_change) AS otherChange
         FROM <include refid="tb"/>
         <where>
             orz_id = #{orzId}

@@ -205,7 +205,20 @@
     </select>
 
     <select id="sumBy" parameterType="map" resultMap="DoctorReportMatingMap">
-        SELECT <include refid="cols_all"/>
+        SELECT
+        sum(houbei_in) AS houbeiIn,
+        sum(sow_ph_wean_in) AS sowPhWeanIn,
+        sum(other_in) AS otherIn,
+        sum(dead) AS dead,
+        sum(weed_out) AS weedOut,
+        sum(sale) AS sale,
+        sum(chg_farm_out) AS chgFarmOut,
+        sum(other_change) AS otherChange,
+        sum(mating_count) AS matingCount,
+        sum(preg_positive) AS pregPositive,
+        sum(preg_negative) AS pregNegative,
+        sum(preg_fanqing) AS pregFanqing,
+        sum(preg_liuchan) AS pregLiuchan
         FROM <include refid="tb"/>
         <where>
             orz_id = #{orzId}
