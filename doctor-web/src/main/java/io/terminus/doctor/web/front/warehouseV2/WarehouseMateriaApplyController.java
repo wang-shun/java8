@@ -280,7 +280,12 @@ public class WarehouseMateriaApplyController {
                     row.createCell(11).setCellValue(String.valueOf(m.getVendorName()));
                     row.createCell(12).setCellValue(String.valueOf(m.getSpecification()));
                     row.createCell(13).setCellValue(String.valueOf(m.getOpenAt()));
-                    row.createCell(14).setCellValue(String.valueOf(m.getCloseAt()));
+                    String g = m.getCloseAt();
+                    if(g != null){
+                        row.createCell(14).setCellValue(String.valueOf(g));
+                    }else{
+                        row.createCell(14).setCellValue("");
+                    }
                     row.createCell(15).setCellValue(String.valueOf(m.getFarmName()));
                 }
 
