@@ -90,8 +90,8 @@
         where id= #{relStockHandleId}
     </select>
 
-    <select id="findwarehouseName" parameterType="long" resultType="String">
-        SELECT warehouse_name FROM <include refid="tb"/>
+    <select id="findwarehouseName" parameterType="long" resultMap="DoctorWarehouseStockHandleMap">
+        SELECT warehouse_id,warehouse_name FROM <include refid="tb"/>
         where id = #{relStockHandleId}
     </select>
 

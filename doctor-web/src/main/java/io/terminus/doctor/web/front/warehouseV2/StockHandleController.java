@@ -253,8 +253,9 @@ public class StockHandleController {
 
                             //配方生产出库
                             if (stockHandle.getHandleSubType().equals( WarehouseMaterialHandleType.FORMULA_OUT.getValue())) {
-                                String warehouseName = RespHelper.or500(doctorWarehouseStockHandleReadService.findwarehouseName(stockHandle.getRelStockHandleId()));
-                                detail.setStorageWarehouseNames(warehouseName);
+                                DoctorWarehouseStockHandle sh = RespHelper.or500(doctorWarehouseStockHandleReadService.findwarehouseName(stockHandle.getRelStockHandleId()));
+                                detail.setStorageWarehouseIds(sh.getWarehouseId());
+                                detail.setStorageWarehouseNames(sh.getWarehouseName());
                             }
 
                             return detail;
@@ -263,8 +264,9 @@ public class StockHandleController {
 
         //配方生产出库
         if (stockHandle.getHandleSubType().equals( WarehouseMaterialHandleType.FORMULA_OUT.getValue())) {
-            String warehouseName = RespHelper.or500(doctorWarehouseStockHandleReadService.findwarehouseName(stockHandle.getRelStockHandleId()));
-            vo.setStorageWarehouseName(warehouseName);
+            DoctorWarehouseStockHandle sh = RespHelper.or500(doctorWarehouseStockHandleReadService.findwarehouseName(stockHandle.getRelStockHandleId()));
+            vo.setStorageWarehouseId(sh.getWarehouseId());
+            vo.setStorageWarehouseName(sh.getWarehouseName());
         }
 
         DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(vo.getFarmId()));
@@ -421,8 +423,8 @@ public class StockHandleController {
 
                     //配方生产出库
                     if (stockHandle.getHandleSubType().equals( WarehouseMaterialHandleType.FORMULA_OUT.getValue())) {
-                        String warehouseName = RespHelper.or500(doctorWarehouseStockHandleReadService.findwarehouseName(stockHandle.getRelStockHandleId()));
-                        vo.setTransferInWarehouseName(warehouseName);
+                        DoctorWarehouseStockHandle sh = RespHelper.or500(doctorWarehouseStockHandleReadService.findwarehouseName(stockHandle.getRelStockHandleId()));
+                        vo.setTransferInWarehouseName(sh.getWarehouseName());
                     }
 
                     vo.setUnitPrice(mh.getUnitPrice().divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP).doubleValue());

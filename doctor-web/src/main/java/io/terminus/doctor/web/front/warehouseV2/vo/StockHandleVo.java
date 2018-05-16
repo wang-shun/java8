@@ -20,6 +20,8 @@ public class StockHandleVo extends DoctorWarehouseStockHandle {
 
     private String warehouseManagerName;
 
+    private Long storageWarehouseId;
+
     private String storageWarehouseName;
 
     private Double totalAmount;
@@ -62,6 +64,8 @@ public class StockHandleVo extends DoctorWarehouseStockHandle {
         private String unitId;
 
         //入库仓库
+        private Long storageWarehouseIds;
+
         private String storageWarehouseNames;
     }
 }
