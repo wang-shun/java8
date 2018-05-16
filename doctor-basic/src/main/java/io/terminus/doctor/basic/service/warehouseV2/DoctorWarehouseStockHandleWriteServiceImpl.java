@@ -140,44 +140,52 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
             }
             //配方出库,调拨出库
             if (type == 12 || type == 10) {
-                DoctorWarehouseStockHandle a = doctorWarehouseStockHandleDao.findByRelStockHandleId(id,type);//被入库的单据表
-                DoctorWarehouseMaterialHandle b = doctorWarehouseMaterialHandleDao.findByStockHandleId(a.getId());//被入库的单据明细表
-                DoctorWareHouse wareHouse2 = new DoctorWareHouse();
-                wareHouse.setId(b.getWarehouseId());
-                wareHouse.setWareHouseName(b.getWarehouseName());
-                wareHouse.setFarmId(b.getFarmId());
-                wareHouse.setType(b.getWarehouseType());
-                   if(type == 12){
-                       List<DoctorWarehouseStockHandle> c = doctorWarehouseStockHandleDao.findByRelStockHandleIds(a.getId());//其他配方出库的单据
-                       for(int i=0;i<c.size();i++){
-                           List<DoctorWarehouseMaterialHandle> d = doctorWarehouseMaterialHandleDao.findByStockHandleIds(c.get(i).getId());//其他配方出库的单据明细
-                           for(int j=0;j<d.size();j++) {
-                               warehouseFormulaManager.delete(d.get(j));//删除其他配方入库单据明细
-                               DoctorWareHouse wareHouse1 = new DoctorWareHouse();
-                               wareHouse.setId(d.get(j).getWarehouseId());
-                               wareHouse.setWareHouseName(d.get(j).getWarehouseName());
-                               wareHouse.setFarmId(d.get(j).getFarmId());
-                               wareHouse.setType(d.get(j).getWarehouseType());
-                               doctorWarehouseStockManager.out(d.get(j).getMaterialId(),d.get(j).getQuantity(),wareHouse1);
-                           }
-                           doctorWarehouseStockHandleDao.delete(c.get(i).getId());//删除其他配方出库的单据
-                       }
-                       warehouseFormulaManager.delete(b);//删除被入库的单据明细表
+                DoctorWarehouseStockHandle a = doctorWarehouseStockHandleDao.findByRelStockHandleId(id, type);//被入库的单据表
+                if (a != null) {
+                    DoctorWarehouseMaterialHandle b = doctorWarehouseMaterialHandleDao.findByStockHandleId(a.getId());//被入库的单据明细表
+                    DoctorWareHouse wareHouse2 = new DoctorWareHouse();
+                    wareHouse.setId(b.getWarehouseId());
+                    wareHouse.setWareHouseName(b.getWarehouseName());
+                    wareHouse.setFarmId(b.getFarmId());
+                    wareHouse.setType(b.getWarehouseType());
+                    if (type == 12) {
+                        List<DoctorWarehouseStockHandle> c = doctorWarehouseStockHandleDao.findByRelStockHandleIds(a.getId());//其他配方出库的单据
+                        for (int i = 0; i < c.size(); i++) {
+                            long g = c.get(i).getId();
+                            if (g != id) {
+                                List<DoctorWarehouseMaterialHandle> d = doctorWarehouseMaterialHandleDao.findByStockHandleIds(c.get(i).getId());//其他配方出库的单据明细
+                                for (int j = 0; j < d.size(); j++) {
+                                    warehouseFormulaManager.delete(d.get(j));//删除其他配方出库单据明细
+                                    DoctorWareHouse wareHouse1 = new DoctorWareHouse();
+                                    wareHouse.setId(d.get(j).getWarehouseId());
+                                    wareHouse.setWareHouseName(d.get(j).getWarehouseName());
+                                    wareHouse.setFarmId(d.get(j).getFarmId());
+                                    wareHouse.setType(d.get(j).getWarehouseType());
+                                    doctorWarehouseStockManager.in(d.get(j).getMaterialId(), d.get(j).getQuantity(), wareHouse1);
+                                }
 
-                       doctorWarehouseStockManager.out(b.getMaterialId(),b.getQuantity(),wareHouse2);
-                   }
-                    if(type == 10){
+                                doctorWarehouseStockHandleDao.delete(c.get(i).getId());//删除其他配方出库的单据
+                            }
+                        }
+                        warehouseFormulaManager.delete(b);//删除被入库的单据明细表
+                        doctorWarehouseStockManager.out(b.getMaterialId(), b.getQuantity(), wareHouse2);
+                    }
+                    if (type == 10) {
                         warehouseTransferManager.delete(b);//删除被入库的单据明细表
-                        doctorWarehouseStockManager.out(b.getMaterialId(),b.getQuantity(),wareHouse2);
+                        doctorWarehouseStockManager.out(b.getMaterialId(), b.getQuantity(), wareHouse2);
                     }
                     doctorWarehouseStockHandleDao.delete(a.getId());//删除被入库的单据
-                if(type == 12){
-                    warehouseFormulaManager.delete(handle);//删除出库单的单据明细
-                    doctorWarehouseStockManager.in(handle.getMaterialId(),handle.getQuantity(),wareHouse);
-                }
-                if(type == 10){
-                    warehouseTransferManager.delete(handle);//删除出库单的单据明细
-                    doctorWarehouseStockManager.in(handle.getMaterialId(),handle.getQuantity(),wareHouse);
+                    if (type == 12) {
+                        List<DoctorWarehouseMaterialHandle> handles1 = doctorWarehouseMaterialHandleDao.findByStockHandle(id);
+                        for(DoctorWarehouseMaterialHandle handle1 : handles1) {
+                            warehouseFormulaManager.delete(handle1);//删除出库单的单据明细
+                            doctorWarehouseStockManager.in(handle.getMaterialId(), handle.getQuantity(), wareHouse);
+                        }
+                    }
+                    if (type == 10) {
+                        warehouseTransferManager.delete(handle);//删除出库单的单据明细
+                        doctorWarehouseStockManager.in(handle.getMaterialId(), handle.getQuantity(), wareHouse);
+                    }
                 }
             }
         }
