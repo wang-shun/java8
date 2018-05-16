@@ -12,6 +12,14 @@ import io.terminus.doctor.event.dao.reportBi.DoctorReportReserveDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportSowDao;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.reportBi.DoctorDimensionReport;
+import io.terminus.doctor.event.model.DoctorReportBoar;
+import io.terminus.doctor.event.model.DoctorReportDeliver;
+import io.terminus.doctor.event.model.DoctorReportEfficiency;
+import io.terminus.doctor.event.model.DoctorReportFatten;
+import io.terminus.doctor.event.model.DoctorReportMaterial;
+import io.terminus.doctor.event.model.DoctorReportMating;
+import io.terminus.doctor.event.model.DoctorReportNursery;
+import io.terminus.doctor.event.model.DoctorReportReserve;
 import io.terminus.doctor.event.model.DoctorReportSow;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -72,10 +80,74 @@ public class DoctorReportBiDataQuery {
     }
 
     public List<DoctorReportSow> findSowReportBy(DoctorDimensionCriteria dimensionCriteria) {
-        List<DoctorReportSow> reportSows = doctorReportSowDao.findBy(dimensionCriteria);
+        List<DoctorReportSow> reports = doctorReportSowDao.findBy(dimensionCriteria);
         if (Objects.equals(dimensionCriteria.getIsNecessaryTotal(), IsOrNot.YES.getKey())) {
-            reportSows.add(doctorReportSowDao.sumBy(dimensionCriteria));
+            reports.add(doctorReportSowDao.sumBy(dimensionCriteria));
         }
-        return reportSows;
+        return reports;
+    }
+
+    public List<DoctorReportBoar> findBoarReportBy(DoctorDimensionCriteria dimensionCriteria) {
+        List<DoctorReportBoar> reports = doctorReportBoarDao.findBy(dimensionCriteria);
+        if (Objects.equals(dimensionCriteria.getIsNecessaryTotal(), IsOrNot.YES.getKey())) {
+            reports.add(doctorReportBoarDao.sumBy(dimensionCriteria));
+        }
+        return reports;
+    }
+
+    public List<DoctorReportDeliver> findDeliverReportBy(DoctorDimensionCriteria dimensionCriteria) {
+        List<DoctorReportDeliver> reports = doctorReportDeliverDao.findBy(dimensionCriteria);
+        if (Objects.equals(dimensionCriteria.getIsNecessaryTotal(), IsOrNot.YES.getKey())) {
+            reports.add(doctorReportDeliverDao.sumBy(dimensionCriteria));
+        }
+        return reports;
+    }
+
+    public List<DoctorReportEfficiency> findEfficiencyReportBy(DoctorDimensionCriteria dimensionCriteria) {
+        List<DoctorReportEfficiency> reports = doctorReportEfficiencyDao.findBy(dimensionCriteria);
+        if (Objects.equals(dimensionCriteria.getIsNecessaryTotal(), IsOrNot.YES.getKey())) {
+            reports.add(new DoctorReportEfficiency());
+        }
+        return reports;
+    }
+
+    public List<DoctorReportFatten> findFattenReportBy(DoctorDimensionCriteria dimensionCriteria) {
+        List<DoctorReportFatten> reports = doctorReportFattenDao.findBy(dimensionCriteria);
+        if (Objects.equals(dimensionCriteria.getIsNecessaryTotal(), IsOrNot.YES.getKey())) {
+            reports.add(doctorReportFattenDao.sumBy(dimensionCriteria));
+        }
+        return reports;
+    }
+
+    public List<DoctorReportMating> findMatingReportBy(DoctorDimensionCriteria dimensionCriteria) {
+        List<DoctorReportMating> reports = doctorReportMatingDao.findBy(dimensionCriteria);
+        if (Objects.equals(dimensionCriteria.getIsNecessaryTotal(), IsOrNot.YES.getKey())) {
+            reports.add(doctorReportMatingDao.sumBy(dimensionCriteria));
+        }
+        return reports;
+    }
+
+    public List<DoctorReportNursery> findNurseryReportBy(DoctorDimensionCriteria dimensionCriteria) {
+        List<DoctorReportNursery> reports = doctorReportNurseryDao.findBy(dimensionCriteria);
+        if (Objects.equals(dimensionCriteria.getIsNecessaryTotal(), IsOrNot.YES.getKey())) {
+            reports.add(doctorReportNurseryDao.sumBy(dimensionCriteria));
+        }
+        return reports;
+    }
+
+    public List<DoctorReportReserve> findReserveReportBy(DoctorDimensionCriteria dimensionCriteria) {
+        List<DoctorReportReserve> reports = doctorReportReserveDao.findBy(dimensionCriteria);
+        if (Objects.equals(dimensionCriteria.getIsNecessaryTotal(), IsOrNot.YES.getKey())) {
+            reports.add(doctorReportReserveDao.sumBy(dimensionCriteria));
+        }
+        return reports;
+    }
+
+    public List<DoctorReportMaterial> findMaterialReportBy(DoctorDimensionCriteria dimensionCriteria) {
+        List<DoctorReportMaterial> reports = doctorReportMaterialDao.findBy(dimensionCriteria);
+        if (Objects.equals(dimensionCriteria.getIsNecessaryTotal(), IsOrNot.YES.getKey())) {
+            reports.add(doctorReportMaterialDao.sumBy(dimensionCriteria));
+        }
+        return reports;
     }
 }

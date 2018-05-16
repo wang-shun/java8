@@ -172,7 +172,8 @@
     </select>
 
     <select id="sumBy" parameterType="map" resultMap="DoctorReportBoarMap">
-        SELECT <include refid="cols_all"/>
+        SELECT sum(turn_into) as turnInto, sum(dead) as dead, sum(weed_out) as weedOut,
+               sum(sale) as sale, sum(other_change) as otherChange
         FROM <include refid="tb"/>
         <where>
             orz_id = #{orzId}

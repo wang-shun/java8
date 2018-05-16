@@ -34,10 +34,6 @@ public class DoctorReportEfficiencyDao extends MyBatisDao<DoctorReportEfficiency
         return getSqlSession().selectList(sqlId("findBy"), dimensionCriteria);
     }
 
-    public DoctorReportEfficiency sumBy(DoctorDimensionCriteria dimensionCriteria) {
-        return getSqlSession().selectOne(sqlId("sumBy"), dimensionCriteria);
-    }
-
     public void delete() {
         this.sqlSession.delete(sqlId("deleteAll"));
     }
