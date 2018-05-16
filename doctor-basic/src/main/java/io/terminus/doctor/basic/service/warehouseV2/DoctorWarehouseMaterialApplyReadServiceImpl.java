@@ -172,8 +172,8 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
     @Override
     public List<DoctorWarehouseMaterialApplyPigGroup> selectPigGroupApplys(Integer farmId, String pigType, String pigName, String pigGroupName,
-                                                            Integer skuType, String skuName, String openAt, String closeAt) {
+                                                            Integer skuType, String skuName, String openAtStart,String openAtEnd, String closeAtStart,String closeAtEnd) {
 
-        return  doctorWarehouseMaterialApplyDao.selectPigGroupApply(farmId, pigType, pigName, pigGroupName, skuType, skuName, openAt, closeAt);
+        return  doctorWarehouseMaterialApplyDao.selectPigGroupApply1(farmId, pigType, pigName, pigGroupName, skuType, skuName, openAtStart,openAtEnd,closeAtStart,closeAtEnd);
     }
 }

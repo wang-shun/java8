@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.warehouseV2;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroup;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroupDetail;
@@ -89,13 +90,13 @@ public class WarehouseMateriaApplyController {
                 title.createCell(0).setCellValue("物料名称");
                 title.createCell(1).setCellValue("物料类型");
                 title.createCell(2).setCellValue("仓库名称");
-                title.createCell(3).setCellValue("时间日期");
+                title.createCell(3).setCellValue("事件日期");
                 title.createCell(4).setCellValue("会计年月");
                 title.createCell(5).setCellValue("事件类型");
-                title.createCell(6).setCellValue("数量）");
+                title.createCell(6).setCellValue("数量");
                 title.createCell(7).setCellValue("单价");
                 title.createCell(8).setCellValue("金额");
-                title.createCell(9).setCellValue("猪舍名）");
+                title.createCell(9).setCellValue("猪舍名");
                 title.createCell(10).setCellValue("猪舍类型");
                 title.createCell(11).setCellValue("猪群名称");
                 title.createCell(12).setCellValue("饲养员");
@@ -125,7 +126,32 @@ public class WarehouseMateriaApplyController {
                     row.createCell(2).setCellValue(String.valueOf(m.getWarehouseName()));
                     row.createCell(3).setCellValue(String.valueOf(m.getApplyDate()));
                     row.createCell(4).setCellValue(String.valueOf(m.getSettlementDate()));
-                    row.createCell(5).setCellValue(String.valueOf(m.getType()));
+                    String f = String.valueOf(m.getType());
+                    String materialHandleType=new String();
+                    if(f.equals(String.valueOf(WarehouseMaterialHandleType.IN.getValue()))){
+                        materialHandleType="采购入库";
+                    }else if(f.equals(String.valueOf(WarehouseMaterialHandleType.OUT.getValue()))){
+                        materialHandleType="领料出库";
+                    }else if(f.equals(String.valueOf(WarehouseMaterialHandleType.TRANSFER.getValue()))){
+                        materialHandleType="调拨";
+                    }else if(f.equals(String.valueOf(WarehouseMaterialHandleType.INVENTORY.getValue()))){
+                        materialHandleType="盘点";
+                    }else if(f.equals(String.valueOf(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue()))){
+                        materialHandleType="盘盈";
+                    }else if(f.equals(String.valueOf(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue()))){
+                        materialHandleType="盘亏";
+                    }else if(f.equals(String.valueOf(WarehouseMaterialHandleType.TRANSFER_IN.getValue()))){
+                        materialHandleType="调入";
+                    }else if(f.equals(String.valueOf(WarehouseMaterialHandleType.TRANSFER_OUT.getValue()))){
+                        materialHandleType="调出";
+                    }else if(f.equals(String.valueOf(WarehouseMaterialHandleType.FORMULA_IN.getValue()))){
+                        materialHandleType="配方生产入库";
+                    }else if(f.equals(String.valueOf(WarehouseMaterialHandleType.FORMULA_OUT.getValue()))){
+                        materialHandleType="配方生产出库";
+                    }else if(f.equals(String.valueOf(WarehouseMaterialHandleType.RETURN.getValue()))){
+                        materialHandleType="退料入库";
+                    }
+                    row.createCell(5).setCellValue(materialHandleType);
                     row.createCell(6).setCellValue(String.valueOf(m.getQuantity()));
                     row.createCell(7).setCellValue(String.valueOf(m.getUnitPrice()));
                     row.createCell(8).setCellValue(String.valueOf(m.getAmount()));
@@ -172,11 +198,13 @@ public class WarehouseMateriaApplyController {
                                             @RequestParam(required = false) String pigGroupName,
                                             @RequestParam(required = false) Integer skuType,
                                             @RequestParam(required = false) String skuName,
-                                            @RequestParam(required = false) String openAt,
-                                            @RequestParam(required = false) String closeAt,
+                                            @RequestParam(required = false) String openAtStart,
+                                            @RequestParam(required = false) String openAtEnd,
+                                            @RequestParam(required = false) String closeAtStart,
+                                            @RequestParam(required = false) String closeAtEnd,
                                             HttpServletRequest  request,  HttpServletResponse  response) {
         //取到值
-        List<DoctorWarehouseMaterialApplyPigGroup> a =doctorWarehouseMaterialApplyReadService.selectPigGroupApplys(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAt,closeAt);
+        List<DoctorWarehouseMaterialApplyPigGroup> a =doctorWarehouseMaterialApplyReadService.selectPigGroupApplys(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAtStart,openAtEnd,closeAtStart,closeAtEnd);
         //开始导出
         try  {
             //导出名称
