@@ -416,7 +416,7 @@
         format(ifnull(sum(ma.unit_price*ma.quantity)+''/sum(ma.quantity),0)+'',4) as sum_unit_price,
         format(ifnull(sum(ma.amount),0)+'',4) as sum_amount,
         s.type as material_type,
-        mh.vendor_name as vendor_name,
+        v.`name` as vendor_name,
         s.specification as specification,
         f.`name` as farm_name
         from  doctor_warehouse_material_apply as ma
@@ -430,6 +430,8 @@
         on f.id=ma.farm_id
         inner join doctor_basics as db
         on db.id=ma.unit
+        inner join doctor_warehouse_vendor as v
+        on v.id=s.vendor_id
         where mh.type=2 and ma.apply_type=0
         <if test="farmId != null">
             and ma.farm_id = #{farmId}
@@ -483,6 +485,10 @@
             on s.id=mh.material_id
             inner join doctor_farms as f
             on f.id=ma.farm_id
+            inner join doctor_basics as db
+            on db.id=ma.unit
+            inner join doctor_warehouse_vendor as v
+            on v.id=s.vendor_id
             where mh.type=2 and ma.apply_type=0
             <if test="farmId != null">
                 and ma.farm_id = #{farmId}
@@ -533,6 +539,10 @@
             on s.id=mh.material_id
             inner join doctor_farms as f
             on f.id=ma.farm_id
+            inner join doctor_basics as db
+            on db.id=ma.unit
+            inner join doctor_warehouse_vendor as v
+            on v.id=s.vendor_id
             where mh.type=2 and ma.apply_type=0
             <if test="farmId != null">
                 and ma.farm_id = #{farmId}
@@ -577,7 +587,7 @@
         b.staff_name as staff_name,
         f.`name` as farm_name,
         db.name as unit ,
-        mh.vendor_name as vendor_name,
+        v.`name` as vendor_name,
         s.specification as specification
         from doctor_warehouse_material_apply as ma
         inner join doctor_warehouse_material_handle as mh
@@ -590,6 +600,8 @@
         on f.id=ma.farm_id
         inner join doctor_basics as db
         on db.id=mh.unit
+        inner join doctor_warehouse_vendor as v
+        on v.id=s.vendor_id
         where mh.type=2 and ma.apply_type=0
         <if test="pigBarnId != null">
             and ma.pig_barn_id = #{pigBarnId}
@@ -605,7 +617,7 @@
         </if>
     </select>
 
-    <!--猪群Start-->
+    <!--猪群end-->
 
     <select id="selectPigGroupApplyDetail" parameterType="map" resultMap="DoctorWarehouseMaterialApplyPigGroupDetailMap">
         SELECT
@@ -629,7 +641,7 @@
         FROM
         doctor_warehouse_material_apply a
         JOIN doctor_warehouse_material_handle b ON a.material_handle_id = b.id
-        JOIN doctor_warehouse_sku c ON a.material_id = c.id
+        JOIN doctor_warehouse_sku c ON b.material_id = c.id
         JOIN doctor_groups d ON d.id = a.pig_group_id
         JOIN doctor_barns e ON e.id = a.pig_barn_id
         JOIN doctor_basics as db on db.id=c.unit
