@@ -2211,3 +2211,18 @@ ALTER TABLE doctor_warehouse_material_apply MODIFY unit_price decimal(23,4) COMM
 -- 领用表添加退料数量和退料金额字段 2018-05-17
 ALTER TABLE doctor_warehouse_material_apply ADD refund_quantity decimal(23,2) NULL COMMENT '退料数量';
 ALTER TABLE doctor_warehouse_material_apply ADD refund_amount decimal(23,2) NULL COMMENT '退料金额';
+
+-- 修改金额和数量小数位数 2018-05-17
+ALTER TABLE doctor_warehouse_material_handle MODIFY quantity decimal(23,3) NOT NULL COMMENT '数量';
+ALTER TABLE doctor_warehouse_material_handle MODIFY amount decimal(23,3) COMMENT '金额';
+
+ALTER TABLE doctor_warehouse_material_apply MODIFY quantity decimal(23,3) NOT NULL COMMENT '数量';
+ALTER TABLE doctor_warehouse_material_apply MODIFY amount decimal(23,3) COMMENT '金额';
+ALTER TABLE doctor_warehouse_material_apply MODIFY refund_quantity decimal(23,3) COMMENT '退料数量';
+ALTER TABLE doctor_warehouse_material_apply MODIFY refund_amount decimal(23,3) COMMENT '退料金额';
+
+ALTER TABLE doctor_warehouse_stock_monthly MODIFY balance_quantity decimal(23,3) NOT NULL DEFAULT '0.00' COMMENT '余量';
+ALTER TABLE doctor_warehouse_stock_monthly MODIFY balance_amount decimal(23,3) NOT NULL DEFAULT '0.00' COMMENT '余额';
+
+ALTER TABLE doctor_warehouse_stock MODIFY quantity decimal(23,3) COMMENT '数量';
+
