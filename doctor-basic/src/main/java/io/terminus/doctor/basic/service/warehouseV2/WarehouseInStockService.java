@@ -60,6 +60,7 @@ public class WarehouseInStockService extends AbstractWarehouseStockService<Wareh
 
         materialHandle.setRemark(detail.getRemark());
         materialHandle.setSettlementDate(stockDto.getSettlementDate());
+        materialHandle.setUnitPrice(detail.getUnitPrice());
 
         boolean changeHandleDate = !DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
         boolean changeQuantity = detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0;
@@ -75,7 +76,7 @@ public class WarehouseInStockService extends AbstractWarehouseStockService<Wareh
                     doctorWarehouseStockManager.out(detail.getMaterialId(), changedQuantity.negate(), wareHouse);
                 }
                 materialHandle.setQuantity(detail.getQuantity());
-                warehouseInManager.resetUnitPrice(materialHandle, detail.getQuantity());
+//                warehouseInManager.resetUnitPrice(materialHandle, detail.getQuantity());
             }
             Date recalculateDate = materialHandle.getHandleDate();
             if (changeHandleDate) {
