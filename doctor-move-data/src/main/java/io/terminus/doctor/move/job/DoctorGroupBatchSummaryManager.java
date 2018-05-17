@@ -3,6 +3,7 @@ package io.terminus.doctor.move.job;
 import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialApplyReadService;
 import io.terminus.doctor.common.enums.WareHouseType;

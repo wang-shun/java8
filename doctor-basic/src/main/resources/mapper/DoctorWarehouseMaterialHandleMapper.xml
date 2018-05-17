@@ -637,7 +637,7 @@
         <if test="type != null">
             and d.type=#{type}
         </if>
-        order by b.handle_date,b.id
+        order by b.handle_date,b.id,f.pig_group_name
     </select>
 
     <sql id ="balanceAmount">
