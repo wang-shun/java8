@@ -2226,3 +2226,5 @@ ALTER TABLE doctor_warehouse_stock_monthly MODIFY balance_amount decimal(23,3) N
 
 ALTER TABLE doctor_warehouse_stock MODIFY quantity decimal(23,3) COMMENT '数量';
 
+ALTER TABLE doctor_warehouse_material_handle MODIFY before_stock_quantity decimal(23,3) COMMENT '之前库存数量';
+
