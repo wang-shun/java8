@@ -61,6 +61,7 @@ public class WarehouseInStockService extends AbstractWarehouseStockService<Wareh
         materialHandle.setRemark(detail.getRemark());
         materialHandle.setSettlementDate(stockDto.getSettlementDate());
         materialHandle.setUnitPrice(detail.getUnitPrice());
+        materialHandle.setAmount(detail.getAmount());
 
         boolean changeHandleDate = !DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
         boolean changeQuantity = detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0;
