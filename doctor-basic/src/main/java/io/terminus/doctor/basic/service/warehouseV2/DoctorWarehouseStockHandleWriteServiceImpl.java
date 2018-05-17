@@ -140,7 +140,12 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
             }
             //配方出库,调拨出库
             if (type == 12 || type == 10) {
-                DoctorWarehouseStockHandle a = doctorWarehouseStockHandleDao.findByRelStockHandleId(id, type);//被入库的单据表
+                DoctorWarehouseStockHandle a = null;
+                if(type == 12) {
+                    a = doctorWarehouseStockHandleDao.findByRelStockHandleId(id, type);//被入库的单据表
+                } else {
+                    a = doctorWarehouseStockHandleDao.findByRelStockHandleIds(id).get(0);
+                }
                 if (a != null) {
                     DoctorWarehouseMaterialHandle b = doctorWarehouseMaterialHandleDao.findByStockHandleId(a.getId());//被入库的单据明细表
                     DoctorWareHouse wareHouse2 = new DoctorWareHouse();
