@@ -7,14 +7,12 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.basic.dao.DoctorWareHouseDao;
-import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
-import io.terminus.doctor.basic.dao.DoctorWarehouseOrgSettlementDao;
-import io.terminus.doctor.basic.dao.DoctorWarehouseStockMonthlyDao;
+import io.terminus.doctor.basic.dao.*;
 import io.terminus.doctor.basic.dto.warehouseV2.CompanyReportDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.DoctorWarehouseOrgSettlement;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.ResponseUtil;
@@ -55,6 +53,9 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
     @Autowired
     private DoctorWareHouseDao doctorWareHouseDao;
+
+    @Autowired
+    private DoctorWarehouseMaterialApplyDao doctorWarehouseMaterialApplyDao;
 
     @Override
     public Response<BigDecimal> findLibraryById(Long id,String materialName) {
@@ -416,7 +417,15 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
     @Override
     public Response<List<Map>> getDataByMaterialName(Long stockHandleId, String materialName) {
-        return Response.ok(doctorWarehouseMaterialHandleDao.getDataByMaterialName(stockHandleId,materialName));
+        List<Map> dataByMaterialName = doctorWarehouseMaterialHandleDao.getDataByMaterialName(stockHandleId, materialName);
+        dataByMaterialName.forEach( map ->{
+            DoctorWarehouseMaterialApply materialApply = doctorWarehouseMaterialApplyDao.findMaterialHandle((Long) map.get("id"));
+            map.put("applyBarnId",materialApply.getPigBarnId());
+            map.put("applyGroupId",materialApply.getPigGroupId());
+            map.put("applyBarnName",materialApply.getPigBarnName());
+            map.put("applyGroupName",materialApply.getPigGroupName());
+        });
+        return Response.ok(dataByMaterialName);
     }
 
     private Map<String, Object> getMonth(Map<String, Object> criteria){
