@@ -78,7 +78,7 @@ public class WarehouseOutManager extends AbstractStockManager<WarehouseStockOutD
         doctorWarehouseMaterialHandleDao.update(materialHandle);
 
 //        if (!DateUtil.inSameDate(materialHandle.getHandleDate(), new Date())) {
-            recalculate(materialHandle);
+        recalculate(materialHandle);
 //        }
 
         doctorWarehouseMaterialApplyDao.deleteByMaterialHandle(materialHandle.getId());
@@ -109,6 +109,8 @@ public class WarehouseOutManager extends AbstractStockManager<WarehouseStockOutD
         apply.setApplyDate(materialHandle.getHandleDate());
         apply.setApplyYear(materialHandle.getHandleYear());
         apply.setApplyMonth(materialHandle.getHandleMonth());
+        apply.setRefundAmount(new BigDecimal(0));
+        apply.setRefundQuantity(new BigDecimal(0));
         if (detail.getApplyPigGroupId() != null) {
             if (detail.getApplyPigGroupId().equals(-1L)) {
                 apply.setPigGroupName("母猪");

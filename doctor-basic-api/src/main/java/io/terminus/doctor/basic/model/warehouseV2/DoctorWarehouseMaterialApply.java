@@ -9,10 +9,8 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Desc:
- * Mail: [ your email ]
- * Date: 2018-04-21 12:22:21
- * Created by [ your name ]
+ * 领用
+ * Date: 2018-05-17 10:46:41
  */
 @Data
 @Builder
@@ -20,7 +18,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class DoctorWarehouseMaterialApply implements Serializable {
 
-    private static final long serialVersionUID = 7135833311250873988L;
+    private static final long serialVersionUID = -8920485322020278197L;
 
     /**
      * 自增主键
@@ -49,7 +47,6 @@ public class DoctorWarehouseMaterialApply implements Serializable {
 
     /**
      * 仓库类型
-     *
      * @see io.terminus.doctor.common.enums.WareHouseType
      */
     private Integer warehouseType;
@@ -71,6 +68,7 @@ public class DoctorWarehouseMaterialApply implements Serializable {
 
     /**
      * 猪舍类型
+     * @see io.terminus.doctor.common.enums.PigType
      */
     private Integer pigType;
 
@@ -121,7 +119,6 @@ public class DoctorWarehouseMaterialApply implements Serializable {
 
     /**
      * 物料类型，易耗品，原料，饲料，药品，饲料
-     *
      * @see io.terminus.doctor.common.enums.WareHouseType
      */
     private Integer type;
@@ -143,7 +140,6 @@ public class DoctorWarehouseMaterialApply implements Serializable {
 
     /**
      * 领用类型。0猪舍，1猪群，2母猪
-     *
      * @see io.terminus.doctor.basic.enums.WarehouseMaterialApplyType
      */
     private Integer applyType;
@@ -157,6 +153,16 @@ public class DoctorWarehouseMaterialApply implements Serializable {
      * 会计年月
      */
     private Date settlementDate;
+
+    /**
+     * 退料数量
+     */
+    private java.math.BigDecimal refundQuantity;
+
+    /**
+     * 退料金额
+     */
+    private java.math.BigDecimal refundAmount;
 
     /**
      * 创建时间

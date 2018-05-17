@@ -437,6 +437,20 @@
         select ifnull(sum(quantity),0) from doctor_warehouse_material_handle where rel_material_handle_id=#{materialHandleId} and delete_flag=1
     </select>
 
+    <select id="findByApply" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
+        select t1.* from doctor_warehouse_material_handle t1
+        left join doctor_warehouse_material_apply t2
+        on t1.id=t2.material_handle_id
+        where
+        stock_handle_id=#{stockHandleId}
+        <if test="applyGroupId !=null">
+            AND pig_group_id=#{pig_group_id}
+        </if>
+        <if test="applyBarnId !=null">
+            AND pig_barn_id=#{pig_barn_id}
+        </if>
+    </select>
+
     <select id="getWarehouseMaterialHandleCount" resultType="int">
         select count(1) as count from  doctor_warehouse_material_handle
         where  warehouse_id = #{id} and delete_flag = 1

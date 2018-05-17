@@ -2206,3 +2206,8 @@ ALTER TABLE doctor_warehouse_material_apply CHANGE settlementDate settlement_dat
 
 --领用表单价改为可为null 2018-04-23
 ALTER TABLE doctor_warehouse_material_apply MODIFY unit_price decimal(23,4) COMMENT '单价';
+
+
+-- 领用表添加退料数量和退料金额字段 2018-05-17
+ALTER TABLE doctor_warehouse_material_apply ADD refund_quantity decimal(23,2) NULL COMMENT '退料数量';
+ALTER TABLE doctor_warehouse_material_apply ADD refund_amount decimal(23,2) NULL COMMENT '退料金额';

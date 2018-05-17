@@ -243,6 +243,15 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectOne(this.sqlId("countQuantityAlreadyRefund"), materialHandleId);
     }
 
+
+    public DoctorWarehouseMaterialHandle findByApply(Long stockHandleId, Long applyGroupId, Long applyBarnId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("stockHandleId", stockHandleId);
+        params.put("applyGroupId", applyGroupId);
+        params.put("applyBarnId", applyBarnId);
+        return this.sqlSession.selectOne(this.sqlId("findByApply"), params);
+    }
+
     public void updateHandleDateAndSettlementDate(Calendar handleDate, Date settlementDate, Long materialHandleId) {
         Map<String, Object> params = new HashMap<>();
         params.put("materialHandleId", materialHandleId);

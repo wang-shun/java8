@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.doctor.basic.enums.WarehouseMaterialApplyType;
 import io.terminus.doctor.basic.model.DoctorMaterialConsumeProvider;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.service.DoctorMaterialConsumeProviderReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialApplyReadService;
 import io.terminus.doctor.common.enums.WareHouseType;
