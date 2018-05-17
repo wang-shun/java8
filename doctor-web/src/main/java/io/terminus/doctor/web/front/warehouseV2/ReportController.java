@@ -919,8 +919,21 @@ public class ReportController {
 
                         thisMonthTotalRksl.add(drksl); //入库数量累加
                         thisMonthTotalRkje.add(drkje); //入库金额累加
+
+                        if(drksl.compareTo(BigDecimal.ZERO) == 0 || drkje.compareTo(BigDecimal.ZERO) == 0){
+                            tempmap.put("rkdj","");
+                        } else {
+                            tempmap.put("rkdj", drkje.divide(drksl, 4, RoundingMode.HALF_UP));
+                        }
+
                         thisMonthTotalCksl.add(dcksl); //出库数量累加
                         thisMonthTotalCkje.add(dckje); //出库金额累加
+
+                        if(dcksl.compareTo(BigDecimal.ZERO) == 0 || dckje.compareTo(BigDecimal.ZERO) == 0){
+                            tempmap.put("ckdj","");
+                        } else {
+                            tempmap.put("ckdj", dckje.divide(dcksl, 4, RoundingMode.HALF_UP));
+                        }
 
                         BigDecimal singleJcsl = new BigDecimal(0d);
                         BigDecimal singleJcje = new BigDecimal(0d);
