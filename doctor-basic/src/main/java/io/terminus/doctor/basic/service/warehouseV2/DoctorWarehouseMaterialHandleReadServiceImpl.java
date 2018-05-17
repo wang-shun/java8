@@ -419,7 +419,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     public Response<List<Map>> getDataByMaterialName(Long stockHandleId, String materialName) {
         List<Map> dataByMaterialName = doctorWarehouseMaterialHandleDao.getDataByMaterialName(stockHandleId, materialName);
         dataByMaterialName.forEach( map ->{
-            DoctorWarehouseMaterialApply materialApply = doctorWarehouseMaterialApplyDao.findMaterialHandle((Long) map.get("id"));
+            DoctorWarehouseMaterialApply materialApply = doctorWarehouseMaterialApplyDao.findMaterialHandle((Long) map.get("material_handle_id"));
             map.put("applyBarnId",materialApply.getPigBarnId());
             map.put("applyGroupId",materialApply.getPigGroupId());
             map.put("applyBarnName",materialApply.getPigBarnName());
