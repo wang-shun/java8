@@ -144,10 +144,10 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
                 if (a != null) {
                     DoctorWarehouseMaterialHandle b = doctorWarehouseMaterialHandleDao.findByStockHandleId(a.getId());//被入库的单据明细表
                     DoctorWareHouse wareHouse2 = new DoctorWareHouse();
-                    wareHouse.setId(b.getWarehouseId());
-                    wareHouse.setWareHouseName(b.getWarehouseName());
-                    wareHouse.setFarmId(b.getFarmId());
-                    wareHouse.setType(b.getWarehouseType());
+                    wareHouse2.setId(b.getWarehouseId());
+                    wareHouse2.setWareHouseName(b.getWarehouseName());
+                    wareHouse2.setFarmId(b.getFarmId());
+                    wareHouse2.setType(b.getWarehouseType());
                     if (type == 12) {
                         List<DoctorWarehouseStockHandle> c = doctorWarehouseStockHandleDao.findByRelStockHandleIds(a.getId());//其他配方出库的单据
                         for (int i = 0; i < c.size(); i++) {
@@ -157,10 +157,10 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
                                 for (int j = 0; j < d.size(); j++) {
                                     warehouseFormulaManager.delete(d.get(j));//删除其他配方出库单据明细
                                     DoctorWareHouse wareHouse1 = new DoctorWareHouse();
-                                    wareHouse.setId(d.get(j).getWarehouseId());
-                                    wareHouse.setWareHouseName(d.get(j).getWarehouseName());
-                                    wareHouse.setFarmId(d.get(j).getFarmId());
-                                    wareHouse.setType(d.get(j).getWarehouseType());
+                                    wareHouse1.setId(d.get(j).getWarehouseId());
+                                    wareHouse1.setWareHouseName(d.get(j).getWarehouseName());
+                                    wareHouse1.setFarmId(d.get(j).getFarmId());
+                                    wareHouse1.setType(d.get(j).getWarehouseType());
                                     doctorWarehouseStockManager.in(d.get(j).getMaterialId(), d.get(j).getQuantity(), wareHouse1);
                                 }
 
