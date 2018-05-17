@@ -422,8 +422,14 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
             DoctorWarehouseMaterialApply materialApply = doctorWarehouseMaterialApplyDao.findMaterialHandle((Long) map.get("material_handle_id"));
             map.put("applyBarnId",materialApply.getPigBarnId());
             map.put("applyGroupId",materialApply.getPigGroupId());
-            map.put("applyBarnName",materialApply.getPigBarnName());
-            map.put("applyGroupName",materialApply.getPigGroupName());
+            if(materialApply.getPigBarnName()==null)
+                map.put("applyBarnName"," ");
+            else
+                map.put("applyBarnName",materialApply.getPigBarnName());
+            if(materialApply.getPigGroupName()==null)
+                map.put("applyGroupName","");
+            else
+                map.put("applyGroupName",materialApply.getPigGroupName());
         });
         return Response.ok(dataByMaterialName);
     }
