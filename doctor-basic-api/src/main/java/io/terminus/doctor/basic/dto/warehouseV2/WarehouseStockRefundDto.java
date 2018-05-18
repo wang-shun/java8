@@ -30,5 +30,14 @@ public class WarehouseStockRefundDto extends AbstractWarehouseStockDto implement
         private static final long serialVersionUID = 7670362280319755039L;
 
 
+        /**
+         * 领用猪舍
+         */
+        private Long applyBarnId;
+
+        /**
+         * 领用猪群
+         */
+        private Long applyGroupId;
     }
 }

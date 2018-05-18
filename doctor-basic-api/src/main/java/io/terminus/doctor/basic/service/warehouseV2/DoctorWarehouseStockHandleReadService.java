@@ -27,7 +27,7 @@ public interface DoctorWarehouseStockHandleReadService {
      * @param RelId
      * @return
      */
-    Response<String> findwarehouseName(Long RelId);
+    Response<DoctorWarehouseStockHandle> findwarehouseName(Long RelId);
 
     /**
      * 查询

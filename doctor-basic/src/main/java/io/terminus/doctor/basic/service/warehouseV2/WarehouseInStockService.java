@@ -1,11 +1,9 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockInDto;
-import io.terminus.doctor.basic.enums.WarehouseMaterialApplyType;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.manager.WarehouseInManager;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -13,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -63,6 +60,8 @@ public class WarehouseInStockService extends AbstractWarehouseStockService<Wareh
 
         materialHandle.setRemark(detail.getRemark());
         materialHandle.setSettlementDate(stockDto.getSettlementDate());
+        materialHandle.setUnitPrice(detail.getUnitPrice());
+        materialHandle.setAmount(detail.getAmount());
 
         boolean changeHandleDate = !DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
         boolean changeQuantity = detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0;
@@ -78,7 +77,7 @@ public class WarehouseInStockService extends AbstractWarehouseStockService<Wareh
                     doctorWarehouseStockManager.out(detail.getMaterialId(), changedQuantity.negate(), wareHouse);
                 }
                 materialHandle.setQuantity(detail.getQuantity());
-                warehouseInManager.resetUnitPrice(materialHandle, detail.getQuantity());
+//                warehouseInManager.resetUnitPrice(materialHandle, detail.getQuantity());
             }
             Date recalculateDate = materialHandle.getHandleDate();
             if (changeHandleDate) {

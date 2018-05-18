@@ -34,7 +34,7 @@ public class DoctorWarehouseStockHandleReadServiceImpl implements DoctorWarehous
     }
 
     @Override
-    public Response<String> findwarehouseName(Long RelId) {
+    public Response<DoctorWarehouseStockHandle> findwarehouseName(Long RelId) {
         return Response.ok(doctorWarehouseStockHandleDao.findwarehouseName(RelId));
     }
 

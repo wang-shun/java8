@@ -217,10 +217,18 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                 }
             } else if (materialHandle.getType().equals(WarehouseMaterialHandleType.FORMULA_IN.getValue())) {
                 //配方生产入库，根据出库的总价/入库的数量
+                //获取配方入库单据
                 DoctorWarehouseStockHandle formulaInStockHandle = doctorWarehouseStockHandleDao.findById(materialHandle.getStockHandleId());
                 if (null == formulaInStockHandle)
                     throw new ServiceException("stock.handle.not.found");
-                List<DoctorWarehouseMaterialHandle> formulaOutMaterialHandles = doctorWarehouseMaterialHandleDao.findByStockHandle(formulaInStockHandle.getRelStockHandleId());
+                //根据配方入库单据获取对应配方出库单据，再根据配方出库单据获取明细
+                List<Long> formulaOutStockHandleIds = doctorWarehouseStockHandleDao.findRelStockHandle(formulaInStockHandle.getId()).stream().map(DoctorWarehouseStockHandle::getId).collect(Collectors.toList());
+                if (formulaOutStockHandleIds.isEmpty())
+                    throw new ServiceException("formula.out.stock.handle.not.found");
+
+                List<DoctorWarehouseMaterialHandle> formulaOutMaterialHandles = doctorWarehouseMaterialHandleDao.findByStockHandles(formulaOutStockHandleIds);
+                if (formulaOutMaterialHandles.isEmpty())
+                    throw new ServiceException("formula.out.material.handle.not.found");
 
                 BigDecimal totalFormulaOutAmount = formulaOutMaterialHandles
                         .stream()

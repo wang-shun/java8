@@ -66,6 +66,12 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
 //        return sqlSession.selectOne("findByMaterialHandle", materialHandleId);
     }
 
+    public List<DoctorWarehouseMaterialApply> findAllByMaterialHandle(Long materialHandleId) {
+        return this.list(DoctorWarehouseMaterialApply.builder()
+                .materialHandleId(materialHandleId)
+                .build());
+    }
+
     /**
      * 删除猪群或母猪领用
      *
@@ -126,6 +132,13 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         this.sqlSession.update(this.sqlId("reverseSettlement"), map);
     }
 
+    /**
+     * 根据物料明细更新领用单价和金额
+     *
+     * @param materialHandleId
+     * @param unitPrice
+     * @param amount
+     */
     public void updateUnitPriceAndAmountByMaterialHandle(Long materialHandleId, BigDecimal unitPrice, BigDecimal amount) {
         Map<String, Object> map = Maps.newHashMap();
         map.put("materialHandleId", materialHandleId);
@@ -149,31 +162,31 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
      */
     public List<DoctorWarehouseMaterialApplyPigGroup> selectPigGroupApply(Integer farmId, String pigType, String pigName, String pigGroupName,
 
-                                                                                      Integer skuType, String skuName, String openAt, String closeAt){
+                                                                          Integer skuType, String skuName, String openAt, String closeAt) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date openAt1 = null;
         Date closeAt1 = null;
         try {
-            if(openAt != null){
+            if (openAt != null) {
                 openAt1 = sdf.parse(openAt);
             }
-            if(closeAt != null) {
+            if (closeAt != null) {
                 closeAt1 = sdf.parse(closeAt);
             }
-        }catch (ParseException e) {
+        } catch (ParseException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        Map<String,Object> map = Maps.newHashMap();
-        map.put("farmId",farmId);
-        map.put("pigType",pigType);
-        map.put("pigName",pigName);
-        map.put("pigGroupName",pigGroupName);
-        map.put("skuType",skuType);
-        map.put("skuName",skuName);
-        map.put("openAt",openAt1);
-        map.put("closeAt",closeAt1);
-        return this.sqlSession.selectList(this.sqlId("selectPigGroupApply"),map);
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("farmId", farmId);
+        map.put("pigType", pigType);
+        map.put("pigName", pigName);
+        map.put("pigGroupName", pigGroupName);
+        map.put("skuType", skuType);
+        map.put("skuName", skuName);
+        map.put("openAt", openAt1);
+        map.put("closeAt", closeAt1);
+        return this.sqlSession.selectList(this.sqlId("selectPigGroupApply"), map);
 
     }
 
@@ -228,6 +241,43 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         map.put("pigGroupId", pigGroupId);
         map.put("skuId", skuId);
         return this.sqlSession.selectList(this.sqlId("selectPigGroupApplyDetail"), map);
+    }
+
+    public List<DoctorWarehouseMaterialApplyPigGroup> selectPigGroupApply1(Integer farmId, String pigType, String pigName, String pigGroupName, Integer skuType, String skuName, String openAtStart, String openAtEnd, String closeAtStart, String closeAtEnd) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date openAtStart1 = null;
+        Date openAtEnd1 = null;
+        Date closeAtStart1 = null;
+        Date closeAtEnd1 = null;
+        try {
+            if(openAtStart != null){
+                openAtStart1 = sdf.parse(openAtStart);
+            }
+            if(openAtEnd != null){
+                openAtEnd1 = sdf.parse(openAtEnd);
+            }
+            if(closeAtStart != null) {
+                closeAtStart1 = sdf.parse(closeAtStart);
+            }
+            if(closeAtEnd != null) {
+                closeAtEnd1 = sdf.parse(closeAtEnd);
+            }
+        }catch (ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        Map<String,Object> map = Maps.newHashMap();
+        map.put("farmId",farmId);
+        map.put("pigType",pigType);
+        map.put("pigName",pigName);
+        map.put("pigGroupName",pigGroupName);
+        map.put("skuType",skuType);
+        map.put("skuName",skuName);
+        map.put("openAtStart",openAtStart1);
+        map.put("openAtEnd",openAtEnd1);
+        map.put("closeAtStart",closeAtStart1);
+        map.put("closeAtEnd",closeAtEnd1);
+        return this.sqlSession.selectList(this.sqlId("selectPigGroupApply1"),map);
     }
 }
 

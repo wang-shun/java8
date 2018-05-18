@@ -829,6 +829,7 @@ public class ReportController {
                         pigBarnId, pigGroupId, handlerType,
                         type, warehouseId, str
                 );
+
                 // 计算这条物料的结存数据与汇总数据
                 if (resultMap.size() > 0) {
 
@@ -857,6 +858,52 @@ public class ReportController {
                     for(int i = 0;i < resultMap.size();i++){
 
                         Map<String, Object> thismap = resultMap.get(i);
+
+                        //获取下一条数据
+                        Map<String,Object> nextmap = null;
+                        if(i < resultMap.size() - 1) {
+                            nextmap = resultMap.get(i + 1);
+                        }
+
+                        if(null != thismap && null != nextmap) {
+
+                            String thisId = isBlank(thismap.get("id")) ? "" : thismap.get("id").toString().trim();
+                            String thisMaterName = isBlank(thismap.get("material_name")) ? "" : thismap.get("material_name").toString().trim();
+                            String thisMaterType = isBlank(thismap.get("material_type")) ? "" : thismap.get("material_type").toString().trim();
+                            String thisWareHouseName = isBlank(thismap.get("ware_house_name")) ? "" : thismap.get("ware_house_name").toString().trim();
+                            String thisHandleDate = isBlank(thismap.get("handle_date")) ? "" : thismap.get("handle_date").toString().trim();
+                            String thisSettlementDate = isBlank(thismap.get("settlement_date")) ? "" : thismap.get("settlement_date").toString().trim();
+                            String thisHandlerType = isBlank(thismap.get("handler_type")) ? "" : thismap.get("handler_type").toString().trim();
+                            String thisPigBarnName = isBlank(thismap.get("pig_barn_name")) ? "" : thismap.get("pig_barn_name").toString().trim();
+                            String thisPigType = isBlank(thismap.get("pig_type")) ? "" : thismap.get("pig_type").toString().trim();
+                            String thisPigGroupName = isBlank(thismap.get("pig_group_name")) ? "" : thismap.get("pig_group_name").toString().trim();
+
+                            String nextId = isBlank(nextmap.get("id")) ? "" : nextmap.get("id").toString().trim();
+                            String nextMaterName = isBlank(nextmap.get("material_name")) ? "" : nextmap.get("material_name").toString().trim();
+                            String nextMaterType = isBlank(nextmap.get("material_type")) ? "" : nextmap.get("material_type").toString().trim();
+                            String nextWareHouseName = isBlank(nextmap.get("ware_house_name")) ? "" : nextmap.get("ware_house_name").toString().trim();
+                            String nextHandleDate = isBlank(nextmap.get("handle_date")) ? "" : nextmap.get("handle_date").toString().trim();
+                            String nextSettlementDate = isBlank(nextmap.get("settlement_date")) ? "" : nextmap.get("settlement_date").toString().trim();
+                            String nextHandlerType = isBlank(nextmap.get("handler_type")) ? "" : nextmap.get("handler_type").toString().trim();
+                            String nextPigBarnName = isBlank(nextmap.get("pig_barn_name")) ? "" : nextmap.get("pig_barn_name").toString().trim();
+                            String nextPigType = isBlank(nextmap.get("pig_type")) ? "" : nextmap.get("pig_type").toString().trim();
+
+                            if(thisId.equals(nextId)
+                                    && thisMaterName.equals(nextMaterName)
+                                    && thisMaterType.equals(nextMaterType)
+                                    && thisWareHouseName.equals(nextWareHouseName)
+                                    && thisHandleDate.equals(nextHandleDate)
+                                    && thisSettlementDate.equals(nextSettlementDate)
+                                    && thisHandlerType.equals(nextHandlerType)
+                                    && thisPigBarnName.equals(nextPigBarnName)
+                                    && thisPigType.equals(nextPigType)
+                                    && "".equals(thisPigGroupName))
+                            {
+                                continue;
+                            }
+
+                        }
+
                         Map<String, Object> tempmap = thismap;
 
                         // 计算每一条明细的结存数据
@@ -872,8 +919,21 @@ public class ReportController {
 
                         thisMonthTotalRksl.add(drksl); //入库数量累加
                         thisMonthTotalRkje.add(drkje); //入库金额累加
+
+                        if(drksl.compareTo(BigDecimal.ZERO) == 0 || drkje.compareTo(BigDecimal.ZERO) == 0){
+                            tempmap.put("rkdj","");
+                        } else {
+                            tempmap.put("rkdj", drkje.divide(drksl, 4, RoundingMode.HALF_UP));
+                        }
+
                         thisMonthTotalCksl.add(dcksl); //出库数量累加
                         thisMonthTotalCkje.add(dckje); //出库金额累加
+
+                        if(dcksl.compareTo(BigDecimal.ZERO) == 0 || dckje.compareTo(BigDecimal.ZERO) == 0){
+                            tempmap.put("ckdj","");
+                        } else {
+                            tempmap.put("ckdj", dckje.divide(dcksl, 4, RoundingMode.HALF_UP));
+                        }
 
                         BigDecimal singleJcsl = new BigDecimal(0d);
                         BigDecimal singleJcje = new BigDecimal(0d);
@@ -960,7 +1020,19 @@ public class ReportController {
         return null;
     }
 
-    public static boolean isNull(Object str){
+    private static boolean isBlank(Object str){
+        try {
+            if (null == str ||  "".equals(str.toString().trim())) {
+                return true;
+            }
+        }
+        catch (Exception e){
+            return false;
+        }
+        return false;
+    }
+
+    private static boolean isNull(Object str){
         try {
             if (str == null
                     || str.toString().trim().equals("")

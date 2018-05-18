@@ -225,6 +225,15 @@ public class StockHandleController {
 
                             //退料入库-->可退数量
                             if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.RETURN.getValue())) {
+                                DoctorWarehouseMaterialApply apply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandle(mh.getRelMaterialHandleId()));
+                                if (null != apply) {
+                                    detail.setApplyPigBarnName(apply.getPigBarnName());
+                                    detail.setApplyPigBarnId(apply.getPigBarnId());
+                                    detail.setApplyPigGroupName(apply.getPigGroupName());
+                                    detail.setApplyPigGroupId(apply.getPigGroupId());
+                                } else {
+                                    log.warn("material apply not found,by material handle {}", mh.getId());
+                                }
                                 BigDecimal RefundableNumber = new BigDecimal(0);
                                 //得到领料出库的数量
                                 BigDecimal LibraryQuantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findLibraryById(mh.getRelMaterialHandleId(),mh.getMaterialName()));
@@ -253,8 +262,9 @@ public class StockHandleController {
 
                             //配方生产出库
                             if (stockHandle.getHandleSubType().equals( WarehouseMaterialHandleType.FORMULA_OUT.getValue())) {
-                                String warehouseName = RespHelper.or500(doctorWarehouseStockHandleReadService.findwarehouseName(stockHandle.getRelStockHandleId()));
-                                detail.setStorageWarehouseNames(warehouseName);
+                                DoctorWarehouseStockHandle sh = RespHelper.or500(doctorWarehouseStockHandleReadService.findwarehouseName(stockHandle.getRelStockHandleId()));
+                                detail.setStorageWarehouseIds(sh.getWarehouseId());
+                                detail.setStorageWarehouseNames(sh.getWarehouseName());
                             }
 
                             return detail;
@@ -263,8 +273,9 @@ public class StockHandleController {
 
         //配方生产出库
         if (stockHandle.getHandleSubType().equals( WarehouseMaterialHandleType.FORMULA_OUT.getValue())) {
-            String warehouseName = RespHelper.or500(doctorWarehouseStockHandleReadService.findwarehouseName(stockHandle.getRelStockHandleId()));
-            vo.setStorageWarehouseName(warehouseName);
+            DoctorWarehouseStockHandle sh = RespHelper.or500(doctorWarehouseStockHandleReadService.findwarehouseName(stockHandle.getRelStockHandleId()));
+            vo.setStorageWarehouseId(sh.getWarehouseId());
+            vo.setStorageWarehouseName(sh.getWarehouseName());
         }
 
         DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(vo.getFarmId()));
@@ -410,6 +421,11 @@ public class StockHandleController {
 
                     //退料入库-->可退数量
                     if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.RETURN.getValue())) {
+                        DoctorWarehouseMaterialApply apply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandle(mh.getRelMaterialHandleId()));
+                        if (null != apply) {
+                            vo.setApplyPigBarnName(apply.getPigBarnName());
+                            vo.setApplyPigGroupName(apply.getPigGroupName());
+                        }
                         BigDecimal RefundableNumber = new BigDecimal(0);
                         //得到领料出库的数量
                         BigDecimal LibraryQuantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findLibraryById(mh.getRelMaterialHandleId(),mh.getMaterialName()));
@@ -421,8 +437,8 @@ public class StockHandleController {
 
                     //配方生产出库
                     if (stockHandle.getHandleSubType().equals( WarehouseMaterialHandleType.FORMULA_OUT.getValue())) {
-                        String warehouseName = RespHelper.or500(doctorWarehouseStockHandleReadService.findwarehouseName(stockHandle.getRelStockHandleId()));
-                        vo.setTransferInWarehouseName(warehouseName);
+                        DoctorWarehouseStockHandle sh = RespHelper.or500(doctorWarehouseStockHandleReadService.findwarehouseName(stockHandle.getRelStockHandleId()));
+                        vo.setTransferInWarehouseName(sh.getWarehouseName());
                     }
 
                     vo.setUnitPrice(mh.getUnitPrice().divide(new BigDecimal(100), 2, BigDecimal.ROUND_HALF_UP).doubleValue());
@@ -774,11 +790,13 @@ public class StockHandleController {
                     title.createCell(2).setCellValue("厂家");
                     title.createCell(3).setCellValue("规格");
                     title.createCell(4).setCellValue("单位");
-                    title.createCell(5).setCellValue("可退数量");
-                    title.createCell(6).setCellValue("退料数量");
-                    title.createCell(7).setCellValue("单价(元)");
-                    title.createCell(8).setCellValue("金额(元)");
-                    title.createCell(9).setCellValue("备注");
+                    title.createCell(5).setCellValue("领用猪舍");
+                    title.createCell(6).setCellValue("领用猪群");
+                    title.createCell(7).setCellValue("可退数量");
+                    title.createCell(8).setCellValue("退料数量");
+                    title.createCell(9).setCellValue("单价(元)");
+                    title.createCell(10).setCellValue("金额(元)");
+                    title.createCell(11).setCellValue("备注");
 
                     BigDecimal totalQuantity = new BigDecimal(0);
                     double totalAmount = 0L;
@@ -789,11 +807,13 @@ public class StockHandleController {
                         row.createCell(1).setCellValue(vo.getMaterialCode());
                         row.createCell(3).setCellValue(vo.getMaterialSpecification());
                         row.createCell(4).setCellValue(vo.getUnit());
-                        row.createCell(5).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
-                        row.createCell(6).setCellValue(vo.getQuantity().doubleValue());
-                        row.createCell(7).setCellValue(vo.getUnitPrice());
-                        row.createCell(8).setCellValue(vo.getAmount());
-                        row.createCell(9).setCellValue(vo.getRemark());
+                        row.createCell(5).setCellValue(vo.getApplyPigBarnName());
+                        row.createCell(6).setCellValue(vo.getApplyPigGroupName());
+                        row.createCell(7).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
+                        row.createCell(8).setCellValue(vo.getQuantity().doubleValue());
+                        row.createCell(9).setCellValue(vo.getUnitPrice());
+                        row.createCell(10).setCellValue(vo.getAmount());
+                        row.createCell(11).setCellValue(vo.getRemark());
 
                         totalQuantity = totalQuantity.add(vo.getQuantity());
                         totalAmount += vo.getAmount();

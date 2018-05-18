@@ -23,31 +23,22 @@ public class DoctorWarehouseStockHandleDao extends MyBatisDao<DoctorWarehouseSto
     }
 
     //得到配方入库仓库
-    public String findwarehouseName(Long RelId) {
-        String warehouseName = this.sqlSession.selectOne(this.sqlId("findwarehouseName"), RelId);
-        return warehouseName;
+    public DoctorWarehouseStockHandle findwarehouseName(Long RelId) {
+        DoctorWarehouseStockHandle findwarehouseName = this.sqlSession.selectOne(this.sqlId("findwarehouseName"), RelId);
+        return findwarehouseName;
     }
 
-    public List<DoctorWarehouseStockHandle> findByRelStockHandleId(Long id, int type) {
-        int handle_sub_type = 0;
-        //领料出库
-        if (type == 2) {
-            handle_sub_type = 13;
-        }
-        //配方出库
-        if (type == 12) {
-            handle_sub_type = 11;
-        }
-        //调拨出库
-        if (type == 10) {
-            handle_sub_type = 9;
-        }
+    public DoctorWarehouseStockHandle findByRelStockHandleId(Long id, int type) {
         Map<String, Object> criteria = Maps.newHashMap();
         criteria.put("id", id);
-        criteria.put("handle_sub_type", handle_sub_type);
-        return this.sqlSession.selectList(this.sqlId("findByRelStockHandleId"), criteria);
+        return this.sqlSession.selectOne(this.sqlId("findByRelStockHandleId"), criteria);
     }
 
+    public List<DoctorWarehouseStockHandle> findByRelStockHandleIds(Long id) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("id", id);
+        return this.sqlSession.selectList(this.sqlId("findByRelStockHandleIds"), criteria);
+    }
 
     public List<DoctorWarehouseStockHandle> findRelStockHandle(Long stockHandleId) {
         return this.sqlSession.selectList(this.sqlId("findRelStockHandle"), stockHandleId);

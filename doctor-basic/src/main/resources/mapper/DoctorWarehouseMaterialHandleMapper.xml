@@ -132,6 +132,12 @@
                     material_id =#{t}
                 </foreach>
             </if>
+            <if test="stockHandleIds !=null and stockHandleIds.size() >0">
+                AND
+                <foreach collection="stockHandleIds" item="t" open="(" separator="or" close=")">
+                    stock_handle_id =#{t}
+                </foreach>
+            </if>
 
             <if test="settlementDateStart">AND <![CDATA[settlement_date >= #{settlementDateStart}]]></if>
             <if test="settlementDateEnd">AND <![CDATA[settlement_date <= #{settlementDateEnd}]]></if>
@@ -431,6 +437,21 @@
         select ifnull(sum(quantity),0) from doctor_warehouse_material_handle where rel_material_handle_id=#{materialHandleId} and delete_flag=1
     </select>
 
+    <select id="findByApply" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
+        select t1.* from doctor_warehouse_material_handle t1
+        left join doctor_warehouse_material_apply t2
+        on t1.id=t2.material_handle_id
+        where
+        stock_handle_id=#{stockHandleId}
+        and delete_flag=1
+        <if test="applyGroupId !=null">
+            AND pig_group_id=#{applyGroupId}
+        </if>
+        <if test="applyBarnId !=null">
+            AND pig_barn_id=#{applyBarnId}
+        </if>
+    </select>
+
     <select id="getWarehouseMaterialHandleCount" resultType="int">
         select count(1) as count from  doctor_warehouse_material_handle
         where  warehouse_id = #{id} and delete_flag = 1
@@ -447,9 +468,14 @@
         order by settlement_date ,id desc;
     </select>
 
-    <select id="findByStockHandleId" parameterType="long" resultType="DoctorWarehouseMaterialHandle">
+    <select id="findByStockHandleId" parameterType="long" resultMap="DoctorWarehouseMaterialHandleMap">
         select * from  doctor_warehouse_material_handle
-        where  stock_handle_id = #{id}
+        where  stock_handle_id = #{id} and delete_flag = 1
+    </select>
+
+    <select id="findByStockHandleIds" parameterType="long" resultMap="DoctorWarehouseMaterialHandleMap">
+        select * from  doctor_warehouse_material_handle
+        where  stock_handle_id = #{id} and delete_flag = 1
     </select>
 
     <select id="listByFarmIdTime" parameterType="map" resultType="map">
@@ -611,7 +637,7 @@
         <if test="type != null">
             and d.type=#{type}
         </if>
-        order by b.handle_date,b.id
+        order by b.handle_date,b.id,f.pig_group_name
     </select>
 
     <sql id ="balanceAmount">

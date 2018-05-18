@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2018-04-21 12:22:21
+ ~ Date: 2018-05-17 10:46:41
  ~ Created by [ your name ]
 -->
 
@@ -35,12 +35,14 @@
         <result property="applyType" column="apply_type"/>
         <result property="amount" column="amount"/>
         <result property="settlementDate" column="settlement_date"/>
+        <result property="refundQuantity" column="refund_quantity"/>
+        <result property="refundAmount" column="refund_amount"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
     <resultMap id="DoctorWarehouseMaterialApplyPigGroupMap" type="DoctorWarehouseMaterialApplyPigGroup">
-    <id property="id" column="id"/>
+        <id property="id" column="id"/>
         <result property="staffName" column="staff_name"/>
         <result property="pigGroupName" column="pig_group_name"/>
         <result property="pigName" column="pig_name"/>
@@ -93,12 +95,18 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `material_handle_id`, `org_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `pig_barn_id`, `pig_barn_name`, `pig_type`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_id`, `apply_staff_name`, `apply_year`, `apply_month`, `material_name`, `type`, `unit`, `quantity`, `unit_price`, `apply_type`, `amount`, `settlement_date`,
+        `material_handle_id`, `org_id`, `farm_id`, `warehouse_id`, `warehouse_type`, `warehouse_name`, `pig_barn_id`,
+        `pig_barn_name`, `pig_type`, `pig_group_id`, `pig_group_name`, `material_id`, `apply_date`, `apply_staff_id`,
+        `apply_staff_name`, `apply_year`, `apply_month`, `material_name`, `type`, `unit`, `quantity`, `unit_price`,
+        `apply_type`, `amount`, `settlement_date`, `refund_quantity`, `refund_amount`,
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{materialHandleId}, #{orgId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{pigBarnId}, #{pigBarnName}, #{pigType}, #{pigGroupId}, #{pigGroupName}, #{materialId}, #{applyDate}, #{applyStaffId}, #{applyStaffName}, #{applyYear}, #{applyMonth}, #{materialName}, #{type}, #{unit}, #{quantity}, #{unitPrice}, #{applyType}, #{amount}, #{settlementDate}, 
+        #{materialHandleId}, #{orgId}, #{farmId}, #{warehouseId}, #{warehouseType}, #{warehouseName}, #{pigBarnId},
+        #{pigBarnName}, #{pigType}, #{pigGroupId}, #{pigGroupName}, #{materialId}, #{applyDate}, #{applyStaffId},
+        #{applyStaffName}, #{applyYear}, #{applyMonth}, #{materialName}, #{type}, #{unit}, #{quantity}, #{unitPrice},
+        #{applyType}, #{amount}, #{settlementDate}, #{refundQuantity}, #{refundAmount},
         now(), now()
     </sql>
 
@@ -129,11 +137,13 @@
             <if test="applyType != null">AND `apply_type` = #{applyType}</if>
             <if test="amount != null">AND `amount` = #{amount}</if>
             <if test="settlementDate != null">AND `settlement_date` = #{settlementDate}</if>
+            <if test="refundQuantity != null">AND `refund_quantity` = #{refundQuantity}</if>
+            <if test="refundAmount != null">AND `refund_amount` = #{refundAmount}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
         </where>
     </sql>
-    
+
     <sql id="advCriteria">
         <where>
             <if test="materialHandleId != null">AND `material_handle_id` = #{materialHandleId}</if>
@@ -161,6 +171,8 @@
             <if test="applyType != null">AND `apply_type` = #{applyType}</if>
             <if test="amount != null">AND `amount` = #{amount}</if>
             <if test="settlementDate != null">AND `settlement_date` = #{settlementDate}</if>
+            <if test="refundQuantity != null">AND `refund_quantity` = #{refundQuantity}</if>
+            <if test="refundAmount != null">AND `refund_amount` = #{refundAmount}</if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
 
@@ -242,33 +254,41 @@
             <if test="applyType != null">`apply_type` = #{applyType},</if>
             <if test="amount != null">`amount` = #{amount},</if>
             <if test="settlementDate != null">`settlement_date` = #{settlementDate},</if>
+            <if test="refundQuantity != null">`refund_quantity` = #{refundQuantity},</if>
+            <if test="refundAmount != null">`refund_amount` = #{refundAmount},</if>
             updated_at = now()
         </set>
         WHERE id = #{id}
     </update>
 
     <delete id="delete" parameterType="long">
-        DELETE FROM <include refid="tb"/>
+        DELETE FROM
+        <include refid="tb"/>
         WHERE id = #{id}
     </delete>
-    
+
     <select id="count" parameterType="map" resultType="long">
         SELECT COUNT(1)
-        FROM <include refid="tb"/>
+        FROM
+        <include refid="tb"/>
         <include refid="criteria"/>
     </select>
 
     <select id="paging" parameterType="map" resultMap="DoctorWarehouseMaterialApplyMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
         LIMIT #{offset}, #{limit}
     </select>
 
     <select id="list" parameterType="map" resultMap="DoctorWarehouseMaterialApplyMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
     </select>
@@ -353,51 +373,96 @@
     <update id="updateUnitPriceAndAmountByMaterialHandle" parameterType="map">
         UPDATE
         <include refid="tb"/>
-        set unit_price=#{unitPrice},amount=#{amount}
+        set unit_price=#{unitPrice},amount=#{amount},refund_amount=unit_price * refund_quantity
         where material_handle_id=#{materialHandleId}
     </update>
 
     <select id="selectPigGroupApply" parameterType="map" resultMap="DoctorWarehouseMaterialApplyPigGroupMap">
-      SELECT
-            a.pig_group_name,
-            e.NAME as pig_name,
-            a.pig_type,
-            e.staff_name,
-            c.code,
-            c.name as sku_name,
-            db.name as unit,
-            sum( a.quantity ) AS quantity,
-            ifnull(sum( a.unit_price * a.quantity ) / sum( a.quantity ),0) AS unit_price,
-            sum(a.amount) AS amount,
-            c.type as sku_type,
-            b.name as vendor_name,
-            c.specification,
-            date_format(d.open_at,'%Y-%m-%d') as open_at,
-            date_format(d.close_at,'%Y-%m-%d') as close_at,
-            d.farm_name,
-            a.pig_group_id,
-            a.material_id as sku_id
+        SELECT
+        a.pig_group_name,
+        e.NAME as pig_name,
+        a.pig_type,
+        e.staff_name,
+        c.code,
+        c.name as sku_name,
+        db.name as unit,
+        sum( a.quantity ) AS quantity,
+        ifnull(sum( a.unit_price * a.quantity ) / sum( a.quantity ),0) AS unit_price,
+        sum(a.amount) AS amount,
+        c.type as sku_type,
+        b.name as vendor_name,
+        c.specification,
+        date_format(d.open_at,'%Y-%m-%d') as open_at,
+        date_format(d.close_at,'%Y-%m-%d') as close_at,
+        d.farm_name,
+        a.pig_group_id,
+        a.material_id as sku_id
         FROM
-            doctor_warehouse_material_apply a
-            JOIN doctor_warehouse_sku c ON a.material_id = c.id
-            JOIN doctor_warehouse_vendor b ON c.vendor_id = b.id
-            JOIN doctor_groups d ON d.id = a.pig_group_id
-            JOIN doctor_barns e ON e.id = a.pig_barn_id
-            JOIN doctor_basics as db on db.id=c.unit
+        doctor_warehouse_material_apply a
+        JOIN doctor_warehouse_sku c ON a.material_id = c.id
+        JOIN doctor_warehouse_vendor b ON c.vendor_id = b.id
+        JOIN doctor_groups d ON d.id = a.pig_group_id
+        JOIN doctor_barns e ON e.id = a.pig_barn_id
+        JOIN doctor_basics as db on db.id=c.unit
         WHERE
-            a.apply_type = 1
-            <if test="farmId != null"> AND a.farm_id = #{farmId}</if>
-            <if test="pigType != null"> AND a.pig_type = #{pigType}</if>
-            <if test="pigName != null"> AND e.id = #{pigName}</if>
-            <if test="pigGroupName != null"> AND a.pig_group_id = #{pigGroupName}</if>
-            <if test="skuType != null">  AND c.type= #{skuType}</if>
-            <if test="skuName != null"> AND c.name like concat('%',#{skuName},'%')</if>
-            <if test="openAt != null"> AND d.open_at = #{openAt}</if>
-            <if test="closeAt != null">  AND d.close_at = #{closeAt}</if>
+        a.apply_type = 1
+        <if test="farmId != null"> AND a.farm_id = #{farmId}</if>
+        <if test="pigType != null"> AND a.pig_type = #{pigType}</if>
+        <if test="pigName != null"> AND e.id = #{pigName}</if>
+        <if test="pigGroupName != null"> AND a.pig_group_id = #{pigGroupName}</if>
+        <if test="skuType != null">  AND c.type= #{skuType}</if>
+        <if test="skuName != null"> AND c.name like concat('%',#{skuName},'%')</if>
+        <if test="openAt != null"> AND d.open_at = #{openAt}</if>
+        <if test="closeAt != null">  AND d.close_at = #{closeAt}</if>
         GROUP BY
-            a.material_id,
-            a.pig_group_id,
-            a.pig_barn_id
+        a.material_id,
+        a.pig_group_id,
+        a.pig_barn_id
+    </select>
+
+    <select id="selectPigGroupApply1" parameterType="map" resultMap="DoctorWarehouseMaterialApplyPigGroupMap">
+        SELECT
+        a.pig_group_name,
+        e.NAME as pig_name,
+        a.pig_type,
+        e.staff_name,
+        c.code,
+        c.name as sku_name,
+        db.name as unit,
+        sum( a.quantity ) AS quantity,
+        ifnull(sum( a.unit_price * a.quantity ) / sum( a.quantity ),0) AS unit_price,
+        sum(a.amount) AS amount,
+        c.type as sku_type,
+        b.name as vendor_name,
+        c.specification,
+        date_format(d.open_at,'%Y-%m-%d') as open_at,
+        date_format(d.close_at,'%Y-%m-%d') as close_at,
+        d.farm_name,
+        a.pig_group_id,
+        a.material_id as sku_id
+        FROM
+        doctor_warehouse_material_apply a
+        JOIN doctor_warehouse_sku c ON a.material_id = c.id
+        JOIN doctor_warehouse_vendor b ON c.vendor_id = b.id
+        JOIN doctor_groups d ON d.id = a.pig_group_id
+        JOIN doctor_barns e ON e.id = a.pig_barn_id
+        JOIN doctor_basics as db on db.id=c.unit
+        WHERE
+        a.apply_type = 1
+        <if test="farmId != null"> AND a.farm_id = #{farmId}</if>
+        <if test="pigType != null"> AND a.pig_type = #{pigType}</if>
+        <if test="pigName != null"> AND e.id = #{pigName}</if>
+        <if test="pigGroupName != null"> AND a.pig_group_id = #{pigGroupName}</if>
+        <if test="skuType != null">  AND c.type= #{skuType}</if>
+        <if test="skuName != null"> AND c.name like concat('%',#{skuName},'%')</if>
+        <if test="openAtStart != null"> AND <![CDATA[d.open_at >= #{openAtStart}]]></if>
+        <if test="openAtEnd != null"> AND <![CDATA[d.open_at < #{openAtEnd}]]></if>
+        <if test="closeAtStart != null">  AND <![CDATA[d.close_at >= #{closeAtStart}]]></if>
+        <if test="closeAtEnd != null">  AND <![CDATA[d.close_at < #{closeAtEnd}]]></if>
+        GROUP BY
+        a.material_id,
+        a.pig_group_id,
+        a.pig_barn_id
     </select>
 
     <!--猪群Start-->
@@ -416,7 +481,7 @@
         format(ifnull(sum(ma.unit_price*ma.quantity)+''/sum(ma.quantity),0)+'',4) as sum_unit_price,
         format(ifnull(sum(ma.amount),0)+'',4) as sum_amount,
         s.type as material_type,
-        mh.vendor_name as vendor_name,
+        v.`name` as vendor_name,
         s.specification as specification,
         f.`name` as farm_name
         from  doctor_warehouse_material_apply as ma
@@ -430,6 +495,8 @@
         on f.id=ma.farm_id
         inner join doctor_basics as db
         on db.id=ma.unit
+        inner join doctor_warehouse_vendor as v
+        on v.id=s.vendor_id
         where mh.type=2 and ma.apply_type=0
         <if test="farmId != null">
             and ma.farm_id = #{farmId}
@@ -483,6 +550,10 @@
             on s.id=mh.material_id
             inner join doctor_farms as f
             on f.id=ma.farm_id
+            inner join doctor_basics as db
+            on db.id=ma.unit
+            inner join doctor_warehouse_vendor as v
+            on v.id=s.vendor_id
             where mh.type=2 and ma.apply_type=0
             <if test="farmId != null">
                 and ma.farm_id = #{farmId}
@@ -533,6 +604,10 @@
             on s.id=mh.material_id
             inner join doctor_farms as f
             on f.id=ma.farm_id
+            inner join doctor_basics as db
+            on db.id=ma.unit
+            inner join doctor_warehouse_vendor as v
+            on v.id=s.vendor_id
             where mh.type=2 and ma.apply_type=0
             <if test="farmId != null">
                 and ma.farm_id = #{farmId}
@@ -577,7 +652,7 @@
         b.staff_name as staff_name,
         f.`name` as farm_name,
         db.name as unit ,
-        mh.vendor_name as vendor_name,
+        v.`name` as vendor_name,
         s.specification as specification
         from doctor_warehouse_material_apply as ma
         inner join doctor_warehouse_material_handle as mh
@@ -590,6 +665,8 @@
         on f.id=ma.farm_id
         inner join doctor_basics as db
         on db.id=mh.unit
+        inner join doctor_warehouse_vendor as v
+        on v.id=s.vendor_id
         where mh.type=2 and ma.apply_type=0
         <if test="pigBarnId != null">
             and ma.pig_barn_id = #{pigBarnId}
@@ -605,7 +682,7 @@
         </if>
     </select>
 
-    <!--猪群Start-->
+    <!--猪群end-->
 
     <select id="selectPigGroupApplyDetail" parameterType="map" resultMap="DoctorWarehouseMaterialApplyPigGroupDetailMap">
         SELECT
@@ -629,7 +706,7 @@
         FROM
         doctor_warehouse_material_apply a
         JOIN doctor_warehouse_material_handle b ON a.material_handle_id = b.id
-        JOIN doctor_warehouse_sku c ON a.material_id = c.id
+        JOIN doctor_warehouse_sku c ON b.material_id = c.id
         JOIN doctor_groups d ON d.id = a.pig_group_id
         JOIN doctor_barns e ON e.id = a.pig_barn_id
         JOIN doctor_basics as db on db.id=c.unit
@@ -638,4 +715,5 @@
         <if test="pigGroupId != null"> AND a.pig_group_id = #{pigGroupId}</if>
         <if test="skuId != null"> AND a.material_id = #{skuId}</if>
     </select>
+
 </mapper>

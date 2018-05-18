@@ -1,6 +1,5 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
@@ -16,9 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -136,8 +132,8 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
     @Override
     public Response<Map<String,Object>> selectPigGroupApply(Integer farmId, String pigType, String pigName, String pigGroupName,
-                                                                                                Integer skuType, String skuName, String openAt, String closeAt){
-        List<DoctorWarehouseMaterialApplyPigGroup> pigGroupList =doctorWarehouseMaterialApplyDao.selectPigGroupApply(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAt,closeAt);
+                                                                                                Integer skuType, String skuName, String openAtStart,String openAtEnd, String closeAtStart,String closeAtEnd){
+        List<DoctorWarehouseMaterialApplyPigGroup> pigGroupList =doctorWarehouseMaterialApplyDao.selectPigGroupApply1(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAtStart,openAtEnd,closeAtStart,closeAtEnd);
         Double allQuantity = 0.0;
         Double allAmount = 0.0;
         for(int i = 0;i<pigGroupList.size(); i++){
@@ -172,8 +168,8 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
     @Override
     public List<DoctorWarehouseMaterialApplyPigGroup> selectPigGroupApplys(Integer farmId, String pigType, String pigName, String pigGroupName,
-                                                            Integer skuType, String skuName, String openAt, String closeAt) {
+                                                            Integer skuType, String skuName, String openAtStart,String openAtEnd, String closeAtStart,String closeAtEnd) {
 
-        return  doctorWarehouseMaterialApplyDao.selectPigGroupApply(farmId, pigType, pigName, pigGroupName, skuType, skuName, openAt, closeAt);
+        return  doctorWarehouseMaterialApplyDao.selectPigGroupApply1(farmId, pigType, pigName, pigGroupName, skuType, skuName, openAtStart,openAtEnd,closeAtStart,closeAtEnd);
     }
 }

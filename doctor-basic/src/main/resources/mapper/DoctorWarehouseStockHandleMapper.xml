@@ -90,8 +90,8 @@
         where id= #{relStockHandleId}
     </select>
 
-    <select id="findwarehouseName" parameterType="long" resultType="String">
-        SELECT warehouse_name FROM <include refid="tb"/>
+    <select id="findwarehouseName" parameterType="long" resultMap="DoctorWarehouseStockHandleMap">
+        SELECT warehouse_id,warehouse_name FROM <include refid="tb"/>
         where id = #{relStockHandleId}
     </select>
 
@@ -153,11 +153,16 @@
         ORDER BY `id` DESC
     </select>
 
-    <select id="findByRelStockHandleId" resultType="DoctorWarehouseStockHandle">
-        select * from  doctor_warehouse_stock_handle
-        where  rel_stock_handle_id = #{id} and handle_sub_type = #{handle_sub_type};
+    <select id="findByRelStockHandleId" resultMap="DoctorWarehouseStockHandleMap">
+        select *  from  doctor_warehouse_stock_handle
+        where  id = (select rel_stock_handle_id from doctor_warehouse_stock_handle where id = #{id})
     </select>
-    
+
+    <select id="findByRelStockHandleIds" resultMap="DoctorWarehouseStockHandleMap">
+        select * from  doctor_warehouse_stock_handle
+        where  rel_stock_handle_id = #{id}
+    </select>
+
     <select id="findRelStockHandle" parameterType="long" resultMap="DoctorWarehouseStockHandleMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>

@@ -85,6 +85,14 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
                 .build());
     }
 
+    public List<DoctorWarehouseMaterialHandle> findByStockHandles(List<Long> stockHandleIds) {
+
+        Map<String, Object> param = new HashMap<>();
+        param.put("stockHandleIds", stockHandleIds);
+        param.put("deleteFlag", WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
+
+        return this.advList(param);
+    }
 
     public List<DoctorWarehouseMaterialHandle> findAfter(Long warehouseId, Long skuId, Date handleDate, boolean includeHandleDate) {
         Map<String, Object> criteria = Maps.newHashMap();
@@ -235,6 +243,15 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectOne(this.sqlId("countQuantityAlreadyRefund"), materialHandleId);
     }
 
+
+    public DoctorWarehouseMaterialHandle findByApply(Long stockHandleId, Long applyGroupId, Long applyBarnId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("stockHandleId", stockHandleId);
+        params.put("applyGroupId", applyGroupId);
+        params.put("applyBarnId", applyBarnId);
+        return this.sqlSession.selectOne(this.sqlId("findByApply"), params);
+    }
+
     public void updateHandleDateAndSettlementDate(Calendar handleDate, Date settlementDate, Long materialHandleId) {
         Map<String, Object> params = new HashMap<>();
         params.put("materialHandleId", materialHandleId);
@@ -247,7 +264,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     }
 
     //得到领料出库的数量
-    public BigDecimal findLibraryById(Long id,String materialName) {
+    public BigDecimal findLibraryById(Long id, String materialName) {
         Map<String, Object> map = Maps.newHashMap();
         map.put("id", id);
         map.put("materialName", materialName);
@@ -257,7 +274,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
 
 
     //得到在此之前退料入库的数量和
-    public BigDecimal findRetreatingById(Long relMaterialHandleId,String materialName,Long stockHandleId) {
+    public BigDecimal findRetreatingById(Long relMaterialHandleId, String materialName, Long stockHandleId) {
         Map<String, Object> map = Maps.newHashMap();
         map.put("relMaterialHandleId", relMaterialHandleId);
         map.put("materialName", materialName);
@@ -268,6 +285,10 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
 
     public DoctorWarehouseMaterialHandle findByStockHandleId(Long id) {
         return this.sqlSession.selectOne(this.sqlId("findByStockHandleId"), id);
+    }
+
+    public List<DoctorWarehouseMaterialHandle> findByStockHandleIds(Long id) {
+        return this.sqlSession.selectList(this.sqlId("findByStockHandleIds"), id);
     }
 
     //查公司结算列表
@@ -364,18 +385,18 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectList("getWareHouseDataOption", farmId);
     }
 
-    public List<Map<String,Object>> selectFarmsByOrgId(Long orgId) {
+    public List<Map<String, Object>> selectFarmsByOrgId(Long orgId) {
         return this.sqlSession.selectList("selectFarmsByOrgId", orgId);
     }
 
-    public List<Map<String,Object>> selectCompanyReportInfo(Map<String, Object> criteria) {
-        return this.sqlSession.selectList("selectCompanyReportInfo",criteria);
+    public List<Map<String, Object>> selectCompanyReportInfo(Map<String, Object> criteria) {
+        return this.sqlSession.selectList("selectCompanyReportInfo", criteria);
     }
 
     //<!--退料入库-->
     //<!--得到仓库类型，仓库名称，仓库管理员，所属公司-->
     public List<Map> getFarmData(Long id) {
-        return this.sqlSession.selectList(this.sqlId("getFarmData"),id);
+        return this.sqlSession.selectList(this.sqlId("getFarmData"), id);
     }
 
     //<!--得到领料出库的物料名称-->
@@ -385,7 +406,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     }
 
     //<!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注-->
-    public List<Map> getDataByMaterialName(Long id,String materialName) {
+    public List<Map> getDataByMaterialName(Long id, String materialName) {
         Map<String, Object> map = Maps.newHashMap();
         map.put("stockHandleId", id);
         map.put("materialName", materialName);

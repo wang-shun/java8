@@ -1,10 +1,12 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
 import io.terminus.common.exception.ServiceException;
+import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialApplyDao;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockRefundDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.manager.WarehouseReturnManager;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.common.exception.InvalidException;
@@ -25,6 +27,9 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
     @Autowired
     private WarehouseReturnManager warehouseReturnManager;
 
+    @Autowired
+    private DoctorWarehouseMaterialApplyDao doctorWarehouseMaterialApplyDao;
+
 
     @Override
     protected WarehouseMaterialHandleType getMaterialHandleType() {
@@ -40,6 +45,7 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
     @Override
     protected DoctorWarehouseStockHandle create(WarehouseStockRefundDto stockDto, DoctorWareHouse wareHouse) {
 
+        //退料对应的出库单据
         DoctorWarehouseStockHandle outStockHandle = doctorWarehouseStockHandleDao.findById(stockDto.getOutStockHandleId());
 
         DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleManager.create(stockDto, wareHouse, getMaterialHandleType(), outStockHandle.getId());
@@ -93,12 +99,20 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
                     throw new InvalidException("quantity.not.enough.to.refund", outMaterialHandle.getQuantity().subtract(alreadyRefundQuantity));
 
                 BigDecimal changedQuantity = detail.getQuantity().subtract(materialHandle.getQuantity());
-                if (changedQuantity.compareTo(new BigDecimal(0)) > 0) {
+                if (changedQuantity.compareTo(new BigDecimal(0)) > 0) {//退料数量改大
                     doctorWarehouseStockManager.in(detail.getMaterialId(), changedQuantity, wareHouse);
                 } else {
                     doctorWarehouseStockManager.out(detail.getMaterialId(), changedQuantity.negate(), wareHouse);
                 }
                 materialHandle.setQuantity(detail.getQuantity());
+
+                //更新领用记录中的退料数量
+                doctorWarehouseMaterialApplyDao.findAllByMaterialHandle(materialHandle.getId()).forEach(apply -> {
+                    if (apply.getRefundQuantity() == null)
+                        apply.setRefundQuantity(new BigDecimal(0));
+
+                    apply.setRefundQuantity(apply.getRefundQuantity().subtract(changedQuantity));
+                });
             }
 
             Date recalculateDate = materialHandle.getHandleDate();
@@ -122,4 +136,5 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
             doctorWarehouseMaterialHandleDao.update(materialHandle);
         }
     }
+
 }

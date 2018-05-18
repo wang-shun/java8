@@ -6,7 +6,6 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroup;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroupDetail;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -67,7 +66,7 @@ public interface DoctorWarehouseMaterialApplyReadService {
     Response<List<DoctorWarehouseMaterialApply>> month(Long warehouseId, Integer applyYear, Integer applyMonth, String skuName);
 
     Response<Map<String,Object>> selectPigGroupApply(Integer farmId, String pigType, String pigName, String pigGroupName,
-                                                                                         Integer skuType, String skuName, String openAt, String closeAt);
+                                                                                         Integer skuType, String skuName, String openAtStart,String openAtEnd, String closeAtStart,String closeAtEnd);
 
     /**
      * 猪舍领用报表
@@ -86,5 +85,5 @@ public interface DoctorWarehouseMaterialApplyReadService {
     public Response<List<DoctorWarehouseMaterialApplyPigGroupDetail>> selectPigGroupApplyDetail(Long pigGroupId, Long skuId);
 
     public List<DoctorWarehouseMaterialApplyPigGroup> selectPigGroupApplys(Integer farmId, String pigType, String pigName, String pigGroupName,
-                                                                           Integer skuType, String skuName, String openAt, String closeAt);
+                                                                           Integer skuType, String skuName, String openAtStart,String openAtEnd, String closeAtStart,String closeAtEnd);
 }

@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
-import io.terminus.doctor.basic.enums.WarehouseMaterialHandleSubType;
+import io.terminus.doctor.basic.enums.HandleType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.WareHouseType;
 import lombok.extern.slf4j.Slf4j;
@@ -48,8 +48,8 @@ public class SelectOptionServiceImpl implements SelectOptionService {
     @Override
     public List<Map<String,String>> getHandlerTypeOption() {
         List<Map<String,String>> lists = Lists.newArrayList();
-        List<Integer> values = WarehouseMaterialHandleSubType.ALL_TYPES;
-        List<String> descs = WarehouseMaterialHandleSubType.ALL_TYPES_DESC;
+        List<Integer> values = HandleType.ALL_TYPES;
+        List<String> descs = HandleType.ALL_TYPES_DESC;
         for(int i = 0;i < values.size();i++) {
             Map<String, String> sels = Maps.newHashMap();
             sels.put("value",values.get(i).toString());

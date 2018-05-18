@@ -18,12 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -237,7 +234,7 @@ public class PiggeryCollarController {
                     row.createCell(2).setCellValue(String.valueOf(m.get("staff_name")));
                     if(String.valueOf(m.get("settlement_year"))!=null&&String.valueOf(m.get("settlement_month"))!=null){
                         if(!String.valueOf(m.get("settlement_year")).equals("")&&!String.valueOf(m.get("settlement_month")).equals("")) {
-                            row.createCell(3).setCellValue(String.valueOf(m.get("settlement_year")) + "年" + String.valueOf(m.get("settlement_month")) + "月");
+                            row.createCell(3).setCellValue(String.valueOf(m.get("settlement_year")) + "-" + String.valueOf(m.get("settlement_month")) );
                         }
                     }
                     row.createCell(4).setCellValue(String.valueOf(m.get("material_code")));
@@ -350,7 +347,7 @@ public class PiggeryCollarController {
                     row.createCell(1).setCellValue(materialType);
                     row.createCell(2).setCellValue(String.valueOf(m.get("warehouse_name")));
                     row.createCell(3).setCellValue(String.valueOf(m.get("handle_date")));
-                    row.createCell(4).setCellValue(String.valueOf(m.get("settlement_year"))+"年"+String.valueOf(m.get("settlement_month"))+"月");
+                    row.createCell(4).setCellValue(String.valueOf(m.get("settlement_year"))+"-"+String.valueOf(m.get("settlement_month")));
                     String b=String.valueOf(m.get("material_handle_type"));
                     String materialHandleType=new String();
                     if(b.equals(String.valueOf(WarehouseMaterialHandleType.IN.getValue()))){
