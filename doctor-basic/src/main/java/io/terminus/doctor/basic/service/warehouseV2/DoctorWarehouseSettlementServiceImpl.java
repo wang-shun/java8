@@ -10,6 +10,7 @@ import io.terminus.doctor.basic.model.DoctorWarehouseOrgSettlement;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockMonthly;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
@@ -220,15 +221,15 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                 //获取配方入库单据
                 DoctorWarehouseStockHandle formulaInStockHandle = doctorWarehouseStockHandleDao.findById(materialHandle.getStockHandleId());
                 if (null == formulaInStockHandle)
-                    throw new ServiceException("stock.handle.not.found");
+                    throw new InvalidException("stock.handle.not.found", materialHandle.getStockHandleId());
                 //根据配方入库单据获取对应配方出库单据，再根据配方出库单据获取明细
                 List<Long> formulaOutStockHandleIds = doctorWarehouseStockHandleDao.findRelStockHandle(formulaInStockHandle.getId()).stream().map(DoctorWarehouseStockHandle::getId).collect(Collectors.toList());
                 if (formulaOutStockHandleIds.isEmpty())
-                    throw new ServiceException("formula.out.stock.handle.not.found");
+                    throw new InvalidException("formula.out.stock.handle.not.found", formulaInStockHandle.getId());
 
                 List<DoctorWarehouseMaterialHandle> formulaOutMaterialHandles = doctorWarehouseMaterialHandleDao.findByStockHandles(formulaOutStockHandleIds);
                 if (formulaOutMaterialHandles.isEmpty())
-                    throw new ServiceException("formula.out.material.handle.not.found");
+                    throw new InvalidException("formula.out.material.handle.not.found", formulaInStockHandle.getId());
 
                 BigDecimal totalFormulaOutAmount = formulaOutMaterialHandles
                         .stream()
@@ -243,7 +244,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 
                 DoctorWarehouseMaterialHandle otherIn = settlementMaterialHandles.get(materialHandle.getRelMaterialHandleId());
                 if (null == otherIn)
-                    throw new ServiceException("material.handle.not.found");
+                    throw new InvalidException("material.handle.not.found", materialHandle.getRelMaterialHandleId());
 
                 materialHandle.setUnitPrice(otherIn.getUnitPrice());
             }
