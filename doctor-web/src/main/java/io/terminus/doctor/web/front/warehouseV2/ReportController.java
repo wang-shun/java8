@@ -740,6 +740,9 @@ public class ReportController {
             throw new JsonResponseException("stock.warehouseId.null");
         }
 
+        // 最终结果集数据集合
+        List<Map<String, Object>> resultNewMap = Lists.newArrayList();
+
         List<String> materials = Lists.newArrayList();
         if(StringUtils.isBlank(materialName))
         {
@@ -748,6 +751,7 @@ public class ReportController {
                     pigBarnId,pigGroupId,handlerType,
                     type,warehouseId,materialName
             );
+
             if(resultMap.size() > 0)
             {
                 for(Map<String,Object> map:resultMap){
@@ -755,16 +759,13 @@ public class ReportController {
                 }
             }
             else {
-                return null;
+                return resultNewMap;
             }
         } else {
             materials.add(materialName);
         }
 
         if(materials.size() > 0) {
-
-            // 最终结果集数据集合
-            List<Map<String, Object>> resultNewMap = Lists.newArrayList();
 
             for(String str : materials) {
 
@@ -1015,9 +1016,8 @@ public class ReportController {
                     resultNewMap.add(thisMap);
                 }
             }
-            return resultNewMap;
         }
-        return null;
+        return resultNewMap;
     }
 
     private static boolean isBlank(Object str){
@@ -1149,14 +1149,6 @@ public class ReportController {
             DoctorFarm farm = doctorFarmReadService.findFarmById(farmId).getResult();
             if (null == farm)
                 throw new JsonResponseException("farm.not.found");
-
-            List<Map<String,Object>> exportVos = wlbdReport(farmId,settlementDate,pigBarnType,
-                    pigBarnId,pigGroupId,handlerType,
-                    type,warehouseId,materialName);
-            if(exportVos == null || exportVos.size() == 0)
-            {
-                return;
-            }
 
             String farmName = farm.getName();
             String fileName = "物料变动报表" + new Date().getTime();
@@ -1325,8 +1317,13 @@ public class ReportController {
                     sheet.addMergedRegion(cra);
                 }
 
+                List<Map<String,Object>> exportVos = wlbdReport(farmId,settlementDate,pigBarnType,
+                        pigBarnId,pigGroupId,handlerType,
+                        type,warehouseId,materialName);
+
                 //往excel表中写入数据
-                if(!CollectionUtils.isEmpty(exportVos)) {
+                if(null != exportVos && !CollectionUtils.isEmpty(exportVos)) {
+
                     Row dataRow = null;
                     Cell dataCell = null;
                     int startRowIndex = 2;
@@ -1733,7 +1730,7 @@ public class ReportController {
                 workbook.write(response.getOutputStream());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
     }
 }
