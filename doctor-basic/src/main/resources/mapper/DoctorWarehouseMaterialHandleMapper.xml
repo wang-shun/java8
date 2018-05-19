@@ -761,7 +761,7 @@
         ( select ifnull(sum(quantity),0) from doctor_warehouse_material_handle
         where type=13 and delete_flag=1 and rel_material_handle_id=(
         select id from doctor_warehouse_material_handle
-        where type=2 and delete_flag=1 and stock_handle_id=#{stockHandleId} and material_name=#{materialName})
+        where type=2 and stock_handle_id=#{stockHandleId} and material_name=#{materialName})
         <!--and <![CDATA[ date(handle_date) <= STR_TO_DATE(#{handleDate},"%Y-%m-%d")]]>-->
         )
         ,2),'') as refundableQuantity,mh.remark as remark
