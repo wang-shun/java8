@@ -208,6 +208,7 @@
             AND sum_at &gt;= date_format(#{startAt}, '%y-%m-%d')
             AND sum_at &lt;= date_format(#{endAt}, '%y-%m-%d')
         </where>
+        ORDER BY sum_at
     </select>
 
     <select id="sumBy" parameterType="map" resultMap="DoctorReportNurseryMap">
