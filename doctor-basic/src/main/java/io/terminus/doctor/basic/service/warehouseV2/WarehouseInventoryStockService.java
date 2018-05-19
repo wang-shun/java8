@@ -216,7 +216,7 @@ public class WarehouseInventoryStockService extends
                     log.info("change profit to deficit.new stock quantity is {}", detail.getQuantity());
                 } else {
                     BigDecimal changedQuantity;
-                    if (materialHandle.getType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT)) {
+                    if (materialHandle.getType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue())) {
                         //盘盈+10
                         changedQuantity = detail.getQuantity().subtract(beforeStockQuantity);
                         int c = materialHandle.getQuantity().compareTo(changedQuantity);
