@@ -459,7 +459,7 @@
 
     <select id="findLibraryById" parameterType="map" resultType="BigDecimal">
         select quantity from <include refid="tb"/>
-        where type=2 and id=#{id}  and material_name=#{materialName}
+        where type=2 and delete_flag = 1 and id=#{id}  and material_name=#{materialName}
     </select>
 
     <select id="findRetreatingById" parameterType="map" resultType="BigDecimal">
