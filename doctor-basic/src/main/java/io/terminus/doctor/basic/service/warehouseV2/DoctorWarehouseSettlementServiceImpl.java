@@ -250,8 +250,8 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                         otherIn = doctorWarehouseMaterialHandleDao.findById(materialHandle.getRelMaterialHandleId());
                         if (null == otherIn || otherIn.getDeleteFlag().equals(WarehouseMaterialHandleDeleteFlag.DELETE.getValue()))
                             throw new InvalidException("material.handle.not.found", materialHandle.getRelMaterialHandleId());
-                    }
-                    throw new InvalidException("material.handle.not.found", materialHandle.getRelMaterialHandleId());
+                    } else
+                        throw new InvalidException("material.handle.not.found", materialHandle.getRelMaterialHandleId());
                 }
 
                 materialHandle.setUnitPrice(otherIn.getUnitPrice());
