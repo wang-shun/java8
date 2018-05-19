@@ -268,7 +268,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             }
 
             historyStockQuantity = historyStockQuantity.subtract(materialHandle.getQuantity());
-            historyStockAmount = historyStockAmount.add(new BigDecimal(materialHandle.getUnitPrice().toString()).multiply(materialHandle.getQuantity()));
+            historyStockAmount = historyStockAmount.subtract(new BigDecimal(materialHandle.getUnitPrice().toString()).multiply(materialHandle.getQuantity()));
         }
 
         materialHandle.setAmount(materialHandle.getUnitPrice().multiply(materialHandle.getQuantity()));
