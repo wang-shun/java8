@@ -14,18 +14,20 @@ public abstract class AbstractWarehouseStockDetail {
 
     private Long materialHandleId;
 
-    @NotNull(message = "stock.material.id.null", groups = StockDefaultValid.class)
+    @NotNull(message = "stock.material.id.null", groups = {StockDefaultValid.class, StockFormulaValid.class})
     private Long materialId;
 
-    @NotNull(message = "stock.quantity.null", groups = StockDefaultValid.class)
+
+    @NotNull(message = "stock.quantity.null", groups = {StockDefaultValid.class, StockFormulaValid.class, StockInventoryValid.class})
     @DecimalMin.List({
             @DecimalMin(value = "0", inclusive = true, message = "stock.quantity.small.then.zero", groups = StockInventoryValid.class),
-            @DecimalMin(value = "0", inclusive = false, message = "stock.quantity.small.then.zero", groups = StockOtherValid.class)
+            @DecimalMin(value = "0", inclusive = false, message = "stock.quantity.small.then.zero", groups = {StockOtherValid.class, StockFormulaValid.class})
     })
     private BigDecimal quantity;
 
     private String remark;
 
+    private String beforeStockQuantity;
 
     public static interface StockDefaultValid {
 
@@ -35,6 +37,10 @@ public abstract class AbstractWarehouseStockDetail {
     }
 
     public static interface StockOtherValid extends StockDefaultValid {
+    }
+
+    public static interface StockFormulaValid {
+
     }
 
 }

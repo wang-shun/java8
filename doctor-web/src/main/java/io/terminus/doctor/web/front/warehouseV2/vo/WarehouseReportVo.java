@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -24,7 +25,7 @@ public class WarehouseReportVo {
     public static class WarehouseReportMonthDetail {
 
         private String name;
-        private long amount;
+        private BigDecimal amount;
 
     }
 

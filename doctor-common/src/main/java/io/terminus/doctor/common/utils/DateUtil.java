@@ -8,6 +8,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.Dates;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
@@ -15,6 +16,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
 import org.joda.time.format.DateTimeParser;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -36,6 +38,9 @@ public class DateUtil {
     public static final DateTimeFormatter DATE_CN = DateTimeFormat.forPattern("yyyy年MM月dd日");
 
     public static final DateTimeFormatter DATE_TIME = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+
+    //精确到毫秒
+    public static final DateTimeFormatter DATE_TIME_MSEC = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss:SSS");
 
     public static final DateTimeFormatter DATE_SLASH = DateTimeFormat.forPattern("yyyy/MM/dd");
 
@@ -367,4 +372,36 @@ public class DateUtil {
         list.add(endAt);
         return list;
     }
+
+    public static String toDateTimeToSSSString(Date date) {
+        if (date == null) return null;
+        return new DateTime(date).toString(DATE_TIME_MSEC);
+    }
+
+    public static String formatDateStringForTimeorder(Date date) {
+        String dateStr = toDateTimeToSSSString(date);
+        if (StringUtils.isBlank(dateStr)) return null;
+        return dateStr.replace("-","")
+                        .replace(" ","")
+                           .replace(":","");
+    }
+
+    public static Integer getYearForDate(Date date){
+        Calendar  calendar=Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar.get(Calendar.YEAR);//得到年
+    }
+
+    public static Integer getMonthForDate(Date date){
+        Calendar  calendar=Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar.get(Calendar.MONTH + 1);//得到月
+    }
+
+    public static Integer getDayForDate(Date date){
+        Calendar  calendar=Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar.get(Calendar.DATE);//得到日
+    }
+
 }

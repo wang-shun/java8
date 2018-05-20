@@ -20,6 +20,10 @@ public class StockHandleVo extends DoctorWarehouseStockHandle {
 
     private String warehouseManagerName;
 
+    private Long storageWarehouseId;
+
+    private String storageWarehouseName;
+
     private Double totalAmount;
 
     private Double totalQuantity;
@@ -53,5 +57,15 @@ public class StockHandleVo extends DoctorWarehouseStockHandle {
 
         private Long transferInWarehouseId;
 
+        //可退数量
+        private Double refundableQuantity;
+
+        //单位ID
+        private String unitId;
+
+        //入库仓库
+        private Long storageWarehouseIds;
+
+        private String storageWarehouseNames;
     }
 }
