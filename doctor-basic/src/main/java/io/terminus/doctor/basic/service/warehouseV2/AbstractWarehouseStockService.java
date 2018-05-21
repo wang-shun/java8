@@ -221,9 +221,9 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
     private void lockedIfNecessary(AbstractWarehouseStockDto stockDto) {
 
         //新增/编辑当日单据不需要重算，也就不需要锁
-        if (DateUtil.inSameDate(stockDto.getHandleDate().getTime(), new Date()))
-            return;
-
+//        if (DateUtil.inSameDate(stockDto.getHandleDate().getTime(), new Date()))
+//            return;
+//
         List<Lock> locks = new ArrayList<>();
 
         log.info("lock for warehouse :{}", stockDto.getWarehouseId());

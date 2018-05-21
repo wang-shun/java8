@@ -332,7 +332,7 @@
         SELECT *
         FROM
         <include refid="tb"/>
-        WHERE material_handle_id= #{materialHandleId}
+        WHERE delete_flag=1 and material_handle_id= #{materialHandleId}
         ORDER BY id DESC LIMIT 1
     </select>
 

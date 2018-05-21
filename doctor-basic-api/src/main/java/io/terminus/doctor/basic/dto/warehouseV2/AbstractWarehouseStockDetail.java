@@ -18,8 +18,7 @@ public abstract class AbstractWarehouseStockDetail {
     private Long materialId;
 
 
-
-    @NotNull(message = "stock.quantity.null", groups = {StockDefaultValid.class, StockFormulaValid.class})
+    @NotNull(message = "stock.quantity.null", groups = {StockDefaultValid.class, StockFormulaValid.class, StockInventoryValid.class})
     @DecimalMin.List({
             @DecimalMin(value = "0", inclusive = true, message = "stock.quantity.small.then.zero", groups = StockInventoryValid.class),
             @DecimalMin(value = "0", inclusive = false, message = "stock.quantity.small.then.zero", groups = {StockOtherValid.class, StockFormulaValid.class})

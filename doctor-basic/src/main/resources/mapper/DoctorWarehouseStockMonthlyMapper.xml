@@ -178,10 +178,11 @@
     </select>
 
     <select id="findEachWarehouseBalanceBySettlementDate" parameterType="map" resultType="map">
-        select sum(balance_amount) as amount ,sum(balance_quantity) as quantity,warehouse_id
+        select sum(balance_amount) as amount ,sum(balance_quantity) as quantity,warehouse_id as warehouseId,material_id as materialId
         FROM <include refid="tb"/>
         where org_id=#{orgId}
-        group by warehouse_id;
+        and <![CDATA[settlement_date<#{settlementDate}]]>
+        group by warehouse_id,material_id;
     </select>
 
     <select id="listByHouseIdTime" parameterType="map" resultType="map">

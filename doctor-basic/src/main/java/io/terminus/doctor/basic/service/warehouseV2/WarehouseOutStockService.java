@@ -154,6 +154,7 @@ public class WarehouseOutStockService extends AbstractWarehouseStockService<Ware
             }
 
             apply.setPigBarnId(detail.getApplyPigBarnId());
+            apply.setPigBarnName(detail.getApplyPigBarnName());
             apply.setApplyStaffId(detail.getApplyStaffId());
             apply.setApplyStaffName(detail.getApplyStaffName());
             apply.setPigType(detail.getPigType());

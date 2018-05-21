@@ -6,7 +6,7 @@ mybatis:
 # Datasource
 datasource:
   driver-class-name: com.mysql.jdbc.Driver
-  url: jdbc:mysql://101.201.44.35:3306/pig_doctor_v2?useUnicode=true&characterEncoding=UTF8&autoReconnect=true
+  url: jdbc:mysql://101.201.44.35:3306/pig_doctor?useUnicode=true&characterEncoding=UTF8&autoReconnect=true
   username: root
   password: anywhere
 
@@ -27,8 +27,7 @@ zookeeper:
 
 # Redis
 redis:
-  #host: 101.201.44.35
-  host: 127.0.0.1
+  host: 101.201.44.35
   port: 6379
   max-total: 10
   max-idle: 2

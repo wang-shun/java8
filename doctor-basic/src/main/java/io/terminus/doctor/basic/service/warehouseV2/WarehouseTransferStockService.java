@@ -102,13 +102,13 @@ public class WarehouseTransferStockService
     public void changed(Map<WarehouseStockTransferDto.WarehouseStockTransferDetail, DoctorWarehouseMaterialHandle> changed, DoctorWarehouseStockHandle stockHandle, WarehouseStockTransferDto stockDto, DoctorWareHouse wareHouse) {
 
         Map<Long/*transferInMaterialHandleId*/, DoctorWarehouseStockHandle> newTransferInStockHandle = new HashMap<>();
-        Map<Long/*transferInMaterialHandleId*/, DoctorWareHouse> oldTransferInWarehouse = new HashMap<>();
+        Map<Long/*transferInMaterialHandleId*/, DoctorWareHouse> newTransferInWarehouseMap = new HashMap<>();
         changed.forEach((detail, materialHandle) -> {
             DoctorWarehouseMaterialHandle transferIn = doctorWarehouseMaterialHandleDao.findById(materialHandle.getRelMaterialHandleId());
             if (!detail.getTransferInWarehouseId().equals(transferIn.getWarehouseId())) {
                 DoctorWareHouse newTransferInWarehouse = doctorWareHouseDao.findById(detail.getTransferInWarehouseId());
-                newTransferInStockHandle.put(detail.getTransferInWarehouseId(), doctorWarehouseStockHandleManager.create(stockDto, newTransferInWarehouse, WarehouseMaterialHandleType.TRANSFER_IN, null));
-                oldTransferInWarehouse.put(detail.getTransferInWarehouseId(), newTransferInWarehouse);
+                newTransferInStockHandle.put(detail.getTransferInWarehouseId(), doctorWarehouseStockHandleManager.create(stockDto, newTransferInWarehouse, WarehouseMaterialHandleType.TRANSFER_IN, stockHandle.getId()));
+                newTransferInWarehouseMap.put(detail.getTransferInWarehouseId(), newTransferInWarehouse);
             }
         });
 
@@ -139,12 +139,15 @@ public class WarehouseTransferStockService
                     warehouseTransferManager.delete(transferIn);
 
                     //新的调入仓库
-                    transferInWarehouse = oldTransferInWarehouse.get(detail.getTransferInWarehouseId());
+                    transferInWarehouse = newTransferInWarehouseMap.get(detail.getTransferInWarehouseId());
 
                     lockWarehouse(transferInWarehouse.getId());
 
                     //创建新的调入明细
-                    warehouseTransferManager.create(detail, stockDto, newTransferInStockHandle.get(detail.getTransferInWarehouseId()), transferInWarehouse);
+                    DoctorWarehouseMaterialHandle newTransferInMaterialHandle = warehouseTransferManager.create(detail, stockDto, newTransferInStockHandle.get(detail.getTransferInWarehouseId()), transferInWarehouse);
+                    newTransferInMaterialHandle.setRelMaterialHandleId(materialHandle.getId());
+                    doctorWarehouseMaterialHandleDao.update(newTransferInMaterialHandle);
+
                     //新调入仓库增加库存
                     doctorWarehouseStockManager.in(detail.getMaterialId(), detail.getQuantity(), transferInWarehouse);
                 }

@@ -212,7 +212,9 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
                     //补全猪场
                     for(Map<String,Object> farm:farms){
                         boolean flag = false;
+                        Long orgId = null;
                         for(Map<String,Object> list:lists){
+                            orgId = (Long)list.get("orgId");
                             if((long)list.get("farmId")==(long)farm.get("id")){
                                 flag = true;
                             }
@@ -220,6 +222,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
                         if(!flag){
                             farm.put("settlementDate",criteria.get("settlementDate"));
                             farm.put("farmId",farm.get("id"));
+                            farm.put("orgId",orgId);
                             farm.put("farmName",farm.get("name"));
                             farm.put("inAmount",new BigDecimal("0"));
                             farm.put("outAmount",new BigDecimal("0"));

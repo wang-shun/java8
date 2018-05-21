@@ -129,7 +129,7 @@ public class WarehouseInventoryStockService extends
 
             DoctorWarehouseMaterialHandle v = changed.get(k);
 
-            BigDecimal inventoryQuantity;
+            BigDecimal inventoryQuantity;//之前盘点的数量
             if (v.getType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue()))
                 inventoryQuantity = v.getBeforeStockQuantity().add(v.getQuantity());
             else
@@ -161,14 +161,24 @@ public class WarehouseInventoryStockService extends
             materialHandle.setRemark(detail.getRemark());
             materialHandle.setSettlementDate(stockDto.getSettlementDate());
 
-            BigDecimal inventoryQuantity;
-            if (materialHandle.getType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue()))
-                inventoryQuantity = materialHandle.getBeforeStockQuantity().add(materialHandle.getQuantity());
-            else
-                inventoryQuantity = materialHandle.getBeforeStockQuantity().subtract(materialHandle.getQuantity());
-
-
             boolean changeHandleDate = !DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
+
+            BigDecimal beforeStockQuantity;
+            if (changeHandleDate) {
+                //如果更改了操作日期，那么该笔明细之前的库存量需要重新计算
+                beforeStockQuantity = warehouseInventoryManager.getHistoryQuantityInclude(warehouseInventoryManager.buildNewHandleDate(stockDto.getHandleDate()).getTime(), materialHandle.getWarehouseId(), materialHandle.getMaterialId());
+            } else
+                beforeStockQuantity = materialHandle.getBeforeStockQuantity();
+
+            log.info("before stock quantity is :{}", beforeStockQuantity);
+
+            BigDecimal inventoryQuantity;//之前盘点的数量
+            if (materialHandle.getType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue()))
+                inventoryQuantity = beforeStockQuantity.add(materialHandle.getQuantity());
+            else
+                inventoryQuantity = beforeStockQuantity.subtract(materialHandle.getQuantity());
+
+
             if (detail.getQuantity().compareTo(inventoryQuantity) != 0
                     || changeHandleDate) {
 
@@ -180,7 +190,7 @@ public class WarehouseInventoryStockService extends
                 //100，之前是盘盈3，现在是盘盈1=-2
                 BigDecimal stockChangedQuantity = null;
                 if (materialHandle.getType().equals(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue())
-                        && detail.getQuantity().compareTo(materialHandle.getBeforeStockQuantity()) > 0) {
+                        && detail.getQuantity().compareTo(beforeStockQuantity) > 0) {
                     //盘亏改盘盈
                     if (detail.getUnitPrice() == null)
                         throw new ServiceException("inventory.material.handle.unit.price.not.null");
@@ -189,42 +199,48 @@ public class WarehouseInventoryStockService extends
                     materialHandle.setStockHandleId(newStockHandle.getId());
                     materialHandle.setUnitPrice(detail.getUnitPrice());
 
-                    stockChangedQuantity = materialHandle.getQuantity().add(detail.getQuantity().subtract(materialHandle.getBeforeStockQuantity()));
+                    stockChangedQuantity = materialHandle.getQuantity().add(detail.getQuantity().subtract(beforeStockQuantity));
 
-                    materialHandle.setQuantity(detail.getQuantity().subtract(materialHandle.getBeforeStockQuantity()));
+                    materialHandle.setQuantity(detail.getQuantity().subtract(beforeStockQuantity));
+                    log.info("change deficit to profit.new stock quantity is {}", detail.getQuantity());
                 } else if (materialHandle.getType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue())
-                        && detail.getQuantity().compareTo(materialHandle.getBeforeStockQuantity()) < 0) {
+                        && detail.getQuantity().compareTo(beforeStockQuantity) < 0) {
                     //盘盈改盘亏
                     materialHandle.setType(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue());
                     materialHandle.setStockHandleId(newStockHandle.getId());
 
-                    stockChangedQuantity = materialHandle.getQuantity().add(materialHandle.getBeforeStockQuantity().subtract(detail.getQuantity()));
+                    stockChangedQuantity = materialHandle.getQuantity().add(beforeStockQuantity.subtract(detail.getQuantity()));
                     stockChangedQuantity = stockChangedQuantity.negate();
 
-                    materialHandle.setQuantity(materialHandle.getBeforeStockQuantity().subtract(detail.getQuantity()));
+                    materialHandle.setQuantity(beforeStockQuantity.subtract(detail.getQuantity()));
+                    log.info("change profit to deficit.new stock quantity is {}", detail.getQuantity());
                 } else {
                     BigDecimal changedQuantity;
-                    if (materialHandle.getType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT)) {
+                    if (materialHandle.getType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue())) {
                         //盘盈+10
-                        changedQuantity = detail.getQuantity().subtract(materialHandle.getBeforeStockQuantity());
+                        changedQuantity = detail.getQuantity().subtract(beforeStockQuantity);
                         int c = materialHandle.getQuantity().compareTo(changedQuantity);
                         if (c > 0) {//原盘盈+11
                             //入库1
                             stockChangedQuantity = changedQuantity.subtract(materialHandle.getQuantity());
+                            log.info("profit increase.now profit is {},original profit is {},stock change quantity is {}", changedQuantity, materialHandle.getQuantity(), stockChangedQuantity);
                         } else if (c < 0) {//盘盈+9
                             //出库1
                             stockChangedQuantity = changedQuantity.subtract(materialHandle.getQuantity());
+                            log.info("profit decrease.now profit is {},original profit is {},stock change quantity is {}", changedQuantity, materialHandle.getQuantity(), stockChangedQuantity);
                         }
                     } else {
                         //盘亏10
-                        changedQuantity = materialHandle.getBeforeStockQuantity().subtract(detail.getQuantity());
+                        changedQuantity = beforeStockQuantity.subtract(detail.getQuantity());
                         int c = materialHandle.getQuantity().compareTo(changedQuantity);
                         if (c > 0) {//原盘亏11
                             //入库1
                             stockChangedQuantity = materialHandle.getQuantity().subtract(changedQuantity);
+                            log.info("deficit decrease.now deficit is {},original deficit is {},stock change quantity is {}", changedQuantity, materialHandle.getQuantity(), stockChangedQuantity);
                         } else if (c < 0) {
                             //出库1
                             stockChangedQuantity = changedQuantity.subtract(materialHandle.getQuantity());
+                            log.info("deficit increase.now deficit is {},original deficit is {},stock change quantity is {}", changedQuantity, materialHandle.getQuantity(), stockChangedQuantity);
                         }
                     }
                     materialHandle.setQuantity(changedQuantity);

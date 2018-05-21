@@ -459,12 +459,12 @@
 
     <select id="findLibraryById" parameterType="map" resultType="BigDecimal">
         select quantity from <include refid="tb"/>
-        where type=2 and id=#{id}  and material_name=#{materialName}
+        where type=2 and delete_flag = 1 and id=#{id}  and material_name=#{materialName}
     </select>
 
     <select id="findRetreatingById" parameterType="map" resultType="BigDecimal">
         select ifnull(sum(quantity),0) from <include refid="tb"/>
-        where type=13 and rel_material_handle_id=#{relMaterialHandleId} and material_name=#{materialName} and stock_handle_id!=#{stockHandleId}
+        where type=13 and delete_flag = 1 and rel_material_handle_id=#{relMaterialHandleId} and material_name=#{materialName} and stock_handle_id!=#{stockHandleId}
         order by settlement_date ,id desc;
     </select>
 
@@ -756,12 +756,12 @@
         ifnull(
         ROUND(
         (select ifnull(quantity,0) from doctor_warehouse_material_handle
-        where type=2 and stock_handle_id=#{stockHandleId} and material_name=#{materialName}
+        where type=2 and delete_flag=1 and stock_handle_id=#{stockHandleId} and material_name=#{materialName}
         ) -
         ( select ifnull(sum(quantity),0) from doctor_warehouse_material_handle
-        where type=13 and rel_material_handle_id=(
+        where type=13 and delete_flag=1 and rel_material_handle_id=(
         select id from doctor_warehouse_material_handle
-        where type=2 and stock_handle_id=#{stockHandleId} and material_name=#{materialName})
+        where type=2 and delete_flag=1 and stock_handle_id=#{stockHandleId} and material_name=#{materialName})
         <!--and <![CDATA[ date(handle_date) <= STR_TO_DATE(#{handleDate},"%Y-%m-%d")]]>-->
         )
         ,2),'') as refundableQuantity,mh.remark as remark
