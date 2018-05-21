@@ -266,7 +266,9 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             if (historyStockAmount.equals(new BigDecimal(0)) || historyStockQuantity.equals(new BigDecimal(0))) {
                 log.error("history amount or quantity is zero,can not settlement for material handle:{}", materialHandle.getId());
             }
-            materialHandle.setUnitPrice(new BigDecimal(historyStockAmount.toString()).divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
+            log.info("material handle:{},amount:{},quantity:{}", materialHandle.getId(), historyStockAmount, historyStockQuantity);
+            
+            materialHandle.setUnitPrice(historyStockAmount.divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
 
             if (materialHandle.getType().equals(WarehouseMaterialHandleType.OUT.getValue())) {
                 doctorWarehouseMaterialApplyDao.updateUnitPriceAndAmountByMaterialHandle(materialHandle.getId(), materialHandle.getUnitPrice(), materialHandle.getQuantity().multiply(materialHandle.getUnitPrice()));
