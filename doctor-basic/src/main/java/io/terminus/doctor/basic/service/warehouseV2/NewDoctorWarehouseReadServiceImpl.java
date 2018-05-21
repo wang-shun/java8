@@ -1,6 +1,7 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
@@ -114,16 +115,55 @@ public class NewDoctorWarehouseReadServiceImpl implements NewDoctorWarehouseRead
 
         if (null == warehousePurchases || warehousePurchases.isEmpty()) {
             log.debug("该仓库[{}]已出库完", warehouseId);
-            return Response.ok(new AmountAndQuantityDto(0, new BigDecimal(0)));
+            return Response.ok(new AmountAndQuantityDto());
         }
 
         BigDecimal totalQuantity = new BigDecimal(0);
-        long totalAmount = 0L;
+        BigDecimal totalAmount = new BigDecimal(0);
         for (DoctorWarehousePurchase purchase : warehousePurchases) {
             BigDecimal leftQuantity = purchase.getQuantity().subtract(purchase.getHandleQuantity());
             totalQuantity = totalQuantity.add(leftQuantity);
-            totalAmount += leftQuantity.multiply(new BigDecimal(purchase.getUnitPrice())).longValue();
+            totalAmount = totalAmount.add(leftQuantity.multiply(new BigDecimal(purchase.getUnitPrice())));
         }
         return Response.ok(new AmountAndQuantityDto(totalAmount, totalQuantity));
+    }
+
+    @Override
+    public Response<List<DoctorWareHouse>> getWarehouseByType(DoctorWareHouse criteria, Integer pageCurrent) {
+        try {
+            int pageNum = 6;
+            int pageSize = (pageCurrent - 1) * pageNum;
+            return Response.ok(doctorWareHouseDao.getWarehouseByType(criteria, pageSize, pageNum));
+        } catch (Exception e) {
+            log.error("failed to list doctor warehouseV2, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouseV2.list.fail");
+        }
+    }
+
+    /**
+     * 按照仓库类型进行tab分页筛选，仓库按照创建时间进行排列
+     *
+     * @param farmId
+     * @param type
+     * @return
+     */
+    @Override
+    public Response<List<Map<String, Object>>> listTypeMap(Long farmId, Integer type) {
+        return Response.ok(doctorWareHouseDao.listTypeMap(farmId, type));
+    }
+
+    @Override
+    public Response<Paging<Map<String, Object>>> listDetailTypeMap(Integer type,
+                                                                 String materialName,
+                                                                 Long warehouseId,
+                                                                 Integer pageNo,
+                                                                 Integer pageSize) {
+        PageInfo pageInfo = new PageInfo(pageNo, pageSize);
+        Map<String, Object> param = new HashedMap();
+        param.put("type", type);
+        param.put("materialName", materialName);
+        param.put("warehouseId", warehouseId);
+        return Response.ok(doctorWareHouseDao.listDetailTypeMap(
+                pageInfo.getOffset(), pageInfo.getLimit(), param));
     }
 }

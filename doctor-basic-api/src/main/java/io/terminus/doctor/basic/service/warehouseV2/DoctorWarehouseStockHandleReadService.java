@@ -4,8 +4,8 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc:
@@ -14,6 +14,20 @@ import java.util.List;
  * Created by [ your name ]
  */
 public interface DoctorWarehouseStockHandleReadService {
+
+    /**
+     *得到单位名称
+     * @param relStockHandleId
+     * @return
+     */
+    Response<String> getNameByUnit(Long relStockHandleId);
+
+    /**
+     * 得到配方入库仓库
+     * @param RelId
+     * @return
+     */
+    Response<DoctorWarehouseStockHandle> findwarehouseName(Long RelId);
 
     /**
      * 查询

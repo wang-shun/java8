@@ -16,6 +16,7 @@ import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.zookeeper.common.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
 import io.terminus.zookeeper.pubsub.Subscriber;
+import org.apache.curator.framework.CuratorFramework;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
@@ -29,6 +30,9 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.integration.support.locks.LockRegistry;
+import org.springframework.integration.zookeeper.config.CuratorFrameworkFactoryBean;
+import org.springframework.integration.zookeeper.lock.ZookeeperLockRegistry;
 
 import java.util.List;
 
@@ -104,6 +108,13 @@ public class DoctorBasicConfiguration {
         template.setConnectionFactory(redisConnectionFactory);
         template.setDefaultSerializer(new GenericJackson2JsonRedisSerializer());
         return template;
+    }
+
+
+    @Bean
+    @Autowired
+    public LockRegistry zookeeperLockRegistry(ZKClientFactory zkClientFactory) {
+        return new ZookeeperLockRegistry(zkClientFactory.getClient(), "/lock");
     }
 
 }

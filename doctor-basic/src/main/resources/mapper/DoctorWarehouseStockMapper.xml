@@ -170,5 +170,10 @@
         ORDER BY `id` DESC
         LIMIT #{offset}, #{limit}
     </select>
+    
+    <select id="findSkuIds" parameterType="long" resultType="long">
+        SELECT sku_id FROM <include refid="tb"/>
+        WHERE warehouse_id=#{warehouseId}
+    </select>
 
 </mapper>

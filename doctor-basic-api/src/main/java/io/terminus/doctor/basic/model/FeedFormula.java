@@ -45,27 +45,32 @@ public class FeedFormula implements Serializable {
     private static final Integer PERCENT_SCALE = 4; // percent 数据大小比例
 
     private Long id;
-    
+
     /**
      * 饲料id
      */
     private Long feedId;
-    
+
     /**
      * 饲料名称
      */
     private String feedName;
-    
+
     /**
      * 猪场id
      */
     private Long farmId;
-    
+
     /**
      * 猪场名称
      */
     private String farmName;
-    
+
+    /**
+     * 配方名称
+     */
+    private String formulaName;
+
     /**
      * 配方json
      */
@@ -74,40 +79,41 @@ public class FeedFormula implements Serializable {
     private String formula;
 
     @Setter(AccessLevel.NONE)
-    private Map<String,String> formulaMap;
-    
+    private Map<String, String> formulaMap;
+
     private Date createdAt;
-    
+
     private Date updatedAt;
 
     @SneakyThrows
-    public void setFormula(String formula){
+    public void setFormula(String formula) {
         this.formula = formula;
-        if(Strings.isNullOrEmpty(formula)){
+        if (Strings.isNullOrEmpty(formula)) {
             this.formulaMap = Collections.emptyMap();
-        }else {
+        } else {
             this.formulaMap = OBJECT_MAPPER.readValue(formula, JacksonType.MAP_OF_OBJECT);
         }
     }
 
     @SneakyThrows
-    public void setFormulaMap(Map<String,String> formulaMap){
+    public void setFormulaMap(Map<String, String> formulaMap) {
         this.formulaMap = formulaMap;
-        if(isNull(formulaMap) || Iterables.isEmpty(formulaMap.entrySet())){
+        if (isNull(formulaMap) || Iterables.isEmpty(formulaMap.entrySet())) {
             this.formula = null;
-        }else {
+        } else {
             this.formula = OBJECT_MAPPER.writeValueAsString(formulaMap);
         }
     }
 
-    public String getMaterialName(){
+    public String getMaterialName() {
         return this.feedName;
     }
-    public Map<String,String> getExtraMap(){
+
+    public Map<String, String> getExtraMap() {
         return this.formulaMap;
     }
 
-    public Integer getCanProduce(){
+    public Integer getCanProduce() {
         return 1;
     }
 
@@ -118,40 +124,40 @@ public class FeedFormula implements Serializable {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class FeedProduce implements Serializable{
+    public static class FeedProduce implements Serializable {
 
         private static final long serialVersionUID = 633401329050233302L;
 
         private Double total; //生产物料总量信息
 
-        private List<MaterialProduceEntry> materialProduceEntries ; // 原料占比信息
+        private List<MaterialProduceEntry> materialProduceEntries; // 原料占比信息
 
         private List<MaterialProduceEntry> medicalProduceEntries; // 对应的药品比例信息
 
         // 计算合计数量
-        public Double calculateTotalPercent(){
+        public Double calculateTotalPercent() {
             this.total = 0D;
-            if(!isNull(materialProduceEntries)){
-                this.total += materialProduceEntries.stream().map(MaterialProduceEntry::getMaterialCount).reduce((a,b)->a+b).orElse(0D);
+            if (!isNull(materialProduceEntries)) {
+                this.total += materialProduceEntries.stream().map(MaterialProduceEntry::getMaterialCount).reduce((a, b) -> a + b).orElse(0D);
             }
-            if(total.longValue() < FeedFormula.DEFAULT_COUNT){
+            if (total.longValue() < FeedFormula.DEFAULT_COUNT) {
                 throw new JsonResponseException("input.totalMaterialCount.error");
-            }else{
+            } else {
                 total = FeedFormula.DEFAULT_COUNT.doubleValue();
             }
 
             BigDecimal totalDecimal = BigDecimal.valueOf(total);
-            if(!isNull(materialProduceEntries)){
-                materialProduceEntries.forEach(m->{
+            if (!isNull(materialProduceEntries)) {
+                materialProduceEntries.forEach(m -> {
                     m.setPercent(BigDecimal.valueOf(m.getMaterialCount() * 100).divide(totalDecimal, PERCENT_SCALE, BigDecimal.ROUND_CEILING).doubleValue());
                 });
             }
             return this.total;
         }
 
-        public void calculatePercentByTotal(Double baseCount){
-            if(!isNull(materialProduceEntries)){
-                materialProduceEntries.forEach(m->{
+        public void calculatePercentByTotal(Double baseCount) {
+            if (!isNull(materialProduceEntries)) {
+                materialProduceEntries.forEach(m -> {
                     m.setMaterialCount(
                             BigDecimal.valueOf(baseCount)
                                     .divide(BigDecimal.valueOf(total), SCALE, BigDecimal.ROUND_UP)
@@ -159,7 +165,7 @@ public class FeedFormula implements Serializable {
                 });
             }
 
-            if(!isNull(medicalProduceEntries)){
+            if (!isNull(medicalProduceEntries)) {
                 medicalProduceEntries.forEach(m -> {
                     m.setMaterialCount(BigDecimal.valueOf(baseCount)
                             .divide(BigDecimal.valueOf(total), SCALE, BigDecimal.ROUND_UP)
@@ -179,16 +185,30 @@ public class FeedFormula implements Serializable {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class MaterialProduceEntry implements Serializable{
+    public static class MaterialProduceEntry implements Serializable {
 
         private static final long serialVersionUID = -5681942806422877951L;
 
         private Long materialId;    //原料Id
+
+        private Long warehouseId;   //原料或药品所属仓库id
 
         private String materialName;    //  原料名称
 
         private Double materialCount; // 原料数量信息
 
         private Double percent; //原料配比信息
+    }
+
+
+    public static void main(String[] args) {
+        FeedProduce produce = new FeedProduce();
+        produce.setTotal(100D);
+        MaterialProduceEntry entry=new MaterialProduceEntry();
+        entry.setMaterialId(1L);
+        entry.setWarehouseId(1L);
+        entry.setMaterialCount(3D);
+        produce.setMaterialProduceEntries(Collections.singletonList(entry));
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(produce));
     }
 }

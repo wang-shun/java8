@@ -712,9 +712,11 @@ public class DoctorPigCreateEvents {
             case VACCINATION:
                 DoctorVaccinationDto vaccinationDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorVaccinationDto.class);
                 vaccinationDto = doctorValidService.valid(vaccinationDto, vaccinationDto.getPigCode());
-                DoctorBasicMaterial vaccinationItem = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(vaccinationDto.getVaccinationItemId()));
-                expectTrue(notNull(vaccinationItem), "basic.not.null", vaccinationDto.getVaccinationItemId());
-                vaccinationDto.setVaccinationItemName(vaccinationItem.getName());
+                //DoctorBasicMaterial vaccinationItem = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(vaccinationDto.getVaccinationItemId()));
+                //基础数据查询从DoctorBasicMaterial换至DoctorBasic ----QT 2018/5/15
+                DoctorBasic cType = RespHelper.or500(doctorBasicReadService.findBasicById(vaccinationDto.getVaccinationItemId()));
+                expectTrue(notNull(cType), "basic.not.null", vaccinationDto.getVaccinationItemId());
+                vaccinationDto.setVaccinationItemName(cType.getName());
                 DoctorWarehouseSku vaccination = RespHelper.or500(doctorWarehouseSkuReadService.findById(vaccinationDto.getVaccinationId()));
                 expectTrue(notNull(vaccination), "basic.material.not.null", vaccinationDto.getVaccinationId());
                 vaccinationDto.setVaccinationName(vaccination.getName());

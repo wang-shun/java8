@@ -45,7 +45,7 @@ public class WarehousePigGroupApplyVo {
 
     private BigDecimal quantity;
 
-    private Long unitPrice;
+    private BigDecimal unitPrice;
 
-    private Long amount;
+    private BigDecimal amount;
 }
