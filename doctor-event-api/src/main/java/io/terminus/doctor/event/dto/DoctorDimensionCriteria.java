@@ -7,6 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by xjn on 18/1/11.
@@ -21,6 +22,12 @@ public class DoctorDimensionCriteria implements Serializable{
      * 组织id
      */
     private Long orzId;
+
+    /**
+     * 多个组织
+     */
+    private List<Long> orzIds;
+
     /**
      * 组织维度
      * @see io.terminus.doctor.event.enums.OrzDimension
