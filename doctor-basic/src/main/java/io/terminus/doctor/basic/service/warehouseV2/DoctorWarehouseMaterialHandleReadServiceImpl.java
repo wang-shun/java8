@@ -209,9 +209,9 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
                 List<Map> lists = doctorWarehouseMaterialHandleDao.listByFarmIdTime(criteria);
                 Date time = (Date) criteria.get("settlementDate");
                 if (time.getTime() < System.currentTimeMillis()) {
-                    boolean settled = false;
+//                    boolean settled = false;
                     if (lists == null || lists.size() == 0) {
-                        settled = true;
+//                        settled = true;
                         lists = Lists.newArrayList();
                     }
                     //补全猪场
@@ -241,8 +241,8 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
                             });
                         }
                     }
-                    if(!settled)
-                        settled = doctorWarehouseSettlementService.isSettled((Long) lists.get(0).get("orgId"), (Date) lists.get(0).get("settlementDate"));
+//                    if(!settled)
+                    boolean settled = doctorWarehouseSettlementService.isSettled((Long) lists.get(0).get("orgId"), (Date) lists.get(0).get("settlementDate"));
                     HashMap<Object, Object> infoMap = Maps.newHashMap();
 
                     BigDecimal allInAmount = new BigDecimal(0);
