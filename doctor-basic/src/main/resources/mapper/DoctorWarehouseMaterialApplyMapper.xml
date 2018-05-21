@@ -648,7 +648,10 @@
         format(ifnull(ma.amount,0),4) as amount,
         ma.pig_barn_name as pig_barn_name,
         ma.pig_type as pig_type,
-        ifnull(ma.pig_group_name,'无') as pig_group_name,
+        ifnull((
+          select w.pig_group_name from doctor_warehouse_material_apply w where w.material_handle_id = ma.material_handle_id
+          and w.apply_type!=0
+        ),'无') as pig_group_name,
         b.staff_name as staff_name,
         f.`name` as farm_name,
         db.name as unit ,
