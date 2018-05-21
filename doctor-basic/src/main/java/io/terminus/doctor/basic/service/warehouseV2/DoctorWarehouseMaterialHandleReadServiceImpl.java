@@ -217,7 +217,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
                     //补全猪场
                     for (Map<String, Object> farm : farms) {
                         boolean flag = false;
-                        Long orgId = null;
+                        Long orgId = (Long)criteria.get("orgId");
                         for (Map<String, Object> list : lists) {
                             orgId = (Long) list.get("orgId");
                             if ((long) list.get("farmId") == (long) farm.get("id")) {
