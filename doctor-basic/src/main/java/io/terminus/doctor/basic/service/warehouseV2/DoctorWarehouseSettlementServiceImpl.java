@@ -107,9 +107,9 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             throw new ServiceException("under.settlement");
 
         try {
-            //每个仓库在该会计年月之前的余额和余量
+            //每个仓库下每个物料在该会计年月之前的余额和余量
 //            Map<Long/*warehouseId*/, AmountAndQuantityDto> eachWarehouseBalance = doctorWarehouseMaterialHandleDao.findEachWarehouseBalanceBySettlementDate(orgId, settlementDate);
-            Map<Long/*warehouseId*/, AmountAndQuantityDto> eachWarehouseBalance = doctorWarehouseStockMonthlyDao.findEachWarehouseBalanceBySettlementDate(orgId, DateUtils.addMonths(settlementDate, -1));
+            Map<String/*warehouseId-materialId*/, AmountAndQuantityDto> eachWarehouseBalance = doctorWarehouseStockMonthlyDao.findEachWarehouseBalanceBySettlementDate(orgId, DateUtils.addMonths(settlementDate, -1));
 
             //已结算的单据明细
             Map<Long/*materialHandleId*/, DoctorWarehouseMaterialHandle> settlementMaterialHandles = new HashMap<>();
@@ -118,11 +118,11 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             for (DoctorWarehouseMaterialHandle materialHandle : materialHandles) {
 
                 AmountAndQuantityDto newHistoryBalance = CalcUnitPrice(materialHandle,
-                        eachWarehouseBalance.getOrDefault(materialHandle.getWarehouseId(), new AmountAndQuantityDto()),
+                        eachWarehouseBalance.getOrDefault(materialHandle.getWarehouseId() + "-" + materialHandle.getMaterialId(), new AmountAndQuantityDto()),
                         settlementMaterialHandles);
 
                 //更新余额和余量
-                eachWarehouseBalance.put(materialHandle.getWarehouseId(), newHistoryBalance);
+                eachWarehouseBalance.put(materialHandle.getWarehouseId() + "-" + materialHandle.getMaterialId(), newHistoryBalance);
 
                 settlementMaterialHandles.put(materialHandle.getId(), materialHandle);
             }
@@ -216,6 +216,8 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                 if (null != previousIn) {
                     log.debug("use previous material handle[purchase in] unit price :{}", previousIn.getUnitPrice());
                     materialHandle.setUnitPrice(previousIn.getUnitPrice());
+                } else {
+                    log.info("previous in not found,use user set unit price :{}", materialHandle.getUnitPrice());
                 }
             } else if (materialHandle.getType().equals(WarehouseMaterialHandleType.FORMULA_IN.getValue())) {
                 //配方生产入库，根据出库的总价/入库的数量
@@ -261,6 +263,9 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             historyStockAmount = historyStockAmount.add(new BigDecimal(materialHandle.getUnitPrice().toString()).multiply(materialHandle.getQuantity()));
         } else {
             //出库类型：领料出库，盘亏出库，调拨出库，配方生产出库
+            if (historyStockAmount.equals(new BigDecimal(0)) || historyStockQuantity.equals(new BigDecimal(0))) {
+                log.error("history amount or quantity is zero,can not settlement for material handle:{}", materialHandle.getId());
+            }
             materialHandle.setUnitPrice(new BigDecimal(historyStockAmount.toString()).divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
 
             if (materialHandle.getType().equals(WarehouseMaterialHandleType.OUT.getValue())) {
