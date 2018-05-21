@@ -746,7 +746,7 @@
     <!--得到领料出库的物料名称-->
     <select id="getMaterialNameByID" parameterType="Long" resultType="map">
         select material_id,material_name from doctor_warehouse_material_handle
-        where stock_handle_id = #{id}
+        where stock_handle_id = #{id} and delete_flag=1
     </select>
 
     <!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注-->
@@ -772,7 +772,7 @@
         on s.vendor_id=v.id
         inner join doctor_basics as db
         on db.id=s.unit
-        where material_name=#{materialName} and stock_handle_id=#{stockHandleId}
+        where mh.material_name=#{materialName} and mh.stock_handle_id=#{stockHandleId}  and mh.delete_flag=1
 
     </select>
 </mapper>
