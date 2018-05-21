@@ -12,6 +12,7 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -21,6 +22,7 @@ import java.util.Date;
  * 配方生产
  * Created by sunbo@terminus.io on 2018/4/8.
  */
+@Slf4j
 @Component
 public class WarehouseFormulaManager extends AbstractStockManager<WarehouseFormulaDto.WarehouseFormulaDetail, WarehouseFormulaDto> {
 
@@ -49,7 +51,7 @@ public class WarehouseFormulaManager extends AbstractStockManager<WarehouseFormu
 
                 if (historyQuantity.subtract(detail.getQuantity()).compareTo(new BigDecimal(0)) < 0) {
 //                    throw new ServiceException("warehouse.stock.not.enough");
-                    throw new InvalidException("stock.not.enough", wareHouse.getWareHouseName(), materialHandle.getMaterialName(), historyQuantity);
+                    throw new InvalidException("stock.not.enough.no.unit", wareHouse.getWareHouseName(), materialHandle.getMaterialName(), historyQuantity);
                 }
                 historyQuantity = historyQuantity.subtract(detail.getQuantity());
             } else {
@@ -59,14 +61,16 @@ public class WarehouseFormulaManager extends AbstractStockManager<WarehouseFormu
             //该笔单据明细之后单据明细需要重算
             recalculate(stockDto.getHandleDate().getTime(), false, wareHouse.getId(), detail.getMaterialId(), historyQuantity);
         } else {
+            log.info("get current stock quantity for warehouse:{},sku:{}", detail.getMaterialId(), wareHouse.getId());
             BigDecimal currentQuantity = doctorWarehouseStockDao.findBySkuIdAndWarehouseId(detail.getMaterialId(), wareHouse.getId())
                     .orElse(DoctorWarehouseStock.builder().quantity(new BigDecimal(0)).build())
                     .getQuantity();
 
+
             if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.FORMULA_OUT.getValue()) &&
                     currentQuantity.compareTo(materialHandle.getQuantity()) < 0)
 //                throw new ServiceException("warehouse.stock.not.enough");
-                throw new InvalidException("stock.not.enough", wareHouse.getWareHouseName(), materialHandle.getMaterialName(), currentQuantity);
+                throw new InvalidException("stock.not.enough.no.unit", wareHouse.getWareHouseName(), materialHandle.getMaterialName(), currentQuantity);
 
             materialHandle.setBeforeStockQuantity(currentQuantity);
         }
