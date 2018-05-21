@@ -208,7 +208,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
                 List<Map> lists = doctorWarehouseMaterialHandleDao.listByFarmIdTime(criteria);
 
-                if(lists!=null&&lists.size()>0) {
+//                if(lists!=null&&lists.size()>0) {
                     //补全猪场
                     for(Map<String,Object> farm:farms){
                         boolean flag = false;
@@ -272,7 +272,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
                     lists.add(infoMap);
                     resultList.add(lists);
-                }
+//                }
             }
 
             Collections.reverse(resultList);
