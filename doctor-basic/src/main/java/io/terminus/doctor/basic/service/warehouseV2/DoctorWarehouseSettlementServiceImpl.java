@@ -263,8 +263,8 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             historyStockAmount = historyStockAmount.add(new BigDecimal(materialHandle.getUnitPrice().toString()).multiply(materialHandle.getQuantity()));
         } else {
             //出库类型：领料出库，盘亏出库，调拨出库，配方生产出库
-            if (historyStockAmount.equals(new BigDecimal(0.000)) || historyStockQuantity.equals(new BigDecimal(0.000))) {
-                log.error("history amount or quantity is zero,can not settlement for material handle:{}", materialHandle.getId());
+            if (historyStockAmount.compareTo(new BigDecimal("0")) <= 0 || historyStockQuantity.compareTo(new BigDecimal("0")) <= 0) {
+                log.error("history amount or quantity is small then zero,can not settlement for material handle:{}", materialHandle.getId());
                 throw new InvalidException("settlement.history.quantity.amount.zero");
             }
 //            log.info("material handle:{},amount:{},quantity:{}", materialHandle.getId(), historyStockAmount, historyStockQuantity);
@@ -316,4 +316,5 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
         doctorWarehouseOrgSettlementDao.update(settlement);
         return Response.ok();
     }
+
 }
