@@ -26,7 +26,7 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
         BigDecimal amount = new BigDecimal(0);
         BigDecimal quantity = new BigDecimal(0);
         for (DoctorWarehouseStockMonthly monthly : monthlies) {
-            if(monthly.getBalanceAmount() != null) {
+            if (monthly.getBalanceAmount() != null) {
                 amount = amount.add(monthly.getBalanceAmount());
                 quantity = quantity.add(monthly.getBalanceQuantity());
             }
@@ -92,19 +92,24 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
     /**
      * 查询每个仓库的余额和余量
      *
-     * @return
+     * @return Key:warehouseId+'-'+materialId
      */
-    public Map<Long, AmountAndQuantityDto> findEachWarehouseBalanceBySettlementDate(Long orgId, Date settlementDate) {
+    public Map<String, AmountAndQuantityDto> findEachWarehouseBalanceBySettlementDate(Long orgId, Date settlementDate) {
         Map<String, Object> params = new HashMap<>();
         params.put("orgId", orgId);
         params.put("settlementDate", settlementDate);
 
         List<Map<String, Object>> result = this.sqlSession.selectList(this.sqlId("findEachWarehouseBalanceBySettlementDate"), params);
 
-        Map<Long, AmountAndQuantityDto> balances = new HashMap<>();
+        Map<String, AmountAndQuantityDto> balances = new HashMap<>();
 
         result.forEach(r -> {
-            balances.put((Long) r.get("warehouseId"), new AmountAndQuantityDto((BigDecimal) r.get("amount"), (BigDecimal) r.get("quantity")));
+            Long warehouseId = (Long) r.get("warehouseId");
+            Long materialId = (Long) r.get("materialId");
+
+            String key = warehouseId + "-" + materialId;
+
+            balances.put(key, new AmountAndQuantityDto((BigDecimal) r.get("amount"), (BigDecimal) r.get("quantity")));
         });
 
         return balances;
