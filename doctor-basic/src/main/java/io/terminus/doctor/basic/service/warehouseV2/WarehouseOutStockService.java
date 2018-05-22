@@ -10,6 +10,7 @@ import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +57,11 @@ public class WarehouseOutStockService extends AbstractWarehouseStockService<Ware
 
     @Override
     protected void delete(DoctorWarehouseMaterialHandle materialHandle) {
+
+        BigDecimal refundQuantity = doctorWarehouseMaterialHandleDao.countQuantityAlreadyRefund(materialHandle.getId());
+        if (refundQuantity.compareTo(new BigDecimal(0)) > 0)
+            throw new InvalidException("already.refund.not.allow.delete", materialHandle.getMaterialName());
+
         warehouseOutManager.delete(materialHandle);
 
         DoctorWareHouse wareHouse = new DoctorWareHouse();
