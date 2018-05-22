@@ -6,6 +6,7 @@ import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroup;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroupDetail;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialApplyReadService;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSettlementService;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -21,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +33,8 @@ import java.util.Map;
 public class WarehouseMateriaApplyController {
 
    @RpcConsumer
-    private DoctorWarehouseMaterialApplyReadService doctorWarehouseMaterialApplyReadService;
+   private DoctorWarehouseMaterialApplyReadService doctorWarehouseMaterialApplyReadService;
+
    @Autowired
    private Exporter exporter;
 
@@ -42,38 +46,49 @@ public class WarehouseMateriaApplyController {
      * @param pigGroupName
      * @param skuType
      * @param skuName
-     * @param openAt
-     * @param closeAt
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "piggroup/{farmId}")
     public Map<String,Object> selectPigGroupApply(@PathVariable Integer farmId,
-                                                                               @RequestParam(required = false) String pigType,
-                                                                               @RequestParam(required = false) String pigName,
-                                                                               @RequestParam(required = false) String pigGroupName,
-                                                                               @RequestParam(required = false) Integer skuType,
-                                                                               @RequestParam(required = false) String skuName,
-                                                                               @RequestParam(required = false) String openAtStart,
-                                                                               @RequestParam(required = false) String openAtEnd,
-                                                                               @RequestParam(required = false) String closeAtStart,
-                                                                               @RequestParam(required = false) String closeAtEnd){
-        Map<String,Object> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApply(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAtStart,openAtEnd,closeAtStart,closeAtEnd));
+                                                  @RequestParam(required = false) Long orgId,
+                                                  @RequestParam(required = false) String date,
+                                                  @RequestParam(required = false) String pigType,
+                                                  @RequestParam(required = false) String pigName,
+                                                  @RequestParam(required = false) String pigGroupName,
+                                                  @RequestParam(required = false) Integer skuType,
+                                                  @RequestParam(required = false) String skuName,
+                                                  @RequestParam(required = false) String openAtStart,
+                                                  @RequestParam(required = false) String openAtEnd,
+                                                  @RequestParam(required = false) String closeAtStart,
+                                                  @RequestParam(required = false) String closeAtEnd) throws ParseException {
+        Map<String,Object> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApply(orgId,date,farmId,pigType,pigName,pigGroupName,skuType,skuName,openAtStart,openAtEnd,closeAtStart,closeAtEnd));
         return a;
     }
+
+    /**
+     * 猪群详情
+     * @param pigGroupId
+     * @param skuId
+     * @return
+     */
     @RequestMapping(method = RequestMethod.GET, value = "piggroup/detail")
-    public List<DoctorWarehouseMaterialApplyPigGroupDetail> PigGroupApplyDetail(@RequestParam(required = true) Long pigGroupId,
-                                                  @RequestParam(required = true) Long skuId){
-        List<DoctorWarehouseMaterialApplyPigGroupDetail> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApplyDetail(pigGroupId,skuId));
+    public List<DoctorWarehouseMaterialApplyPigGroupDetail> PigGroupApplyDetail(@RequestParam(required = false) Long orgId,
+                                                                                @RequestParam(required = false) String date,
+                                                                                @RequestParam(required = true) Long pigGroupId,
+                                                                                @RequestParam(required = true) Long skuId){
+        List<DoctorWarehouseMaterialApplyPigGroupDetail> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApplyDetail(orgId,date,pigGroupId,skuId));
         return a;
     }
 
     //猪群详情报表导出
     @RequestMapping(method  =  RequestMethod.GET,  value  =  "/piggroup/detail/export")
-    public  void  selectPigGroupApplyExport(@RequestParam(required = true) Long pigGroupId,
-                                      @RequestParam(required = true) Long skuId,
+    public  void  selectPigGroupApplyExport(@RequestParam(required = false) Long orgId,
+                                            @RequestParam(required = false) String date,
+                                            @RequestParam(required = true) Long pigGroupId,
+                                            @RequestParam(required = true) Long skuId,
                                       HttpServletRequest  request,  HttpServletResponse  response) {
         //取到值
-        List<DoctorWarehouseMaterialApplyPigGroupDetail> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApplyDetail(pigGroupId,skuId));
+        List<DoctorWarehouseMaterialApplyPigGroupDetail> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApplyDetail(orgId,date,pigGroupId,skuId));
         //开始导出
         try  {
             //导出名称

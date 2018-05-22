@@ -6,6 +6,7 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroup;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroupDetail;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
@@ -65,24 +66,24 @@ public interface DoctorWarehouseMaterialApplyReadService {
      */
     Response<List<DoctorWarehouseMaterialApply>> month(Long warehouseId, Integer applyYear, Integer applyMonth, String skuName);
 
-    Response<Map<String,Object>> selectPigGroupApply(Integer farmId, String pigType, String pigName, String pigGroupName,
-                                                                                         Integer skuType, String skuName, String openAtStart,String openAtEnd, String closeAtStart,String closeAtEnd);
+    Response<Map<String,Object>> selectPigGroupApply(Long orgId,String date,Integer farmId, String pigType, String pigName, String pigGroupName,
+                                                                                         Integer skuType, String skuName, String openAtStart,String openAtEnd, String closeAtStart,String closeAtEnd) throws ParseException;
 
     /**
      * 猪舍领用报表
      * @param criteria
      * @return
      */
-    Response<List<Map>> piggeryReport(DoctorWarehouseMaterialApply criteria);
+    Response<List<Map>> piggeryReport(Long orgId,String date,DoctorWarehouseMaterialApply criteria);
 
     /**
      * 猪舍领用详情
      * @param criteria
      * @return
      */
-    Response<List<Map>> piggeryDetails(DoctorWarehouseMaterialApply criteria);
+    Response<List<Map>> piggeryDetails(Long orgId,String date,DoctorWarehouseMaterialApply criteria);
 
-    public Response<List<DoctorWarehouseMaterialApplyPigGroupDetail>> selectPigGroupApplyDetail(Long pigGroupId, Long skuId);
+    public Response<List<DoctorWarehouseMaterialApplyPigGroupDetail>> selectPigGroupApplyDetail(Long orgId,String date,Long pigGroupId, Long skuId);
 
     public List<DoctorWarehouseMaterialApplyPigGroup> selectPigGroupApplys(Integer farmId, String pigType, String pigName, String pigGroupName,
                                                                            Integer skuType, String skuName, String openAtStart,String openAtEnd, String closeAtStart,String closeAtEnd);
