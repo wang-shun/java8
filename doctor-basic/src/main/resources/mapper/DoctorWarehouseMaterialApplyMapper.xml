@@ -477,9 +477,9 @@
         s.`code` as material_code,
         s.`name` as material_name,
         db.name as unit,
-        format(ifnull(sum(ma.quantity)+'',0),2) as sum_quantity,
+        format(ifnull(sum(ma.quantity)+'',0),3) as sum_quantity,
         format(ifnull(sum(ma.unit_price*ma.quantity)+''/sum(ma.quantity),0)+'',4) as sum_unit_price,
-        format(ifnull(sum(ma.amount),0)+'',4) as sum_amount,
+        format(ifnull(sum(ma.amount),0)+'',2) as sum_amount,
         s.type as material_type,
         v.`name` as vendor_name,
         s.specification as specification,
@@ -497,7 +497,7 @@
         on db.id=ma.unit
         inner join doctor_warehouse_vendor as v
         on v.id=s.vendor_id
-        where mh.type=2 and ma.apply_type=0
+        where mh.type=2 and ma.apply_type=0 and mh.delete_flag=1
         <if test="farmId != null">
             and ma.farm_id = #{farmId}
         </if>
@@ -536,7 +536,7 @@
             '' as unit,
             '' as sum_quantity,
             '' as sum_unit_price,
-            format(ifnull(sum(ma.amount)+'',0),4) as sum_amount,
+            format(ifnull(sum(ma.amount)+'',0),2) as sum_amount,
             '' as material_type,
             '' as vendor_name,
             '' as specification,
@@ -554,7 +554,7 @@
             on db.id=ma.unit
             inner join doctor_warehouse_vendor as v
             on v.id=s.vendor_id
-            where mh.type=2 and ma.apply_type=0
+            where mh.type=2 and ma.apply_type=0 and mh.delete_flag=1
             <if test="farmId != null">
                 and ma.farm_id = #{farmId}
             </if>
@@ -588,9 +588,9 @@
             '' as material_code,
             '' as material_name,
             '' as unit,
-            format(ifnull(sum(ma.quantity)+'',0),2) as sum_quantity,
+            format(ifnull(sum(ma.quantity)+'',0),3) as sum_quantity,
             '' as sum_unit_price,
-            format(ifnull(sum(ma.amount)+'',0),4) as sum_amount,
+            format(ifnull(sum(ma.amount)+'',0),2) as sum_amount,
             '' as material_type,
             '' as vendor_name,
             '' as specification,
@@ -608,7 +608,7 @@
             on db.id=ma.unit
             inner join doctor_warehouse_vendor as v
             on v.id=s.vendor_id
-            where mh.type=2 and ma.apply_type=0
+            where mh.type=2 and ma.apply_type=0 and mh.delete_flag=1
             <if test="farmId != null">
                 and ma.farm_id = #{farmId}
             </if>
@@ -643,9 +643,9 @@
         year(mh.settlement_date) as settlement_year,
         month(mh.settlement_date) as settlement_month,
         mh.type as material_handle_type,
-        format(ifnull(ma.quantity,0),2) as quantity,
+        format(ifnull(ma.quantity,0),3) as quantity,
         format(ma.unit_price,4) as unit_price,
-        format(ifnull(ma.amount,0),4) as amount,
+        format(ifnull(ma.amount,0),2) as amount,
         ma.pig_barn_name as pig_barn_name,
         ma.pig_type as pig_type,
         ifnull((
@@ -670,7 +670,7 @@
         on db.id=mh.unit
         inner join doctor_warehouse_vendor as v
         on v.id=s.vendor_id
-        where mh.type=2 and ma.apply_type=0
+        where mh.type=2 and ma.apply_type=0 and mh.delete_flag=1
         <if test="pigBarnId != null">
             and ma.pig_barn_id = #{pigBarnId}
         </if>
@@ -695,9 +695,9 @@
         date_format( a.apply_date,'%Y-%m-%d') as apply_date,
         date_format(b.settlement_date,'%Y-%m') as settlement_date,
         b.type,
-        a.quantity,
-        a.unit_price,
-        b.amount,
+        format(a.quantity,3),
+        format(a.unit_price,4),
+        format(b.amount,2),
         a.pig_barn_name,
         a.pig_type,
         a.pig_group_name,
@@ -714,7 +714,7 @@
         JOIN doctor_barns e ON e.id = a.pig_barn_id
         JOIN doctor_basics as db on db.id=c.unit
         WHERE
-        a.apply_type = 1
+        a.apply_type = 1 and b.delete_flag=1
         <if test="pigGroupId != null"> AND a.pig_group_id = #{pigGroupId}</if>
         <if test="skuId != null"> AND a.material_id = #{skuId}</if>
     </select>
