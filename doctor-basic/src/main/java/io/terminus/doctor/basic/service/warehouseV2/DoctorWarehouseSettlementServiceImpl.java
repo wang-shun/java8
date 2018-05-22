@@ -121,6 +121,9 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                 if (null == lastSettlementBalance) {
                     log.warn("no balance found for warehouse:{},material:{},init amount to 0,quantity to 0", materialHandle.getWarehouseId(), materialHandle.getMaterialId());
                     lastSettlementBalance = new AmountAndQuantityDto();
+                } else {
+
+                    log.info("start calc unit price for material {},history amount {},history quantity {}", materialHandle.getId(), lastSettlementBalance.getAmount(), lastSettlementBalance.getQuantity());
                 }
 
                 AmountAndQuantityDto newHistoryBalance = CalcUnitPrice(materialHandle,
