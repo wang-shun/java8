@@ -150,7 +150,9 @@ public class NewDoctorWarehouseReadServiceImpl implements NewDoctorWarehouseRead
      */
     @Override
     public Response<List<Map<String, Object>>> listTypeMap(Long farmId, Integer type) {
-        return Response.ok(doctorWareHouseDao.listTypeMap(farmId, type));
+        //会计年月
+        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(new Date());
+        return Response.ok(doctorWareHouseDao.listTypeMap(farmId, type,settlementDate));
     }
 
     @Override

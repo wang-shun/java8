@@ -8,10 +8,7 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by yaoqijun.
@@ -39,10 +36,11 @@ public class DoctorWareHouseDao extends MyBatisDao<DoctorWareHouse>{
      * @param type
      * @return
      */
-    public List<Map<String, Object>> listTypeMap(Long farmId, Integer type) {
+    public List<Map<String, Object>> listTypeMap(Long farmId, Integer type,Date date) {
         Map<String, Object> params = new HashMap<>();
         params.put("farmId", farmId);
         params.put("type", type);
+        params.put("settlementDate",date);
         return this.getSqlSession().selectList(sqlId("listTypeMap"),params);
     }
 

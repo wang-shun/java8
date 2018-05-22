@@ -155,87 +155,53 @@
         select
         a.id,a.ware_house_name,a.type,
         a.manager_id,a.manager_name,
-        case when ifnull((select sum(b.balance_amount)
-        from doctor_warehouse_stock_monthly b
-        where date_format(b.settlement_date,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
-        and b.warehouse_id=a.id),0) = 0 then ''
-        else ifnull(round((select sum(b.balance_amount)
-        from doctor_warehouse_stock_monthly b
-        where date_format(b.settlement_date,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m') and b.warehouse_id=a.id),4),'') end as lastmonth_sum_amount,
-        case when ifnull((select sum(b.balance_quantity)
-        from doctor_warehouse_stock_monthly b
-        where date_format(b.settlement_date,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
-        and b.warehouse_id=a.id),0) = 0 then ''
-        else ifnull(round((select sum(b.balance_quantity)
-        from doctor_warehouse_stock_monthly b
-        where date_format(b.settlement_date,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m') and b.warehouse_id=a.id),2),'') end as lastmonth_sum_quantity,
-        case when
-        ifnull((select sum(b.quantity)
-        from doctor_warehouse_material_handle b
-        where b.warehouse_id=a.id and b.delete_flag=1 and b.farm_id=#{farmId}
-        and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
-        and b.type in (1,7,9,11,13)
-        ),0)=0 then ''
-        else
+
+        ifnull(round(temp1.lastmonth_sum_amount,2),0) as lastmonth_sum_amount,
+
+        ifnull(round(temp1.lastmonth_sum_quantity,3),0) as lastmonth_sum_quantity,
+
         ifnull(
-        ROUND((select sum(b.quantity)
-        from doctor_warehouse_material_handle b
-        where b.warehouse_id=a.id and b.delete_flag=1 and b.farm_id=#{farmId}
-        and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
-        and b.type in (1,7,9,11,13)
-        ),2),'') end as thismonth_sum_rk_quantity,
-        case when
-        ifnull((select sum(b.quantity)
-        from doctor_warehouse_material_handle b
-        where b.warehouse_id=a.id and b.delete_flag=1 and b.farm_id=#{farmId}
-        and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
-        and b.type in (2,8,10,12)
-        ),0) = 0 then ''
-        else
+        ROUND(temp2.thismonth_sum_rk_quantity,3),0) as thismonth_sum_rk_quantity,
+
+
         ifnull(
-        ROUND((select sum(b.quantity)
-        from doctor_warehouse_material_handle b
-        where b.warehouse_id=a.id and b.delete_flag=1 and b.farm_id=#{farmId}
-        and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
-        and b.type in (2,8,10,12)
-        ),2),'') end as thismonth_sum_ck_quantity,
-        case when
-        (ifnull((select sum(b.balance_quantity)
-        from doctor_warehouse_stock_monthly b
-        where date_format(b.settlement_date,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
-        and b.warehouse_id=a.id),0)
-        +
-        ifnull((select sum(b.quantity)
-        from doctor_warehouse_material_handle b
-        where b.warehouse_id=a.id and b.delete_flag=1 and b.farm_id=#{farmId}
-        and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
-        and b.type in (1,7,9,11,13)),0)
-        -
-        ifnull((select sum(b.quantity)
-        from doctor_warehouse_material_handle b
-        where b.warehouse_id=a.id and b.delete_flag=1 and b.farm_id=#{farmId}
-        and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
-        and b.type in (2,8,10,12)),0)) = 0 then ''
-        else
-        ifnull(
-        ROUND((ifnull((select sum(b.balance_quantity)
-        from doctor_warehouse_stock_monthly b
-        where date_format(b.settlement_date,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')
-        and b.warehouse_id=a.id),0)
-        +
-        ifnull((select sum(b.quantity)
-        from doctor_warehouse_material_handle b
-        where b.warehouse_id=a.id and b.delete_flag=1 and b.farm_id=#{farmId}
-        and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
-        and b.type in (1,7,9,11,13)),0)
-        -
-        ifnull((select sum(b.quantity)
-        from doctor_warehouse_material_handle b
-        where b.warehouse_id=a.id and b.delete_flag=1 and b.farm_id=#{farmId}
-        and date_format(b.handle_date,'%Y-%m')=date_format(now(),'%Y-%m')
-        and b.type in (2,8,10,12)),0)
-        ),2),'') end as now_sum_quantity
+        ROUND(temp3.thismonth_sum_ck_quantity,3),0) as thismonth_sum_ck_quantity,
+
+
+
+        round(ifnull(temp1.lastmonth_sum_quantity,0) + ifnull(temp2.thismonth_sum_rk_quantity,0)-ifnull(temp3.thismonth_sum_ck_quantity,0),3) as now_sum_quantity
+
         from doctor_ware_houses a
+        left join (
+        select sum(b.balance_amount) as lastmonth_sum_amount,sum(b.balance_quantity) as lastmonth_sum_quantity,b.warehouse_id
+        from doctor_warehouse_stock_monthly b
+        where date_format(b.settlement_date,'%Y-%m')=date_format(DATE_SUB(#{settlementDate}, INTERVAL 1 MONTH),'%Y-%m')
+        and b.farm_id = #{farmId}
+        GROUP BY b.warehouse_id
+        )temp1 on a.id = temp1.warehouse_id
+
+        left join (
+        select sum(b.quantity) as thismonth_sum_rk_quantity,b.warehouse_id
+        from doctor_warehouse_material_handle b,doctor_warehouse_stock_handle b1
+        where b.stock_handle_id=b1.id
+        and b.delete_flag=1
+        and b.farm_id=#{farmId}
+        and date_format(b.handle_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+        and b1.handle_type =1
+        GROUP BY b.warehouse_id
+        )temp2 on a.id = temp2.warehouse_id
+
+        left join (
+        select sum(b.quantity) as thismonth_sum_ck_quantity,b.warehouse_id
+        from doctor_warehouse_material_handle b,doctor_warehouse_stock_handle b1
+        where b.stock_handle_id=b1.id
+        and b.delete_flag=1
+        and b.farm_id=#{farmId}
+        and date_format(b.handle_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+        and b1.handle_type =2
+        GROUP BY b.warehouse_id
+        )temp3 on a.id = temp3.warehouse_id
+
         where a.farm_id=#{farmId}
         <if test="type != null" > and a.type=#{type}</if>
         order by a.type,a.created_at
