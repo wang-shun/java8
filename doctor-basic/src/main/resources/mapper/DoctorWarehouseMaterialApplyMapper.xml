@@ -696,7 +696,7 @@
         date_format(b.settlement_date,'%Y-%m') as settlement_date,
         b.type,
         a.quantity as quantity,
-        a.unit_price as unit_price,
+        a.unit_price as  unit_price,
         b.amount as amount,
         a.pig_barn_name,
         a.pig_type,
