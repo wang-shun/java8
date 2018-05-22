@@ -166,8 +166,8 @@ public class StockHandleController {
     //查询
     @RequestMapping(method = RequestMethod.GET, value = "{id:\\d+}")
     public StockHandleVo query(@PathVariable Long id,
-                               @RequestParam(required = false) Long orgId,
-                               @RequestParam(required = false) String date) {
+                               @RequestParam Long orgId,
+                               @RequestParam String date) {
 
         //单据表
         DoctorWarehouseStockHandle stockHandle = RespHelper.or500(doctorWarehouseStockHandleReadService.findById(id));
@@ -192,9 +192,8 @@ public class StockHandleController {
                                 boolean b = doctorWarehouseSettlementService.isSettled(orgId, sdf.parse(date));
                                 if(!b){
                                     if (!stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.IN.getValue())||stockHandle.getHandleSubType()!=WarehouseMaterialHandleType.IN.getValue()) {
-                                        BigDecimal bd=new BigDecimal("--");
-                                        detail.setUnitPrice(bd);
-                                        detail.setAmount(bd);
+                                        detail.setUnitPrice(BigDecimal.ZERO);
+                                        detail.setAmount(BigDecimal.ZERO);
                                     }
                                 }
                             } catch (ParseException e) {
@@ -345,8 +344,8 @@ public class StockHandleController {
     //导出
     @RequestMapping(method = RequestMethod.GET, value = "{id:\\d+}/export")
     public void export(@PathVariable Long id,
-                       @RequestParam(required = false) Long orgId,
-                       @RequestParam(required = false) String date,
+                       @RequestParam Long orgId,
+                       @RequestParam String date,
                        HttpServletRequest request,
                        HttpServletResponse response) {
 
@@ -570,6 +569,11 @@ public class StockHandleController {
                             row.createCell(6).setCellValue(vo.getApplyPigGroupName());
                             row.createCell(7).setCellValue(vo.getApplyStaffName());
                             row.createCell(8).setCellValue(vo.getQuantity().doubleValue());
+                            CellStyle style = workbook.createCellStyle();
+                            //对齐
+                            style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                            row.createCell(9).setCellStyle(style);
+                            row.createCell(10).setCellStyle(style);
                             row.createCell(9).setCellValue("--");
                             row.createCell(10).setCellValue("--");
                             row.createCell(11).setCellValue(vo.getRemark());
@@ -585,6 +589,7 @@ public class StockHandleController {
                         CellStyle style = workbook.createCellStyle();
                         style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
                         countCell.setCellStyle(style);
+                        countRow.createCell(10).setCellStyle(style);
                         countCell.setCellValue("合计");
 
                         countRow.createCell(8).setCellValue(totalQuantity.doubleValue());
@@ -656,6 +661,11 @@ public class StockHandleController {
                         row.createCell(5).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
                         row.createCell(6).setCellValue(vo.getBeforeInventoryQuantity().add(vo.getQuantity()).doubleValue());
                         if(!b){
+                            CellStyle style = workbook.createCellStyle();
+                            //对齐
+                            style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                            row.createCell(7).setCellStyle(style);
+                            row.createCell(8).setCellStyle(style);
                             row.createCell(7).setCellValue("--");
                             row.createCell(8).setCellValue("--");
                         }else{
@@ -711,6 +721,11 @@ public class StockHandleController {
                             row.createCell(5).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
                             row.createCell(6).setCellValue(vo.getBeforeInventoryQuantity().subtract(vo.getQuantity()).doubleValue());
                             if(!b){
+                                CellStyle style = workbook.createCellStyle();
+                                //对齐
+                                style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                                row.createCell(7).setCellStyle(style);
+                                row.createCell(8).setCellStyle(style);
                                 row.createCell(7).setCellValue("--");
                                 row.createCell(8).setCellValue("--");
                             }else{
@@ -768,6 +783,11 @@ public class StockHandleController {
                         row.createCell(7).setCellValue(vo.getTransferInWarehouseName());
                         row.createCell(8).setCellValue(vo.getQuantity().doubleValue());
                         if(!b){
+                            CellStyle style = workbook.createCellStyle();
+                            //对齐
+                            style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                            row.createCell(9).setCellStyle(style);
+                            row.createCell(10).setCellStyle(style);
                             row.createCell(9).setCellValue("--");
                             row.createCell(10).setCellValue("--");
                         }else{
@@ -801,6 +821,11 @@ public class StockHandleController {
                         row.createCell(4).setCellValue(vo.getUnit());
                         row.createCell(5).setCellValue(vo.getQuantity().doubleValue());
                        if(!b){
+                           CellStyle style = workbook.createCellStyle();
+                           //对齐
+                           style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                           row.createCell(6).setCellStyle(style);
+                           row.createCell(7).setCellStyle(style);
                            row.createCell(6).setCellValue("--");
                            row.createCell(7).setCellValue("--");
                        }else{
@@ -833,6 +858,11 @@ public class StockHandleController {
                         row.createCell(4).setCellValue(vo.getUnit());
                         row.createCell(5).setCellValue(vo.getQuantity().doubleValue());
                         if(!b){
+                            CellStyle style = workbook.createCellStyle();
+                            //对齐
+                            style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                            row.createCell(6).setCellStyle(style);
+                            row.createCell(7).setCellStyle(style);
                             row.createCell(6).setCellValue("--");
                             row.createCell(7).setCellValue("--");
                         }else{
@@ -865,6 +895,11 @@ public class StockHandleController {
                         row.createCell(4).setCellValue(vo.getUnit());
                         row.createCell(5).setCellValue(vo.getQuantity().doubleValue());
                         if(!b){
+                            CellStyle style = workbook.createCellStyle();
+                            //对齐
+                            style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                            row.createCell(6).setCellStyle(style);
+                            row.createCell(7).setCellStyle(style);
                             row.createCell(6).setCellValue("--");
                             row.createCell(7).setCellValue("--");
                         }else{
@@ -904,6 +939,11 @@ public class StockHandleController {
                             row.createCell(6).setCellValue(vo.getApplyPigGroupName());
                             row.createCell(7).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
                             row.createCell(8).setCellValue(vo.getQuantity().doubleValue());
+                            CellStyle style = workbook.createCellStyle();
+                            //对齐
+                            style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                            row.createCell(9).setCellStyle(style);
+                            row.createCell(10).setCellStyle(style);
                             row.createCell(9).setCellValue("--");
                             row.createCell(10).setCellValue("--");
                             row.createCell(11).setCellValue(vo.getRemark());
@@ -919,6 +959,7 @@ public class StockHandleController {
                         CellStyle style = workbook.createCellStyle();
                         style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
                         countCell.setCellStyle(style);
+                        countRow.createCell(8).setCellStyle(style);
                         countCell.setCellValue("合计");
 
                         countRow.createCell(6).setCellValue(totalQuantity.doubleValue());

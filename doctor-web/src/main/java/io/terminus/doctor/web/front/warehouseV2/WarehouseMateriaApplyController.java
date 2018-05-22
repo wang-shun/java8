@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -35,7 +36,11 @@ public class WarehouseMateriaApplyController {
    @RpcConsumer
    private DoctorWarehouseMaterialApplyReadService doctorWarehouseMaterialApplyReadService;
 
-   @Autowired
+    @RpcConsumer
+    private DoctorWarehouseSettlementService doctorWarehouseSettlementService;
+
+
+    @Autowired
    private Exporter exporter;
 
     /**
@@ -50,8 +55,8 @@ public class WarehouseMateriaApplyController {
      */
     @RequestMapping(method = RequestMethod.GET, value = "piggroup/{farmId}")
     public Map<String,Object> selectPigGroupApply(@PathVariable Integer farmId,
-                                                  @RequestParam(required = false) Long orgId,
-                                                  @RequestParam(required = false) String date,
+                                                  @RequestParam Long orgId,
+                                                  @RequestParam String date,
                                                   @RequestParam(required = false) String pigType,
                                                   @RequestParam(required = false) String pigName,
                                                   @RequestParam(required = false) String pigGroupName,
@@ -72,8 +77,8 @@ public class WarehouseMateriaApplyController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "piggroup/detail")
-    public List<DoctorWarehouseMaterialApplyPigGroupDetail> PigGroupApplyDetail(@RequestParam(required = false) Long orgId,
-                                                                                @RequestParam(required = false) String date,
+    public List<DoctorWarehouseMaterialApplyPigGroupDetail> PigGroupApplyDetail(@RequestParam Long orgId,
+                                                                                @RequestParam String date,
                                                                                 @RequestParam(required = true) Long pigGroupId,
                                                                                 @RequestParam(required = true) Long skuId){
         List<DoctorWarehouseMaterialApplyPigGroupDetail> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApplyDetail(orgId,date,pigGroupId,skuId));
@@ -82,8 +87,8 @@ public class WarehouseMateriaApplyController {
 
     //猪群详情报表导出
     @RequestMapping(method  =  RequestMethod.GET,  value  =  "/piggroup/detail/export")
-    public  void  selectPigGroupApplyExport(@RequestParam(required = false) Long orgId,
-                                            @RequestParam(required = false) String date,
+    public  void  selectPigGroupApplyExport(@RequestParam Long orgId,
+                                            @RequestParam String date,
                                             @RequestParam(required = true) Long pigGroupId,
                                             @RequestParam(required = true) Long skuId,
                                       HttpServletRequest  request,  HttpServletResponse  response) {
@@ -168,8 +173,16 @@ public class WarehouseMateriaApplyController {
                     }
                     row.createCell(5).setCellValue(materialHandleType);
                     row.createCell(6).setCellValue(String.valueOf(m.getQuantity()));
-                    row.createCell(7).setCellValue(String.valueOf(m.getUnitPrice()));
-                    row.createCell(8).setCellValue(String.valueOf(m.getAmount()));
+                    if(m.getUnitPrice().equals(BigDecimal.ZERO)){
+                        row.createCell(7).setCellValue("--");
+                    }else{
+                        row.createCell(7).setCellValue(String.valueOf(m.getUnitPrice()));
+                    }
+                    if(m.getAmount().equals(BigDecimal.ZERO)){
+                        row.createCell(8).setCellValue("--");
+                    }else{
+                        row.createCell(8).setCellValue(String.valueOf(m.getAmount()));
+                    }
                     row.createCell(9).setCellValue(String.valueOf(m.getPigBarnName()));
 
                     String c=String.valueOf(m.getPigType());
@@ -203,11 +216,12 @@ public class WarehouseMateriaApplyController {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
     //猪群领用报表导出
     @RequestMapping(method  =  RequestMethod.GET,  value  =  "/piggroup/{farmId}/export")
     public  void  PigGroupApplyDetailExport(@PathVariable Integer farmId,
+                                            @RequestParam Long orgId,
+                                            @RequestParam String date,
                                             @RequestParam(required = false) String pigType,
                                             @RequestParam(required = false) String pigName,
                                             @RequestParam(required = false) String pigGroupName,
@@ -251,6 +265,8 @@ public class WarehouseMateriaApplyController {
                 title.createCell(15).setCellValue("猪场名称");
 
 
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+                boolean bb = doctorWarehouseSettlementService.isSettled(orgId, sdf.parse(date));
                 for(DoctorWarehouseMaterialApplyPigGroup  m:  a){
                     Row  row  =  sheet.createRow(pos++);
                     row.createCell(0).setCellValue(String.valueOf(m.getPigGroupName()));
@@ -278,8 +294,14 @@ public class WarehouseMateriaApplyController {
                     row.createCell(5).setCellValue(String.valueOf(m.getSkuName()));
                     row.createCell(6).setCellValue(String.valueOf(m.getUnit()));
                     row.createCell(7).setCellValue(String.valueOf(m.getQuantity()));
-                    row.createCell(8).setCellValue(String.valueOf(m.getUnitPrice()));
-                    row.createCell(9).setCellValue(String.valueOf(m.getAmount()));
+                    if(!bb){
+                        row.createCell(8).setCellValue("--");
+                        row.createCell(9).setCellValue("--");
+                    }else{
+                        row.createCell(8).setCellValue(String.valueOf(m.getUnitPrice()));
+                        row.createCell(9).setCellValue(String.valueOf(m.getAmount()));
+                    }
+
                     String b=String.valueOf(m.getSkuType());
                     if(b.equals(String.valueOf(WareHouseType.FEED.getKey()))){
                         row.createCell(10).setCellValue(WareHouseType.FEED.getDesc());

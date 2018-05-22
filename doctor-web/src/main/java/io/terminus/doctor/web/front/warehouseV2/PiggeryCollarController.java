@@ -34,14 +34,14 @@ import java.util.Map;
 @RequestMapping("api/doctor/warehouse/piggeryCollar")
 public class PiggeryCollarController {
 
-    @Autowired
-    private Exporter exporter;
-
     @RpcConsumer
     private DoctorWarehouseMaterialApplyReadService doctorWarehouseMaterialApplyReadService;
 
     @RpcConsumer
     private DoctorWarehouseSettlementService doctorWarehouseSettlementService;
+
+    @Autowired
+    private Exporter exporter;
 
     /**
      * 猪舍领用报表
@@ -55,23 +55,23 @@ public class PiggeryCollarController {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/piggeryReport")
     public List<Map> piggeryReport(@RequestParam Long farmId,
-                                         @RequestParam(required = false) Long orgId,
-                                         @RequestParam(required = false) String date,
+                                         @RequestParam Long orgId,
+                                         @RequestParam String date,
                                          @RequestParam(required = false) Long pigBarnId,
                                          @RequestParam(required = false) Integer pigType,
                                          @RequestParam(required = false) Integer type,
-                                         @RequestParam(required = false) String materialName) throws ParseException {
+                                         @RequestParam(required = false) String materialName){
 //        HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
 //        response.setHeader("Access-Control-Allow-Origin", "*");
         DoctorWarehouseMaterialApply materialApply=new DoctorWarehouseMaterialApply();
         materialApply.setFarmId(farmId);
-        String[] split = date.split("-");
         if (null != date){
+            String[] split = date.split("-");
             materialApply.setApplyYear( Integer.valueOf(split[0]));
             materialApply.setApplyMonth(Integer.valueOf(split[1]));
         }else{
             Date dd=new Date(System.currentTimeMillis());
-            materialApply.setApplyYear( dd.getYear());
+            materialApply.setApplyYear(dd.getYear());
             materialApply.setApplyMonth(dd.getMonth());
         }
         if (null != pigBarnId){
@@ -87,7 +87,7 @@ public class PiggeryCollarController {
             materialApply.setMaterialName(materialName);
         }
 
-        List<Map> maps = RespHelper.or500(doctorWarehouseMaterialApplyReadService.piggeryReport(orgId,date,materialApply));
+        List<Map> maps = RespHelper.or500(doctorWarehouseMaterialApplyReadService.piggeryReport(orgId, date, materialApply));
         return maps;
     }
 
@@ -100,13 +100,13 @@ public class PiggeryCollarController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "/piggeryDetails")
-    public List<Map> piggeryDetails(@RequestParam(required = false) Long orgId,
-                                    @RequestParam(required = false) String date,
+    public List<Map> piggeryDetails(@RequestParam Long orgId,
+                                    @RequestParam String date,
                                     @RequestParam Long pigBarnId,
-                                    @RequestParam(required = false) String materialName)throws ParseException {
+                                    @RequestParam(required = false) String materialName){
         DoctorWarehouseMaterialApply materialApply=new DoctorWarehouseMaterialApply();
-        String[] split = date.split("-");
         if (null != date){
+            String[] split = date.split("-");
             materialApply.setApplyYear( Integer.valueOf(split[0]));
             materialApply.setApplyMonth(Integer.valueOf(split[1]));
         }else{
@@ -128,18 +128,18 @@ public class PiggeryCollarController {
     //猪舍领用报表导出
     @RequestMapping(method = RequestMethod.GET, value = "/piggeryReport/export")
     public void piggeryReportExport(@RequestParam Long farmId,
-                                    @RequestParam(required = false) Long orgId,
-                                    @RequestParam(required = false) String date,
+                                    @RequestParam Long orgId,
+                                    @RequestParam String date,
                                     @RequestParam(required = false) Long pigBarnId,
                                     @RequestParam(required = false) Integer pigType,
                                     @RequestParam(required = false) Integer type,
                                     @RequestParam(required = false) String materialName,
-                                    HttpServletRequest request, HttpServletResponse response)  throws ParseException {
+                                    HttpServletRequest request, HttpServletResponse response){
         //取到值
         DoctorWarehouseMaterialApply materialApply=new DoctorWarehouseMaterialApply();
         materialApply.setFarmId(farmId);
-        String[] split = date.split("-");
         if (null != date){
+            String[] split = date.split("-");
             materialApply.setApplyYear( Integer.valueOf(split[0]));
             materialApply.setApplyMonth(Integer.valueOf(split[1]));
         }else{
@@ -252,15 +252,15 @@ public class PiggeryCollarController {
 
     //猪舍领用详情导出
     @RequestMapping(method = RequestMethod.GET, value = "/piggeryDetails/export")
-    public void piggeryDetailsExport(@RequestParam(required = false) Long orgId,
-                                     @RequestParam(required = false) String date,
+    public void piggeryDetailsExport(@RequestParam Long orgId,
+                                     @RequestParam String date,
                                      @RequestParam Long pigBarnId,
                                      @RequestParam(required = false) String materialName,
-                                    HttpServletRequest request, HttpServletResponse response)throws ParseException  {
+                                    HttpServletRequest request, HttpServletResponse response){
         //取到值
         DoctorWarehouseMaterialApply materialApply=new DoctorWarehouseMaterialApply();
-        String[] split = date.split("-");
         if (null != date){
+            String[] split = date.split("-");
             materialApply.setApplyYear( Integer.valueOf(split[0]));
             materialApply.setApplyMonth(Integer.valueOf(split[1]));
         }else{

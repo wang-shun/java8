@@ -151,9 +151,8 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
                 if(pigGroupList.get(i).getQuantity() != null){
                     allQuantity =pigGroupList.get(i).getQuantity().add(allQuantity);
                 }
-                BigDecimal bd = new BigDecimal("--");
-                pigGroupList.get(i).setUnitPrice(bd);
-                pigGroupList.get(i).setAmount(bd);
+                pigGroupList.get(i).setUnitPrice(BigDecimal.ZERO);
+                pigGroupList.get(i).setAmount(BigDecimal.ZERO);
             }
             Map<String,Object> map = new HashMap<>();
             map.put("pigGroupList",pigGroupList);
@@ -189,9 +188,8 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
             if(!b){
                 BigDecimal allQuantity = new BigDecimal(0);
                 for(int i = 0;i<maps.size(); i++){
-                    BigDecimal bd = new BigDecimal("--");
-                    maps.get(i).put("sum_unit_price",bd);
-                    maps.get(i).put("sum_amount",bd);
+                    maps.get(i).put("sum_unit_price","--");
+                    maps.get(i).put("sum_amount","--");
                 }
             }
         } catch (ParseException e) {
@@ -211,9 +209,8 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
             if(!b){
                 BigDecimal allQuantity = new BigDecimal(0);
                 for(int i = 0;i<maps.size(); i++){
-                    BigDecimal bd = new BigDecimal("--");
-                    maps.get(i).put("unit_price",bd);
-                    maps.get(i).put("amount",bd);
+                    maps.get(i).put("unit_price","--");
+                    maps.get(i).put("amount","--");
                 }
             }
         } catch (ParseException e) {
@@ -234,9 +231,8 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
             if(!b){
                 BigDecimal allQuantity = new BigDecimal(0);
                 for(int i = 0;i<ApplyPigGroupDetails.size(); i++){
-                    BigDecimal bd = new BigDecimal("--");
-                    ApplyPigGroupDetails.get(i).setUnitPrice(bd);
-                    ApplyPigGroupDetails.get(i).setAmount(bd);
+                    ApplyPigGroupDetails.get(i).setUnitPrice(BigDecimal.ZERO);
+                    ApplyPigGroupDetails.get(i).setAmount(BigDecimal.ZERO);
                 }
             }
         } catch (ParseException e) {
