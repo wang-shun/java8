@@ -21,9 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by sunbo@terminus.io on 2017/8/9.
@@ -38,6 +36,9 @@ public class NewDoctorWarehouseReadServiceImpl implements NewDoctorWarehouseRead
 
     @Autowired
     private DoctorWarehousePurchaseDao doctorWarehousePurchaseDao;
+
+    @Autowired
+    private DoctorWarehouseSettlementService doctorWarehouseSettlementService;
 
 
     @Override
@@ -163,6 +164,9 @@ public class NewDoctorWarehouseReadServiceImpl implements NewDoctorWarehouseRead
         param.put("type", type);
         param.put("materialName", materialName);
         param.put("warehouseId", warehouseId);
+        //会计年月
+        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(new Date());
+        param.put("settlementDate",settlementDate);
         return Response.ok(doctorWareHouseDao.listDetailTypeMap(
                 pageInfo.getOffset(), pageInfo.getLimit(), param));
     }
