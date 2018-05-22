@@ -181,6 +181,10 @@ public class WarehouseOutStockService extends AbstractWarehouseStockService<Ware
                     apply.setApplyType(WarehouseMaterialApplyType.SOW.getValue());
                     apply.setPigGroupName("母猪");
                     apply.setPigGroupId(-1L);
+                } else {
+                    //只更改了领用猪群
+                    apply.setPigGroupId(detail.getApplyPigGroupId());
+                    apply.setPigGroupName(detail.getApplyPigGroupName());
                 }
                 //还需要调整猪舍领用
                 doctorWarehouseMaterialApplyDao.updateBarnApply(materialHandle.getId(), apply);
