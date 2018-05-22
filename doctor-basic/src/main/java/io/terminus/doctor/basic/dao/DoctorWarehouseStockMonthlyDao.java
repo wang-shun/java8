@@ -103,7 +103,7 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
 
         List<Map<String, Object>> result = this.sqlSession.selectList(this.sqlId("findEachWarehouseBalanceBySettlementDate"), params);
 
-        log.info("get balance for org {} and settlement date {}", orgId, settlementDate);
+        log.debug("get balance for org {} and settlement date {}", orgId, settlementDate);
 
         Map<String, AmountAndQuantityDto> balances = new HashMap<>();
 
@@ -113,7 +113,7 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
             BigDecimal amount = (BigDecimal) r.get("amount");
             BigDecimal quantity = (BigDecimal) r.get("quantity");
 
-            log.info("warehouse:{},material:{},amount:{},quantity:{}", warehouseId, materialId, amount, quantity);
+            log.debug("warehouse:{},material:{},amount:{},quantity:{}", warehouseId, materialId, amount, quantity);
 
             String key = warehouseId + "-" + materialId;
 

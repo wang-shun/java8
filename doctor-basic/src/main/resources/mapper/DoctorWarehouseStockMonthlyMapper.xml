@@ -181,7 +181,7 @@
         select sum(balance_amount) as amount ,sum(balance_quantity) as quantity,warehouse_id as warehouseId,material_id as materialId
         FROM <include refid="tb"/>
         where org_id=#{orgId}
-        and <![CDATA[settlement_date<#{settlementDate}]]>
+        and <![CDATA[settlement_date<=#{settlementDate}]]>
         group by warehouse_id,material_id;
     </select>
 

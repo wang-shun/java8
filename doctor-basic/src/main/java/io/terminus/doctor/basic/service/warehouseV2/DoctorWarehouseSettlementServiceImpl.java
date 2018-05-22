@@ -123,7 +123,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                     lastSettlementBalance = new AmountAndQuantityDto();
                 } else {
 
-                    log.info("start calc unit price for material {},history amount {},history quantity {}", materialHandle.getId(), lastSettlementBalance.getAmount(), lastSettlementBalance.getQuantity());
+                    log.debug("start calc unit price for material {},history amount {},history quantity {}", materialHandle.getId(), lastSettlementBalance.getAmount(), lastSettlementBalance.getQuantity());
                 }
 
                 AmountAndQuantityDto newHistoryBalance = CalcUnitPrice(materialHandle,
@@ -272,7 +272,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             historyStockAmount = historyStockAmount.add(new BigDecimal(materialHandle.getUnitPrice().toString()).multiply(materialHandle.getQuantity()));
         } else {
             //出库类型：领料出库，盘亏出库，调拨出库，配方生产出库
-            log.info("material handle:{},history amount:{},history quantity:{}", materialHandle.getId(), historyStockAmount, historyStockQuantity);
+            log.debug("material handle:{},history amount:{},history quantity:{}", materialHandle.getId(), historyStockAmount, historyStockQuantity);
             if (historyStockAmount.compareTo(new BigDecimal("0")) <= 0 || historyStockQuantity.compareTo(new BigDecimal("0")) <= 0) {
                 log.error("history amount or quantity is small then zero,can not settlement for material handle:{}", materialHandle.getId());
                 throw new InvalidException("settlement.history.quantity.amount.zero");
