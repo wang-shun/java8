@@ -199,82 +199,88 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
             int startMonth =(int)criteria.get("startMonth");
             int startYear =(int)criteria.get("startYear");
 
-            for(;count>=0;count--,startMonth++){
-                if(startMonth>12) {
+            for(;count>=0;count--,startMonth++) {
+                if (startMonth > 12) {
                     startMonth = 1;
                     startYear += 1;
                 }
-                criteria.put("settlementDate",DateUtil.toDate(startYear + "-" + startMonth + "-01"));
+                criteria.put("settlementDate", DateUtil.toDate(startYear + "-" + startMonth + "-01"));
 
                 List<Map> lists = doctorWarehouseMaterialHandleDao.listByFarmIdTime(criteria);
-
-                if(lists!=null&&lists.size()>0) {
+                Date time = (Date) criteria.get("settlementDate");
+                if (time.getTime() < System.currentTimeMillis()) {
+//                    boolean settled = false;
+                    if (lists == null || lists.size() == 0) {
+//                        settled = true;
+                        lists = Lists.newArrayList();
+                    }
                     //补全猪场
-                    for(Map<String,Object> farm:farms){
+                    for (Map<String, Object> farm : farms) {
                         boolean flag = false;
                         Long orgId = null;
-                        for(Map<String,Object> list:lists){
-                            orgId = (Long)list.get("orgId");
-                            if((long)list.get("farmId")==(long)farm.get("id")){
+                        for (Map<String, Object> list : lists) {
+                            orgId = (Long) list.get("orgId");
+                            if ((long) list.get("farmId") == (long) farm.get("id")) {
                                 flag = true;
                             }
                         }
-                        if(!flag){
-                            farm.put("settlementDate",criteria.get("settlementDate"));
-                            farm.put("farmId",farm.get("id"));
-                            farm.put("orgId",orgId);
-                            farm.put("farmName",farm.get("name"));
-                            farm.put("inAmount",new BigDecimal("0"));
-                            farm.put("outAmount",new BigDecimal("0"));
-                            farm.put("balanceAmount",new BigDecimal("0"));
+                        if (!flag) {
+                            farm.put("settlementDate", criteria.get("settlementDate"));
+                            farm.put("farmId", farm.get("id"));
+                            farm.put("orgId", orgId);
+                            farm.put("farmName", farm.get("name"));
+                            farm.put("inAmount", new BigDecimal("0"));
+                            farm.put("outAmount", new BigDecimal("0"));
+                            farm.put("balanceAmount", new BigDecimal("0"));
                             lists.add(farm);
                             Collections.sort(lists, new Comparator<Map>() {
                                 @Override
                                 public int compare(Map o1, Map o2) {
-                                    return (int)((long)o1.get("farmId")-(long)o2.get("farmId"));
+                                    return (int) ((long) o1.get("farmId") - (long) o2.get("farmId"));
                                 }
                             });
                         }
                     }
+//                    if(!settled)
                     boolean settled = doctorWarehouseSettlementService.isSettled((Long) lists.get(0).get("orgId"), (Date) lists.get(0).get("settlementDate"));
                     HashMap<Object, Object> infoMap = Maps.newHashMap();
 
                     BigDecimal allInAmount = new BigDecimal(0);
                     BigDecimal allOutAmount = new BigDecimal(0);
                     BigDecimal allBalanceAmount = new BigDecimal(0);
-                    for(int x=0;x<lists.size();x++){
-                        if(lists.get(x).get("inAmount")!=null)
-                           allInAmount = allInAmount.add(new BigDecimal(lists.get(x).get("inAmount").toString()));
+                    for (int x = 0; x < lists.size(); x++) {
+                        if (lists.get(x).get("inAmount") != null)
+                            allInAmount = allInAmount.add(new BigDecimal(lists.get(x).get("inAmount").toString()));
 
-                        if(lists.get(x).get("outAmount")!=null)
-                          allOutAmount = allOutAmount.add(new BigDecimal(lists.get(x).get("outAmount").toString()));
+                        if (lists.get(x).get("outAmount") != null)
+                            allOutAmount = allOutAmount.add(new BigDecimal(lists.get(x).get("outAmount").toString()));
 
-                        if(lists.get(x).get("balanceAmount")!=null)
-                          allBalanceAmount = allBalanceAmount.add(new BigDecimal(lists.get(x).get("balanceAmount").toString()));
+                        if (lists.get(x).get("balanceAmount") != null)
+                            allBalanceAmount = allBalanceAmount.add(new BigDecimal(lists.get(x).get("balanceAmount").toString()));
 
                     }
 
                     DoctorWarehouseOrgSettlement orgId = doctorWarehouseOrgSettlementDao.findByOrg((Long) criteria.get("orgId"));
                     Date settleDate = null;
-                    if(orgId!=null) {
-                         settleDate = orgId.getLastSettlementDate();
+                    if (orgId != null) {
+                        settleDate = orgId.getLastSettlementDate();
                     }
-                    infoMap.put("year",startYear);
-                    infoMap.put("month",startMonth);
-                    infoMap.put("handleDate",settleDate);
-                    infoMap.put("settlementDate",criteria.get("settlementDate"));
+                    infoMap.put("year", startYear);
+                    infoMap.put("month", startMonth);
+                    infoMap.put("handleDate", settleDate);
+                    infoMap.put("settlementDate", criteria.get("settlementDate"));
                     infoMap.put("settled", settled);
-                    infoMap.put("allInAmount",allInAmount);
-                    infoMap.put("allOutAmount",allOutAmount);
-                    infoMap.put("allBalanceAmount",allBalanceAmount);
+                    infoMap.put("allInAmount", allInAmount);
+                    infoMap.put("allOutAmount", allOutAmount);
+                    infoMap.put("allBalanceAmount", allBalanceAmount);
 
-                    farms.get(0).put("settled",settled);
+                    farms.get(0).put("settled", settled);
 
                     lists.add(infoMap);
                     resultList.add(lists);
+//                }
                 }
             }
-
             Collections.reverse(resultList);
             return ResponseUtil.isOk(resultList,farms);
         } catch (Exception e) {
