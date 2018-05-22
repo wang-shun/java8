@@ -117,8 +117,14 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             List<DoctorWarehouseMaterialHandle> materialHandles = doctorWarehouseMaterialHandleDao.findByOrgAndSettlementDate(orgId, settlementDate);
             for (DoctorWarehouseMaterialHandle materialHandle : materialHandles) {
 
+                AmountAndQuantityDto lastSettlementBalance = eachWarehouseBalance.get(materialHandle.getWarehouseId() + "-" + materialHandle.getMaterialId());
+                if (null == lastSettlementBalance) {
+                    log.warn("no balance found for warehouse:{},material:{},init amount to 0,quantity to 0", materialHandle.getWarehouseId(), materialHandle.getMaterialId());
+                    lastSettlementBalance = new AmountAndQuantityDto();
+                }
+
                 AmountAndQuantityDto newHistoryBalance = CalcUnitPrice(materialHandle,
-                        eachWarehouseBalance.getOrDefault(materialHandle.getWarehouseId() + "-" + materialHandle.getMaterialId(), new AmountAndQuantityDto()),
+                        lastSettlementBalance,
                         settlementMaterialHandles);
 
                 //更新余额和余量
@@ -267,7 +273,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                 log.error("history amount or quantity is small then zero,can not settlement for material handle:{}", materialHandle.getId());
                 throw new InvalidException("settlement.history.quantity.amount.zero");
             }
-//            log.info("material handle:{},amount:{},quantity:{}", materialHandle.getId(), historyStockAmount, historyStockQuantity);
+            log.info("material handle:{},history amount:{},history quantity:{}", materialHandle.getId(), historyStockAmount, historyStockQuantity);
 
             materialHandle.setUnitPrice(historyStockAmount.divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
 
