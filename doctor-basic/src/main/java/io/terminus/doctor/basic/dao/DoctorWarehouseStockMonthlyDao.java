@@ -4,6 +4,7 @@ import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
 import io.terminus.common.mysql.dao.MyBatisDao;
 
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockMonthly;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
@@ -15,6 +16,7 @@ import java.util.*;
  * Date: 2017-09-29 13:22:37
  * Created by [ your name ]
  */
+@Slf4j
 @Repository
 public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseStockMonthly> {
 
@@ -101,15 +103,21 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
 
         List<Map<String, Object>> result = this.sqlSession.selectList(this.sqlId("findEachWarehouseBalanceBySettlementDate"), params);
 
+        log.info("get balance for org {} and settlement date {}", orgId, settlementDate);
+
         Map<String, AmountAndQuantityDto> balances = new HashMap<>();
 
         result.forEach(r -> {
             Long warehouseId = (Long) r.get("warehouseId");
             Long materialId = (Long) r.get("materialId");
+            BigDecimal amount = (BigDecimal) r.get("amount");
+            BigDecimal quantity = (BigDecimal) r.get("quantity");
+
+            log.info("warehouse:{},material:{},amount:{},quantity:{}", warehouseId, materialId, amount, quantity);
 
             String key = warehouseId + "-" + materialId;
 
-            balances.put(key, new AmountAndQuantityDto((BigDecimal) r.get("amount"), (BigDecimal) r.get("quantity")));
+            balances.put(key, new AmountAndQuantityDto(amount, quantity));
         });
 
         return balances;
