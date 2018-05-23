@@ -153,6 +153,9 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         BigDecimal allQuantity = new BigDecimal(0);
         BigDecimal allAmount = new BigDecimal(0);
         for (int i = 0; i < pigGroupList.size(); i++) {
+            pigGroupList.get(i).setQuantity(pigGroupList.get(i).getQuantity().setScale(3, BigDecimal.ROUND_HALF_UP));
+            pigGroupList.get(i).setUnitPrice(pigGroupList.get(i).getUnitPrice().setScale(4, BigDecimal.ROUND_HALF_UP));
+            pigGroupList.get(i).setAmount(pigGroupList.get(i).getAmount().setScale(2, BigDecimal.ROUND_HALF_UP));
             boolean b = doctorWarehouseOrgSettlementDao.isSettled(orgId, pigGroupList.get(i).getSettlementDate());
             if(!b){
                 pigGroupList.get(i).setUnitPrice(BigDecimal.ZERO);
@@ -219,6 +222,9 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         List<DoctorWarehouseMaterialApplyPigGroupDetail> ApplyPigGroupDetails = doctorWarehouseMaterialApplyDao.selectPigGroupApplyDetail(pigGroupId, skuId);
 
         for (int i = 0; i < ApplyPigGroupDetails.size(); i++) {
+            ApplyPigGroupDetails.get(i).setQuantity(ApplyPigGroupDetails.get(i).getQuantity().setScale(3, BigDecimal.ROUND_HALF_UP));
+            ApplyPigGroupDetails.get(i).setUnitPrice(ApplyPigGroupDetails.get(i).getUnitPrice().setScale(4, BigDecimal.ROUND_HALF_UP));
+            ApplyPigGroupDetails.get(i).setAmount(ApplyPigGroupDetails.get(i).getAmount().setScale(2, BigDecimal.ROUND_HALF_UP));
             try {
             //会计年月支持选择未结算过的会计年月，如果选择未结算的会计区间，则报表不显示金额和单价
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
@@ -241,6 +247,9 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
         List<DoctorWarehouseMaterialApplyPigGroup> pigGroupList = doctorWarehouseMaterialApplyDao.selectPigGroupApply1(farmId, pigType, pigName, pigGroupName, skuType, skuName, openAtStart,openAtEnd,closeAtStart,closeAtEnd);
         for (int i = 0; i < pigGroupList.size(); i++) {
+            pigGroupList.get(i).setQuantity(pigGroupList.get(i).getQuantity().setScale(3, BigDecimal.ROUND_HALF_UP));
+            pigGroupList.get(i).setUnitPrice(pigGroupList.get(i).getUnitPrice().setScale(4, BigDecimal.ROUND_HALF_UP));
+            pigGroupList.get(i).setAmount(pigGroupList.get(i).getAmount().setScale(2, BigDecimal.ROUND_HALF_UP));
             boolean b = doctorWarehouseOrgSettlementDao.isSettled(orgId, pigGroupList.get(i).getSettlementDate());
             if (!b) {
                 pigGroupList.get(i).setUnitPrice(BigDecimal.ZERO);
