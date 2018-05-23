@@ -83,8 +83,8 @@ public interface DoctorWarehouseMaterialApplyReadService {
      */
     Response<List<Map>> piggeryDetails(Long orgId,String date,DoctorWarehouseMaterialApply criteria);
 
-    public Response<List<DoctorWarehouseMaterialApplyPigGroupDetail>> selectPigGroupApplyDetail(Long orgId,String date,Long pigGroupId, Long skuId);
+    public Response<List<DoctorWarehouseMaterialApplyPigGroupDetail>> selectPigGroupApplyDetail(Long orgId,Long pigGroupId, Long skuId);
 
-    public List<DoctorWarehouseMaterialApplyPigGroup> selectPigGroupApplys(Integer farmId, String pigType, String pigName, String pigGroupName,
+    public List<DoctorWarehouseMaterialApplyPigGroup> selectPigGroupApplys(Long orgId,Integer farmId, String pigType, String pigName, String pigGroupName,
                                                                            Integer skuType, String skuName, String openAtStart,String openAtEnd, String closeAtStart,String closeAtEnd);
 }

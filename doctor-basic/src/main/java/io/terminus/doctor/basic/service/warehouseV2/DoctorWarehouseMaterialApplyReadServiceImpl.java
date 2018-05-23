@@ -153,8 +153,6 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         BigDecimal allQuantity = new BigDecimal(0);
         BigDecimal allAmount = new BigDecimal(0);
         for (int i = 0; i < pigGroupList.size(); i++) {
-            //会计年月支持选择未结算过的会计年月，如果选择未结算的会计区间，则报表不显示金额和单价
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
             boolean b = doctorWarehouseOrgSettlementDao.isSettled(orgId, pigGroupList.get(i).getSettlementDate());
             if(!b){
                 pigGroupList.get(i).setUnitPrice(BigDecimal.ZERO);
@@ -217,31 +215,38 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
     }
 
     @Override
-    public Response<List<DoctorWarehouseMaterialApplyPigGroupDetail>> selectPigGroupApplyDetail(Long orgId,String date,Long pigGroupId, Long skuId){
+    public Response<List<DoctorWarehouseMaterialApplyPigGroupDetail>> selectPigGroupApplyDetail(Long orgId,Long pigGroupId, Long skuId){
         List<DoctorWarehouseMaterialApplyPigGroupDetail> ApplyPigGroupDetails = doctorWarehouseMaterialApplyDao.selectPigGroupApplyDetail(pigGroupId, skuId);
 
-        try {
+        for (int i = 0; i < ApplyPigGroupDetails.size(); i++) {
+            try {
             //会计年月支持选择未结算过的会计年月，如果选择未结算的会计区间，则报表不显示金额和单价
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
-            boolean  b = doctorWarehouseOrgSettlementDao.isSettled(orgId, sdf.parse(date));
+            boolean b = doctorWarehouseOrgSettlementDao.isSettled(orgId, sdf.parse(ApplyPigGroupDetails.get(i).getSettlementDate()));
             if(!b){
-                BigDecimal allQuantity = new BigDecimal(0);
-                for(int i = 0;i<ApplyPigGroupDetails.size(); i++){
-                    ApplyPigGroupDetails.get(i).setUnitPrice(BigDecimal.ZERO);
-                    ApplyPigGroupDetails.get(i).setAmount(BigDecimal.ZERO);
-                }
+                ApplyPigGroupDetails.get(i).setUnitPrice(BigDecimal.ZERO);
+                ApplyPigGroupDetails.get(i).setAmount(BigDecimal.ZERO);
             }
-        } catch (ParseException e) {
-            e.printStackTrace();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
 
         return Response.ok(ApplyPigGroupDetails);
     }
 
     @Override
-    public List<DoctorWarehouseMaterialApplyPigGroup> selectPigGroupApplys(Integer farmId, String pigType, String pigName, String pigGroupName,
+    public List<DoctorWarehouseMaterialApplyPigGroup> selectPigGroupApplys(Long orgId,Integer farmId, String pigType, String pigName, String pigGroupName,
                                                             Integer skuType, String skuName, String openAtStart,String openAtEnd, String closeAtStart,String closeAtEnd) {
 
-        return  doctorWarehouseMaterialApplyDao.selectPigGroupApply1(farmId, pigType, pigName, pigGroupName, skuType, skuName, openAtStart,openAtEnd,closeAtStart,closeAtEnd);
+        List<DoctorWarehouseMaterialApplyPigGroup> pigGroupList = doctorWarehouseMaterialApplyDao.selectPigGroupApply1(farmId, pigType, pigName, pigGroupName, skuType, skuName, openAtStart,openAtEnd,closeAtStart,closeAtEnd);
+        for (int i = 0; i < pigGroupList.size(); i++) {
+            boolean b = doctorWarehouseOrgSettlementDao.isSettled(orgId, pigGroupList.get(i).getSettlementDate());
+            if (!b) {
+                pigGroupList.get(i).setUnitPrice(BigDecimal.ZERO);
+                pigGroupList.get(i).setAmount(BigDecimal.ZERO);
+            }
+        }
+        return pigGroupList;
     }
 }

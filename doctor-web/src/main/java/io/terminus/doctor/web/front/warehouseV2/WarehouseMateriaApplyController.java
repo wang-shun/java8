@@ -77,22 +77,20 @@ public class WarehouseMateriaApplyController {
      */
     @RequestMapping(method = RequestMethod.GET, value = "piggroup/detail")
     public List<DoctorWarehouseMaterialApplyPigGroupDetail> PigGroupApplyDetail(@RequestParam Long orgId,
-                                                                                @RequestParam String date,
                                                                                 @RequestParam(required = true) Long pigGroupId,
                                                                                 @RequestParam(required = true) Long skuId){
-        List<DoctorWarehouseMaterialApplyPigGroupDetail> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApplyDetail(orgId,date,pigGroupId,skuId));
+        List<DoctorWarehouseMaterialApplyPigGroupDetail> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApplyDetail(orgId,pigGroupId,skuId));
         return a;
     }
 
     //猪群详情报表导出
     @RequestMapping(method  =  RequestMethod.GET,  value  =  "/piggroup/detail/export")
     public  void  selectPigGroupApplyExport(@RequestParam Long orgId,
-                                            @RequestParam String date,
                                             @RequestParam(required = true) Long pigGroupId,
                                             @RequestParam(required = true) Long skuId,
                                       HttpServletRequest  request,  HttpServletResponse  response) {
         //取到值
-        List<DoctorWarehouseMaterialApplyPigGroupDetail> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApplyDetail(orgId,date,pigGroupId,skuId));
+        List<DoctorWarehouseMaterialApplyPigGroupDetail> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApplyDetail(orgId,pigGroupId,skuId));
         //开始导出
         try  {
             //导出名称
@@ -220,7 +218,6 @@ public class WarehouseMateriaApplyController {
     @RequestMapping(method  =  RequestMethod.GET,  value  =  "/piggroup/{farmId}/export")
     public  void  PigGroupApplyDetailExport(@PathVariable Integer farmId,
                                             @RequestParam Long orgId,
-                                            @RequestParam String date,
                                             @RequestParam(required = false) String pigType,
                                             @RequestParam(required = false) String pigName,
                                             @RequestParam(required = false) String pigGroupName,
@@ -232,7 +229,7 @@ public class WarehouseMateriaApplyController {
                                             @RequestParam(required = false) String closeAtEnd,
                                             HttpServletRequest  request,  HttpServletResponse  response) {
         //取到值
-        List<DoctorWarehouseMaterialApplyPigGroup> a =doctorWarehouseMaterialApplyReadService.selectPigGroupApplys(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAtStart,openAtEnd,closeAtStart,closeAtEnd);
+        List<DoctorWarehouseMaterialApplyPigGroup> a =doctorWarehouseMaterialApplyReadService.selectPigGroupApplys(orgId,farmId,pigType,pigName,pigGroupName,skuType,skuName,openAtStart,openAtEnd,closeAtStart,closeAtEnd);
         //开始导出
         try  {
             //导出名称
@@ -263,9 +260,6 @@ public class WarehouseMateriaApplyController {
                 title.createCell(14).setCellValue("关群日期");
                 title.createCell(15).setCellValue("猪场名称");
 
-
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
-                boolean bb = doctorWarehouseSettlementService.isSettled(orgId, sdf.parse(date));
                 for(DoctorWarehouseMaterialApplyPigGroup  m:  a){
                     Row  row  =  sheet.createRow(pos++);
                     row.createCell(0).setCellValue(String.valueOf(m.getPigGroupName()));
@@ -293,11 +287,15 @@ public class WarehouseMateriaApplyController {
                     row.createCell(5).setCellValue(String.valueOf(m.getSkuName()));
                     row.createCell(6).setCellValue(String.valueOf(m.getUnit()));
                     row.createCell(7).setCellValue(String.valueOf(m.getQuantity()));
-                    if(!bb){
+
+                    if(m.getUnitPrice().equals(BigDecimal.ZERO)){
                         row.createCell(8).setCellValue("--");
-                        row.createCell(9).setCellValue("--");
                     }else{
                         row.createCell(8).setCellValue(String.valueOf(m.getUnitPrice()));
+                    }
+                    if(m.getAmount().equals(BigDecimal.ZERO)){
+                        row.createCell(9).setCellValue("--");
+                    }else{
                         row.createCell(9).setCellValue(String.valueOf(m.getAmount()));
                     }
 
