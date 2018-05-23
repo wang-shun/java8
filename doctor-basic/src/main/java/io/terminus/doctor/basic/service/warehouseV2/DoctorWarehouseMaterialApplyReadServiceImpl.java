@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -138,44 +139,39 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
     }
 
     @Override
-    public Response<Map<String,Object>> selectPigGroupApply(Long orgId,String date,Integer farmId, String pigType, String pigName, String pigGroupName,
+    public Response<Map<String,Object>> selectPigGroupApply(Long orgId,Integer farmId, String pigType, String pigName, String pigGroupName,
                                                                                                 Integer skuType, String skuName, String openAtStart,String openAtEnd, String closeAtStart,String closeAtEnd) throws ParseException {
-        List<DoctorWarehouseMaterialApplyPigGroup> pigGroupList =doctorWarehouseMaterialApplyDao.selectPigGroupApply1(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAtStart,openAtEnd,closeAtStart,closeAtEnd);
+        List<DoctorWarehouseMaterialApplyPigGroup> pigGroupList = doctorWarehouseMaterialApplyDao.selectPigGroupApply1(farmId, pigType, pigName, pigGroupName, skuType, skuName, openAtStart, openAtEnd, closeAtStart, closeAtEnd);
+        // DecimalFormat df = new DecimalFormat("#.00");
+        //double db = df.format(d);
+        /*for(int i = 0;i<pigGroupList.size(); i++){
+            pigGroupList.get(i).getQuantity().setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+            pigGroupList.get(i).getUnitPrice().setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+            pigGroupList.get(i).getAmount().setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+        }*/
 
-        //会计年月支持选择未结算过的会计年月，如果选择未结算的会计区间，则报表不显示金额和单价
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
-        boolean b = doctorWarehouseOrgSettlementDao.isSettled(orgId, sdf.parse(date));
-        if(!b){
-            BigDecimal allQuantity = new BigDecimal(0);
-            for(int i = 0;i<pigGroupList.size(); i++){
-                if(pigGroupList.get(i).getQuantity() != null){
-                    allQuantity =pigGroupList.get(i).getQuantity().add(allQuantity);
-                }
+        BigDecimal allQuantity = new BigDecimal(0);
+        BigDecimal allAmount = new BigDecimal(0);
+        for (int i = 0; i < pigGroupList.size(); i++) {
+            //会计年月支持选择未结算过的会计年月，如果选择未结算的会计区间，则报表不显示金额和单价
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+            boolean b = doctorWarehouseOrgSettlementDao.isSettled(orgId, pigGroupList.get(i).getSettlementDate());
+            if(!b){
                 pigGroupList.get(i).setUnitPrice(BigDecimal.ZERO);
                 pigGroupList.get(i).setAmount(BigDecimal.ZERO);
             }
-            Map<String,Object> map = new HashMap<>();
-            map.put("pigGroupList",pigGroupList);
-            map.put("allQuantity",allQuantity);
-            map.put("allAmount","--");
-            return Response.ok(map);
-        }else{
-            BigDecimal allQuantity = new BigDecimal(0);
-            BigDecimal allAmount = new BigDecimal(0);
-            for(int i = 0;i<pigGroupList.size(); i++){
-                if(pigGroupList.get(i).getQuantity() != null){
-                    allQuantity =pigGroupList.get(i).getQuantity().add(allQuantity);
-                }
-                if(pigGroupList.get(i).getAmount() != null) {
-                    allAmount = pigGroupList.get(i).getAmount().add(allAmount);
-                }
+            if (pigGroupList.get(i).getQuantity() != null) {
+                allQuantity = pigGroupList.get(i).getQuantity().add(allQuantity);
             }
-            Map<String,Object> map = new HashMap<>();
-            map.put("pigGroupList",pigGroupList);
-            map.put("allQuantity",allQuantity);
-            map.put("allAmount",allAmount);
-            return Response.ok(map);
+            if (pigGroupList.get(i).getAmount() != null) {
+                allAmount = pigGroupList.get(i).getAmount().add(allAmount);
+            }
         }
+        Map<String, Object> map = new HashMap<>();
+        map.put("pigGroupList", pigGroupList);
+        map.put("allQuantity", allQuantity);
+        map.put("allAmount", allAmount);
+        return Response.ok(map);
     }
 
     @Override

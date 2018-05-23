@@ -73,4 +73,8 @@ public class DoctorWarehouseMaterialApplyPigGroup implements Serializable {
 
     //物料id
     private Integer skuId;
+
+    //会计年月
+    private Date settlementDate
+            ;
 }

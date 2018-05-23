@@ -56,7 +56,6 @@ public class WarehouseMateriaApplyController {
     @RequestMapping(method = RequestMethod.GET, value = "piggroup/{farmId}")
     public Map<String,Object> selectPigGroupApply(@PathVariable Integer farmId,
                                                   @RequestParam Long orgId,
-                                                  @RequestParam String date,
                                                   @RequestParam(required = false) String pigType,
                                                   @RequestParam(required = false) String pigName,
                                                   @RequestParam(required = false) String pigGroupName,
@@ -66,7 +65,7 @@ public class WarehouseMateriaApplyController {
                                                   @RequestParam(required = false) String openAtEnd,
                                                   @RequestParam(required = false) String closeAtStart,
                                                   @RequestParam(required = false) String closeAtEnd) throws ParseException {
-        Map<String,Object> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApply(orgId,date,farmId,pigType,pigName,pigGroupName,skuType,skuName,openAtStart,openAtEnd,closeAtStart,closeAtEnd));
+        Map<String,Object> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApply(orgId,farmId,pigType,pigName,pigGroupName,skuType,skuName,openAtStart,openAtEnd,closeAtStart,closeAtEnd));
         return a;
     }
 

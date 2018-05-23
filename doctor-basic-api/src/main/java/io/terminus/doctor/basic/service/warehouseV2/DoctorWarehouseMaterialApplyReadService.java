@@ -66,7 +66,7 @@ public interface DoctorWarehouseMaterialApplyReadService {
      */
     Response<List<DoctorWarehouseMaterialApply>> month(Long warehouseId, Integer applyYear, Integer applyMonth, String skuName);
 
-    Response<Map<String,Object>> selectPigGroupApply(Long orgId,String date,Integer farmId, String pigType, String pigName, String pigGroupName,
+    Response<Map<String,Object>> selectPigGroupApply(Long orgId,Integer farmId, String pigType, String pigName, String pigGroupName,
                                                                                          Integer skuType, String skuName, String openAtStart,String openAtEnd, String closeAtStart,String closeAtEnd) throws ParseException;
 
     /**
