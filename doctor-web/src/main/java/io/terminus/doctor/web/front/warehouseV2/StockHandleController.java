@@ -166,8 +166,8 @@ public class StockHandleController {
     //查询
     @RequestMapping(method = RequestMethod.GET, value = "{id:\\d+}")
     public StockHandleVo query(@PathVariable Long id,
-                               @RequestParam Long orgId,
-                               @RequestParam String date) {
+                               @RequestParam(required = false) Long orgId,
+                               @RequestParam(required = false) String date) {
 
         //单据表
         DoctorWarehouseStockHandle stockHandle = RespHelper.or500(doctorWarehouseStockHandleReadService.findById(id));

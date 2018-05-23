@@ -485,7 +485,8 @@
         s.type as material_type,
         v.`name` as vendor_name,
         s.specification as specification,
-        f.`name` as farm_name
+        f.`name` as farm_name,
+        f.org_id as org_id
         from  doctor_warehouse_material_apply as ma
         inner join doctor_warehouse_material_handle as mh
         on ma.material_handle_id=mh.id
@@ -522,7 +523,7 @@
             and mh.material_name like concat('%',#{materialName},'%')
         </if>
         <!--group by b.id,mh.vendor_name,mh.material_id,mh.material_name-->
-        group by ma.pig_barn_id,ma.pig_barn_name,ma.pig_type,b.staff_name,mh.material_id,s.`code`,s.`name`,s.type,mh.vendor_name,s.specification,f.`name`
+        group by ma.pig_barn_id,ma.pig_barn_name,ma.pig_type,b.staff_name,mh.material_id,s.`code`,s.`name`,s.type,mh.vendor_name,s.specification,f.`name`,f.org_id
 
         union all
 
