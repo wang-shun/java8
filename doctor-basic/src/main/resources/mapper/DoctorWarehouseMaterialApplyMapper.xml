@@ -543,7 +543,8 @@
             '' as material_type,
             '' as vendor_name,
             '' as specification,
-            '' as farm_name
+            '' as farm_name,
+            '' as org_id
             from  doctor_warehouse_material_apply as ma
             inner join doctor_warehouse_material_handle as mh
             on ma.material_handle_id=mh.id
@@ -597,7 +598,8 @@
             '' as material_type,
             '' as vendor_name,
             '' as specification,
-            '' as farm_name
+            '' as farm_name,
+            '' as org_id
             from  doctor_warehouse_material_apply as ma
             inner join doctor_warehouse_material_handle as mh
             on ma.material_handle_id=mh.id
