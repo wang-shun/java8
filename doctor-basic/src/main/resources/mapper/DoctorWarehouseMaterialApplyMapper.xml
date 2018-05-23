@@ -531,7 +531,7 @@
             select '' as pig_barn_id,
             '合计' as pig_barn_name,
             '' as pig_type,
-            '' as staff_name,
+
             '' as settlement_year,
             '' as settlement_month,
             '' as material_code,
@@ -655,7 +655,7 @@
         ma.pig_type as pig_type,
         ifnull((
           select w.pig_group_name from doctor_warehouse_material_apply w where w.material_handle_id = ma.material_handle_id
-          and w.apply_type!=0 and w.org_id = ma.org_id limit 1
+          and w.apply_type!=0
         ),'无') as pig_group_name,
         b.staff_name as staff_name,
         f.`name` as farm_name,
