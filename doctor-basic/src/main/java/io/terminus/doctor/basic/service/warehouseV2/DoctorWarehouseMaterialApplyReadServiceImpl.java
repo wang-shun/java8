@@ -152,8 +152,8 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
             pigGroupList.get(i).setAmount(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getAmount())).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
             boolean b = doctorWarehouseOrgSettlementDao.isSettled(orgId, pigGroupList.get(i).getSettlementDate());
             if(!b){
-                pigGroupList.get(i).setUnitPrice("0");
-                pigGroupList.get(i).setAmount("0");
+                pigGroupList.get(i).setUnitPrice("--");
+                pigGroupList.get(i).setAmount("--");
             }
             if (pigGroupList.get(i).getQuantity() != null) {
                 allQuantity = new BigDecimal(Double.parseDouble(pigGroupList.get(i).getQuantity())).add(allQuantity);
@@ -224,8 +224,8 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
             boolean b = doctorWarehouseOrgSettlementDao.isSettled(orgId, sdf.parse(ApplyPigGroupDetails.get(i).getSettlementDate()));
             if(!b){
-                ApplyPigGroupDetails.get(i).setUnitPrice("0");
-                ApplyPigGroupDetails.get(i).setAmount("0");
+                ApplyPigGroupDetails.get(i).setUnitPrice("--");
+                ApplyPigGroupDetails.get(i).setAmount("--");
             }
             } catch (ParseException e) {
                 e.printStackTrace();
@@ -246,8 +246,8 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
             pigGroupList.get(i).setAmount(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getAmount())).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
             boolean b = doctorWarehouseOrgSettlementDao.isSettled(orgId, pigGroupList.get(i).getSettlementDate());
             if (!b) {
-                pigGroupList.get(i).setUnitPrice("0");
-                pigGroupList.get(i).setAmount("0");
+                pigGroupList.get(i).setUnitPrice("--");
+                pigGroupList.get(i).setAmount("--");
             }
         }
         return pigGroupList;
