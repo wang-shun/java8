@@ -216,16 +216,16 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         List<DoctorWarehouseMaterialApplyPigGroupDetail> ApplyPigGroupDetails = doctorWarehouseMaterialApplyDao.selectPigGroupApplyDetail(pigGroupId, skuId);
 
         for (int i = 0; i < ApplyPigGroupDetails.size(); i++) {
-            ApplyPigGroupDetails.get(i).setQuantity(ApplyPigGroupDetails.get(i).getQuantity().setScale(3, BigDecimal.ROUND_HALF_UP));
-            ApplyPigGroupDetails.get(i).setUnitPrice(ApplyPigGroupDetails.get(i).getUnitPrice().setScale(4, BigDecimal.ROUND_HALF_UP));
-            ApplyPigGroupDetails.get(i).setAmount(ApplyPigGroupDetails.get(i).getAmount().setScale(2, BigDecimal.ROUND_HALF_UP));
+            ApplyPigGroupDetails.get(i).setQuantity(new BigDecimal(Double.parseDouble(ApplyPigGroupDetails.get(i).getQuantity())).setScale(3, BigDecimal.ROUND_HALF_UP).toString());
+            ApplyPigGroupDetails.get(i).setUnitPrice(new BigDecimal(Double.parseDouble(ApplyPigGroupDetails.get(i).getUnitPrice())).setScale(4, BigDecimal.ROUND_HALF_UP).toString());
+            ApplyPigGroupDetails.get(i).setAmount(new BigDecimal(Double.parseDouble(ApplyPigGroupDetails.get(i).getAmount())).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
             try {
             //会计年月支持选择未结算过的会计年月，如果选择未结算的会计区间，则报表不显示金额和单价
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
             boolean b = doctorWarehouseOrgSettlementDao.isSettled(orgId, sdf.parse(ApplyPigGroupDetails.get(i).getSettlementDate()));
             if(!b){
-                ApplyPigGroupDetails.get(i).setUnitPrice(BigDecimal.ZERO);
-                ApplyPigGroupDetails.get(i).setAmount(BigDecimal.ZERO);
+                ApplyPigGroupDetails.get(i).setUnitPrice("0");
+                ApplyPigGroupDetails.get(i).setAmount("0");
             }
             } catch (ParseException e) {
                 e.printStackTrace();
