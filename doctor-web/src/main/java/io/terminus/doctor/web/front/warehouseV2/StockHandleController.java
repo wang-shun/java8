@@ -1,12 +1,9 @@
 package io.terminus.doctor.web.front.warehouseV2;
 
-import com.google.api.client.util.Charsets;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
-import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.*;
@@ -20,11 +17,7 @@ import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.web.core.export.Exporter;
 import io.terminus.doctor.web.front.warehouseV2.vo.StockHandleExportVo;
 import io.terminus.doctor.web.front.warehouseV2.vo.StockHandleVo;
-import io.terminus.doctor.web.front.warehouseV2.vo.WarehouseEventExportVo;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -35,7 +28,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.boot.autoconfigure.web.ConditionalOnEnabledResourceChain;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -43,14 +35,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import io.terminus.common.model.Response;
 
 /**
  * 库存操作单据
@@ -176,7 +165,9 @@ public class StockHandleController {
 
     //查询
     @RequestMapping(method = RequestMethod.GET, value = "{id:\\d+}")
-    public StockHandleVo query(@PathVariable Long id) {
+    public StockHandleVo query(@PathVariable Long id,
+                               @RequestParam(required = false) Long orgId,
+                               @RequestParam(required = false) String date) {
 
         //单据表
         DoctorWarehouseStockHandle stockHandle = RespHelper.or500(doctorWarehouseStockHandleReadService.findById(id));
@@ -194,6 +185,20 @@ public class StockHandleController {
                             StockHandleVo.Detail detail = new StockHandleVo.Detail();
                             //单据明细里面的值全部复制到detail里面去
                             BeanUtils.copyProperties(mh, detail);
+
+                            try {
+                                //会计年月支持选择未结算过的会计年月，如果选择未结算的会计区间，则报表不显示金额和单价
+                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+                                boolean b = doctorWarehouseSettlementService.isSettled(orgId, sdf.parse(date));
+                                if(!b){
+                                    if (!stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.IN.getValue())||stockHandle.getHandleSubType()!=WarehouseMaterialHandleType.IN.getValue()) {
+                                        detail.setUnitPrice(BigDecimal.ZERO);
+                                        detail.setAmount(BigDecimal.ZERO);
+                                    }
+                                }
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
 
                             //物料表
                             DoctorWarehouseSku sku = RespHelper.or500(doctorWarehouseSkuReadService.findById(mh.getMaterialId()));
@@ -338,7 +343,11 @@ public class StockHandleController {
 
     //导出
     @RequestMapping(method = RequestMethod.GET, value = "{id:\\d+}/export")
-    public void export(@PathVariable Long id, HttpServletRequest request, HttpServletResponse response) {
+    public void export(@PathVariable Long id,
+                       @RequestParam Long orgId,
+                       @RequestParam String date,
+                       HttpServletRequest request,
+                       HttpServletResponse response) {
 
         //单据表
         DoctorWarehouseStockHandle stockHandle = RespHelper.or500(doctorWarehouseStockHandleReadService.findById(id));
@@ -545,40 +554,84 @@ public class StockHandleController {
                     title.createCell(10).setCellValue("金额（元）");
                     title.createCell(11).setCellValue("备注");
 
-                    BigDecimal totalQuantity = new BigDecimal(0);
-                    double totalAmount = 0L;
-                    for (StockHandleExportVo vo : exportVos) {
-                        Row row = sheet.createRow(pos++);
-                        row.createCell(0).setCellValue(vo.getMaterialName());
-                        row.createCell(2).setCellValue(vo.getVendorName());
-                        row.createCell(1).setCellValue(vo.getMaterialCode());
-                        row.createCell(3).setCellValue(vo.getMaterialSpecification());
-                        row.createCell(4).setCellValue(vo.getUnit());
-                        row.createCell(5).setCellValue(vo.getApplyPigBarnName());
-                        row.createCell(6).setCellValue(vo.getApplyPigGroupName());
-                        row.createCell(7).setCellValue(vo.getApplyStaffName());
-                        row.createCell(8).setCellValue(vo.getQuantity().doubleValue());
-                        row.createCell(9).setCellValue(vo.getUnitPrice());
-                        row.createCell(10).setCellValue(vo.getAmount());
-                        row.createCell(11).setCellValue(vo.getRemark());
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+                    boolean b = doctorWarehouseSettlementService.isSettled(orgId, sdf.parse(date));
+                    if(!b){
+                        BigDecimal totalQuantity = new BigDecimal(0);
+                        for (StockHandleExportVo vo : exportVos) {
+                            Row row = sheet.createRow(pos++);
+                            row.createCell(0).setCellValue(vo.getMaterialName());
+                            row.createCell(2).setCellValue(vo.getVendorName());
+                            row.createCell(1).setCellValue(vo.getMaterialCode());
+                            row.createCell(3).setCellValue(vo.getMaterialSpecification());
+                            row.createCell(4).setCellValue(vo.getUnit());
+                            row.createCell(5).setCellValue(vo.getApplyPigBarnName());
+                            row.createCell(6).setCellValue(vo.getApplyPigGroupName());
+                            row.createCell(7).setCellValue(vo.getApplyStaffName());
+                            row.createCell(8).setCellValue(vo.getQuantity().doubleValue());
+                            CellStyle style = workbook.createCellStyle();
+                            //对齐
+                            style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                            row.createCell(9).setCellStyle(style);
+                            row.createCell(10).setCellStyle(style);
+                            row.createCell(9).setCellValue("--");
+                            row.createCell(10).setCellValue("--");
+                            row.createCell(11).setCellValue(vo.getRemark());
 
-                        totalQuantity = totalQuantity.add(vo.getQuantity());
-                        totalAmount += vo.getAmount();
+                            totalQuantity = totalQuantity.add(vo.getQuantity());
+                        }
+
+                        Row countRow = sheet.createRow(pos);
+                        CellRangeAddress cra = new CellRangeAddress(pos, pos, 0, 7);
+                        sheet.addMergedRegion(cra);
+
+                        Cell countCell = countRow.createCell(0);
+                        CellStyle style = workbook.createCellStyle();
+                        style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                        countCell.setCellStyle(style);
+                        countRow.createCell(10).setCellStyle(style);
+                        countCell.setCellValue("合计");
+
+                        countRow.createCell(8).setCellValue(totalQuantity.doubleValue());
+                        countRow.createCell(10).setCellValue("--");
+                        pos++;
+
+                    }else{
+                        BigDecimal totalQuantity = new BigDecimal(0);
+                        double totalAmount = 0L;
+                        for (StockHandleExportVo vo : exportVos) {
+                            Row row = sheet.createRow(pos++);
+                            row.createCell(0).setCellValue(vo.getMaterialName());
+                            row.createCell(2).setCellValue(vo.getVendorName());
+                            row.createCell(1).setCellValue(vo.getMaterialCode());
+                            row.createCell(3).setCellValue(vo.getMaterialSpecification());
+                            row.createCell(4).setCellValue(vo.getUnit());
+                            row.createCell(5).setCellValue(vo.getApplyPigBarnName());
+                            row.createCell(6).setCellValue(vo.getApplyPigGroupName());
+                            row.createCell(7).setCellValue(vo.getApplyStaffName());
+                            row.createCell(8).setCellValue(vo.getQuantity().doubleValue());
+                            row.createCell(9).setCellValue(vo.getUnitPrice());
+                            row.createCell(10).setCellValue(vo.getAmount());
+                            row.createCell(11).setCellValue(vo.getRemark());
+
+                            totalQuantity = totalQuantity.add(vo.getQuantity());
+                            totalAmount += vo.getAmount();
+                        }
+
+                        Row countRow = sheet.createRow(pos);
+                        CellRangeAddress cra = new CellRangeAddress(pos, pos, 0, 7);
+                        sheet.addMergedRegion(cra);
+
+                        Cell countCell = countRow.createCell(0);
+                        CellStyle style = workbook.createCellStyle();
+                        style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                        countCell.setCellStyle(style);
+                        countCell.setCellValue("合计");
+
+                        countRow.createCell(8).setCellValue(totalQuantity.doubleValue());
+                        countRow.createCell(10).setCellValue(totalAmount);
+                        pos++;
                     }
-
-                    Row countRow = sheet.createRow(pos);
-                    CellRangeAddress cra = new CellRangeAddress(pos, pos, 0, 7);
-                    sheet.addMergedRegion(cra);
-
-                    Cell countCell = countRow.createCell(0);
-                    CellStyle style = workbook.createCellStyle();
-                    style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
-                    countCell.setCellStyle(style);
-                    countCell.setCellValue("合计");
-
-                    countRow.createCell(8).setCellValue(totalQuantity.doubleValue());
-                    countRow.createCell(10).setCellValue(totalAmount);
-                    pos++;
 
                 }
                 //盘盈
@@ -594,6 +647,8 @@ public class StockHandleController {
                     title.createCell(8).setCellValue("金额（元）");
                     title.createCell(9).setCellValue("备注");
 
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+                    boolean b = doctorWarehouseSettlementService.isSettled(orgId, sdf.parse(date));
                     BigDecimal totalQuantity = new BigDecimal(0);
                     for (StockHandleExportVo vo : exportVos) {
 
@@ -605,8 +660,18 @@ public class StockHandleController {
                         row.createCell(4).setCellValue(vo.getUnit());
                         row.createCell(5).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
                         row.createCell(6).setCellValue(vo.getBeforeInventoryQuantity().add(vo.getQuantity()).doubleValue());
-                        row.createCell(7).setCellValue(vo.getUnitPrice());
-                        row.createCell(8).setCellValue(vo.getAmount());
+                        if(!b){
+                            CellStyle style = workbook.createCellStyle();
+                            //对齐
+                            style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                            row.createCell(7).setCellStyle(style);
+                            row.createCell(8).setCellStyle(style);
+                            row.createCell(7).setCellValue("--");
+                            row.createCell(8).setCellValue("--");
+                        }else{
+                            row.createCell(7).setCellValue(vo.getUnitPrice());
+                            row.createCell(8).setCellValue(vo.getAmount());
+                        }
                         row.createCell(9).setCellValue(vo.getRemark());
 
                         totalQuantity = vo.getQuantity();
@@ -642,6 +707,8 @@ public class StockHandleController {
                         title.createCell(8).setCellValue("金额（元）");
                         title.createCell(9).setCellValue("备注");
 
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+                        boolean b = doctorWarehouseSettlementService.isSettled(orgId, sdf.parse(date));
                         BigDecimal totalQuantity = new BigDecimal(0);
                         for (StockHandleExportVo vo : exportVos) {
 
@@ -653,8 +720,18 @@ public class StockHandleController {
                             row.createCell(4).setCellValue(vo.getUnit());
                             row.createCell(5).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
                             row.createCell(6).setCellValue(vo.getBeforeInventoryQuantity().subtract(vo.getQuantity()).doubleValue());
-                            row.createCell(7).setCellValue(vo.getUnitPrice());
-                            row.createCell(8).setCellValue(vo.getAmount());
+                            if(!b){
+                                CellStyle style = workbook.createCellStyle();
+                                //对齐
+                                style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                                row.createCell(7).setCellStyle(style);
+                                row.createCell(8).setCellStyle(style);
+                                row.createCell(7).setCellValue("--");
+                                row.createCell(8).setCellValue("--");
+                            }else{
+                                row.createCell(7).setCellValue(vo.getUnitPrice());
+                                row.createCell(8).setCellValue(vo.getAmount());
+                            }
                             row.createCell(9).setCellValue(vo.getRemark());
 
                             totalQuantity = vo.getQuantity();
@@ -692,6 +769,8 @@ public class StockHandleController {
                     title.createCell(10).setCellValue("金额（元）");
                     title.createCell(11).setCellValue("备注");
 
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+                    boolean b = doctorWarehouseSettlementService.isSettled(orgId, sdf.parse(date));
                     for (StockHandleExportVo vo : exportVos) {
                         Row row = sheet.createRow(pos++);
                         row.createCell(0).setCellValue(vo.getMaterialName());
@@ -703,8 +782,19 @@ public class StockHandleController {
                         row.createCell(6).setCellValue(vo.getTransferInFarmName());
                         row.createCell(7).setCellValue(vo.getTransferInWarehouseName());
                         row.createCell(8).setCellValue(vo.getQuantity().doubleValue());
-                        row.createCell(9).setCellValue(vo.getUnitPrice());
-                        row.createCell(10).setCellValue(vo.getAmount());
+                        if(!b){
+                            CellStyle style = workbook.createCellStyle();
+                            //对齐
+                            style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                            row.createCell(9).setCellStyle(style);
+                            row.createCell(10).setCellStyle(style);
+                            row.createCell(9).setCellValue("--");
+                            row.createCell(10).setCellValue("--");
+                        }else{
+                            row.createCell(9).setCellValue(vo.getUnitPrice());
+                            row.createCell(10).setCellValue(vo.getAmount());
+                        }
+
                         row.createCell(11).setCellValue(vo.getRemark());
                     }
                 }
@@ -720,6 +810,8 @@ public class StockHandleController {
                     title.createCell(7).setCellValue("金额（元）");
                     title.createCell(8).setCellValue("备注");
 
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+                    boolean b = doctorWarehouseSettlementService.isSettled(orgId, sdf.parse(date));
                     for (StockHandleExportVo vo : exportVos) {
                         Row row = sheet.createRow(pos++);
                         row.createCell(0).setCellValue(vo.getMaterialName());
@@ -728,8 +820,18 @@ public class StockHandleController {
                         row.createCell(3).setCellValue(vo.getMaterialSpecification());
                         row.createCell(4).setCellValue(vo.getUnit());
                         row.createCell(5).setCellValue(vo.getQuantity().doubleValue());
-                        row.createCell(6).setCellValue(vo.getUnitPrice());
-                        row.createCell(7).setCellValue(vo.getAmount());
+                       if(!b){
+                           CellStyle style = workbook.createCellStyle();
+                           //对齐
+                           style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                           row.createCell(6).setCellStyle(style);
+                           row.createCell(7).setCellStyle(style);
+                           row.createCell(6).setCellValue("--");
+                           row.createCell(7).setCellValue("--");
+                       }else{
+                           row.createCell(6).setCellValue(vo.getUnitPrice());
+                           row.createCell(7).setCellValue(vo.getAmount());
+                       }
                         row.createCell(8).setCellValue(vo.getRemark());
                     }
                 }
@@ -745,6 +847,8 @@ public class StockHandleController {
                     title.createCell(1).setCellValue("金额（元）");
                     title.createCell(8).setCellValue("备注");
 
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+                    boolean b = doctorWarehouseSettlementService.isSettled(orgId, sdf.parse(date));
                     for (StockHandleExportVo vo : exportVos) {
                         Row row = sheet.createRow(pos++);
                         row.createCell(0).setCellValue(vo.getMaterialName());
@@ -753,8 +857,18 @@ public class StockHandleController {
                         row.createCell(3).setCellValue(vo.getMaterialSpecification());
                         row.createCell(4).setCellValue(vo.getUnit());
                         row.createCell(5).setCellValue(vo.getQuantity().doubleValue());
-                        row.createCell(6).setCellValue(vo.getUnitPrice());
-                        row.createCell(7).setCellValue(vo.getAmount());
+                        if(!b){
+                            CellStyle style = workbook.createCellStyle();
+                            //对齐
+                            style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                            row.createCell(6).setCellStyle(style);
+                            row.createCell(7).setCellStyle(style);
+                            row.createCell(6).setCellValue("--");
+                            row.createCell(7).setCellValue("--");
+                        }else{
+                            row.createCell(6).setCellValue(vo.getUnitPrice());
+                            row.createCell(7).setCellValue(vo.getAmount());
+                        }
                         row.createCell(8).setCellValue(vo.getRemark());
                     }
                 }
@@ -770,6 +884,8 @@ public class StockHandleController {
                     title.createCell(7).setCellValue("金额（元）");
                     title.createCell(8).setCellValue("备注");
 
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+                    boolean b = doctorWarehouseSettlementService.isSettled(orgId, sdf.parse(date));
                     for (StockHandleExportVo vo : exportVos) {
                         Row row = sheet.createRow(pos++);
                         row.createCell(0).setCellValue(vo.getMaterialName());
@@ -778,8 +894,18 @@ public class StockHandleController {
                         row.createCell(3).setCellValue(vo.getMaterialSpecification());
                         row.createCell(4).setCellValue(vo.getUnit());
                         row.createCell(5).setCellValue(vo.getQuantity().doubleValue());
-                        row.createCell(6).setCellValue(vo.getUnitPrice());
-                        row.createCell(7).setCellValue(vo.getAmount());
+                        if(!b){
+                            CellStyle style = workbook.createCellStyle();
+                            //对齐
+                            style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                            row.createCell(6).setCellStyle(style);
+                            row.createCell(7).setCellStyle(style);
+                            row.createCell(6).setCellValue("--");
+                            row.createCell(7).setCellValue("--");
+                        }else{
+                            row.createCell(6).setCellValue(vo.getUnitPrice());
+                            row.createCell(7).setCellValue(vo.getAmount());
+                        }
                         row.createCell(8).setCellValue(vo.getRemark());
                     }
                 }
@@ -798,40 +924,85 @@ public class StockHandleController {
                     title.createCell(10).setCellValue("金额(元)");
                     title.createCell(11).setCellValue("备注");
 
-                    BigDecimal totalQuantity = new BigDecimal(0);
-                    double totalAmount = 0L;
-                    for (StockHandleExportVo vo : exportVos) {
-                        Row row = sheet.createRow(pos++);
-                        row.createCell(0).setCellValue(vo.getMaterialName());
-                        row.createCell(2).setCellValue(vo.getVendorName());
-                        row.createCell(1).setCellValue(vo.getMaterialCode());
-                        row.createCell(3).setCellValue(vo.getMaterialSpecification());
-                        row.createCell(4).setCellValue(vo.getUnit());
-                        row.createCell(5).setCellValue(vo.getApplyPigBarnName());
-                        row.createCell(6).setCellValue(vo.getApplyPigGroupName());
-                        row.createCell(7).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
-                        row.createCell(8).setCellValue(vo.getQuantity().doubleValue());
-                        row.createCell(9).setCellValue(vo.getUnitPrice());
-                        row.createCell(10).setCellValue(vo.getAmount());
-                        row.createCell(11).setCellValue(vo.getRemark());
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+                    boolean b = doctorWarehouseSettlementService.isSettled(orgId, sdf.parse(date));
+                    if(!b){
+                        BigDecimal totalQuantity = new BigDecimal(0);
+                        for (StockHandleExportVo vo : exportVos) {
+                            Row row = sheet.createRow(pos++);
+                            row.createCell(0).setCellValue(vo.getMaterialName());
+                            row.createCell(2).setCellValue(vo.getVendorName());
+                            row.createCell(1).setCellValue(vo.getMaterialCode());
+                            row.createCell(3).setCellValue(vo.getMaterialSpecification());
+                            row.createCell(4).setCellValue(vo.getUnit());
+                            row.createCell(5).setCellValue(vo.getApplyPigBarnName());
+                            row.createCell(6).setCellValue(vo.getApplyPigGroupName());
+                            row.createCell(7).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
+                            row.createCell(8).setCellValue(vo.getQuantity().doubleValue());
+                            CellStyle style = workbook.createCellStyle();
+                            //对齐
+                            style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                            row.createCell(9).setCellStyle(style);
+                            row.createCell(10).setCellStyle(style);
+                            row.createCell(9).setCellValue("--");
+                            row.createCell(10).setCellValue("--");
+                            row.createCell(11).setCellValue(vo.getRemark());
 
-                        totalQuantity = totalQuantity.add(vo.getQuantity());
-                        totalAmount += vo.getAmount();
+                            totalQuantity = totalQuantity.add(vo.getQuantity());
+                        }
+
+                        Row countRow = sheet.createRow(pos);
+                        CellRangeAddress cra = new CellRangeAddress(pos, pos, 0, 4);
+                        sheet.addMergedRegion(cra);
+
+                        Cell countCell = countRow.createCell(0);
+                        CellStyle style = workbook.createCellStyle();
+                        style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                        countCell.setCellStyle(style);
+                        countRow.createCell(8).setCellStyle(style);
+                        countCell.setCellValue("合计");
+
+                        countRow.createCell(6).setCellValue(totalQuantity.doubleValue());
+                        countRow.createCell(8).setCellValue("--");
+                        pos++;
+
+                    }else{
+                        BigDecimal totalQuantity = new BigDecimal(0);
+                        double totalAmount = 0L;
+                        for (StockHandleExportVo vo : exportVos) {
+                            Row row = sheet.createRow(pos++);
+                            row.createCell(0).setCellValue(vo.getMaterialName());
+                            row.createCell(2).setCellValue(vo.getVendorName());
+                            row.createCell(1).setCellValue(vo.getMaterialCode());
+                            row.createCell(3).setCellValue(vo.getMaterialSpecification());
+                            row.createCell(4).setCellValue(vo.getUnit());
+                            row.createCell(5).setCellValue(vo.getApplyPigBarnName());
+                            row.createCell(6).setCellValue(vo.getApplyPigGroupName());
+                            row.createCell(7).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
+                            row.createCell(8).setCellValue(vo.getQuantity().doubleValue());
+                            row.createCell(9).setCellValue(vo.getUnitPrice());
+                            row.createCell(10).setCellValue(vo.getAmount());
+                            row.createCell(11).setCellValue(vo.getRemark());
+
+                            totalQuantity = totalQuantity.add(vo.getQuantity());
+                            totalAmount += vo.getAmount();
+                        }
+
+                        Row countRow = sheet.createRow(pos);
+                        CellRangeAddress cra = new CellRangeAddress(pos, pos, 0, 4);
+                        sheet.addMergedRegion(cra);
+
+                        Cell countCell = countRow.createCell(0);
+                        CellStyle style = workbook.createCellStyle();
+                        style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                        countCell.setCellStyle(style);
+                        countCell.setCellValue("合计");
+
+                        countRow.createCell(6).setCellValue(totalQuantity.doubleValue());
+                        countRow.createCell(8).setCellValue(totalAmount);
+                        pos++;
                     }
 
-                    Row countRow = sheet.createRow(pos);
-                    CellRangeAddress cra = new CellRangeAddress(pos, pos, 0, 4);
-                    sheet.addMergedRegion(cra);
-
-                    Cell countCell = countRow.createCell(0);
-                    CellStyle style = workbook.createCellStyle();
-                    style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
-                    countCell.setCellStyle(style);
-                    countCell.setCellValue("合计");
-
-                    countRow.createCell(6).setCellValue(totalQuantity.doubleValue());
-                    countRow.createCell(8).setCellValue(totalAmount);
-                    pos++;
                 }
 
                 Row foot = sheet.createRow(pos);
@@ -883,7 +1054,5 @@ public class StockHandleController {
         params.put("updatedAtEnd", updatedAtEnd);
         return RespHelper.or500(doctorWarehouseStockHandleReadService.paging(pageNo, pageSize, params));
     }
-
-
 
 }

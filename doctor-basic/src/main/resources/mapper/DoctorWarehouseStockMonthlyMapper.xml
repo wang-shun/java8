@@ -186,40 +186,109 @@
     </select>
 
     <select id="listByHouseIdTime" parameterType="map" resultType="map">
-        select a.farm_id as farmId,a.warehouse_id as warehouseId,a.warehouse_name as warehouseName,
+       select a.farm_id as farmId,a.warehouse_id as warehouseId,a.warehouse_name as warehouseName,
         a.handle_year as handleYear,a.handle_month as handleMonth,a.org_id as orgId,a.settlement_date as settlementDate,
-        <include refid="inAmount"/>
-        <include refid="outAmount"/>
-        <include refid="balanceAmount"/>
+         ifnull(ROUND(temp1.inAmount,2),0) as inAmount,
+				 ifnull(ROUND(temp2.outAmount,2),0) as outAmount,
+				 ifnull(ROUND(temp3.balanceAmount,2),0) as balanceAmount
+
         from doctor_warehouse_material_handle a
+
+        left join (select  sum(c.amount) as inAmount,c.warehouse_id
+                            from doctor_warehouse_material_handle c ,doctor_warehouse_stock_handle c1
+                            where c.stock_handle_id = c1.id
+                            and c.farm_id = #{farmId}
+                            and c.delete_flag = 1
+                            and date_format(c.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+                            and c1.handle_type = 1
+                            GROUP BY c.warehouse_id
+                            ) temp1 on a.warehouse_id = temp1.warehouse_id
+
+        left join (select sum(d.amount) as outAmount,d.warehouse_id
+            from doctor_warehouse_material_handle d,doctor_warehouse_stock_handle d1
+            where d.stock_handle_id = d1.id
+			and d.farm_id = #{farmId}
+            and d.delete_flag = 1
+            and date_format(d.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+            and d1.handle_type = 2
+			GROUP BY d.warehouse_id
+			) temp2 on a.warehouse_id = temp2.warehouse_id
+
+        left join (select sum(b.balance_amount) as balanceAmount,b.warehouse_id
+                from doctor_warehouse_stock_monthly b
+                where b.farm_id = #{farmId}
+                and date_format(b.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+                GROUP BY b.warehouse_id
+        ) temp3 on a.warehouse_id = temp3.warehouse_id
+
         where a.delete_flag = 1
-        <if test="farmId!=null">
-            and a.farm_id = #{farmId,jdbcType = BIGINT}
-        </if>
-        <if test="settlementDate!=null">
-            and <![CDATA[a.settlement_date=#{settlementDate}]]>
-        </if>
+        and a.farm_id = #{farmId}
+        and date_format(a.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
         GROUP BY a.warehouse_id
         order by a.warehouse_id
     </select>
 
     <select id="monthWarehouseDetail" parameterType="map" resultType="map">
-        select a.material_name as materialName,b.code as code,a.vendor_name as vendorName,
+       select a.material_name as materialName,b.code as code,a.vendor_name as vendorName,
         b.specification as specification,a.warehouse_type as warehouseType,
-        <include refid="detail"></include>
+        ifnull(round(temp1.balance_quantity,2),0) as lastQuantity,
+        ifnull(round(temp1.balance_amount),0) as lastAmount,
+        ifnull(round(temp2.balance_quantity,2),0) as balanceQuantity,
+        ifnull(round(temp2.balance_amount),0) as balanceAmount,
+
+        ifnull(round(temp3.inAmount,2),0) as inAmount,
+        ifnull(round(temp3.inQuantity,2),0) as inQuantity,
+        ifnull(round(temp4.outAmount,2),0) as outAmount,
+        ifnull(round(temp4.outQuantity,2),0) as outQuantity,
+
         db.name as unit
         from doctor_warehouse_material_handle a
         left join doctor_warehouse_sku b
         on a.material_id = b.id
         left join doctor_basics db
         on a.unit = db.id
+
+        left join (
+         select c.balance_quantity,c.balance_amount,c.material_id
+         from doctor_warehouse_stock_monthly c
+         where c.warehouse_id = #{warehouseId}
+         and date_format(c.settlement_date,'%Y-%m')=date_format(date_sub(#{settlementDate}, interval 1 month),'%Y-%m')
+				 GROUP BY c.material_id
+        )temp1 on a.material_id = temp1.material_id
+
+        left join (
+         select c.balance_quantity,c.balance_amount,c.material_id
+         from doctor_warehouse_stock_monthly c
+         where c.warehouse_id = #{warehouseId}
+         and date_format(c.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+         GROUP BY c.material_id
+        )temp2 on a.material_id = temp2.material_id
+
+        left join (
+                select  sum(e.amount) as inAmount , sum(e.quantity) as inQuantity,e.material_id
+                from doctor_warehouse_material_handle e,doctor_warehouse_stock_handle e1
+                where e.stock_handle_id = e1.id
+                and e.warehouse_id = #{warehouseId}
+                and date_format(e.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+                and e.delete_flag = 1
+                and e1.handle_type =1
+                GROUP BY e.material_id
+        )temp3 on a.material_id = temp3.material_id
+
+        left join (
+                select  sum(e.amount) as outAmount , sum(e.quantity) as outQuantity,e.material_id
+                from doctor_warehouse_material_handle e,doctor_warehouse_stock_handle e1
+                where e.stock_handle_id = e1.id
+                and e.warehouse_id = #{warehouseId}
+                and date_format(e.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+                and e.delete_flag = 1
+                and e1.handle_type =2
+                GROUP BY e.material_id
+        )temp4 on a.material_id = temp4.material_id
         where
            a.delete_flag=1
-        <if test="materialName!=null">
-            and a.material_name = #{materialName,jdbcType=VARCHAR}
-        </if>
-        and a.warehouse_id = #{warehouseId,jdbcType=BIGINT}
-        and DATE_FORMAT(a.settlement_date,'%Y-%M') = DATE_FORMAT(#{settlementDate,jdbcType=TIMESTAMP},'%Y-%M')
+        and a.warehouse_id = #{warehouseId}
+        and DATE_FORMAT(a.settlement_date,'%Y-%M') = DATE_FORMAT(#{settlementDate},'%Y-%M')
         group by a.material_id
     </select>
 
