@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -35,14 +34,14 @@ import java.util.Map;
 @RequestMapping("api/doctor/warehouse/piggeryCollar")
 public class PiggeryCollarController {
 
-    @Autowired
-    private Exporter exporter;
-
     @RpcConsumer
     private DoctorWarehouseMaterialApplyReadService doctorWarehouseMaterialApplyReadService;
 
     @RpcConsumer
     private DoctorWarehouseSettlementService doctorWarehouseSettlementService;
+
+    @Autowired
+    private Exporter exporter;
 
     /**
      * 猪舍领用报表
@@ -56,23 +55,23 @@ public class PiggeryCollarController {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/piggeryReport")
     public List<Map> piggeryReport(@RequestParam Long farmId,
-                                         @RequestParam(required = false) Long orgId,
-                                         @RequestParam(required = false) String date,
+                                         @RequestParam Long orgId,
+                                         @RequestParam String date,
                                          @RequestParam(required = false) Long pigBarnId,
                                          @RequestParam(required = false) Integer pigType,
                                          @RequestParam(required = false) Integer type,
-                                         @RequestParam(required = false) String materialName) throws ParseException {
+                                         @RequestParam(required = false) String materialName){
 //        HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
 //        response.setHeader("Access-Control-Allow-Origin", "*");
         DoctorWarehouseMaterialApply materialApply=new DoctorWarehouseMaterialApply();
         materialApply.setFarmId(farmId);
-        String[] split = date.split("-");
         if (null != date){
+            String[] split = date.split("-");
             materialApply.setApplyYear( Integer.valueOf(split[0]));
             materialApply.setApplyMonth(Integer.valueOf(split[1]));
         }else{
             Date dd=new Date(System.currentTimeMillis());
-            materialApply.setApplyYear( dd.getYear());
+            materialApply.setApplyYear(dd.getYear());
             materialApply.setApplyMonth(dd.getMonth());
         }
         if (null != pigBarnId){
@@ -88,15 +87,7 @@ public class PiggeryCollarController {
             materialApply.setMaterialName(materialName);
         }
 
-        //会计年月支持选择未结算过的会计年月，如果选择未结算的会计区间，则报表不显示金额和单价
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
-        boolean b = doctorWarehouseSettlementService.isSettled(orgId, sdf.parse(date));
-        if(!b){
-            materialApply.setQuantity(null);
-            materialApply.setAmount(null);
-        }
-
-        List<Map> maps = RespHelper.or500(doctorWarehouseMaterialApplyReadService.piggeryReport(materialApply));
+        List<Map> maps = RespHelper.or500(doctorWarehouseMaterialApplyReadService.piggeryReport(orgId, date, materialApply));
         return maps;
     }
 
@@ -109,12 +100,13 @@ public class PiggeryCollarController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "/piggeryDetails")
-    public List<Map> piggeryDetails(@RequestParam(required = false) String date,
-                                   @RequestParam Long pigBarnId,
-                                   @RequestParam(required = false) String materialName) {
+    public List<Map> piggeryDetails(@RequestParam Long orgId,
+                                    @RequestParam String date,
+                                    @RequestParam Long pigBarnId,
+                                    @RequestParam(required = false) String materialName){
         DoctorWarehouseMaterialApply materialApply=new DoctorWarehouseMaterialApply();
-        String[] split = date.split("-");
         if (null != date){
+            String[] split = date.split("-");
             materialApply.setApplyYear( Integer.valueOf(split[0]));
             materialApply.setApplyMonth(Integer.valueOf(split[1]));
         }else{
@@ -129,25 +121,25 @@ public class PiggeryCollarController {
             materialApply.setMaterialName(materialName);
         }
 
-        List<Map> maps = RespHelper.or500(doctorWarehouseMaterialApplyReadService.piggeryDetails(materialApply));
+        List<Map> maps = RespHelper.or500(doctorWarehouseMaterialApplyReadService.piggeryDetails(orgId,date,materialApply));
         return maps;
     }
 
     //猪舍领用报表导出
     @RequestMapping(method = RequestMethod.GET, value = "/piggeryReport/export")
     public void piggeryReportExport(@RequestParam Long farmId,
-                                    @RequestParam(required = false) Long orgId,
-                                    @RequestParam(required = false) String date,
+                                    @RequestParam Long orgId,
+                                    @RequestParam String date,
                                     @RequestParam(required = false) Long pigBarnId,
                                     @RequestParam(required = false) Integer pigType,
                                     @RequestParam(required = false) Integer type,
                                     @RequestParam(required = false) String materialName,
-                                    HttpServletRequest request, HttpServletResponse response) {
+                                    HttpServletRequest request, HttpServletResponse response){
         //取到值
         DoctorWarehouseMaterialApply materialApply=new DoctorWarehouseMaterialApply();
         materialApply.setFarmId(farmId);
-        String[] split = date.split("-");
         if (null != date){
+            String[] split = date.split("-");
             materialApply.setApplyYear( Integer.valueOf(split[0]));
             materialApply.setApplyMonth(Integer.valueOf(split[1]));
         }else{
@@ -168,19 +160,7 @@ public class PiggeryCollarController {
             materialApply.setMaterialName(materialName);
         }
 
-        //会计年月支持选择未结算过的会计年月，如果选择未结算的会计区间，则报表不显示金额和单价
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
-        try {
-            boolean b = doctorWarehouseSettlementService.isSettled(orgId, sdf.parse(date));
-            if(!b){
-                materialApply.setQuantity(null);
-                materialApply.setAmount(null);
-            }
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        List<Map> maps = RespHelper.or500(doctorWarehouseMaterialApplyReadService.piggeryReport(materialApply));
+        List<Map> maps = RespHelper.or500(doctorWarehouseMaterialApplyReadService.piggeryReport(orgId,date,materialApply));
 
         //开始导出
         try {
@@ -272,14 +252,15 @@ public class PiggeryCollarController {
 
     //猪舍领用详情导出
     @RequestMapping(method = RequestMethod.GET, value = "/piggeryDetails/export")
-    public void piggeryDetailsExport(@RequestParam(required = false) String date,
-                                    @RequestParam Long pigBarnId,
-                                    @RequestParam(required = false) String materialName,
-                                    HttpServletRequest request, HttpServletResponse response) {
+    public void piggeryDetailsExport(@RequestParam Long orgId,
+                                     @RequestParam String date,
+                                     @RequestParam Long pigBarnId,
+                                     @RequestParam(required = false) String materialName,
+                                    HttpServletRequest request, HttpServletResponse response){
         //取到值
         DoctorWarehouseMaterialApply materialApply=new DoctorWarehouseMaterialApply();
-        String[] split = date.split("-");
         if (null != date){
+            String[] split = date.split("-");
             materialApply.setApplyYear( Integer.valueOf(split[0]));
             materialApply.setApplyMonth(Integer.valueOf(split[1]));
         }else{
@@ -294,7 +275,7 @@ public class PiggeryCollarController {
             materialApply.setMaterialName(materialName);
         }
 
-        List<Map> maps = RespHelper.or500(doctorWarehouseMaterialApplyReadService.piggeryDetails(materialApply));
+        List<Map> maps = RespHelper.or500(doctorWarehouseMaterialApplyReadService.piggeryDetails(orgId,date,materialApply));
 
         //开始导出
         try {

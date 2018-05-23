@@ -95,7 +95,6 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
     @Transactional
     @ExceptionHandle("doctor.warehouse.stock.handle.delete.fail")
     public Response<String> delete(Long id) {
-
         List<Lock> locks = new ArrayList<>();
         DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleDao.findById(id);
         if (stockHandle.getHandleSubType().intValue() == WarehouseMaterialHandleType.TRANSFER_OUT.getValue()) {
