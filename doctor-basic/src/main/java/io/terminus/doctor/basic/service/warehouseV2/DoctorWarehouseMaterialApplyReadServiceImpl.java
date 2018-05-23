@@ -142,30 +142,24 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
     public Response<Map<String,Object>> selectPigGroupApply(Long orgId,Integer farmId, String pigType, String pigName, String pigGroupName,
                                                                                                 Integer skuType, String skuName, String openAtStart,String openAtEnd, String closeAtStart,String closeAtEnd) throws ParseException {
         List<DoctorWarehouseMaterialApplyPigGroup> pigGroupList = doctorWarehouseMaterialApplyDao.selectPigGroupApply1(farmId, pigType, pigName, pigGroupName, skuType, skuName, openAtStart, openAtEnd, closeAtStart, closeAtEnd);
-        // DecimalFormat df = new DecimalFormat("#.00");
-        //double db = df.format(d);
-        /*for(int i = 0;i<pigGroupList.size(); i++){
-            pigGroupList.get(i).getQuantity().setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-            pigGroupList.get(i).getUnitPrice().setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-            pigGroupList.get(i).getAmount().setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-        }*/
+
 
         BigDecimal allQuantity = new BigDecimal(0);
         BigDecimal allAmount = new BigDecimal(0);
         for (int i = 0; i < pigGroupList.size(); i++) {
-            pigGroupList.get(i).setQuantity(pigGroupList.get(i).getQuantity().setScale(3, BigDecimal.ROUND_HALF_UP));
-            pigGroupList.get(i).setUnitPrice(pigGroupList.get(i).getUnitPrice().setScale(4, BigDecimal.ROUND_HALF_UP));
-            pigGroupList.get(i).setAmount(pigGroupList.get(i).getAmount().setScale(2, BigDecimal.ROUND_HALF_UP));
+            pigGroupList.get(i).setQuantity(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getQuantity())).setScale(3, BigDecimal.ROUND_HALF_UP).toString());
+            pigGroupList.get(i).setUnitPrice(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getUnitPrice())).setScale(4, BigDecimal.ROUND_HALF_UP).toString());
+            pigGroupList.get(i).setAmount(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getAmount())).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
             boolean b = doctorWarehouseOrgSettlementDao.isSettled(orgId, pigGroupList.get(i).getSettlementDate());
             if(!b){
-                pigGroupList.get(i).setUnitPrice(BigDecimal.ZERO);
-                pigGroupList.get(i).setAmount(BigDecimal.ZERO);
+                pigGroupList.get(i).setUnitPrice("0");
+                pigGroupList.get(i).setAmount("0");
             }
             if (pigGroupList.get(i).getQuantity() != null) {
-                allQuantity = pigGroupList.get(i).getQuantity().add(allQuantity);
+                allQuantity = new BigDecimal(Double.parseDouble(pigGroupList.get(i).getQuantity())).add(allQuantity);
             }
             if (pigGroupList.get(i).getAmount() != null) {
-                allAmount = pigGroupList.get(i).getAmount().add(allAmount);
+                allAmount = new BigDecimal(Double.parseDouble( pigGroupList.get(i).getAmount())).add(allAmount);
             }
         }
         Map<String, Object> map = new HashMap<>();
@@ -247,13 +241,13 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
         List<DoctorWarehouseMaterialApplyPigGroup> pigGroupList = doctorWarehouseMaterialApplyDao.selectPigGroupApply1(farmId, pigType, pigName, pigGroupName, skuType, skuName, openAtStart,openAtEnd,closeAtStart,closeAtEnd);
         for (int i = 0; i < pigGroupList.size(); i++) {
-            pigGroupList.get(i).setQuantity(pigGroupList.get(i).getQuantity().setScale(3, BigDecimal.ROUND_HALF_UP));
-            pigGroupList.get(i).setUnitPrice(pigGroupList.get(i).getUnitPrice().setScale(4, BigDecimal.ROUND_HALF_UP));
-            pigGroupList.get(i).setAmount(pigGroupList.get(i).getAmount().setScale(2, BigDecimal.ROUND_HALF_UP));
+            pigGroupList.get(i).setQuantity(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getQuantity())).setScale(3, BigDecimal.ROUND_HALF_UP).toString());
+            pigGroupList.get(i).setUnitPrice(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getUnitPrice())).setScale(4, BigDecimal.ROUND_HALF_UP).toString());
+            pigGroupList.get(i).setAmount(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getAmount())).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
             boolean b = doctorWarehouseOrgSettlementDao.isSettled(orgId, pigGroupList.get(i).getSettlementDate());
             if (!b) {
-                pigGroupList.get(i).setUnitPrice(BigDecimal.ZERO);
-                pigGroupList.get(i).setAmount(BigDecimal.ZERO);
+                pigGroupList.get(i).setUnitPrice("0");
+                pigGroupList.get(i).setAmount("0");
             }
         }
         return pigGroupList;

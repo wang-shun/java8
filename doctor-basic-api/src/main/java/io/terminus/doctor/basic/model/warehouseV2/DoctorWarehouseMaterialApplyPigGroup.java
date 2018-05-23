@@ -45,13 +45,13 @@ public class DoctorWarehouseMaterialApplyPigGroup implements Serializable {
     private String code;
 
     //数量
-    private BigDecimal quantity;
+    private String quantity;
 
     //单价
-    private BigDecimal unitPrice;
+    private String unitPrice;
 
     //金额
-    private BigDecimal amount;
+    private String amount;
 
     //猪舍类型
     private String pigType;
