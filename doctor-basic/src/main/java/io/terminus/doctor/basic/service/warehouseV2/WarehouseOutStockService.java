@@ -117,7 +117,8 @@ public class WarehouseOutStockService extends AbstractWarehouseStockService<Ware
                     //已退数量
                     BigDecimal alreadyRefundQuantity = doctorWarehouseMaterialHandleDao.countQuantityAlreadyRefund(materialHandle.getId());
                     if (detail.getQuantity().compareTo(alreadyRefundQuantity) < 0)
-                        throw new ServiceException("warehouse.stock.not.enough");
+//                        throw new ServiceException("warehouse.stock.not.enough");
+                        throw new InvalidException("small.then.refund.quantity", materialHandle.getMaterialName(), alreadyRefundQuantity);
 
                     doctorWarehouseStockManager.in(detail.getMaterialId(), changedQuantity.negate(), wareHouse);
                 }
