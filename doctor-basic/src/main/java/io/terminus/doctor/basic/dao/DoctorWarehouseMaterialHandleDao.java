@@ -120,10 +120,10 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     }
 
     public void updates(List<DoctorWarehouseMaterialHandle> materialHandles) {
-//        materialHandles.forEach(m -> {
-//            this.update(m);
-//        });
-        this.sqlSession.update(this.sqlId("updates"), materialHandles);
+        materialHandles.forEach(m -> {
+            this.update(m);
+        });
+//        this.sqlSession.update(this.sqlId("updates"), materialHandles);
     }
 
     /**
