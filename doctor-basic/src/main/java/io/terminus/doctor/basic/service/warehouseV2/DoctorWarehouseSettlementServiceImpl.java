@@ -136,6 +136,8 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                 settlementMaterialHandles.put(materialHandle.getId(), materialHandle);
             }
 
+            doctorWarehouseMaterialHandleDao.updates(materialHandles);
+
             //统计各个仓库下各个物料余额和余量
             farmIds.stream().forEach(f -> {
                 doctorWareHouseDao.findByFarmId(f).forEach(wareHouse -> {
@@ -290,7 +292,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
         }
 
         materialHandle.setAmount(materialHandle.getUnitPrice().multiply(materialHandle.getQuantity()));
-        doctorWarehouseMaterialHandleDao.update(materialHandle);
+//        doctorWarehouseMaterialHandleDao.update(materialHandle);
         return new AmountAndQuantityDto(historyStockAmount, historyStockQuantity);
     }
 

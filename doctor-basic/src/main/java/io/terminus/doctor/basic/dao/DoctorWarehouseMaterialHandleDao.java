@@ -119,6 +119,12 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectOne(this.sqlId("countHistoryStock"), criteria);
     }
 
+    public void updates(List<DoctorWarehouseMaterialHandle> materialHandles) {
+        materialHandles.forEach(m -> {
+            this.update(m);
+        });
+    }
+
     /**
      * 获取会计年月内的明细单据
      *
