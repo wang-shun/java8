@@ -1,5 +1,7 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
+import ch.qos.logback.core.util.TimeUtil;
+import com.google.common.base.Stopwatch;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
@@ -27,6 +29,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
@@ -114,6 +117,9 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             //已结算的单据明细
             Map<Long/*materialHandleId*/, DoctorWarehouseMaterialHandle> settlementMaterialHandles = new HashMap<>();
 
+
+            Stopwatch stopwatch = Stopwatch.createStarted();
+
             List<DoctorWarehouseMaterialHandle> materialHandles = doctorWarehouseMaterialHandleDao.findByOrgAndSettlementDate(orgId, settlementDate);
             for (DoctorWarehouseMaterialHandle materialHandle : materialHandles) {
 
@@ -136,7 +142,11 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                 settlementMaterialHandles.put(materialHandle.getId(), materialHandle);
             }
 
+            log.info("calc material handle unit price and amount under org {} use :{}ms ", orgId, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+
             doctorWarehouseMaterialHandleDao.updates(materialHandles);
+
+            log.info("update material handle unit price and amount under org {} use :{}ms", orgId, stopwatch.elapsed(TimeUnit.MILLISECONDS));
 
             //统计各个仓库下各个物料余额和余量
             farmIds.stream().forEach(f -> {
@@ -173,6 +183,8 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                     });
                 });
             });
+
+            log.info("update or create stock monthly balance under org {} use :{}ms", orgId, stopwatch.elapsed(TimeUnit.MILLISECONDS));
 
             DoctorWarehouseOrgSettlement settlement = doctorWarehouseOrgSettlementDao.findByOrg(orgId);
             if (null == settlement) {
