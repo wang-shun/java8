@@ -531,7 +531,7 @@
             select '' as pig_barn_id,
             '合计' as pig_barn_name,
             '' as pig_type,
-
+            '' as staff_name,
             '' as settlement_year,
             '' as settlement_month,
             '' as material_code,
