@@ -44,10 +44,10 @@ public class WarehouseOutManager extends AbstractStockManager<WarehouseStockOutD
 
             //获取该笔明细之前的库存量，包括该事件日期
             BigDecimal historyQuantity = getHistoryQuantityInclude(stockDto.getHandleDate().getTime(), wareHouse.getId(), detail.getMaterialId());
-            
+
             if (historyQuantity.compareTo(materialHandle.getQuantity()) < 0) {
 //                throw new ServiceException("warehouse.stock.not.enough");
-                throw new InvalidException("stock.not.enough.no.unit", materialHandle.getWarehouseName(), materialHandle.getMaterialName(), historyQuantity);
+                throw new InvalidException("history.stock.not.enough.no.unit", materialHandle.getWarehouseName(), materialHandle.getMaterialName(), historyQuantity);
             }
 
             materialHandle.setHandleDate(this.buildNewHandleDate(stockDto.getHandleDate()).getTime());

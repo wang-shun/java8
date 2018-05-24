@@ -56,7 +56,7 @@ public class WarehouseReturnManager extends AbstractStockManager<WarehouseStockR
 
         details.forEach(d -> {
             if (!outMaterialHandleMap.containsKey(d.getMaterialId()))
-                throw new ServiceException("material.not.allow.refund");
+                throw new InvalidException("material.not.allow.refund", d.getMaterialId());
 
             if (d.getApplyBarnId() == null && d.getApplyGroupId() == null)
                 throw new ServiceException("apply.barn.or.apply.group.not.null");

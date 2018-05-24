@@ -89,7 +89,7 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
             if (WarehouseMaterialHandleType.isBigOut(doctorWarehouseMaterialHandle.getType())
                     && historyQuantity.compareTo(doctorWarehouseMaterialHandle.getQuantity()) < 0)
 //                throw new ServiceException("warehouse.stock.not.enough");
-                throw new InvalidException("stock.not.enough.no.unit", doctorWarehouseMaterialHandle.getWarehouseName(), doctorWarehouseMaterialHandle.getMaterialName(), historyQuantity);
+                throw new InvalidException("history.stock.not.enough.no.unit", doctorWarehouseMaterialHandle.getWarehouseName(), doctorWarehouseMaterialHandle.getMaterialName(), historyQuantity);
 
 
             log.debug("set {} before stock quantity:{}", doctorWarehouseMaterialHandle.getId(), historyQuantity);
