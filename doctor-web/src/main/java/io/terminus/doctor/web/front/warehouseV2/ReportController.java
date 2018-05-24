@@ -709,11 +709,15 @@ public class ReportController {
 //        System.out.println(new BigDecimal(1000000000.00d).setScale(4, BigDecimal.ROUND_HALF_UP));
 //    }
 
+    @RpcConsumer
+    private DoctorWarehouseSettlementService doctorWarehouseSettlementService;
+
     /**
      * 物料变动报表
      */
     @RequestMapping(method = RequestMethod.GET, value = "/wlbdReport")
     public List<Map<String,Object>> wlbdReport(
+            Long orgId,
             Long farmId,
             String settlementDate,
             Integer pigBarnType,
@@ -738,6 +742,17 @@ public class ReportController {
         if(ObjectUtils.isEmpty(warehouseId))
         {
             throw new JsonResponseException("stock.warehouseId.null");
+        }
+
+        boolean byjsflag = false; //默认没结算
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM");
+        try {
+            Date ddate = simpleDateFormat.parse(settlementDate);
+            if (doctorWarehouseSettlementService.isSettled(orgId, ddate)) {
+                byjsflag = true; //表示已经结算了
+            }
+        } catch (Exception e){
+
         }
 
         // 最终结果集数据集合
@@ -787,11 +802,19 @@ public class ReportController {
                     lastMap.put("rkdj","");
                     lastMap.put("rkje","");
                     lastMap.put("cksl","");
-                    lastMap.put("ckdj","");
-                    lastMap.put("ckje","");
+                    if(byjsflag) {
+                        lastMap.put("ckdj", "");
+                        lastMap.put("ckje", "");
+                    }else{ //结算前
+                        lastMap.put("ckdj", "--");
+                        lastMap.put("ckje", "--");
+                    }
                     lastMap.put("jcsl","");
-                    lastMap.put("jcdj","");
-                    lastMap.put("jcje","");
+                    if(byjsflag) {
+                        lastMap.put("jcdj", "");
+                        lastMap.put("jcje", "");
+
+                    }
                     lastMap.put("pig_barn_name","");
                     lastMap.put("pig_type","");
                     lastMap.put("pig_group_name","");
@@ -801,6 +824,26 @@ public class ReportController {
                     lastMap.put("provider_name","");
                     lastMap.put("specification","");
                 } else {
+                    Object lckdj = lastMap.get("ckdj");
+                    Object lckje = lastMap.get("ckje");
+                    if(byjsflag) {
+                        if (isNull(lckdj)) {
+                            lastMap.put("ckdj", "");
+                        } else {
+                            lastMap.put("ckdj",
+                                    new BigDecimal(Double.parseDouble(lckdj.toString())).setScale(4, BigDecimal.ROUND_DOWN));
+                        }
+                        if (isNull(lckje)) {
+                            lastMap.put("ckje", "");
+                        } else {
+                            lastMap.put("ckje",
+                                    new BigDecimal(Double.parseDouble(lckje.toString())).setScale(2, BigDecimal.ROUND_DOWN));
+                        }
+                    } else { //结算前
+                        lastMap.put("ckdj", "--");
+                        lastMap.put("ckje", "--");
+                    }
+
                     Object ljcsl = lastMap.get("jcsl");
                     Object ljcdj = lastMap.get("jcdj");
                     Object ljcje = lastMap.get("jcje");
@@ -808,19 +851,25 @@ public class ReportController {
                         lastMap.put("jcsl","");
                     } else {
                         lastMap.put("jcsl",
-                                new BigDecimal(Double.parseDouble(ljcsl.toString())).setScale(2, BigDecimal.ROUND_HALF_UP));
+                                new BigDecimal(Double.parseDouble(ljcsl.toString())).setScale(3, BigDecimal.ROUND_DOWN));
                     }
-                    if(isNull(ljcdj)){
-                        lastMap.put("jcdj","");
-                    } else {
-                        lastMap.put("jcdj",
-                                new BigDecimal(Double.parseDouble(ljcdj.toString())).setScale(4, BigDecimal.ROUND_HALF_UP));
-                    }
-                    if(isNull(ljcje)){
-                        lastMap.put("jcje","");
-                    } else {
-                        lastMap.put("jcje",
-                                new BigDecimal(Double.parseDouble(ljcje.toString())).setScale(4, BigDecimal.ROUND_HALF_UP));
+                    if(byjsflag) {
+                        if (isNull(ljcdj)) {
+                            lastMap.put("jcdj", "");
+                        } else {
+                            lastMap.put("jcdj",
+
+                                    new BigDecimal(Double.parseDouble(ljcdj.toString())).setScale(4, BigDecimal.ROUND_HALF_UP));
+
+                        }
+                        if (isNull(ljcje)) {
+                            lastMap.put("jcje", "");
+                        } else {
+                            lastMap.put("jcje",
+
+                                    new BigDecimal(Double.parseDouble(ljcje.toString())).setScale(4, BigDecimal.ROUND_HALF_UP));
+                        }
+
                     }
                 }
                 resultNewMap.add(lastMap);
@@ -847,9 +896,9 @@ public class ReportController {
                     BigDecimal thisMonthTotalJcje = new BigDecimal(0d);
 
                     // 上月结存数据、金额
-                    BigDecimal lastMonthTotalJcsl = isNull(lastMap.get("jcsl")) ? new BigDecimal(0d) :
+                    BigDecimal lastMonthTotalJcsl = isNull(lastMap.get("jcsl")) || "--".equals(lastMap.get("jcsl").toString()) ? new BigDecimal(0d) :
                             new BigDecimal(Double.parseDouble(lastMap.get("jcsl").toString()));
-                    BigDecimal lastMonthTotalJcje = isNull(lastMap.get("jcje")) ? new BigDecimal(0d) :
+                    BigDecimal lastMonthTotalJcje = isNull(lastMap.get("jcje")) || "--".equals(lastMap.get("jcje").toString()) ? new BigDecimal(0d) :
                             new BigDecimal(Double.parseDouble(lastMap.get("jcje").toString()));
 
                     // 临时变量
@@ -917,6 +966,15 @@ public class ReportController {
                         BigDecimal drkje = isNull(rkje) ? new BigDecimal(0d) :  new BigDecimal(rkje.toString());
                         BigDecimal dcksl = isNull(cksl) ? new BigDecimal(0d) :  new BigDecimal(cksl.toString());
                         BigDecimal dckje = isNull(ckje) ? new BigDecimal(0d) :  new BigDecimal(ckje.toString());
+                        tempmap.put("rksl",isNull(rksl) ? "" :  new BigDecimal(rksl.toString()).setScale(3, BigDecimal.ROUND_DOWN));
+                        tempmap.put("cksl",isNull(cksl) ? "" :  new BigDecimal(cksl.toString()).setScale(3, BigDecimal.ROUND_DOWN));
+                        tempmap.put("rkje",isNull(rkje) ? "" :  new BigDecimal(rkje.toString()).setScale(2, BigDecimal.ROUND_DOWN));
+
+                        if(byjsflag) {
+                            tempmap.put("ckje", isNull(ckje) ? "" : new BigDecimal(ckje.toString()).setScale(2, BigDecimal.ROUND_DOWN));
+                        } else {
+                            tempmap.put("ckje","--");
+                        }
 
                         thisMonthTotalRksl.add(drksl); //入库数量累加
                         thisMonthTotalRkje.add(drkje); //入库金额累加
@@ -924,16 +982,24 @@ public class ReportController {
                         if(drksl.compareTo(BigDecimal.ZERO) == 0 || drkje.compareTo(BigDecimal.ZERO) == 0){
                             tempmap.put("rkdj","");
                         } else {
-                            tempmap.put("rkdj", drkje.divide(drksl, 4, RoundingMode.HALF_UP));
+                            tempmap.put("rkdj", drkje.divide(drksl, 4, BigDecimal.ROUND_DOWN));
                         }
 
                         thisMonthTotalCksl.add(dcksl); //出库数量累加
                         thisMonthTotalCkje.add(dckje); //出库金额累加
 
                         if(dcksl.compareTo(BigDecimal.ZERO) == 0 || dckje.compareTo(BigDecimal.ZERO) == 0){
-                            tempmap.put("ckdj","");
+                            if(byjsflag) {
+                                tempmap.put("ckdj", "");
+                            }else{
+                                tempmap.put("ckdj", "--");
+                            }
                         } else {
-                            tempmap.put("ckdj", dckje.divide(dcksl, 4, RoundingMode.HALF_UP));
+                            if(byjsflag) {
+                                tempmap.put("ckdj", dckje.divide(dcksl, 4, BigDecimal.ROUND_DOWN));
+                            }else {
+                                tempmap.put("ckdj", "--");
+                            }
                         }
 
                         BigDecimal singleJcsl = new BigDecimal(0d);
@@ -960,14 +1026,20 @@ public class ReportController {
                         }
 
                         tempmap.put("jcsl",singleJcsl.compareTo(BigDecimal.ZERO) == 0 ? "" :
-                                singleJcsl.setScale(2, BigDecimal.ROUND_HALF_UP)); //单笔记录的结存数量
-                        tempmap.put("jcje",singleJcje.compareTo(BigDecimal.ZERO) == 0 ? "" :
-                                        singleJcje.setScale(4, BigDecimal.ROUND_HALF_UP)); //单笔记录的结存金额
 
-                        if(singleJcsl.compareTo(BigDecimal.ZERO) == 0 || singleJcje.compareTo(BigDecimal.ZERO) == 0){
-                            tempmap.put("jcdj","");
-                        } else {
-                            tempmap.put("jcdj", singleJcje.divide(singleJcsl, 4, RoundingMode.HALF_UP));
+                                singleJcsl.setScale(2, BigDecimal.ROUND_HALF_UP)); //单笔记录的结存数量
+                        if(byjsflag) {
+                            tempmap.put("jcje", singleJcje.compareTo(BigDecimal.ZERO) == 0 ? "" :
+                                    singleJcje.setScale(4, BigDecimal.ROUND_HALF_UP)); //单笔记录的结存金额
+
+                        }
+                        if(byjsflag) {
+                            if (singleJcsl.compareTo(BigDecimal.ZERO) == 0 || singleJcje.compareTo(BigDecimal.ZERO) == 0) {
+                                tempmap.put("jcdj", "");
+                            } else {
+
+                                tempmap.put("jcdj", singleJcje.divide(singleJcsl, 4, RoundingMode.HALF_UP));
+                            }
                         }
                         resultNewMap.add(tempmap);
                         tempsinglejcsl = singleJcsl;
@@ -987,24 +1059,35 @@ public class ReportController {
                     thisMap.put("settlement_date","");
                     thisMap.put("handler_type","");
                     thisMap.put("rksl",thisMonthTotalRksl.compareTo(BigDecimal.ZERO) == 0
-                                        ? "" : thisMonthTotalRksl.setScale(2, BigDecimal.ROUND_HALF_UP));
+                                        ? "" : thisMonthTotalRksl.setScale(3, BigDecimal.ROUND_DOWN));
                     thisMap.put("rkdj",thisMonthTotalRksl.compareTo(BigDecimal.ZERO) == 0 || thisMonthTotalRkje.compareTo(BigDecimal.ZERO) == 0
-                                        ? "" : thisMonthTotalRkje.divide(thisMonthTotalRksl, 4, RoundingMode.HALF_UP));
+                                        ? "" : thisMonthTotalRkje.divide(thisMonthTotalRksl, 4, BigDecimal.ROUND_DOWN));
                     thisMap.put("rkje",thisMonthTotalRkje.compareTo(BigDecimal.ZERO) == 0
-                                    ? "" : thisMonthTotalRkje.setScale(4, BigDecimal.ROUND_HALF_UP));
-                    thisMap.put("cksl",thisMonthTotalCksl.compareTo(BigDecimal.ZERO) == 0
-                            ? "" : translateNum(thisMonthTotalCksl + "",2));
-                    thisMap.put("ckdj",thisMonthTotalCksl.compareTo(BigDecimal.ZERO) == 0
-                            || thisMonthTotalCkje.compareTo(BigDecimal.ZERO) == 0 ? "":
-                            thisMonthTotalCkje.divide(thisMonthTotalCksl, 4, RoundingMode.HALF_UP));
-                    thisMap.put("ckje", thisMonthTotalCkje.compareTo(BigDecimal.ZERO) == 0 ? "" :
-                           thisMonthTotalCkje.setScale(4, BigDecimal.ROUND_HALF_UP));
+                                    ? "" : thisMonthTotalRkje.setScale(2, BigDecimal.ROUND_DOWN));
+                    thisMap.put("cksl",
+                            thisMonthTotalCksl.compareTo(BigDecimal.ZERO) == 0
+                                    ? "" : thisMonthTotalCksl.setScale(3, BigDecimal.ROUND_DOWN));
+                    if(byjsflag) {
+                        thisMap.put("ckdj", thisMonthTotalCksl.compareTo(BigDecimal.ZERO) == 0
+                                || thisMonthTotalCkje.compareTo(BigDecimal.ZERO) == 0 ? "" :
+                                thisMonthTotalCkje.divide(thisMonthTotalCksl, 4, BigDecimal.ROUND_DOWN));
+                        thisMap.put("ckje", thisMonthTotalCkje.compareTo(BigDecimal.ZERO) == 0 ? "" :
+                                thisMonthTotalCkje.setScale(2, BigDecimal.ROUND_DOWN));
+                    }
+                    else {
+                        thisMap.put("ckdj","--");
+                        thisMap.put("ckje","--");
+                    }
+
                     thisMap.put("jcsl", thisMonthTotalJcsl.compareTo(BigDecimal.ZERO) == 0 ? "" :
                             thisMonthTotalJcsl.setScale(2, BigDecimal.ROUND_HALF_UP));
-                    thisMap.put("jcdj",thisMonthTotalJcsl.compareTo(BigDecimal.ZERO) == 0 || thisMonthTotalJcje.compareTo(BigDecimal.ZERO) == 0 ? "":
-                                    thisMonthTotalJcje.divide(thisMonthTotalJcsl, 4, RoundingMode.HALF_UP));
-                    thisMap.put("jcje",thisMonthTotalJcje.compareTo(BigDecimal.ZERO) == 0 ? "" :
-                            thisMonthTotalJcje.setScale(4, BigDecimal.ROUND_HALF_UP));
+                    if(byjsflag) {
+                        thisMap.put("jcdj", thisMonthTotalJcsl.compareTo(BigDecimal.ZERO) == 0 || thisMonthTotalJcje.compareTo(BigDecimal.ZERO) == 0 ? "" :
+                                thisMonthTotalJcje.divide(thisMonthTotalJcsl, 4, RoundingMode.HALF_UP));
+                        thisMap.put("jcje", thisMonthTotalJcje.compareTo(BigDecimal.ZERO) == 0 ? "" :
+                                thisMonthTotalJcje.setScale(4, BigDecimal.ROUND_HALF_UP));
+                    }
+
                     thisMap.put("pig_barn_name","");
                     thisMap.put("pig_type","");
                     thisMap.put("pig_group_name","");
@@ -1132,6 +1215,7 @@ public class ReportController {
     //导出
     @RequestMapping(method = RequestMethod.GET, value = "/wlbdReport/export")
     public void exportWlbdReport(
+            Long orgId,
             Long farmId,
             String settlementDate,
             Integer pigBarnType,
@@ -1146,12 +1230,39 @@ public class ReportController {
         //开始导出
         try {
 
+            if(ObjectUtils.isEmpty(farmId))
+            {
+                throw new JsonResponseException("stock.farmId.null");
+            }
+
+            if(ObjectUtils.isEmpty(settlementDate))
+            {
+                throw new JsonResponseException("stock.settlementDate.null");
+            }
+
+            if(ObjectUtils.isEmpty(warehouseId))
+            {
+                throw new JsonResponseException("stock.warehouseId.null");
+            }
+
             DoctorFarm farm = doctorFarmReadService.findFarmById(farmId).getResult();
-            if (null == farm)
+            if (null == farm) {
                 throw new JsonResponseException("farm.not.found");
+            }
 
             String farmName = farm.getName();
             String fileName = "物料变动报表" + new Date().getTime();
+
+            boolean byjsflag = false; //默认没结算
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM");
+            try {
+                Date ddate = simpleDateFormat.parse(settlementDate);
+                if (doctorWarehouseSettlementService.isSettled(orgId, ddate)) {
+                    byjsflag = true; //表示已经结算了
+                }
+            } catch (Exception e){
+
+            }
 
             //导出名称
             exporter.setHttpServletResponse(request, response, fileName);
@@ -1228,32 +1339,38 @@ public class ReportController {
                 titleCell = titleRow.createCell(12);
                 titleCell.setCellValue("结存");
                 titleCell.setCellStyle(titleCellStyle);
-                titleCell = titleRow.createCell(13);
-                titleCell = titleRow.createCell(14);
-                titleCell = titleRow.createCell(15);
+
+                if(byjsflag) {
+                    titleCell = titleRow.createCell(13);
+                    titleCell = titleRow.createCell(14);
+                }
+                int vb = byjsflag ? 15 : 13;
+
+                titleCell = titleRow.createCell(vb);
                 titleCell.setCellValue("猪舍名称");
                 titleCell.setCellStyle(titleCellStyle);
-                titleCell = titleRow.createCell(16);
+                titleCell = titleRow.createCell(vb + 1);
                 titleCell.setCellValue("猪舍类型");
                 titleCell.setCellStyle(titleCellStyle);
-                titleCell = titleRow.createCell(17);
+                titleCell = titleRow.createCell(vb + 2);
                 titleCell.setCellValue("猪群名称");
                 titleCell.setCellStyle(titleCellStyle);
-                titleCell = titleRow.createCell(18);
+                titleCell = titleRow.createCell(vb + 3);
                 titleCell.setCellValue("饲养员");
                 titleCell.setCellStyle(titleCellStyle);
-                titleCell = titleRow.createCell(19);
+                titleCell = titleRow.createCell(vb + 4);
                 titleCell.setCellValue("猪场名称");
                 titleCell.setCellStyle(titleCellStyle);
-                titleCell = titleRow.createCell(20);
+                titleCell = titleRow.createCell(vb + 5);
                 titleCell.setCellValue("单位");
                 titleCell.setCellStyle(titleCellStyle);
-                titleCell = titleRow.createCell(21);
+                titleCell = titleRow.createCell(vb + 6);
                 titleCell.setCellValue("厂家");
                 titleCell.setCellStyle(titleCellStyle);
-                titleCell = titleRow.createCell(22);
+                titleCell = titleRow.createCell(vb + 7);
                 titleCell.setCellValue("规格");
                 titleCell.setCellStyle(titleCellStyle);
+
                 titleRow =  sheet.createRow(1);
                 titleCell = titleRow.createCell(0);
                 titleCell = titleRow.createCell(1);
@@ -1282,20 +1399,26 @@ public class ReportController {
                 titleCell = titleRow.createCell(12);
                 titleCell.setCellValue("数量");
                 titleCell.setCellStyle(titleCellStyle);
-                titleCell = titleRow.createCell(13);
-                titleCell.setCellValue("单价");
-                titleCell.setCellStyle(titleCellStyle);
-                titleCell = titleRow.createCell(14);
-                titleCell.setCellValue("金额");
-                titleCell.setCellStyle(titleCellStyle);
-                titleCell = titleRow.createCell(15);
-                titleCell = titleRow.createCell(16);
-                titleCell = titleRow.createCell(17);
-                titleCell = titleRow.createCell(18);
-                titleCell = titleRow.createCell(19);
-                titleCell = titleRow.createCell(20);
-                titleCell = titleRow.createCell(21);
-                titleCell = titleRow.createCell(22);
+
+
+                if(byjsflag) {
+                    titleCell = titleRow.createCell(13);
+                    titleCell.setCellValue("单价");
+                    titleCell.setCellStyle(titleCellStyle);
+                    titleCell = titleRow.createCell(14);
+                    titleCell.setCellValue("金额");
+                    titleCell.setCellStyle(titleCellStyle);
+                }
+                int vh = byjsflag ? 15 : 13;
+
+                titleCell = titleRow.createCell(vh);
+                titleCell = titleRow.createCell(vh + 1);
+                titleCell = titleRow.createCell(vh + 2);
+                titleCell = titleRow.createCell(vh + 3);
+                titleCell = titleRow.createCell(vh + 4);
+                titleCell = titleRow.createCell(vh + 5);
+                titleCell = titleRow.createCell(vh + 6);
+                titleCell = titleRow.createCell(vh + 7);
 
                 int fis = 0;
                 int sec = 1;
@@ -1309,15 +1432,22 @@ public class ReportController {
                 sheet.addMergedRegion(cra);
                 cra = new CellRangeAddress(fis, fis, 9, 11);
                 sheet.addMergedRegion(cra);
-                cra = new CellRangeAddress(fis, fis, 12, 14);
-                sheet.addMergedRegion(cra);
 
-                for(int i=15;i <= 22;i++){
+
+                if(byjsflag) {
+                    cra = new CellRangeAddress(fis, fis, 12, 14);
+                    sheet.addMergedRegion(cra);
+                }
+
+                int vg = byjsflag ? 15 : 13;
+
+                int ebvy = vg + 7;
+                for(int i = vg;i <= ebvy;i++){
                     cra = new CellRangeAddress(fis, sec, i, i);
                     sheet.addMergedRegion(cra);
                 }
 
-                List<Map<String,Object>> exportVos = wlbdReport(farmId,settlementDate,pigBarnType,
+                List<Map<String,Object>> exportVos = wlbdReport(orgId,farmId,settlementDate,pigBarnType,
                         pigBarnId,pigGroupId,handlerType,
                         type,warehouseId,materialName);
 
@@ -1339,7 +1469,8 @@ public class ReportController {
                                     dataCell.setCellValue(tName);
                                     dataCell.setCellStyle(leftCellStyle);
                                 }
-                                if ((i > 0 && i < 12) || (i > 14 && i <= 22)) {
+
+                                if ((i > 0 && i < 12) || (i > (vg - 1)  && i <= ebvy)) {
                                     dataCell = dataRow.createCell(i);
                                 }
 
@@ -1347,41 +1478,44 @@ public class ReportController {
                                     dataCell = dataRow.createCell(i);
                                     dataCell.setCellValue(
                                             isNull(map.get("jcsl"))
-                                                    ? "" : (new BigDecimal(map.get("jcsl").toString())
-                                                        .setScale(2, BigDecimal.ROUND_HALF_UP)).toString());
+                                                    ? "" : map.get("jcsl").toString());
                                     dataCell.setCellStyle(normalCellStyle);
                                     dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
                                 }
 
-                                if (i == 13) {
-                                    dataCell = dataRow.createCell(i);
-                                    dataCell.setCellValue(
-                                            isNull(map.get("jcdj"))
-                                                    ? "" : (new BigDecimal(map.get("jcdj").toString())
-                                            .setScale(4, BigDecimal.ROUND_HALF_UP)).toString());
-                                    dataCell.setCellStyle(normalCellStyle);
-                                    dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
+
+                                if(byjsflag) {
+                                    if (i == 13) {
+                                        dataCell = dataRow.createCell(i);
+                                        dataCell.setCellValue(
+                                                isNull(map.get("jcdj"))
+                                                        ? "" : (new BigDecimal(map.get("jcdj").toString())
+                                                        .setScale(4, BigDecimal.ROUND_HALF_UP)).toString());
+                                        dataCell.setCellStyle(normalCellStyle);
+                                        dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
+                                    }
+
+                                    if (i == 14) {
+                                        dataCell = dataRow.createCell(i);
+                                        dataCell.setCellValue(
+                                                isNull(map.get("jcje"))
+                                                        ? "" : (new BigDecimal(map.get("jcje").toString())
+                                                        .setScale(4, BigDecimal.ROUND_HALF_UP)).toString());
+                                        dataCell.setCellStyle(normalCellStyle);
+                                        dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
+                                    }
                                 }
 
-                                if (i == 14) {
-                                    dataCell = dataRow.createCell(i);
-                                    dataCell.setCellValue(
-                                            isNull(map.get("jcje"))
-                                                    ? "" : (new BigDecimal(map.get("jcje").toString())
-                                                    .setScale(4, BigDecimal.ROUND_HALF_UP)).toString());
-                                    dataCell.setCellStyle(normalCellStyle);
-                                    dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
-                                }
                             }
 
                             //合并单元格
                             cra = new CellRangeAddress(startRowIndex, startRowIndex, 0, 11);
                             sheet.addMergedRegion(cra);
-                            cra = new CellRangeAddress(startRowIndex, startRowIndex, 15, 22);
+                            cra = new CellRangeAddress(startRowIndex, startRowIndex, vg, ebvy);
                             sheet.addMergedRegion(cra);
                         } else if ("本月结存".equals(tName)) {
                             dataRow = sheet.createRow(startRowIndex);
-                            for (int i = 0; i <= 22; i++) {
+                            for (int i = 0; i <= ebvy; i++) {
 
                                 if (i == 0) {
                                     dataCell = dataRow.createCell(i);
@@ -1389,7 +1523,8 @@ public class ReportController {
                                     dataCell.setCellStyle(leftCellStyle);
                                 }
 
-                                if ((i > 0 && i < 6) || (i > 14 && i <= 22)) {
+
+                                if ((i > 0 && i < 6) || (i > (vg-1) && i <= ebvy)) {
                                     dataCell = dataRow.createCell(i);
                                 }
 
@@ -1456,29 +1591,32 @@ public class ReportController {
                                     dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
                                 }
 
-                                if (i == 13) {
-                                    dataCell = dataRow.createCell(i);
-                                    dataCell.setCellValue(
-                                            isNull(map.get("jcdj"))
-                                                    ? "" : map.get("jcdj").toString());
-                                    dataCell.setCellStyle(normalCellStyle);
-                                    dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
+                                if(byjsflag) {
+                                    if (i == 13) {
+                                        dataCell = dataRow.createCell(i);
+                                        dataCell.setCellValue(
+                                                isNull(map.get("jcdj"))
+                                                        ? "" : map.get("jcdj").toString());
+                                        dataCell.setCellStyle(normalCellStyle);
+                                        dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
+                                    }
+
+                                    if (i == 14) {
+                                        dataCell = dataRow.createCell(i);
+                                        dataCell.setCellValue(
+                                                isNull(map.get("jcje"))
+                                                        ? "" : map.get("jcje").toString());
+                                        dataCell.setCellStyle(normalCellStyle);
+                                        dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
+                                    }
                                 }
 
-                                if (i == 14) {
-                                    dataCell = dataRow.createCell(i);
-                                    dataCell.setCellValue(
-                                            isNull(map.get("jcje"))
-                                                    ? "" : map.get("jcje").toString());
-                                    dataCell.setCellStyle(normalCellStyle);
-                                    dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
-                                }
                             }
 
                             //合并单元格
                             cra = new CellRangeAddress(startRowIndex, startRowIndex, 0, 5);
                             sheet.addMergedRegion(cra);
-                            cra = new CellRangeAddress(startRowIndex, startRowIndex, 15, 22);
+                            cra = new CellRangeAddress(startRowIndex, startRowIndex, vg, ebvy);
                             sheet.addMergedRegion(cra);
                         } else {
                             // 写入表数据
@@ -1579,8 +1717,7 @@ public class ReportController {
                             dataCell = dataRow.createCell(6);
                             dataCell.setCellValue(
                                     isNull(map.get("rksl"))
-                                            ? "" : (new BigDecimal(map.get("rksl").toString())
-                                                    .setScale(2, BigDecimal.ROUND_HALF_UP)).toString());
+                                            ? "" : map.get("rksl").toString());
                             dataCell.setCellStyle(normalCellStyle);
                             dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
 
@@ -1594,16 +1731,14 @@ public class ReportController {
                             dataCell = dataRow.createCell(8);
                             dataCell.setCellValue(
                                     isNull(map.get("rkje"))
-                                            ? "" : (new BigDecimal(map.get("rkje").toString())
-                                            .setScale(4, BigDecimal.ROUND_HALF_UP)).toString());
+                                            ? "" : map.get("rkje").toString());
                             dataCell.setCellStyle(normalCellStyle);
                             dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
 
                             dataCell = dataRow.createCell(9);
                             dataCell.setCellValue(
                                     isNull(map.get("cksl"))
-                                            ? "" : (new BigDecimal(map.get("cksl").toString())
-                                            .setScale(2, BigDecimal.ROUND_HALF_UP)).toString());
+                                            ? "" : map.get("cksl").toString());
                             dataCell.setCellStyle(normalCellStyle);
                             dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
 
@@ -1617,8 +1752,7 @@ public class ReportController {
                             dataCell = dataRow.createCell(11);
                             dataCell.setCellValue(
                                     isNull(map.get("ckje"))
-                                            ? "" : (new BigDecimal(map.get("ckje").toString())
-                                            .setScale(4, BigDecimal.ROUND_HALF_UP)).toString());
+                                            ? "" : map.get("ckje").toString());
                             dataCell.setCellStyle(normalCellStyle);
                             dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
 
@@ -1629,28 +1763,30 @@ public class ReportController {
                             dataCell.setCellStyle(normalCellStyle);
                             dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
 
-                            dataCell = dataRow.createCell(13);
-                            dataCell.setCellValue(
-                                    isNull(map.get("jcdj"))
-                                            ? "" : map.get("jcdj").toString());
-                            dataCell.setCellStyle(normalCellStyle);
-                            dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
+                            if(byjsflag) {
+                                dataCell = dataRow.createCell(13);
+                                dataCell.setCellValue(
+                                        isNull(map.get("jcdj"))
+                                                ? "" : map.get("jcdj").toString());
+                                dataCell.setCellStyle(normalCellStyle);
+                                dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
 
-                            dataCell = dataRow.createCell(14);
-                            dataCell.setCellValue(
-                                    isNull(map.get("jcje"))
-                                            ? "" : map.get("jcje").toString());
-                            dataCell.setCellStyle(normalCellStyle);
-                            dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
+                                dataCell = dataRow.createCell(14);
+                                dataCell.setCellValue(
+                                        isNull(map.get("jcje"))
+                                                ? "" : map.get("jcje").toString());
+                                dataCell.setCellStyle(normalCellStyle);
+                                dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
+                            }
 
-                            dataCell = dataRow.createCell(15);
+                            dataCell = dataRow.createCell(vg);
                             String pig_barn_name = String.valueOf(map.get("pig_barn_name"));
                             pig_barn_name = null == pig_barn_name || "".equals(pig_barn_name.trim()) || "null".equals(pig_barn_name.trim().toLowerCase()) ? "" : pig_barn_name.trim();
                             dataCell.setCellValue(pig_barn_name);
                             dataCell.setCellStyle(normalCellStyle);
                             dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
 
-                            dataCell = dataRow.createCell(16);
+                            dataCell = dataRow.createCell(vg + 1);
                             String pig_type = String.valueOf(map.get("pig_type"));
                             pig_type = null == pig_type || "".equals(pig_type.trim()) || "null".equals(pig_type.trim().toLowerCase()) ? "" : pig_type.trim();
                             switch (pig_type) {
@@ -1682,42 +1818,42 @@ public class ReportController {
                             dataCell.setCellStyle(normalCellStyle);
                             dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
 
-                            dataCell = dataRow.createCell(17);
+                            dataCell = dataRow.createCell(vg + 2);
                             String pig_group_name = String.valueOf(map.get("pig_group_name"));
                             pig_group_name = null == pig_group_name || "".equals(pig_group_name.trim()) || "null".equals(pig_group_name.trim().toLowerCase()) ? "" : pig_group_name.trim();
                             dataCell.setCellValue(pig_group_name);
                             dataCell.setCellStyle(normalCellStyle);
                             dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
 
-                            dataCell = dataRow.createCell(18);
+                            dataCell = dataRow.createCell(vg + 3);
                             String apply_staff_name = String.valueOf(map.get("apply_staff_name"));
                             apply_staff_name = null == apply_staff_name || "".equals(apply_staff_name.trim()) || "null".equals(apply_staff_name.trim().toLowerCase()) ? "" : apply_staff_name.trim();
                             dataCell.setCellValue(apply_staff_name);
                             dataCell.setCellStyle(normalCellStyle);
                             dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
 
-                            dataCell = dataRow.createCell(19);
+                            dataCell = dataRow.createCell(vg + 4);
                             String farm_name = String.valueOf(map.get("farm_name"));
                             farm_name = null == farm_name || "".equals(farm_name.trim()) || "null".equals(farm_name.trim().toLowerCase()) ? "" : farm_name.trim();
                             dataCell.setCellValue(farm_name);
                             dataCell.setCellStyle(normalCellStyle);
                             dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
 
-                            dataCell = dataRow.createCell(20);
+                            dataCell = dataRow.createCell(vg + 5);
                             String unit = String.valueOf(map.get("unit"));
                             unit = null == unit || "".equals(unit.trim()) || "null".equals(unit.trim().toLowerCase()) ? "" : unit.trim();
                             dataCell.setCellValue(unit);
                             dataCell.setCellStyle(normalCellStyle);
                             dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
 
-                            dataCell = dataRow.createCell(21);
+                            dataCell = dataRow.createCell(vg + 6);
                             String provider_name = String.valueOf(map.get("provider_name"));
                             provider_name = null == provider_name || "".equals(provider_name.trim()) || "null".equals(provider_name.trim().toLowerCase()) ? "" : provider_name.trim();
                             dataCell.setCellValue(provider_name);
                             dataCell.setCellStyle(normalCellStyle);
                             dataCell.setCellType(XSSFCell.CELL_TYPE_STRING);
 
-                            dataCell = dataRow.createCell(22);
+                            dataCell = dataRow.createCell(vg + 7);
                             String specification = String.valueOf(map.get("specification"));
                             specification = null == specification || "".equals(specification.trim()) || "null".equals(specification.trim().toLowerCase()) ? "" : specification.trim();
                             dataCell.setCellValue(specification);

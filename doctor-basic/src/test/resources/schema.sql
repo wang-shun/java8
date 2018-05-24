@@ -295,18 +295,19 @@ CREATE TABLE `doctor_warehouse_stock_handle` (
 
 CREATE TABLE `doctor_warehouse_stock_monthly` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司id',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
   `warehouse_id` bigint(20) NOT NULL COMMENT '仓库编号',
   `material_id` bigint(20) NOT NULL COMMENT '物料编号',
-  `handle_year` smallint(6) NOT NULL COMMENT '处理年',
-  `handle_month` tinyint(2) NOT NULL COMMENT '处理月',
   `balance_quantity` decimal(23,2) NOT NULL DEFAULT '0.00' COMMENT '余量',
-  `balacne_amount` bigint(20) NOT NULL DEFAULT '0' COMMENT '余额',
+  `balance_amount` decimal(23,2) NOT NULL DEFAULT '0.00' COMMENT '余额',
+  `settlement_date` date DEFAULT NULL COMMENT '会计年月',
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
-  `handle_date` date DEFAULT NULL COMMENT '处理日期',
   PRIMARY KEY (`id`),
-  KEY `warehouse_id_year_month_material_id_index` (`warehouse_id`,`handle_year`,`handle_month`,`material_id`)
-) COMMENT='仓库物料月度结余表';
+  KEY `warehouse_id_year_month_material_id_index` (`warehouse_id`,`material_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8 COMMENT='仓库物料月度结余表';
+
 
 
 CREATE TABLE `doctor_warehouse_material_apply` (

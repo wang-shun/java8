@@ -6,6 +6,7 @@ import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroup;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroupDetail;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialApplyReadService;
+import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSettlementService;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -21,6 +22,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -30,8 +34,13 @@ import java.util.Map;
 public class WarehouseMateriaApplyController {
 
    @RpcConsumer
-    private DoctorWarehouseMaterialApplyReadService doctorWarehouseMaterialApplyReadService;
-   @Autowired
+   private DoctorWarehouseMaterialApplyReadService doctorWarehouseMaterialApplyReadService;
+
+    @RpcConsumer
+    private DoctorWarehouseSettlementService doctorWarehouseSettlementService;
+
+
+    @Autowired
    private Exporter exporter;
 
     /**
@@ -42,38 +51,46 @@ public class WarehouseMateriaApplyController {
      * @param pigGroupName
      * @param skuType
      * @param skuName
-     * @param openAt
-     * @param closeAt
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "piggroup/{farmId}")
     public Map<String,Object> selectPigGroupApply(@PathVariable Integer farmId,
-                                                                               @RequestParam(required = false) String pigType,
-                                                                               @RequestParam(required = false) String pigName,
-                                                                               @RequestParam(required = false) String pigGroupName,
-                                                                               @RequestParam(required = false) Integer skuType,
-                                                                               @RequestParam(required = false) String skuName,
-                                                                               @RequestParam(required = false) String openAtStart,
-                                                                               @RequestParam(required = false) String openAtEnd,
-                                                                               @RequestParam(required = false) String closeAtStart,
-                                                                               @RequestParam(required = false) String closeAtEnd){
-        Map<String,Object> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApply(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAtStart,openAtEnd,closeAtStart,closeAtEnd));
+                                                  @RequestParam Long orgId,
+                                                  @RequestParam(required = false) String pigType,
+                                                  @RequestParam(required = false) String pigName,
+                                                  @RequestParam(required = false) String pigGroupName,
+                                                  @RequestParam(required = false) Integer skuType,
+                                                  @RequestParam(required = false) String skuName,
+                                                  @RequestParam(required = false) String openAtStart,
+                                                  @RequestParam(required = false) String openAtEnd,
+                                                  @RequestParam(required = false) String closeAtStart,
+                                                  @RequestParam(required = false) String closeAtEnd) throws ParseException {
+        Map<String,Object> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApply(orgId,farmId,pigType,pigName,pigGroupName,skuType,skuName,openAtStart,openAtEnd,closeAtStart,closeAtEnd));
         return a;
     }
+
+    /**
+     * 猪群详情
+     * @param pigGroupId
+     * @param skuId
+     * @return
+     */
     @RequestMapping(method = RequestMethod.GET, value = "piggroup/detail")
-    public List<DoctorWarehouseMaterialApplyPigGroupDetail> PigGroupApplyDetail(@RequestParam(required = true) Long pigGroupId,
-                                                  @RequestParam(required = true) Long skuId){
-        List<DoctorWarehouseMaterialApplyPigGroupDetail> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApplyDetail(pigGroupId,skuId));
+    public List<DoctorWarehouseMaterialApplyPigGroupDetail> PigGroupApplyDetail(@RequestParam Long orgId,
+                                                                                @RequestParam(required = true) Long pigGroupId,
+                                                                                @RequestParam(required = true) Long skuId){
+        List<DoctorWarehouseMaterialApplyPigGroupDetail> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApplyDetail(orgId,pigGroupId,skuId));
         return a;
     }
 
     //猪群详情报表导出
     @RequestMapping(method  =  RequestMethod.GET,  value  =  "/piggroup/detail/export")
-    public  void  selectPigGroupApplyExport(@RequestParam(required = true) Long pigGroupId,
-                                      @RequestParam(required = true) Long skuId,
+    public  void  selectPigGroupApplyExport(@RequestParam Long orgId,
+                                            @RequestParam(required = true) Long pigGroupId,
+                                            @RequestParam(required = true) Long skuId,
                                       HttpServletRequest  request,  HttpServletResponse  response) {
         //取到值
-        List<DoctorWarehouseMaterialApplyPigGroupDetail> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApplyDetail(pigGroupId,skuId));
+        List<DoctorWarehouseMaterialApplyPigGroupDetail> a = RespHelper.or500(doctorWarehouseMaterialApplyReadService.selectPigGroupApplyDetail(orgId,pigGroupId,skuId));
         //开始导出
         try  {
             //导出名称
@@ -153,8 +170,16 @@ public class WarehouseMateriaApplyController {
                     }
                     row.createCell(5).setCellValue(materialHandleType);
                     row.createCell(6).setCellValue(String.valueOf(m.getQuantity()));
-                    row.createCell(7).setCellValue(String.valueOf(m.getUnitPrice()));
-                    row.createCell(8).setCellValue(String.valueOf(m.getAmount()));
+                    if(m.getUnitPrice().equals(BigDecimal.ZERO)){
+                        row.createCell(7).setCellValue("--");
+                    }else{
+                        row.createCell(7).setCellValue(String.valueOf(m.getUnitPrice()));
+                    }
+                    if(m.getAmount().equals(BigDecimal.ZERO)){
+                        row.createCell(8).setCellValue("--");
+                    }else{
+                        row.createCell(8).setCellValue(String.valueOf(m.getAmount()));
+                    }
                     row.createCell(9).setCellValue(String.valueOf(m.getPigBarnName()));
 
                     String c=String.valueOf(m.getPigType());
@@ -188,11 +213,11 @@ public class WarehouseMateriaApplyController {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
     //猪群领用报表导出
     @RequestMapping(method  =  RequestMethod.GET,  value  =  "/piggroup/{farmId}/export")
     public  void  PigGroupApplyDetailExport(@PathVariable Integer farmId,
+                                            @RequestParam Long orgId,
                                             @RequestParam(required = false) String pigType,
                                             @RequestParam(required = false) String pigName,
                                             @RequestParam(required = false) String pigGroupName,
@@ -204,7 +229,7 @@ public class WarehouseMateriaApplyController {
                                             @RequestParam(required = false) String closeAtEnd,
                                             HttpServletRequest  request,  HttpServletResponse  response) {
         //取到值
-        List<DoctorWarehouseMaterialApplyPigGroup> a =doctorWarehouseMaterialApplyReadService.selectPigGroupApplys(farmId,pigType,pigName,pigGroupName,skuType,skuName,openAtStart,openAtEnd,closeAtStart,closeAtEnd);
+        List<DoctorWarehouseMaterialApplyPigGroup> a =doctorWarehouseMaterialApplyReadService.selectPigGroupApplys(orgId,farmId,pigType,pigName,pigGroupName,skuType,skuName,openAtStart,openAtEnd,closeAtStart,closeAtEnd);
         //开始导出
         try  {
             //导出名称
@@ -235,7 +260,6 @@ public class WarehouseMateriaApplyController {
                 title.createCell(14).setCellValue("关群日期");
                 title.createCell(15).setCellValue("猪场名称");
 
-
                 for(DoctorWarehouseMaterialApplyPigGroup  m:  a){
                     Row  row  =  sheet.createRow(pos++);
                     row.createCell(0).setCellValue(String.valueOf(m.getPigGroupName()));
@@ -263,8 +287,18 @@ public class WarehouseMateriaApplyController {
                     row.createCell(5).setCellValue(String.valueOf(m.getSkuName()));
                     row.createCell(6).setCellValue(String.valueOf(m.getUnit()));
                     row.createCell(7).setCellValue(String.valueOf(m.getQuantity()));
-                    row.createCell(8).setCellValue(String.valueOf(m.getUnitPrice()));
-                    row.createCell(9).setCellValue(String.valueOf(m.getAmount()));
+
+                    if(m.getUnitPrice().equals(BigDecimal.ZERO)){
+                        row.createCell(8).setCellValue("--");
+                    }else{
+                        row.createCell(8).setCellValue(String.valueOf(m.getUnitPrice()));
+                    }
+                    if(m.getAmount().equals(BigDecimal.ZERO)){
+                        row.createCell(9).setCellValue("--");
+                    }else{
+                        row.createCell(9).setCellValue(String.valueOf(m.getAmount()));
+                    }
+
                     String b=String.valueOf(m.getSkuType());
                     if(b.equals(String.valueOf(WareHouseType.FEED.getKey()))){
                         row.createCell(10).setCellValue(WareHouseType.FEED.getDesc());

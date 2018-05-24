@@ -482,22 +482,48 @@
         select a.farm_id as farmId,ifnull(f.name,'') as farmName,a.type as type,
         a.handle_year as handleYear,a.handle_Month as handleMonth,a.org_id as orgId,
         a.settlement_date as settlementDate,
-        <include refid="inAmount"/>
-        <include refid="outAmount"/>
-        <include refid="balanceAmount"/>
+
+        ifnull(ROUND(temp1.inAmount,2),0) as inAmount,
+        ifnull(ROUND(temp2.outAmount,2),0) as outAmount,
+        ifnull(ROUND(temp3.balanceAmount,2),0)as balanceAmount
+
         from doctor_warehouse_material_handle a
         left join doctor_farms f on a.farm_id = f.id
-        where a.delete_flag = 1
-        <if test="farmId!=null">
-            and a.farm_id = #{farmId,jdbcType = BIGINT}
-        </if>
-        <if test="settlementDate!=null">
-            and a.settlement_date = #{settlementDate,jdbcType=BIGINT}
-        </if>
 
-        <if test="orgId!=null">
-            and a.org_id = #{orgId,jdbcType=BIGINT}
-        </if>
+        left join (select  sum(c.amount) as inAmount,c.farm_id
+                        from doctor_warehouse_material_handle c ,doctor_warehouse_stock_handle c1
+                        where c.stock_handle_id = c1.id
+                        and c.org_id = #{orgId}
+                        and c.delete_flag = 1
+                        and date_format(c.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+                        and c1.handle_type = 1
+                        GROUP BY c.farm_id
+                    ) temp1 on a.farm_id = temp1.farm_id
+
+        left join (select sum(d.amount) as outAmount,d.farm_id
+        from doctor_warehouse_material_handle d,doctor_warehouse_stock_handle d1
+        where d.stock_handle_id = d1.id
+        and d.org_id = #{orgId}
+        and d.delete_flag = 1
+        and date_format(d.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+        and d1.handle_type = 2
+                    GROUP BY d.farm_id
+                    ) temp2 on a.farm_id = temp2.farm_id
+
+        left join (select sum(b.balance_amount) as balanceAmount,b.farm_id
+            from doctor_warehouse_stock_monthly b
+            where b.org_id = #{orgId}
+            and date_format(b.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+            GROUP BY b.farm_id
+            ) temp3 on a.farm_id = temp3.farm_id
+
+
+        where a.delete_flag = 1
+
+        and date_format(a.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+
+        and a.org_id = #{orgId}
+
         group by a.farm_id
         order by a.farm_id
     </select>
@@ -746,7 +772,7 @@
     <!--得到领料出库的物料名称-->
     <select id="getMaterialNameByID" parameterType="Long" resultType="map">
         select material_id,material_name from doctor_warehouse_material_handle
-        where stock_handle_id = #{id}
+        where stock_handle_id = #{id} and delete_flag=1
     </select>
 
     <!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注-->
@@ -772,7 +798,7 @@
         on s.vendor_id=v.id
         inner join doctor_basics as db
         on db.id=s.unit
-        where material_name=#{materialName} and stock_handle_id=#{stockHandleId}
+        where mh.material_name=#{materialName} and mh.stock_handle_id=#{stockHandleId}  and mh.delete_flag=1
 
     </select>
 </mapper>

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
@@ -35,13 +36,13 @@ public class DoctorWarehouseMaterialApplyPigGroupDetail implements Serializable 
     private Integer type;
 
     //数量
-    private Double quantity;
+    private String quantity;
 
     //单价
-    private Integer unitPrice;
+    private String unitPrice;
 
     //金额
-    private Double amount;
+    private String amount;
 
     //猪舍名
     private String pigBarnName;

@@ -117,8 +117,17 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             List<DoctorWarehouseMaterialHandle> materialHandles = doctorWarehouseMaterialHandleDao.findByOrgAndSettlementDate(orgId, settlementDate);
             for (DoctorWarehouseMaterialHandle materialHandle : materialHandles) {
 
+                AmountAndQuantityDto lastSettlementBalance = eachWarehouseBalance.get(materialHandle.getWarehouseId() + "-" + materialHandle.getMaterialId());
+                if (null == lastSettlementBalance) {
+                    log.warn("no balance found for warehouse:{},material:{},init amount to 0,quantity to 0", materialHandle.getWarehouseId(), materialHandle.getMaterialId());
+                    lastSettlementBalance = new AmountAndQuantityDto();
+                } else {
+
+                    log.debug("start calc unit price for material {},history amount {},history quantity {}", materialHandle.getId(), lastSettlementBalance.getAmount(), lastSettlementBalance.getQuantity());
+                }
+
                 AmountAndQuantityDto newHistoryBalance = CalcUnitPrice(materialHandle,
-                        eachWarehouseBalance.getOrDefault(materialHandle.getWarehouseId() + "-" + materialHandle.getMaterialId(), new AmountAndQuantityDto()),
+                        lastSettlementBalance,
                         settlementMaterialHandles);
 
                 //更新余额和余量
@@ -126,6 +135,8 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 
                 settlementMaterialHandles.put(materialHandle.getId(), materialHandle);
             }
+
+            doctorWarehouseMaterialHandleDao.updates(materialHandles);
 
             //统计各个仓库下各个物料余额和余量
             farmIds.stream().forEach(f -> {
@@ -263,11 +274,12 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             historyStockAmount = historyStockAmount.add(new BigDecimal(materialHandle.getUnitPrice().toString()).multiply(materialHandle.getQuantity()));
         } else {
             //出库类型：领料出库，盘亏出库，调拨出库，配方生产出库
+            log.debug("material handle:{},history amount:{},history quantity:{}", materialHandle.getId(), historyStockAmount, historyStockQuantity);
             if (historyStockAmount.compareTo(new BigDecimal("0")) <= 0 || historyStockQuantity.compareTo(new BigDecimal("0")) <= 0) {
                 log.error("history amount or quantity is small then zero,can not settlement for material handle:{}", materialHandle.getId());
                 throw new InvalidException("settlement.history.quantity.amount.zero");
             }
-//            log.info("material handle:{},amount:{},quantity:{}", materialHandle.getId(), historyStockAmount, historyStockQuantity);
+
 
             materialHandle.setUnitPrice(historyStockAmount.divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
 
@@ -280,7 +292,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
         }
 
         materialHandle.setAmount(materialHandle.getUnitPrice().multiply(materialHandle.getQuantity()));
-        doctorWarehouseMaterialHandleDao.update(materialHandle);
+//        doctorWarehouseMaterialHandleDao.update(materialHandle);
         return new AmountAndQuantityDto(historyStockAmount, historyStockQuantity);
     }
 
