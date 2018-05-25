@@ -295,8 +295,11 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     orInvalid(doctorGroupWriteService.groupEventDisease(groupDetail, doctorValidService.valid(map(putBasicFields(params), DoctorDiseaseGroupInput.class), groupCode)));
                     break;
                 case ANTIEPIDEMIC:
+                    log.info("ANTIEPIDEMIC----------------------------------vaccinId"+getLong(params, "vaccinId"));
                     params.put("vaccinName", getVaccinName(getLong(params, "vaccinId")));
+                    log.info("ANTIEPIDEMIC----------------------------------vaccinStaffId"+getLong(params, "vaccinStaffId"));
                     params.put("vaccinStaffName", orServEx(this.findRealName(getLong(params, "vaccinStaffId"))));
+                    log.info("ANTIEPIDEMIC----------------------------------vaccinItemId"+getLong(params, "vaccinItemId"));
                     params.put("vaccinItemName", getVaccinItemName(getLong(params, "vaccinItemId")));
                     orInvalid(doctorGroupWriteService.groupEventAntiepidemic(groupDetail, doctorValidService.valid(map(putBasicFields(params), DoctorAntiepidemicGroupInput.class), groupCode)));
                     break;
