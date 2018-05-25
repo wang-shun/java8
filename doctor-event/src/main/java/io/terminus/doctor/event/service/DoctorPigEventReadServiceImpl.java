@@ -146,7 +146,9 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         try {
             List<PigEvent> pigEvents = Lists.newArrayList(PigEvent.values());
             pigIds.forEach(pigId -> {
+                //查猪track信息
                 DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
+                //查猪当前猪舍
                 DoctorBarn doctorBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
                 pigEvents.retainAll(pigEventManager.selectEvents(PigStatus.from(doctorPigTrack.getStatus()), PigType.from(doctorBarn.getPigType())));
                 if (pigEvents.contains(PigEvent.MATING) && Objects.equals(doctorPigTrack.getCurrentMatingCount(), 3)) {
