@@ -242,6 +242,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                 } else {
                     log.info("previous in not found,use user set unit price :{}", materialHandle.getUnitPrice());
                 }
+                materialHandle.setAmount(materialHandle.getUnitPrice().multiply(materialHandle.getQuantity()));
             } else if (materialHandle.getType().equals(WarehouseMaterialHandleType.FORMULA_IN.getValue())) {
                 //配方生产入库，根据出库的总价/入库的数量
                 //获取配方入库单据
@@ -264,6 +265,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                         .orElse(new BigDecimal(0));
 
                 materialHandle.setUnitPrice(totalFormulaOutAmount.divide(materialHandle.getQuantity(), 4, BigDecimal.ROUND_HALF_UP));
+                materialHandle.setAmount(totalFormulaOutAmount);
 
             } else if (materialHandle.getType().equals(WarehouseMaterialHandleType.TRANSFER_IN.getValue())
                     || materialHandle.getType().equals(WarehouseMaterialHandleType.RETURN.getValue())) {
@@ -280,6 +282,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                 }
 
                 materialHandle.setUnitPrice(otherIn.getUnitPrice());
+                materialHandle.setAmount(materialHandle.getUnitPrice().multiply(materialHandle.getQuantity()));
             }
 
             historyStockQuantity = historyStockQuantity.add(materialHandle.getQuantity());
@@ -292,7 +295,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                 throw new InvalidException("settlement.history.quantity.amount.zero");
             }
 
-
+            materialHandle.setAmount(historyStockAmount.multiply(materialHandle.getQuantity()).divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
             materialHandle.setUnitPrice(historyStockAmount.divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
 
             if (materialHandle.getType().equals(WarehouseMaterialHandleType.OUT.getValue())) {
@@ -303,7 +306,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             historyStockAmount = historyStockAmount.subtract(new BigDecimal(materialHandle.getUnitPrice().toString()).multiply(materialHandle.getQuantity()));
         }
 
-        materialHandle.setAmount(materialHandle.getUnitPrice().multiply(materialHandle.getQuantity()));
+//        materialHandle.setAmount(materialHandle.getUnitPrice().multiply(materialHandle.getQuantity()));
 //        doctorWarehouseMaterialHandleDao.update(materialHandle);
         return new AmountAndQuantityDto(historyStockAmount, historyStockQuantity);
     }
