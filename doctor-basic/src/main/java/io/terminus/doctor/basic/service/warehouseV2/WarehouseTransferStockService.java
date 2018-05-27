@@ -123,6 +123,7 @@ public class WarehouseTransferStockService
             boolean changedTransferInWarehouse = !detail.getTransferInWarehouseId().equals(transferIn.getWarehouseId());
 
             materialHandle.setRemark(detail.getRemark());
+            materialHandle.setSettlementDate(stockDto.getSettlementDate());
             if (!changedTransferInWarehouse)
                 transferIn.setRemark(detail.getRemark());
 
