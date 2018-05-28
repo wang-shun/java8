@@ -760,12 +760,14 @@
     <!--退料入库-->
     <!--得到仓库类型，仓库名称，仓库管理员，所属公司，单据编号-->
     <select id="getFarmData" parameterType="Long" resultType="map">
-        select wh.farm_id as farm_id,wh.type as ware_house_type,wh.ware_house_name as ware_house_name,wh.manager_name as manager_name,
+        select mh.id as material_handle_id, wh.farm_id as farm_id,wh.type as ware_house_type,wh.ware_house_name as ware_house_name,wh.manager_name as manager_name,
         f.name as farm_name,f.org_name as org_name,sh.serial_no as serial_no  from doctor_ware_houses as wh
         inner join doctor_farms as f
         on f.id=wh.farm_id
         inner join doctor_warehouse_stock_handle as sh
         on sh.warehouse_id=wh.id
+        inner join doctor_warehouse_material_handle as mh
+		on mh.stock_handle_id=sh.id
         where sh.id = #{id}
     </select>
 
