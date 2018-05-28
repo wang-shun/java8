@@ -315,28 +315,17 @@
         sum(later_nest) AS laterNest, sum(farrow_nest) AS farrowNest, sum(farrow_all) AS farrowAll,
         sum(farrow_living) AS farrowLiving, sum(farrow_health) AS farrowHealth, sum(farrow_weak),
         sum(farrow_dead) AS farrowDead, sum(farrow_jmh) AS farrowJmh,
-        round(sum(farrow_all)/sum(farrow_nest), 2) AS pigletCountPerFarrow,
-        round(sum(farrow_living)/sum(farrow_nest), 2) AS pigletLivingCountPerFarrow,
-        round(sum(farrow_health)/sum(farrow_nest), 2) AS pigletHealthCountPerFarrow,
-        round(sum(farrow_weak)/sum(farrow_nest), 2) AS  pigletWeakCountPerFarrow,
-        round(sum(first_born_weight)/sum(farrow_nest), 2) AS avgWeightPerFarrow,
+
         sum(first_born_weight) AS firstBornWeight, sum(piglet_other_in) AS pigletOtherIn,
         sum(piglet_chg_farm_out) AS pigletChgFarmOut,
-        round(sum(piglet_chg_farm_out_avg_weight * piglet_chg_farm_out)/sum(piglet_chg_farm_out), 2) AS pigletChgFarmOutAvgWeight,
         sum(to_nursery) AS toNursery,
-        round(sum(to_nursery_avg_weight * to_nursery)/sum(to_nursery), 2) AS toNurseryAvgWeight,
         sum(piglet_dead) AS pigletDead,
         sum(piglet_weed_out) AS pigletWeadOut,
         sum(piglet_other_change) AS pigletOtherChange,
         sum(wean_nest) AS weanNest,
         sum(wean_count) AS weanCount,
         sum(wean_qualified_count) AS weanQualifiedCount,
-        round(sum(wean_count) / sum(wean_nest), 2) AS weanCountPerFarrow,
-        round(sum(wean_day_age * wean_count) / sum(wean_count), 2) AS weanDayAge,
-        round(sum(wean_weight_per_farrow * wean_count) / sum(wean_count), 2) AS weanWeightPerFarrow,
         sum(piglet_sale) AS pigletSale,
-        round(sum(piglet_sale_ave_weight * piglet_sale) / sum(piglet_sale), 2) AS pigletSaleAveWeight,
-        round(sum(wean_weight_per_farrow * wean_count) / sum(wean_count), 2) AS weanWeightPerFarrow
         FROM <include refid="tb"/>
         <where>
             <if test="orzId != null">AND orz_id = #{orzId}</if>
