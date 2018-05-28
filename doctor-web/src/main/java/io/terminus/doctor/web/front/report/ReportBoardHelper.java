@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static io.terminus.doctor.web.front.report.ReportTotalHelper.*;
 import static java.util.Objects.isNull;
 
 /**
@@ -134,28 +135,44 @@ public class ReportBoardHelper {
             throw new JsonResponseException("region.is.null");
         }
 
+        List<Map<String, String>> maps;
+
         switch (region) {
+
             case RESERVE:
-                return RespHelper.or500(doctorDailyReportV2ReadService.reserveReport(dimensionCriteria))
+                maps = RespHelper.or500(doctorDailyReportV2ReadService.reserveReport(dimensionCriteria))
                         .stream().map(this::objToMap).collect(Collectors.toList());
+                return totalReserve(maps, dimensionCriteria.getIsNecessaryTotal());
             case SOW:
-                return RespHelper.or500(doctorDailyReportV2ReadService.sowReport(dimensionCriteria))
+                maps = RespHelper.or500(doctorDailyReportV2ReadService.sowReport(dimensionCriteria))
                         .stream().map(this::objToMap).collect(Collectors.toList());
+            return totalSow(maps, dimensionCriteria.getIsNecessaryTotal());
+
             case MATING:
-                return RespHelper.or500(doctorDailyReportV2ReadService.matingReport(dimensionCriteria))
+                maps = RespHelper.or500(doctorDailyReportV2ReadService.matingReport(dimensionCriteria))
                         .stream().map(this::objToMap).collect(Collectors.toList());
+                return totalMating(maps, dimensionCriteria.getIsNecessaryTotal());
+
             case DELIVER:
-                return RespHelper.or500(doctorDailyReportV2ReadService.deliverReport(dimensionCriteria))
+                maps = RespHelper.or500(doctorDailyReportV2ReadService.deliverReport(dimensionCriteria))
                         .stream().map(this::objToMap).collect(Collectors.toList());
+                return totalDeliver(maps, dimensionCriteria.getIsNecessaryTotal());
+
             case NURSERY:
-                return RespHelper.or500(doctorDailyReportV2ReadService.nurseryReport(dimensionCriteria))
+                maps = RespHelper.or500(doctorDailyReportV2ReadService.nurseryReport(dimensionCriteria))
                         .stream().map(this::objToMap).collect(Collectors.toList());
+                return totalNursery(maps, dimensionCriteria.getIsNecessaryTotal());
+
             case FATTEN:
-                return RespHelper.or500(doctorDailyReportV2ReadService.fattenReport(dimensionCriteria))
+                maps = RespHelper.or500(doctorDailyReportV2ReadService.fattenReport(dimensionCriteria))
                         .stream().map(this::objToMap).collect(Collectors.toList());
+                return totalFatten(maps, dimensionCriteria.getIsNecessaryTotal());
+
             case BOAR:
-                return RespHelper.or500(doctorDailyReportV2ReadService.boarReport(dimensionCriteria))
+                maps = RespHelper.or500(doctorDailyReportV2ReadService.boarReport(dimensionCriteria))
                         .stream().map(this::objToMap).collect(Collectors.toList());
+                return totalBoar(maps, dimensionCriteria.getIsNecessaryTotal());
+
             case MATERIAL:
                 return RespHelper.or500(doctorDailyReportV2ReadService.materialReport(dimensionCriteria))
                         .stream().map(this::objToMap).collect(Collectors.toList());
@@ -166,6 +183,7 @@ public class ReportBoardHelper {
                 throw new JsonResponseException("region.is.illegal");
         }
     }
+
 
     private void subFieldDefault(DoctorReportFieldTypeDto doctorReportFieldTypeDto) {
         doctorReportFieldTypeDto.getFields().forEach(subField -> subField.setValue("-"));
