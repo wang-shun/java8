@@ -13,9 +13,9 @@ import java.util.Objects;
  * @date 18/5/28
  * email xiaojiannan@terminus.io
  */
-public class ReportTotalHelper {
+ class ReportTotalHelper {
 
-    public static List<Map<String, String>> totalBoar(List<Map<String, String>> maps, Integer isNecessaryTotal){
+     static List<Map<String, String>> totalBoar(List<Map<String, String>> maps, Integer isNecessaryTotal){
         if (!Objects.equals(isNecessaryTotal, IsOrNot.YES.getKey())) {
             return maps;
         }
@@ -37,7 +37,7 @@ public class ReportTotalHelper {
     }
 
 
-    public static List<Map<String, String>> totalDeliver(List<Map<String, String>> maps, Integer isNecessaryTotal){
+     static List<Map<String, String>> totalDeliver(List<Map<String, String>> maps, Integer isNecessaryTotal){
         if (!Objects.equals(isNecessaryTotal, IsOrNot.YES.getKey())) {
             return maps;
         }
@@ -45,40 +45,34 @@ public class ReportTotalHelper {
         Map<String, String> total = maps.get(maps.size() - 1);
         for (int i = 0; i < maps.size() -1 ; i++) {
             Map<String, String> map = maps.get(i);
-            if (!Objects.equals(map.get("sowPhWeanOut"), "-")) {
-                total.put("sowPhWeanOut", add(map.get("sowPhWeanOut"), total.get("sowPhWeanOut")));
-            }
+            total.put("sowPhWeanOut", add(map.get("sowPhWeanOut"), total.get("sowPhWeanOut")));
+            total.put("farrowNest", add(map.get("farrowNest"), total.get("farrowNest")));
+            total.put("toNursery", add(map.get("toNursery"), total.get("toNursery")));
+            total.put("weanNest", add(map.get("weanNest"), total.get("weanNest")));
+            total.put("weanWeightPerFarrow", add(multi(map.get("weanWeightPerFarrow"), map.get("weanCount")), total.get("weanWeightPerFarrow")));
+            total.put("weanDayAge", add(multi(map.get("weanDayAge"), map.get("weanCount")), total.get("weanDayAge")));
+            total.put("pigletSale", add(map.get("pigletSale"), total.get("pigletSale")));
 
-            if (!Objects.equals(map.get("farrowNest"), "-")) {
-                total.put("farrowNest", add(map.get("farrowNest"), total.get("farrowNest")));
-            }
-
-            if (!Objects.equals(map.get("toNursery"), "-")) {
-                total.put("toNursery", add(map.get("toNursery"), total.get("toNursery")));
-            }
-
-            if (!Objects.equals(map.get("weanNest"), "-")) {
-                total.put("weanNest", add(map.get("weanNest"), total.get("weanNest")));
-            }
-
-            if (!Objects.equals(map.get("pigletSale"), "-")) {
-                total.put("pigletSale", add(map.get("pigletSale"), total.get("pigletSale")));
-            }
+            total.put("pigletSaleAveWeight", add(multi(map.get("pigletSaleAveWeight"), map.get("pigletSale")), total.get("pigletSaleAveWeight")));
         }
 
-        if (!Objects.equals(total.get("farrowNest"), "-")) {
-            String farrowNest = total.get("farrowNest");
-            total.put("pigletCountPerFarrow", div(total.get("farrowAll"), farrowNest));
-            total.put("pigletLivingCountPerFarrow", div(total.get("farrowLiving"), farrowNest));
-            total.put("pigletHealthCountPerFarrow", div(total.get("farrowHealth"), farrowNest));
-            total.put("pigletWeakCountPerFarrow", div(total.get("farrowWeak"), farrowNest));
-            total.put("avgWeightPerFarrow", div(total.get("firstBornWeight"), farrowNest));
-        }
+        String farrowNest = total.get("farrowNest");
+        total.put("pigletCountPerFarrow", div(total.get("farrowAll"), farrowNest));
+        total.put("pigletLivingCountPerFarrow", div(total.get("farrowLiving"), farrowNest));
+        total.put("pigletHealthCountPerFarrow", div(total.get("farrowHealth"), farrowNest));
+        total.put("pigletWeakCountPerFarrow", div(total.get("farrowWeak"), farrowNest));
+        total.put("avgWeightPerFarrow", div(total.get("firstBornWeight"), farrowNest));
+
+        total.put("weanCountPerFarrow", div(total.get("weanCountPerFarrow"), total.get("weanNest")));
+        total.put("weanWeightPerFarrow", div(total.get("weanWeightPerFarrow"), total.get("weanCount")));
+        total.put("weanDayAge", div(total.get("weanDayAge"), total.get("weanCount")));
+
+        total.put("pigletSaleAveWeight", div(total.get("pigletSaleAveWeight"), total.get("pigletSale")));
 
         return maps;
     }
 
-    public static List<Map<String, String>> totalFatten(List<Map<String, String>> maps, Integer isNecessaryTotal){
+     static List<Map<String, String>> totalFatten(List<Map<String, String>> maps, Integer isNecessaryTotal){
         if (!Objects.equals(isNecessaryTotal, IsOrNot.YES.getKey())) {
             return maps;
         }
@@ -108,7 +102,7 @@ public class ReportTotalHelper {
         return maps;
     }
 
-    public static List<Map<String, String>> totalMating(List<Map<String, String>> maps, Integer isNecessaryTotal) {
+     static List<Map<String, String>> totalMating(List<Map<String, String>> maps, Integer isNecessaryTotal) {
         if (!Objects.equals(isNecessaryTotal, IsOrNot.YES.getKey())) {
             return maps;
         }
@@ -126,7 +120,7 @@ public class ReportTotalHelper {
         return maps;
     }
 
-    public static List<Map<String, String>> totalNursery(List<Map<String, String>> maps, Integer isNecessaryTotal) {
+     static List<Map<String, String>> totalNursery(List<Map<String, String>> maps, Integer isNecessaryTotal) {
         if (!Objects.equals(isNecessaryTotal, IsOrNot.YES.getKey())) {
             return maps;
         }
@@ -159,7 +153,7 @@ public class ReportTotalHelper {
         return maps;
     }
 
-    public static List<Map<String, String>> totalReserve(List<Map<String, String>> maps, Integer isNecessaryTotal) {
+     static List<Map<String, String>> totalReserve(List<Map<String, String>> maps, Integer isNecessaryTotal) {
         if (!Objects.equals(isNecessaryTotal, IsOrNot.YES.getKey())) {
             return maps;
         }
@@ -180,7 +174,7 @@ public class ReportTotalHelper {
         return maps;
     }
 
-    public static List<Map<String, String>> totalSow(List<Map<String, String>> maps, Integer isNecessaryTotal) {
+     static List<Map<String, String>> totalSow(List<Map<String, String>> maps, Integer isNecessaryTotal) {
         if (!Objects.equals(isNecessaryTotal, IsOrNot.YES.getKey())) {
             return maps;
         }

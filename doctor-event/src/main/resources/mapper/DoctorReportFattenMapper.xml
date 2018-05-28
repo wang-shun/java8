@@ -215,14 +215,9 @@
     <select id="sumBy" parameterType="map" resultMap="DoctorReportFattenMap">
         SELECT
         sum(turn_into) AS turnInfo,
-        round(sum(turn_into_age * turn_into) / sum(turn_into), 2) AS turnIntoAge,
-        round(sum(turn_into_avg_weight * turn_into) / sum(turn_into), 2) AS turnIntoAvgWeight,
         sum(sale) AS sale,
-        round(sum(sale_avg_weight * sale) / sum(sale), 2) AS saleAvgWeight,
         sum(to_houbei) AS toHoubei,
-        round(sum(to_houbei_avg_weight * to_houbei) / sum(to_houbei), 2) AS toHoubeiAvgWeight,
         sum(chg_farm_out) AS chgFarmOut,
-        round(sum(chg_farm_avg_weight * chg_farm_out) / sum(chg_farm_out), 2) AS chgFarmAvgWeight,
         sum(dead) as dead,
         sum(weed_out) AS weedOut,
         sum(other_change) AS otherChange
