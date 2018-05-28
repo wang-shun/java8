@@ -276,9 +276,9 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                         //可能对于的出库单据明细已经结算
                         otherIn = doctorWarehouseMaterialHandleDao.findById(materialHandle.getRelMaterialHandleId());
                         if (null == otherIn || otherIn.getDeleteFlag().equals(WarehouseMaterialHandleDeleteFlag.DELETE.getValue()))
-                            throw new InvalidException("material.handle.not.found", materialHandle.getRelMaterialHandleId());
+                            throw new InvalidException("settlement.out.material.handle.not.found", materialHandle.getRelMaterialHandleId());
                     } else
-                        throw new InvalidException("material.handle.not.found", materialHandle.getRelMaterialHandleId());
+                        throw new InvalidException("settlement.transfer.out.material.handle.not.found", materialHandle.getRelMaterialHandleId());
                 }
 
                 materialHandle.setUnitPrice(otherIn.getUnitPrice());
