@@ -310,6 +310,9 @@ export.tables:
         display: 备注
       - name: creatorName
         display: 录入人员
+      - name: createdAt
+        display: 录入时间
+        format: mmDateFormatter
   web-pig-boarCollect:
     display: 公猪采精事件
     columns:
@@ -340,6 +343,9 @@ export.tables:
         display: 备注
       - name: creatorName
         display: 录入人员
+      - name: createdAt
+        display: 录入时间
+        format: mmDateFormatter
   web-pig-boarChangeBarn:
     display: 公猪转舍事件
     columns:
@@ -356,6 +362,9 @@ export.tables:
         display: 备注
       - name: creatorName
         display: 录入人员
+      - name: createdAt
+        display: 录入时间
+        format: mmDateFormatter
   web-pig-boarDisease:
     display: 疾病事件
     columns:
@@ -374,6 +383,9 @@ export.tables:
         display: 备注
       - name: creatorName
         display: 录入人员
+      - name: createdAt
+        display: 录入时间
+        format: mmDateFormatter
   web-pig-boarVaccination:
     display: 防疫事件
     columns:
@@ -394,7 +406,9 @@ export.tables:
         display: 备注
       - name: creatorName
         display: 录入人员
-
+      - name: createdAt
+        display: 录入时间
+        format: mmDateFormatter
   web-pig-boarCondition:
       display: 公猪体况
       columns:
@@ -419,7 +433,9 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
-
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
   web-pig-boarRemove:
       display: 公猪离场事件
       columns:
@@ -448,6 +464,9 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
   web-pig-boarTransFarm:
       display: 公猪转场事件
       columns:
@@ -468,7 +487,9 @@ export.tables:
           display: 转场人员
         - name: remark
           display: 备注
-
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
 
   web-pig-sowRemove:
       display: 母猪离场事件
@@ -500,7 +521,9 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
-
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
   web-pig-sowVaccination:
       display: 防疫事件
       columns:
@@ -521,7 +544,9 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
-
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
   web-pig-sowDisease:
       display: 疾病事件
       columns:
@@ -542,6 +567,9 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
   web-pig-sowChangeBarn:
       display: 母猪转舍事件
       columns:
@@ -562,6 +590,9 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
   web-pig-sowInputFactory:
       display: 母猪进场事件
       columns:
@@ -597,6 +628,9 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
   web-pig-sowMating:
       display: 母猪配种
       columns:
@@ -622,6 +656,9 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
         - name: pigStatusAfterName
           display: 当前状态
   web-pig-sowPregChkResult:
@@ -644,6 +681,9 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
   web-pig-sowFarrowing:
       display: 分娩
       columns:
@@ -692,6 +732,9 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
   web-pig-PigletsChg:
       display: 仔猪变动
       columns:
@@ -724,6 +767,9 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
   web-pig-sowWean:
       display: 断奶事件
       columns:
@@ -752,6 +798,9 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
   web-pig-sowFosters:
       display: 母猪拼窝事件
       columns:
@@ -774,6 +823,9 @@ export.tables:
           display: 备注
         - name: operatorName
           display: 录入人员
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
   web-pig-sowTransFarm:
       display: 母猪转场事件
       columns:
@@ -796,6 +848,9 @@ export.tables:
           display: 转场人员
         - name: remark
           display: 备注
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
   web-pig-sowCondition:
       display: 母猪猪体况
       columns:
@@ -818,7 +873,9 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
-
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
   web-group-new:
       display: 猪群新建事件
       columns:
@@ -841,6 +898,9 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
   web-group-MoveIn:
       display: 转入猪群
       columns:
@@ -877,6 +937,9 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
   web-group-change:
       display: 猪群变动
       columns:
@@ -905,6 +968,9 @@ export.tables:
           display: 均重
         - name: creatorName
           display: 录入人员
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
   web-group-transGroup:
       display: 猪群转群
       columns:
@@ -931,6 +997,9 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
   web-group-turnSeed:
       display: 转种猪事件
       columns:
@@ -962,6 +1031,9 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
   web-group-Disease:
       display: 猪群疾病
       columns:
@@ -980,6 +1052,9 @@ export.tables:
           display: 诊断人员
         - name: remark
           display: 备注
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
   web-group-accination:
       display: 猪群防疫
       columns:
@@ -1000,6 +1075,9 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
   web-group-transFarm:
       display: 猪群转场事件
       columns:
@@ -1028,7 +1106,9 @@ export.tables:
           display: 备注
         - name: creatorName
           display: 录入人员
-
+        - name: createdAt
+          display: 录入时间
+          format: mmDateFormatter
   web-wareHouse-stock-handle:
       display: 仓库单据
       columns:
