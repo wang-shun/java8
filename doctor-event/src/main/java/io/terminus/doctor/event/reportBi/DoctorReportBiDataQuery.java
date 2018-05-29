@@ -27,6 +27,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Objects;
 
+import static java.util.Objects.isNull;
+
 /**
  * Created by xjn on 18/1/18.
  * email:xiaojiannan@terminus.io
@@ -82,7 +84,12 @@ public class DoctorReportBiDataQuery {
     public List<DoctorReportSow> findSowReportBy(DoctorDimensionCriteria dimensionCriteria) {
         List<DoctorReportSow> reports = doctorReportSowDao.findBy(dimensionCriteria);
         if (Objects.equals(dimensionCriteria.getIsNecessaryTotal(), IsOrNot.YES.getKey())) {
-            reports.add(doctorReportSowDao.sumBy(dimensionCriteria));
+            DoctorReportSow sum = doctorReportSowDao.sumBy(dimensionCriteria);
+            if (isNull(sum)) {
+                sum = new DoctorReportSow();
+            }
+            sum.setId(-1L);
+            reports.add(sum);
         }
         return reports;
     }
@@ -90,7 +97,12 @@ public class DoctorReportBiDataQuery {
     public List<DoctorReportBoar> findBoarReportBy(DoctorDimensionCriteria dimensionCriteria) {
         List<DoctorReportBoar> reports = doctorReportBoarDao.findBy(dimensionCriteria);
         if (Objects.equals(dimensionCriteria.getIsNecessaryTotal(), IsOrNot.YES.getKey())) {
-            reports.add(doctorReportBoarDao.sumBy(dimensionCriteria));
+            DoctorReportBoar sum = doctorReportBoarDao.sumBy(dimensionCriteria);
+            if (isNull(sum)) {
+                sum = new DoctorReportBoar();
+            }
+            sum.setId(-1L);
+            reports.add(sum);
         }
         return reports;
     }
@@ -98,7 +110,12 @@ public class DoctorReportBiDataQuery {
     public List<DoctorReportDeliver> findDeliverReportBy(DoctorDimensionCriteria dimensionCriteria) {
         List<DoctorReportDeliver> reports = doctorReportDeliverDao.findBy(dimensionCriteria);
         if (Objects.equals(dimensionCriteria.getIsNecessaryTotal(), IsOrNot.YES.getKey())) {
-            reports.add(doctorReportDeliverDao.sumBy(dimensionCriteria));
+            DoctorReportDeliver sum = doctorReportDeliverDao.sumBy(dimensionCriteria);
+            if (isNull(sum)) {
+                sum = new DoctorReportDeliver();
+            }
+            sum.setId(-1L);
+            reports.add(sum);
         }
         return reports;
     }
@@ -106,7 +123,9 @@ public class DoctorReportBiDataQuery {
     public List<DoctorReportEfficiency> findEfficiencyReportBy(DoctorDimensionCriteria dimensionCriteria) {
         List<DoctorReportEfficiency> reports = doctorReportEfficiencyDao.findBy(dimensionCriteria);
         if (Objects.equals(dimensionCriteria.getIsNecessaryTotal(), IsOrNot.YES.getKey())) {
-            reports.add(new DoctorReportEfficiency());
+            DoctorReportEfficiency sum = new DoctorReportEfficiency();
+            sum.setId(-1L);
+            reports.add(sum);
         }
         return reports;
     }
@@ -114,7 +133,12 @@ public class DoctorReportBiDataQuery {
     public List<DoctorReportFatten> findFattenReportBy(DoctorDimensionCriteria dimensionCriteria) {
         List<DoctorReportFatten> reports = doctorReportFattenDao.findBy(dimensionCriteria);
         if (Objects.equals(dimensionCriteria.getIsNecessaryTotal(), IsOrNot.YES.getKey())) {
-            reports.add(doctorReportFattenDao.sumBy(dimensionCriteria));
+            DoctorReportFatten sum = doctorReportFattenDao.sumBy(dimensionCriteria);
+            if (isNull(sum)) {
+                sum = new DoctorReportFatten();
+            }
+            sum.setId(-1L);
+            reports.add(sum);
         }
         return reports;
     }
@@ -122,7 +146,12 @@ public class DoctorReportBiDataQuery {
     public List<DoctorReportMating> findMatingReportBy(DoctorDimensionCriteria dimensionCriteria) {
         List<DoctorReportMating> reports = doctorReportMatingDao.findBy(dimensionCriteria);
         if (Objects.equals(dimensionCriteria.getIsNecessaryTotal(), IsOrNot.YES.getKey())) {
-            reports.add(doctorReportMatingDao.sumBy(dimensionCriteria));
+            DoctorReportMating sum = doctorReportMatingDao.sumBy(dimensionCriteria);
+            if (isNull(sum)) {
+                sum = new DoctorReportMating();
+            }
+            sum.setId(-1L);
+            reports.add(sum);
         }
         return reports;
     }
@@ -130,7 +159,12 @@ public class DoctorReportBiDataQuery {
     public List<DoctorReportNursery> findNurseryReportBy(DoctorDimensionCriteria dimensionCriteria) {
         List<DoctorReportNursery> reports = doctorReportNurseryDao.findBy(dimensionCriteria);
         if (Objects.equals(dimensionCriteria.getIsNecessaryTotal(), IsOrNot.YES.getKey())) {
-            reports.add(doctorReportNurseryDao.sumBy(dimensionCriteria));
+            DoctorReportNursery sum = doctorReportNurseryDao.sumBy(dimensionCriteria);
+            if (isNull(sum)) {
+                sum = new DoctorReportNursery();
+            }
+            sum.setId(-1L);
+            reports.add(sum);
         }
         return reports;
     }
@@ -138,7 +172,12 @@ public class DoctorReportBiDataQuery {
     public List<DoctorReportReserve> findReserveReportBy(DoctorDimensionCriteria dimensionCriteria) {
         List<DoctorReportReserve> reports = doctorReportReserveDao.findBy(dimensionCriteria);
         if (Objects.equals(dimensionCriteria.getIsNecessaryTotal(), IsOrNot.YES.getKey())) {
-            reports.add(doctorReportReserveDao.sumBy(dimensionCriteria));
+            DoctorReportReserve sum = doctorReportReserveDao.sumBy(dimensionCriteria);
+            if (isNull(sum)) {
+                sum = new DoctorReportReserve();
+            }
+            sum.setId(-1L);
+            reports.add(sum);
         }
         return reports;
     }
@@ -146,7 +185,12 @@ public class DoctorReportBiDataQuery {
     public List<DoctorReportMaterial> findMaterialReportBy(DoctorDimensionCriteria dimensionCriteria) {
         List<DoctorReportMaterial> reports = doctorReportMaterialDao.findBy(dimensionCriteria);
         if (Objects.equals(dimensionCriteria.getIsNecessaryTotal(), IsOrNot.YES.getKey())) {
-            reports.add(doctorReportMaterialDao.sumBy(dimensionCriteria));
+            DoctorReportMaterial sum = doctorReportMaterialDao.sumBy(dimensionCriteria);
+            if (isNull(sum)) {
+                sum = new DoctorReportMaterial();
+            }
+            sum.setId(-1L);
+            reports.add(sum);
         }
         return reports;
     }
