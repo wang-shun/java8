@@ -72,4 +72,6 @@ public class DoctorMoveInGroupExportDto extends DoctorGroupEvent{
      * 金额(分)
      */
     private Long amount;
+
+    private Date createdAt;
 }

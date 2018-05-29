@@ -28,5 +28,6 @@ public class DoctorPigletsChgExportDto implements Serializable{
     private String pigletsCustomerName;    //客户姓名 （非必填）
     private String pigletsMark;  //标识(非必填)
     private String creatorName;
+    private Date createdAt;
 }
 

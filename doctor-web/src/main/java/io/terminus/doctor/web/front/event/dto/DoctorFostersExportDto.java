@@ -22,4 +22,5 @@ public class DoctorFostersExportDto implements Serializable{
     private Integer fostersCount;   //  拼窝数量
     private String fosterSowCode; //代哺母猪
     private String operatorName;
+    private Date createdAt;
 }
