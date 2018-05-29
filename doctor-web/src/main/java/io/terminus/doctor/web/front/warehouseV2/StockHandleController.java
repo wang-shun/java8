@@ -138,7 +138,7 @@ public class StockHandleController {
             String materialName = String.valueOf(mm.get("material_name"));
             //根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注
             List<Map> mp = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getDataByMaterialName(id, materialName));
-            mp.forEach( mpp ->{
+            for(Map mpp :mp){
                 DoctorWarehouseMaterialApply materialApply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandle((Long) mpp.get("material_handle_id")));
                 mpp.put("applyBarnId",materialApply.getPigBarnId());
                 mpp.put("applyGroupId",materialApply.getPigGroupId());
@@ -151,17 +151,23 @@ public class StockHandleController {
                 else
                     mpp.put("applyGroupName",materialApply.getPigGroupName());
 
-                //判断猪群是否关闭
+                //判断猪群是否关闭：如果领用到猪群,并且猪群已经关闭，则不能退料入库
                 if(materialApply.getPigGroupId()!=null&&materialApply.getApplyType()==1){
                     DoctorGroup doctorGroup = RespHelper.or500(doctorGroupReadService.findGroupById(materialApply.getPigGroupId()));
-                    mpp.put("groupStatus",doctorGroup.getStatus());
-                }else{
-                    mpp.put("groupStatus",0);
+                    if(doctorGroup.getStatus()!=-1){
+                        maps.add(mpp);
+                    }
                 }
-            });
-            maps.addAll(mp);
+                //母猪
+                if(materialApply.getPigGroupId()!=null&&materialApply.getApplyType()==2){
+                    maps.add(mpp);
+                }
+                //猪舍
+                if(materialApply.getPigGroupId()==null&&materialApply.getApplyType()==0){
+                    maps.add(mpp);
+                }
+            };
         }
-
         return maps;
     }
 
