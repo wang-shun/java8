@@ -1130,3 +1130,22 @@ export.tables:
         - display: 金额（元）
         - name: remark
         - display: 备注
+  sow-manager-export:
+      display: 母猪管理
+      columns:
+        - name: pigCode
+          display: 母猪号
+        - name: rfid
+          display: 猪只RFID
+        - name: statusName
+          display: 母猪状态
+        - name: statusDay
+          display: 状态天数(天)
+        - name: pigWeight
+          display: 体重(kg)
+        - name: currentParity
+          display: 胎次
+        - name: breedName
+          display: 品种
+        - name: currentBarnName
+          display: 猪舍

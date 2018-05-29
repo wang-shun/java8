@@ -710,7 +710,17 @@ public class DoctorSearches {
         Paging<SearchedPig> paging = pagePigs(pageNo, pageSize, pigEventCriteria, DoctorPig.PigSex.SOW);
         List<DoctorSowManagerDto> list = paging.getData().stream().map(doctorPigEventDetail -> {
             DoctorSowManagerDto dto = new DoctorSowManagerDto();
-
+            dto.setId(doctorPigEventDetail.getId());
+            dto.setPigCode(doctorPigEventDetail.getPigCode());
+            dto.setBreedName(doctorPigEventDetail.getBreedName());
+            dto.setCurrentParity(doctorPigEventDetail.getCurrentParity());
+            dto.setPigWeight(doctorPigEventDetail.getPigWeight());
+            dto.setRfid(doctorPigEventDetail.getRfid());
+            dto.setStatus(doctorPigEventDetail.getStatus());
+            dto.setStatusDay(doctorPigEventDetail.getStatusDay());
+            dto.setCurrentBarnId(doctorPigEventDetail.getCurrentBarnId());
+            dto.setCurrentBarnName(doctorPigEventDetail.getCurrentBarnName());
+            dto.setStatusName(doctorPigEventDetail.getStatusName());
             return dto;
         }).collect(toList());
         return new Paging<>(paging.getTotal(), list);
