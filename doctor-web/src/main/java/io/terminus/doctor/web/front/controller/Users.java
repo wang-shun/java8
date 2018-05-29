@@ -329,7 +329,7 @@ public class Users {
     @ResponseBody
     public Boolean changePassword(@RequestParam("oldPassword") String oldPassword,
                                   @RequestParam("newPassword") String newPassword,
-                                  @RequestParam("sid") String sessionId, HttpServletRequest request) {
+                                   HttpServletRequest request) {
         String sessionIds = null;
         Cookie[] cookie = request.getCookies();
         for (int i = 0; i < cookie.length; i++) {
