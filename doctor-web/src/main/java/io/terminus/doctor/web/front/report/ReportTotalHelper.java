@@ -1,7 +1,6 @@
 package io.terminus.doctor.web.front.report;
 
 import io.terminus.doctor.common.enums.IsOrNot;
-import io.terminus.doctor.event.util.EventUtil;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -201,7 +200,11 @@ import java.util.Objects;
             total = "0";
         }
         if (Objects.equals(qty, "-")) {
-            qty = "0";
+            return "0";
+        }
+        BigDecimal bigDecimal = new BigDecimal(qty);
+        if (bigDecimal.doubleValue() == 0.0) {
+            return "0";
         }
         return new BigDecimal(total).divide(new BigDecimal(qty), 2, BigDecimal.ROUND_HALF_UP).toString();
     }
@@ -213,8 +216,8 @@ import java.util.Objects;
         if (Objects.equals(qty2, "-")) {
             qty2 = "0";
         }
-        Integer qty = EventUtil.plusInt(Integer.parseInt(qty1), Integer.parseInt(qty2));
-        return qty.toString();
+
+        return new BigDecimal(qty1).add(new BigDecimal(qty2)).toString();
     }
 
     private static String multi(String qty1, String qty2) {

@@ -325,7 +325,7 @@
         sum(wean_nest) AS weanNest,
         sum(wean_count) AS weanCount,
         sum(wean_qualified_count) AS weanQualifiedCount,
-        sum(piglet_sale) AS pigletSale,
+        sum(piglet_sale) AS pigletSale
         FROM <include refid="tb"/>
         <where>
             <if test="orzId != null">AND orz_id = #{orzId}</if>
