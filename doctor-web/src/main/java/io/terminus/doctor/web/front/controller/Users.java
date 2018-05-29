@@ -329,7 +329,7 @@ public class Users {
     @ResponseBody
     public Boolean changePassword(@RequestParam("oldPassword") String oldPassword,
                                   @RequestParam("newPassword") String newPassword,
-                                  @RequestParam("sid") String sessionId) {
+                                  @RequestParam("msid") String sessionId) {
         return doctorCommonSessionBean.changePassword(oldPassword, newPassword, sessionId);
     }
 
