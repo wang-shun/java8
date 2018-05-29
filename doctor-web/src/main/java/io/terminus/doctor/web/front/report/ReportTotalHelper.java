@@ -51,6 +51,7 @@ import java.util.Objects;
             total.put("weanWeightPerFarrow", add(multi(map.get("weanWeightPerFarrow"), map.get("weanCount")), total.get("weanWeightPerFarrow")));
             total.put("weanDayAge", add(multi(map.get("weanDayAge"), map.get("weanCount")), total.get("weanDayAge")));
             total.put("pigletSale", add(map.get("pigletSale"), total.get("pigletSale")));
+            total.put("firstBornWeight", add(multi(map.get("firstBornWeight"), map.get("farrowLiving")), total.get("firstBornWeight")));
 
             total.put("pigletSaleAveWeight", add(multi(map.get("pigletSaleAveWeight"), map.get("pigletSale")), total.get("pigletSaleAveWeight")));
         }
@@ -61,6 +62,7 @@ import java.util.Objects;
         total.put("pigletHealthCountPerFarrow", div(total.get("farrowHealth"), farrowNest));
         total.put("pigletWeakCountPerFarrow", div(total.get("farrowWeak"), farrowNest));
         total.put("avgWeightPerFarrow", div(total.get("firstBornWeight"), farrowNest));
+        total.put("firstBornWeight", div(total.get("firstBornWeight"), total.get("farrowLiving")));
 
         total.put("weanCountPerFarrow", div(total.get("weanCountPerFarrow"), total.get("weanNest")));
         total.put("weanWeightPerFarrow", div(total.get("weanWeightPerFarrow"), total.get("weanCount")));
