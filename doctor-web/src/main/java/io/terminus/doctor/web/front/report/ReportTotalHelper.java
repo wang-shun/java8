@@ -197,15 +197,33 @@ import java.util.Objects;
 
 
     private static String div(String total, String qty) {
+        if (Objects.equals(total, "-")) {
+            total = "0";
+        }
+        if (Objects.equals(qty, "-")) {
+            qty = "0";
+        }
         return new BigDecimal(total).divide(new BigDecimal(qty), 2, BigDecimal.ROUND_HALF_UP).toString();
     }
 
     private static String add(String qty1, String qty2) {
+        if (Objects.equals(qty1, "-")) {
+            qty1 = "0";
+        }
+        if (Objects.equals(qty2, "-")) {
+            qty2 = "0";
+        }
         Integer qty = EventUtil.plusInt(Integer.parseInt(qty1), Integer.parseInt(qty2));
         return qty.toString();
     }
 
     private static String multi(String qty1, String qty2) {
+        if (Objects.equals(qty1, "-")) {
+            qty1 = "0";
+        }
+        if (Objects.equals(qty2, "-")) {
+            qty2 = "0";
+        }
         return new BigDecimal(qty1).multiply(new BigDecimal(qty2)).toString();
     }
 }
