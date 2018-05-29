@@ -760,18 +760,20 @@
     <!--退料入库-->
     <!--得到仓库类型，仓库名称，仓库管理员，所属公司，单据编号-->
     <select id="getFarmData" parameterType="Long" resultType="map">
-        select wh.farm_id as farm_id,wh.type as ware_house_type,wh.ware_house_name as ware_house_name,wh.manager_name as manager_name,
+        select mh.id as material_handle_id, wh.farm_id as farm_id,wh.type as ware_house_type,wh.ware_house_name as ware_house_name,wh.manager_name as manager_name,
         f.name as farm_name,f.org_name as org_name,sh.serial_no as serial_no  from doctor_ware_houses as wh
         inner join doctor_farms as f
         on f.id=wh.farm_id
         inner join doctor_warehouse_stock_handle as sh
         on sh.warehouse_id=wh.id
+        inner join doctor_warehouse_material_handle as mh
+		on mh.stock_handle_id=sh.id
         where sh.id = #{id}
     </select>
 
     <!--得到领料出库的物料名称-->
     <select id="getMaterialNameByID" parameterType="Long" resultType="map">
-        select material_id,material_name from doctor_warehouse_material_handle
+        select DISTINCT material_id,material_name from doctor_warehouse_material_handle
         where stock_handle_id = #{id} and delete_flag=1
     </select>
 
@@ -782,12 +784,12 @@
         ifnull(
         ROUND(
         (select ifnull(quantity,0) from doctor_warehouse_material_handle
-        where type=2 and delete_flag=1 and stock_handle_id=#{stockHandleId} and material_name=#{materialName}
+        where type=2 and delete_flag=1 and stock_handle_id=#{stockHandleId} and material_name=#{materialName} group by material_handle_id
         ) -
         ( select ifnull(sum(quantity),0) from doctor_warehouse_material_handle
         where type=13 and delete_flag=1 and rel_material_handle_id=(
         select id from doctor_warehouse_material_handle
-        where type=2 and delete_flag=1 and stock_handle_id=#{stockHandleId} and material_name=#{materialName})
+        where type=2 and delete_flag=1 and stock_handle_id=#{stockHandleId} and material_name=#{materialName} group by material_handle_id )
         <!--and <![CDATA[ date(handle_date) <= STR_TO_DATE(#{handleDate},"%Y-%m-%d")]]>-->
         )
         ,2),'') as refundableQuantity,mh.remark as remark

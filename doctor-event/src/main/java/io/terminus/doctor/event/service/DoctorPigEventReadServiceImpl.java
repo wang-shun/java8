@@ -144,13 +144,16 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     @Override
     public Response<List<Integer>> queryPigEvents(List<Long> pigIds) {
         try {
+            //查出所有的事件
             List<PigEvent> pigEvents = Lists.newArrayList(PigEvent.values());
             pigIds.forEach(pigId -> {
                 //查猪track信息
                 DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
                 //查猪当前猪舍
                 DoctorBarn doctorBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
+                //查当前猪可执行的事件，并和已有事件取交集
                 pigEvents.retainAll(pigEventManager.selectEvents(PigStatus.from(doctorPigTrack.getStatus()), PigType.from(doctorBarn.getPigType())));
+                //当母猪是配种状态，且配种次数大于3，不给配。
                 if (pigEvents.contains(PigEvent.MATING) && Objects.equals(doctorPigTrack.getCurrentMatingCount(), 3)) {
                     pigEvents.remove(PigEvent.MATING);
                 }

@@ -133,7 +133,7 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
             if(type == 2){
                 List<DoctorWarehouseStockHandle> a = doctorWarehouseStockHandleDao.findByRelStockHandleIds(id);
                 if(a.size() == 1){
-                    return Response.fail("此物料存在退料,不支持删除");
+                    return Response.fail("此物料存在退料,不支持删除" );
                 }
                 warehouseOutManager.delete(handle);
                 doctorWarehouseStockManager.in(handle.getMaterialId(),handle.getQuantity(),wareHouse);

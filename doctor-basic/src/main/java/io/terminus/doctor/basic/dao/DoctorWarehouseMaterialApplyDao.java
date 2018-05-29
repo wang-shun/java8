@@ -23,7 +23,6 @@ import java.util.*;
 @Repository
 public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseMaterialApply> {
 
-
     public List<DoctorWarehouseMaterialApply> listAndOrderByHandleDate(DoctorWarehouseMaterialApply criteria, Integer limit) {
 
         Map<String, Object> params = Maps.newHashMap();
