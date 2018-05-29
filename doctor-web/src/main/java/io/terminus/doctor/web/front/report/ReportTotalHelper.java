@@ -52,7 +52,7 @@ import java.util.Objects;
             total.put("weanDayAge", add(multi(map.get("weanDayAge"), map.get("weanCount")), total.get("weanDayAge")));
             total.put("pigletSale", add(map.get("pigletSale"), total.get("pigletSale")));
             total.put("firstBornWeight", add(multi(map.get("firstBornWeight"), map.get("farrowLiving")), total.get("firstBornWeight")));
-
+            total.put("pigletChgFarmOutAvgWeight", add(multi(map.get("pigletChgFarmOutAvgWeight"), map.get("pigletChgFarmOut")), total.get("pigletChgFarmOutAvgWeight")));
             total.put("pigletSaleAveWeight", add(multi(map.get("pigletSaleAveWeight"), map.get("pigletSale")), total.get("pigletSaleAveWeight")));
         }
 
@@ -68,6 +68,7 @@ import java.util.Objects;
         total.put("weanWeightPerFarrow", div(total.get("weanWeightPerFarrow"), total.get("weanCount")));
         total.put("weanDayAge", div(total.get("weanDayAge"), total.get("weanCount")));
 
+        total.put("pigletChgFarmOutAvgWeight", div(total.get("pigletChgFarmOutAvgWeight"), total.get("pigletChgFarmOut")));
         total.put("pigletSaleAveWeight", div(total.get("pigletSaleAveWeight"), total.get("pigletSale")));
 
         return maps;
@@ -83,6 +84,7 @@ import java.util.Objects;
             Map<String, String> map = maps.get(i);
             total.put("turnInto", add(map.get("turnInto"), total.get("turnInto")));
             total.put("turnIntoAvgWeight", add(multi(map.get("turnIntoAvgWeight"), map.get("turnInto")), total.get("turnIntoAvgWeight")));
+            total.put("turnIntoAge", add(multi(map.get("turnIntoAge"), map.get("turnInto")), total.get("turnIntoAge")));
             total.put("sale", add(map.get("sale"), total.get("sale")));
             total.put("saleAvgWeight", add(multi(map.get("saleAvgWeight"), map.get("sale")), total.get("saleAvgWeight")));
             total.put("toHoubei", add(map.get("toHoubei"), total.get("toHoubei")));
@@ -96,6 +98,7 @@ import java.util.Objects;
         }
 
         total.put("turnIntoAvgWeight", div(total.get("turnIntoAvgWeight"), total.get("turnInto")));
+        total.put("turnIntoAge", div(total.get("turnIntoAge"), total.get("turnInto")));
         total.put("saleAvgWeight", div(total.get("saleAvgWeight"), total.get("sale")));
         total.put("toHoubeiAvgWeight", div(total.get("toHoubeiAvgWeight"), total.get("toHoubei")));
         total.put("chgFarmAvgWeight", div(total.get("chgFarmAvgWeight"), total.get("chgFarmOut")));
@@ -131,6 +134,7 @@ import java.util.Objects;
             Map<String, String> map = maps.get(i);
             total.put("turnInto", add(map.get("turnInto"), total.get("turnInto")));
             total.put("turnIntoAvgWeight", add(multi(map.get("turnIntoAvgWeight"), map.get("turnInto")), total.get("turnIntoAvgWeight")));
+            total.put("turnIntoAge", add(multi(map.get("turnIntoAge"), map.get("turnInto")), total.get("turnIntoAge")));
             total.put("sale", add(map.get("sale"), total.get("sale")));
             total.put("saleAvgWeight", add(multi(map.get("saleAvgWeight"), map.get("sale")), total.get("saleAvgWeight")));
             total.put("toFatten", add(map.get("toFatten"), total.get("toFatten")));
@@ -146,6 +150,7 @@ import java.util.Objects;
         }
 
         total.put("turnIntoAvgWeight", div(total.get("turnIntoAvgWeight"), total.get("turnInto")));
+        total.put("turnIntoAge", div(total.get("turnIntoAge"), total.get("turnInto")));
         total.put("saleAvgWeight", div(total.get("saleAvgWeight"), total.get("sale")));
         total.put("toFattenAvgWeight", div(total.get("toFattenAvgWeight"), total.get("toFatten")));
         total.put("toHoubeiAvgWeight", div(total.get("toHoubeiAvgWeight"), total.get("toHoubei")));
