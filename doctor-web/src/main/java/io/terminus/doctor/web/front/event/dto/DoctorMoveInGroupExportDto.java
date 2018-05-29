@@ -3,6 +3,8 @@ package io.terminus.doctor.web.front.event.dto;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * Created by terminus on 2017/3/15.
  */
