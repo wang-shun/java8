@@ -153,6 +153,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
                 DoctorBarn doctorBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
                 //查当前猪可执行的事件，并和已有事件取交集
                 pigEvents.retainAll(pigEventManager.selectEvents(PigStatus.from(doctorPigTrack.getStatus()), PigType.from(doctorBarn.getPigType())));
+                //当母猪是配种状态，且配种次数大于3，不给配。
                 if (pigEvents.contains(PigEvent.MATING) && Objects.equals(doctorPigTrack.getCurrentMatingCount(), 3)) {
                     pigEvents.remove(PigEvent.MATING);
                 }
