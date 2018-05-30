@@ -468,7 +468,7 @@ export.tables:
           display: 录入时间
           format: mmDateFormatter
   web-pig-boarTransFarm:
-      display: 公猪转场事件
+      display: 公猪转场转出事件
       columns:
         - name: pigCode
           display: 公猪号
@@ -487,10 +487,29 @@ export.tables:
           display: 转场人员
         - name: remark
           display: 备注
-        - name: createdAt
-          display: 录入时间
-          format: mmDateFormatter
-
+  web-pig-boarTransFarmIn:
+        display: 公猪转场转入事件
+        columns:
+          - name: pigCode
+            display: 公猪号
+          - name: chgFarmDate
+            display: 转场日期
+            format: isoDateFormatter
+          - name: fromFarmName
+            display: 原猪场
+          - name: fromBarnName
+            display: 原猪舍
+          - name: toFarmName
+            display: 转入猪场
+          - name: toBarnName
+            display: 转入猪舍
+          - name: operatorName
+            display: 转场人员
+          - name: remark
+            display: 备注
+          - name: createdAt
+            display: 录入时间
+            format: mmDateFormatter
   web-pig-sowRemove:
       display: 母猪离场事件
       columns:
@@ -827,7 +846,7 @@ export.tables:
           display: 录入时间
           format: mmDateFormatter
   web-pig-sowTransFarm:
-      display: 母猪转场事件
+      display: 母猪转场转出事件
       columns:
         - name: pigCode
           display: 母猪号
@@ -851,6 +870,28 @@ export.tables:
         - name: createdAt
           display: 录入时间
           format: mmDateFormatter
+web-pig-sowTransFarmIn:
+      display: 母猪转场转入事件
+      columns:
+        - name: pigCode
+          display: 母猪号
+        - name: chgFarmDate
+          display: 转场日期
+          format: isoDateFormatter
+        - name: fromFarmName
+          display: 原猪场
+        - name: fromBarnName
+          display: 原猪舍
+        - name: toFarmName
+          display: 转入猪场
+        - name: toBarnName
+          display: 转入猪舍
+        - name: pigletsCount
+          display: 转入仔猪数
+        - name: operatorName
+          display: 转场人员
+        - name: remark
+          display: 备注
   web-pig-sowCondition:
       display: 母猪猪体况
       columns:
