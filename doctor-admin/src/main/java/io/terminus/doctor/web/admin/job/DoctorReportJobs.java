@@ -81,7 +81,7 @@ public class DoctorReportJobs {
             }
             log.info("daily report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
 
-            Date yestoday = DateTime.now().minusDays(10).toDate();
+            Date yestoday = DateTime.now().minusDays(1).toDate();
             doctorDailyReportV2Service.generateYesterdayAndToday(getAllFarmIds(), yestoday);
 
             log.info("daily report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
@@ -134,6 +134,26 @@ public class DoctorReportJobs {
             log.info("parity monthly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
             log.error("parity monthly report job failed, cause:{}", Throwables.getStackTraceAsString(e));
+        }
+    }
+
+    @Scheduled(cron = "0 0 5 * * ?")
+    @RequestMapping(value = "/deliver/rate", method = RequestMethod.GET)
+    public void deliverRate() {
+        try {
+            if (!hostLeader.isLeader()) {
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
+            log.info("deliver rate report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
+
+            //获取昨天的天初
+            Date yesterday = DateTime.now().minusDays(1).toDate();
+            RespHelper.or500(doctorDailyReportV2Service.generateDeliverRate(getAllFarmIds(), yesterday));
+
+            log.info("deliver rate report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+        } catch (Exception e) {
+            log.error("deliver rate  report job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
     }
 

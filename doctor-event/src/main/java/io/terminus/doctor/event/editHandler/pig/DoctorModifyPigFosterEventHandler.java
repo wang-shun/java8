@@ -84,19 +84,20 @@ public class DoctorModifyPigFosterEventHandler extends DoctorAbstractModifyPigEv
 
     @Override
     protected boolean rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
-        return false;
+        DoctorPigEvent fosterByEvent = doctorPigEventDao.findByRelPigEventId(deletePigEvent.getId());
+        Boolean rollback = Objects.equals(deletePigEvent.getBarnId(), fosterByEvent.getBarnId());
+        return rollback && doctorModifyPigFosterByEventHandler.rollbackHandleCheck(fosterByEvent);
     }
 
     @Override
     protected void triggerEventRollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
-        super.triggerEventRollbackHandle(deletePigEvent, operatorId, operatorName);
+        DoctorPigEvent fosterByEvent = doctorPigEventDao.findByRelPigEventId(deletePigEvent.getId());
+        doctorModifyPigFosterByEventHandler.rollbackHandle(fosterByEvent, operatorId, operatorName);
     }
 
     @Override
     protected DoctorPigTrack buildNewTrackForRollback(DoctorPigEvent deletePigEvent, DoctorPigTrack oldPigTrack) {
-        if (Objects.equals(oldPigTrack.getStatus(), PigStatus.FEED.getKey())) {
-            oldPigTrack.setUnweanQty(EventUtil.plusInt(oldPigTrack.getUnweanQty(), deletePigEvent.getQuantity()));
-        }
+        oldPigTrack.setUnweanQty(EventUtil.plusInt(oldPigTrack.getUnweanQty(), deletePigEvent.getQuantity()));
         return oldPigTrack;
     }
 

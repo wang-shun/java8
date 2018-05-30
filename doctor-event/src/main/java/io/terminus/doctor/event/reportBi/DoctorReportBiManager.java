@@ -23,12 +23,22 @@ public class DoctorReportBiManager {
         this.query = query;
     }
 
+    /**
+     * 增量同步，每个猪场指定时间后的数据
+     * @param longDateMap 猪场id与同步日期的map
+     */
     public void synchronizeDeltaDayBiData(Map<Long, Date> longDateMap) {
         synchronize.synchronizeDeltaDayBiData(longDateMap);
     }
 
-    public void synchronizeDeltaDayBiData(Long farmId, Date start, Integer orzType) {
-        synchronize.synchronizeDeltaDayBiData(farmId, start, orzType);
+    /**
+     * 同步某组织维度指定时间后的数据
+     * @param orzId
+     * @param start
+     * @param orzType
+     */
+    public void synchronizeDeltaDayBiData(Long orzId, Date start, Integer orzType) {
+        synchronize.synchronizeDeltaDayBiData(orzId, start, orzType);
     }
 
     public void synchronizeDelta(Long farmId, Date start, Integer orzType) {
@@ -43,6 +53,11 @@ public class DoctorReportBiManager {
     }
 
 
+    /**
+     * 查询某一维度条件下的报表数据
+     * @param dimensionCriteria 条件
+     * @return
+     */
     public DoctorDimensionReport dimensionReport(DoctorDimensionCriteria dimensionCriteria) {
         return query.dimensionReport(dimensionCriteria);
     }

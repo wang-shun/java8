@@ -18,6 +18,7 @@ import io.terminus.doctor.event.dto.reportBi.DoctorDimensionReport;
 import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.manager.DoctorDailyReportV2Manager;
+import io.terminus.doctor.event.reportBi.DoctorReportBiDataSynchronize;
 import io.terminus.doctor.event.reportBi.DoctorReportBiManager;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorEfficiencySynchronizer;
 import io.terminus.doctor.event.reportBi.synchronizer.DoctorWarehouseSynchronizer;
@@ -53,12 +54,15 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
     @Autowired
     private DoctorEfficiencySynchronizer efficiencySynchronizer;
 
+    private final DoctorReportBiDataSynchronize doctorReportBiDataSynchronize;
+
     @Autowired
-    public DoctorDailyReportV2ServiceImpl(DoctorDailyReportV2Manager doctorDailyReportV2Manager, DoctorReportBiManager doctorReportBiManager, DoctorPigEventDao doctorPigEventDao, DoctorGroupEventDao doctorGroupEventDao) {
+    public DoctorDailyReportV2ServiceImpl(DoctorDailyReportV2Manager doctorDailyReportV2Manager, DoctorReportBiManager doctorReportBiManager, DoctorPigEventDao doctorPigEventDao, DoctorGroupEventDao doctorGroupEventDao, DoctorReportBiDataSynchronize doctorReportBiDataSynchronize) {
         this.doctorDailyReportV2Manager = doctorDailyReportV2Manager;
         this.doctorReportBiManager = doctorReportBiManager;
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
+        this.doctorReportBiDataSynchronize = doctorReportBiDataSynchronize;
     }
 
     @Override
@@ -210,7 +214,9 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
     @Override
     public Response<Boolean> synchronizeDeltaDayBiData(Long orzId, Date start, Integer orzType) {
         try {
+            log.info("synchronize Delta day bi data starting, orzId:{}, orzType:{}, start:{}", orzId, orzType, start);
             doctorReportBiManager.synchronizeDeltaDayBiData(orzId, start, orzType);
+            log.info("synchronize Delta day bi data end");
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("synchronize delta day bi data failed,orzId:{}, start:{}, orzType:{}, cause:{}",
@@ -357,6 +363,33 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
         } catch (Exception e) {
             log.error("find early at failed,cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("find.early.at.failed");
+        }
+    }
+
+    @Override
+    public Response<Boolean> generateDeliverRate(List<Long> farmIds, Date date) {
+        try {
+            log.info("generate deliver rate starting");
+            Map<Long, Date> farmToDate = doctorDailyReportV2Manager.queryFarmDeliverRateDate(DateUtil.toDateString(date));
+            doctorReportBiDataSynchronize.synchronizeDeltaDeliverRate(farmToDate);
+            log.info("generate deliver rate end");
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("generate deliver rate failed, date:{},cause:{}", date, Throwables.getStackTraceAsString(e));
+            return Response.fail("generate.deliver.rate.failed");
+        }
+    }
+
+    @Override
+    public Response<Boolean> flushDeliverRate(Long orzId, Integer orzType, Date start) {
+        try {
+            log.info("flush deliver rate starting, orzId:{}, orzType:{}, start:{}", orzId, orzType, start);
+            doctorReportBiDataSynchronize.synchronizeDeliverRate(orzId, orzType, start, 1);
+            log.info("flush deliver rate end");
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error(",cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("flush.deliver.rate.failed");
         }
     }
 }

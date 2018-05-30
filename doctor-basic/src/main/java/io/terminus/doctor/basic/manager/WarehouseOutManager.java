@@ -10,6 +10,7 @@ import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.*;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,18 +42,17 @@ public class WarehouseOutManager extends AbstractStockManager<WarehouseStockOutD
         //出库类型，当天最后一笔
         if (!DateUtil.inSameDate(stockDto.getHandleDate().getTime(), new Date())) {
 
-            materialHandle.setHandleDate(this.buildNewHandleDate(stockDto.getHandleDate()).getTime());
-
             //获取该笔明细之前的库存量，包括该事件日期
             BigDecimal historyQuantity = getHistoryQuantityInclude(stockDto.getHandleDate().getTime(), wareHouse.getId(), detail.getMaterialId());
 
-            materialHandle.setBeforeStockQuantity(historyQuantity);
-
-            historyQuantity = historyQuantity.subtract(detail.getQuantity());
-
-            if (historyQuantity.compareTo(new BigDecimal(0)) < 0) {
-                throw new ServiceException("warehouse.stock.not.enough");
+            if (historyQuantity.compareTo(materialHandle.getQuantity()) < 0) {
+//                throw new ServiceException("warehouse.stock.not.enough");
+                throw new InvalidException("history.stock.not.enough.no.unit", materialHandle.getWarehouseName(), materialHandle.getMaterialName(), historyQuantity);
             }
+
+            materialHandle.setHandleDate(this.buildNewHandleDate(stockDto.getHandleDate()).getTime());
+            materialHandle.setBeforeStockQuantity(historyQuantity);
+            historyQuantity = historyQuantity.subtract(detail.getQuantity());
 
             //该笔单据明细之后单据明细需要重算
             recalculate(stockDto.getHandleDate().getTime(), false, wareHouse.getId(), detail.getMaterialId(), historyQuantity);
@@ -62,7 +62,8 @@ public class WarehouseOutManager extends AbstractStockManager<WarehouseStockOutD
                     .getQuantity();
 
             if (currentQuantity.compareTo(materialHandle.getQuantity()) < 0)
-                throw new ServiceException("warehouse.stock.not.enough");
+//                throw new ServiceException("warehouse.stock.not.enough");
+                throw new InvalidException("stock.not.enough.no.unit", materialHandle.getWarehouseName(), materialHandle.getMaterialName(), currentQuantity);
 
             materialHandle.setBeforeStockQuantity(currentQuantity);
         }

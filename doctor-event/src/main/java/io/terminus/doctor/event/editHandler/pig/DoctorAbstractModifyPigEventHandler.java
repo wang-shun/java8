@@ -399,7 +399,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
      * @return 是否需要更新track
      */
     private boolean isUpdateTrack(Integer eventType) {
-        return !IGNORE_EVENT.contains(eventType);
+        return !IGNORE_EVENT.contains(eventType) && !Objects.equals(eventType, PigEvent.CHG_FARM_IN.getKey());
     }
 
     private void createTrackSnapshotFroDelete(DoctorPigEvent deleteEvent, Long modifyLogId) {

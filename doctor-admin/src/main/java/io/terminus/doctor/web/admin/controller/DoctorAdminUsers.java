@@ -2,6 +2,7 @@ package io.terminus.doctor.web.admin.controller;
 
 import com.google.api.client.util.Maps;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
@@ -269,6 +270,15 @@ public class DoctorAdminUsers {
                                                                  @RequestParam(required = false) Integer type,
                                                                  @RequestParam(required = false) Integer pageNo,
                                                                  @RequestParam(required = false) Integer pageSize) {
+        if (Strings.isNullOrEmpty(name)) {
+            name = null;
+        }
+        if (Strings.isNullOrEmpty(email)) {
+            email = null;
+        }
+        if (Strings.isNullOrEmpty(mobile)) {
+            mobile = null;
+        }
         Paging<User> userPaging = RespHelper.or500(primaryUserReadService.pagingOpenDoctorServiceUser(id, name, email, mobile, status, type, pageNo, pageSize));
         if (userPaging.getTotal() == 0L) {
             return new Paging<>(0L, Collections.emptyList());

@@ -78,7 +78,7 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
     /**
      * 重算
      *
-     * @param handleDate      入库类型，是handleDate+00:00:00；出库类型，是handleDate+23:59:59
+     * @param handleDate      handleDate+23:59:59
      * @param historyQuantity 历史库存量
      */
     public void recalculate(Date handleDate, boolean includeHandleDate, Long warehouseId, Long skuId, BigDecimal historyQuantity) {
@@ -88,7 +88,9 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
         for (DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle : needToRecalculate) {
             if (WarehouseMaterialHandleType.isBigOut(doctorWarehouseMaterialHandle.getType())
                     && historyQuantity.compareTo(doctorWarehouseMaterialHandle.getQuantity()) < 0)
-                throw new ServiceException("warehouse.stock.not.enough");
+//                throw new ServiceException("warehouse.stock.not.enough");
+                throw new InvalidException("history.stock.not.enough.no.unit", doctorWarehouseMaterialHandle.getWarehouseName(), doctorWarehouseMaterialHandle.getMaterialName(), historyQuantity);
+
 
             log.debug("set {} before stock quantity:{}", doctorWarehouseMaterialHandle.getId(), historyQuantity);
             doctorWarehouseMaterialHandle.setBeforeStockQuantity(historyQuantity);

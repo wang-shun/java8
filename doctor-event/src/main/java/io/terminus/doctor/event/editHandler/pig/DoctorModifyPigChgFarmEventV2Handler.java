@@ -2,11 +2,15 @@ package io.terminus.doctor.event.editHandler.pig;
 
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.event.dao.DoctorChgFarmInfoDao;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.edit.DoctorEventChangeDto;
+import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTransFarmEventHandler;
 import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorChgFarmInfo;
 import io.terminus.doctor.event.model.DoctorDailyReport;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigDaily;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -21,17 +25,18 @@ import static io.terminus.common.utils.Arguments.notNull;
 import static io.terminus.doctor.event.editHandler.group.DoctorAbstractModifyGroupEventHandler.getAfterDay;
 
 /**
- * Created by xjn on 17/4/19.
- * 转场
- *
+ * Created by xjn on 18/4/23.
+ * email:xiaojiannan@terminus.io
  */
-@Deprecated
 @Component
-public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigEventHandler {
+public class DoctorModifyPigChgFarmEventV2Handler extends DoctorAbstractModifyPigEventHandler{
+
     @Autowired
-    private DoctorModifyPigRemoveEventHandler modifyPigRemoveEventHandler;
+    private DoctorModifyPigChgFarmInEventV2Handler modifyPigChgFarmInEventHandler;
     @Autowired
-    private DoctorModifyPigChgFarmInEventHandler modifyPigChgFarmInEventHandler;
+    private DoctorModifyGroupTransFarmEventHandler modifyGroupTransFarmEventHandler;
+    @Autowired
+    private DoctorChgFarmInfoDao doctorChgFarmInfoDao;
 
     @Override
     protected void modifyHandleCheck(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
@@ -41,32 +46,55 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
     @Override
     protected boolean rollbackHandleCheck(DoctorPigEvent deletePigEvent) {
         DoctorPigEvent chgFarmInEvent = doctorPigEventDao.findByRelPigEventId(deletePigEvent.getId());
-        DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(deletePigEvent.getPigId());
         DoctorBarn doctorBarn = doctorBarnDao.findById(deletePigEvent.getBarnId());
-        return notNull(lastEvent)
-                && Objects.equals(doctorBarn.getStatus(), DoctorBarn.Status.USING.getValue())
-                && Objects.equals(deletePigEvent.getId(), lastEvent.getId())
-                && modifyPigChgFarmInEventHandler.rollbackHandleCheck(chgFarmInEvent);
+        DoctorGroupEvent groupEvent = doctorGroupEventDao.findByRelPigEventId(deletePigEvent.getId());
+        Boolean rollback = true;
+        if (notNull(groupEvent)) {
+            rollback = modifyGroupTransFarmEventHandler.rollbackHandleCheck(groupEvent);
+        }
+        return  Objects.equals(doctorBarn.getStatus(), DoctorBarn.Status.USING.getValue())
+                && modifyPigChgFarmInEventHandler.rollbackHandleCheck(chgFarmInEvent)
+                && rollback;
     }
 
     @Override
     protected void triggerEventRollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
+
         DoctorPigEvent chgFarmInEvent = doctorPigEventDao.findByRelPigEventId(deletePigEvent.getId());
         modifyPigChgFarmInEventHandler.rollbackHandle(chgFarmInEvent, operatorId, operatorName);
+
+        DoctorGroupEvent groupEvent = doctorGroupEventDao.findByRelPigEventId(deletePigEvent.getId());
+        if (notNull(groupEvent)) {
+            modifyGroupTransFarmEventHandler.rollbackHandle(groupEvent, operatorId, operatorName);
+        }
     }
 
     @Override
     protected DoctorPig buildNewPigForRollback(DoctorPigEvent deletePigEvent, DoctorPig oldPig) {
-        return modifyPigRemoveEventHandler.buildNewPigForRollback(deletePigEvent, oldPig);
+        DoctorChgFarmInfo doctorChgFarmInfo = doctorChgFarmInfoDao.findByFarmIdAndPigId(deletePigEvent.getFarmId(), deletePigEvent.getPigId());
+        DoctorPig doctorPig = JSON_MAPPER.fromJson(doctorChgFarmInfo.getPig(), DoctorPig.class);
+        doctorPig.setExtra(oldPig.getExtra());
+        return doctorPig;
     }
 
     @Override
     protected DoctorPigTrack buildNewTrackForRollback(DoctorPigEvent deletePigEvent, DoctorPigTrack oldPigTrack) {
-        return modifyPigRemoveEventHandler.buildNewTrackForRollback(deletePigEvent, oldPigTrack);
+        DoctorBarn doctorBarn = doctorBarnDao.findById(deletePigEvent.getBarnId());
+        oldPigTrack.setFarmId(deletePigEvent.getFarmId());
+        oldPigTrack.setCurrentBarnId(doctorBarn.getId());
+        oldPigTrack.setCurrentBarnName(doctorBarn.getName());
+        oldPigTrack.setCurrentBarnType(doctorBarn.getPigType());
+        if (!Objects.equals(deletePigEvent.getPigStatusBefore(), oldPigTrack.getStatus())) {
+            oldPigTrack.setStatus(deletePigEvent.getPigStatusBefore());
+        }
+        return oldPigTrack;
     }
 
     @Override
     protected void updateDailyForDelete(DoctorPigEvent deletePigEvent) {
+        DoctorChgFarmInfo doctorChgFarmInfo = doctorChgFarmInfoDao.findByFarmIdAndPigId(deletePigEvent.getFarmId(), deletePigEvent.getPigId());
+        doctorChgFarmInfoDao.delete(doctorChgFarmInfo.getId());
+
         updateDailyOfDelete(deletePigEvent);
     }
 
@@ -145,7 +173,7 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
         if (Objects.equals(changeDto.getPigSex(), DoctorPig.PigSex.BOAR.getKey())) {
             oldDailyPig.setBoarOtherOut(EventUtil.plusInt(oldDailyPig.getBoarOtherOut(), changeDto.getRemoveCountChange()));
             oldDailyPig.setBoarEnd(EventUtil.minusInt(oldDailyPig.getBoarEnd(), changeDto.getRemoveCountChange()));
-           return oldDailyPig;
+            return oldDailyPig;
         }
         //母猪
         if (Objects.equals(changeDto.getBarnType(), PigType.DELIVER_SOW.getValue())) {
@@ -179,6 +207,5 @@ public class DoctorModifyPigChgFarmEventHandler extends DoctorAbstractModifyPigE
         oldDailyPig.setSowEnd(EventUtil.minusInt(oldDailyPig.getSowEnd(), changeDto.getRemoveCountChange()));
         return oldDailyPig;
     }
-
 
 }

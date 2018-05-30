@@ -841,8 +841,8 @@ public class DoctorPigEventExports {
                 exporter.export("web-pig-sowInputFactory", eventCriteria, 1, 500, this::pagingInFarmExport, request, response);
                 break;
             case "20":
-                //进场
-                exporter.export("web-pig-sowInputFactory", eventCriteria, 1, 500, this::pagingInFarmExport, request, response);
+                //转场转入
+                exporter.export("web-pig-sowTransFarmIn", eventCriteria, 1, 500, this::pagingChgFarm, request, response);
                 break;
             case "9":
                 //配种
@@ -904,8 +904,8 @@ public class DoctorPigEventExports {
                 exporter.export("web-pig-boarInputFactory", eventCriteria, 1, 500, this::pagingInFarmExport, request, response);
                 break;
             case "20":
-                //进场
-                exporter.export("web-pig-boarInputFactory", eventCriteria, 1, 500, this::pagingInFarmExport, request, response);
+                //转场转入
+                exporter.export("web-pig-boarTransFarmIn", eventCriteria, 1, 500, this::pagingChgFarm, request, response);
                 break;
             case "8":
                 //采精

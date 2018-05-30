@@ -1,12 +1,13 @@
 package io.terminus.doctor.web.front.warehouseV2;
 
+import com.alibaba.dubbo.rpc.RpcException;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSettlementService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.integration.support.locks.LockRegistry;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -60,8 +60,13 @@ public class SettlementController {
 
         List<Long> farmIds = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orgId)).stream().map(DoctorFarm::getId).collect(Collectors.toList());
 
-        RespHelper.orServEx(doctorWarehouseSettlementService.settlement(orgId, farmIds,
-                settlementDate));
+        try {
+            RespHelper.orServEx(doctorWarehouseSettlementService.settlement(orgId, farmIds,
+                    settlementDate));
+        } catch (RpcException e) {
+            throw new JsonResponseException("结算超时");
+        }
+
         return true;
     }
 

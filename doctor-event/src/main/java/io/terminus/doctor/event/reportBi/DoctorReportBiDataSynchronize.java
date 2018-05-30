@@ -104,7 +104,7 @@ public class DoctorReportBiDataSynchronize {
     }
 
     /**
-     * 全量同步数据
+     * 全量同步数据（此方式全量同步数据太慢，已弃用）
      */
     @Deprecated
     public void synchronizeFullBiData() {
@@ -178,21 +178,35 @@ public class DoctorReportBiDataSynchronize {
         log.info("synchronize real time bi data end");
     }
 
+    /**
+     * 默认不是实时调用
+     * @param orzId
+     * @param orzType
+     * @param date
+     * @param type
+     */
     public void synchronizeDelta(Long orzId, Integer orzType, Date date, Integer type) {
         synchronizeDelta(orzId, orzType, date, date, type, IsOrNot.NO.getKey());
     }
 
     /**
-     *
-     *
+     * 同步数据
+     * @param orzId
+     * @param orzType
+     * @param pigDate
+     * @param groupDate
+     * @param type
+     * @param isRealTime
      */
     public void synchronizeDelta(Long orzId, Integer orzType, Date pigDate, Date groupDate, Integer type, Integer isRealTime) {
 
+        //如果组织类型是猪场，则同步该猪场数据，以及猪场所在公司数据
         if (Objects.equals(orzType, OrzDimension.FARM.getValue())) {
             DoctorFarm doctorFarm = RespHelper.orServEx(doctorFarmReadService.findFarmById(orzId));
             synchronizeDeltaBiData(orzId, orzType, pigDate, groupDate, type, isRealTime);
             synchronizeDeltaBiData(doctorFarm.getOrgId(), OrzDimension.ORG.getValue(), pigDate, groupDate, type, isRealTime);
         } else if (Objects.equals(orzType, OrzDimension.ORG.getValue())) {
+            //如果组织维度是公司，则同步公司下所有猪场，以及公司数据
             List<DoctorFarm> farmList = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orzId));
             farmList.parallelStream().forEach(doctorFarm -> {
                 synchronizeDeltaBiData(doctorFarm.getId(), OrzDimension.FARM.getValue(), pigDate, groupDate, type, isRealTime);
@@ -201,6 +215,13 @@ public class DoctorReportBiDataSynchronize {
         }
     }
 
+    /**
+     * 用于猪与猪群查询日期相同
+     * @param orzId
+     * @param orzType
+     * @param date
+     * @param type
+     */
     private void synchronizeDeltaBiData(Long orzId, Integer orzType, Date date, Integer type) {
         synchronizeDeltaBiData(orzId, orzType, date, date, type, IsOrNot.NO.getKey());
     }
@@ -210,10 +231,10 @@ public class DoctorReportBiDataSynchronize {
          * @param orzId 组织id
          * @param orzType 组织类型
          *                @see OrzDimension
-         * @param pigDate 查询date 之后的日报包含date
-         * @param groupDate 查询date 之后的日报包含date
+         * @param pigDate 查询猪date 之后的日报包含date
+         * @param groupDate 查询猪群date 之后的日报包含date
          * @param type  标志日报中的哪个字段与date进行比较，1-》日报中的sumAt， 2-》日报中的updatedAt
-         * @param isRealTime
+         * @param isRealTime 是否是实时同步调用
          *
          */
     private void synchronizeDeltaBiData(Long orzId, Integer orzType, Date pigDate, Date groupDate, Integer type, Integer isRealTime) {
@@ -254,6 +275,48 @@ public class DoctorReportBiDataSynchronize {
             });
         }
 
+    }
+
+    /**
+     * 增量同步产房区，分娩率
+     * @param farmIdToSumAt
+     */
+    public void synchronizeDeltaDeliverRate(Map<Long, Date> farmIdToSumAt) {
+        log.info("synchronize delta day bi data starting");
+        farmIdToSumAt.entrySet().parallelStream().forEach(entry -> {
+            synchronizeDeliverRate(entry.getKey(), OrzDimension.FARM.getValue(), entry.getValue(), 1);
+            log.info("synchronize delta farm ending: farmId:{}, date:{}", entry.getKey(), entry.getValue());
+        });
+        Map<Long, Date> orgIdToSumAt = Maps.newHashMap();
+        farmIdToSumAt.forEach((key, value) -> {
+            Long orgId = cache.getUnchecked(key).getOrgId();
+            if (!orgIdToSumAt.containsKey(orgId) || value.before(orgIdToSumAt.get(orgId))) {
+                orgIdToSumAt.put(orgId, value);
+            }
+        });
+        orgIdToSumAt.entrySet().parallelStream().forEach(entry -> {
+            synchronizeDeliverRate(entry.getKey(), OrzDimension.ORG.getValue(), entry.getValue(), 1);
+            log.info("synchronize delta orgId ending: orgId:{}, date:{}", entry.getKey(), entry.getValue());
+        });
+        log.info("synchronize delta day bi data end");
+
+    }
+
+    /**
+     * 同步产房区
+     * @param orzId
+     * @param orzType
+     * @param pigDate
+     * @param type
+     */
+    public void synchronizeDeliverRate(Long orzId, Integer orzType, Date pigDate, Integer type) {
+        List<DoctorDimensionCriteria> criteriaList = Lists.newArrayList();
+        criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, pigDate, type, DateDimension.DAY.getValue(), orzType));
+        criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, pigDate, type, DateDimension.WEEK.getValue(), orzType));
+        criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, pigDate, type, DateDimension.MONTH.getValue(), orzType));
+        criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, pigDate, type, DateDimension.QUARTER.getValue(), orzType));
+        criteriaList.addAll(doctorPigDailyDao.findByDateType(orzId, pigDate, type, DateDimension.YEAR.getValue(), orzType));
+        criteriaList.parallelStream().forEach(deliverSynchronizer::synchronizeDeliverRate);
     }
 
     /**
@@ -459,8 +522,8 @@ public class DoctorReportBiDataSynchronize {
             } else {
                 Date minDate = doctorGroupDailyDao.minDate(dimensionCriteria);
                 Date maxDate = doctorGroupDailyDao.maxDate(dimensionCriteria);
-                start = doctorGroupDailyDao.orgDayStock(dimensionCriteria.getOrzId(), minDate);
-                end = doctorGroupDailyDao.orgDayStock(dimensionCriteria.getOrzId(), maxDate);
+                start = doctorGroupDailyDao.orgDayStartStock(dimensionCriteria.getOrzId(), minDate, dimensionCriteria.getPigType());
+                end = doctorGroupDailyDao.orgDayEndStock(dimensionCriteria.getOrzId(), maxDate, dimensionCriteria.getPigType());
                 groupDaily.setDailyLivestockOnHand(FieldHelper.getInteger(doctorGroupDailyDao.orgDayAvgLiveStock(dimensionCriteria), DateUtil.getDeltaDaysAbs(maxDate, minDate)));
             }
             groupDaily.setStart(start);

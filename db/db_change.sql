@@ -2145,6 +2145,28 @@ ALTER TABLE `doctor_track_snapshots` ADD COLUMN `event_source` tinyint (4) DEFAU
 create index doctor_event_modify_logs_business_id on doctor_event_modify_logs(business_id);
 
 
+
+CREATE TABLE `doctor_chg_farm_infos` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `farm_id` bigint(20) NOT NULL COMMENT '猪场id',
+  `pig_id`  bigint(20) NOT NULL COMMENT '猪id',
+  `pig_code` VARCHAR(64) NOT NULL COMMENT '猪耳号',
+  `pig_type` tinyint(4) NOT NULL COMMENT '猪性别，1-》母猪，2-》公猪',
+  `barn_id` bigint(20) NOT NULL COMMENT '所属猪舍',
+  `rfid` VARCHAR(32) DEFAULT NULL COMMENT 'rfid',
+  `event_id` VARCHAR(64) NOT NULL COMMENT '转场事件id',
+  `track` VARCHAR (1024) NOT NULL COMMENT 'track json',
+  `pig` VARCHAR (1024) NOT NULL COMMENT 'pig json',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `index_farm_id` (`farm_id`),
+  KEY `index_pig_id` (`pig_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='猪场猪转场记录';
+
+-- 转场事件名 改为转场转出
+UPDATE doctor_pig_events set name = '转场转出' where type = 2;
+
 -- 修改单据明细中的盘点之前库存数量字段 2018-04-09
 ALTER TABLE doctor_warehouse_material_handle CHANGE before_inventory_quantity before_stock_quantity DECIMAL(23,2) COMMENT '之前库存数量';
 

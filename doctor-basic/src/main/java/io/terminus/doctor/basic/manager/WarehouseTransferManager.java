@@ -9,6 +9,7 @@ import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -45,11 +46,13 @@ public class WarehouseTransferManager extends AbstractStockManager {
 
 
             if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.TRANSFER_OUT.getValue())) {
-                historyQuantity = historyQuantity.subtract(detail.getQuantity());
 
-                if (historyQuantity.compareTo(new BigDecimal(0)) < 0) {
-                    throw new ServiceException("warehouse.stock.not.enough");
+                if (historyQuantity.compareTo(detail.getQuantity()) < 0) {
+//                    throw new ServiceException("warehouse.stock.not.enough");
+                    throw new InvalidException("history.stock.not.enough.no.unit", materialHandle.getWarehouseName(), materialHandle.getMaterialName(), historyQuantity);
                 }
+
+                historyQuantity = historyQuantity.subtract(detail.getQuantity());
             } else {
                 historyQuantity = historyQuantity.add(detail.getQuantity());
             }
@@ -63,7 +66,8 @@ public class WarehouseTransferManager extends AbstractStockManager {
 
             if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.TRANSFER_OUT.getValue()) &&
                     currentQuantity.compareTo(materialHandle.getQuantity()) < 0)
-                throw new ServiceException("warehouse.stock.not.enough");
+//                throw new ServiceException("warehouse.stock.not.enough");
+                throw new InvalidException("stock.not.enough.no.unit", materialHandle.getWarehouseName(), materialHandle.getMaterialName(), currentQuantity);
 
             materialHandle.setBeforeStockQuantity(currentQuantity);
         }
@@ -78,7 +82,7 @@ public class WarehouseTransferManager extends AbstractStockManager {
         doctorWarehouseMaterialHandleDao.update(materialHandle);
 
 //        if (!DateUtil.inSameDate(materialHandle.getHandleDate(), new Date())) {
-            recalculate(materialHandle);
+        recalculate(materialHandle);
 //        }
     }
 }
