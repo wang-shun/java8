@@ -150,6 +150,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
         } catch (InvalidException e) {
             return RespWithEx.exception(e);
         } catch (Exception e){
+            e.printStackTrace();
             log.error("query pig detail info fail, cause:{}", Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("query.pigDetailInfo.fail");
         }
