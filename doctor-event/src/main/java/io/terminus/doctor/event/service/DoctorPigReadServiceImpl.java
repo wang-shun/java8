@@ -138,12 +138,13 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
                         .minus(doctorPig.getBirthDate().getTime()).getMillis() / (1000 * 60 * 60 * 24) + 1);
             }
             Integer targetEventSize = MoreObjects.firstNonNull(eventSize, 3);
-            log.error("queryPigDetailInfoByPigId:3");
+            log.error("queryPigDetailInfoByPigId:3"+pigId+targetEventSize);
             List<DoctorPigEvent> doctorPigEvents;
             if (isNull(doctorChgFarmInfo)) {
                 doctorPigEvents = RespHelper.orServEx(
                         doctorPigEventReadService.queryPigDoctorEvents(null, pigId, 1, targetEventSize, null, null)).getData();
             } else {
+                log.error("queryPigDetailInfoByPigId:3"+doctorChgFarmInfo.getEventId());
                 doctorPigEvents = doctorPigEventDao.queryBeforeChgFarm(pigId, doctorChgFarmInfo.getEventId());
             }
             log.error("queryPigDetailInfoByPigId:4"+isNull(doctorChgFarmInfo));
