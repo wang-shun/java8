@@ -186,8 +186,6 @@ public class DoctorSearches {
 
         searchFromMessage(params);
 
-        log.error("pagePigs"+params.toString());
-
         params.put("pigCode", params.get("q"));
         params.put("pigType", pigType.getKey().toString());
         Map<String, Object> objectMap = transMapType(params);
@@ -219,7 +217,14 @@ public class DoctorSearches {
         if(objectMap.containsKey("statuses")){
             objectMap.put("statuses", Splitters.splitToInteger(objectMap.get("statuses").toString(), Splitters.UNDERSCORE));
         }
-        Paging<SearchedPig> paging = RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
+
+        Paging<SearchedPig> paging;
+        if(objectMap.containsKey("statuses")
+                && ((List)objectMap.get("statuses")).contains(PigStatus.CHG_FARM.getKey())){
+            paging = RespHelper.or500(doctorPigReadService.pagingChgFarmPig(objectMap, pageNo, pageSize));
+        } else {
+            paging = RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
+        }
         paging.getData().forEach(searchedPig -> {
             if(searchedPig.getPigType() != null){
                 DoctorPig.PigSex pigSex = DoctorPig.PigSex.from(searchedPig.getPigType());
@@ -229,12 +234,23 @@ public class DoctorSearches {
             }
 
             Integer status = searchedPig.getStatus();
-            KongHuaiPregCheckResult result = KongHuaiPregCheckResult.from(searchedPig.getStatus());
-            if (result != null) {
-                status = PigStatus.KongHuai.getKey();
+            Date eventAt;
+            if (Objects.equals(status, PigStatus.CHG_FARM.getKey())) {
+                DoctorChgFarmInfo doctorChgFarmInfo = RespHelper.or500(doctorPigReadService.findByFarmIdAndPigId(searchedPig.getFarmId(), searchedPig.getId()));
+                DoctorPigEvent chgFarm = RespHelper.or500(doctorPigEventReadService.findById(doctorChgFarmInfo.getEventId()));
+                eventAt = chgFarm.getEventAt();
+            } else {
+                KongHuaiPregCheckResult result = KongHuaiPregCheckResult.from(searchedPig.getStatus());
+                if (result != null) {
+                    status = PigStatus.KongHuai.getKey();
+                }
+
+                if (Objects.equals(status, PigStatus.Pregnancy.getKey())) {
+                    status = PigStatus.Mate.getKey();
+                }
+                eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(searchedPig.getId()
+                        , status));
             }
-            Date eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(searchedPig.getId()
-                    , status));
             Integer statusDay = DateUtil.getDeltaDays(eventAt, new Date());
             searchedPig.setStatusDay(statusDay);
         });
