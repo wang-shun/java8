@@ -3,6 +3,8 @@ package io.terminus.doctor.web.front.event.dto;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * Created by terminus on 2017/3/15.
  */
@@ -35,4 +37,9 @@ public class DoctorDiseaseGroupExportDto extends DoctorGroupEvent{
      * 疾病猪只数
      */
     private Integer quantity;
+
+    /**
+     * 创建日期
+     */
+    private Date createdAt;
 }

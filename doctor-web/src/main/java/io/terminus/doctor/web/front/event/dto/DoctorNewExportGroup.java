@@ -5,6 +5,7 @@ import lombok.Data;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 
 /**
  * Created by terminus on 2017/3/15.
@@ -81,4 +82,9 @@ public class DoctorNewExportGroup extends DoctorGroupEvent {
      * 当前状态
      */
     private String currentStatus;
+
+    /**
+     * 录入时间
+     */
+    private Date createdAt;
 }

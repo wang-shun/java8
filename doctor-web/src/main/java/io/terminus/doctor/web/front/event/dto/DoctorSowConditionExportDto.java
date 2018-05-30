@@ -25,4 +25,5 @@ public class DoctorSowConditionExportDto implements Serializable {
 
     private String operatorName;
     private String creatorName;
+    private Date createdAt;
 }

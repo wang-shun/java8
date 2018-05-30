@@ -25,5 +25,5 @@ public class DoctorWeanExportDto implements Serializable{
     private Integer partWeanPigletsCount; //已断奶数
     private String operatorName;
     private String creatorName;
-
+    private Date createdAt;
 }

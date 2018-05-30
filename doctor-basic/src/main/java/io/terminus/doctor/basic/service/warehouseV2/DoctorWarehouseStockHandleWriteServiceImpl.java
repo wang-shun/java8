@@ -3,7 +3,6 @@ package io.terminus.doctor.basic.service.warehouseV2;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
-import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.*;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
@@ -18,7 +17,6 @@ import io.terminus.doctor.common.exception.InvalidException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +24,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
 /**
@@ -136,7 +133,7 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
             if(type == 2){
                 List<DoctorWarehouseStockHandle> a = doctorWarehouseStockHandleDao.findByRelStockHandleIds(id);
                 if(a.size() == 1){
-                    return Response.fail("此物料存在退料,不支持删除");
+                    return Response.fail("此物料存在退料,不支持删除" );
                 }
                 warehouseOutManager.delete(handle);
                 doctorWarehouseStockManager.in(handle.getMaterialId(),handle.getQuantity(),wareHouse);
