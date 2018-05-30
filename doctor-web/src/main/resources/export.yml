@@ -873,7 +873,7 @@ export.tables:
           format: mmDateFormatter
         - name: remark
           display: 备注
-web-pig-sowTransFarmIn:
+  web-pig-sowTransFarmIn:
       display: 母猪转场转入事件
       columns:
         - name: pigCode
