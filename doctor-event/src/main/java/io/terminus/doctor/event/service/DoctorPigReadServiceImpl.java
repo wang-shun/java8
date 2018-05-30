@@ -138,7 +138,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
                         .minus(doctorPig.getBirthDate().getTime()).getMillis() / (1000 * 60 * 60 * 24) + 1);
             }
             Integer targetEventSize = MoreObjects.firstNonNull(eventSize, 3);
-            log.error("queryPigDetailInfoByPigId:3"+pigId+targetEventSize);
+            log.error("queryPigDetailInfoByPigId:3"+pigId+","+targetEventSize);
             List<DoctorPigEvent> doctorPigEvents;
             if (isNull(doctorChgFarmInfo)) {
                 doctorPigEvents = RespHelper.orServEx(

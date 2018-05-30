@@ -103,7 +103,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
                                                                  Date beginDate, Date endDate) {
         try {
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
-            if (isNull(farmId) || isNull(pigId)) {
+            if (isNull(pigId)) {
                 return Response.fail("query.pigDoctorEvents.fail");
             }
             Map<String, Object> criteria = Maps.newHashMap();
