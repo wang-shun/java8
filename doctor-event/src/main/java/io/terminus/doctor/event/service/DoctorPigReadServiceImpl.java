@@ -121,14 +121,12 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             Integer dayAge = null;
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
             DoctorPig doctorPig = doctorPigDao.findById(pigId);
-            log.error("queryPigDetailInfoByPigId:1");
             DoctorChgFarmInfo doctorChgFarmInfo = null;
             if (!Objects.equals(doctorPigTrack.getFarmId(), farmId)) {
                 doctorChgFarmInfo = doctorChgFarmInfoDao.findByFarmIdAndPigId(farmId, pigId);
                 doctorPigTrack = JSON_MAPPER.fromJson(doctorChgFarmInfo.getTrack(), DoctorPigTrack.class);
                 doctorPig = JSON_MAPPER.fromJson(doctorChgFarmInfo.getPig(), DoctorPig.class);
             }
-            log.error("queryPigDetailInfoByPigId:2");
             if (doctorPig == null) {
                 return RespWithEx.fail("pig.not.found");
             }
@@ -138,22 +136,20 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
                         .minus(doctorPig.getBirthDate().getTime()).getMillis() / (1000 * 60 * 60 * 24) + 1);
             }
             Integer targetEventSize = MoreObjects.firstNonNull(eventSize, 3);
-            log.error("queryPigDetailInfoByPigId:3"+pigId+","+targetEventSize);
+
             List<DoctorPigEvent> doctorPigEvents;
             if (isNull(doctorChgFarmInfo)) {
                 doctorPigEvents = RespHelper.orServEx(
                         doctorPigEventReadService.queryPigDoctorEvents(null, pigId, 1, targetEventSize, null, null)).getData();
             } else {
-                log.error("queryPigDetailInfoByPigId:3"+doctorChgFarmInfo.getEventId());
                 doctorPigEvents = doctorPigEventDao.queryBeforeChgFarm(pigId, doctorChgFarmInfo.getEventId());
             }
-            log.error("queryPigDetailInfoByPigId:4"+isNull(doctorChgFarmInfo));
+
             return RespWithEx.ok(DoctorPigInfoDetailDto.builder().doctorPig(doctorPig).doctorPigTrack(doctorPigTrack)
                     .doctorPigEvents(doctorPigEvents).dayAge(dayAge).isChgFarm(notNull(doctorChgFarmInfo)).build());
         } catch (InvalidException e) {
             return RespWithEx.exception(e);
         } catch (Exception e){
-            e.printStackTrace();
             log.error("query pig detail info fail, cause:{}", Throwables.getStackTraceAsString(e));
             return RespWithEx.fail("query.pigDetailInfo.fail");
         }

@@ -88,7 +88,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 
     @Override
     public Date getSettlementDate(Date date) {
-
+        date = DateUtil.toDate(DateUtil.toDateString(date));
         List<Map<String, Object>> results = jdbcTemplate.queryForList("select * from v_pc_fiscal_period where company_id=? and deleted_flag=0 and start_date<=? and end_date>=?", new Object[]{1, date, date});
         if (results.isEmpty())
             throw new ServiceException("settlement.date.empty");

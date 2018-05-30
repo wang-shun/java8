@@ -204,6 +204,41 @@
         WHERE id = #{id}
     </update>
 
+    <update id="updates" parameterType="list">
+        <foreach collection="list" item="m" separator=";">
+            UPDATE
+            <include refid="tb"/>
+            <set>
+                <if test="m.stockHandleId != null">`stock_handle_id` = #{m.stockHandleId},</if>
+                <if test="m.orgId != null">`org_id` = #{m.orgId},</if>
+                <if test="m.farmId != null">`farm_id` = #{m.farmId},</if>
+                <if test="m.warehouseId != null">`warehouse_id` = #{m.warehouseId},</if>
+                <if test="m.warehouseType != null">`warehouse_type` = #{m.warehouseType},</if>
+                <if test="m.warehouseName != null">`warehouse_name` = #{m.warehouseName},</if>
+                <if test="m.relMaterialHandleId != null">`rel_material_handle_id` = #{m.relMaterialHandleId},</if>
+                <if test="m.vendorName != null">`vendor_name` = #{m.vendorName},</if>
+                <if test="m.materialId != null">`material_id` = #{m.materialId},</if>
+                <if test="m.materialName != null">`material_name` = #{m.materialName},</if>
+                <if test="m.type != null">`type` = #{m.type},</if>
+                <if test="m.unitPrice != null">`unit_price` = #{m.unitPrice},</if>
+                <if test="m.unit != null">`unit` = #{m.unit},</if>
+                <if test="m.deleteFlag != null">`delete_flag` = #{m.deleteFlag},</if>
+                <if test="m.beforeStockQuantity != null">`before_stock_quantity` = #{m.beforeStockQuantity},</if>
+                <if test="m.quantity != null">`quantity` = #{m.quantity},</if>
+                <if test="m.handleDate != null">`handle_date` = #{m.handleDate},</if>
+                <if test="m.handleYear != null">`handle_year` = #{m.handleYear},</if>
+                <if test="m.handleMonth != null">`handle_month` = #{m.handleMonth},</if>
+                <if test="m.operatorId != null">`operator_id` = #{m.operatorId},</if>
+                <if test="m.operatorName != null">`operator_name` = #{m.operatorName},</if>
+                <if test="m.remark != null">`remark` = #{m.remark},</if>
+                <if test="m.settlementDate != null">`settlement_date` = #{m.settlementDate},</if>
+                <if test="m.amount != null">`amount` = #{m.amount},</if>
+                updated_at = now()
+            </set>
+            WHERE id = #{m.id}
+        </foreach>
+    </update>
+
     <delete id="delete" parameterType="long">
         DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
