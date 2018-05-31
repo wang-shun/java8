@@ -108,6 +108,7 @@ public class UserFiles {
                 boolean add = result.add(fileHelper.upFile(userId, realPath, group, fileRealName, folderId, file));
 
                 log.error("UserFiles:upload:boolean:"+add);
+                log.error("UserFiles:upload:boolean:"+result.get(0).toString());
 
             }
         }
