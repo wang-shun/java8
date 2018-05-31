@@ -105,7 +105,10 @@ public class UserFiles {
                 result.add(fileHelper.upImage(userId, realPath, group, fileRealName, folderId, file));
             } else {
                 //文件上传
-                result.add(fileHelper.upFile(userId, realPath, group, fileRealName, folderId, file));
+                boolean add = result.add(fileHelper.upFile(userId, realPath, group, fileRealName, folderId, file));
+
+                log.error("UserFiles:upload:boolean:"+add);
+
             }
         }
 

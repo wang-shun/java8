@@ -189,10 +189,13 @@ public class Users {
     @RequestMapping(value = "/importExcel", method = RequestMethod.GET)
     public void importExcel(@RequestParam String fileUrl){
         log.info("import excel fileUrl:{}", fileUrl);
+        log.error("import excel fileUrl:{}", fileUrl);
         try {
             publisher.publish(DataEvent.toBytes(DataEventType.ImportExcel.getKey(), fileUrl));
+            log.error("importExcel:"+DataEvent.toBytes(DataEventType.ImportExcel.getKey(), fileUrl));
         } catch (Exception e) {
             log.info("import excel failed", Throwables.getStackTraceAsString(e));
+            log.error("import excel failed", Throwables.getStackTraceAsString(e));
         }
     }
 
