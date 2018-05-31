@@ -175,6 +175,7 @@ public class FileHelper {
             }
 
             Response<Long> createRes = userFileService.createFile(upFile);
+            log.error("FileHelper:upFile:"+createRes.isSuccess());
             if(!createRes.isSuccess()){
                 log.error("Create file failed, upFile={}, error code={}", upFile, createRes.getError());
                 throw new JsonResponseException(createRes.getError());

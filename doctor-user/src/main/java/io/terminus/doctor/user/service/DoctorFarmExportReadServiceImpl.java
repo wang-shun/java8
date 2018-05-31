@@ -30,6 +30,7 @@ public class DoctorFarmExportReadServiceImpl implements DoctorFarmExportReadServ
                                 .from(doctorFarmExport.getStatus()).getDesc());
                         return doctorFarmExport;
                     }).collect(Collectors.toList());
+            log.error("findFarmExportRecord:"+list.toString());
             return Response.ok(list);
         } catch (Exception e) {
             log.error("find farm export record failed, farmName:{}, cause:{}"
