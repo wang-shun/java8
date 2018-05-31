@@ -45,6 +45,7 @@ rpc.dubbo:
     module: doctor-web
     registryAddress: 101.201.44.35:2181
     version: 1.0.0
+    timeout: 20000
 
 # zookeeper
 zookeeper:

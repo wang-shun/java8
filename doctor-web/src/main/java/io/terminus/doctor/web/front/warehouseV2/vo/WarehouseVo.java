@@ -19,6 +19,12 @@ import java.util.Date;
 public class WarehouseVo {
 
     @JsonView(WarehouseWithOutStatisticsView.class)
+    private Long farmId;
+
+    @JsonView(WarehouseWithOutStatisticsView.class)
+    private String farmName;
+
+    @JsonView(WarehouseWithOutStatisticsView.class)
     private Long id;
 
     @JsonView(WarehouseWithOutStatisticsView.class)
@@ -32,6 +38,9 @@ public class WarehouseVo {
 
     @JsonView(WarehouseWithOutStatisticsView.class)
     private Long managerId;
+
+    @JsonView(WarehouseWithOutStatisticsView.class)
+    private String address;
 
     @JsonView({WarehouseView.class, WarehouseStatisticsView.class})
     private Date lastApplyDate;

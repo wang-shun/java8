@@ -306,6 +306,11 @@
             </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>io.terminus.pampas</groupId>
+            <artifactId>pampas-engine</artifactId>
+        </dependency>
+
         <!-- zkClient test content -->
         <dependency>
             <groupId>io.terminus.boot</groupId>

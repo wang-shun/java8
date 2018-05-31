@@ -124,7 +124,7 @@ public class DoctorWarehouseMaterialHandleManager {
             reverseOut(handle);
         } else if (WarehouseMaterialHandleType.TRANSFER_OUT.getValue() == handle.getType()
                 || WarehouseMaterialHandleType.TRANSFER_IN.getValue() == handle.getType()) {
-            DoctorWarehouseMaterialHandle otherHandle = doctorWarehouseMaterialHandleDao.findById(handle.getOtherTransferHandleId());
+            DoctorWarehouseMaterialHandle otherHandle = doctorWarehouseMaterialHandleDao.findById(handle.getRelMaterialHandleId());
             if (null == otherHandle)
                 throw new ServiceException("other.material.handle.not.found");
 
@@ -255,7 +255,7 @@ public class DoctorWarehouseMaterialHandleManager {
         private AbstractWarehouseStockDetail stockDetail;
         private DoctorWarehouseStock stock;
         private Map<DoctorWarehousePurchase, BigDecimal/*quantity*/> purchases;
-        private long unitPrice;
+        private BigDecimal unitPrice;
         private String vendorName;
         private BigDecimal quantity;
         private DoctorWarehouseSku sku;

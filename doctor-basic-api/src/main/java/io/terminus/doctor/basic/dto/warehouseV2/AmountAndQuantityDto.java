@@ -13,12 +13,22 @@ import java.math.BigDecimal;
  * Created by sunbo@terminus.io on 2017/8/24.
  */
 @Data
-@AllArgsConstructor
 public class AmountAndQuantityDto implements Serializable {
 
     private static final long serialVersionUID = 9069885794858381029L;
 
-    private final long amount;
+    private final BigDecimal amount;
 
     private final BigDecimal quantity;
+
+
+    public AmountAndQuantityDto() {
+        this.amount = new BigDecimal(0);
+        this.quantity = new BigDecimal(0);
+    }
+
+    public AmountAndQuantityDto(BigDecimal amount, BigDecimal quantity) {
+        this.amount = amount;
+        this.quantity = quantity;
+    }
 }

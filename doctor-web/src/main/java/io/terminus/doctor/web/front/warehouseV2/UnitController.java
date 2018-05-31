@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * 物料单位
  * Created by sunbo@terminus.io on 2017/10/30.
  */
 @RestController

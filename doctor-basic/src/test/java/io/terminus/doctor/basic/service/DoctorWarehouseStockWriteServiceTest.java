@@ -91,13 +91,13 @@ public class DoctorWarehouseStockWriteServiceTest {
         detail.setMaterialId(153L);
         detail.setQuantity(new BigDecimal(15));
 //        detail.setUnit("个");
-        detail.setUnitPrice(78990L);
+        detail.setUnitPrice(new BigDecimal(78990));
 
         WarehouseStockInDto.WarehouseStockInDetailDto detail2 = new WarehouseStockInDto.WarehouseStockInDetailDto();
         detail2.setMaterialId(157L);
         detail2.setQuantity(new BigDecimal(10));
 //        detail2.setUnit("件");
-        detail2.setUnitPrice(32810L);
+        detail2.setUnitPrice(new BigDecimal(32810));
 
         List<WarehouseStockInDto.WarehouseStockInDetailDto> detailDtos = new ArrayList<>(2);
         detailDtos.add(detail);
@@ -169,7 +169,7 @@ public class DoctorWarehouseStockWriteServiceTest {
         detail.setMaterialId(153L);
         detail.setQuantity(new BigDecimal(15));
 //        detail.setUnit("个");
-        detail.setUnitPrice(78990L);
+        detail.setUnitPrice(new BigDecimal(78990));
 //        detail.setVendorName("白金");
 //        detail.setSpecification("899个/包");
 //        detail.setMaterialCode("9998847700038775");

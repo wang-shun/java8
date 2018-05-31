@@ -163,4 +163,57 @@ public interface DoctorWarehouseReportReadService {
             WarehouseMaterialHandleType... types
     );
 
+    /**
+     * 获取会计年月里面所有物料数据
+     * @param farmId
+     * @param settlementDate
+     * @param pigBarnType
+     * @param pigBarnId
+     * @param pigGroupId
+     * @param handlerType
+     * @param type
+     * @param warehouseId
+     * @param materialName
+     * @return
+     */
+    List<Map<String,Object>> getMeterails(
+            Long farmId,
+            String settlementDate,
+            Integer pigBarnType,
+            Long pigBarnId,
+            Long pigGroupId,
+            Integer handlerType,
+            Integer type,
+            Long warehouseId,
+            String materialName);
+
+    /**
+     * 按照仓库类型进行tab分页筛选，仓库按照创建时间进行排列
+     */
+    Map<String,Object> lastWlbdReport(
+            Long farmId,
+            String settlementDate,
+            Integer pigBarnType,
+            Long pigBarnId,
+            Long pigGroupId,
+            Integer handlerType,
+            Integer type,
+            Long warehouseId,
+            String materialName);
+
+
+    /**
+     * 按照仓库类型进行tab分页筛选，仓库按照创建时间进行排列
+     */
+    List<Map<String,Object>> wlbdReport(
+            Long farmId,
+            String settlementDate,
+            Integer pigBarnType,
+            Long pigBarnId,
+            Long pigGroupId,
+            Integer handlerType,
+            Integer type,
+            Long warehouseId,
+            String materialName);
+
 }

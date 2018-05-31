@@ -4,7 +4,6 @@ import lombok.Setter;
 import net.glxn.qrgen.QRCode;
 import net.glxn.qrgen.image.ImageType;
 import org.springframework.stereotype.Component;
-
 import java.io.File;
 import java.io.OutputStream;
 

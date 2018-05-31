@@ -139,4 +139,189 @@
         </where>
         ORDER BY `id` DESC
     </select>
+
+    <select id="getWarehouseByType" parameterType="Map" resultMap="DoctorWareHouseMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        ORDER BY `created_at`
+        limit #{pageNum},#{pageSize}
+    </select>
+
+    <!--  按照仓库类型进行tab分页筛选，仓库按照创建时间进行排列 -->
+    <select id="listTypeMap" parameterType="Map" resultType="map">
+        select
+        a.id,a.ware_house_name,a.type,
+        a.manager_id,a.manager_name,
+
+        ifnull(round(temp1.lastmonth_sum_amount,2),0) as lastmonth_sum_amount,
+
+        ifnull(round(temp1.lastmonth_sum_quantity,3),0) as lastmonth_sum_quantity,
+
+        ifnull(
+        ROUND(temp2.thismonth_sum_rk_quantity,3),0) as thismonth_sum_rk_quantity,
+
+
+        ifnull(
+        ROUND(temp3.thismonth_sum_ck_quantity,3),0) as thismonth_sum_ck_quantity,
+
+
+
+        round(ifnull(temp1.lastmonth_sum_quantity,0) + ifnull(temp2.thismonth_sum_rk_quantity,0)-ifnull(temp3.thismonth_sum_ck_quantity,0),3) as now_sum_quantity
+
+        from doctor_ware_houses a
+        left join (
+        select sum(b.balance_amount) as lastmonth_sum_amount,sum(b.balance_quantity) as lastmonth_sum_quantity,b.warehouse_id
+        from doctor_warehouse_stock_monthly b
+        where date_format(b.settlement_date,'%Y-%m')=date_format(DATE_SUB(#{settlementDate}, INTERVAL 1 MONTH),'%Y-%m')
+        and b.farm_id = #{farmId}
+        GROUP BY b.warehouse_id
+        )temp1 on a.id = temp1.warehouse_id
+
+        left join (
+        select sum(b.quantity) as thismonth_sum_rk_quantity,b.warehouse_id
+        from doctor_warehouse_material_handle b,doctor_warehouse_stock_handle b1
+        where b.stock_handle_id=b1.id
+        and b.delete_flag=1
+        and b.farm_id=#{farmId}
+        and date_format(b.handle_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+        and b1.handle_type =1
+        GROUP BY b.warehouse_id
+        )temp2 on a.id = temp2.warehouse_id
+
+        left join (
+        select sum(b.quantity) as thismonth_sum_ck_quantity,b.warehouse_id
+        from doctor_warehouse_material_handle b,doctor_warehouse_stock_handle b1
+        where b.stock_handle_id=b1.id
+        and b.delete_flag=1
+        and b.farm_id=#{farmId}
+        and date_format(b.handle_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+        and b1.handle_type =2
+        GROUP BY b.warehouse_id
+        )temp3 on a.id = temp3.warehouse_id
+
+        where a.farm_id=#{farmId}
+        <if test="type != null" > and a.type=#{type}</if>
+        order by a.type,a.created_at
+    </select>
+
+    <!--  按照仓库类型进行tab分页筛选，仓库按照创建时间进行排列 -->
+    <select id="listDetailTypeCount" parameterType="Map" resultType="long">
+        select count(1) as ct
+        from
+        (select a.id
+        from doctor_warehouse_material_handle a
+        join doctor_warehouse_sku b on a.material_id=b.id
+        join doctor_warehouse_vendor c on b.vendor_id=c.id
+        where a.delete_flag=1
+        <if test="type != null" > and a.warehouse_type=#{type}</if>
+        <if test="materialName != null" > and b.`name` like CONCAT('%', #{materialName}, '%')</if>
+        <if test="warehouseId != null" > and a.warehouse_id=#{warehouseId}</if>
+        group by a.material_id
+        ) temp
+    </select>
+
+    <select id="listDetailTypeMap" parameterType="Map" resultType="map">
+        select  a.id,b.`code`,b.`name` as material_name,
+        c.`name` as vendor_name,
+        b.specification,db.name as unit,
+        ifnull(round(tmp1.lastmonth_sum_amount,4),0) as lastmonth_sum_amount,
+
+
+        ifnull(round(tmp1.lastmonth_sum_quantity ,3),0) as lastmonth_sum_quantity,
+
+
+        ifnull(
+        ROUND( tmp2.thismonth_sum_rk_quantity,3),0) as thismonth_sum_rk_quantity,
+
+        ifnull(
+        ROUND( tmp3.thismonth_sum_ck_quantity,3),0) as thismonth_sum_ck_quantity,
+
+        round(ifnull(tmp1.lastmonth_sum_quantity ,0) + ifnull(tmp2.thismonth_sum_rk_quantity,0)-ifnull(tmp3.thismonth_sum_ck_quantity,0),3) as now_sum_quantity
+
+
+        from doctor_warehouse_material_handle a
+        join doctor_warehouse_sku b on a.material_id=b.id
+        join doctor_warehouse_vendor c on b.vendor_id=c.id
+        left join (select m.material_id,sum(m.balance_amount) as lastmonth_sum_amount,sum(m.balance_quantity) as lastmonth_sum_quantity
+        from doctor_warehouse_stock_monthly m
+        where date_format(m.settlement_date,'%Y-%m')=date_format(DATE_SUB(#{settlementDate}, INTERVAL 1 MONTH),'%Y-%m')
+        and m.warehouse_id=#{warehouseId}
+        GROUP BY m.material_id
+        ) tmp1 on a.material_id = tmp1.material_id
+        left join (
+        select j.material_id,sum(j.quantity) as thismonth_sum_rk_quantity
+        from doctor_warehouse_material_handle j,doctor_warehouse_stock_handle j1
+        where j.stock_handle_id = j1.id
+        and j.warehouse_id= #{warehouseId}
+        and j.delete_flag=1
+        and date_format(j.handle_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+        and j1.handle_type =1
+        GROUP BY j.material_id
+        )tmp2 on a.material_id = tmp2.material_id
+        left join(
+        select k.material_id,sum(k.quantity) as thismonth_sum_ck_quantity
+        from doctor_warehouse_material_handle k,doctor_warehouse_stock_handle k1
+        where k.stock_handle_id = k1.id
+        and k.warehouse_id= #{warehouseId}
+        and k.delete_flag=1
+        and date_format(k.handle_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+        and k1.handle_type = 2
+        GROUP BY k.material_id
+        )tmp3 on a.material_id = tmp3.material_id
+        left join doctor_basics db on db.id = b.unit
+        where a.delete_flag=1
+        and a.warehouse_id=#{warehouseId}
+        <if test="type != null" > and a.warehouse_type=#{type}</if>
+        <if test="materialName != null" > and b.`name` like CONCAT('%', #{materialName}, '%')</if>
+        group by  a.material_id
+        order by b.code
+        limit #{offset},#{limit}
+
+        <!--select-->
+        <!--tmp.material_id as id, sku.`code` as code, sku.`name` as material_name,-->
+        <!--sku.specification, vendor.`name` as vendor_name, basics.`name` as unit,-->
+        <!--sum(tmp.syjcsl) as lastmonth_sum_quantity, sum(tmp.syjcje) as lastmonth_sum_amount,-->
+        <!--sum(tmp.byrksl) as thismonth_sum_rk_quantity, sum(tmp.bycksl) as thismonth_sum_ck_quantity,-->
+        <!--(sum(tmp.syjcsl) + sum(tmp.byrksl) - sum(tmp.bycksl)) as now_sum_quantity-->
+        <!--from-->
+        <!--(select-->
+        <!--material_id, balance_quantity as syjcsl, balance_amount as syjcje, 0.0 as byrksl, 0.0 as bycksl-->
+        <!--from doctor_warehouse_stock_monthly-->
+        <!--where 1=1-->
+        <!--<if test="warehouseId != null" > and warehouse_id=#{warehouseId}</if>-->
+        <!--and date_format(settlement_date,'%Y-%m')=date_format(DATE_SUB(curdate(), INTERVAL 1 MONTH),'%Y-%m')-->
+
+        <!--union all-->
+        <!--select-->
+        <!--b.material_id, 0.0 as syjcsl, 0.0 as syjcje,-->
+        <!--sum(case when a.handle_type in(1,7,9,11,13) then b.quantity else 0 end) as byrksl,-->
+        <!--sum(case when a.handle_type in (2,8,10,12) then b.quantity else 0 end) as bycksl-->
+        <!--from doctor_warehouse_stock_handle a, doctor_warehouse_material_handle b-->
+        <!--where a.id = b.stock_handle_id and b.delete_flag = 1-->
+        <!--<if test="warehouseId != null" > and a.warehouse_id=#{warehouseId}</if>-->
+        <!--<if test="type != null" > and b.warehouse_type=#{type}</if>-->
+        <!--and DATE_FORMAT(a.settlement_date,'%Y-%m')=date_format(curdate(),'%Y-%m')-->
+        <!--group by b.material_id-->
+        <!--) tmp-->
+
+        <!--join doctor_warehouse_sku sku on tmp.material_id = sku.id-->
+        <!--join doctor_warehouse_vendor vendor on sku.vendor_id = vendor.id-->
+        <!--left join doctor_basics basics on basics.id = sku.unit-->
+        <!--where 1=1-->
+        <!--<if test="materialName != null" > and sku.`name` like CONCAT('%', #{materialName}, '%')</if>-->
+        <!--group by tmp.material_id, sku.`code`, sku.`name`, sku.specification, vendor.`name`, basics.`name`-->
+        <!--order by material_name-->
+
+        <!--limit #{offset},#{limit}-->
+    </select>
+
+    <select id="findMapByFarmId" parameterType="Long" resultType="map">
+      select id as id,ware_house_name as name,type as type
+      from doctor_ware_houses
+      where farm_id = #{farmId,jdbcType=BIGINT}
+    </select>
+
 </mapper>

@@ -24,6 +24,8 @@ public class WarehouseStockVo {
 
     private String unit;
 
+    private Long unitId;
+
     private String vendorName;
 
     private String code;

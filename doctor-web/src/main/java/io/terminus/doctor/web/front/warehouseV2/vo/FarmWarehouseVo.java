@@ -28,7 +28,7 @@ public class FarmWarehouseVo {
     /**
      * 余量
      */
-    private long balanceAmount;
+    private BigDecimal balanceAmount;
 
     /**
      * 本月入库数量
@@ -38,7 +38,7 @@ public class FarmWarehouseVo {
     /**
      * 本月入库金额
      */
-    private long inAmount;
+    private BigDecimal inAmount;
 
     /**
      * 本月出库数量
@@ -48,7 +48,7 @@ public class FarmWarehouseVo {
     /**
      * 本月出库金额
      */
-    private long outAmount;
+    private BigDecimal outAmount;
 
     /**
      * 本月调拨出数量
@@ -58,7 +58,7 @@ public class FarmWarehouseVo {
     /**
      * 本月调拨出金额
      */
-    private long transferOutAmount;
+    private BigDecimal transferOutAmount;
 
 
     /**
@@ -69,7 +69,7 @@ public class FarmWarehouseVo {
     /**
      * 本月调拨入金额
      */
-    private long transferInAmount;
+    private BigDecimal transferInAmount;
 
 
 }

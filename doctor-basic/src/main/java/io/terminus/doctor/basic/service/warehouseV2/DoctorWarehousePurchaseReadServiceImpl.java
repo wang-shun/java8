@@ -33,6 +33,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RpcProvider
+@Deprecated
 public class DoctorWarehousePurchaseReadServiceImpl implements DoctorWarehousePurchaseReadService {
 
     @Autowired
@@ -125,7 +126,7 @@ public class DoctorWarehousePurchaseReadServiceImpl implements DoctorWarehousePu
     public Response<Long> calculateUnitPrice(Long warehouseId, Long materialId) {
 
         try {
-            return Response.ok(doctorWarehousePurchaseManager.calculateUnitPrice(warehouseId, materialId));
+            return Response.ok(doctorWarehousePurchaseManager.calculateUnitPrice(warehouseId, materialId).longValue());
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
         } catch (Exception e) {

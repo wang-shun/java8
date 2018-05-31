@@ -5,8 +5,11 @@
 package io.terminus.doctor.web;
 
 import io.terminus.doctor.common.banner.DoctorBanner;
+import io.terminus.pampas.boot.autoconfigure.PampasAutoConfiguration;
+import io.terminus.pampas.boot.autoconfigure.PampasMVCAutoConfiguration;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.core.io.ClassPathResource;
 
@@ -15,7 +18,7 @@ import org.springframework.core.io.ClassPathResource;
  * Date: 2016-02-01
  */
 @SpringBootApplication
-public class DoctorWebApplication {
+public class  DoctorWebApplication {
     public static void main(String[] args) {
         SpringApplication application = new SpringApplication(DoctorWebApplication.class,
                 "classpath:/spring/doctor-web-dubbo-consumer.xml");
