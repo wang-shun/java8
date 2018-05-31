@@ -53,7 +53,7 @@
             <if test="eventId != null">AND `event_id` = #{eventId}</if>
             <if test="track != null">AND `track` = #{track}</if>
             <if test="pig != null">AND `pig` = #{pig}</if>
-            <if test="barnIds != null  &amp;&amp; barnIds.size() > 0">AND b.current_barn_id IN
+            <if test="barnIds != null  &amp;&amp; barnIds.size() > 0">AND barn_id IN
                 <foreach collection="barnIds" item="barn" open="(" separator="," close=")">
                     #{barn}
                 </foreach>
