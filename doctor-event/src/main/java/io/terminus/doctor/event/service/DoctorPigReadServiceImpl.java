@@ -568,11 +568,15 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
                 if (searchedPig.getBirthDate() != null) {
                     searchedPig.setDayAge((int)(DateTime.now().minus(searchedPig.getBirthDate().getTime()).getMillis() / (1000 * 60 * 60 * 24) + 1));
                 }
-                searchedPig.setStatus(doctorPigTrack.getStatus());
-                searchedPig.setStatusName(PigStatus.from(doctorPigTrack.getStatus()).getName());
-                searchedPig.setCurrentBarnId(doctorPigTrack.getCurrentBarnId());
-                searchedPig.setCurrentBarnName(doctorPigTrack.getCurrentBarnName());
-                searchedPig.setCurrentParity(doctorPigTrack.getCurrentParity());
+                if(doctorPigTrack!=null) {
+                    searchedPig.setStatus(doctorPigTrack.getStatus());
+                    searchedPig.setStatusName(PigStatus.from(doctorPigTrack.getStatus()).getName());
+                    searchedPig.setCurrentBarnId(doctorPigTrack.getCurrentBarnId());
+                    searchedPig.setCurrentBarnName(doctorPigTrack.getCurrentBarnName());
+                    searchedPig.setCurrentParity(doctorPigTrack.getCurrentParity());
+                }else{
+                    log.error("pagingChgFarmPig:"+doctorChgFarmInfo.getId());
+                }
                 return searchedPig;
             }).collect(Collectors.toList());
             log.error("pagingChgFarmPig:"+list.size());

@@ -223,7 +223,6 @@ public class DoctorSearches {
                 && ((List)objectMap.get("statuses")).contains(PigStatus.CHG_FARM.getKey())){
             log.error("pagePigs:"+1+":"+objectMap.toString());
             paging = RespHelper.or500(doctorPigReadService.pagingChgFarmPig(objectMap, pageNo, pageSize));
-            log.error("pagePigs:"+paging.getData().toString()+","+paging.getTotal());
         } else {
             log.error("pagePigs:"+2+":"+objectMap.toString());
             paging = RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
@@ -235,21 +234,17 @@ public class DoctorSearches {
                     searchedPig.setPigTypeName(pigSex.getDesc());
                 }
             }
-            log.error("pagePigs:"+searchedPig.getPigTypeName());
             Integer status = searchedPig.getStatus();
             Date eventAt;
             if (Objects.equals(status, PigStatus.CHG_FARM.getKey())) {
                 try {
                     DoctorChgFarmInfo doctorChgFarmInfo = RespHelper.or500(doctorPigReadService.findByFarmIdAndPigId(searchedPig.getFarmId(), searchedPig.getId()));
-                    log.error("pagePigs:doctorChgFarmInfo"+doctorChgFarmInfo.getId());
                     DoctorPigEvent chgFarm = RespHelper.or500(doctorPigEventReadService.findById(doctorChgFarmInfo.getEventId()));
-                    log.error("pagePigs:chgFarm"+chgFarm.getId());
                     eventAt = chgFarm.getEventAt();
                 }catch(Exception e){
                     log.error(e.getMessage());
                     eventAt = new Date();
                 }
-                log.error("pagePigs:eventAt"+eventAt);
             } else {
                 KongHuaiPregCheckResult result = KongHuaiPregCheckResult.from(searchedPig.getStatus());
                 if (result != null) {
@@ -264,7 +259,6 @@ public class DoctorSearches {
             }
             Integer statusDay = DateUtil.getDeltaDays(eventAt, new Date());
             searchedPig.setStatusDay(statusDay);
-            log.error("pagePigs:day"+searchedPig.getStatusDay());
         });
         log.error("pagePigs:size"+paging.getData().size());
         return paging;
