@@ -575,6 +575,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
                     searchedPig.setCurrentBarnName(doctorPigTrack.getCurrentBarnName());
                     searchedPig.setCurrentParity(doctorPigTrack.getCurrentParity());
                 }else{
+                    searchedPig.setStatus(13);
                     log.error("pagingChgFarmPig:"+doctorChgFarmInfo.getId());
                 }
                 return searchedPig;
