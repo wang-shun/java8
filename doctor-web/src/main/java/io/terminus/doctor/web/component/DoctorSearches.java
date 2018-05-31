@@ -235,13 +235,14 @@ public class DoctorSearches {
                     searchedPig.setPigTypeName(pigSex.getDesc());
                 }
             }
-
+            log.error("pagePigs:"+searchedPig.getPigTypeName());
             Integer status = searchedPig.getStatus();
             Date eventAt;
             if (Objects.equals(status, PigStatus.CHG_FARM.getKey())) {
                 DoctorChgFarmInfo doctorChgFarmInfo = RespHelper.or500(doctorPigReadService.findByFarmIdAndPigId(searchedPig.getFarmId(), searchedPig.getId()));
                 DoctorPigEvent chgFarm = RespHelper.or500(doctorPigEventReadService.findById(doctorChgFarmInfo.getEventId()));
                 eventAt = chgFarm.getEventAt();
+                log.error("pagePigs:eventAt"+eventAt);
             } else {
                 KongHuaiPregCheckResult result = KongHuaiPregCheckResult.from(searchedPig.getStatus());
                 if (result != null) {
@@ -256,7 +257,9 @@ public class DoctorSearches {
             }
             Integer statusDay = DateUtil.getDeltaDays(eventAt, new Date());
             searchedPig.setStatusDay(statusDay);
+            log.error("pagePigs:day"+searchedPig.getStatusDay());
         });
+        log.error("pagePigs:size"+paging.getData().size());
         return paging;
     }
 
