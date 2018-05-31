@@ -559,7 +559,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             if (paging.isEmpty()) {
                 return Response.ok(Paging.empty());
             }
-
+            log.error("pagingChgFarmPig:"+paging.getData().size());
             List<SearchedPig> list = paging.getData().stream().map(doctorChgFarmInfo -> {
                 DoctorPig doctorPig = JSON_MAPPER.fromJson(doctorChgFarmInfo.getPig(), DoctorPig.class);
                 DoctorPigTrack doctorPigTrack = JSON_MAPPER.fromJson(doctorChgFarmInfo.getTrack(), DoctorPigTrack.class);
@@ -575,6 +575,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
                 searchedPig.setCurrentParity(doctorPigTrack.getCurrentParity());
                 return searchedPig;
             }).collect(Collectors.toList());
+            log.error("pagingChgFarmPig:"+list.size());
             return Response.ok(new Paging<>(paging.getTotal(), list));
         } catch (Exception e) {
             log.error("paging chg farm pig failed,cause:{}", Throwables.getStackTraceAsString(e));

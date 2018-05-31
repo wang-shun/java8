@@ -223,6 +223,7 @@ public class DoctorSearches {
                 && ((List)objectMap.get("statuses")).contains(PigStatus.CHG_FARM.getKey())){
             log.error("pagePigs:"+1+":"+objectMap.toString());
             paging = RespHelper.or500(doctorPigReadService.pagingChgFarmPig(objectMap, pageNo, pageSize));
+            log.error("pagePigs:"+paging.getData().toString()+","+paging.getTotal());
         } else {
             log.error("pagePigs:"+2+":"+objectMap.toString());
             paging = RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
