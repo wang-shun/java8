@@ -241,9 +241,9 @@ public class DoctorSearches {
             if (Objects.equals(status, PigStatus.CHG_FARM.getKey())) {
                 try {
                     DoctorChgFarmInfo doctorChgFarmInfo = RespHelper.or500(doctorPigReadService.findByFarmIdAndPigId(searchedPig.getFarmId(), searchedPig.getId()));
-                    log.error("pagePigs:doctorChgFarmInfo"+doctorChgFarmInfo.toString());
+                    log.error("pagePigs:doctorChgFarmInfo"+doctorChgFarmInfo.getId());
                     DoctorPigEvent chgFarm = RespHelper.or500(doctorPigEventReadService.findById(doctorChgFarmInfo.getEventId()));
-                    log.error("pagePigs:chgFarm"+chgFarm.toString());
+                    log.error("pagePigs:chgFarm"+chgFarm.getId());
                     eventAt = chgFarm.getEventAt();
                 }catch(Exception e){
                     log.error(e.getMessage());
