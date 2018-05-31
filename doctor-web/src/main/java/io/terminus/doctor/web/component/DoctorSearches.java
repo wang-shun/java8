@@ -221,8 +221,10 @@ public class DoctorSearches {
         Paging<SearchedPig> paging;
         if(objectMap.containsKey("statuses")
                 && ((List)objectMap.get("statuses")).contains(PigStatus.CHG_FARM.getKey())){
+            log.error("pagePigs:"+1+":"+objectMap.toString());
             paging = RespHelper.or500(doctorPigReadService.pagingChgFarmPig(objectMap, pageNo, pageSize));
         } else {
+            log.error("pagePigs:"+2+":"+objectMap.toString());
             paging = RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
         }
         paging.getData().forEach(searchedPig -> {
