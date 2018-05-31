@@ -58,12 +58,12 @@
                     #{barn}
                 </foreach>
             </if>
-            <if test="pigTypes != null  &amp;&amp; pigTypes.size() > 0">AND a.pig_type IN
+            <if test="pigTypes != null  &amp;&amp; pigTypes.size() > 0">AND pig_type IN
                 <foreach collection="pigTypes" item="type" open="(" separator="," close=")">
                     #{type}
                 </foreach>
             </if>
-            <if test="pigIds != null &amp;&amp; pigIds.size() > 0">AND a.id in
+            <if test="pigIds != null &amp;&amp; pigIds.size() > 0">AND pig_id in
                 <foreach collection="pigIds" item="id" open="(" separator="," close=")">
                     #{id}
                 </foreach>
