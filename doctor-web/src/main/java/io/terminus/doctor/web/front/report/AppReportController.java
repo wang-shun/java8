@@ -43,7 +43,7 @@ public class AppReportController {
     @RequestMapping(value = "/query/report/detail", method = RequestMethod.GET)
     public List<Map<String, String>> queryReportDetail(@ModelAttribute DoctorDimensionCriteria dimensionCriteria) {
 
-        Date tomorrow = DateTime.now().withTimeAtStartOfDay().toDate();
+        Date tomorrow = DateTime.now().plusDays(1).withTimeAtStartOfDay().toDate();
 
         if (notNull(dimensionCriteria.getStartAt()) && !dimensionCriteria.getStartAt().before(tomorrow)) {
             throw new JsonResponseException("start.at.error");
