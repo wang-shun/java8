@@ -4,8 +4,12 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.basic.dto.DoctorReportFieldTypeDto;
+import io.terminus.doctor.basic.model.DoctorReportFields;
 import io.terminus.doctor.basic.service.DoctorReportFieldCustomizesReadService;
+import io.terminus.doctor.basic.service.DoctorReportFieldsReadService;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
@@ -25,6 +29,7 @@ import io.terminus.doctor.event.service.DoctorDailyReportV2ReadService;
 import io.terminus.doctor.event.service.DoctorDailyReportV2Service;
 import io.terminus.doctor.web.front.report.DataFormatter.DataFormatter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -32,6 +37,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -53,10 +59,13 @@ public class ReportBoardHelper {
     private DoctorDailyReportV2Service doctorDailyReportV2Service;
     @RpcConsumer
     private DoctorDailyReportV2ReadService doctorDailyReportV2ReadService;
+    @RpcConsumer
+    private DoctorReportFieldsReadService doctorReportFieldsReadService;
 
     private final ApplicationContext applicationContext;
     private Map<String, Method> methodMap;
     private Map<String, DataFormatter> dataFormatterMap;
+    private Map<String, String> filedNameToFormatterNameMap = Maps.newHashMap();
 
     @Autowired
     public ReportBoardHelper(ApplicationContext applicationContext) {
@@ -128,6 +137,8 @@ public class ReportBoardHelper {
     }
 
     public List<Map<String, String>> fillRegionReport(DoctorDimensionCriteria dimensionCriteria) {
+
+        filedNameToFormatterNameMap();
 
         DoctorReportRegion region = DoctorReportRegion.from(dimensionCriteria.getRegionType());
 
@@ -213,7 +224,8 @@ public class ReportBoardHelper {
         for (Field field: fields) {
             try {
                 field.setAccessible(true);
-                map.put(field.getName(), getValue(field.get(obj), null));
+                map.put(field.getName(), getValue(field.get(obj),
+                        filedNameToFormatterNameMap.get(clazz.getSimpleName() + "." + field.getName())));
             } catch (Exception e) {
                 log.error("field name error, fieldName:{}, cause:{}", field.getName(), Throwables.getStackTraceAsString(e));
             }
@@ -248,5 +260,25 @@ public class ReportBoardHelper {
         }
         Map map = JsonMapperUtil.nonEmptyMapper().fromJson(val, Map.class);
         return map.get("value").toString();
+    }
+
+    private void filedNameToFormatterNameMap() {
+        if (!filedNameToFormatterNameMap.isEmpty()) {
+            return;
+        }
+        Response<List<DoctorReportFields>> listResponse = doctorReportFieldsReadService.list(new HashMap<>());
+        if (!listResponse.isSuccess() || Arguments.isNullOrEmpty(listResponse.getResult())) {
+            return;
+        }
+        List<DoctorReportFields> list = listResponse.getResult();
+        Map<Long, String> idToReportFieldMap = list.stream()
+                .collect(Collectors.toMap(DoctorReportFields::getId, DoctorReportFields::getReportField));
+        list.forEach(doctorReportFields -> {
+            if (StringUtils.isNotBlank(doctorReportFields.getDataFormatter())) {
+                String key = idToReportFieldMap.getOrDefault(doctorReportFields.getFId(), "")
+                        + "." + doctorReportFields.getReportField();
+                filedNameToFormatterNameMap.put(key, doctorReportFields.getDataFormatter());
+            }
+        });
     }
 }
