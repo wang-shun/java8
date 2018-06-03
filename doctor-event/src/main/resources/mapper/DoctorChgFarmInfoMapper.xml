@@ -53,17 +53,17 @@
             <if test="eventId != null">AND `event_id` = #{eventId}</if>
             <if test="track != null">AND `track` = #{track}</if>
             <if test="pig != null">AND `pig` = #{pig}</if>
-            <if test="barnIds != null  &amp;&amp; barnIds.size() > 0">AND b.current_barn_id IN
+            <if test="barnIds != null  &amp;&amp; barnIds.size() > 0">AND barn_id IN
                 <foreach collection="barnIds" item="barn" open="(" separator="," close=")">
                     #{barn}
                 </foreach>
             </if>
-            <if test="pigTypes != null  &amp;&amp; pigTypes.size() > 0">AND a.pig_type IN
+            <if test="pigTypes != null  &amp;&amp; pigTypes.size() > 0">AND pig_type IN
                 <foreach collection="pigTypes" item="type" open="(" separator="," close=")">
                     #{type}
                 </foreach>
             </if>
-            <if test="pigIds != null &amp;&amp; pigIds.size() > 0">AND a.id in
+            <if test="pigIds != null &amp;&amp; pigIds.size() > 0">AND pig_id in
                 <foreach collection="pigIds" item="id" open="(" separator="," close=")">
                     #{id}
                 </foreach>

@@ -559,7 +559,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             if (paging.isEmpty()) {
                 return Response.ok(Paging.empty());
             }
-
+            log.error("pagingChgFarmPig:"+paging.getData().size());
             List<SearchedPig> list = paging.getData().stream().map(doctorChgFarmInfo -> {
                 DoctorPig doctorPig = JSON_MAPPER.fromJson(doctorChgFarmInfo.getPig(), DoctorPig.class);
                 DoctorPigTrack doctorPigTrack = JSON_MAPPER.fromJson(doctorChgFarmInfo.getTrack(), DoctorPigTrack.class);
@@ -568,13 +568,19 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
                 if (searchedPig.getBirthDate() != null) {
                     searchedPig.setDayAge((int)(DateTime.now().minus(searchedPig.getBirthDate().getTime()).getMillis() / (1000 * 60 * 60 * 24) + 1));
                 }
-                searchedPig.setStatus(doctorPigTrack.getStatus());
-                searchedPig.setStatusName(PigStatus.from(doctorPigTrack.getStatus()).getName());
-                searchedPig.setCurrentBarnId(doctorPigTrack.getCurrentBarnId());
-                searchedPig.setCurrentBarnName(doctorPigTrack.getCurrentBarnName());
-                searchedPig.setCurrentParity(doctorPigTrack.getCurrentParity());
+                if(doctorPigTrack!=null) {
+                    searchedPig.setStatus(doctorPigTrack.getStatus());
+                    searchedPig.setStatusName(PigStatus.from(doctorPigTrack.getStatus()).getName());
+                    searchedPig.setCurrentBarnId(doctorPigTrack.getCurrentBarnId());
+                    searchedPig.setCurrentBarnName(doctorPigTrack.getCurrentBarnName());
+                    searchedPig.setCurrentParity(doctorPigTrack.getCurrentParity());
+                }else{
+                    searchedPig.setStatus(13);
+                    log.error("pagingChgFarmPig:"+doctorChgFarmInfo.getId());
+                }
                 return searchedPig;
             }).collect(Collectors.toList());
+            log.error("pagingChgFarmPig:"+list.size());
             return Response.ok(new Paging<>(paging.getTotal(), list));
         } catch (Exception e) {
             log.error("paging chg farm pig failed,cause:{}", Throwables.getStackTraceAsString(e));

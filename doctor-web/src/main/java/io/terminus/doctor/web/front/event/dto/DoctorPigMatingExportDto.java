@@ -26,5 +26,6 @@ public class DoctorPigMatingExportDto implements Serializable{
     private String creatorName;
     private Integer pigStatusAfter;
     private String pigStatusAfterName;
+    private Date createdAt;
 
 }

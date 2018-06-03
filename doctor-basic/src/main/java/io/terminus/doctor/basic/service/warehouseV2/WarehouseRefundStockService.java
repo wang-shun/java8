@@ -83,6 +83,7 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
     protected void changed(DoctorWarehouseMaterialHandle materialHandle, WarehouseStockRefundDto.WarehouseStockRefundDetailDto detail, DoctorWarehouseStockHandle stockHandle, WarehouseStockRefundDto stockDto, DoctorWareHouse wareHouse) {
 
         materialHandle.setRemark(detail.getRemark());
+        materialHandle.setSettlementDate(stockDto.getSettlementDate());
 
         DoctorWarehouseMaterialHandle outMaterialHandle = doctorWarehouseMaterialHandleDao.findById(materialHandle.getRelMaterialHandleId());
 

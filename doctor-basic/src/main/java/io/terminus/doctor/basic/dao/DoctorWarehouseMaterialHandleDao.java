@@ -123,6 +123,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         materialHandles.forEach(m -> {
             this.update(m);
         });
+//        this.sqlSession.update(this.sqlId("updates"), materialHandles);
     }
 
     /**
@@ -243,7 +244,6 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     /**
      * 统计出库单据已退数量
      *
-     * @param materialHandleId 出库明细id
      * @return
      */
     public BigDecimal countQuantityAlreadyRefund(Long materialHandleId) {

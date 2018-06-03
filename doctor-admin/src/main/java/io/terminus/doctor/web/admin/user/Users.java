@@ -189,16 +189,21 @@ public class Users {
     @RequestMapping(value = "/importExcel", method = RequestMethod.GET)
     public void importExcel(@RequestParam String fileUrl){
         log.info("import excel fileUrl:{}", fileUrl);
+        log.error("import excel fileUrl:{}", fileUrl);
         try {
             publisher.publish(DataEvent.toBytes(DataEventType.ImportExcel.getKey(), fileUrl));
+            log.error("importExcel:"+DataEvent.toBytes(DataEventType.ImportExcel.getKey(), fileUrl).toString());
         } catch (Exception e) {
-            log.info("import excel failed", Throwables.getStackTraceAsString(e));
+            log.info("import excel failed---------------------------", e.getMessage());
+            log.error("import excel failed", Throwables.getStackTraceAsString(e));
         }
     }
 
     @RequestMapping(value = "/list/farmExport", method = RequestMethod.GET)
     public List<DoctorFarmExport> findFarmExportRecord(@RequestParam(required = false) String farmName) {
-        return RespHelper.or500(doctorFarmExportReadService.findFarmExportRecord(farmName));
+        Response<List<DoctorFarmExport>> farmExportRecord = doctorFarmExportReadService.findFarmExportRecord(farmName);
+        log.error(farmExportRecord.getResult().toString());
+        return RespHelper.or500(farmExportRecord);
     }
 
 

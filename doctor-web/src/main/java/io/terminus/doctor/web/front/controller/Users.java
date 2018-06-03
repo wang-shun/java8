@@ -329,8 +329,16 @@ public class Users {
     @ResponseBody
     public Boolean changePassword(@RequestParam("oldPassword") String oldPassword,
                                   @RequestParam("newPassword") String newPassword,
-                                  @RequestParam("sid") String sessionId) {
-        return doctorCommonSessionBean.changePassword(oldPassword, newPassword, sessionId);
+                                   HttpServletRequest request) {
+        String sessionIds = null;
+        Cookie[] cookie = request.getCookies();
+        for (int i = 0; i < cookie.length; i++) {
+            Cookie cook = cookie[i];
+            if(cook.getName().equalsIgnoreCase("msid")){ //获取键
+                sessionIds = cook.getValue().toString();    //获取值
+            }
+        }
+        return doctorCommonSessionBean.changePassword(oldPassword, newPassword, sessionIds);
     }
 
     /**

@@ -21,5 +21,6 @@ public class DoctorPigChangeBarnExportDto implements Serializable{
     private String pigStatusAfterName;
     private String remark;
     private String creatorName;
+    private Date createdAt;
 
 }

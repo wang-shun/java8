@@ -38,18 +38,15 @@ import io.terminus.doctor.event.dto.search.SearchedPig;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorChgFarmInfo;
-import io.terminus.doctor.event.model.DoctorGroup;
-import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.model.*;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorMessageUserReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
+import io.terminus.doctor.web.core.export.Exporter;
+import io.terminus.doctor.web.front.event.dto.DoctorSowManagerDto;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -60,6 +57,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -70,6 +69,7 @@ import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.isEmpty;
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Desc: 猪场软件主搜
@@ -81,6 +81,9 @@ import static io.terminus.common.utils.Arguments.notEmpty;
 @RestController
 @RequestMapping("/api/doctor/search")
 public class DoctorSearches {
+
+    @Autowired
+    private Exporter exporter;
 
     private final DoctorBarnReadService doctorBarnReadService;
 
@@ -218,8 +221,10 @@ public class DoctorSearches {
         Paging<SearchedPig> paging;
         if(objectMap.containsKey("statuses")
                 && ((List)objectMap.get("statuses")).contains(PigStatus.CHG_FARM.getKey())){
+            log.error("pagePigs:"+1+":"+objectMap.toString());
             paging = RespHelper.or500(doctorPigReadService.pagingChgFarmPig(objectMap, pageNo, pageSize));
         } else {
+            log.error("pagePigs:"+2+":"+objectMap.toString());
             paging = RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
         }
         paging.getData().forEach(searchedPig -> {
@@ -229,13 +234,17 @@ public class DoctorSearches {
                     searchedPig.setPigTypeName(pigSex.getDesc());
                 }
             }
-
             Integer status = searchedPig.getStatus();
             Date eventAt;
             if (Objects.equals(status, PigStatus.CHG_FARM.getKey())) {
-                DoctorChgFarmInfo doctorChgFarmInfo = RespHelper.or500(doctorPigReadService.findByFarmIdAndPigId(searchedPig.getFarmId(), searchedPig.getId()));
-                DoctorPigEvent chgFarm = RespHelper.or500(doctorPigEventReadService.findById(doctorChgFarmInfo.getEventId()));
-                eventAt = chgFarm.getEventAt();
+                try {
+                    DoctorChgFarmInfo doctorChgFarmInfo = RespHelper.or500(doctorPigReadService.findByFarmIdAndPigId(searchedPig.getFarmId(), searchedPig.getId()));
+                    DoctorPigEvent chgFarm = RespHelper.or500(doctorPigEventReadService.findById(doctorChgFarmInfo.getEventId()));
+                    eventAt = chgFarm.getEventAt();
+                }catch(Exception e){
+                    log.error(e.getMessage());
+                    eventAt = new Date();
+                }
             } else {
                 KongHuaiPregCheckResult result = KongHuaiPregCheckResult.from(searchedPig.getStatus());
                 if (result != null) {
@@ -251,6 +260,7 @@ public class DoctorSearches {
             Integer statusDay = DateUtil.getDeltaDays(eventAt, new Date());
             searchedPig.setStatusDay(statusDay);
         });
+        log.error("pagePigs:size"+paging.getData().size());
         return paging;
     }
 
@@ -709,5 +719,33 @@ public class DoctorSearches {
             }
         }
         return result;
+    }
+
+    @RequestMapping(value = "/sowManagerExport", method = RequestMethod.GET)
+    public void sowManagerExport(@RequestParam Map<String, String> eventCriteria, HttpServletRequest request, HttpServletResponse response) {
+        //导出母猪管理
+        exporter.export("sow-manager-export", eventCriteria, 1, 500, this::pagingSowManagerExport, request, response);
+    }
+
+    public Paging<DoctorSowManagerDto> pagingSowManagerExport(Map<String, String> pigEventCriteria) {
+        Integer pageNo = Integer.valueOf(pigEventCriteria.get("pageNo"));
+        Integer pageSize = Integer.valueOf(pigEventCriteria.get("size"));
+        Paging<SearchedPig> paging = pagePigs(pageNo, pageSize, pigEventCriteria, DoctorPig.PigSex.SOW);
+        List<DoctorSowManagerDto> list = paging.getData().stream().map(doctorPigEventDetail -> {
+            DoctorSowManagerDto dto = new DoctorSowManagerDto();
+            dto.setId(doctorPigEventDetail.getId());
+            dto.setPigCode(doctorPigEventDetail.getPigCode());
+            dto.setBreedName(doctorPigEventDetail.getBreedName());
+            dto.setCurrentParity(doctorPigEventDetail.getCurrentParity());
+            dto.setPigWeight(doctorPigEventDetail.getPigWeight());
+            dto.setRfid(doctorPigEventDetail.getRfid());
+            dto.setStatus(doctorPigEventDetail.getStatus());
+            dto.setStatusDay(doctorPigEventDetail.getStatusDay());
+            dto.setCurrentBarnId(doctorPigEventDetail.getCurrentBarnId());
+            dto.setCurrentBarnName(doctorPigEventDetail.getCurrentBarnName());
+            dto.setStatusName(doctorPigEventDetail.getStatusName());
+            return dto;
+        }).collect(toList());
+        return new Paging<>(paging.getTotal(), list);
     }
 }

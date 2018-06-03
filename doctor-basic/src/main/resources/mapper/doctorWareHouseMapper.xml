@@ -215,10 +215,41 @@
         from doctor_warehouse_material_handle a
         join doctor_warehouse_sku b on a.material_id=b.id
         join doctor_warehouse_vendor c on b.vendor_id=c.id
+        <if test="showZero!=null and showZero==0">
+            left join (select m.material_id,sum(m.balance_amount) as lastmonth_sum_amount,sum(m.balance_quantity) as lastmonth_sum_quantity
+            from doctor_warehouse_stock_monthly m
+            where date_format(m.settlement_date,'%Y-%m')=date_format(DATE_SUB(#{settlementDate}, INTERVAL 1 MONTH),'%Y-%m')
+            and m.warehouse_id=#{warehouseId}
+            GROUP BY m.material_id
+            ) tmp1 on a.material_id = tmp1.material_id
+            left join (
+            select j.material_id,sum(j.quantity) as thismonth_sum_rk_quantity
+            from doctor_warehouse_material_handle j,doctor_warehouse_stock_handle j1
+            where j.stock_handle_id = j1.id
+            and j.warehouse_id= #{warehouseId}
+            and j.delete_flag=1
+            and date_format(j.handle_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+            and j1.handle_type =1
+            GROUP BY j.material_id
+            )tmp2 on a.material_id = tmp2.material_id
+            left join(
+            select k.material_id,sum(k.quantity) as thismonth_sum_ck_quantity
+            from doctor_warehouse_material_handle k,doctor_warehouse_stock_handle k1
+            where k.stock_handle_id = k1.id
+            and k.warehouse_id= #{warehouseId}
+            and k.delete_flag=1
+            and date_format(k.handle_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+            and k1.handle_type = 2
+            GROUP BY k.material_id
+            )tmp3 on a.material_id = tmp3.material_id
+        </if>
         where a.delete_flag=1
         <if test="type != null" > and a.warehouse_type=#{type}</if>
         <if test="materialName != null" > and b.`name` like CONCAT('%', #{materialName}, '%')</if>
         <if test="warehouseId != null" > and a.warehouse_id=#{warehouseId}</if>
+        <if test="showZero!=null and showZero==0">
+            and round(ifnull(tmp1.lastmonth_sum_quantity ,0) + ifnull(tmp2.thismonth_sum_rk_quantity,0)-ifnull(tmp3.thismonth_sum_ck_quantity,0),3)!=0
+        </if>
         group by a.material_id
         ) temp
     </select>
@@ -276,6 +307,9 @@
         and a.warehouse_id=#{warehouseId}
         <if test="type != null" > and a.warehouse_type=#{type}</if>
         <if test="materialName != null" > and b.`name` like CONCAT('%', #{materialName}, '%')</if>
+        <if test="showZero!=null and showZero==0">
+            and round(ifnull(tmp1.lastmonth_sum_quantity ,0) + ifnull(tmp2.thismonth_sum_rk_quantity,0)-ifnull(tmp3.thismonth_sum_ck_quantity,0),3)!=0
+        </if>
         group by  a.material_id
         order by b.code
         limit #{offset},#{limit}

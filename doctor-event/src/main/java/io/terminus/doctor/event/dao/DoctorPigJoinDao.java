@@ -7,6 +7,8 @@ import io.terminus.common.utils.Constants;
 import io.terminus.doctor.event.dto.search.DoctorPigCountDto;
 import io.terminus.doctor.event.dto.search.SearchedPig;
 import io.terminus.doctor.event.model.DoctorPig;
+import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collections;
@@ -19,6 +21,7 @@ import java.util.Map;
  * author: DreamYoung
  * Date: 2016/12/22
  */
+@Slf4j
 @Repository
 public class DoctorPigJoinDao extends MyBatisDao<SearchedPig> {
 
@@ -26,14 +29,16 @@ public class DoctorPigJoinDao extends MyBatisDao<SearchedPig> {
         if (params == null) {    //如果查询条件为空
             params = Maps.newHashMap();
         }
-
+        log.info("pigPagingWithJoin"+params.toString());
         Long total = sqlSession.selectOne(sqlId(COUNT), params);
+        log.error("pigPagingWithJoin"+total.toString());
         if (total <= 0){
             return new Paging<>(0L, Collections.emptyList());
         }
         params.put(Constants.VAR_OFFSET, offset);
         params.put(Constants.VAR_LIMIT, limit);
         List<SearchedPig> datas = sqlSession.selectList(sqlId(PAGING), params);
+        log.error("pigPagingWithJoin"+datas.toString());
         return new Paging<>(total, datas);
     }
 
