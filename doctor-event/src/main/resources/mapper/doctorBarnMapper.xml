@@ -64,7 +64,7 @@
         <if test="status != null">AND status = #{status}</if>
         <if test="capacity != null">AND capacity = #{capacity}</if>
         <if test="staffId != null">AND staff_id = #{staffId}</if>
-        <if test="staffName != null">AND staff_name = #{staffName}</if>
+        <if test="staffName != null">AND staff_name like concat('%',#{staffName},'%')</if>
     </sql>
 
     <insert id="create" parameterType="DoctorBarn" keyProperty="id" useGeneratedKeys="true">
