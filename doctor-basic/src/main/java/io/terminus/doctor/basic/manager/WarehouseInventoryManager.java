@@ -41,7 +41,7 @@ public class WarehouseInventoryManager extends AbstractStockManager<WarehouseSto
 
             materialHandle.setHandleDate(this.buildNewHandleDate(stockDto.getHandleDate()).getTime());
 
-            BigDecimal historyQuantity = getHistoryQuantityInclude(stockDto.getHandleDate().getTime(), wareHouse.getId(), detail.getMaterialId());
+            BigDecimal historyQuantity = getHistoryQuantityInclude(materialHandle.getHandleDate(), wareHouse.getId(), detail.getMaterialId());
 
             materialHandle.setBeforeStockQuantity(historyQuantity);
             if (profit)
@@ -49,7 +49,7 @@ public class WarehouseInventoryManager extends AbstractStockManager<WarehouseSto
             else
                 historyQuantity = historyQuantity.subtract(materialHandle.getQuantity());
 
-            recalculate(stockDto.getHandleDate().getTime(), false, wareHouse.getId(), materialHandle.getMaterialId(), historyQuantity);
+            recalculate(materialHandle.getHandleDate(), false, wareHouse.getId(), materialHandle.getMaterialId(), historyQuantity);
         } else {
             BigDecimal currentQuantity = doctorWarehouseStockDao.findBySkuIdAndWarehouseId(detail.getMaterialId(), wareHouse.getId())
                     .orElse(DoctorWarehouseStock.builder().quantity(new BigDecimal(0)).build())
@@ -69,7 +69,7 @@ public class WarehouseInventoryManager extends AbstractStockManager<WarehouseSto
         doctorWarehouseMaterialHandleDao.update(materialHandle);
 
 //        if (!DateUtil.inSameDate(materialHandle.getHandleDate(), new Date())) {
-            recalculate(materialHandle);
+        recalculate(materialHandle);
 //        }
     }
 }
