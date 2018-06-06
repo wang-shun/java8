@@ -12,6 +12,7 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.DateUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 /**
  * Created by sunbo@terminus.io on 2018/4/19.
  */
+@Slf4j
 @Service
 public class WarehouseOutStockService extends AbstractWarehouseStockService<WarehouseStockOutDto, WarehouseStockOutDto.WarehouseStockOutDetail> {
 
@@ -126,8 +128,10 @@ public class WarehouseOutStockService extends AbstractWarehouseStockService<Ware
             }
             Date recalculateDate = materialHandle.getHandleDate();
             if (changeHandleDate) {
+                log.info("change handle date from {} to {}", stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
                 warehouseOutManager.buildNewHandleDateForUpdate(materialHandle, stockDto.getHandleDate());
                 if (stockDto.getHandleDate().getTime().before(stockHandle.getHandleDate())) {//事件日期改早了，重算日期采用新的日期
+                    log.info("handle date get small");
                     recalculateDate = materialHandle.getHandleDate();
                 }
             }
