@@ -136,6 +136,10 @@ public class WarehouseOutStockService extends AbstractWarehouseStockService<Ware
                 }
             }
             doctorWarehouseMaterialHandleDao.update(materialHandle);
+            if (changeHandleDate)
+                log.info("recalculate stock history {},{} by change handle date", materialHandle.getWarehouseId(), materialHandle.getMaterialId());
+            if (changeQuantity)
+                log.info("recalculate stock history {},{} by change quantity", materialHandle.getWarehouseId(), materialHandle.getMaterialId());
             warehouseOutManager.recalculate(materialHandle, recalculateDate);
 
         } else {
