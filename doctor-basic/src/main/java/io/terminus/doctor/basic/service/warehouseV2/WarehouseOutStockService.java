@@ -139,7 +139,7 @@ public class WarehouseOutStockService extends AbstractWarehouseStockService<Ware
             if (changeHandleDate)
                 log.info("recalculate stock history {},{} by change handle date", materialHandle.getWarehouseId(), materialHandle.getMaterialId());
             if (changeQuantity)
-                log.info("recalculate stock history {},{} by change quantity", materialHandle.getWarehouseId(), materialHandle.getMaterialId());
+                log.info("recalculate stock history {},{} by change quantity,from {},to", materialHandle.getWarehouseId(), materialHandle.getMaterialId(), materialHandle.getQuantity(), detail.getQuantity());
             warehouseOutManager.recalculate(materialHandle, recalculateDate);
 
         } else {
