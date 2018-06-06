@@ -107,12 +107,14 @@ public class WarehouseOutStockService extends AbstractWarehouseStockService<Ware
         boolean changeQuantity = detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0;
 
         if (changeQuantity)
-            log.info("recalculate stock history {},{},{} by change quantity,from {},to {}",
+            log.info("recalculate stock history {},{},{} by change quantity,from {},to {},{},{}",
                     materialHandle.getId(),
                     materialHandle.getWarehouseId(),
                     materialHandle.getMaterialId(),
                     materialHandle.getQuantity(),
-                    detail.getQuantity());
+                    detail.getQuantity(),
+                    detail.getMaterialHandleId(),
+                    detail.getMaterialId());
 
         if (changeQuantity || changeHandleDate) {
 
