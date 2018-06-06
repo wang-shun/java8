@@ -106,6 +106,14 @@ public class WarehouseOutStockService extends AbstractWarehouseStockService<Ware
         boolean changeHandleDate = !DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
         boolean changeQuantity = detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0;
 
+        if (changeQuantity)
+            log.info("recalculate stock history {},{},{} by change quantity,from {},to {}",
+                    materialHandle.getId(),
+                    materialHandle.getWarehouseId(),
+                    materialHandle.getMaterialId(),
+                    materialHandle.getQuantity(),
+                    detail.getQuantity());
+
         if (changeQuantity || changeHandleDate) {
 
             //更改了数量，或更改了操作日期
@@ -140,13 +148,7 @@ public class WarehouseOutStockService extends AbstractWarehouseStockService<Ware
                 log.info("recalculate stock history {},{},{} by change handle date",
                         materialHandle.getId(),
                         materialHandle.getWarehouseId(), materialHandle.getMaterialId());
-            if (changeQuantity)
-                log.info("recalculate stock history {},{},{} by change quantity,from {},to {}",
-                        materialHandle.getId(),
-                        materialHandle.getWarehouseId(),
-                        materialHandle.getMaterialId(),
-                        materialHandle.getQuantity(),
-                        detail.getQuantity());
+
             warehouseOutManager.recalculate(materialHandle, recalculateDate);
 
         } else {
