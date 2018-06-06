@@ -266,12 +266,11 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
     private AmountAndQuantityDto CalcUnitPrice(DoctorWarehouseMaterialHandle materialHandle,
                                                AmountAndQuantityDto historyBalance,
                                                Map<Long, DoctorWarehouseMaterialHandle> settlementMaterialHandles) {
-        if (materialHandle.getWarehouseId().equals(263L) && materialHandle.getMaterialId().equals(280L))
-            log.info("settlement for material handle {},material {},warehouse {},quantity {}",
-                    materialHandle.getId(),
-                    materialHandle.getMaterialId(),
-                    materialHandle.getWarehouseId(),
-                    materialHandle.getQuantity());
+        log.debug("settlement for material handle {},material {},warehouse {},quantity {}",
+                materialHandle.getId(),
+                materialHandle.getMaterialId(),
+                materialHandle.getWarehouseId(),
+                materialHandle.getQuantity());
 
         BigDecimal historyStockAmount = historyBalance.getAmount();
         BigDecimal historyStockQuantity = historyBalance.getQuantity();
