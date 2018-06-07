@@ -1,6 +1,7 @@
 package io.terminus.doctor.basic.dto.warehouseV2;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
@@ -25,6 +26,7 @@ public class WarehouseStockRefundDto extends AbstractWarehouseStockDto implement
 
 
     @Data
+    @EqualsAndHashCode(callSuper = true)
     public static class WarehouseStockRefundDetailDto extends AbstractWarehouseStockDetail implements Serializable {
 
         private static final long serialVersionUID = 7670362280319755039L;

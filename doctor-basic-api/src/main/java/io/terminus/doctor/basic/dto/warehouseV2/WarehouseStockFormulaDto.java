@@ -1,5 +1,6 @@
 package io.terminus.doctor.basic.dto.warehouseV2;
 
+import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
@@ -17,6 +18,7 @@ public class WarehouseStockFormulaDto extends AbstractWarehouseStockDto implemen
     @NotEmpty(message = "stock.detail.empty", groups = AbstractWarehouseStockDetail.StockDefaultValid.class)
     private List<WarehouseStockFormulaDetail> details;
 
+    @EqualsAndHashCode(callSuper = true)
     public static class WarehouseStockFormulaDetail extends AbstractWarehouseStockDetail implements Serializable {
 
         private static final long serialVersionUID = 4662817408999322033L;
