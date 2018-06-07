@@ -191,7 +191,12 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     public ResponseUtil<List<List<Map>>> companyReport(Map<String, Object> criteria) {
         //查公司名下所有猪场
         List<Map<String,Object>> farms = this.doctorWarehouseMaterialHandleDao.selectFarmsByOrgId((Long)criteria.get("orgId"));
-
+        //查猪场最早创建仓库的时间
+        List<Long> ids = Lists.newArrayList();
+        farms.forEach(stringObjectMap -> {
+            ids.add((Long)stringObjectMap.get("id"));
+        });
+        Date maxTime = this.doctorWareHouseDao.findMaxTimeByFarmId(ids);
         List<List<Map>> resultList = Lists.newArrayList();
         try {
             criteria = this.getMonth(criteria);
@@ -208,10 +213,8 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
                 List<Map> lists = doctorWarehouseMaterialHandleDao.listByFarmIdTime(criteria);
                 Date time = (Date) criteria.get("settlementDate");
-                if (time.getTime() < System.currentTimeMillis()) {
-//                    boolean settled = false;
+                if (time.getTime() < System.currentTimeMillis()&&time.getTime()>maxTime.getTime()) {
                     if (lists == null || lists.size() == 0) {
-//                        settled = true;
                         lists = Lists.newArrayList();
                     }
                     //补全猪场
