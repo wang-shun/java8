@@ -111,6 +111,15 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             throw new ServiceException("under.settlement");
 
         try {
+
+            DoctorWarehouseOrgSettlement settlement = doctorWarehouseOrgSettlementDao.findByOrg(orgId);
+            if (null != settlement) {
+                if (settlementDate.after(DateUtils.addDays(settlement.getLastSettlementDate(), 1))) {
+                    throw new ServiceException("settlement.future");
+                }
+            }
+
+
             //每个仓库下每个物料在该会计年月之前的余额和余量
 //            Map<Long/*warehouseId*/, AmountAndQuantityDto> eachWarehouseBalance = doctorWarehouseMaterialHandleDao.findEachWarehouseBalanceBySettlementDate(orgId, settlementDate);
             Map<String/*warehouseId-materialId*/, AmountAndQuantityDto> eachWarehouseBalance = doctorWarehouseStockMonthlyDao.findEachWarehouseBalanceBySettlementDate(orgId, DateUtils.addMonths(settlementDate, -1));
@@ -232,8 +241,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 //            });
 
             log.info("update or create stock monthly balance under org {} use :{}ms", orgId, stopwatch.elapsed(TimeUnit.MILLISECONDS));
-
-            DoctorWarehouseOrgSettlement settlement = doctorWarehouseOrgSettlementDao.findByOrg(orgId);
+            
             if (null == settlement) {
                 settlement = new DoctorWarehouseOrgSettlement();
                 settlement.setOrgId(orgId);
