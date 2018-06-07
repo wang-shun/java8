@@ -121,9 +121,11 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 
             Stopwatch stopwatch = Stopwatch.createStarted();
 
+
+            log.info("start to settlement org {} material handle for {}", settlementDate);
             List<DoctorWarehouseMaterialHandle> materialHandles = doctorWarehouseMaterialHandleDao.findByOrgAndSettlementDate(orgId, settlementDate);
 
-            log.info("start to settlement org {} material handle,total :{}", orgId, materialHandles.size());
+            log.info("get all need to settlement material handle,total :{}", materialHandles.size());
 
             for (DoctorWarehouseMaterialHandle materialHandle : materialHandles) {
 
