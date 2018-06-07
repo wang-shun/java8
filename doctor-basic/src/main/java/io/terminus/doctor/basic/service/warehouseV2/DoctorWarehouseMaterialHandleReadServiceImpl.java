@@ -189,6 +189,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
     @Override
     public ResponseUtil<List<List<Map>>> companyReport(Map<String, Object> criteria) {
+        List<List<Map>> resultList = Lists.newArrayList();
         //查公司名下所有猪场
         List<Map<String,Object>> farms = this.doctorWarehouseMaterialHandleDao.selectFarmsByOrgId((Long)criteria.get("orgId"));
         //查猪场最早创建仓库的时间
@@ -197,7 +198,8 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
             ids.add((Long)stringObjectMap.get("id"));
         });
         Date maxTime = this.doctorWareHouseDao.findMaxTimeByFarmId(ids);
-        List<List<Map>> resultList = Lists.newArrayList();
+        if(maxTime==null)
+            return ResponseUtil.isOk(resultList,farms);
         try {
             criteria = this.getMonth(criteria);
             int count =(int)criteria.get("count");
