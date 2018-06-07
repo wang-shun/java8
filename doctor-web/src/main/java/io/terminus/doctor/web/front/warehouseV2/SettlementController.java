@@ -64,7 +64,7 @@ public class SettlementController {
             RespHelper.orServEx(doctorWarehouseSettlementService.settlement(orgId, farmIds,
                     settlementDate));
         } catch (RpcException e) {
-            throw new JsonResponseException("结算超时");
+            throw new JsonResponseException("结算量大，计算耗时，请稍后查询结算结果");
         }
 
         return true;
