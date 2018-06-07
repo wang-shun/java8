@@ -9,13 +9,7 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.cache.DoctorDepartmentCache;
-import io.terminus.doctor.event.dao.DoctorEventModifyLogDao;
-import io.terminus.doctor.event.dao.DoctorGroupDailyDao;
-import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupStatisticDao;
-import io.terminus.doctor.event.dao.DoctorPigDailyDao;
-import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.DoctorPigStatisticDao;
+import io.terminus.doctor.event.dao.*;
 import io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -61,6 +55,9 @@ public class DoctorDailyReportV2Manager {
     private final DoctorEventModifyLogDao doctorEventModifyLogDao;
     private final DoctorDepartmentCache departmentCache;
     private final DoctorReportWriteService doctorReportWriteService;
+
+    @Autowired
+    private DoctorKpiDao doctorKpiDao;
 
     @Autowired
     public DoctorDailyReportV2Manager(DoctorGroupStatisticDao groupStatisticDao, DoctorGroupDailyDao groupDailyDao, DoctorPigStatisticDao pigStatisticDao, DoctorPigDailyDao pigDailyDao, DoctorPigEventDao doctorPigEventDao, DoctorGroupEventDao doctorGroupEventDao, DoctorEventModifyLogDao doctorEventModifyLogDao, DoctorDepartmentCache departmentCache, DoctorReportWriteService doctorReportWriteService) {
@@ -324,6 +321,7 @@ public class DoctorDailyReportV2Manager {
         doctorPigDaily.setMateYx(pigStatisticDao.mateYx(criteria));
         doctorPigDaily.setMatingCount(pigStatisticDao.matingCount(criteria));
         doctorPigDaily.setSowPhMating(pigStatisticDao.sowPhMating(criteria));
+        criteria.setOrgId(doctorKpiDao.getOrgIdByFarmId(criteria.getFarmId()));
         doctorPigDaily.setSowPhKonghuai(pigStatisticDao.sowPhKonghuai(criteria));
         doctorPigDaily.setSowPhPregnant(pigStatisticDao.sowPhPregnant(criteria));
         doctorPigDaily.setPregPositive(pigStatisticDao.pregPositive(criteria));
