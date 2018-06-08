@@ -368,8 +368,9 @@
         <where>
             b.status = 1
             AND b.farm_id = #{farmId}
-            AND b.event_at = #{sumAt}
             AND b.pig_type = #{pigType}
+            and DATE_FORMAT(a.close_at, '%Y-%m-%d') = #{sumAt}
+            and a.status = -1
             <if test="pigType == 2">and
                 (
                 (`type` = 4 and trans_group_type = 1 and other_barn_type = 3 )
