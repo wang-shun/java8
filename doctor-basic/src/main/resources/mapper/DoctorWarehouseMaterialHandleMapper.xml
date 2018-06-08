@@ -749,6 +749,7 @@
         select id,name
         from doctor_farms
         where org_id = #{orgId,jdbcType = BIGINT}
+        and (frozen = 0 or frozen is null)
         order by id
     </select>
 

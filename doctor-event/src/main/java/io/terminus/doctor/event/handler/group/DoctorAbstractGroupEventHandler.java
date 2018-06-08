@@ -360,9 +360,11 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     //校验产房0仔猪未断奶数量，如果还有未断奶的仔猪，转群/变动数量要限制
     protected void checkUnweanTrans(Integer pigType, Integer toType, DoctorGroupTrack groupTrack, Integer eventQty) {
+        log.error("checkUnweanTrans:pigType="+pigType+",toType:"+toType+",eventQty:"+eventQty);
         if (!Objects.equals(pigType, PigType.DELIVER_SOW.getValue()) || Objects.equals(pigType, toType)) {
             return;
         }
+        log.error("checkUnweanTrans:groupTrack="+groupTrack.toString());
         Integer unwean = MoreObjects.firstNonNull(groupTrack.getUnweanQty(), 0);
         if (eventQty > (groupTrack.getQuantity() - unwean)) {
             throw new InvalidException("group.has.unwean", eventQty, groupTrack.getQuantity() - unwean);

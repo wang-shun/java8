@@ -358,4 +358,14 @@
       where farm_id = #{farmId,jdbcType=BIGINT}
     </select>
 
+    <select id="findMaxTimeByFarmId" parameterType="list" resultType="Date">
+       select min(created_at) as time
+       from doctor_ware_houses
+       where 1=1
+       and farm_id in
+        <foreach collection="list" open="(" separator="," close=")" item="i">
+          #{i}
+        </foreach>
+    </select>
+
 </mapper>

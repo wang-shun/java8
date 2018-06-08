@@ -310,7 +310,9 @@ public class DoctorEfficiencySynchronizer {
         //年产胎次（月）=365-非生产天数*12/生产天数/总窝数
         if (null != pigDaily && pigDaily.getFarrowNest() != null && pigDaily.getFarrowNest() != 0 && efficiency.getNpd() != null
                 && (npd.getPregnancy() + npd.getLactation() != 0)) {
+            //哺乳期+怀孕期（总生产天数）
             BigDecimal pd = new BigDecimal(npd.getPregnancy()).add(new BigDecimal(npd.getLactation()));
+            //除以产房分娩窝数
             BigDecimal eachBirthDay = pd.divide(new BigDecimal(pigDaily.getFarrowNest()), 2, BigDecimal.ROUND_HALF_UP);
 
             if (DateDimension.MONTH.getValue().equals(dateType)) {//年产胎次（月）=365-非生产天数*12/生产天数/总窝数
