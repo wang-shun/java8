@@ -105,8 +105,12 @@ public class DoctorNurserySynchronizer {
     private Double outAvgWeight70(DoctorGroupDailyExtend dailyExtend) {
         Integer STANDARD_AGE = 70;
         Double FACTOR = 1.55;
-        return (STANDARD_AGE - FieldHelper.get(dailyExtend.getTurnActualAge(), dailyExtend.getTurnActualCount())
-                + EventUtil.getAvgWeight(dailyExtend.getTurnActualWeight(), dailyExtend.getTurnActualCount()) * FACTOR) / FACTOR;
+        if(FieldHelper.get(dailyExtend.getTurnActualAge(), dailyExtend.getTurnActualCount()) == 0){
+            return 0.0;
+        }else {
+            return (STANDARD_AGE - FieldHelper.get(dailyExtend.getTurnActualAge(), dailyExtend.getTurnActualCount())
+                    + EventUtil.getAvgWeight(dailyExtend.getTurnActualWeight(), dailyExtend.getTurnActualCount()) * FACTOR) / FACTOR;
+        }
     }
 
     private Double feedMeatRate(DoctorGroupDailyExtend dailyExtend, DoctorDimensionCriteria dimensionCriteria){
