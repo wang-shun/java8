@@ -2,6 +2,7 @@ package io.terminus.doctor.basic.dto.warehouseV2;
 
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.validation.annotation.Validated;
 
@@ -37,6 +38,7 @@ public class WarehouseFormulaDto extends AbstractWarehouseStockDto implements Se
     private List<WarehouseFormulaDetail> details;
 
     @Data
+    @EqualsAndHashCode(callSuper = true)
     public static class WarehouseFormulaDetail extends AbstractWarehouseStockDetail implements Serializable {
 
         private static final long serialVersionUID = 8852999063915768802L;

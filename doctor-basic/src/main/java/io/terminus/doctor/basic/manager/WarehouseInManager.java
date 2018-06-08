@@ -24,9 +24,9 @@ public class WarehouseInManager extends AbstractStockManager<WarehouseStockInDto
 
     @Override
     public DoctorWarehouseMaterialHandle create(WarehouseStockInDto.WarehouseStockInDetailDto detail,
-                       WarehouseStockInDto stockDto,
-                       DoctorWarehouseStockHandle stockHandle,
-                       DoctorWareHouse wareHouse) {
+                                                WarehouseStockInDto stockDto,
+                                                DoctorWarehouseStockHandle stockHandle,
+                                                DoctorWareHouse wareHouse) {
 
         DoctorWarehouseMaterialHandle materialHandle = buildMaterialHandle(detail, stockDto, stockHandle, wareHouse);
         materialHandle.setType(WarehouseMaterialHandleType.IN.getValue());
@@ -40,13 +40,13 @@ public class WarehouseInManager extends AbstractStockManager<WarehouseStockInDto
             materialHandle.setHandleDate(this.buildNewHandleDate(stockDto.getHandleDate()).getTime());
 
             //获取该笔明细之前的库存量
-            BigDecimal historyQuantity = getHistoryQuantityInclude(stockDto.getHandleDate().getTime(), wareHouse.getId(), detail.getMaterialId());
+            BigDecimal historyQuantity = getHistoryQuantityInclude(materialHandle.getHandleDate(), wareHouse.getId(), detail.getMaterialId());
 
             materialHandle.setBeforeStockQuantity(historyQuantity);
             historyQuantity = historyQuantity.add(detail.getQuantity());
 
             //需要重算每个明细的beforeStockQuantity
-            recalculate(stockDto.getHandleDate().getTime(), false, wareHouse.getId(), detail.getMaterialId(), historyQuantity);
+            recalculate(materialHandle.getHandleDate(), false, wareHouse.getId(), detail.getMaterialId(), historyQuantity);
         } else {
             BigDecimal currentQuantity = doctorWarehouseStockDao.findBySkuIdAndWarehouseId(detail.getMaterialId(), wareHouse.getId())
                     .orElse(DoctorWarehouseStock.builder().quantity(new BigDecimal(0)).build())
@@ -67,7 +67,7 @@ public class WarehouseInManager extends AbstractStockManager<WarehouseStockInDto
 
 //        if (!DateUtil.inSameDate(materialHandle.getHandleDate(), new Date())) {
 //            删除历史单据明细
-            recalculate(materialHandle);
+        recalculate(materialHandle);
 //        }
     }
 

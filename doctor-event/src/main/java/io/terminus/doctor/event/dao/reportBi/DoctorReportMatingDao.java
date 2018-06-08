@@ -3,7 +3,10 @@ package io.terminus.doctor.event.dao.reportBi;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.model.DoctorReportMating;
+import io.terminus.doctor.event.model.DoctorReportSow;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * Desc:
@@ -18,5 +21,13 @@ public class DoctorReportMatingDao extends MyBatisDao<DoctorReportMating> {
     }
     public DoctorReportMating findByDimension(DoctorDimensionCriteria dimensionCriteria) {
         return getSqlSession().selectOne(sqlId("findByDimension"), dimensionCriteria);
+    }
+
+    public List<DoctorReportMating> findBy(DoctorDimensionCriteria dimensionCriteria) {
+        return getSqlSession().selectList(sqlId("findBy"), dimensionCriteria);
+    }
+
+    public DoctorReportMating sumBy(DoctorDimensionCriteria dimensionCriteria) {
+        return getSqlSession().selectOne(sqlId("sumBy"), dimensionCriteria);
     }
 }

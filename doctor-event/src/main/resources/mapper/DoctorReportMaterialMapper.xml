@@ -307,4 +307,90 @@
         </where>
     </delete>
 
+    <select id="findBy" parameterType="map" resultMap="DoctorReportMaterialMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            <if test="orzId != null">AND orz_id = #{orzId}</if>
+            <if test="orzIds != null &amp;&amp; orzIds.size > 0">
+                orz_id IN
+                <foreach collection="orzIds" item="oId" open="(" separator="," close=")">
+                    #{oId}
+                </foreach>
+            </if>
+            <if test="orzType != null"> AND orz_type = #{orzType}</if>
+            <if test="dateType != null"> AND date_type = #{dateType}</if>
+            <if test="startAt != null"> AND sum_at &gt;= date_format(#{startAt}, '%y-%m-%d')</if>
+            <if test="endAt != null"> AND sum_at &lt;= date_format(#{endAt}, '%y-%m-%d')</if>
+        </where>
+        ORDER BY sum_at
+    </select>
+
+    <select id="sumBy" parameterType="map" resultMap="DoctorReportMaterialMap">
+        SELECT
+        sum(houbei_feed_amount) AS houbeiFeedAmount,
+        sum(houbei_feed_quantity) AS houbeiFeedQuantity,
+        sum(houbei_material_amount) AS  houbeiMaterialAmount,
+        sum(houbei_material_quantity) AS houbeiMaterialQuantity,
+        sum(houbei_vaccination_amount) AS houbeiVaccinationAmount,
+        sum(houbei_medicine_amount) AS houbeiMedicineAmount,
+        sum(houbei_consume_amount) AS houbeiConsumeAmount,
+        sum(peihuai_feed_amount) AS peihuaiFeedAmount,
+        sum(peihuai_feed_quantity) AS peihuaiFeedQuantity,
+        sum(peihuai_material_amount) AS peihuaiMaterialAmount,
+        sum(peihuai_material_quantity) AS peihuaiMaterialQuantity,
+        sum(peihuai_vaccination_amount) AS peihuaiVaccinationAmount,
+        sum(peihuai_medicine_amount) AS  peihuaiMedicineAmount,
+        sum(peihuai_consume_amount) AS peihuaiConsumeAmount,
+        sum(sow_feed_amount) AS sowFeedAmount,
+        sum(sow_feed_quantity) AS sowFeedQuantity,
+        sum(sow_material_amount) AS sowMaterialAmount,
+        sum(sow_material_quantity) AS sowMaterialQuantity,
+        sum(sow_vaccination_amount) AS sowVaccinationAmount,
+        sum(sow_medicine_amount) AS sowMedicineAmount,
+        sum(sow_consume_amount) AS sowConsumeAmount,
+        sum(piglet_feed_amount) AS pigletFeedAmount,
+        sum(piglet_feed_quantity) AS pigletFeedQuantity,
+        sum(piglet_material_amount) AS pigletMaterialAmount,
+        sum(piglet_material_quantity) AS pigletMaterialQuantity,
+        sum(piglet_vaccination_amount) AS pigletVaccinationAmount,
+        sum(piglet_medicine_amount) AS pigletMedicineAmount,
+        sum(piglet_consume_amount) AS pigletConsumeAmount,
+        sum(baoyu_feed_amount) AS baoyuFeedAmount,
+        sum(baoyu_feed_quantity) AS baoyuFeedQuantity,
+        sum(baoyu_material_amount) AS baoyuMaterialAmount,
+        sum(baoyu_material_quantity) AS baoyuMaterialQuantity,
+        sum(baoyu_vaccination_amount) AS baoyuVaccinationAmount,
+        sum(baoyu_medicine_amount) AS baoyuMedicineAmount,
+        sum(baoyu_consume_amount) AS baoyuConsumeAmount,
+        sum(yufei_feed_amount) AS yufeiFeedAmount,
+        sum(yufei_feed_quantity) AS yufeiFeedQuantity,
+        sum(yufei_material_amount) AS yufeiMaterialAmount,
+        sum(yufei_material_quantity) AS yufeiMaterialQuantity,
+        sum(yufei_vaccination_amount) AS yufeiVaccinationAmount,
+        sum(yufei_medicine_amount) AS yufeiMedicineAmount,
+        sum(yufei_consume_amount) AS yufeiConsumeAmount,
+        sum(boar_feed_amount) AS boarFeedAmount,
+        sum(boar_feed_quantity) AS boarFeedQuantity,
+        sum(boar_material_amount) AS boarMaterialAmount,
+        sum(boar_material_quantity) AS boarMaterialQuantity,
+        sum(boar_vaccination_amount) AS boarVaccinationAmount,
+        sum(boar_medicine_amount) AS boarMedicineAmount,
+        sum(boar_consume_amount) AS boarConsumeAmount
+        FROM <include refid="tb"/>
+        <where>
+            <if test="orzId != null">AND orz_id = #{orzId}</if>
+            <if test="orzIds != null &amp;&amp; orzIds.size > 0">
+                orz_id IN
+                <foreach collection="orzIds" item="oId" open="(" separator="," close=")">
+                    #{oId}
+                </foreach>
+            </if>
+            <if test="orzType != null"> AND orz_type = #{orzType}</if>
+            <if test="dateType != null"> AND date_type = #{dateType}</if>
+            <if test="startAt != null"> AND sum_at &gt;= date_format(#{startAt}, '%y-%m-%d')</if>
+            <if test="endAt != null"> AND sum_at &lt;= date_format(#{endAt}, '%y-%m-%d')</if>
+        </where>
+    </select>
+
 </mapper>

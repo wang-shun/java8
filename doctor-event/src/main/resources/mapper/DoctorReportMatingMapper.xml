@@ -192,4 +192,54 @@
         </where>
     </select>
 
+    <select id="findBy" parameterType="map" resultMap="DoctorReportMatingMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            <if test="orzId != null">AND orz_id = #{orzId}</if>
+            <if test="orzIds != null &amp;&amp; orzIds.size > 0">
+                orz_id IN
+                <foreach collection="orzIds" item="oId" open="(" separator="," close=")">
+                    #{oId}
+                </foreach>
+            </if>
+            <if test="orzType != null"> AND orz_type = #{orzType}</if>
+            <if test="dateType != null"> AND date_type = #{dateType}</if>
+            <if test="startAt != null"> AND sum_at &gt;= date_format(#{startAt}, '%y-%m-%d')</if>
+            <if test="endAt != null"> AND sum_at &lt;= date_format(#{endAt}, '%y-%m-%d')</if>
+        </where>
+        ORDER BY sum_at
+    </select>
+
+    <select id="sumBy" parameterType="map" resultMap="DoctorReportMatingMap">
+        SELECT
+        sum(houbei_in) AS houbeiIn,
+        sum(sow_ph_wean_in) AS sowPhWeanIn,
+        sum(other_in) AS otherIn,
+        sum(dead) AS dead,
+        sum(weed_out) AS weedOut,
+        sum(sale) AS sale,
+        sum(chg_farm_out) AS chgFarmOut,
+        sum(other_change) AS otherChange,
+        sum(mating_count) AS matingCount,
+        sum(preg_positive) AS pregPositive,
+        sum(preg_negative) AS pregNegative,
+        sum(preg_fanqing) AS pregFanqing,
+        sum(preg_liuchan) AS pregLiuchan
+        FROM <include refid="tb"/>
+        <where>
+            <if test="orzId != null">AND orz_id = #{orzId}</if>
+            <if test="orzIds != null &amp;&amp; orzIds.size > 0">
+                orz_id IN
+                <foreach collection="orzIds" item="oId" open="(" separator="," close=")">
+                    #{oId}
+                </foreach>
+            </if>
+            <if test="orzType != null"> AND orz_type = #{orzType}</if>
+            <if test="dateType != null"> AND date_type = #{dateType}</if>
+            <if test="startAt != null"> AND sum_at &gt;= date_format(#{startAt}, '%y-%m-%d')</if>
+            <if test="endAt != null"> AND sum_at &lt;= date_format(#{endAt}, '%y-%m-%d')</if>
+        </where>
+    </select>
+
 </mapper>

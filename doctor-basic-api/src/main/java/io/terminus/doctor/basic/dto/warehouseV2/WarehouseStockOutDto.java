@@ -2,6 +2,7 @@ package io.terminus.doctor.basic.dto.warehouseV2;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 import org.hibernate.validator.constraints.NotBlank;
@@ -28,6 +29,7 @@ public class WarehouseStockOutDto extends AbstractWarehouseStockDto implements S
     @Builder
     @AllArgsConstructor
     @NoArgsConstructor
+    @EqualsAndHashCode(callSuper = true)
     public static class WarehouseStockOutDetail extends AbstractWarehouseStockDetail implements Serializable {
 
         private static final long serialVersionUID = -6161879769774585774L;

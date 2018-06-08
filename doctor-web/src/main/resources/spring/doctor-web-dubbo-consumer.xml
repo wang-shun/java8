@@ -113,6 +113,8 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.FeedFormulaReadService" id="feedFormulaReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorMaterialInWareHouseReadService" id="doctorMaterialInWareHouseReadService" check="false"/>
 
+    <dubbo:reference interface="io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSettlementService" version="1.0.0" retries="0" id="doctorWarehouseSettlementService" cache="false" timeout="120000"></dubbo:reference>
+
     <!-- group service -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorGroupReadService" id="doctorGroupReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorGroupWriteService" id="doctorGroupWriteService" check="false"/>

@@ -42,7 +42,7 @@ public class WarehouseFormulaManager extends AbstractStockManager<WarehouseFormu
             materialHandle.setHandleDate(this.buildNewHandleDate(stockDto.getHandleDate()).getTime());
 
             //获取该笔明细之前的库存量，包括该事件日期
-            BigDecimal historyQuantity = getHistoryQuantityInclude(stockDto.getHandleDate().getTime(), wareHouse.getId(), detail.getMaterialId());
+            BigDecimal historyQuantity = getHistoryQuantityInclude(materialHandle.getHandleDate(), wareHouse.getId(), detail.getMaterialId());
 
             materialHandle.setBeforeStockQuantity(historyQuantity);
 
@@ -59,7 +59,7 @@ public class WarehouseFormulaManager extends AbstractStockManager<WarehouseFormu
             }
 
             //该笔单据明细之后单据明细需要重算
-            recalculate(stockDto.getHandleDate().getTime(), false, wareHouse.getId(), detail.getMaterialId(), historyQuantity);
+            recalculate(materialHandle.getHandleDate(), false, wareHouse.getId(), detail.getMaterialId(), historyQuantity);
         } else {
             log.info("get current stock quantity for warehouse:{},sku:{}", detail.getMaterialId(), wareHouse.getId());
             BigDecimal currentQuantity = doctorWarehouseStockDao.findBySkuIdAndWarehouseId(detail.getMaterialId(), wareHouse.getId())
