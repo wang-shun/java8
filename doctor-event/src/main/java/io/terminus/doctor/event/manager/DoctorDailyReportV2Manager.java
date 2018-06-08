@@ -323,6 +323,7 @@ public class DoctorDailyReportV2Manager {
         doctorPigDaily.setSowPhMating(pigStatisticDao.sowPhMating(criteria));
         criteria.setOrgId(doctorKpiDao.getOrgIdByFarmId(criteria.getFarmId()));
         doctorPigDaily.setSowPhKonghuai(pigStatisticDao.sowPhKonghuai(criteria));
+        log.error("flushPhPigDaily:SowPhKonghuai"+doctorPigDaily.getSowPhKonghuai());
         doctorPigDaily.setSowPhPregnant(pigStatisticDao.sowPhPregnant(criteria));
         doctorPigDaily.setPregPositive(pigStatisticDao.pregPositive(criteria));
         doctorPigDaily.setPregNegative(pigStatisticDao.pregNegative(criteria));
