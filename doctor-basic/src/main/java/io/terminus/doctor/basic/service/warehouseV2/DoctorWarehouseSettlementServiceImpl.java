@@ -114,7 +114,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 
             DoctorWarehouseOrgSettlement settlement = doctorWarehouseOrgSettlementDao.findByOrg(orgId);
             if (null != settlement) {
-                if (settlementDate.after(DateUtils.addDays(settlement.getLastSettlementDate(), 1))) {
+                if (settlementDate.after(DateUtils.addMonths(settlement.getLastSettlementDate(), 1))) {
                     throw new ServiceException("settlement.future");
                 }
             }
@@ -241,7 +241,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 //            });
 
             log.info("update or create stock monthly balance under org {} use :{}ms", orgId, stopwatch.elapsed(TimeUnit.MILLISECONDS));
-            
+
             if (null == settlement) {
                 settlement = new DoctorWarehouseOrgSettlement();
                 settlement.setOrgId(orgId);
