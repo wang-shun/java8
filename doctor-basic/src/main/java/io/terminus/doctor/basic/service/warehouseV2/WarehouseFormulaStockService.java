@@ -138,6 +138,7 @@ public class WarehouseFormulaStockService extends AbstractWarehouseStockService<
             DoctorWarehouseMaterialHandle materialHandle = materialHandles.get(detail.getMaterialHandleId()).get(0);
 
             materialHandle.setRemark(detail.getRemark());
+            materialHandle.setSettlementDate(stockDto.getSettlementDate());
 
             int quantityChange = materialHandle.getQuantity().compareTo(detail.getQuantity());
             if (quantityChange != 0 || changeHandleDate) {

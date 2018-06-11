@@ -167,4 +167,43 @@
             <if test="dateType == 5">AND date_format(sum_at, '%y') = date_format(#{sumAt}, '%y')</if>
         </where>
     </select>
+
+    <select id="findBy" parameterType="map" resultMap="DoctorReportSowMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            <if test="orzId != null">AND orz_id = #{orzId}</if>
+            <if test="orzIds != null &amp;&amp; orzIds.size > 0">
+                orz_id IN
+                <foreach collection="orzIds" item="oId" open="(" separator="," close=")">
+                    #{oId}
+                </foreach>
+            </if>
+            <if test="orzType != null"> AND orz_type = #{orzType}</if>
+            <if test="dateType != null"> AND date_type = #{dateType}</if>
+            <if test="startAt != null"> AND sum_at &gt;= date_format(#{startAt}, '%y-%m-%d')</if>
+            <if test="endAt != null"> AND sum_at &lt;= date_format(#{endAt}, '%y-%m-%d')</if>
+        </where>
+        ORDER BY sum_at
+    </select>
+
+    <select id="sumBy" parameterType="map" resultMap="DoctorReportSowMap">
+        SELECT sum(dead) as dead, sum(weed_out) as weedOut, sum(sale) as sale,
+               sum(chg_farm_out) as chgFarmOut, sum(other_change) as otherChange,
+               sum(houbei_in) as houbeiIn, sum(other_in) as otherIn
+        FROM <include refid="tb"/>
+        <where>
+            <if test="orzId != null">AND orz_id = #{orzId}</if>
+            <if test="orzIds != null &amp;&amp; orzIds.size > 0">
+                orz_id IN
+                <foreach collection="orzIds" item="oId" open="(" separator="," close=")">
+                    #{oId}
+                </foreach>
+            </if>
+            <if test="orzType != null"> AND orz_type = #{orzType}</if>
+            <if test="dateType != null"> AND date_type = #{dateType}</if>
+            <if test="startAt != null"> AND sum_at &gt;= date_format(#{startAt}, '%y-%m-%d')</if>
+            <if test="endAt != null"> AND sum_at &lt;= date_format(#{endAt}, '%y-%m-%d')</if>
+        </where>
+    </select>
 </mapper>

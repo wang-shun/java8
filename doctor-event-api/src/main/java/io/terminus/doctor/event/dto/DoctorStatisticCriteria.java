@@ -18,14 +18,19 @@ import java.util.Map;
 public class DoctorStatisticCriteria implements Serializable {
     private static final long serialVersionUID = -2306055017759941831L;
 
-    public DoctorStatisticCriteria(Long farmId, Integer pigType, String sumAt) {
+    public DoctorStatisticCriteria(Long orgId,Long farmId, Integer pigType, String sumAt) {
+        this.orgId=orgId;
         this.farmId = farmId;
         this.pigType = pigType;
         this.sumAt = sumAt;
     }
 
+    public DoctorStatisticCriteria(Long farmId, Integer pigType, String sumAt) {
+        this(null,farmId, pigType, sumAt);
+    }
+
     public DoctorStatisticCriteria(Long farmId, String sumAt) {
-        this(farmId, null, sumAt);
+        this(null,farmId, null, sumAt);
     }
 
     /**

@@ -71,6 +71,10 @@ public class DoctorPigBoarInFarmExportDto implements Serializable{
      */
     private String creatorName;
     /**
+     * 录入时间
+     */
+    private Date createdAt;
+    /**
      * 进场状态
      */
     private Integer pigStatusAfter;

@@ -91,14 +91,14 @@ public class WarehouseReturnManager extends AbstractStockManager<WarehouseStockR
                 }
 
                 //获取该笔明细之前的库存量，包括该事件日期
-                BigDecimal historyQuantity = getHistoryQuantityInclude(stockDto.getHandleDate().getTime(), wareHouse.getId(), d.getMaterialId());
+                BigDecimal historyQuantity = getHistoryQuantityInclude(materialHandle.getHandleDate(), wareHouse.getId(), d.getMaterialId());
 
                 materialHandle.setBeforeStockQuantity(historyQuantity);
 
                 historyQuantity = historyQuantity.subtract(d.getQuantity());
 
                 //该笔单据明细之后单据明细需要重算
-                recalculate(stockDto.getHandleDate().getTime(), false, wareHouse.getId(), d.getMaterialId(), historyQuantity);
+                recalculate(materialHandle.getHandleDate(), false, wareHouse.getId(), d.getMaterialId(), historyQuantity);
             } else {
                 BigDecimal currentQuantity = doctorWarehouseStockDao.findBySkuIdAndWarehouseId(d.getMaterialId(), wareHouse.getId())
                         .orElse(DoctorWarehouseStock.builder().quantity(new BigDecimal(0)).build())

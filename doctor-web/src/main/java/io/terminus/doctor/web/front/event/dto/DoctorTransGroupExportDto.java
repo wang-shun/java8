@@ -4,6 +4,8 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * Created by terminus on 2017/3/15.
  */
@@ -46,5 +48,7 @@ public class DoctorTransGroupExportDto extends DoctorGroupEvent{
     private Integer boarQty;
 
     private Integer sowQty;
+
+    private Date createdAt;
 
 }

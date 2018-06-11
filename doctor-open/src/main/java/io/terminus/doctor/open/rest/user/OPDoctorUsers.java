@@ -332,11 +332,12 @@ public class OPDoctorUsers {
 
     private ServiceReviewOpenDto getPigJxy(BaseUser baseUser) {
         ServiceReviewOpenDto openDto = new ServiceReviewOpenDto();
-        openDto.setServiceStatus(DoctorServiceStatus.Status.OPENED.value());
+        openDto.setServiceStatus(DoctorServiceStatus.Status.BETA.value());
         openDto.setUserId(baseUser.getId());
         openDto.setType(DoctorServiceReview.Type.PIG_JXY.getValue());
-        openDto.setStatus(DoctorServiceReview.Status.OK.getValue());
-        openDto.setUrl("http://39.108.236.233/app");
+        openDto.setStatus(DoctorServiceReview.Status.NOT_OK.getValue());
+        openDto.setReason("敬请期待");
+//        openDto.setUrl("http://39.108.236.233/app");
         return openDto;
     }
 

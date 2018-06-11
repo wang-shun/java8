@@ -1,5 +1,7 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
+import ch.qos.logback.core.util.TimeUtil;
+import com.google.common.base.Stopwatch;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
@@ -27,8 +29,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * 结算服务
@@ -85,7 +89,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 
     @Override
     public Date getSettlementDate(Date date) {
-
+        date = DateUtil.toDate(DateUtil.toDateString(date));
         List<Map<String, Object>> results = jdbcTemplate.queryForList("select * from v_pc_fiscal_period where company_id=? and deleted_flag=0 and start_date<=? and end_date>=?", new Object[]{1, date, date});
         if (results.isEmpty())
             throw new ServiceException("settlement.date.empty");
@@ -107,6 +111,15 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             throw new ServiceException("under.settlement");
 
         try {
+
+            DoctorWarehouseOrgSettlement settlement = doctorWarehouseOrgSettlementDao.findByOrg(orgId);
+            if (null != settlement) {
+                if (settlementDate.after(DateUtils.addMonths(settlement.getLastSettlementDate(), 1))) {
+                    throw new ServiceException("settlement.future");
+                }
+            }
+
+
             //每个仓库下每个物料在该会计年月之前的余额和余量
 //            Map<Long/*warehouseId*/, AmountAndQuantityDto> eachWarehouseBalance = doctorWarehouseMaterialHandleDao.findEachWarehouseBalanceBySettlementDate(orgId, settlementDate);
             Map<String/*warehouseId-materialId*/, AmountAndQuantityDto> eachWarehouseBalance = doctorWarehouseStockMonthlyDao.findEachWarehouseBalanceBySettlementDate(orgId, DateUtils.addMonths(settlementDate, -1));
@@ -114,7 +127,15 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             //已结算的单据明细
             Map<Long/*materialHandleId*/, DoctorWarehouseMaterialHandle> settlementMaterialHandles = new HashMap<>();
 
+
+            Stopwatch stopwatch = Stopwatch.createStarted();
+
+
+            log.info("start to settlement org {} material handle for {}", settlementDate);
             List<DoctorWarehouseMaterialHandle> materialHandles = doctorWarehouseMaterialHandleDao.findByOrgAndSettlementDate(orgId, settlementDate);
+
+            log.info("get all need to settlement material handle,total :{}", materialHandles.size());
+
             for (DoctorWarehouseMaterialHandle materialHandle : materialHandles) {
 
                 AmountAndQuantityDto lastSettlementBalance = eachWarehouseBalance.get(materialHandle.getWarehouseId() + "-" + materialHandle.getMaterialId());
@@ -136,45 +157,91 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                 settlementMaterialHandles.put(materialHandle.getId(), materialHandle);
             }
 
+            log.info("calc material handle unit price and amount under org {} use :{}ms ", orgId, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+
             doctorWarehouseMaterialHandleDao.updates(materialHandles);
 
-            //统计各个仓库下各个物料余额和余量
-            farmIds.stream().forEach(f -> {
-                doctorWareHouseDao.findByFarmId(f).forEach(wareHouse -> {
-                    doctorWarehouseStockDao.findSkuIds(wareHouse.getId()).forEach(sku -> {
+            log.info("update material handle unit price and amount under org {} use :{}ms", orgId, stopwatch.elapsed(TimeUnit.MILLISECONDS));
 
-                        //上一个会计年月的余额和余量
-                        DoctorWarehouseStockMonthly balance = doctorWarehouseStockMonthlyDao.findBalanceBySettlementDate(wareHouse.getId(), sku, DateUtils.addMonths(settlementDate, -1));
-                        BigDecimal balanceAmount, balanceQuantity;
-                        if (null == balance || null == balance.getBalanceAmount())
-                            balanceAmount = new BigDecimal(0);
-                        else balanceAmount = balance.getBalanceAmount();
-                        if (null == balance || null == balance.getBalanceQuantity())
-                            balanceQuantity = new BigDecimal(0);
-                        else balanceQuantity = balance.getBalanceQuantity();
 
-                        //本会计年月发生额和发生量
-                        AmountAndQuantityDto thisSettlementAmountAndQuantity = doctorWarehouseMaterialHandleDao.findBalanceBySettlementDate(wareHouse.getId(), sku, settlementDate);
+            Map<Long/*farmId*/, List<DoctorWarehouseMaterialHandle>> warehouseMaterialHandleMap = materialHandles.
+                    stream().collect(Collectors.groupingBy(DoctorWarehouseMaterialHandle::getWarehouseId));
 
-                        //创建或更新月度统计
-                        DoctorWarehouseStockMonthly stockMonthly = doctorWarehouseStockMonthlyDao.findBalanceBySettlementDate(wareHouse.getId(), sku, settlementDate);
-                        if (null == stockMonthly)
-                            stockMonthly = new DoctorWarehouseStockMonthly();
-                        stockMonthly.setOrgId(orgId);
-                        stockMonthly.setFarmId(f);
-                        stockMonthly.setWarehouseId(wareHouse.getId());
-                        stockMonthly.setMaterialId(sku);
-                        stockMonthly.setSettlementDate(settlementDate);
-                        stockMonthly.setBalanceAmount(balanceAmount.add(thisSettlementAmountAndQuantity.getAmount()));
-                        stockMonthly.setBalanceQuantity(balanceQuantity.add(thisSettlementAmountAndQuantity.getQuantity()));
-                        if (null == stockMonthly.getId())
-                            doctorWarehouseStockMonthlyDao.create(stockMonthly);
-                        else doctorWarehouseStockMonthlyDao.update(stockMonthly);
-                    });
+            warehouseMaterialHandleMap.forEach((warehouseId, warehouseMaterialHandles) -> {
+                warehouseMaterialHandles.stream().collect(Collectors.groupingBy(DoctorWarehouseMaterialHandle::getMaterialId)).forEach((sku, skuMaterialHandles) -> {
+                    log.debug("start record warehouse {},sku {}", warehouseId, sku);
+
+                    //上一个会计年月的余额和余量
+                    DoctorWarehouseStockMonthly balance = doctorWarehouseStockMonthlyDao.findBalanceBySettlementDate(warehouseId, sku, DateUtils.addMonths(settlementDate, -1));
+                    BigDecimal balanceAmount, balanceQuantity;
+                    if (null == balance || null == balance.getBalanceAmount())
+                        balanceAmount = new BigDecimal(0);
+                    else balanceAmount = balance.getBalanceAmount();
+                    if (null == balance || null == balance.getBalanceQuantity())
+                        balanceQuantity = new BigDecimal(0);
+                    else balanceQuantity = balance.getBalanceQuantity();
+
+                    //本会计年月发生额和发生量
+                    AmountAndQuantityDto thisSettlementAmountAndQuantity = doctorWarehouseMaterialHandleDao.findBalanceBySettlementDate(warehouseId, sku, settlementDate);
+
+                    //创建或更新月度统计
+                    DoctorWarehouseStockMonthly stockMonthly = doctorWarehouseStockMonthlyDao.findBalanceBySettlementDate(warehouseId, sku, settlementDate);
+                    if (null == stockMonthly)
+                        stockMonthly = new DoctorWarehouseStockMonthly();
+                    stockMonthly.setOrgId(orgId);
+                    stockMonthly.setFarmId(skuMaterialHandles.get(0).getFarmId());
+                    stockMonthly.setWarehouseId(warehouseId);
+                    stockMonthly.setMaterialId(sku);
+                    stockMonthly.setSettlementDate(settlementDate);
+                    stockMonthly.setBalanceAmount(balanceAmount.add(thisSettlementAmountAndQuantity.getAmount()));
+                    stockMonthly.setBalanceQuantity(balanceQuantity.add(thisSettlementAmountAndQuantity.getQuantity()));
+                    if (null == stockMonthly.getId())
+                        doctorWarehouseStockMonthlyDao.create(stockMonthly);
+                    else doctorWarehouseStockMonthlyDao.update(stockMonthly);
                 });
+
             });
 
-            DoctorWarehouseOrgSettlement settlement = doctorWarehouseOrgSettlementDao.findByOrg(orgId);
+            //统计各个仓库下各个物料余额和余量
+//            farmIds.stream().forEach(f -> {
+//                doctorWareHouseDao.findByFarmId(f).forEach(wareHouse -> {
+//                    doctorWarehouseStockDao.findSkuIds(wareHouse.getId()).forEach(sku -> {
+//
+//                        log.info("start record farm {},warehouse {},sku {}", f, wareHouse.getId(), sku);
+//
+//                        //上一个会计年月的余额和余量
+//                        DoctorWarehouseStockMonthly balance = doctorWarehouseStockMonthlyDao.findBalanceBySettlementDate(wareHouse.getId(), sku, DateUtils.addMonths(settlementDate, -1));
+//                        BigDecimal balanceAmount, balanceQuantity;
+//                        if (null == balance || null == balance.getBalanceAmount())
+//                            balanceAmount = new BigDecimal(0);
+//                        else balanceAmount = balance.getBalanceAmount();
+//                        if (null == balance || null == balance.getBalanceQuantity())
+//                            balanceQuantity = new BigDecimal(0);
+//                        else balanceQuantity = balance.getBalanceQuantity();
+//
+//                        //本会计年月发生额和发生量
+//                        AmountAndQuantityDto thisSettlementAmountAndQuantity = doctorWarehouseMaterialHandleDao.findBalanceBySettlementDate(wareHouse.getId(), sku, settlementDate);
+//
+//                        //创建或更新月度统计
+//                        DoctorWarehouseStockMonthly stockMonthly = doctorWarehouseStockMonthlyDao.findBalanceBySettlementDate(wareHouse.getId(), sku, settlementDate);
+//                        if (null == stockMonthly)
+//                            stockMonthly = new DoctorWarehouseStockMonthly();
+//                        stockMonthly.setOrgId(orgId);
+//                        stockMonthly.setFarmId(f);
+//                        stockMonthly.setWarehouseId(wareHouse.getId());
+//                        stockMonthly.setMaterialId(sku);
+//                        stockMonthly.setSettlementDate(settlementDate);
+//                        stockMonthly.setBalanceAmount(balanceAmount.add(thisSettlementAmountAndQuantity.getAmount()));
+//                        stockMonthly.setBalanceQuantity(balanceQuantity.add(thisSettlementAmountAndQuantity.getQuantity()));
+//                        if (null == stockMonthly.getId())
+//                            doctorWarehouseStockMonthlyDao.create(stockMonthly);
+//                        else doctorWarehouseStockMonthlyDao.update(stockMonthly);
+//                    });
+//                });
+//            });
+
+            log.info("update or create stock monthly balance under org {} use :{}ms", orgId, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+
             if (null == settlement) {
                 settlement = new DoctorWarehouseOrgSettlement();
                 settlement.setOrgId(orgId);
@@ -187,6 +254,12 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 
             return Response.ok();
 
+        } catch (InvalidException e) {
+            log.error("message:{},params:{}", e.getError(), Stream.of(e.getParams()).map(o -> o.toString()).collect(Collectors.joining(",")));
+            throw e;
+        } catch (Exception e) {
+            log.error("settlement fail,", e);
+            throw e;
         } finally {
             lock.unlock();
         }
@@ -205,8 +278,8 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                                                Map<Long, DoctorWarehouseMaterialHandle> settlementMaterialHandles) {
         log.debug("settlement for material handle {},material {},warehouse {},quantity {}",
                 materialHandle.getId(),
-                materialHandle.getMaterialName(),
-                materialHandle.getWarehouseName(),
+                materialHandle.getMaterialId(),
+                materialHandle.getWarehouseId(),
                 materialHandle.getQuantity());
 
         BigDecimal historyStockAmount = historyBalance.getAmount();
@@ -214,7 +287,6 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 
         if (WarehouseMaterialHandleType.isBigIn(materialHandle.getType())) {
             //入库类型：采购入库，退料入库，盘盈入库，调拨入库，配方生产入库
-
 
             if (materialHandle.getType().equals(WarehouseMaterialHandleType.IN.getValue())) {
                 return new AmountAndQuantityDto(historyStockAmount.add(materialHandle.getAmount()), historyStockQuantity.add(materialHandle.getQuantity()));
@@ -230,6 +302,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                 } else {
                     log.info("previous in not found,use user set unit price :{}", materialHandle.getUnitPrice());
                 }
+                materialHandle.setAmount(materialHandle.getUnitPrice().multiply(materialHandle.getQuantity()));
             } else if (materialHandle.getType().equals(WarehouseMaterialHandleType.FORMULA_IN.getValue())) {
                 //配方生产入库，根据出库的总价/入库的数量
                 //获取配方入库单据
@@ -252,6 +325,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                         .orElse(new BigDecimal(0));
 
                 materialHandle.setUnitPrice(totalFormulaOutAmount.divide(materialHandle.getQuantity(), 4, BigDecimal.ROUND_HALF_UP));
+                materialHandle.setAmount(totalFormulaOutAmount);
 
             } else if (materialHandle.getType().equals(WarehouseMaterialHandleType.TRANSFER_IN.getValue())
                     || materialHandle.getType().equals(WarehouseMaterialHandleType.RETURN.getValue())) {
@@ -262,12 +336,13 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                         //可能对于的出库单据明细已经结算
                         otherIn = doctorWarehouseMaterialHandleDao.findById(materialHandle.getRelMaterialHandleId());
                         if (null == otherIn || otherIn.getDeleteFlag().equals(WarehouseMaterialHandleDeleteFlag.DELETE.getValue()))
-                            throw new InvalidException("material.handle.not.found", materialHandle.getRelMaterialHandleId());
+                            throw new InvalidException("settlement.out.material.handle.not.found", materialHandle.getRelMaterialHandleId());
                     } else
-                        throw new InvalidException("material.handle.not.found", materialHandle.getRelMaterialHandleId());
+                        throw new InvalidException("settlement.transfer.out.material.handle.not.found", materialHandle.getRelMaterialHandleId());
                 }
 
                 materialHandle.setUnitPrice(otherIn.getUnitPrice());
+                materialHandle.setAmount(materialHandle.getUnitPrice().multiply(materialHandle.getQuantity()));
             }
 
             historyStockQuantity = historyStockQuantity.add(materialHandle.getQuantity());
@@ -280,7 +355,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                 throw new InvalidException("settlement.history.quantity.amount.zero");
             }
 
-
+            materialHandle.setAmount(historyStockAmount.multiply(materialHandle.getQuantity()).divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
             materialHandle.setUnitPrice(historyStockAmount.divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
 
             if (materialHandle.getType().equals(WarehouseMaterialHandleType.OUT.getValue())) {
@@ -291,7 +366,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             historyStockAmount = historyStockAmount.subtract(new BigDecimal(materialHandle.getUnitPrice().toString()).multiply(materialHandle.getQuantity()));
         }
 
-        materialHandle.setAmount(materialHandle.getUnitPrice().multiply(materialHandle.getQuantity()));
+//        materialHandle.setAmount(materialHandle.getUnitPrice().multiply(materialHandle.getQuantity()));
 //        doctorWarehouseMaterialHandleDao.update(materialHandle);
         return new AmountAndQuantityDto(historyStockAmount, historyStockQuantity);
     }

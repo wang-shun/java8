@@ -171,6 +171,7 @@ public class DoctorPigEventExports {
                 dto.setParity(doctorPigEventDetail.getParity());
                 dto.setInitBarnName(doctorPigEventDetail.getBarnName());
                 dto.setCreatorName(doctorPigEventDetail.getCreatorName());
+                dto.setCreatedAt(doctorPigEventDetail.getCreatedAt());
                 return dto;
             }catch (Exception e){
                 log.error("pagingInFarmExport error: {}", Throwables.getStackTraceAsString(e));
@@ -191,6 +192,7 @@ public class DoctorPigEventExports {
                 dto.setCreatorName(doctorPigEventDetail.getCreatorName());
                 dto.setPigCode(doctorPigEventDetail.getPigCode());
                 dto.setBarnName(doctorPigEventDetail.getBarnName());
+                dto.setCreatedAt(doctorPigEventDetail.getCreatedAt());
                 return dto;
             }catch (Exception e){
                 log.error("pagingSemenExport error: {}", Throwables.getStackTraceAsString(e));
@@ -215,6 +217,7 @@ public class DoctorPigEventExports {
                 if (doctorPigEventDetail.getPigStatusAfter() != null) {
                     dto.setPigStatusAfterName(PigStatus.from(doctorPigEventDetail.getPigStatusAfter()).getDesc());
                 }
+                dto.setCreatedAt(doctorPigEventDetail.getCreatedAt());
                 return dto;
             }catch (Exception e){
                 log.error("pagingChangeBarn error :{} fail", Throwables.getStackTraceAsString(e));
@@ -286,6 +289,7 @@ public class DoctorPigEventExports {
                 dto.setBarnName(doctorPigEventDetail.getBarnName());
                 dto.setOperatorName(doctorPigEventDetail.getOperatorName());
                 dto.setCreatorName(doctorPigEventDetail.getCreatorName());
+                dto.setCreatedAt(doctorPigEventDetail.getCreatedAt());
                 return dto;
             }catch(Exception e){
                 log.error("pagingRemove error: {}", Throwables.getStackTraceAsString(e));
@@ -318,6 +322,7 @@ public class DoctorPigEventExports {
                 dto.setOperatorName(doctorPigEventDetail.getOperatorName());
                 dto.setBarnName(doctorPigEventDetail.getBarnName());
                 dto.setMatingDate(doctorPigEventDetail.getEventAt());
+                dto.setCreatedAt(doctorPigEventDetail.getCreatedAt());
                 return dto;
             }catch (Exception e){
                 log.error("pagingMating error: {}", Throwables.getStackTraceAsString(e));
@@ -341,6 +346,7 @@ public class DoctorPigEventExports {
                 dto.setCreatorName(doctorPigEventDetail.getCreatorName());
                 dto.setPigCode(doctorPigEventDetail.getPigCode());
                 dto.setBarnName(doctorPigEventDetail.getBarnName());
+                dto.setCreatedAt(doctorPigEventDetail.getCreatedAt());
                 return dto;
             }catch (Exception e){
                 log.error("pagingLetsChg error: {}", Throwables.getStackTraceAsString(e));
@@ -368,6 +374,7 @@ public class DoctorPigEventExports {
                 }
                 dto.setBarnName(doctorPigEventDetail.getBarnName());
                 dto.setOperatorName(doctorPigEventDetail.getOperatorName());
+                dto.setCreatedAt(doctorPigEventDetail.getCreatedAt());
                 return dto;
             }catch (Exception e){
                 log.error("pagingWean error :{} fail"+ Throwables.getStackTraceAsString(e));
@@ -395,6 +402,7 @@ public class DoctorPigEventExports {
                     dto.setCheckResultName(PregCheckResult.from(doctorPigEventDetail.getPregCheckResult()).getDesc());
                 }
                 dto.setCreatorName(doctorPigEventDetail.getCreatorName());
+                dto.setCreatedAt(doctorPigEventDetail.getCreatedAt());
                 return dto;
             }catch (Exception e){
                 log.error("pagingPregChkResult error: {}", Throwables.getStackTraceAsString(e));
@@ -420,6 +428,7 @@ public class DoctorPigEventExports {
                 }
                 dto.setBarnName(doctorPigEventDetail.getBarnName());
                 dto.setCreatorName(doctorPigEventDetail.getCreatorName());
+                dto.setCreatedAt(doctorPigEventDetail.getCreatedAt());
                 return dto;
             }catch (Exception e){
                 log.error("pagingFarrowing error, cause:{}", Throwables.getStackTraceAsString(e));
@@ -442,6 +451,7 @@ public class DoctorPigEventExports {
                 dto.setFosterReasonName(RespHelper.or500(doctorBasicReadService.findBasicById(fostersDto.getFosterReason())).getName());
                 dto.setBarnName(doctorPigEventDetail.getBarnName());
                 dto.setOperatorName(doctorPigEventDetail.getOperatorName());
+                dto.setCreatedAt(doctorPigEventDetail.getCreatedAt());
                 return dto;
             }catch (Exception e){
                 log.error("pagingFosters error :{} fail",Throwables.getStackTraceAsString(e));
@@ -484,6 +494,7 @@ public class DoctorPigEventExports {
                 dto.setPigCode(doctorPigEventDetail.getPigCode());
                 dto.setBarnName(doctorPigEventDetail.getBarnName());
                 dto.setOperatorName(doctorPigEventDetail.getOperatorName());
+                dto.setCreatedAt(doctorPigEventDetail.getCreatedAt());
                 return dto;
             }catch (Exception e){
                 log.error("pagingBoarCondition error: {}", Throwables.getStackTraceAsString(e));
@@ -503,6 +514,7 @@ public class DoctorPigEventExports {
                 DoctorChgFarmExportDto dto = OBJECT_MAPPER.convertValue(chgFarmDto, DoctorChgFarmExportDto.class);
                 dto.setPigCode(doctorPigEventDetail.getPigCode());
                 dto.setOperatorName(doctorPigEventDetail.getOperatorName());
+                dto.setCreatedAt(doctorPigEventDetail.getCreatedAt());
                 return dto;
             }catch (Exception e){
                 log.error("pagingChgFarm error: {}", Throwables.getStackTraceAsString(e));
@@ -531,6 +543,7 @@ public class DoctorPigEventExports {
                 exportData.setEventAt(doctorGroupEventDetail.getEventAt());
                 exportData.setRemark(doctorGroupEventDetail.getRemark());
                 exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
+                exportData.setCreatedAt(doctorGroupEventDetail.getCreatedAt());
                 return exportData;
             } catch (Exception e) {
                 log.info("get.group.new.failed, eventId:{}", doctorGroupEventDetail.getId());
@@ -565,6 +578,7 @@ public class DoctorPigEventExports {
                 exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
                 exportData.setSource(isNull(moveInGroupEvent.getSource()) ? null : PigSource.from(moveInGroupEvent.getSource()).getDesc());
                 exportData.setSex(isNull(moveInGroupEvent.getSex()) ? null : DoctorGroupTrack.Sex.from(moveInGroupEvent.getSex()).getDesc());
+                exportData.setCreatedAt(doctorGroupEventDetail.getCreatedAt());
                 return exportData;
             } catch (Exception e) {
                 log.info("get.group.MoveIn.failed, eventId:{}", doctorGroupEventDetail.getId());
@@ -599,6 +613,7 @@ public class DoctorPigEventExports {
                 exportData.setEventAt(doctorGroupEventDetail.getEventAt());
                 exportData.setRemark(doctorGroupEventDetail.getRemark());
                 exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
+                exportData.setCreatedAt(doctorGroupEventDetail.getCreatedAt());
                 return exportData;
             } catch (Exception e) {
                 log.info("get.group.change.failed, eventId:{}", doctorGroupEventDetail.getId());
@@ -628,6 +643,7 @@ public class DoctorPigEventExports {
                 exportData.setWeight(doctorGroupEventDetail.getWeight());
                 exportData.setRemark(doctorGroupEventDetail.getRemark());
                 exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
+                exportData.setCreatedAt(doctorGroupEventDetail.getCreatedAt());
                 return exportData;
             } catch (Exception e) {
                 log.info("get.group.chgFarm.failed, eventId:{}", doctorGroupEventDetail.getId());
@@ -654,6 +670,7 @@ public class DoctorPigEventExports {
                 exportData.setEventAt(doctorGroupEventDetail.getEventAt());
                 exportData.setRemark(doctorGroupEventDetail.getRemark());
                 exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
+                exportData.setCreatedAt(doctorGroupEventDetail.getCreatedAt());
                 return exportData;
             } catch (Exception e) {
                 log.info("get.group.disease.failed, eventId:{}", doctorGroupEventDetail.getId());
@@ -680,6 +697,7 @@ public class DoctorPigEventExports {
                 exportData.setEventAt(doctorGroupEventDetail.getEventAt());
                 exportData.setRemark(doctorGroupEventDetail.getRemark());
                 exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
+                exportData.setCreatedAt(doctorGroupEventDetail.getCreatedAt());
                 return exportData;
             } catch (Exception e) {
                 log.info("get.group.vaccination.failed, eventId:{}", doctorGroupEventDetail.getId());
@@ -707,6 +725,7 @@ public class DoctorPigEventExports {
                 exportData.setEventAt(doctorGroupEventDetail.getEventAt());
                 exportData.setRemark(doctorGroupEventDetail.getRemark());
                 exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
+                exportData.setCreatedAt(doctorGroupEventDetail.getCreatedAt());
                 return exportData;
             } catch (Exception e) {
                 log.info("get.group.transGroup.failed, eventId:{}", doctorGroupEventDetail.getId());
@@ -733,6 +752,7 @@ public class DoctorPigEventExports {
                 exportData.setEventAt(doctorGroupEventDetail.getEventAt());
                 exportData.setRemark(doctorGroupEventDetail.getRemark());
                 exportData.setCreatorName(doctorGroupEventDetail.getCreatorName());
+                exportData.setCreatedAt(doctorGroupEventDetail.getCreatedAt());
                 return exportData;
             } catch (Exception e) {
                 log.info("get.group.turnSeed.failed, eventId:{}", doctorGroupEventDetail.getId());

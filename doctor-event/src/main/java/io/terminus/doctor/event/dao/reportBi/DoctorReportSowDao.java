@@ -5,6 +5,8 @@ import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.model.DoctorReportSow;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * Desc:
  * Mail: [ your email ]
@@ -18,5 +20,13 @@ public class DoctorReportSowDao extends MyBatisDao<DoctorReportSow> {
     }
     public DoctorReportSow findByDimension(DoctorDimensionCriteria dimensionCriteria) {
         return getSqlSession().selectOne(sqlId("findByDimension"), dimensionCriteria);
+    }
+
+    public List<DoctorReportSow> findBy(DoctorDimensionCriteria dimensionCriteria) {
+        return getSqlSession().selectList(sqlId("findBy"), dimensionCriteria);
+    }
+
+    public DoctorReportSow sumBy(DoctorDimensionCriteria dimensionCriteria) {
+        return getSqlSession().selectOne(sqlId("sumBy"), dimensionCriteria);
     }
 }

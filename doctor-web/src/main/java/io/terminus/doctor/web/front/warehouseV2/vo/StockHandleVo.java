@@ -28,6 +28,8 @@ public class StockHandleVo extends DoctorWarehouseStockHandle {
 
     private Double totalQuantity;
 
+    private Integer status;
+
     private List<Detail> details;
 
     @Data
@@ -67,5 +69,8 @@ public class StockHandleVo extends DoctorWarehouseStockHandle {
         private Long storageWarehouseIds;
 
         private String storageWarehouseNames;
+
+        //判断猪群是否关闭
+        private Integer groupStatus;
     }
 }

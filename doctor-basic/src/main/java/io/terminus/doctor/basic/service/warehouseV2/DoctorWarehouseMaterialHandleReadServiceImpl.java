@@ -189,10 +189,17 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
     @Override
     public ResponseUtil<List<List<Map>>> companyReport(Map<String, Object> criteria) {
+        List<List<Map>> resultList = Lists.newArrayList();
         //查公司名下所有猪场
         List<Map<String,Object>> farms = this.doctorWarehouseMaterialHandleDao.selectFarmsByOrgId((Long)criteria.get("orgId"));
-
-        List<List<Map>> resultList = Lists.newArrayList();
+        //查猪场最早创建仓库的时间
+        List<Long> ids = Lists.newArrayList();
+        farms.forEach(stringObjectMap -> {
+            ids.add((Long)stringObjectMap.get("id"));
+        });
+        Date maxTime = this.doctorWareHouseDao.findMaxTimeByFarmId(ids);
+        if(maxTime==null)
+            return ResponseUtil.isOk(resultList,farms);
         try {
             criteria = this.getMonth(criteria);
             int count =(int)criteria.get("count");
@@ -208,10 +215,8 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
                 List<Map> lists = doctorWarehouseMaterialHandleDao.listByFarmIdTime(criteria);
                 Date time = (Date) criteria.get("settlementDate");
-                if (time.getTime() < System.currentTimeMillis()) {
-//                    boolean settled = false;
+                if (time.getTime() < System.currentTimeMillis()&&time.getTime()>maxTime.getTime()) {
                     if (lists == null || lists.size() == 0) {
-//                        settled = true;
                         lists = Lists.newArrayList();
                     }
                     //补全猪场
@@ -427,19 +432,20 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     @Override
     public Response<List<Map>> getDataByMaterialName(Long stockHandleId, String materialName) {
         List<Map> dataByMaterialName = doctorWarehouseMaterialHandleDao.getDataByMaterialName(stockHandleId, materialName);
-        dataByMaterialName.forEach( map ->{
-            DoctorWarehouseMaterialApply materialApply = doctorWarehouseMaterialApplyDao.findMaterialHandle((Long) map.get("material_handle_id"));
-            map.put("applyBarnId",materialApply.getPigBarnId());
-            map.put("applyGroupId",materialApply.getPigGroupId());
-            if(materialApply.getPigBarnName()==null)
-                map.put("applyBarnName"," ");
-            else
-                map.put("applyBarnName",materialApply.getPigBarnName());
-            if(materialApply.getPigGroupName()==null)
-                map.put("applyGroupName","");
-            else
-                map.put("applyGroupName",materialApply.getPigGroupName());
-        });
+//        dataByMaterialName.forEach( map ->{
+//            DoctorWarehouseMaterialApply materialApply = doctorWarehouseMaterialApplyDao.findMaterialHandle((Long) map.get("material_handle_id"));
+//            map.put("applyBarnId",materialApply.getPigBarnId());
+//            map.put("applyGroupId",materialApply.getPigGroupId());
+//            if(materialApply.getPigBarnName()==null)
+//                map.put("applyBarnName","--");
+//            else
+//                map.put("applyBarnName",materialApply.getPigBarnName());
+//            if(materialApply.getPigGroupName()==null)
+//                map.put("applyGroupName","--");
+//            else
+//                map.put("applyGroupName",materialApply.getPigGroupName());
+//
+//        });
         return Response.ok(dataByMaterialName);
     }
 

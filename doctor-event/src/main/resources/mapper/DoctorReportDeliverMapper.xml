@@ -288,4 +288,57 @@
         </where>
     </select>
 
+    <select id="findBy" parameterType="map" resultMap="DoctorReportDeliverMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            <if test="orzId != null">AND orz_id = #{orzId}</if>
+            <if test="orzIds != null &amp;&amp; orzIds.size > 0">
+                orz_id IN
+                <foreach collection="orzIds" item="oId" open="(" separator="," close=")">
+                    #{oId}
+                </foreach>
+            </if>
+            <if test="orzType != null"> AND orz_type = #{orzType}</if>
+            <if test="dateType != null"> AND date_type = #{dateType}</if>
+            <if test="startAt != null"> AND sum_at &gt;= date_format(#{startAt}, '%y-%m-%d')</if>
+            <if test="endAt != null"> AND sum_at &lt;= date_format(#{endAt}, '%y-%m-%d')</if>
+        </where>
+        ORDER BY sum_at
+    </select>
+
+    <select id="sumBy" parameterType="map" resultMap="DoctorReportDeliverMap">
+        SELECT
+        sum(sow_cf_in) AS sowCfIn, sum(other_in) AS otherIn, sum(dead) AS dead, sum(weed_out) AS weedOut,
+        sum(sale) AS sale, sum(chg_farm_out) AS chgFarmOut, sum(sow_ph_wean_out) AS sowPhWeanOut,
+        sum(other_change) AS otherChange, sum(early_mating) AS earlyMating, sum(early_nest) AS earlyNest,
+        sum(later_nest) AS laterNest, sum(farrow_nest) AS farrowNest, sum(farrow_all) AS farrowAll,
+        sum(farrow_living) AS farrowLiving, sum(farrow_health) AS farrowHealth, sum(farrow_weak),
+        sum(farrow_dead) AS farrowDead, sum(farrow_jmh) AS farrowJmh,
+
+        sum(first_born_weight) AS firstBornWeight, sum(piglet_other_in) AS pigletOtherIn,
+        sum(piglet_chg_farm_out) AS pigletChgFarmOut,
+        sum(to_nursery) AS toNursery,
+        sum(piglet_dead) AS pigletDead,
+        sum(piglet_weed_out) AS pigletWeadOut,
+        sum(piglet_other_change) AS pigletOtherChange,
+        sum(wean_nest) AS weanNest,
+        sum(wean_count) AS weanCount,
+        sum(wean_qualified_count) AS weanQualifiedCount,
+        sum(piglet_sale) AS pigletSale
+        FROM <include refid="tb"/>
+        <where>
+            <if test="orzId != null">AND orz_id = #{orzId}</if>
+            <if test="orzIds != null &amp;&amp; orzIds.size > 0">
+                orz_id IN
+                <foreach collection="orzIds" item="oId" open="(" separator="," close=")">
+                    #{oId}
+                </foreach>
+            </if>
+            <if test="orzType != null"> AND orz_type = #{orzType}</if>
+            <if test="dateType != null"> AND date_type = #{dateType}</if>
+            <if test="startAt != null"> AND sum_at &gt;= date_format(#{startAt}, '%y-%m-%d')</if>
+            <if test="endAt != null"> AND sum_at &lt;= date_format(#{endAt}, '%y-%m-%d')</if>
+        </where>
+    </select>
 </mapper>

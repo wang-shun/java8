@@ -282,12 +282,13 @@ public class WarehouseController {
     public Response<Paging<Map<String,Object>>> sameDetailTypeWarehouse(Integer type,
                                                                       String materialName,
                                                                       Long warehouseId,
+                                                                      String showZero,
                                                                       Integer pageNo,
                                                                       Integer pageSize) {
 
 //        if (null == farmId)
 //            throw new JsonResponseException("missing parameter,farmId must pick one");
-        return doctorWarehouseReaderService.listDetailTypeMap(type,materialName,warehouseId,pageNo,pageSize);
+        return doctorWarehouseReaderService.listDetailTypeMap(type,materialName,warehouseId,pageNo,pageSize,showZero);
     }
 
     /*************************    2018/04/18  end         ******************************/

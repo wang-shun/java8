@@ -20,4 +20,5 @@ public class DoctorChgFarmExportDto implements Serializable {
     private Integer pigletsCount; // 仔猪数量
     private String remark;  // 注解
     private String operatorName;
+    private Date createdAt;
 }

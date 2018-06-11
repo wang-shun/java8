@@ -204,6 +204,41 @@
         WHERE id = #{id}
     </update>
 
+    <update id="updates" parameterType="list">
+        <foreach collection="list" item="m" separator=";">
+            UPDATE
+            <include refid="tb"/>
+            <set>
+                <if test="m.stockHandleId != null">`stock_handle_id` = #{m.stockHandleId},</if>
+                <if test="m.orgId != null">`org_id` = #{m.orgId},</if>
+                <if test="m.farmId != null">`farm_id` = #{m.farmId},</if>
+                <if test="m.warehouseId != null">`warehouse_id` = #{m.warehouseId},</if>
+                <if test="m.warehouseType != null">`warehouse_type` = #{m.warehouseType},</if>
+                <if test="m.warehouseName != null">`warehouse_name` = #{m.warehouseName},</if>
+                <if test="m.relMaterialHandleId != null">`rel_material_handle_id` = #{m.relMaterialHandleId},</if>
+                <if test="m.vendorName != null">`vendor_name` = #{m.vendorName},</if>
+                <if test="m.materialId != null">`material_id` = #{m.materialId},</if>
+                <if test="m.materialName != null">`material_name` = #{m.materialName},</if>
+                <if test="m.type != null">`type` = #{m.type},</if>
+                <if test="m.unitPrice != null">`unit_price` = #{m.unitPrice},</if>
+                <if test="m.unit != null">`unit` = #{m.unit},</if>
+                <if test="m.deleteFlag != null">`delete_flag` = #{m.deleteFlag},</if>
+                <if test="m.beforeStockQuantity != null">`before_stock_quantity` = #{m.beforeStockQuantity},</if>
+                <if test="m.quantity != null">`quantity` = #{m.quantity},</if>
+                <if test="m.handleDate != null">`handle_date` = #{m.handleDate},</if>
+                <if test="m.handleYear != null">`handle_year` = #{m.handleYear},</if>
+                <if test="m.handleMonth != null">`handle_month` = #{m.handleMonth},</if>
+                <if test="m.operatorId != null">`operator_id` = #{m.operatorId},</if>
+                <if test="m.operatorName != null">`operator_name` = #{m.operatorName},</if>
+                <if test="m.remark != null">`remark` = #{m.remark},</if>
+                <if test="m.settlementDate != null">`settlement_date` = #{m.settlementDate},</if>
+                <if test="m.amount != null">`amount` = #{m.amount},</if>
+                updated_at = now()
+            </set>
+            WHERE id = #{m.id}
+        </foreach>
+    </update>
+
     <delete id="delete" parameterType="long">
         DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
@@ -714,6 +749,7 @@
         select id,name
         from doctor_farms
         where org_id = #{orgId,jdbcType = BIGINT}
+        and (frozen = 0 or frozen is null)
         order by id
     </select>
 
@@ -760,18 +796,20 @@
     <!--退料入库-->
     <!--得到仓库类型，仓库名称，仓库管理员，所属公司，单据编号-->
     <select id="getFarmData" parameterType="Long" resultType="map">
-        select wh.farm_id as farm_id,wh.type as ware_house_type,wh.ware_house_name as ware_house_name,wh.manager_name as manager_name,
+        select mh.id as material_handle_id, wh.farm_id as farm_id,wh.type as ware_house_type,wh.ware_house_name as ware_house_name,wh.manager_name as manager_name,
         f.name as farm_name,f.org_name as org_name,sh.serial_no as serial_no  from doctor_ware_houses as wh
         inner join doctor_farms as f
         on f.id=wh.farm_id
         inner join doctor_warehouse_stock_handle as sh
         on sh.warehouse_id=wh.id
+        inner join doctor_warehouse_material_handle as mh
+		on mh.stock_handle_id=sh.id
         where sh.id = #{id}
     </select>
 
     <!--得到领料出库的物料名称-->
     <select id="getMaterialNameByID" parameterType="Long" resultType="map">
-        select material_id,material_name from doctor_warehouse_material_handle
+        select DISTINCT material_id,material_name from doctor_warehouse_material_handle
         where stock_handle_id = #{id} and delete_flag=1
     </select>
 
@@ -782,12 +820,12 @@
         ifnull(
         ROUND(
         (select ifnull(quantity,0) from doctor_warehouse_material_handle
-        where type=2 and delete_flag=1 and stock_handle_id=#{stockHandleId} and material_name=#{materialName}
+        where type=2 and delete_flag=1 and stock_handle_id=#{stockHandleId} and material_name=#{materialName} group by material_handle_id
         ) -
         ( select ifnull(sum(quantity),0) from doctor_warehouse_material_handle
         where type=13 and delete_flag=1 and rel_material_handle_id=(
         select id from doctor_warehouse_material_handle
-        where type=2 and delete_flag=1 and stock_handle_id=#{stockHandleId} and material_name=#{materialName})
+        where type=2 and delete_flag=1 and stock_handle_id=#{stockHandleId} and material_name=#{materialName} group by material_handle_id )
         <!--and <![CDATA[ date(handle_date) <= STR_TO_DATE(#{handleDate},"%Y-%m-%d")]]>-->
         )
         ,2),'') as refundableQuantity,mh.remark as remark

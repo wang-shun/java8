@@ -40,6 +40,15 @@ public class DoctorKpiDao {
     }
 
     /**
+     * 根据猪场id得到公司id
+     * @param farmId
+     * @return
+     */
+    public Long getOrgIdByFarmId(Long farmId) {
+        return this.sqlSession.selectOne(sqlId("getOrgIdByFarmId"), farmId);
+    }
+
+    /**
      * 获取某一猪群的死淘率
      */
     public double getDeadRateByGroupId(Long groupId) {
@@ -1367,8 +1376,8 @@ public class DoctorKpiDao {
      * @param startAt 日期
      * @return 空怀母猪数
      */
-    public Integer getSowKonghuaiCount(Long farmId, Date startAt) {
-        return sqlSession.selectOne(sqlId("getSowKonghuaiCount"), ImmutableMap.of("farmId", farmId, "startAt", startAt));
+    public Integer getSowKonghuaiCount(Long orgId,Long farmId, Date startAt) {
+        return sqlSession.selectOne(sqlId("getSowKonghuaiCount"), ImmutableMap.of("orgId",orgId,"farmId", farmId, "startAt", startAt));
     }
 
     /**

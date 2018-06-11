@@ -67,7 +67,8 @@ public interface NewDoctorWarehouseReaderService {
                                                          String materialName,
                                                          Long warehouseId,
                                                          Integer pageNo,
-                                                         Integer pageSize);
+                                                         Integer pageSize,
+                                                         String showZero);
 
 
 

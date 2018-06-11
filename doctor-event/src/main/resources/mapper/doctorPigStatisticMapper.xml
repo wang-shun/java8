@@ -277,32 +277,45 @@
     </select>
 
     <select id="sowPhKonghuai" parameterType="map" resultType="int">
-        select
+        SELECT	count(DISTINCT c.pig_id) AS khmzsl
+        FROM
+        doctor_pig_events c,
         (
-        select count(1)
-        from doctor_pig_tracks
-        where status in (1,5,9)
-        and farm_id = #{farmId}
-        and current_barn_type in(5,6)
-        )
-        -
+        SELECT
+        a.pig_id AS pig_id,
+        max(a.id) AS max_event_id
+        FROM
+        doctor_pig_events a,
         (
-        select ifnull(sum(
-        case when type = 7 then 1 else 0 end +
-        case when type = 12 then 1 else 0 end +
-        case when type = 20 and barn_type in(5,6) and pig_status_before in (1,5,9) then 1 else 0 end +
-        case when type = 11 and barn_type in(5,6) and pig_status_before != 5 and pig_status_after = 5 then 1 else 0 end -
-        case when barn_type in(5,6) and pig_status_before in (1,5,9) and pig_status_after not in(1,5,9) then 1 else 0 end
-        )
-        ,0)
-        from doctor_pig_events
-        where event_at &gt; #{sumAt}
-        and farm_id = #{farmId}
-        and type in(2,6,7,9,11,12,20)
-        and status =1
-        and kind = 1
-        and event_source != 5
-        )
+        SELECT
+        j.pig_id,
+        max(j.event_at) AS max_event_at
+        FROM
+        doctor_pig_events j
+        WHERE
+        j.org_id=#{orgId}
+        AND j.farm_id = #{farmId} and j.kind=1 and j.`status` = 1
+        AND <![CDATA[j.event_at <= #{sumAt}]]>
+        GROUP BY
+        j.pig_id
+        ) t
+        WHERE
+        a.pig_id = t.pig_id
+        AND a.event_at = t.max_event_at
+        AND a.org_id = #{orgId}
+        AND a.farm_id = #{farmId}
+        AND <![CDATA[a.event_at <= #{sumAt}]]>
+        GROUP BY
+        a.pig_id
+        ) max_events_temp
+        WHERE
+        max_events_temp.max_event_id = c.id
+        AND c.type!=2 and c.type!=6
+        AND (
+        c.pig_status_after = 1
+        OR c.pig_status_after = 9
+        OR c.pig_status_after = 5
+        );
     </select>
 
     <select id="sowPhPregnant" parameterType="map" resultType="int">

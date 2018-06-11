@@ -66,4 +66,13 @@ public class DoctorWareHouseDao extends MyBatisDao<DoctorWareHouse>{
     public List<Map<String,Object>> findMapByFarmId(Long farmId) {
         return this.sqlSession.selectList(this.sqlId("findMapByFarmId"), farmId);
     }
+
+    /**
+     * 根据framId查最早创建的时间
+     * @param farms
+     * @return
+     */
+    public Date findMaxTimeByFarmId(List<Long> farms) {
+        return this.sqlSession.selectOne(this.sqlId("findMaxTimeByFarmId"),farms);
+    }
 }
