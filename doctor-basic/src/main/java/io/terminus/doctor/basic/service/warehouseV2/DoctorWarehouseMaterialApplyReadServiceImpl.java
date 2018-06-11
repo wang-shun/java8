@@ -61,6 +61,12 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
     @Override
     @ExceptionHandle("doctor.warehouse.material.apply.find.fail")
+    public Response<DoctorWarehouseMaterialApply> findByMaterialHandleAndFarmId(Long materialHandleId,Long farmId) {
+        return Response.ok(doctorWarehouseMaterialApplyDao.findByMaterialHandleAndFarmId(materialHandleId,farmId));
+    }
+
+    @Override
+    @ExceptionHandle("doctor.warehouse.material.apply.find.fail")
     public Response<List<DoctorWarehouseMaterialApply>> findByFarmAndPigGroup(Long farmId, Long groupId) {
         List<DoctorWarehouseMaterialApply> applies = doctorWarehouseMaterialApplyDao.list(DoctorWarehouseMaterialApply.builder()
                 .farmId(farmId)

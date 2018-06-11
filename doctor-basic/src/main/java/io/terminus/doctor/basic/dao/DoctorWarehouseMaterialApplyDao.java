@@ -66,6 +66,24 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
 //        return sqlSession.selectOne("findByMaterialHandle", materialHandleId);
     }
 
+    public DoctorWarehouseMaterialApply findByMaterialHandleAndFarmId(Long materialHandleId,Long farmId) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("materialHandleId", materialHandleId);
+        map.put("farmId", farmId);
+        DoctorWarehouseMaterialApply ma=new DoctorWarehouseMaterialApply();
+        List<DoctorWarehouseMaterialApply> getDataByMaterialName = this.sqlSession.selectList(this.sqlId("findByMaterialHandleAndFarmId"), map);
+        if(getDataByMaterialName.size()>1){
+            for(DoctorWarehouseMaterialApply dd:getDataByMaterialName){
+                if(dd.getPigGroupId()!=null){
+                    ma=dd;
+                }
+            }
+        }else{
+           ma=getDataByMaterialName.get(0);
+        }
+        return ma;
+    }
+
     public List<DoctorWarehouseMaterialApply> findAllByMaterialHandle(Long materialHandleId) {
         return this.list(DoctorWarehouseMaterialApply.builder()
                 .materialHandleId(materialHandleId)

@@ -413,11 +413,10 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     }
 
     //<!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注-->
-    public List<Map> getDataByMaterialName(Long id, String materialName) {
-        Map<String, Object> map = Maps.newHashMap();
-        map.put("stockHandleId", id);
-        map.put("materialName", materialName);
-        List<Map> getDataByMaterialName = this.sqlSession.selectList(this.sqlId("getDataByMaterialName"), map);
+    public List<Map> getDataByMaterialName(Long id) {
+//        Map<String, Object> map = Maps.newHashMap();
+//        map.put("stockHandleId", id);
+        List<Map> getDataByMaterialName = this.sqlSession.selectList(this.sqlId("getDataByMaterialName"), id);
         return getDataByMaterialName;
     }
 

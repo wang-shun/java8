@@ -814,21 +814,20 @@
     </select>
 
     <!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注-->
-    <select id="getDataByMaterialName" parameterType="map" resultType="map">
+    <select id="getDataByMaterialName" parameterType="Long" resultType="map">
         select mh.id as material_handle_id, mh.material_id as material_id, mh.material_name as material_name,s.code as material_code,
         v.name as vendor_name,s.specification as specification,db.name as unit,mh.unit_price as unit_price,
         ifnull(
         ROUND(
         (select ifnull(quantity,0) from doctor_warehouse_material_handle
-        where type=2 and delete_flag=1 and stock_handle_id=#{stockHandleId} and material_name=#{materialName} group by material_handle_id
+        where type=2 and delete_flag=1 and stock_handle_id=#{id} group by material_handle_id
         ) -
         ( select ifnull(sum(quantity),0) from doctor_warehouse_material_handle
         where type=13 and delete_flag=1 and rel_material_handle_id=(
         select id from doctor_warehouse_material_handle
-        where type=2 and delete_flag=1 and stock_handle_id=#{stockHandleId} and material_name=#{materialName} group by material_handle_id )
-        <!--and <![CDATA[ date(handle_date) <= STR_TO_DATE(#{handleDate},"%Y-%m-%d")]]>-->
+        where type=2 and delete_flag=1 and stock_handle_id=#{id}  group by material_handle_id )
         )
-        ,2),'') as refundableQuantity,mh.remark as remark
+        ,2),'') as refundableQuantity,mh.remark as remark,mh.farm_id as farm_id
         from doctor_warehouse_material_handle as mh
         inner join doctor_warehouse_sku as s
         on mh.material_id=s.id
@@ -836,7 +835,7 @@
         on s.vendor_id=v.id
         inner join doctor_basics as db
         on db.id=s.unit
-        where mh.material_name=#{materialName} and mh.stock_handle_id=#{stockHandleId}  and mh.delete_flag=1
+        where mh.stock_handle_id=#{id}  and mh.delete_flag=1
 
     </select>
 </mapper>
