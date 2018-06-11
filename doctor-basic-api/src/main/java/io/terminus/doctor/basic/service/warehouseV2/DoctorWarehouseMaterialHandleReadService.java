@@ -163,6 +163,6 @@ public interface DoctorWarehouseMaterialHandleReadService {
     Response<List<Map>> getMaterialNameByID(Long id);
 
     //<!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注-->
-    Response<List<Map>> getDataByMaterialName(Long stockHandleId);
+    Response<List<Map>> getDataByMaterialName(Long id);
 
 }

@@ -430,9 +430,9 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     }
 
     @Override
-    public Response<List<Map>> getDataByMaterialName(Long stockHandleId) {
-        List<Map> dataByMaterialName = doctorWarehouseMaterialHandleDao.getDataByMaterialName(stockHandleId);
-        return Response.ok(dataByMaterialName);
+    public Response<List<Map>> getDataByMaterialName(Long id) {
+//        List<Map> dataByMaterialName = doctorWarehouseMaterialHandleDao.getDataByMaterialName(id);
+        return Response.ok(doctorWarehouseMaterialHandleDao.getDataByMaterialName(id));
     }
 
     private Map<String, Object> getMonth(Map<String, Object> criteria){

@@ -813,21 +813,11 @@
         where stock_handle_id = #{id} and delete_flag=1
     </select>
 
-    <!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注-->
-    <select id="getDataByMaterialName" parameterType="Long" resultType="map">
+    <!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，备注-->
+    <select id="getDataByMaterialName"  parameterType="Long" resultType="map">
         select mh.id as material_handle_id, mh.material_id as material_id, mh.material_name as material_name,s.code as material_code,
         v.name as vendor_name,s.specification as specification,db.name as unit,mh.unit_price as unit_price,
-        ifnull(
-        ROUND(
-        (select ifnull(quantity,0) from doctor_warehouse_material_handle
-        where type=2 and delete_flag=1 and stock_handle_id=#{id} group by material_handle_id
-        ) -
-        ( select ifnull(sum(quantity),0) from doctor_warehouse_material_handle
-        where type=13 and delete_flag=1 and rel_material_handle_id=(
-        select id from doctor_warehouse_material_handle
-        where type=2 and delete_flag=1 and stock_handle_id=#{id}  group by material_handle_id )
-        )
-        ,2),'') as refundableQuantity,mh.remark as remark,mh.farm_id as farm_id
+        mh.remark as remark,mh.farm_id as farm_id
         from doctor_warehouse_material_handle as mh
         inner join doctor_warehouse_sku as s
         on mh.material_id=s.id
