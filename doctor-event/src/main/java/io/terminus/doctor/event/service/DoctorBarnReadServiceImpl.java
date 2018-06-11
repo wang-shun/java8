@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -263,7 +264,16 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
                 List<DoctorGroupTrack> tracks = doctorGroupTrackDao.findsByGroups(groups.stream().map(DoctorGroup::getId).collect(Collectors.toList()));
                 currentCount = tracks.stream().mapToInt(DoctorGroupTrack::getQuantity).sum();
                 iotBarnInfo.setCurrentPigs(currentCount);
-                tracks.forEach(doctorGroupTrack -> map.put("日龄", doctorGroupTrack.getAvgDayAge()));
+                int totalAge = 0;
+                for (DoctorGroupTrack groupTrack: tracks) {
+                    totalAge += groupTrack.getQuantity() * groupTrack.getAvgDayAge();
+                }
+                int avgDayAge = 0;
+                if (currentCount != 0) {
+                    avgDayAge =new BigDecimal(totalAge).
+                            divide(new BigDecimal(currentCount), BigDecimal.ROUND_HALF_UP).intValue();
+                }
+                map.put("日龄", avgDayAge);
                 return Response.ok(iotBarnInfo);
             }
 
