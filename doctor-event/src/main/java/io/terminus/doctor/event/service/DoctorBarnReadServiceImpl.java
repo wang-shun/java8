@@ -273,7 +273,7 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
                     avgDayAge =new BigDecimal(totalAge).
                             divide(new BigDecimal(currentCount), BigDecimal.ROUND_HALF_UP).intValue();
                 }
-                map.put("日龄", avgDayAge);
+                map.put("平均日龄", avgDayAge);
                 return Response.ok(iotBarnInfo);
             }
 
