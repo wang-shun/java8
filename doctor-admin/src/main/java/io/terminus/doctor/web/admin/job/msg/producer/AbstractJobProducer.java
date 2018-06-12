@@ -165,7 +165,7 @@ public abstract class AbstractJobProducer {
         DoctorMessageRuleRole ruleRole = DoctorMessageRuleRole.builder()
                 .ruleId(messageRule.getId())
                 .templateId(messageRule.getTemplateId())
-                .farmId(407l)
+                .farmId(messageRule.getFarmId())
                 .ruleValue(messageRule.getRuleValue())
                 .build();
         message(ruleRole, getUsersHasFarm(messageRule.getFarmId()));
