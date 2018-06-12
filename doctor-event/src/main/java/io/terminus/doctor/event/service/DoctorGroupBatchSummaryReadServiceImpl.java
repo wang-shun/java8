@@ -153,7 +153,8 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
 
         Double fcrWeight = getFcrDeltaWeight(events, inCount, inAvgWeight);
         summary.setFcr(EventUtil.divide(fcrFeed, fcrWeight));
-        Double gain = EventUtil.get2(EventUtil.getAvgWeight(fcrWeight, groupTrack.getAvgDayAge() - getFirstMoveInEvent(events)));
+        //Double gain = EventUtil.get2(EventUtil.getAvgWeight(fcrWeight, groupTrack.getAvgDayAge() - getFirstMoveInEvent(events)));
+        Double gain = EventUtil.get2(EventUtil.getAvgWeight(fcrWeight, getlivestocksum(events)));
         summary.setDailyWeightGain(gain < 0 ? 0 : gain);//日增重(kg)
         setToNurseryOrFatten(summary, events);                                       //阶段转
 
