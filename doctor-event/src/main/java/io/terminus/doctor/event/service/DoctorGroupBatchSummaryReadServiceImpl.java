@@ -185,6 +185,7 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
             if(events.get(i).getType() == GroupEventType.MOVE_IN.getValue()){
                 y = y + events.get(i).getQuantity();
                 livestock[a] = y;
+                a++;
             }
             if(events.get(i).getType() == GroupEventType.TRANS_GROUP.getValue() ||
                 events.get(i).getType() == GroupEventType.TRANS_FARM.getValue() ||
@@ -192,8 +193,8 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
                 events.get(i).getType() == GroupEventType.CHANGE.getValue()){
                 y = y -  events.get(i).getQuantity();
                 livestock[a] = y;
+                a++;
             }
-            a++;
         }
         for(int j = 0; j < livestock.length; j++){
             getlivestocksum = getlivestocksum + livestock[j];
