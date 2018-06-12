@@ -489,4 +489,9 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         return map;
     }
 
+    //根据id判断是否有退料入库
+    @Override
+    public Response<Integer> findCountByRelMaterialHandleId(Long id,Long farmId) {
+        return  Response.ok(doctorWarehouseMaterialHandleDao.findCountByRelMaterialHandleId(id,farmId));
+    }
 }

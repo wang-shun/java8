@@ -418,4 +418,12 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return getDataByMaterialName;
     }
 
+    //根据id判断是否有退料入库
+    public Integer findCountByRelMaterialHandleId(Long id,Long farmId) {
+        Map<String, Long> params = Maps.newHashMap();
+        params.put("farmId", farmId);
+        params.put("id", id);
+        Integer count = this.sqlSession.selectOne(this.sqlId("findCountByRelMaterialHandleId"), params);
+        return count;
+    }
 }

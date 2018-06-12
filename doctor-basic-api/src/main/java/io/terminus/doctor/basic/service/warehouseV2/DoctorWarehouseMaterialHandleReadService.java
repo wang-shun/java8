@@ -165,4 +165,7 @@ public interface DoctorWarehouseMaterialHandleReadService {
     //<!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注-->
     Response<List<Map>> getDataByMaterialName(Long id);
 
+    //根据id判断是否有退料入库
+    Response<Integer> findCountByRelMaterialHandleId(Long id,Long farmId);
+
 }

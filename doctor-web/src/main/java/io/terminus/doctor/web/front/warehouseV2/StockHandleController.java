@@ -403,6 +403,13 @@ public class StockHandleController {
            return true;*/
     }
 
+    //根据id判断是否有退料入库
+    @RequestMapping(method = RequestMethod.GET, value = "/findByRelMaterialHandleId")
+    public Response<Integer> findByRelMaterialHandleId(@RequestParam Long id,@RequestParam Long farmId) {
+        Response<Integer> count = doctorWarehouseMaterialHandleReadService.findCountByRelMaterialHandleId(id, farmId);
+        return count;
+    }
+
     //删除单据明细表
     @RequestMapping(method = RequestMethod.DELETE, value = "/deleteById/{id:\\d+}")
     public Response<String> deleteById(@PathVariable Long id,@RequestParam(required = false) Long orgId) {

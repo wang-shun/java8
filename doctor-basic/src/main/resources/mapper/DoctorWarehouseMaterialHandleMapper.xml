@@ -828,4 +828,11 @@
         where mh.stock_handle_id=#{id}  and mh.delete_flag=1
 
     </select>
+
+    <!--根据id判断是否有退料入库-->
+    <select id="findCountByRelMaterialHandleId" parameterType="map" resultType="INTEGER">
+        select count(*) from  doctor_warehouse_material_handle
+        where delete_flag=1 and rel_material_handle_id = #{id} and farm_id=#{farmId}
+    </select>
+
 </mapper>
