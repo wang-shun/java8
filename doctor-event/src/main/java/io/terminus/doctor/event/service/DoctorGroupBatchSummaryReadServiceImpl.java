@@ -179,18 +179,18 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
     private int getlivestocksum(List<DoctorGroupEvent> events) {
         int y = 0;
         int a = 0;
-        int livestock[] = null ;
+        int livestock[] = new int [10] ;
         int getlivestocksum = 0;
         for(int i = 0;i < events.size(); i++){
-            if(events.get(i).getType() == 2){
+            if(events.get(i).getType() == GroupEventType.MOVE_IN.getValue()){
                 y = y + events.get(i).getQuantity();
                 livestock[a] = y;
                 a++;
             }
-            if(events.get(i).getType() == 4 ||
-                events.get(i).getType() == 9 ||
-                events.get(i).getType() == 5||
-                events.get(i).getType() == 3){
+            if(events.get(i).getType() == GroupEventType.TRANS_GROUP.getValue() ||
+                events.get(i).getType() == GroupEventType.TRANS_FARM.getValue() ||
+                events.get(i).getType() == GroupEventType.TURN_SEED.getValue()||
+                events.get(i).getType() == GroupEventType.CHANGE.getValue()){
                 y = y -  events.get(i).getQuantity();
                 livestock[a] = y;
                 a++;
