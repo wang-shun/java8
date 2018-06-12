@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -178,26 +179,28 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
     //求每天存栏数之和
     private int getlivestocksum(List<DoctorGroupEvent> events) {
         int y = 0;
-        int a = 0;
-        int livestock[] = new int [10] ;
+        //int a = 0;
+        //int livestock[] = new int [10] ;
+        ArrayList<Integer> livestock = new ArrayList<Integer>();
         int getlivestocksum = 0;
         for(int i = 0;i < events.size(); i++){
             if(events.get(i).getType() == GroupEventType.MOVE_IN.getValue()){
                 y = y + events.get(i).getQuantity();
-                livestock[a] = y;
-                a++;
+                livestock.add(y);
+               // a++;
             }
             if(events.get(i).getType() == GroupEventType.TRANS_GROUP.getValue() ||
                 events.get(i).getType() == GroupEventType.TRANS_FARM.getValue() ||
                 events.get(i).getType() == GroupEventType.TURN_SEED.getValue()||
                 events.get(i).getType() == GroupEventType.CHANGE.getValue()){
                 y = y -  events.get(i).getQuantity();
-                livestock[a] = y;
-                a++;
+                //livestock[a] = y;
+                livestock.add(y);
+                //a++;
             }
         }
-        for(int j = 0; j < livestock.length; j++){
-            getlivestocksum = getlivestocksum + livestock[j];
+        for(int j = 0; j < livestock.size(); j++){
+            getlivestocksum = getlivestocksum + livestock.get(j);
         }
         return getlivestocksum;
     }
