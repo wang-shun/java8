@@ -112,6 +112,7 @@ public abstract class AbstractJobProducer {
      * 产生消息
      */
     public void produce() {
+        //获取消息种类
         List<DoctorMessageRuleTemplate> ruleTemplates = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findByCategory(category.getKey()));
         for (int i = 0; ruleTemplates != null && i < ruleTemplates.size(); i++) {
             DoctorMessageRuleTemplate ruleTemplate = ruleTemplates.get(i);
@@ -164,7 +165,7 @@ public abstract class AbstractJobProducer {
         DoctorMessageRuleRole ruleRole = DoctorMessageRuleRole.builder()
                 .ruleId(messageRule.getId())
                 .templateId(messageRule.getTemplateId())
-                .farmId(messageRule.getFarmId())
+                .farmId(407l)
                 .ruleValue(messageRule.getRuleValue())
                 .build();
         message(ruleRole, getUsersHasFarm(messageRule.getFarmId()));

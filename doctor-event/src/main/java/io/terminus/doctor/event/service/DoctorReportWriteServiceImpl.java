@@ -102,7 +102,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                     .collect(Collectors.groupingBy(DoctorPigEvent::getPigId));
 
             log.info("farm {},total {} pig event", f, pigEvents.size());
-
+            //查出所有事件
             pigEvents.forEach((pigId, events) -> {
                 List<DoctorPigEvent> filterMultiPreCheckEvents = filterMultiPregnancyCheckEvent(events);
 
@@ -113,6 +113,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                     DoctorPigEvent currentEvent = filterMultiPreCheckEvents.get(i);
                     DoctorPigEvent nextEvent = filterMultiPreCheckEvents.get(i + 1);
 
+                    //得到天数
                     int days = DateUtil.getDeltaDays(currentEvent.getEventAt(), nextEvent.getEventAt());//天数
                     int month = new DateTime(nextEvent.getEventAt()).getMonthOfYear();
                     int year = new DateTime(nextEvent.getEventAt()).getYear();
@@ -225,7 +226,8 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                 npd.setOrgId(null == farm ? null : farm.getOrgId());
                 if (null == npd.getId())
                     doctorReportNpdDao.create(npd);
-                else doctorReportNpdDao.update(npd);
+                else
+                    doctorReportNpdDao.update(npd);
             }
         });
 

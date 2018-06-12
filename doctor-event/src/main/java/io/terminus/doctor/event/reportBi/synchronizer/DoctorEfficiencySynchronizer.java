@@ -188,10 +188,12 @@ public class DoctorEfficiencySynchronizer {
 
         Set<Long> orgIds = new HashSet<>();
 
+        //得到Farm
         Map<Long, List<DoctorFarm>> farmMap = RespHelper.orServEx(doctorFarmReadService.findFarmsByIds(npds.stream().map(DoctorReportNpd::getFarmId).collect(Collectors.toList())))
                 .stream().collect(Collectors.groupingBy(DoctorFarm::getId));
 
 
+        //将非生产天数表转成Map
         Map<Long, List<DoctorReportNpd>> npdMap = npds.stream().collect(Collectors.groupingBy(DoctorReportNpd::getFarmId));
 //        RespHelper.orServEx(doctorFarmReadService.findAllFarms()).stream().forEach(f -> {
         npdMap.forEach((f, v) -> {
@@ -202,8 +204,8 @@ public class DoctorEfficiencySynchronizer {
             criteria.setOrzType(OrzDimension.FARM.getValue());
             criteria.setSumAt(start);
             efficiency = doctorReportEfficiencyDao.findByDimension(criteria);
-            if (null == efficiency) efficiency = new DoctorReportEfficiency();
-
+            if (null == efficiency)
+                efficiency = new DoctorReportEfficiency();
             if (!npdMap.containsKey(f)) {
                 //补
                 efficiency.setOrzId(f);
@@ -213,6 +215,7 @@ public class DoctorEfficiencySynchronizer {
                 efficiency.setSumAt(start);
                 efficiency.setSumAtName(DateHelper.dateCN(start, dateDimension));
 
+                //妊娠期和哺乳期默认为0
                 efficiency.setPregnancy(0);
                 efficiency.setLactation(0);
                 if (null == efficiency.getId())
@@ -221,6 +224,7 @@ public class DoctorEfficiencySynchronizer {
                     doctorReportEfficiencyDao.update(efficiency);
             } else {
                 DoctorReportNpd npd = npdMap.get(f).get(0);//每个猪场只会有一条，无论是月、季、年
+                //通过farmId查找出基础信息表
                 DoctorPigDaily pigDaily = doctorPigDailyDao.countByFarm(npd.getFarmId(), start, end);
 
                 efficiency.setOrzId(npd.getFarmId());
@@ -295,14 +299,16 @@ public class DoctorEfficiencySynchronizer {
     }
 
 
-    private void calc(DoctorPigDaily pigDaily, DoctorReportNpd npd, Date start, Date end, DoctorReportEfficiency efficiency, int dateType) {
+    private void calc(/*基础数据表*/DoctorPigDaily pigDaily, /*非生产天数表*/DoctorReportNpd npd, Date start, Date end, /*效率表*/DoctorReportEfficiency efficiency, int dateType) {
 
+        //求开始与结束的天数
         int dayCount = DateUtil.getDeltaDays(start, end) + 1;
 
+        //每天平均非生产头数=母猪存栏/天数
         BigDecimal sowAvg = npd.getSowCount() == 0 ? new BigDecimal(0) :
                 new BigDecimal(npd.getSowCount()).divide(new BigDecimal(dayCount), 2, BigDecimal.ROUND_HALF_UP);
 
-        //非生产天数=非生产天数/母猪存栏/天数
+        //非生产天数=总非生产天数/每天平均非生产头数
         if (sowAvg.compareTo(new BigDecimal(0)) != 0) {
             efficiency.setNpd(new BigDecimal(npd.getNpd()).divide(sowAvg, 2, BigDecimal.ROUND_HALF_UP));
         }
@@ -312,7 +318,7 @@ public class DoctorEfficiencySynchronizer {
                 && (npd.getPregnancy() + npd.getLactation() != 0)) {
             //哺乳期+怀孕期（总生产天数）
             BigDecimal pd = new BigDecimal(npd.getPregnancy()).add(new BigDecimal(npd.getLactation()));
-            //除以产房分娩窝数
+            //平局每胎生产天数=除以产房分娩窝数
             BigDecimal eachBirthDay = pd.divide(new BigDecimal(pigDaily.getFarrowNest()), 2, BigDecimal.ROUND_HALF_UP);
 
             if (DateDimension.MONTH.getValue().equals(dateType)) {//年产胎次（月）=365-非生产天数*12/生产天数/总窝数
