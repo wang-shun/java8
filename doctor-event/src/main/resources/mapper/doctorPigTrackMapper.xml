@@ -400,7 +400,7 @@
         where pig_id = #{pigId}
     </update>
 
-    <select id="selectPigIds" parameterType="Long" resultMap="Long">
+    <select id="selectPigIds" parameterType="Long" resultType="Long">
         select pig_id as id from doctor_pig_tracks
         where farm_id = #{farmId}
         and status != 7
