@@ -68,6 +68,12 @@
                     #{id}
                 </foreach>
             </if>
+            <if test="ids != null and ids.size()>0">
+                and
+                <foreach collection="ids" item="id" open="(" separator="and" close=")">
+                    farm_id != #{id}
+                </foreach>
+            </if>
             <if test="createdAt != null">AND <![CDATA[created_at >= #{createdAt}]]> </if>
             <if test="updatedAt != null">AND <![CDATA[updated_at < #{updatedAt}]]> </if>
         </where>
@@ -133,12 +139,6 @@
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
-        <if test="ids!=null">
-          and
-            <foreach collection="ids" item="id" open="(" separator="and" close=")">
-               farm_id != #{id}
-            </foreach>
-        </if>
         ORDER BY `id` DESC
         LIMIT #{offset}, #{limit}
     </select>
