@@ -556,7 +556,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
         try {
             PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
             //查猪场中存在的猪Id
-            List<Long> ids = doctorPigTrackDao.selectPigIds((Long)params.get("farmId"));
+            List<Long> ids = doctorPigTrackDao.selectPigIds(Long.valueOf(params.get("farmId").toString()));
             log.error("pagingChgFarmPig:-------------"+ids.size());
             params.put("ids",ids);
             Paging<DoctorChgFarmInfo> paging = doctorChgFarmInfoDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), params);
