@@ -260,7 +260,7 @@ public class StockHandleController {
                                 log.warn("sku not found,{}", mh.getMaterialId());
                             }
 
-                            //物料领用表
+                            //领料出库
                             if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.OUT.getValue())) {
                                 DoctorWarehouseMaterialApply apply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandleAndFarmId(mh.getId(),mh.getFarmId()));
                                 if (null != apply) {
@@ -285,6 +285,11 @@ public class StockHandleController {
                                         vo.setStatus(doctorGroup.getStatus());
                                     }
                                 }
+
+                                //得到该领料出库的退料入库的数量
+                                Integer count = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findCountByRelMaterialHandleId(mh.getId(), mh.getFarmId()));
+                                detail.setRetreatingCount(count);
+
                             }
 
                             //退料入库-->可退数量

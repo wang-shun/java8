@@ -72,5 +72,8 @@ public class StockHandleVo extends DoctorWarehouseStockHandle {
 
         //判断猪群是否关闭
         private Integer groupStatus;
+
+        //得到该领料出库的退料入库的数量
+        private Integer retreatingCount;
     }
 }
