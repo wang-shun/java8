@@ -174,6 +174,29 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
         return summary;
     }
 
+    //求每天存栏数之和
+    private int getlivestocksum(List<DoctorGroupEvent> events) {
+        int y = 0;
+        int livestock[] = null ;
+        int getlivestocksum = 0;
+        for(int i = 0;i < events.size(); i++){
+            if(events.get(i).getType() == GroupEventType.MOVE_IN.getValue()){
+                y = y + events.get(i).getQuantity();
+            }
+            if(events.get(i).getType() == GroupEventType.TRANS_GROUP.getValue() ||
+                events.get(i).getType() == GroupEventType.TRANS_FARM.getValue() ||
+                events.get(i).getType() == GroupEventType.TURN_SEED.getValue()||
+                events.get(i).getType() == GroupEventType.CHANGE.getValue()){
+                y = y -  events.get(i).getQuantity();
+            }
+            livestock[i] = y;
+        }
+        for(int j = 0; j < livestock.length; j++){
+            getlivestocksum = getlivestocksum + livestock[j];
+        }
+        return getlivestocksum;
+    }
+
     private int getFirstMoveInEvent(List<DoctorGroupEvent> events) {
         DoctorGroupEvent event = events.stream()
                 .filter(e -> Objects.equals(e.getType(), GroupEventType.MOVE_IN.getValue()))
