@@ -153,8 +153,8 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
 
         Double fcrWeight = getFcrDeltaWeight(events, inCount, inAvgWeight);
         summary.setFcr(EventUtil.divide(fcrFeed, fcrWeight));
-        Double gain = EventUtil.get2(EventUtil.getAvgWeight(fcrWeight, groupTrack.getAvgDayAge() - getFirstMoveInEvent(events)));
-        //Double gain = EventUtil.get2(EventUtil.getAvgWeight(fcrWeight, getlivestocksum(events)));
+        //Double gain = EventUtil.get2(EventUtil.getAvgWeight(fcrWeight, groupTrack.getAvgDayAge() - getFirstMoveInEvent(events)));
+        Double gain = EventUtil.get2(EventUtil.getAvgWeight(fcrWeight, getlivestocksum(events)));
         summary.setDailyWeightGain(gain < 0 ? 0 : gain);//日增重(kg)
         setToNurseryOrFatten(summary, events);                                       //阶段转
 
@@ -182,15 +182,15 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
         int livestock[] = null ;
         int getlivestocksum = 0;
         for(int i = 0;i < events.size(); i++){
-            if(events.get(i).getType() == GroupEventType.MOVE_IN.getValue()){
+            if(events.get(i).getType() == 2){
                 y = y + events.get(i).getQuantity();
                 livestock[a] = y;
                 a++;
             }
-            if(events.get(i).getType() == GroupEventType.TRANS_GROUP.getValue() ||
-                events.get(i).getType() == GroupEventType.TRANS_FARM.getValue() ||
-                events.get(i).getType() == GroupEventType.TURN_SEED.getValue()||
-                events.get(i).getType() == GroupEventType.CHANGE.getValue()){
+            if(events.get(i).getType() == 4 ||
+                events.get(i).getType() == 9 ||
+                events.get(i).getType() == 5||
+                events.get(i).getType() == 3){
                 y = y -  events.get(i).getQuantity();
                 livestock[a] = y;
                 a++;
