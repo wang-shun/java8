@@ -89,6 +89,9 @@
         <where>
             <include refid="criteria"/>
             and `type` = 12
+            and barn_type = 7
+            and pig_status_before = 9
+            and pig_status_after = 9
         </where>
     </select>
 
