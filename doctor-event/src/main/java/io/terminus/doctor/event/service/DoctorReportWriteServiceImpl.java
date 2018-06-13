@@ -94,9 +94,10 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
         log.info("start flush npd from {} to {}", startDate, endDate);
 
         //查询在指定日期内指定猪场发生事件的猪
-        List<Long> pigs = doctorPigEventDao.findPigAtEvent(startDate, endDate, farmIds);
+        //List<Long> pigs = doctorPigEventDao.findPigAtEvent(startDate, endDate, farmIds);
 
         farmIds.forEach(f -> {
+            //查该猪场下所有事件
             Map<Long, List<DoctorPigEvent>> pigEvents = doctorPigEventDao.findForNPD(f, startDate, endDate)
                     .parallelStream()
                     .collect(Collectors.groupingBy(DoctorPigEvent::getPigId));
@@ -104,6 +105,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
             log.info("farm {},total {} pig event", f, pigEvents.size());
             //查出所有事件
             pigEvents.forEach((pigId, events) -> {
+                //去除多余的事件
                 List<DoctorPigEvent> filterMultiPreCheckEvents = filterMultiPregnancyCheckEvent(events);
 
                 for (int i = 0; i < filterMultiPreCheckEvents.size(); i++) {
@@ -122,56 +124,24 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
 
                     if (nextEvent.getType().equals(PigEvent.FARROWING.getKey())) {//分娩
 
-                        if (log.isDebugEnabled())
-                            log.debug("猪【{}】的本次事件为【{}】【{}】，下次事件为【{}】【{}】，间隔为【{}】，计入{}月的怀孕期", pigId,
-                                    PigEvent.from(currentEvent.getType()).getName(),
-                                    DateUtil.toDateString(currentEvent.getEventAt()),
-                                    PigEvent.from(nextEvent.getType()).getName(),
-                                    DateUtil.toDateString(nextEvent.getEventAt()),
-                                    days,
-                                    yearAndMonthKey);
-
                         count(days, nextEvent.getFarmId(), yearAndMonthKey, farmPregnancy);
                     } else if (nextEvent.getType().equals(PigEvent.WEAN.getKey())) {//断奶
-
-                        if (log.isDebugEnabled())
-                            log.debug("猪【{}】的本次事件为【{}】【{}】，下次事件为【{}】【{}】，间隔为【{}】，计入{}月的哺乳期", pigId,
-                                    PigEvent.from(currentEvent.getType()).getName(),
-                                    DateUtil.toDateString(currentEvent.getEventAt()),
-                                    PigEvent.from(nextEvent.getType()).getName(),
-                                    DateUtil.toDateString(nextEvent.getEventAt()),
-                                    days,
-                                    yearAndMonthKey);
 
                         count(days, nextEvent.getFarmId(), yearAndMonthKey, farmLactation);
                     } else if (nextEvent.getType().equals(PigEvent.CHG_FARM.getKey()) //离场
                             || nextEvent.getType().equals(PigEvent.REMOVAL.getKey())) {
-                        if (log.isDebugEnabled())
-                            log.debug("猪【{}】需要离场，前一次事件为【{}】,妊娠检查结果为【{}】", pigId, PigEvent.from(currentEvent.getType()).getName(),
-                                    currentEvent.getType().equals(PigEvent.PREG_CHECK.getKey()) ? PregCheckResult.from(currentEvent.getPregCheckResult()).getDesc() : "无");
                         if (currentEvent.getType().equals(PigEvent.FARROWING.getKey())) {
-                            if (log.isDebugEnabled())
-                                log.debug("猪【{}】的本次事件为【{}】【{}】，下次事件为【{}】【{}】，间隔为【{}】，计入{}月的哺乳期", pigId,
-                                        PigEvent.from(currentEvent.getType()).getName(),
-                                        DateUtil.toDateString(currentEvent.getEventAt()),
-                                        PigEvent.from(nextEvent.getType()).getName(),
-                                        DateUtil.toDateString(nextEvent.getEventAt()),
-                                        days,
-                                        yearAndMonthKey);
+
                             count(days, nextEvent.getFarmId(), yearAndMonthKey, farmLactation);
+
+                        }else if(currentEvent.getType().equals(PigEvent.MATING.getKey())){
+                            //离场，但已怀孕的母猪，要算在孕期里
+                            count(days, nextEvent.getFarmId(), yearAndMonthKey, farmPregnancy);
+
                         } else if (currentEvent.getType().equals(PigEvent.ENTRY.getKey())
                                 || currentEvent.getType().equals(PigEvent.WEAN.getKey())
                                 || currentEvent.getType().equals(PigEvent.PREG_CHECK.getKey())
-                                || currentEvent.getType().equals(PigEvent.MATING.getKey())) {
-
-                            if (log.isDebugEnabled())
-                                log.debug("猪【{}】的本次事件为【{}】【{}】，下次事件为【{}】【{}】，间隔为【{}】，计入{}月的NPD", pigId,
-                                        PigEvent.from(currentEvent.getType()).getName(),
-                                        DateUtil.toDateString(currentEvent.getEventAt()),
-                                        PigEvent.from(nextEvent.getType()).getName(),
-                                        DateUtil.toDateString(nextEvent.getEventAt()),
-                                        days,
-                                        yearAndMonthKey);
+                                /*|| currentEvent.getType().equals(PigEvent.MATING.getKey())*/) {
 
                             pigCount.compute(pigId, (k, v) -> null == v ? 1 : v + 1);
                             count(days, nextEvent.getFarmId(), yearAndMonthKey, farmNPD);
@@ -179,14 +149,6 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
 
                     } else {
 
-                        if (log.isDebugEnabled())
-                            log.debug("猪【{}】的本次事件为【{}】【{}】，下次事件为【{}】【{}】，间隔为【{}】，计入{}月的NPD", pigId,
-                                    PigEvent.from(currentEvent.getType()).getName(),
-                                    DateUtil.toDateString(currentEvent.getEventAt()),
-                                    PigEvent.from(nextEvent.getType()).getName(),
-                                    DateUtil.toDateString(nextEvent.getEventAt()),
-                                    days,
-                                    yearAndMonthKey);
                         pigCount.compute(pigId, (k, v) -> null == v ? 1 : v + 1);
                         count(days, nextEvent.getFarmId(), yearAndMonthKey, farmNPD);
                     }
