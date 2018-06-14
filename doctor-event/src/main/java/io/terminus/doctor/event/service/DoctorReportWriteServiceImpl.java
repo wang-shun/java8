@@ -126,20 +126,6 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                     //事件后状态
                     Integer pigStatusAfter = currentEvent.getPigStatusAfter();
 
-                 /*   //事件前状态
-                    Integer pigStatusBefore = currentEvent.getPigStatusBefore();
-
-                    //事件后状态
-                    Integer pigStatusAfter = currentEvent.getPigStatusAfter();
-
-                    if(pigStatusAfter==PigStatus.Entry.getKey()){
-
-                    }else if(pigStatusBefore==1&&pigStatusAfter==2){
-
-                    }else if(pigStatusBefore==1&&pigStatusAfter==3){
-
-                    }*/
-
                     if (currentEvent.getType().equals(PigEvent.FARROWING.getKey())) {//分娩
 
                         count(beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmPregnancy);
@@ -157,7 +143,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                         if(pigStatusBefore==PigStatus.Entry.getKey()){
 
                         }else if(pigStatusBefore==PigStatus.Mate.getKey()){
-                            count(beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmPregnancy);
+                            count(beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmNPD);
                         }else if(pigStatusBefore==PigStatus.Pregnancy.getKey()){
                             count(beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmPregnancy);
                         }else if(pigStatusBefore==PigStatus.KongHuai.getKey()){
@@ -170,12 +156,27 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                             count(beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmNPD);
                         }
 
-                    } else if(currentEvent.getType().equals(PigEvent.CHG_FARM.getKey())){
+                    } else if(currentEvent.getType().equals(PigEvent.ENTRY.getKey())){//进场
 
+                    } else if(currentEvent.getType().equals(PigEvent.CHG_FARM_IN.getKey())){//转场转入
+                        if(pigStatusAfter==PigStatus.Entry.getKey()){
+
+                        }else if(pigStatusAfter==PigStatus.Mate.getKey()){
+                            count(afterDays, currentEvent.getFarmId(), yearAndMonthKey, farmNPD);
+                        }else if(pigStatusAfter==PigStatus.Pregnancy.getKey()){
+                            count(afterDays, currentEvent.getFarmId(), yearAndMonthKey, farmPregnancy);
+                        }else if(pigStatusAfter==PigStatus.KongHuai.getKey()){
+                            count(afterDays, currentEvent.getFarmId(), yearAndMonthKey, farmNPD);
+                        }else if(pigStatusAfter==PigStatus.Farrow.getKey()){
+                            count(afterDays, currentEvent.getFarmId(), yearAndMonthKey, farmPregnancy);
+                        }else if(pigStatusAfter==PigStatus.FEED.getKey()){
+                            count(afterDays, currentEvent.getFarmId(), yearAndMonthKey, farmLactation);
+                        }else if(pigStatusAfter==PigStatus.Wean.getKey()){
+                            count(afterDays, currentEvent.getFarmId(), yearAndMonthKey, farmNPD);
+                        }
+                    }else{//其余算在空怀
+                        count(afterDays+beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmNPD);
                     }
-
-
-
 
                 }
                 for (int i = 0; i < filterMultiPreCheckEvents.size(); i++) {
