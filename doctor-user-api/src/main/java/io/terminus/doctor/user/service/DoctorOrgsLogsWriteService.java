@@ -12,24 +12,31 @@ import io.terminus.doctor.user.model.DoctorOrgsLogs;
 public interface DoctorOrgsLogsWriteService {
 
     /**
-     * 鍒涘缓
+     * 创建
      * @param doctorOrgsLogs
      * @return Boolean
      */
     Response<Long> create(DoctorOrgsLogs doctorOrgsLogs);
 
     /**
-     * 鏇存柊
+     * 更新
      * @param doctorOrgsLogs
      * @return Boolean
      */
     Response<Boolean> update(DoctorOrgsLogs doctorOrgsLogs);
 
     /**
-     * 鍒犻櫎
+     * 删除
      * @param id
      * @return Boolean
      */
     Response<Boolean> delete(Long id);
 
+
+    /**
+     * 修改公司名称后就往日志里表里加一条记录
+     * @param doctorOrgsLogs
+     * @return Boolean
+     */
+    Response<Long> createLog(DoctorOrgsLogs doctorOrgsLogs);
 }

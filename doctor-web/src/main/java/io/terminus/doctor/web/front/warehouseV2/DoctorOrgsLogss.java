@@ -33,7 +33,7 @@ public class DoctorOrgsLogss {
     private DoctorOrgsLogsReadService doctorOrgsLogsReadService;
 
     /**
-     * 鏌ヨ
+     * 查询
      * @param id
      * @return
      */
@@ -47,7 +47,7 @@ public class DoctorOrgsLogss {
     }
 
     /**
-     * 鍒嗛〉
+     * 分页
      * @param pageNo
      * @param pageSize
      * @return
@@ -66,7 +66,7 @@ public class DoctorOrgsLogss {
     }
 
     /**
-     * 鍒涘缓
+     * 创建
      * @param doctorOrgsLogs
      * @return
      */
@@ -80,7 +80,7 @@ public class DoctorOrgsLogss {
     }
 
     /**
-     * 鏇存柊
+     * 更新
      * @param doctorOrgsLogs
      * @return
      */
@@ -94,7 +94,7 @@ public class DoctorOrgsLogss {
     }
 
     /**
-    * 鍒犻櫎
+    * 删除
     * @param id
     * @return
     */
@@ -108,7 +108,7 @@ public class DoctorOrgsLogss {
     }
 
    /**
-    * 鍒楄〃
+    * 列表
     * @return
     */
     @RequestMapping(value = "/list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

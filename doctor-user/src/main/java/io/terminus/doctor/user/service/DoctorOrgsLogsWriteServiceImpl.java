@@ -54,4 +54,14 @@ public class DoctorOrgsLogsWriteServiceImpl implements DoctorOrgsLogsWriteServic
         }
     }
 
+    @Override
+    public Response<Long> createLog(DoctorOrgsLogs doctorOrgsLogs) {
+        try{
+            doctorOrgsLogsDao.create(doctorOrgsLogs);
+            return Response.ok(doctorOrgsLogs.getId());
+        }catch (Exception e){
+            log.error("failed to create doctor orgs logs, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.orgs.logs.create.fail");
+        }
+    }
 }
