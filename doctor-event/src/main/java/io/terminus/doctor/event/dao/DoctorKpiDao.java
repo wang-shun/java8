@@ -2,12 +2,14 @@ package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport;
 import io.terminus.doctor.event.dto.report.common.DoctorStockStructureCommonReport;
 import io.terminus.doctor.event.handler.sow.DoctorSowMatingHandler;
 import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
+import io.terminus.doctor.event.model.DoctorMessage;
 import io.terminus.doctor.event.util.EventUtil;
 import org.joda.time.DateTime;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -29,9 +31,6 @@ import java.util.Objects;
 public class DoctorKpiDao {
 
     private final SqlSessionTemplate sqlSession;
-
-    @Autowired
-    private DoctorKpiDao doctorKpiDao;
 
     @Autowired
     public DoctorKpiDao(SqlSessionTemplate sqlSession) {
@@ -843,7 +842,7 @@ public class DoctorKpiDao {
      * 存栏变动月报: 期初
      */
     public DoctorLiveStockChangeCommonReport getMonthlyLiveStockChangeBegin(Long farmId, Date startAt) {
-        Long orgId = doctorKpiDao.getOrgIdByFarmId(farmId);
+        Long orgId = getOrgIdByFarmId(farmId);
         DoctorLiveStockChangeCommonReport report = new DoctorLiveStockChangeCommonReport();
         report.setHoubeiBegin(realTimeLiveStockHoubeiSow(farmId, startAt) + realTimeLiveStockHoubeiBoar(farmId, startAt));
         report.setFarrowSowBegin(realTimeLiveStockFarrowSow(orgId,farmId, startAt));
