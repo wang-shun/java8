@@ -155,22 +155,13 @@
         select
         a.id,a.ware_house_name,a.type,
         a.manager_id,a.manager_name,
-
         ifnull(round(temp1.lastmonth_sum_amount,2),0) as lastmonth_sum_amount,
-
         ifnull(round(temp1.lastmonth_sum_quantity,3),0) as lastmonth_sum_quantity,
-
         ifnull(
         ROUND(temp2.thismonth_sum_rk_quantity,3),0) as thismonth_sum_rk_quantity,
-
-
         ifnull(
         ROUND(temp3.thismonth_sum_ck_quantity,3),0) as thismonth_sum_ck_quantity,
-
-
-
         round(ifnull(temp1.lastmonth_sum_quantity,0) + ifnull(temp2.thismonth_sum_rk_quantity,0)-ifnull(temp3.thismonth_sum_ck_quantity,0),3) as now_sum_quantity
-
         from doctor_ware_houses a
         left join (
         select sum(b.balance_amount) as lastmonth_sum_amount,sum(b.balance_quantity) as lastmonth_sum_quantity,b.warehouse_id
@@ -259,20 +250,12 @@
         c.`name` as vendor_name,
         b.specification,db.name as unit,
         ifnull(round(tmp1.lastmonth_sum_amount,4),0) as lastmonth_sum_amount,
-
-
         ifnull(round(tmp1.lastmonth_sum_quantity ,3),0) as lastmonth_sum_quantity,
-
-
         ifnull(
         ROUND( tmp2.thismonth_sum_rk_quantity,3),0) as thismonth_sum_rk_quantity,
-
         ifnull(
         ROUND( tmp3.thismonth_sum_ck_quantity,3),0) as thismonth_sum_ck_quantity,
-
         round(ifnull(tmp1.lastmonth_sum_quantity ,0) + ifnull(tmp2.thismonth_sum_rk_quantity,0)-ifnull(tmp3.thismonth_sum_ck_quantity,0),3) as now_sum_quantity
-
-
         from doctor_warehouse_material_handle a
         join doctor_warehouse_sku b on a.material_id=b.id
         join doctor_warehouse_vendor c on b.vendor_id=c.id
@@ -282,6 +265,7 @@
         and m.warehouse_id=#{warehouseId}
         GROUP BY m.material_id
         ) tmp1 on a.material_id = tmp1.material_id
+
         left join (
         select j.material_id,sum(j.quantity) as thismonth_sum_rk_quantity
         from doctor_warehouse_material_handle j,doctor_warehouse_stock_handle j1
@@ -292,6 +276,7 @@
         and j1.handle_type =1
         GROUP BY j.material_id
         )tmp2 on a.material_id = tmp2.material_id
+
         left join(
         select k.material_id,sum(k.quantity) as thismonth_sum_ck_quantity
         from doctor_warehouse_material_handle k,doctor_warehouse_stock_handle k1
@@ -302,6 +287,7 @@
         and k1.handle_type = 2
         GROUP BY k.material_id
         )tmp3 on a.material_id = tmp3.material_id
+
         left join doctor_basics db on db.id = b.unit
         where a.delete_flag=1
         and a.warehouse_id=#{warehouseId}

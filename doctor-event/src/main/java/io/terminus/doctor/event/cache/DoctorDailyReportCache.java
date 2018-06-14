@@ -84,6 +84,7 @@ public class DoctorDailyReportCache {
     public DoctorDailyReportDto initDailyReportByFarmIdAndDate(Long farmId, Date date) {
         Date startAt = Dates.startOfDay(date);
         Date endAt = DateUtil.getDateEnd(new DateTime(date)).toDate();
+        Long orgId = doctorKpiDao.getOrgIdByFarmId(farmId);
 
         log.info("init daily report farmId:{}, date:{}", farmId, date);
         DoctorDailyReportDto report = new DoctorDailyReportDto();
@@ -155,7 +156,7 @@ public class DoctorDailyReportCache {
         DoctorLiveStockDailyReport liveStock = new DoctorLiveStockDailyReport();
         liveStock.setHoubeiBoar(doctorKpiDao.realTimeLiveStockHoubeiBoar(farmId, startAt));
         liveStock.setHoubeiSow(doctorKpiDao.realTimeLiveStockHoubeiSow(farmId, startAt));  //后备母猪
-        liveStock.setBuruSow(doctorKpiDao.realTimeLiveStockFarrowSow(farmId, startAt));    //产房母猪
+        liveStock.setBuruSow(doctorKpiDao.realTimeLiveStockFarrowSow(orgId,farmId, startAt));    //产房母猪
 //        liveStock.setPeihuaiSow(report.getSowCount() - liveStock.getBuruSow());            //配怀 = 总存栏 - 产房母猪
         liveStock.setKonghuaiSow(0);                                                       //空怀猪作废, 置成0
         liveStock.setBoar(doctorKpiDao.realTimeLiveStockBoar(farmId, startAt));            //公猪
