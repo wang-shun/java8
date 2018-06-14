@@ -31,6 +31,9 @@ public class DoctorKpiDao {
     private final SqlSessionTemplate sqlSession;
 
     @Autowired
+    private DoctorKpiDao doctorKpiDao;
+
+    @Autowired
     public DoctorKpiDao(SqlSessionTemplate sqlSession) {
         this.sqlSession = sqlSession;
     }
@@ -735,8 +738,8 @@ public class DoctorKpiDao {
      * @param date   日期
      * @return 存栏数量
      */
-    public int realTimeLiveStockSow(Long farmId, Date date) {
-        return sqlSession.selectOne(sqlId("realTimeLiveStockSow"), ImmutableMap.of("farmId", farmId, "date", date));
+    public int realTimeLiveStockSow(Long orgId,Long farmId, Date date) {
+        return sqlSession.selectOne(sqlId("realTimeLiveStockSow"), ImmutableMap.of("orgId",orgId,"farmId", farmId, "date", date));
     }
 
     /**
@@ -746,8 +749,8 @@ public class DoctorKpiDao {
      * @param date   日期
      * @return 存栏数量
      */
-    public int realTimeLiveStockFarrowSow(Long farmId, Date date) {
-        return sqlSession.selectOne(sqlId("realTimeLiveStockFarrowSow"), ImmutableMap.of("farmId", farmId, "date", date));
+    public int realTimeLiveStockFarrowSow(Long orgId,Long farmId, Date date) {
+        return sqlSession.selectOne(sqlId("realTimeLiveStockFarrowSow"), ImmutableMap.of("orgId",orgId,"farmId", farmId, "date", date));
     }
 
     /**
@@ -755,8 +758,8 @@ public class DoctorKpiDao {
      * @param date
      * @return
      */
-    public int realTimeLiveStockPHSow(Long farmId, Date date) {
-        return sqlSession.selectOne(sqlId("realTimeLiveStockPHSow"), ImmutableMap.of("farmId", farmId, "date", date));
+    public int realTimeLiveStockPHSow(Long orgId,Long farmId, Date date) {
+        return sqlSession.selectOne(sqlId("realTimeLiveStockPHSow"), ImmutableMap.of("orgId",orgId,"farmId", farmId, "date", date));
     }
 
     /**
@@ -840,10 +843,11 @@ public class DoctorKpiDao {
      * 存栏变动月报: 期初
      */
     public DoctorLiveStockChangeCommonReport getMonthlyLiveStockChangeBegin(Long farmId, Date startAt) {
+        Long orgId = doctorKpiDao.getOrgIdByFarmId(farmId);
         DoctorLiveStockChangeCommonReport report = new DoctorLiveStockChangeCommonReport();
         report.setHoubeiBegin(realTimeLiveStockHoubeiSow(farmId, startAt) + realTimeLiveStockHoubeiBoar(farmId, startAt));
-        report.setFarrowSowBegin(realTimeLiveStockFarrowSow(farmId, startAt));
-        report.setPeiHuaiBegin(realTimeLiveStockSow(farmId, startAt) - report.getFarrowSowBegin());
+        report.setFarrowSowBegin(realTimeLiveStockFarrowSow(orgId,farmId, startAt));
+        report.setPeiHuaiBegin(realTimeLiveStockPHSow(orgId,farmId, startAt));
         report.setFarrowBegin(realTimeLiveStockFarrow(farmId, startAt));
         report.setNurseryBegin(realTimeLiveStockNursery(farmId, startAt));
         report.setFattenBegin(realTimeLiveStockFatten(farmId, startAt));
@@ -1365,8 +1369,8 @@ public class DoctorKpiDao {
      * @param startAt 日期
      * @return 已配种母猪数
      */
-    public Integer getSowMatingCount(Long farmId, Date startAt) {
-        return sqlSession.selectOne(sqlId("getSowMatingCount"), ImmutableMap.of("farmId", farmId, "startAt", startAt));
+    public Integer getSowMatingCount(Long orgId,Long farmId, Date startAt) {
+        return sqlSession.selectOne(sqlId("getSowMatingCount"), ImmutableMap.of("orgId",orgId,"farmId", farmId, "startAt", startAt));
     }
 
     /**
@@ -1387,8 +1391,8 @@ public class DoctorKpiDao {
      * @param startAt 日期
      * @return 怀孕母猪数
      */
-    public Integer getSowPregnantCount(Long farmId, Date startAt) {
-        return sqlSession.selectOne(sqlId("getSowPregnantCount"), ImmutableMap.of("farmId", farmId, "startAt", startAt));
+    public Integer getSowPregnantCount(Long orgId,Long farmId, Date startAt) {
+        return sqlSession.selectOne(sqlId("getSowPregnantCount"), ImmutableMap.of("orgId",orgId,"farmId", farmId, "startAt", startAt));
     }
 
     /**

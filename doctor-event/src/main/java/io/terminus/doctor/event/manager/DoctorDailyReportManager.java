@@ -158,16 +158,16 @@ public class DoctorDailyReportManager {
         //根据猪场id得到公司id
         Long orgId = doctorKpiDao.getOrgIdByFarmId(farmId);
         //母猪存栏变化
-        doctorDailyReport.setSowStart(doctorKpiDao.realTimeLiveStockSow(farmId, new DateTime(startAt).minusDays(1).toDate()));
+        doctorDailyReport.setSowStart(doctorKpiDao.realTimeLiveStockSow(orgId,farmId, new DateTime(startAt).minusDays(1).toDate()));
         doctorDailyReport.setSowIn(doctorKpiDao.getInSow(farmId, startAt, endAt));
         doctorDailyReport.setSowDead(doctorKpiDao.getDeadSow(farmId, startAt, endAt));
         doctorDailyReport.setSowWeedOut(doctorKpiDao.getWeedOutSow(farmId, startAt, endAt));
         doctorDailyReport.setSowSale(doctorKpiDao.getSaleSow(farmId, startAt, endAt));
         doctorDailyReport.setSowOtherOut(doctorKpiDao.getOtherOutSow(farmId, startAt, endAt));
         doctorDailyReport.setSowChgFarm(doctorKpiDao.getPigChgFarm(farmId, 1, startAt, endAt));
-        doctorDailyReport.setSowEnd(doctorKpiDao.realTimeLiveStockSow(farmId, startAt));
+        doctorDailyReport.setSowEnd(doctorKpiDao.realTimeLiveStockSow(orgId,farmId, startAt));
         //产房母猪存栏变化
-        doctorDailyReport.setSowCfStart(doctorKpiDao.realTimeLiveStockFarrowSow(farmId, new DateTime(startAt).minusDays(1).toDate()));
+        doctorDailyReport.setSowCfStart(doctorKpiDao.realTimeLiveStockFarrowSow(orgId,farmId, new DateTime(startAt).minusDays(1).toDate()));
         doctorDailyReport.setSowCfIn(doctorKpiDao.getMonthlyLiveStockChangeToFarrow(farmId, startAt, endAt));
         doctorDailyReport.setSowCfDead(doctorKpiDao.getSowCfDead(farmId, startAt, endAt));
         doctorDailyReport.setSowCfWeedOut(doctorKpiDao.getSowCfWeedOut(farmId, startAt, endAt));
@@ -175,11 +175,11 @@ public class DoctorDailyReportManager {
         doctorDailyReport.setSowCfOtherOut(doctorKpiDao.getSowCfOtherOut(farmId, startAt, endAt));
         doctorDailyReport.setSowCfWeanOut(doctorKpiDao.getMonthlyLiveStockChangeWeanIn(farmId, startAt, endAt));
         doctorDailyReport.setSowCfChgFarm(doctorKpiDao.getSowCfChgFarm(farmId, startAt, endAt));
-        doctorDailyReport.setSowCfEnd(doctorKpiDao.realTimeLiveStockFarrowSow(farmId, startAt));
+        doctorDailyReport.setSowCfEnd(doctorKpiDao.realTimeLiveStockFarrowSow(orgId,farmId, startAt));
         doctorDailyReport.setSowCfInFarmIn(doctorKpiDao.getSowCfInFarmIn(farmId, startAt, endAt));
         //配怀母猪存栏变化
-//        doctorDailyReport.setSowPhStart(doctorKpiDao.realTimeLiveStockPHSow(farmId, new DateTime(startAt).minusDays(1).toDate()));
-        doctorDailyReport.setSowPhStart(EventUtil.minusInt(doctorDailyReport.getSowStart(), doctorDailyReport.getSowCfStart()));
+        doctorDailyReport.setSowPhStart(doctorKpiDao.realTimeLiveStockPHSow(orgId,farmId, new DateTime(startAt).minusDays(1).toDate()));
+//        doctorDailyReport.setSowPhStart(EventUtil.minusInt(doctorDailyReport.getSowStart(), doctorDailyReport.getSowCfStart()));
         doctorDailyReport.setSowPhReserveIn(doctorKpiDao.getSowPhReserveIn(farmId, startAt, endAt));
         doctorDailyReport.setSowPhChgFarmIn(doctorKpiDao.getSowPhChgFarmIn(farmId, startAt, endAt));
         doctorDailyReport.setSowPhWeanIn(doctorDailyReport.getSowCfWeanOut());
@@ -190,11 +190,11 @@ public class DoctorDailyReportManager {
         doctorDailyReport.setSowPhSale(EventUtil.minusInt(doctorDailyReport.getSowSale(), doctorDailyReport.getSowCfSale()));
         doctorDailyReport.setSowPhOtherOut(EventUtil.minusInt(doctorDailyReport.getSowOtherOut(), doctorDailyReport.getSowCfOtherOut()));
         doctorDailyReport.setSowPhChgFarm(EventUtil.minusInt(doctorDailyReport.getSowChgFarm(), doctorDailyReport.getSowCfChgFarm()));
-        doctorDailyReport.setSowPhMating(doctorKpiDao.getSowMatingCount(farmId, endAt));
+        doctorDailyReport.setSowPhMating(doctorKpiDao.getSowMatingCount(orgId,farmId, endAt));
         doctorDailyReport.setSowPhKonghuai(doctorKpiDao.getSowKonghuaiCount(orgId,farmId, endAt));
-        doctorDailyReport.setSowPhPregnant(doctorKpiDao.getSowPregnantCount(farmId, endAt));
-//        doctorDailyReport.setSowPhEnd(doctorKpiDao.realTimeLiveStockPHSow(farmId, startAt));
-        doctorDailyReport.setSowPhEnd(EventUtil.minusInt(doctorDailyReport.getSowEnd(), doctorDailyReport.getSowCfEnd()));
+        doctorDailyReport.setSowPhPregnant(doctorKpiDao.getSowPregnantCount(orgId,farmId, endAt));
+        doctorDailyReport.setSowPhEnd(doctorKpiDao.realTimeLiveStockPHSow(orgId,farmId, startAt));
+//        doctorDailyReport.setSowPhEnd(doctorDailyReport.getSowPhEnd());
 
         doctorDailyReport.setSowPh(doctorDailyReport.getSowPhEnd());
         doctorDailyReport.setSowCf(doctorDailyReport.getSowCfEnd());
