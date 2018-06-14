@@ -17,30 +17,21 @@
 
     <!-- 实时存栏: 在产房的母猪 -->
     <select id="cfLiveStock" parameterType="map" resultType="int">
-        select
-        (
-        SELECT ifnull(count(1) , 0)
-        FROM doctor_pig_tracks
-        WHERE
-        farm_id = #{farmId} AND
-        is_removal = 0 AND
-        pig_type = 1 and
-        current_barn_type = 7 -- 配怀舍
-        )
-        -
-        (
-        SELECT
-        ifnull(sum(case type when 20 then 1 when 14 then 1 else 0 end ), 0) -
-        ifnull(sum(case type when 2 then 1 when 6 then 1 when 10 then 1 when 12 then 1 else 0 end ), 0)
-        FROM doctor_pig_events a
-        WHERE
-        a.farm_id = #{farmId} AND
-        a.event_at &gt; #{sumAt} AND
-        a.kind = 1 AND
-        (a.barn_type = 7 or type = 14) and
-        a.status = 1 and
-        a.event_source != 5
-        );
+        select count(1)
+        from doctor_pig_events c,
+        (select b.pig_id, max(b.id) as max_event_id
+        from doctor_pig_events b,
+        (select a.pig_id, max(a.event_at) as max_event_at from doctor_pig_events a
+        where a.org_id=#{orgId} and a.farm_id = #{farmId} and a.kind = 1 and a.`status` = 1 and <![CDATA[a.event_at <= #{sumAt}]]>
+        group by a.pig_id) t1
+        where b.pig_id = t1.pig_id and b.event_at = t1.max_event_at and b.farm_id = #{farmId} and b.org_id=#{orgId}
+        and b.kind = 1 and b.`status` = 1 and <![CDATA[b.event_at <= #{sumAt}]]>
+        group by b.pig_id
+        ) t2
+        where c.pig_id = t2.pig_id and c.id = t2.max_event_id
+        and c.type != 2 and c.type != 6 and c.type != 12
+        and (((c.type = 1 and c.barn_type = 7) or c.type = 14)
+        or (c.type != 1 and c.type != 14 and (c.barn_type = 7)))
     </select>
 
     <select id="phLiveStock" parameterType="map" resultType="int">

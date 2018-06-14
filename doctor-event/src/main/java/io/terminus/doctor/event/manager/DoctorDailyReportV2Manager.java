@@ -344,9 +344,10 @@ public class DoctorDailyReportV2Manager {
      * @param criteria       条件
      */
     private void flushCfPigDaily(DoctorPigDaily doctorPigDaily, DoctorStatisticCriteria criteria) {
-        doctorPigDaily.setSowCfStart(pigStatisticDao.cfLiveStock(criteria.getFarmId(),
+        criteria.setOrgId(doctorKpiDao.getOrgIdByFarmId(criteria.getFarmId()));
+        doctorPigDaily.setSowCfStart(pigStatisticDao.cfLiveStock(criteria.getOrgId(),criteria.getFarmId(),
                 DateUtil.toDateString(new DateTime(DateUtil.toDate(criteria.getSumAt())).minusDays(1).toDate())));
-        doctorPigDaily.setSowCfEnd(pigStatisticDao.cfLiveStock(criteria.getFarmId(), criteria.getSumAt()));
+        doctorPigDaily.setSowCfEnd(pigStatisticDao.cfLiveStock(criteria.getOrgId(),criteria.getFarmId(), criteria.getSumAt()));
         doctorPigDaily.setSowCfIn(pigStatisticDao.sowCfIn(criteria));
         doctorPigDaily.setSowCfInFarmIn(pigStatisticDao.sowCfInFarmIn(criteria));
         doctorPigDaily.setSowCfDead(pigStatisticDao.sowCfDead(criteria));

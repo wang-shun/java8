@@ -28,8 +28,8 @@ public class DoctorPigStatisticDao {
         return "DoctorPigStatistic." + id;
     }
 
-    public Integer cfLiveStock(Long farmId, String sumAt) {
-        return sqlSession.selectOne(sqlId("cfLiveStock"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
+    public Integer cfLiveStock(Long orgId,Long farmId, String sumAt) {
+        return sqlSession.selectOne(sqlId("cfLiveStock"), ImmutableMap.of("orgId",orgId,"farmId", farmId, "sumAt", sumAt));
     }
 
     public Integer phLiveStock(Long orgId,Long farmId, String sumAt) {

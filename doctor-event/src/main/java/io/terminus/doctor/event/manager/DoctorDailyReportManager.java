@@ -157,15 +157,6 @@ public class DoctorDailyReportManager {
 
         //根据猪场id得到公司id
         Long orgId = doctorKpiDao.getOrgIdByFarmId(farmId);
-        //母猪存栏变化
-        doctorDailyReport.setSowStart(doctorKpiDao.realTimeLiveStockSow(orgId,farmId, new DateTime(startAt).minusDays(1).toDate()));
-        doctorDailyReport.setSowIn(doctorKpiDao.getInSow(farmId, startAt, endAt));
-        doctorDailyReport.setSowDead(doctorKpiDao.getDeadSow(farmId, startAt, endAt));
-        doctorDailyReport.setSowWeedOut(doctorKpiDao.getWeedOutSow(farmId, startAt, endAt));
-        doctorDailyReport.setSowSale(doctorKpiDao.getSaleSow(farmId, startAt, endAt));
-        doctorDailyReport.setSowOtherOut(doctorKpiDao.getOtherOutSow(farmId, startAt, endAt));
-        doctorDailyReport.setSowChgFarm(doctorKpiDao.getPigChgFarm(farmId, 1, startAt, endAt));
-        doctorDailyReport.setSowEnd(doctorKpiDao.realTimeLiveStockSow(orgId,farmId, startAt));
         //产房母猪存栏变化
         doctorDailyReport.setSowCfStart(doctorKpiDao.realTimeLiveStockFarrowSow(orgId,farmId, new DateTime(startAt).minusDays(1).toDate()));
         doctorDailyReport.setSowCfIn(doctorKpiDao.getMonthlyLiveStockChangeToFarrow(farmId, startAt, endAt));
@@ -198,6 +189,17 @@ public class DoctorDailyReportManager {
 
         doctorDailyReport.setSowPh(doctorDailyReport.getSowPhEnd());
         doctorDailyReport.setSowCf(doctorDailyReport.getSowCfEnd());
+
+        //母猪存栏变化
+        doctorDailyReport.setSowStart(EventUtil.plusInt(doctorDailyReport.getSowCfStart(),doctorDailyReport.getSowPhStart()));
+        doctorDailyReport.setSowIn(doctorKpiDao.getInSow(farmId, startAt, endAt));
+        doctorDailyReport.setSowDead(doctorKpiDao.getDeadSow(farmId, startAt, endAt));
+        doctorDailyReport.setSowWeedOut(doctorKpiDao.getWeedOutSow(farmId, startAt, endAt));
+        doctorDailyReport.setSowSale(doctorKpiDao.getSaleSow(farmId, startAt, endAt));
+        doctorDailyReport.setSowOtherOut(doctorKpiDao.getOtherOutSow(farmId, startAt, endAt));
+        doctorDailyReport.setSowChgFarm(doctorKpiDao.getPigChgFarm(farmId, 1, startAt, endAt));
+        doctorDailyReport.setSowEnd(EventUtil.plusInt(doctorDailyReport.getSowCfEnd(),doctorDailyReport.getSowPhEnd()));
+
         //公猪存栏变化
         doctorDailyReport.setBoarStart(doctorKpiDao.realTimeLiveStockBoar(farmId, new DateTime(startAt).minusDays(1).toDate()));
         doctorDailyReport.setBoarIn(doctorKpiDao.getInBoar(farmId, startAt, endAt));
