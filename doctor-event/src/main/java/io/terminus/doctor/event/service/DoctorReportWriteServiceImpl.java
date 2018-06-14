@@ -11,6 +11,7 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorReportNpdDao;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.enums.ReportTime;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -107,7 +108,76 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
             pigEvents.forEach((pigId, events) -> {
                 //去除多余的事件
                 List<DoctorPigEvent> filterMultiPreCheckEvents = filterMultiPregnancyCheckEvent(events);
+                //只有一条事件的情况
+                if(filterMultiPreCheckEvents.size()==1){
+                    DoctorPigEvent currentEvent = filterMultiPreCheckEvents.get(0);
 
+                    int beforeDays = DateUtil.getDeltaDays(startDate, currentEvent.getEventAt());
+                    int afterDays = DateUtil.getDeltaDays(currentEvent.getEventAt(),endDate);
+
+                    int month = new DateTime(currentEvent.getEventAt()).getMonthOfYear();
+                    int year = new DateTime(currentEvent.getEventAt()).getYear();
+
+                    String yearAndMonthKey = year + "-" + month;
+
+                    //事件前状态
+                    Integer pigStatusBefore = currentEvent.getPigStatusBefore();
+
+                    //事件后状态
+                    Integer pigStatusAfter = currentEvent.getPigStatusAfter();
+
+                 /*   //事件前状态
+                    Integer pigStatusBefore = currentEvent.getPigStatusBefore();
+
+                    //事件后状态
+                    Integer pigStatusAfter = currentEvent.getPigStatusAfter();
+
+                    if(pigStatusAfter==PigStatus.Entry.getKey()){
+
+                    }else if(pigStatusBefore==1&&pigStatusAfter==2){
+
+                    }else if(pigStatusBefore==1&&pigStatusAfter==3){
+
+                    }*/
+
+                    if (currentEvent.getType().equals(PigEvent.FARROWING.getKey())) {//分娩
+
+                        count(beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmPregnancy);
+
+                        count(afterDays, currentEvent.getFarmId(), yearAndMonthKey, farmLactation);
+
+                    } else if (currentEvent.getType().equals(PigEvent.WEAN.getKey())) {//断奶
+
+                        count(beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmLactation);
+
+                        count(afterDays, currentEvent.getFarmId(), yearAndMonthKey, farmNPD);
+
+                    } else if (currentEvent.getType().equals(PigEvent.CHG_FARM.getKey()) //离场
+                            || currentEvent.getType().equals(PigEvent.REMOVAL.getKey())) {
+                        if(pigStatusBefore==PigStatus.Entry.getKey()){
+
+                        }else if(pigStatusBefore==PigStatus.Mate.getKey()){
+                            count(beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmPregnancy);
+                        }else if(pigStatusBefore==PigStatus.Pregnancy.getKey()){
+                            count(beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmPregnancy);
+                        }else if(pigStatusBefore==PigStatus.KongHuai.getKey()){
+                            count(beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmNPD);
+                        }else if(pigStatusBefore==PigStatus.Farrow.getKey()){
+                            count(beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmPregnancy);
+                        }else if(pigStatusBefore==PigStatus.FEED.getKey()){
+                            count(beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmLactation);
+                        }else if(pigStatusBefore==PigStatus.Wean.getKey()){
+                            count(beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmNPD);
+                        }
+
+                    } else if(currentEvent.getType().equals(PigEvent.CHG_FARM.getKey())){
+
+                    }
+
+
+
+
+                }
                 for (int i = 0; i < filterMultiPreCheckEvents.size(); i++) {
                     if (i == filterMultiPreCheckEvents.size() - 1)
                         break;
