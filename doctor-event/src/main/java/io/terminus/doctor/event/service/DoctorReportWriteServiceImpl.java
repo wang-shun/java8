@@ -6,15 +6,13 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.dao.DoctorPigDailyDao;
-import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.dao.DoctorReportNpdDao;
+import io.terminus.doctor.event.dao.*;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.enums.ReportTime;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigNpd;
 import io.terminus.doctor.event.model.DoctorReportNpd;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -51,6 +49,8 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
     private DoctorPigDailyDao doctorPigDailyDao;
     @Autowired
     private DoctorReportNpdDao doctorReportNpdDao;
+    @Autowired
+    private DoctorPigNpdDao doctorPigNpdDao;
 
     @RpcConsumer
     private DoctorFarmReadService doctorFarmReadService;
@@ -89,7 +89,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
         Map<Long/*farmID*/, Map<String/*year-month*/, Integer/*怀孕天数*/>> farmPregnancy = new HashMap<>();
         Map<Long/*farmID*/, Map<String/*year-month*/, Integer/*哺乳天数*/>> farmLactation = new HashMap<>();
         Map<Long/*farmID*/, Map<String/*year-month*/, Integer/*非生产天数*/>> farmNPD = new HashMap<>();
-
+        List<DoctorPigNpd> doctorPigNpds = new ArrayList<>();
 
         Map<Long, Integer> pigCount = new HashMap<>();
         log.info("start flush npd from {} to {}", startDate, endDate);
@@ -98,6 +98,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
         //List<Long> pigs = doctorPigEventDao.findPigAtEvent(startDate, endDate, farmIds);
 
         farmIds.forEach(f -> {
+
             //查该猪场下所有事件
             Map<Long, List<DoctorPigEvent>> pigEvents = doctorPigEventDao.findForNPD(f, startDate, endDate)
                     .parallelStream()
@@ -106,124 +107,82 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
             log.info("farm {},total {} pig event", f, pigEvents.size());
             //查出所有事件
             pigEvents.forEach((pigId, events) -> {
+
+                DoctorPigNpd pigNpd = new DoctorPigNpd();
+                pigNpd.setPigId(pigId);
+                pigNpd.setFarmId(f);
+                pigNpd.setSumAt(startDate);
+
                 //去除多余的事件
                 List<DoctorPigEvent> filterMultiPreCheckEvents = filterMultiPregnancyCheckEvent(events);
-                //只有一条事件的情况
-                if(filterMultiPreCheckEvents.size()==1){
-                    DoctorPigEvent currentEvent = filterMultiPreCheckEvents.get(0);
+                for (int i = 0; i < filterMultiPreCheckEvents.size(); i++) {
+//                    if (i == filterMultiPreCheckEvents.size() - 1)
+//                        break;
 
-                    int beforeDays = DateUtil.getDeltaDays(startDate, currentEvent.getEventAt());
-                    int afterDays = DateUtil.getDeltaDays(currentEvent.getEventAt(),endDate);
+                    DoctorPigEvent currentEvent = filterMultiPreCheckEvents.get(i);
+                    DoctorPigEvent beforeEvent = doctorPigEventDao.queryBeforeEvent(currentEvent);
+                    if(beforeEvent==null||beforeEvent.getId()==null){
+                        continue;
+                    }
 
+                    //得到天数
+                    int days = DateUtil.getDeltaDays(beforeEvent.getEventAt(), currentEvent.getEventAt());//天数
                     int month = new DateTime(currentEvent.getEventAt()).getMonthOfYear();
                     int year = new DateTime(currentEvent.getEventAt()).getYear();
 
                     String yearAndMonthKey = year + "-" + month;
 
-                    //事件前状态
-                    Integer pigStatusBefore = currentEvent.getPigStatusBefore();
-
-                    //事件后状态
-                    Integer pigStatusAfter = currentEvent.getPigStatusAfter();
+                    pigNpd.setOrgId(pigNpd.getOrgId()==null?currentEvent.getOrgId():pigNpd.getOrgId());
 
                     if (currentEvent.getType().equals(PigEvent.FARROWING.getKey())) {//分娩
 
-                        count(beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmPregnancy);
-
-                        count(afterDays, currentEvent.getFarmId(), yearAndMonthKey, farmLactation);
+                        count(days, currentEvent.getFarmId(), yearAndMonthKey, farmPregnancy);
+                        if(currentEvent.getFarmId().equals(f))
+                        pigNpd.setPregnancy((pigNpd.getPregnancy()==null?0:pigNpd.getPregnancy())+days);
 
                     } else if (currentEvent.getType().equals(PigEvent.WEAN.getKey())) {//断奶
 
-                        count(beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmLactation);
-
-                        count(afterDays, currentEvent.getFarmId(), yearAndMonthKey, farmNPD);
+                        count(days, currentEvent.getFarmId(), yearAndMonthKey, farmLactation);
+                        if(currentEvent.getFarmId().equals(f))
+                        pigNpd.setLactation((pigNpd.getLactation()==null?0:pigNpd.getLactation())+days);
 
                     } else if (currentEvent.getType().equals(PigEvent.CHG_FARM.getKey()) //离场
                             || currentEvent.getType().equals(PigEvent.REMOVAL.getKey())) {
-                        if(pigStatusBefore==PigStatus.Entry.getKey()){
+                        if (beforeEvent.getType().equals(PigEvent.FARROWING.getKey())) {
+                            //离场前分娩，算哺乳时间
+                            count(days, currentEvent.getFarmId(), yearAndMonthKey, farmLactation);
+                            if(currentEvent.getFarmId().equals(f))
+                            pigNpd.setLactation((pigNpd.getLactation()==null?0:pigNpd.getLactation())+days);
 
-                        }else if(pigStatusBefore==PigStatus.Mate.getKey()){
-                            count(beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmNPD);
-                        }else if(pigStatusBefore==PigStatus.Pregnancy.getKey()){
-                            count(beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmPregnancy);
-                        }else if(pigStatusBefore==PigStatus.KongHuai.getKey()){
-                            count(beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmNPD);
-                        }else if(pigStatusBefore==PigStatus.Farrow.getKey()){
-                            count(beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmPregnancy);
-                        }else if(pigStatusBefore==PigStatus.FEED.getKey()){
-                            count(beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmLactation);
-                        }else if(pigStatusBefore==PigStatus.Wean.getKey()){
-                            count(beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmNPD);
-                        }
+                        }else if(beforeEvent.getType().equals(PigEvent.MATING.getKey())
+                                &&(currentEvent.getPigStatusBefore()==PigStatus.Pregnancy.getKey()||currentEvent.getPigStatusBefore()==PigStatus.Farrow.getKey())){
+                            //离场前配种，算孕期
+                            count(days, currentEvent.getFarmId(), yearAndMonthKey, farmPregnancy);
+                            if(currentEvent.getFarmId().equals(f))
+                            pigNpd.setPregnancy((pigNpd.getPregnancy()==null?0:pigNpd.getPregnancy())+days);
 
-                    } else if(currentEvent.getType().equals(PigEvent.ENTRY.getKey())){//进场
-
-                    } else if(currentEvent.getType().equals(PigEvent.CHG_FARM_IN.getKey())){//转场转入
-                        if(pigStatusAfter==PigStatus.Entry.getKey()){
-
-                        }else if(pigStatusAfter==PigStatus.Mate.getKey()){
-                            count(afterDays, currentEvent.getFarmId(), yearAndMonthKey, farmNPD);
-                        }else if(pigStatusAfter==PigStatus.Pregnancy.getKey()){
-                            count(afterDays, currentEvent.getFarmId(), yearAndMonthKey, farmPregnancy);
-                        }else if(pigStatusAfter==PigStatus.KongHuai.getKey()){
-                            count(afterDays, currentEvent.getFarmId(), yearAndMonthKey, farmNPD);
-                        }else if(pigStatusAfter==PigStatus.Farrow.getKey()){
-                            count(afterDays, currentEvent.getFarmId(), yearAndMonthKey, farmPregnancy);
-                        }else if(pigStatusAfter==PigStatus.FEED.getKey()){
-                            count(afterDays, currentEvent.getFarmId(), yearAndMonthKey, farmLactation);
-                        }else if(pigStatusAfter==PigStatus.Wean.getKey()){
-                            count(afterDays, currentEvent.getFarmId(), yearAndMonthKey, farmNPD);
-                        }
-                    }else{//其余算在空怀
-                        count(afterDays+beforeDays, currentEvent.getFarmId(), yearAndMonthKey, farmNPD);
-                    }
-
-                }
-                for (int i = 0; i < filterMultiPreCheckEvents.size(); i++) {
-                    if (i == filterMultiPreCheckEvents.size() - 1)
-                        break;
-
-                    DoctorPigEvent currentEvent = filterMultiPreCheckEvents.get(i);
-                    DoctorPigEvent nextEvent = filterMultiPreCheckEvents.get(i + 1);
-
-                    //得到天数
-                    int days = DateUtil.getDeltaDays(currentEvent.getEventAt(), nextEvent.getEventAt());//天数
-                    int month = new DateTime(nextEvent.getEventAt()).getMonthOfYear();
-                    int year = new DateTime(nextEvent.getEventAt()).getYear();
-
-                    String yearAndMonthKey = year + "-" + month;
-
-                    if (nextEvent.getType().equals(PigEvent.FARROWING.getKey())) {//分娩
-
-                        count(days, nextEvent.getFarmId(), yearAndMonthKey, farmPregnancy);
-                    } else if (nextEvent.getType().equals(PigEvent.WEAN.getKey())) {//断奶
-
-                        count(days, nextEvent.getFarmId(), yearAndMonthKey, farmLactation);
-                    } else if (nextEvent.getType().equals(PigEvent.CHG_FARM.getKey()) //离场
-                            || nextEvent.getType().equals(PigEvent.REMOVAL.getKey())) {
-                        if (currentEvent.getType().equals(PigEvent.FARROWING.getKey())) {
-
-                            count(days, nextEvent.getFarmId(), yearAndMonthKey, farmLactation);
-
-                        }else if(currentEvent.getType().equals(PigEvent.MATING.getKey())){
-                            //离场，但已怀孕的母猪，要算在孕期里
-                            count(days, nextEvent.getFarmId(), yearAndMonthKey, farmPregnancy);
-
-                        } else if (currentEvent.getType().equals(PigEvent.ENTRY.getKey())
+                        } else /*if (currentEvent.getType().equals(PigEvent.ENTRY.getKey())
                                 || currentEvent.getType().equals(PigEvent.WEAN.getKey())
                                 || currentEvent.getType().equals(PigEvent.PREG_CHECK.getKey())
-                                /*|| currentEvent.getType().equals(PigEvent.MATING.getKey())*/) {
+                                || currentEvent.getType().equals(PigEvent.MATING.getKey()))*/ {
 
                             pigCount.compute(pigId, (k, v) -> null == v ? 1 : v + 1);
-                            count(days, nextEvent.getFarmId(), yearAndMonthKey, farmNPD);
+                            count(days, currentEvent.getFarmId(), yearAndMonthKey, farmNPD);
+                            if(currentEvent.getFarmId().equals(f))
+                            pigNpd.setNpd((pigNpd.getNpd()==null?0:pigNpd.getNpd())+days);
+
                         }
 
                     } else {
 
                         pigCount.compute(pigId, (k, v) -> null == v ? 1 : v + 1);
-                        count(days, nextEvent.getFarmId(), yearAndMonthKey, farmNPD);
+                        count(days, currentEvent.getFarmId(), yearAndMonthKey, farmNPD);
+                        if(currentEvent.getFarmId().equals(f))
+                        pigNpd.setNpd((pigNpd.getNpd()==null?0:pigNpd.getNpd())+days);
                     }
                 }
+                doctorPigNpds.add(pigNpd);
+
             });
         });
 
@@ -264,6 +223,11 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
             }
         });
 
+        try {
+            doctorPigNpdDao.creates(doctorPigNpds);
+        }catch (Exception e){
+            log.error("DoctorReportWriteServiceImpl.createsPigNpd:"+e.getMessage());
+        }
         log.info("total {} pig", pigCount.size());
         log.debug("use {} ms", stopwatch.elapsed(TimeUnit.MILLISECONDS));
     }
@@ -307,12 +271,8 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                     continue;
                 }
 
-                //如果是阳性，过滤
-                if (currentEvent.getPregCheckResult().equals(PregCheckResult.YANG.getKey())) {
-                    continue;
-                }
-
-                if (i != sortedByEventDate.size() - 1) {//还不是最后一笔
+                //只留一次妊娠检查
+                if (i != sortedByEventDate.size() - 1) {
                     boolean remove = false;
                     for (int j = i + 1; j < sortedByEventDate.size(); j++) {
                         if (sortedByEventDate.get(j).getType().equals(PigEvent.PREG_CHECK.getKey()))//下一笔还是妊娠检查事件
@@ -325,6 +285,13 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                     if (remove)
                         continue;
                 }
+
+
+                //如果是阳性，过滤
+                if (currentEvent.getPregCheckResult().equals(PregCheckResult.YANG.getKey())) {
+                    continue;
+                }
+
             }
 
             filterMultiPreCheckEvents.add(currentEvent);

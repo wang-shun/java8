@@ -860,4 +860,24 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         return getSqlSession().selectList(sqlId("queryBeforeChgFarm"),
                 ImmutableMap.of("pigId", pigId, "eventId", eventId));
     }
+
+    /**
+     * 根据当前时间查上一关键事件
+     * 分娩：查上一次配种，转入
+     * 断奶：查上一次分娩，转入
+     * 离场：查上一次相关事件
+     * 配种，阴性:查上一次进场，转入，断奶
+     * @see io.terminus.doctor.event.enums.PigEvent
+     * @param event
+     * @return
+     */
+    public DoctorPigEvent queryBeforeEvent(DoctorPigEvent event){
+        Map<String, Object> params = new HashMap<>();
+        params.put("id",event.getId());
+        params.put("eventAt", event.getEventAt());
+        params.put("pigId", event.getPigId());
+        params.put("type",event.getType());
+        return this.sqlSession.selectOne(this.sqlId("queryBeforeEvent"), params);
+    }
+
 }

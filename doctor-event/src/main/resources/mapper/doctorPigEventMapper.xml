@@ -1718,15 +1718,10 @@
 
     <select id="findForNPD" parameterType="map" resultMap="DoctorPigEventMap">
 
-        SELECT farm_id,t1.pig_id,type,preg_check_result,event_at,id,t1.current_mating_count
+        SELECT farm_id,pig_id,type,preg_check_result,event_at,id,current_mating_count
         FROM
         <include refid="tb"/>
-        t1
-        JOIN
-        (SELECT pig_id
-        FROM
-        <include refid="tb"/>
-        where
+       where
         farm_id=#{farmId}
         and kind=1
         <if test="beginDate !=null">
@@ -1735,10 +1730,7 @@
         <if test="endDate !=null">
             AND <![CDATA[ event_at <= #{endDate} ]]>
         </if>
-        GROUP BY pig_id
-        ) t2
-        on t1.pig_id=t2.pig_id where
-        type!=3
+        and type!=3
         and type!=4
         and type!=5
         and type!=17
@@ -1848,5 +1840,39 @@
             AND status = 1
             order by event_at desc, id desc
         </where>
+    </select>
+
+    <select id="queryBeforeEvent" parameterType="map" resultMap="DoctorPigEventMap">
+        select * from doctor_pig_events where id =
+        (
+          select max(id) from doctor_pig_events b where b.id &lt; #{id}
+            and b.pig_id = #{pigId}
+            <choose>
+                <when test="type==15">
+                    and b.type in (9,20)
+                </when>
+                <when test="type==16">
+                    and b.type in (15,20)
+                </when>
+                <when test="type==9">
+                    and b.type in (7,11,20,16)
+                </when>
+                <when test="type==11">
+                    and b.type in (9)
+                </when>
+                <otherwise>
+                    and b.type!=3
+                    and b.type!=4
+                    and b.type!=5
+                    and b.type!=17
+                    and b.type!=18
+                    and b.type!=19
+                    and b.type!=1
+                    and b.type!=10
+                    and b.type!=12
+                    and b.type!=14
+                </otherwise>
+            </choose>
+        )
     </select>
 </mapper>
