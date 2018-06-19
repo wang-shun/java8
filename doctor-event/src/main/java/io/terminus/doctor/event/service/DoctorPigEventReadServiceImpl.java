@@ -240,10 +240,10 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             return Response.fail("query.pig.event.by.criteria.failed");
         }
     }
-    public Response<Map<String,Integer>> getsum(Map<String, Object> criteria, Integer pageNo, Integer pageSize) {
+    public Response<DoctorPigEvent> getsum(Map<String, Object> criteria, Integer pageNo, Integer pageSize) {
         try {
-            List<DoctorPigEvent> doctorPigEvents = doctorPigEventDao.getsum(criteria);
-            int birthNestAvg = 0;
+            DoctorPigEvent doctorPigEvents = doctorPigEventDao.getsum(criteria).get(0);
+            /*int birthNestAvg = 0;
             int liveCount = 0;
             for(DoctorPigEvent a : doctorPigEvents){
                 //birthNestAvg = birthNestAvg + (Integer) a.getExtraMap().get("birthNestAvg");
@@ -251,8 +251,8 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             }
             Map<String,Integer> map = new HashMap<>();
             map.put("birthNestAvg",birthNestAvg);
-            map.put("liveCount",liveCount);
-            return Response.ok(map);
+            map.put("liveCount",liveCount);*/
+            return Response.ok(doctorPigEvents);
         } catch (Exception e) {
             log.error("query.pig.event.by.criteria.failed cause by {}", Throwables.getStackTraceAsString(e));
             return Response.fail("query.pig.event.by.criteria.failed");

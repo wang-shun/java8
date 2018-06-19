@@ -689,7 +689,7 @@
 
     <select id="getsum" parameterType="map" resultMap="DoctorPigEventMap">
         SELECT
-        <include refid="cols_all"/>
+        sum(farrow_weight) farrowWeight,sum(live_count) liveCount,sum(health_count) healthCount,sum(weak_count) weakCount,sum(dead_count) deadCount,sum(black_count) blackCount,sum(mny_count) mnyCount,sum(jx_count) jxCount
         from
         <include refid="tb"/>
         <where>

@@ -290,7 +290,7 @@ public class DoctorPigEvents {
     }
     @RequestMapping(value = "/getsum", method = RequestMethod.GET)
     @ResponseBody
-    public Map<String,Integer> getsum(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+    public DoctorPigEvent getsum(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
         params = Params.filterNullOrEmpty(params);
         if (params.get("eventTypes") != null) {
             params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
@@ -305,7 +305,7 @@ public class DoctorPigEvents {
             params.put("pigCodeFuzzy", params.get("pigCode"));
             params.remove("pigCode");
         }
-        Response<Map<String,Integer>> pigEventPagingResponse = doctorPigEventReadService.getsum(params, pageNo, pageSize);
+        Response<DoctorPigEvent> pigEventPagingResponse = doctorPigEventReadService.getsum(params, pageNo, pageSize);
         return pigEventPagingResponse.getResult();
     }
 
