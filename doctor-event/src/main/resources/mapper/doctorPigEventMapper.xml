@@ -712,9 +712,6 @@
         sum(wean_count) weanCount,sum(health_count) healthCount,sum(weak_count) weakCount
         from
         <include refid="tb"/>
-        <where>
-            <include refid="criteria"/>
-        </where>
         <if test="ordered!=null">
             ORDER BY DATE_FORMAT(event_at,'%Y-%m-%d')
             <if test="ordered == 0">
