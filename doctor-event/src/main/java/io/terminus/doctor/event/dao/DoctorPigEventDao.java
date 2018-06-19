@@ -35,7 +35,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
 
     public List<DoctorPigEvent> getweansum(Map<String, Object> criteria){
-        return getSqlSession().selectList(sqlId("getabosum"),criteria);
+        return getSqlSession().selectList(sqlId("getweansum"),criteria);
     }
 
     public DoctorPigEvent findByRelGroupEventId(Long relGroupEventId) {
