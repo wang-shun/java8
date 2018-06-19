@@ -287,6 +287,8 @@ public class WarehouseController {
                 BigDecimal quantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findWJSQuantity((BigInteger) mm.get("id"),type,null,null,null, settlementDate));
                 mm.put("lastmonth_sum_quantity",quantity);
                 mm.put("lastmonth_sum_amount","--");
+                BigDecimal nowSumQuantity=quantity.add((BigDecimal)mm.get("thismonth_sum_rk_quantity")).subtract((BigDecimal)mm.get("thismonth_sum_ck_quantity"));
+                mm.put("now_sum_quantity",nowSumQuantity);
             }
         }
 
@@ -316,20 +318,11 @@ public class WarehouseController {
         DoctorFarm doctorFarm = RespHelper.or500(doctorFarmReadService.findFarmById(doctorWareHouse.getFarmId()));
         //判断是否结算
         boolean b = doctorWarehouseSettlementService.isSettled(doctorFarm.getOrgId(), settlementDate);
-        Paging<Map<String, Object>> map = doctorWarehouseReaderService.listDetailTypeMap(type, materialName, warehouseId, pageNo, pageSize, showZero);
+        Integer isSettled=0;//已结算
         if(!b){
-            //未结算：上月结存数量实时计算 findWJSQuantity
-            for(Map mm:map.getData()) {
-                BigDecimal quantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findWJSQuantity(BigInteger.valueOf(warehouseId),type,(Long) mm.get("material_id"),null,(String)mm.get("material_name"), settlementDate));
-                mm.put("lastmonth_sum_quantity", quantity);
-                mm.put("lastmonth_sum_amount", "--");
-                BigDecimal nowSumQuantity=quantity.add((BigDecimal)mm.get("thismonth_sum_rk_quantity")).subtract((BigDecimal)mm.get("thismonth_sum_ck_quantity"));
-                mm.put("now_sum_quantity",nowSumQuantity);
-//                if(nowSumQuantity!=BigDecimal.ZERO){
-//                    maps.getData().add(mm);
-//                }
-            }
+            isSettled=1;//未计算
         }
+        Paging<Map<String, Object>> map = doctorWarehouseReaderService.listDetailTypeMap(type, materialName, warehouseId, pageNo, pageSize, showZero,isSettled);
         return map;
     }
 

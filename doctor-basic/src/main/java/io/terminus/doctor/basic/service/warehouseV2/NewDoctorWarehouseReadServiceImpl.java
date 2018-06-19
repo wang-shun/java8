@@ -161,13 +161,15 @@ public class NewDoctorWarehouseReadServiceImpl implements NewDoctorWarehouseRead
                                                                  Long warehouseId,
                                                                  Integer pageNo,
                                                                  Integer pageSize,
-                                                                 String showZero) {
+                                                                 String showZero,
+                                                         Integer isSettled) {
         PageInfo pageInfo = new PageInfo(pageNo, pageSize);
         Map<String, Object> param = new HashedMap();
         param.put("type", type);
         param.put("materialName", materialName);
         param.put("warehouseId", warehouseId);
         param.put("showZero",showZero);
+        param.put("isSettled",isSettled);
         //会计年月
         Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(new Date());
         param.put("settlementDate",settlementDate);
