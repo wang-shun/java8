@@ -8,6 +8,8 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.common.utils.ResponseUtil;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Date;
 import java.util.Map;
 import java.util.List;
 
@@ -18,6 +20,14 @@ import java.util.List;
  * Created by [ your name ]
  */
 public interface DoctorWarehouseMaterialHandleReadService {
+
+    /**
+     * 未结算：上月结存数量实时计算
+     * @param warehouseId
+     * @param settlementDate
+     * @return
+     */
+    Response<BigDecimal> findWJSQuantity(BigInteger warehouseId,Integer warehouseType,Long materialId,Integer materialType,String materialName, Date settlementDate) ;
 
     /**
      * 得到领料出库的数量

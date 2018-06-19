@@ -14,6 +14,7 @@ import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSettlementSer
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -210,6 +211,20 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
 
         Map<String, BigDecimal> result = this.sqlSession.selectOne(this.sqlId("findBalanceBySettlementDate"), criteria);
         return new AmountAndQuantityDto((result.get("amount")), result.get("quantity"));
+    }
+
+    //未结算：上月结存数量实时计算
+    public BigDecimal findWJSQuantity(BigInteger warehouseId,Integer warehouseType,Long materialId,Integer materialType,String materialName, Date settlementDate) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("warehouseType", warehouseType);
+        criteria.put("materialId", materialId);
+        criteria.put("materialType", materialType);
+        criteria.put("materialName", materialName);
+        criteria.put("settlementDate", settlementDate);
+
+        BigDecimal quantity = this.sqlSession.selectOne(this.sqlId("findWJSQuantity"), criteria);
+        return quantity;
     }
 
     /**

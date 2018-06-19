@@ -727,7 +727,7 @@ public class ReportController {
             Integer type,
             Long warehouseId,
             String materialName
-    ) {
+    ) throws ParseException {
 
         if(ObjectUtils.isEmpty(farmId))
         {
@@ -809,7 +809,10 @@ public class ReportController {
                         lastMap.put("ckdj", "--");
                         lastMap.put("ckje", "--");
                     }
-                    lastMap.put("jcsl","");
+                    SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM");
+                    Date dd = sdf.parse(settlementDate);
+                    BigDecimal quantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findWJSQuantity(BigInteger.valueOf(warehouseId),null,null,type,str,dd));
+                    lastMap.put("jcsl",quantity);
                     if(byjsflag) {
                         lastMap.put("jcdj", "");
                         lastMap.put("jcje", "");
