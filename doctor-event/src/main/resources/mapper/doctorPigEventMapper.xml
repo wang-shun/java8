@@ -687,9 +687,29 @@
         LIMIT #{offset}, #{limit}
     </select>
 
-    <select id="getsum" parameterType="map" resultMap="DoctorPigEventMap">
+    <select id="getabosum" parameterType="map" resultMap="DoctorPigEventMap">
         SELECT
         sum(farrow_weight) farrowWeight,sum(live_count) liveCount,sum(health_count) healthCount,sum(weak_count) weakCount,sum(dead_count) deadCount,sum(black_count) blackCount,sum(mny_count) mnyCount,sum(jx_count) jxCount
+        from
+        <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        <if test="ordered!=null">
+            ORDER BY DATE_FORMAT(event_at,'%Y-%m-%d')
+            <if test="ordered == 0">
+                DESC
+            </if>
+            , id
+            <if test="ordered == 0">
+                DESC
+            </if>
+        </if>
+    </select>
+
+    <select id="getweansum" parameterType="map" resultMap="DoctorPigEventMap">
+        SELECT
+        sum(wean_count) weanCount,sum(health_count) healthCount,sum(weak_count) weakCount
         from
         <include refid="tb"/>
         <where>

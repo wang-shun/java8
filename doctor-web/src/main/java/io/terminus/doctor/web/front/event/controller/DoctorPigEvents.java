@@ -288,9 +288,17 @@ public class DoctorPigEvents {
         }
         return result;
     }
-    @RequestMapping(value = "/getsum", method = RequestMethod.GET)
+
+    /**
+     * 合计分娩事件
+     * @param params
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    @RequestMapping(value = "/getabosum", method = RequestMethod.GET)
     @ResponseBody
-    public DoctorPigEvent getsum(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+    public DoctorPigEvent getabosum(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
         params = Params.filterNullOrEmpty(params);
         if (params.get("eventTypes") != null) {
             params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
@@ -305,7 +313,35 @@ public class DoctorPigEvents {
             params.put("pigCodeFuzzy", params.get("pigCode"));
             params.remove("pigCode");
         }
-        Response<DoctorPigEvent> pigEventPagingResponse = doctorPigEventReadService.getsum(params, pageNo, pageSize);
+        Response<DoctorPigEvent> pigEventPagingResponse = doctorPigEventReadService.getabosum(params, pageNo, pageSize);
+        return pigEventPagingResponse.getResult();
+    }
+
+    /**
+     * 合计断奶事件
+     * @param params
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    @RequestMapping(value = "/getweansum", method = RequestMethod.GET)
+    @ResponseBody
+    public DoctorPigEvent getweansum(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+        params = Params.filterNullOrEmpty(params);
+        if (params.get("eventTypes") != null) {
+            params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
+            params.remove("eventTypes");
+        }
+
+        if (StringUtils.isNotBlank((String)params.get("barnTypes"))) {
+            params.put("barnTypes", Splitters.UNDERSCORE.splitToList((String) params.get("barnTypes")));
+        }
+
+        if (StringUtils.isNotBlank((String) params.get("pigCode"))) {
+            params.put("pigCodeFuzzy", params.get("pigCode"));
+            params.remove("pigCode");
+        }
+        Response<DoctorPigEvent> pigEventPagingResponse = doctorPigEventReadService.getweansum(params, pageNo, pageSize);
         return pigEventPagingResponse.getResult();
     }
 
