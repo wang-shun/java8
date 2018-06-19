@@ -42,11 +42,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -244,15 +240,16 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             return Response.fail("query.pig.event.by.criteria.failed");
         }
     }
-    public Response<List<DoctorPigEvent>> getsum(Map<String, Object> criteria, Integer pageNo, Integer pageSize) {
+    public Response<Map<String,Integer>> getsum(Map<String, Object> criteria, Integer pageNo, Integer pageSize) {
         try {
-            /*List<DoctorPigEvent> doctorPigEvents = doctorPigEventDao.getsum(criteria);
-            int b = 0;
+            List<DoctorPigEvent> doctorPigEvents = doctorPigEventDao.getsum(criteria);
+            int birthNestAvg = 0;
             for(DoctorPigEvent a : doctorPigEvents){
-                b = b + (Integer) a.getExtraMap().get("birthNestAvg");
-            }*/
-            //PageInfo info = PageInfo.of(pageNo, pageSize);
-            return Response.ok(doctorPigEventDao.getsum(criteria));
+                birthNestAvg = birthNestAvg + (Integer) a.getExtraMap().get("birthNestAvg");
+            }
+            Map<String,Integer> map = new HashMap<>();
+            map.put("birthNestAvg",birthNestAvg);
+            return Response.ok(map);
         } catch (Exception e) {
             log.error("query.pig.event.by.criteria.failed cause by {}", Throwables.getStackTraceAsString(e));
             return Response.fail("query.pig.event.by.criteria.failed");
