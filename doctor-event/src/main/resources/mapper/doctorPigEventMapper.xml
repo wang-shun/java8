@@ -687,6 +687,26 @@
         LIMIT #{offset}, #{limit}
     </select>
 
+    <select id="getsum" parameterType="map" resultMap="DoctorPigEventMap">
+        SELECT
+        <include refid="cols_all"/>
+        from
+        <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        <if test="ordered!=null">
+            ORDER BY DATE_FORMAT(event_at,'%Y-%m-%d')
+            <if test="ordered == 0">
+                DESC
+            </if>
+            , id
+            <if test="ordered == 0">
+                DESC
+            </if>
+        </if>
+    </select>
+
     <update id="updatePigEventFarmIdByPigId" parameterType="map">
         UPDATE
         <include refid="tb"/>

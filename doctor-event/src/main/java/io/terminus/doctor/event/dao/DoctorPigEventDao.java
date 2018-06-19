@@ -30,6 +30,10 @@ import java.util.Map;
 @Repository
 public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
+    public List<DoctorPigEvent> getsum(Map<String, Object> criteria){
+        return getSqlSession().selectList(sqlId("getsum"),criteria);
+    }
+
     public DoctorPigEvent findByRelGroupEventId(Long relGroupEventId) {
         return getSqlSession().selectOne(sqlId("findByRelGroupEventId"), relGroupEventId);
     }

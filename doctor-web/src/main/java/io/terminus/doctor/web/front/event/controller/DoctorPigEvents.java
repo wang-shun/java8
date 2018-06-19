@@ -288,7 +288,26 @@ public class DoctorPigEvents {
         }
         return result;
     }
+    @RequestMapping(value = "/getsum", method = RequestMethod.GET)
+    @ResponseBody
+    public List<DoctorPigEvent> getsum(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+        params = Params.filterNullOrEmpty(params);
+        if (params.get("eventTypes") != null) {
+            params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
+            params.remove("eventTypes");
+        }
 
+        if (StringUtils.isNotBlank((String)params.get("barnTypes"))) {
+            params.put("barnTypes", Splitters.UNDERSCORE.splitToList((String) params.get("barnTypes")));
+        }
+
+        if (StringUtils.isNotBlank((String) params.get("pigCode"))) {
+            params.put("pigCodeFuzzy", params.get("pigCode"));
+            params.remove("pigCode");
+        }
+        Response<List<DoctorPigEvent>> pigEventPagingResponse = doctorPigEventReadService.getsum(params, pageNo, pageSize);
+        return pigEventPagingResponse.getResult();
+    }
 
     /**
      * 获取相应的猪类型事件列表

@@ -108,6 +108,9 @@ public interface DoctorPigEventReadService {
      */
     Response<Paging<DoctorPigEvent>> queryPigEventsByCriteria(Map<String, Object> criteria, Integer pageNo, Integer pageSize);
 
+    Response<List<DoctorPigEvent>> getsum(Map<String, Object> criteria, Integer pageNo, Integer pageSize);
+
+
     /**
      * 获取事件操作人列表
      */
