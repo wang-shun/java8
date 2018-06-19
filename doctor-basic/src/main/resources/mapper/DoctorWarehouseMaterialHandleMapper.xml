@@ -448,7 +448,7 @@
             and s.`name` like CONCAT('%', #{materialName}, '%')
         </if>
         AND <![CDATA[ date_format(settlement_date,'%Y-%m')<=date_format(DATE_SUB(#{settlementDate}, INTERVAL 1 MONTH),'%Y-%m')]]>
-        AND delete_flag=1;
+        AND delete_flag=1
     </select>
 
     <update id="updateHandleDateAndSettlementDate" parameterType="map">
