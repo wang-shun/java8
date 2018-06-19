@@ -38,6 +38,10 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         return getSqlSession().selectList(sqlId("getweansum"),criteria);
     }
 
+    public List<DoctorPigEvent> getfosterssum(Map<String, Object> criteria){
+        return getSqlSession().selectList(sqlId("getfosterssum"),criteria);
+    }
+
     public DoctorPigEvent findByRelGroupEventId(Long relGroupEventId) {
         return getSqlSession().selectOne(sqlId("findByRelGroupEventId"), relGroupEventId);
     }

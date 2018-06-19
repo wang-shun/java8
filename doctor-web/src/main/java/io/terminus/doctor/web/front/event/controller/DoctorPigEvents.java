@@ -346,6 +346,34 @@ public class DoctorPigEvents {
     }
 
     /**
+     * 合计拼窝事件
+     * @param params
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    @RequestMapping(value = "/getfosterssum", method = RequestMethod.GET)
+    @ResponseBody
+    public DoctorPigEvent getfosterssum(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+        params = Params.filterNullOrEmpty(params);
+        if (params.get("eventTypes") != null) {
+            params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
+            params.remove("eventTypes");
+        }
+
+        if (StringUtils.isNotBlank((String)params.get("barnTypes"))) {
+            params.put("barnTypes", Splitters.UNDERSCORE.splitToList((String) params.get("barnTypes")));
+        }
+
+        if (StringUtils.isNotBlank((String) params.get("pigCode"))) {
+            params.put("pigCodeFuzzy", params.get("pigCode"));
+            params.remove("pigCode");
+        }
+        Response<DoctorPigEvent> pigEventPagingResponse = doctorPigEventReadService.getfosterssum(params, pageNo, pageSize);
+        return pigEventPagingResponse.getResult();
+    }
+
+    /**
      * 获取相应的猪类型事件列表
      *
      * @param types

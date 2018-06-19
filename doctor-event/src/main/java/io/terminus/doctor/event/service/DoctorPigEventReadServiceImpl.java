@@ -276,6 +276,24 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             return Response.fail("query.pig.event.by.criteria.failed");
         }
     }
+    public Response<DoctorPigEvent> getfosterssum(Map<String, Object> criteria, Integer pageNo, Integer pageSize) {
+        try {
+            DoctorPigEvent doctorPigEvents = doctorPigEventDao.getfosterssum(criteria).get(0);
+            /*int birthNestAvg = 0;
+            int liveCount = 0;
+            for(DoctorPigEvent a : doctorPigEvents){
+                //birthNestAvg = birthNestAvg + (Integer) a.getExtraMap().get("birthNestAvg");
+                liveCount = liveCount+a.getLiveCount();
+            }
+            Map<String,Integer> map = new HashMap<>();
+            map.put("birthNestAvg",birthNestAvg);
+            map.put("liveCount",liveCount);*/
+            return Response.ok(doctorPigEvents);
+        } catch (Exception e) {
+            log.error("query.pig.event.by.criteria.failed cause by {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("query.pig.event.by.criteria.failed");
+        }
+    }
     @Override
     public Response<List<DoctorEventOperator>> queryOperators(Map<String, Object> criteria) {
         try {
