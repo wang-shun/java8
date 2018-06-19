@@ -236,7 +236,7 @@
     </select>
 
     <select id="sowPhMating" parameterType="map" resultType="int">
-        SELECT	count(DISTINCT c.pig_id) AS khmzsl
+        SELECT	count(DISTINCT c.pig_id) AS ypzmzsl
         FROM
         doctor_pig_events c,
         (
@@ -318,7 +318,7 @@
     </select>
 
     <select id="sowPhPregnant" parameterType="map" resultType="int">
-        SELECT	count(DISTINCT c.pig_id) AS khmzsl
+        SELECT	count(DISTINCT c.pig_id) AS hymzsl
         FROM
         doctor_pig_events c,
         (
