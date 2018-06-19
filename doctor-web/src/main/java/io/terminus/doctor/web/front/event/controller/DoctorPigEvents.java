@@ -341,7 +341,7 @@ public class DoctorPigEvents {
             params.put("pigCodeFuzzy", params.get("pigCode"));
             params.remove("pigCode");
         }
-        Response<DoctorPigEvent> pigEventPagingResponse = doctorPigEventReadService.getabosum(params, pageNo, pageSize);
+        Response<DoctorPigEvent> pigEventPagingResponse = doctorPigEventReadService.getweansum(params, pageNo, pageSize);
         return pigEventPagingResponse.getResult();
     }
 
