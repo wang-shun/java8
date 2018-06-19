@@ -374,6 +374,34 @@ public class DoctorPigEvents {
     }
 
     /**
+     * 合计仔猪变动事件
+     * @param params
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    @RequestMapping(value = "/getpigletssum", method = RequestMethod.GET)
+    @ResponseBody
+    public DoctorPigEvent getpigletssum(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+        params = Params.filterNullOrEmpty(params);
+        if (params.get("eventTypes") != null) {
+            params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
+            params.remove("eventTypes");
+        }
+
+        if (StringUtils.isNotBlank((String)params.get("barnTypes"))) {
+            params.put("barnTypes", Splitters.UNDERSCORE.splitToList((String) params.get("barnTypes")));
+        }
+
+        if (StringUtils.isNotBlank((String) params.get("pigCode"))) {
+            params.put("pigCodeFuzzy", params.get("pigCode"));
+            params.remove("pigCode");
+        }
+        Response<DoctorPigEvent> pigEventPagingResponse = doctorPigEventReadService.getpigletssum(params, pageNo, pageSize);
+        return pigEventPagingResponse.getResult();
+    }
+
+    /**
      * 获取相应的猪类型事件列表
      *
      * @param types

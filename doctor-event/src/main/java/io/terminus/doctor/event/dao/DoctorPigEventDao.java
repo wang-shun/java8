@@ -42,6 +42,10 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         return getSqlSession().selectList(sqlId("getfosterssum"),criteria);
     }
 
+    public List<DoctorPigEvent> getpigletssum(Map<String, Object> criteria){
+        return getSqlSession().selectList(sqlId("getpigletssum"),criteria);
+    }
+
     public DoctorPigEvent findByRelGroupEventId(Long relGroupEventId) {
         return getSqlSession().selectOne(sqlId("findByRelGroupEventId"), relGroupEventId);
     }

@@ -112,6 +112,7 @@ public interface DoctorPigEventReadService {
 
     Response<DoctorPigEvent> getweansum(Map<String, Object> criteria, Integer pageNo, Integer pageSize);
     Response<DoctorPigEvent> getfosterssum(Map<String, Object> criteria, Integer pageNo, Integer pageSize);
+    Response<DoctorPigEvent> getpigletssum(Map<String, Object> criteria, Integer pageNo, Integer pageSize);
 
 
     /**

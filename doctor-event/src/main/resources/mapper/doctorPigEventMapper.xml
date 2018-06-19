@@ -747,6 +747,26 @@
         </if>
     </select>
 
+    <select id="getpigletssum" parameterType="map" resultMap="DoctorPigEventMap">
+        SELECT
+        sum(quantity) quantity,sum(weight) weight,sum(amount) amount
+        from
+        <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        <if test="ordered!=null">
+            ORDER BY DATE_FORMAT(event_at,'%Y-%m-%d')
+            <if test="ordered == 0">
+                DESC
+            </if>
+            , id
+            <if test="ordered == 0">
+                DESC
+            </if>
+        </if>
+    </select>
+
     <update id="updatePigEventFarmIdByPigId" parameterType="map">
         UPDATE
         <include refid="tb"/>
