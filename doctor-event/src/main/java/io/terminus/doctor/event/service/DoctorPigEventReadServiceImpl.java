@@ -244,11 +244,14 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         try {
             List<DoctorPigEvent> doctorPigEvents = doctorPigEventDao.getsum(criteria);
             int birthNestAvg = 0;
+            int liveCount = 0;
             for(DoctorPigEvent a : doctorPigEvents){
-                birthNestAvg = birthNestAvg + (Integer) a.getExtraMap().get("birthNestAvg");
+                //birthNestAvg = birthNestAvg + (Integer) a.getExtraMap().get("birthNestAvg");
+                liveCount = liveCount+a.getLiveCount();
             }
             Map<String,Integer> map = new HashMap<>();
             map.put("birthNestAvg",birthNestAvg);
+            map.put("liveCount",liveCount);
             return Response.ok(map);
         } catch (Exception e) {
             log.error("query.pig.event.by.criteria.failed cause by {}", Throwables.getStackTraceAsString(e));
