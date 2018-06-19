@@ -58,6 +58,11 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     private DoctorWarehouseMaterialApplyDao doctorWarehouseMaterialApplyDao;
 
     @Override
+    public Response<BigDecimal> findWJSQuantity(BigInteger warehouseId,Integer warehouseType,Long materialId,Integer materialType,String materialName, Date settlementDate) {
+        return Response.ok(doctorWarehouseMaterialHandleDao.findWJSQuantity(warehouseId,warehouseType,materialId,materialType,materialName,settlementDate));
+    }
+
+    @Override
     public Response<BigDecimal> findLibraryById(Long id,String materialName) {
         return Response.ok(doctorWarehouseMaterialHandleDao.findLibraryById(id,materialName));
     }

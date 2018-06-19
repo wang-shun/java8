@@ -417,6 +417,40 @@
         AND delete_flag=1
     </select>
 
+    <select id="findWJSQuantity" parameterType="map" resultType="BigDecimal">
+        SELECT
+        ifnull(sum(
+        case mh.type
+        when '1' then quantity
+        when '2' then -quantity
+        when '7' then quantity
+        when '8' then -quantity
+        when '9' then quantity
+        when '10' then -quantity
+        when '11' then quantity
+        when '12' then -quantity
+        when '13' then quantity end
+        ),0) as quantity
+        FROM doctor_warehouse_material_handle as mh
+        inner join doctor_warehouse_sku as s
+        on mh.material_id=s.id
+        WHERE mh.warehouse_id=#{warehouseId}
+        <if test="warehouseType != null and ''!=warehouseType" >
+            and mh.warehouse_type=#{warehouseType}
+        </if>
+        <if test="materialId != null and ''!=materialId" >
+            and s.id=#{materialId}
+        </if>
+        <if test="materialType != null and ''!=materialType" >
+            and s.type=#{materialType}
+        </if>
+        <if test="materialName != null and ''!=materialName" >
+            and s.`name` like CONCAT('%', #{materialName}, '%')
+        </if>
+        AND <![CDATA[ date_format(settlement_date,'%Y-%m')<=date_format(DATE_SUB(#{settlementDate}, INTERVAL 1 MONTH),'%Y-%m')]]>
+        AND delete_flag=1;
+    </select>
+
     <update id="updateHandleDateAndSettlementDate" parameterType="map">
         UPDATE
         <include refid="tb"/>

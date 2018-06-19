@@ -156,7 +156,7 @@ public class NewDoctorWarehouseReadServiceImpl implements NewDoctorWarehouseRead
     }
 
     @Override
-    public Response<Paging<Map<String, Object>>> listDetailTypeMap(Integer type,
+    public Paging<Map<String, Object>> listDetailTypeMap(Integer type,
                                                                  String materialName,
                                                                  Long warehouseId,
                                                                  Integer pageNo,
@@ -171,7 +171,7 @@ public class NewDoctorWarehouseReadServiceImpl implements NewDoctorWarehouseRead
         //会计年月
         Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(new Date());
         param.put("settlementDate",settlementDate);
-        return Response.ok(doctorWareHouseDao.listDetailTypeMap(
-                pageInfo.getOffset(), pageInfo.getLimit(), param));
+        return doctorWareHouseDao.listDetailTypeMap(
+                pageInfo.getOffset(), pageInfo.getLimit(), param);
     }
 }

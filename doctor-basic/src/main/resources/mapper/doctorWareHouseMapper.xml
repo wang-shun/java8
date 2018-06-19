@@ -246,7 +246,7 @@
     </select>
 
     <select id="listDetailTypeMap" parameterType="Map" resultType="map">
-        select  a.id,b.`code`,b.`name` as material_name,
+        select  a.id,b.id as material_id,b.`code`,b.`name` as material_name,
         c.`name` as vendor_name,
         b.specification,db.name as unit,
         ifnull(round(tmp1.lastmonth_sum_amount,4),0) as lastmonth_sum_amount,
