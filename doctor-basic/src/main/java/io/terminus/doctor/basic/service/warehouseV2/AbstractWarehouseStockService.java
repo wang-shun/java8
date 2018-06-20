@@ -6,10 +6,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorWareHouseDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseStockHandleDao;
-import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDetail;
-import io.terminus.doctor.basic.dto.warehouseV2.AbstractWarehouseStockDto;
-import io.terminus.doctor.basic.dto.warehouseV2.WarehouseFormulaDto;
-import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockTransferDto;
+import io.terminus.doctor.basic.dto.warehouseV2.*;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.manager.DoctorWarehouseStockHandleManager;
 import io.terminus.doctor.basic.manager.DoctorWarehouseStockManager;
@@ -88,6 +85,8 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
 
         this.getDetails(stockDto).forEach(detail -> {
             create(stockDto, detail, stockHandle, wareHouse);
+            //变动库存
+            doctorWarehouseStockManager.in(detail.getMaterialId(),detail.getQuantity(), wareHouse);
         });
         return stockHandle;
     }
