@@ -72,12 +72,12 @@ public class DoctorReportEfficiency implements Serializable {
     /**
      * 妊娠期
      */
-    private Integer pregnancy;
+    private BigDecimal pregnancy;
     
     /**
      * 哺乳期
      */
-    private Integer lactation;
+    private BigDecimal lactation;
     
     /**
      * 创建时间

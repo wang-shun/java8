@@ -5,6 +5,7 @@ import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.model.DoctorReportEfficiency;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -23,8 +24,8 @@ public class DoctorReportEfficiencyDao extends MyBatisDao<DoctorReportEfficiency
             efficiency = new DoctorReportEfficiency();
             efficiency.setOrzId(dimensionCriteria.getOrzId());
             efficiency.setSumAt(dimensionCriteria.getSumAt());
-            efficiency.setLactation(0);
-            efficiency.setPregnancy(0);
+            efficiency.setLactation(new BigDecimal(0));
+            efficiency.setPregnancy(new BigDecimal(0));
         }
 
         return efficiency;

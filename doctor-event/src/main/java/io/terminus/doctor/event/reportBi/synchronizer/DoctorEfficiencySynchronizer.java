@@ -216,8 +216,8 @@ public class DoctorEfficiencySynchronizer {
                 efficiency.setSumAtName(DateHelper.dateCN(start, dateDimension));
 
                 //妊娠期和哺乳期默认为0
-                efficiency.setPregnancy(0);
-                efficiency.setLactation(0);
+                efficiency.setPregnancy(new BigDecimal(0));
+                efficiency.setLactation(new BigDecimal(0));
                 if (null == efficiency.getId())
                     doctorReportEfficiencyDao.create(efficiency);
                 else
@@ -268,8 +268,8 @@ public class DoctorEfficiencySynchronizer {
                 efficiency.setSumAt(start);
                 efficiency.setSumAtName(DateHelper.dateCN(start, dateDimension));
 
-                efficiency.setPregnancy(0);
-                efficiency.setLactation(0);
+                efficiency.setPregnancy(new BigDecimal(0));
+                efficiency.setLactation(new BigDecimal(0));
                 if (null == efficiency.getId())
                     doctorReportEfficiencyDao.create(efficiency);
                 else
@@ -335,11 +335,11 @@ public class DoctorEfficiencySynchronizer {
             efficiency.setPsy(efficiency.getBirthPerYear().multiply(new BigDecimal(pigDaily.getWeanCount()).divide(new BigDecimal(pigDaily.getWeanNest()), 2, BigDecimal.ROUND_HALF_UP)));
 
         if (sowAvg.compareTo(new BigDecimal(0)) == 0) {
-            efficiency.setPregnancy(0);
-            efficiency.setLactation(0);
+            efficiency.setPregnancy(new BigDecimal(0));
+            efficiency.setLactation(new BigDecimal(0));
         } else {
-            efficiency.setPregnancy(new BigDecimal(npd.getPregnancy()).divide(sowAvg, 2, BigDecimal.ROUND_HALF_UP).intValue());
-            efficiency.setLactation(new BigDecimal(npd.getLactation()).divide(sowAvg, 2, BigDecimal.ROUND_HALF_UP).intValue());
+            efficiency.setPregnancy(new BigDecimal(npd.getPregnancy()).divide(sowAvg, 2, BigDecimal.ROUND_HALF_UP));
+            efficiency.setLactation(new BigDecimal(npd.getLactation()).divide(sowAvg, 2, BigDecimal.ROUND_HALF_UP));
         }
     }
 }
