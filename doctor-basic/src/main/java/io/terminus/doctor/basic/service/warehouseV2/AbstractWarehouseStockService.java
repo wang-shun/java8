@@ -85,8 +85,6 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
 
         this.getDetails(stockDto).forEach(detail -> {
             create(stockDto, detail, stockHandle, wareHouse);
-            //变动库存
-            doctorWarehouseStockManager.in(detail.getMaterialId(),detail.getQuantity(), wareHouse);
         });
         return stockHandle;
     }
