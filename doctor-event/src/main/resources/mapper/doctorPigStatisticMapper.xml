@@ -405,7 +405,7 @@
         SELECT count(1)
         FROM doctor_pig_events a left join doctor_pig_events b on a.pig_id = b.pig_id
         <where>
-            a.farm_id = #{farmId}
+            b.farm_id = #{farmId}
             and a.type = 16
             and b.type = 9
             and b.current_mating_count = 1
@@ -421,7 +421,7 @@
         SELECT count(1)
         FROM doctor_pig_events a left join doctor_pig_events b on a.pig_id = b.pig_id
         <where>
-            a.farm_id = #{farmId}
+            b.farm_id = #{farmId}
             and a.type = 16
             and b.type = 6
             AND b.change_type_id in (110,111)
