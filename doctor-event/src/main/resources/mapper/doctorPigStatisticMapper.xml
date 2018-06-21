@@ -512,12 +512,11 @@
     </select>
 
     <select id="earlyMating" parameterType="map" resultType="int">
-        select count(1)
+        select sum(current_mating_count)
         FROM doctor_pig_events
         <where>
             farm_id = #{farmId}
             and `type` = 9
-            and current_mating_count = 1
             and event_at = date_sub(#{sumAt}, INTERVAL 114 DAY )
             and status = 1
             AND event_source != 5
@@ -541,7 +540,6 @@
         from doctor_pig_events a left join doctor_pig_events b on a.pig_id = b.pig_id
         where a.farm_id =#{farmId}
         and a.type = 9
-        and a.`current_mating_count` = 1
         and a.event_at = date_sub(#{sumAt}, INTERVAL 114 DAY)
         and b.type = 15
         and a.`parity` = b.`parity`
@@ -776,7 +774,7 @@
         where a.farm_id = #{farmId}
         and a.event_at &gt;= #{startAt} and a.event_at &lt;= #{endAt}
         and a.event_source != 5 and a.status = 1
-        and a.type = 9 and a.current_mating_count = 1
+        and a.type = 9
         and b.type = 15 and a.parity = b.parity
         and b.event_source != 5 and b.status = 1
         and a.id = b.rel_event_id

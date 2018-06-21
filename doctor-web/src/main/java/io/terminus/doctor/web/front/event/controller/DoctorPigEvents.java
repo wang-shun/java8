@@ -299,6 +299,7 @@ public class DoctorPigEvents {
     @RequestMapping(value = "/getabosum", method = RequestMethod.GET)
     @ResponseBody
     public DoctorPigEvent getabosum(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+        params.put("ordered",0);
         params = Params.filterNullOrEmpty(params);
         if (params.get("eventTypes") != null) {
             params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
@@ -327,6 +328,7 @@ public class DoctorPigEvents {
     @RequestMapping(value = "/getweansum", method = RequestMethod.GET)
     @ResponseBody
     public DoctorPigEvent getweansum(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+        params.put("ordered",0);
         params = Params.filterNullOrEmpty(params);
         if (params.get("eventTypes") != null) {
             params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
@@ -355,6 +357,7 @@ public class DoctorPigEvents {
     @RequestMapping(value = "/getfosterssum", method = RequestMethod.GET)
     @ResponseBody
     public DoctorPigEvent getfosterssum(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+        params.put("ordered",0);
         params = Params.filterNullOrEmpty(params);
         if (params.get("eventTypes") != null) {
             params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
@@ -383,6 +386,7 @@ public class DoctorPigEvents {
     @RequestMapping(value = "/getpigletssum", method = RequestMethod.GET)
     @ResponseBody
     public DoctorPigEvent getpigletssum(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+        params.put("ordered",0);
         params = Params.filterNullOrEmpty(params);
         if (params.get("eventTypes") != null) {
             params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
