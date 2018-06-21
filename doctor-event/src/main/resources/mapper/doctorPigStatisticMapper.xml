@@ -512,7 +512,7 @@
     </select>
 
     <select id="earlyMating" parameterType="map" resultType="int">
-        select sum(current_mating_count)
+        select count(*)
         FROM doctor_pig_events
         <where>
             farm_id = #{farmId}
