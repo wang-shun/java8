@@ -727,7 +727,10 @@ public class ReportController {
             Integer type,
             Long warehouseId,
             String materialName
-    ) {
+    ) throws ParseException {
+
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM");
+        Date dd = sdf.parse(settlementDate);
 
         if(ObjectUtils.isEmpty(farmId))
         {
@@ -745,10 +748,8 @@ public class ReportController {
         }
 
         boolean byjsflag = false; //默认没结算
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM");
         try {
-            Date ddate = simpleDateFormat.parse(settlementDate);
-            if (doctorWarehouseSettlementService.isSettled(orgId, ddate)) {
+            if (doctorWarehouseSettlementService.isSettled(orgId, dd)) {
                 byjsflag = true; //表示已经结算了
             }
         } catch (Exception e){
@@ -850,7 +851,8 @@ public class ReportController {
                     Object ljcdj = lastMap.get("jcdj");
                     Object ljcje = lastMap.get("jcje");
                     if(isNull(ljcsl)){
-                        lastMap.put("jcsl","");
+                        BigDecimal quantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findWJSQuantity(BigInteger.valueOf(warehouseId),null,null,type,str,dd));
+                        lastMap.put("jcsl",quantity);
                     } else {
                         lastMap.put("jcsl",
                                 new BigDecimal(Double.parseDouble(ljcsl.toString())).setScale(3, BigDecimal.ROUND_DOWN));

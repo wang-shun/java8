@@ -303,7 +303,9 @@ public class DoctorDailyReportV2Manager {
      * @param criteria       条件
      */
     private void flushPhPigDaily(DoctorPigDaily doctorPigDaily, DoctorStatisticCriteria criteria) {
-        doctorPigDaily.setSowPhStart(pigStatisticDao.phLiveStock(criteria.getFarmId(),
+        criteria.setOrgId(doctorKpiDao.getOrgIdByFarmId(criteria.getFarmId()));
+        //期初存栏
+        doctorPigDaily.setSowPhStart(pigStatisticDao.phLiveStock(criteria.getOrgId(),criteria.getFarmId(),
                 DateUtil.toDateString(new DateTime(DateUtil.toDate(criteria.getSumAt())).minusDays(1).toDate())));
         doctorPigDaily.setSowPhReserveIn(pigStatisticDao.sowPhReserveIn(criteria));
         doctorPigDaily.setSowPhWeanIn(pigStatisticDao.sowPhWeanIn(criteria));
@@ -320,10 +322,11 @@ public class DoctorDailyReportV2Manager {
         doctorPigDaily.setMateLc(pigStatisticDao.mateLc(criteria));
         doctorPigDaily.setMateYx(pigStatisticDao.mateYx(criteria));
         doctorPigDaily.setMatingCount(pigStatisticDao.matingCount(criteria));
+        // 已配种母猪数
         doctorPigDaily.setSowPhMating(pigStatisticDao.sowPhMating(criteria));
-        criteria.setOrgId(doctorKpiDao.getOrgIdByFarmId(criteria.getFarmId()));
+        // 空怀母猪数量
         doctorPigDaily.setSowPhKonghuai(pigStatisticDao.sowPhKonghuai(criteria));
-        log.error("flushPhPigDaily-------------------------------------------------------------------------------------:SowPhKonghuai"+doctorPigDaily.getSowPhKonghuai());
+        // 怀孕母猪数量
         doctorPigDaily.setSowPhPregnant(pigStatisticDao.sowPhPregnant(criteria));
         doctorPigDaily.setPregPositive(pigStatisticDao.pregPositive(criteria));
         doctorPigDaily.setPregNegative(pigStatisticDao.pregNegative(criteria));
@@ -331,7 +334,7 @@ public class DoctorDailyReportV2Manager {
         doctorPigDaily.setPregLiuchan(pigStatisticDao.pregLiuchan(criteria));
         doctorPigDaily.setWeanMate(pigStatisticDao.weanMate(criteria));
         doctorPigDaily.setWeanDeadWeedOut(pigStatisticDao.weanDeadWeedOut(criteria));
-        doctorPigDaily.setSowPhEnd(pigStatisticDao.phLiveStock(criteria.getFarmId(), criteria.getSumAt()));
+        doctorPigDaily.setSowPhEnd(pigStatisticDao.phLiveStock(criteria.getOrgId(),criteria.getFarmId(), criteria.getSumAt()));
     }
 
     /**
@@ -341,9 +344,10 @@ public class DoctorDailyReportV2Manager {
      * @param criteria       条件
      */
     private void flushCfPigDaily(DoctorPigDaily doctorPigDaily, DoctorStatisticCriteria criteria) {
-        doctorPigDaily.setSowCfStart(pigStatisticDao.cfLiveStock(criteria.getFarmId(),
+        criteria.setOrgId(doctorKpiDao.getOrgIdByFarmId(criteria.getFarmId()));
+        doctorPigDaily.setSowCfStart(pigStatisticDao.cfLiveStock(criteria.getOrgId(),criteria.getFarmId(),
                 DateUtil.toDateString(new DateTime(DateUtil.toDate(criteria.getSumAt())).minusDays(1).toDate())));
-        doctorPigDaily.setSowCfEnd(pigStatisticDao.cfLiveStock(criteria.getFarmId(), criteria.getSumAt()));
+        doctorPigDaily.setSowCfEnd(pigStatisticDao.cfLiveStock(criteria.getOrgId(),criteria.getFarmId(), criteria.getSumAt()));
         doctorPigDaily.setSowCfIn(pigStatisticDao.sowCfIn(criteria));
         doctorPigDaily.setSowCfInFarmIn(pigStatisticDao.sowCfInFarmIn(criteria));
         doctorPigDaily.setSowCfDead(pigStatisticDao.sowCfDead(criteria));

@@ -14,6 +14,7 @@ import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSettlementSer
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -210,6 +211,20 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
 
         Map<String, BigDecimal> result = this.sqlSession.selectOne(this.sqlId("findBalanceBySettlementDate"), criteria);
         return new AmountAndQuantityDto((result.get("amount")), result.get("quantity"));
+    }
+
+    //未结算：上月结存数量实时计算
+    public BigDecimal findWJSQuantity(BigInteger warehouseId,Integer warehouseType,Long materialId,Integer materialType,String materialName, Date settlementDate) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("warehouseType", warehouseType);
+        criteria.put("materialId", materialId);
+        criteria.put("materialType", materialType);
+        criteria.put("materialName", materialName);
+        criteria.put("settlementDate", settlementDate);
+
+        BigDecimal quantity = this.sqlSession.selectOne(this.sqlId("findWJSQuantity"), criteria);
+        return quantity;
     }
 
     /**
@@ -413,12 +428,17 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     }
 
     //<!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注-->
-    public List<Map> getDataByMaterialName(Long id, String materialName) {
-        Map<String, Object> map = Maps.newHashMap();
-        map.put("stockHandleId", id);
-        map.put("materialName", materialName);
-        List<Map> getDataByMaterialName = this.sqlSession.selectList(this.sqlId("getDataByMaterialName"), map);
+    public List<Map> getDataByMaterialName(Long id) {
+        List<Map> getDataByMaterialName = this.sqlSession.selectList(this.sqlId("getDataByMaterialName"), id);
         return getDataByMaterialName;
     }
 
+    //根据id判断是否有退料入库
+    public Integer findCountByRelMaterialHandleId(Long id,Long farmId) {
+        Map<String, Long> params = Maps.newHashMap();
+        params.put("farmId", farmId);
+        params.put("id", id);
+        Integer count = this.sqlSession.selectOne(this.sqlId("findCountByRelMaterialHandleId"), params);
+        return count;
+    }
 }

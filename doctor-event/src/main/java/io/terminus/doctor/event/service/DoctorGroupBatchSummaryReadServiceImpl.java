@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -153,7 +154,8 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
 
         Double fcrWeight = getFcrDeltaWeight(events, inCount, inAvgWeight);
         summary.setFcr(EventUtil.divide(fcrFeed, fcrWeight));
-        Double gain = EventUtil.get2(EventUtil.getAvgWeight(fcrWeight, groupTrack.getAvgDayAge() - getFirstMoveInEvent(events)));
+        //Double gain = EventUtil.get2(EventUtil.getAvgWeight(fcrWeight, groupTrack.getAvgDayAge() - getFirstMoveInEvent(events)));
+        Double gain = EventUtil.get2(EventUtil.getAvgWeight(fcrWeight, getlivestocksum(events)));
         summary.setDailyWeightGain(gain < 0 ? 0 : gain);//日增重(kg)
         setToNurseryOrFatten(summary, events);                                       //阶段转
 
@@ -172,6 +174,30 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
 //        summary.setInCost();               //转入成本(均)
 //        summary.setOutCost();              //出栏成本(分)
         return summary;
+    }
+
+    //求每天存栏数之和
+    private int getlivestocksum(List<DoctorGroupEvent> events) {
+        int y = 0;
+        ArrayList<Integer> livestock = new ArrayList<Integer>();
+        int getlivestocksum = 0;
+        for(int i = 0;i < events.size(); i++){
+            if(events.get(i).getType() == GroupEventType.MOVE_IN.getValue()){
+                y = y + events.get(i).getQuantity();
+                livestock.add(y);
+            }
+            if(events.get(i).getType() == GroupEventType.TRANS_GROUP.getValue() ||
+                events.get(i).getType() == GroupEventType.TRANS_FARM.getValue() ||
+                events.get(i).getType() == GroupEventType.TURN_SEED.getValue()||
+                events.get(i).getType() == GroupEventType.CHANGE.getValue()){
+                y = y -  events.get(i).getQuantity();
+                livestock.add(y);
+            }
+        }
+        for(int j = 0; j < livestock.size(); j++){
+            getlivestocksum = getlivestocksum + livestock.get(j);
+        }
+        return getlivestocksum;
     }
 
     private int getFirstMoveInEvent(List<DoctorGroupEvent> events) {

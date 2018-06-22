@@ -320,7 +320,8 @@
         <where>
             b.status = 1
             AND b.farm_id = #{farmId}
-            AND b.event_at = #{sumAt}
+            AND DATE_FORMAT(a.close_at, '%Y-%m-%d') = #{sumAt}
+            AND a.status = -1
             AND b.pig_type = #{pigType}
             <if test="pigType == 2">and
                 (
@@ -344,7 +345,8 @@
         <where>
             b.status = 1
             AND b.farm_id = #{farmId}
-            AND b.event_at = #{sumAt}
+            AND DATE_FORMAT(a.close_at, '%Y-%m-%d') = #{sumAt}
+            AND a.status = -1
             AND b.pig_type = #{pigType}
             <if test="pigType == 2">and
                 (

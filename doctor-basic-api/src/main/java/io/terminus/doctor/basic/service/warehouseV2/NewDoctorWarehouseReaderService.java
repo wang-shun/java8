@@ -62,13 +62,14 @@ public interface NewDoctorWarehouseReaderService {
     /**
      * 展示该仓库所有物料结存数量和结存金额明细
      */
-    Response<Paging<Map<String,Object>>> listDetailTypeMap(
+    Paging<Map<String,Object>> listDetailTypeMap(
                                                         Integer type,
                                                          String materialName,
                                                          Long warehouseId,
                                                          Integer pageNo,
                                                          Integer pageSize,
-                                                         String showZero);
+                                                         String showZero,
+                                                        Integer isSettled);
 
 
 

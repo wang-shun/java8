@@ -17,57 +17,40 @@
 
     <!-- 实时存栏: 在产房的母猪 -->
     <select id="cfLiveStock" parameterType="map" resultType="int">
-        select
-        (
-        SELECT ifnull(count(1) , 0)
-        FROM doctor_pig_tracks
-        WHERE
-        farm_id = #{farmId} AND
-        is_removal = 0 AND
-        pig_type = 1 and
-        current_barn_type = 7 -- 配怀舍
-        )
-        -
-        (
-        SELECT
-        ifnull(sum(case type when 20 then 1 when 14 then 1 else 0 end ), 0) -
-        ifnull(sum(case type when 2 then 1 when 6 then 1 when 10 then 1 when 12 then 1 else 0 end ), 0)
-        FROM doctor_pig_events a
-        WHERE
-        a.farm_id = #{farmId} AND
-        a.event_at &gt; #{sumAt} AND
-        a.kind = 1 AND
-        (a.barn_type = 7 or type = 14) and
-        a.status = 1 and
-        a.event_source != 5
-        );
+        select count(1)
+        from doctor_pig_events c,
+        (select b.pig_id, max(b.id) as max_event_id
+        from doctor_pig_events b,
+        (select a.pig_id, max(a.event_at) as max_event_at from doctor_pig_events a
+        where a.org_id=#{orgId} and a.farm_id = #{farmId} and a.kind = 1 and a.`status` = 1 and <![CDATA[a.event_at <= #{sumAt}]]>
+        group by a.pig_id) t1
+        where b.pig_id = t1.pig_id and b.event_at = t1.max_event_at and b.farm_id = #{farmId} and b.org_id=#{orgId}
+        and b.kind = 1 and b.`status` = 1 and <![CDATA[b.event_at <= #{sumAt}]]>
+        group by b.pig_id
+        ) t2
+        where c.pig_id = t2.pig_id and c.id = t2.max_event_id
+        and c.type != 2 and c.type != 6 and c.type != 12
+        and (((c.type = 1 and c.barn_type = 7) or c.type = 14)
+        or (c.type != 1 and c.type != 14 and (c.barn_type = 7)))
     </select>
 
     <select id="phLiveStock" parameterType="map" resultType="int">
-        select
-        (
-        SELECT ifnull(count(1) , 0)
-        FROM doctor_pig_tracks
-        WHERE
-        farm_id = #{farmId} AND
-        is_removal = 0 AND
-        pig_type = 1 and
-        current_barn_type in (5 ,6 ) -- 配怀舍
-        )
-        -
-        (
-        SELECT
-        ifnull(sum(case type when 20 then 1 when 7 then 1 when 12 then 1 else 0 end ), 0) -
-        ifnull(sum(case type when 2 then 1 when 6 then 1 when 14 then 1 else 0 end ), 0)
-        FROM doctor_pig_events
-        WHERE
-        farm_id = #{farmId} AND
-        event_at &gt; #{sumAt} AND
-        kind = 1 AND
-        status = 1 AND
-        event_source != 5 AND
-        (( barn_type in ( 5, 6 ) and type in(2,6,7,14,20)) OR ( barn_type = 7 and type = 12 ) ) -- 保育舍发生的转场+销售+转分娩舍-(产房发生的进场+转配怀舍)
-        )
+         select count(1)
+        from doctor_pig_events c,
+        (select b.pig_id, max(b.id) as max_event_id
+        from doctor_pig_events b,
+        (select a.pig_id, max(a.event_at) as max_event_at from doctor_pig_events a
+        where a.org_id=#{orgId} and a.farm_id = #{farmId} and a.kind = 1 and a.`status` = 1 and <![CDATA[a.event_at <= #{sumAt}]]>
+        group by a.pig_id) t1
+        where b.pig_id = t1.pig_id and b.event_at = t1.max_event_at and b.farm_id = #{farmId} and b.org_id=#{orgId}
+        and b.kind = 1 and b.`status` = 1 and <![CDATA[b.event_at <= #{sumAt}]]>
+        group by b.pig_id
+        ) t2
+        where c.pig_id = t2.pig_id and c.id = t2.max_event_id
+        and c.type != 2 and c.type != 6 and c.type != 14
+        and (((c.type = 1 and c.barn_type != 7) or c.type = 12)
+        or (c.type != 1 and c.type != 12 and (c.barn_type != 7)))
+
     </select>
 
     <select id="sowPhReserveIn" parameterType="map" resultType="int">
@@ -89,6 +72,9 @@
         <where>
             <include refid="criteria"/>
             and `type` = 12
+            and barn_type = 7
+            and pig_status_before = 9
+            and pig_status_after = 9
         </where>
     </select>
 
@@ -250,30 +236,42 @@
     </select>
 
     <select id="sowPhMating" parameterType="map" resultType="int">
-        select
+        SELECT	count(DISTINCT c.pig_id) AS ypzmzsl
+        FROM
+        doctor_pig_events c,
         (
-        select count(1)
-        from doctor_pig_tracks
-        where status = 3
-        and farm_id = #{farmId}
-        and current_barn_type in(5,6)
-        )
-        -
+        SELECT
+        a.pig_id AS pig_id,
+        max(a.id) AS max_event_id
+        FROM
+        doctor_pig_events a,
         (
-        select ifnull(sum(
-        case when type = 20 and pig_status_before = 3 then 1 else 0 end +
-        case when type = 9 and current_mating_count =1 then 1 else 0 end -
-        case when type in (2,6,11) and pig_status_before = 3 then 1 else 0 end)
-        ,0)
-        from doctor_pig_events
-        where event_at &gt; #{sumAt}
-        and farm_id = #{farmId}
-        and type in(2, 6, 9, 11)
-        and barn_type in(5,6)
-        and status =1
-        and kind = 1
-        and event_source != 5
-        )
+        SELECT
+        j.pig_id,
+        max(j.event_at) AS max_event_at
+        FROM
+        doctor_pig_events j
+        WHERE
+        j.org_id=#{orgId}
+        AND j.farm_id = #{farmId} and j.kind=1 and j.`status` = 1
+        AND <![CDATA[j.event_at <= #{sumAt}]]>
+        GROUP BY
+        j.pig_id
+        ) t
+        WHERE
+        a.pig_id = t.pig_id
+        AND a.event_at = t.max_event_at
+        AND a.org_id = #{orgId}
+        AND a.farm_id = #{farmId}
+        AND <![CDATA[a.event_at <= #{sumAt}]]>
+        GROUP BY
+        a.pig_id
+        ) max_events_temp
+        WHERE
+        max_events_temp.max_event_id = c.id
+        AND c.type!=2 and c.type!=6 and c.type!=14
+ 		and (((type = 1 and barn_type!=7) or type = 12) or (type != 1 and type != 12 and (barn_type = 5 or barn_type = 6)))
+        AND c.pig_status_after = 3
     </select>
 
     <select id="sowPhKonghuai" parameterType="map" resultType="int">
@@ -310,7 +308,8 @@
         ) max_events_temp
         WHERE
         max_events_temp.max_event_id = c.id
-        AND c.type!=2 and c.type!=6
+        AND c.type!=2 and c.type!=6 and c.type!=14
+ 		and (((type = 1 and barn_type!=7) or type = 12) or (type != 1 and type != 12 and (barn_type = 5 or barn_type = 6)))
         AND (
         c.pig_status_after = 1
         OR c.pig_status_after = 9
@@ -319,30 +318,42 @@
     </select>
 
     <select id="sowPhPregnant" parameterType="map" resultType="int">
-        select
+        SELECT	count(DISTINCT c.pig_id) AS hymzsl
+        FROM
+        doctor_pig_events c,
         (
-        select count(1)
-        from doctor_pig_tracks
-        where status = 4
-        and farm_id = #{farmId}
-        and current_barn_type in(5,6)
-        )
-        -
+        SELECT
+        a.pig_id AS pig_id,
+        max(a.id) AS max_event_id
+        FROM
+        doctor_pig_events a,
         (
-        select ifnull(sum(
-        case when type in (11,20) and pig_status_after = 4 then 1 else 0 end -
-        case when type in (2,6,11,14) and pig_status_before = 4 then 1 else 0 end
-        )
-        ,0)
-        from doctor_pig_events
-        where event_at &gt; #{sumAt}
-        and farm_id = #{farmId}
-        and type in(2,6,11,14,20)
-        and barn_type in(5,6)
-        and status =1
-        and kind = 1
-        and event_source != 5
-        )
+        SELECT
+        j.pig_id,
+        max(j.event_at) AS max_event_at
+        FROM
+        doctor_pig_events j
+        WHERE
+        j.org_id=#{orgId}
+        AND j.farm_id = #{farmId} and j.kind=1 and j.`status` = 1
+        AND <![CDATA[j.event_at <= #{sumAt}]]>
+        GROUP BY
+        j.pig_id
+        ) t
+        WHERE
+        a.pig_id = t.pig_id
+        AND a.event_at = t.max_event_at
+        AND a.org_id = #{orgId}
+        AND a.farm_id = #{farmId}
+        AND <![CDATA[a.event_at <= #{sumAt}]]>
+        GROUP BY
+        a.pig_id
+        ) max_events_temp
+        WHERE
+        max_events_temp.max_event_id = c.id
+        AND c.type!=2 and c.type!=6 and c.type!=14
+ 		and (((type = 1 and barn_type!=7) or type = 12) or (type != 1 and type != 12 and (barn_type = 5 or barn_type = 6)))
+        AND c.pig_status_after = 4
     </select>
 
 
@@ -394,7 +405,7 @@
         SELECT count(1)
         FROM doctor_pig_events a left join doctor_pig_events b on a.pig_id = b.pig_id
         <where>
-            a.farm_id = #{farmId}
+            b.farm_id = #{farmId}
             and a.type = 16
             and b.type = 9
             and b.current_mating_count = 1
@@ -410,7 +421,7 @@
         SELECT count(1)
         FROM doctor_pig_events a left join doctor_pig_events b on a.pig_id = b.pig_id
         <where>
-            a.farm_id = #{farmId}
+            b.farm_id = #{farmId}
             and a.type = 16
             and b.type = 6
             AND b.change_type_id in (110,111)
@@ -501,7 +512,7 @@
     </select>
 
     <select id="earlyMating" parameterType="map" resultType="int">
-        select count(1)
+        select count(*)
         FROM doctor_pig_events
         <where>
             farm_id = #{farmId}

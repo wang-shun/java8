@@ -95,7 +95,7 @@ public class StockHandleController {
     public List<Map> getFarmData(@RequestParam Long id) {
         List<Map> maps = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getFarmData(id));
         maps.forEach( mp ->{
-            DoctorWarehouseMaterialApply materialApply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandle((Long) mp.get("material_handle_id")));
+            DoctorWarehouseMaterialApply materialApply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandleAndFarmId((Long) mp.get("material_handle_id"),(Long)mp.get("farm_id")));
             //判断猪群是否关闭
             if(materialApply.getPigGroupId()!=null&&materialApply.getApplyType()==1){
                 DoctorGroup doctorGroup = RespHelper.or500(doctorGroupReadService.findGroupById(materialApply.getPigGroupId()));
@@ -120,9 +120,8 @@ public class StockHandleController {
 
     //根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注
     @RequestMapping(method = RequestMethod.GET, value = "/getDataByMaterialName")
-    public List<Map> getDataByMaterialName(@RequestParam Long id,
-                                           @RequestParam String materialName) {
-        List<Map> maps = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getDataByMaterialName(id,materialName));
+    public List<Map> getDataByMaterialName(@RequestParam Long id) {
+        List<Map> maps = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getDataByMaterialName(id));
         return maps;
     }
 
@@ -130,44 +129,49 @@ public class StockHandleController {
     @RequestMapping(method = RequestMethod.GET, value = "/getRetreatingData")
     public List<Map> getRetreatingData(@RequestParam Long id) {
 
-        //得到领料出库的物料名称
-        List<Map> map= RespHelper.or500(doctorWarehouseMaterialHandleReadService.getMaterialNameByID(id));
         List<Map> maps=new ArrayList<Map>();
+        //根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注
+        List<Map> mp = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getDataByMaterialName(id));
+        //得到领用猪群，领用猪舍的名称
+        for(Map mpp :mp){
+            //得到可退数量
+            BigDecimal RefundableNumber = new BigDecimal(0);
+            //得到领料出库的数量
+            BigDecimal LibraryQuantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findLibraryById((Long) mpp.get("material_handle_id"),(String) mpp.get("material_name")));
+            //得到在此之前退料入库的数量和
+            BigDecimal RetreatingQuantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findRetreatingById((Long) mpp.get("material_handle_id"),(String) mpp.get("material_name"),id));
+            RefundableNumber = LibraryQuantity.subtract(RetreatingQuantity);
+            mpp.put("refundableQuantity",RefundableNumber.doubleValue());
 
-        for(Map mm:map){
-            String materialName = String.valueOf(mm.get("material_name"));
-            //根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注
-            List<Map> mp = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getDataByMaterialName(id, materialName));
-            for(Map mpp :mp){
-                DoctorWarehouseMaterialApply materialApply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandle((Long) mpp.get("material_handle_id")));
-                mpp.put("applyBarnId",materialApply.getPigBarnId());
-                mpp.put("applyGroupId",materialApply.getPigGroupId());
-                if(materialApply.getPigBarnName()==null)
-                    mpp.put("applyBarnName","--");
-                else
-                    mpp.put("applyBarnName",materialApply.getPigBarnName());
-                if(materialApply.getPigGroupName()==null)
-                    mpp.put("applyGroupName","--");
-                else
-                    mpp.put("applyGroupName",materialApply.getPigGroupName());
+            DoctorWarehouseMaterialApply materialApply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandleAndFarmId((Long) mpp.get("material_handle_id"),(Long)mpp.get("farm_id")));
+            mpp.put("applyBarnId",materialApply.getPigBarnId());
+            mpp.put("applyGroupId",materialApply.getPigGroupId());
+            if(materialApply.getPigBarnName()==null)
+                mpp.put("applyBarnName","--");
+            else
+                mpp.put("applyBarnName",materialApply.getPigBarnName());
+            if(materialApply.getPigGroupName()==null)
+                mpp.put("applyGroupName","--");
+            else
+                mpp.put("applyGroupName",materialApply.getPigGroupName());
 
-                //判断猪群是否关闭：如果领用到猪群,并且猪群已经关闭，则不能退料入库
-                if(materialApply.getPigGroupId()!=null&&materialApply.getApplyType()==1){
-                    DoctorGroup doctorGroup = RespHelper.or500(doctorGroupReadService.findGroupById(materialApply.getPigGroupId()));
-                    if(doctorGroup.getStatus()!=-1){
-                        maps.add(mpp);
-                    }
-                }
-                //母猪
-                if(materialApply.getPigGroupId()!=null&&materialApply.getApplyType()==2){
+            //判断猪群是否关闭：如果领用到猪群,并且猪群已经关闭，则不能退料入库
+            if(materialApply.getPigGroupId()!=null&&materialApply.getApplyType()==1){
+                DoctorGroup doctorGroup = RespHelper.or500(doctorGroupReadService.findGroupById(materialApply.getPigGroupId()));
+                if(doctorGroup.getStatus()!=-1){
                     maps.add(mpp);
                 }
-                //猪舍
-                if(materialApply.getPigGroupId()==null&&materialApply.getApplyType()==0){
-                    maps.add(mpp);
-                }
-            };
-        }
+            }
+            //母猪
+            if(materialApply.getPigGroupId()!=null&&materialApply.getApplyType()==2){
+                maps.add(mpp);
+            }
+            //猪舍
+            if(materialApply.getPigGroupId()==null&&materialApply.getApplyType()==0){
+                maps.add(mpp);
+            }
+        };
+
         return maps;
     }
 
@@ -256,13 +260,17 @@ public class StockHandleController {
                                 log.warn("sku not found,{}", mh.getMaterialId());
                             }
 
-                            //物料领用表
+                            //领料出库
                             if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.OUT.getValue())) {
-                                DoctorWarehouseMaterialApply apply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandle(mh.getId()));
+                                DoctorWarehouseMaterialApply apply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandleAndFarmId(mh.getId(),mh.getFarmId()));
                                 if (null != apply) {
                                     detail.setApplyPigBarnName(apply.getPigBarnName());
                                     detail.setApplyPigBarnId(apply.getPigBarnId());
-                                    detail.setApplyPigGroupName(apply.getPigGroupName());
+                                    if(apply.getPigGroupName()!=null){
+                                        detail.setApplyPigGroupName(apply.getPigGroupName());
+                                    }else{
+                                        detail.setApplyPigGroupName("--");
+                                    }
                                     detail.setApplyPigGroupId(apply.getPigGroupId());
                                     detail.setApplyStaffName(apply.getApplyStaffName());
                                     detail.setApplyStaffId(apply.getApplyStaffId());
@@ -277,15 +285,24 @@ public class StockHandleController {
                                         vo.setStatus(doctorGroup.getStatus());
                                     }
                                 }
+
+                                //得到该领料出库的退料入库的数量
+                                Integer count = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findCountByRelMaterialHandleId(mh.getId(), mh.getFarmId()));
+                                detail.setRetreatingCount(count);
+
                             }
 
                             //退料入库-->可退数量
                             if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.RETURN.getValue())) {
-                                DoctorWarehouseMaterialApply apply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandle(mh.getRelMaterialHandleId()));
+                                DoctorWarehouseMaterialApply apply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandleAndFarmId(mh.getRelMaterialHandleId(),mh.getFarmId()));
                                 if (null != apply) {
                                     detail.setApplyPigBarnName(apply.getPigBarnName());
                                     detail.setApplyPigBarnId(apply.getPigBarnId());
-                                    detail.setApplyPigGroupName(apply.getPigGroupName());
+                                    if(apply.getPigGroupName()!=null){
+                                        detail.setApplyPigGroupName(apply.getPigGroupName());
+                                    }else{
+                                        detail.setApplyPigGroupName("--");
+                                    }
                                     detail.setApplyPigGroupId(apply.getPigGroupId());
                                 } else {
                                     log.warn("material apply not found,by material handle {}", mh.getId());
@@ -391,6 +408,13 @@ public class StockHandleController {
            return true;*/
     }
 
+    //根据id判断是否有退料入库
+    @RequestMapping(method = RequestMethod.GET, value = "/findByRelMaterialHandleId")
+    public Response<Integer> findByRelMaterialHandleId(@RequestParam Long id,@RequestParam Long farmId) {
+        Response<Integer> count = doctorWarehouseMaterialHandleReadService.findCountByRelMaterialHandleId(id, farmId);
+        return count;
+    }
+
     //删除单据明细表
     @RequestMapping(method = RequestMethod.DELETE, value = "/deleteById/{id:\\d+}")
     public Response<String> deleteById(@PathVariable Long id,@RequestParam(required = false) Long orgId) {
@@ -471,10 +495,14 @@ public class StockHandleController {
                     //领料出库
                     if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.OUT.getValue())) {
                         //物料领用表
-                        DoctorWarehouseMaterialApply apply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandle(mh.getId()));
+                        DoctorWarehouseMaterialApply apply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandleAndFarmId(mh.getId(),mh.getFarmId()));
                         if (null != apply) {
                             vo.setApplyPigBarnName(apply.getPigBarnName());
-                            vo.setApplyPigGroupName(apply.getPigGroupName());
+                            if(apply.getPigGroupName()!=null){
+                                vo.setApplyPigGroupName(apply.getPigGroupName());
+                            }else{
+                                vo.setApplyPigGroupName("--");
+                            }
                             vo.setApplyStaffName(apply.getApplyStaffName());
                         } else
                             log.warn("material apply not found,by material handle {}", mh.getId());
@@ -497,10 +525,14 @@ public class StockHandleController {
 
                     //退料入库-->可退数量
                     if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.RETURN.getValue())) {
-                        DoctorWarehouseMaterialApply apply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandle(mh.getRelMaterialHandleId()));
+                        DoctorWarehouseMaterialApply apply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandleAndFarmId(mh.getRelMaterialHandleId(),mh.getFarmId()));
                         if (null != apply) {
                             vo.setApplyPigBarnName(apply.getPigBarnName());
-                            vo.setApplyPigGroupName(apply.getPigGroupName());
+                            if(apply.getPigGroupName()!=null){
+                                vo.setApplyPigGroupName(apply.getPigGroupName());
+                            }else{
+                                vo.setApplyPigGroupName("--");
+                            }
                         }
                         BigDecimal RefundableNumber = new BigDecimal(0);
                         //得到领料出库的数量

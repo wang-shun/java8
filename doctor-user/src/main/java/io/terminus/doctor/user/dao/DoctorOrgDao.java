@@ -97,7 +97,119 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
 
         if (StringUtils.isBlank(mobile))
             return null;
-
         return sqlSession.selectOne(sqlId("findByMobile"), mobile);
     }
+
+    /**
+     * 修改公司的名称 doctor_orgs表  (公司表)
+     * @param id
+     * @param name
+     * @return
+     */
+    public boolean updateName(Long id,String name){
+        return sqlSession.update(sqlId("updateName"),ImmutableMap.of("id",id,"name",name))==1;
+    }
+
+    /**
+     * 修改公司的名称 doctor_barns表  (猪舍表)
+     * @param id
+     * @param name
+     * @return
+     */
+    public boolean updateBarnName(Long id,String name){
+        return sqlSession.update(sqlId("updateBarnName"),ImmutableMap.of("id",id,"name",name))==1;
+    }
+
+
+    /**
+     * 修改公司的名称 doctor_farms表  (猪场表)
+     * @param id
+     * @param name
+     * @return
+     */
+    public boolean updateFarmsName(Long id,String name){
+        return sqlSession.update(sqlId("updateFarmsName"),ImmutableMap.of("id",id,"name",name))==1;
+    }
+
+    /**
+     * 修改公司的名称 doctor_group_events表  (猪群事件表)
+     * @param id
+     * @param name
+     * @return
+     */
+    public boolean updateGroupEventName(Long id,String name){
+        return sqlSession.update(sqlId("updateGroupEventName"),ImmutableMap.of("id",id,"name",name))==1;
+    }
+
+
+    /**
+     * 修改公司的名称 doctor_groups表  (猪群卡片表)
+     * @param id
+     * @param name
+     * @return
+     */
+    public boolean updateGroupName(Long id,String name){
+        return sqlSession.update(sqlId("updateGroupName"),ImmutableMap.of("id",id,"name",name))==1;
+    }
+
+
+
+    /**
+     * 修改公司的名称 doctor_pig_events表  (猪只事件表)
+     * @param id
+     * @param name
+     * @return
+     */
+    public boolean updatePigEventsName(Long id,String name){
+        return sqlSession.update(sqlId("updatePigEventsName"),ImmutableMap.of("id",id,"name",name))==1;
+    }
+
+
+
+    /**
+     * 修改公司的名称 doctor_pig_score_applys表  (猪场评分功能申请表)
+     * @param id
+     * @param name
+     * @return
+     */
+    public boolean updatePigScoreApplyName(Long id,String name){
+        return sqlSession.update(sqlId("updatePigScoreApplyName"),ImmutableMap.of("id",id,"name",name))==1;
+    }
+
+    /**
+     * 修改公司的名称 doctor_pigs表  (猪基础信息表)
+     * @param id
+     * @param name
+     * @return
+     */
+    public boolean updatePigName(Long id,String name){
+        return sqlSession.update(sqlId("updatePigName"),ImmutableMap.of("id",id,"name",name))==1;
+    }
+
+
+
+    /**
+     * 修改公司的名称 doctor_group_dailies表  (猪群相关报表表)
+     * @param id
+     * @param name
+     * @return
+     */
+    public boolean updateGroupDaileName(Long id,String name){
+        return sqlSession.update(sqlId("updateGroupDaileName"),ImmutableMap.of("id",id,"name",name))==1;
+    }
+
+    /**
+     * 修改公司的名称 doctor_pig_dailies表  (猪相关报表)
+     * @param id
+     * @param name
+     * @return
+     */
+    public boolean updatePigDailieName(Long id,String name){
+        return sqlSession.update(sqlId("updatePigDailieName"),ImmutableMap.of("id",id,"name",name))==1;
+    }
+
+    public DoctorOrg findName(Long id) {
+        return sqlSession.selectOne(sqlId("findName"), id);
+    }
+
 }

@@ -111,7 +111,6 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             throw new ServiceException("under.settlement");
 
         try {
-
             DoctorWarehouseOrgSettlement settlement = doctorWarehouseOrgSettlementDao.findByOrg(orgId);
             if (null != settlement) {
                 if (settlementDate.after(DateUtils.addMonths(settlement.getLastSettlementDate(), 1))) {

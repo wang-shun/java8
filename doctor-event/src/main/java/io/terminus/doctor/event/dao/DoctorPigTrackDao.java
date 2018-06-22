@@ -191,4 +191,13 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
     public Boolean flushCurrentParity(Long pigId, Integer parity) {
         return getSqlSession().update(sqlId("flushCurrentParity"), ImmutableMap.of("pigId", pigId, "parity", parity)) == 1;
     }
+
+    /**
+     * 通过猪场id查猪场存在的猪
+     * @param farmId
+     * @return
+     */
+    public List<Long> selectPigIds(Long farmId) {
+        return getSqlSession().selectList(sqlId("selectPigIds"),farmId);
+    }
 }

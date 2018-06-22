@@ -112,6 +112,7 @@ public abstract class AbstractJobProducer {
      * 产生消息
      */
     public void produce() {
+        //获取消息种类
         List<DoctorMessageRuleTemplate> ruleTemplates = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findByCategory(category.getKey()));
         for (int i = 0; ruleTemplates != null && i < ruleTemplates.size(); i++) {
             DoctorMessageRuleTemplate ruleTemplate = ruleTemplates.get(i);

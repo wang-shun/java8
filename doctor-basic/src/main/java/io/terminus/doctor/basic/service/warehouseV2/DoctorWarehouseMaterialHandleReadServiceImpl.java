@@ -58,6 +58,11 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     private DoctorWarehouseMaterialApplyDao doctorWarehouseMaterialApplyDao;
 
     @Override
+    public Response<BigDecimal> findWJSQuantity(BigInteger warehouseId,Integer warehouseType,Long materialId,Integer materialType,String materialName, Date settlementDate) {
+        return Response.ok(doctorWarehouseMaterialHandleDao.findWJSQuantity(warehouseId,warehouseType,materialId,materialType,materialName,settlementDate));
+    }
+
+    @Override
     public Response<BigDecimal> findLibraryById(Long id,String materialName) {
         return Response.ok(doctorWarehouseMaterialHandleDao.findLibraryById(id,materialName));
     }
@@ -430,23 +435,9 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     }
 
     @Override
-    public Response<List<Map>> getDataByMaterialName(Long stockHandleId, String materialName) {
-        List<Map> dataByMaterialName = doctorWarehouseMaterialHandleDao.getDataByMaterialName(stockHandleId, materialName);
-//        dataByMaterialName.forEach( map ->{
-//            DoctorWarehouseMaterialApply materialApply = doctorWarehouseMaterialApplyDao.findMaterialHandle((Long) map.get("material_handle_id"));
-//            map.put("applyBarnId",materialApply.getPigBarnId());
-//            map.put("applyGroupId",materialApply.getPigGroupId());
-//            if(materialApply.getPigBarnName()==null)
-//                map.put("applyBarnName","--");
-//            else
-//                map.put("applyBarnName",materialApply.getPigBarnName());
-//            if(materialApply.getPigGroupName()==null)
-//                map.put("applyGroupName","--");
-//            else
-//                map.put("applyGroupName",materialApply.getPigGroupName());
-//
-//        });
-        return Response.ok(dataByMaterialName);
+    public Response<List<Map>> getDataByMaterialName(Long id) {
+//        List<Map> dataByMaterialName = doctorWarehouseMaterialHandleDao.getDataByMaterialName(id);
+        return Response.ok(doctorWarehouseMaterialHandleDao.getDataByMaterialName(id));
     }
 
     private Map<String, Object> getMonth(Map<String, Object> criteria){
@@ -503,4 +494,9 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         return map;
     }
 
+    //根据id判断是否有退料入库
+    @Override
+    public Response<Integer> findCountByRelMaterialHandleId(Long id,Long farmId) {
+        return  Response.ok(doctorWarehouseMaterialHandleDao.findCountByRelMaterialHandleId(id,farmId));
+    }
 }
