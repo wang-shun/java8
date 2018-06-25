@@ -134,7 +134,7 @@ public class DoctorPigs {
     }
 
     /**
-     * Éú³ÉÎÑºÅ
+     * ç”Ÿæˆçªå·
      */
     @RequestMapping(value = "/generate/fostersCode", method = RequestMethod.GET)
     @ResponseBody
@@ -145,7 +145,7 @@ public class DoctorPigs {
     }
 
     /**
-     * pig id »ñÈ¡ pig track ĞÅÏ¢ÄÚÈİ
+     * pig id è·å– pig track ä¿¡æ¯å†…å®¹
      * @param pigId
      * @return
      */
@@ -174,7 +174,7 @@ public class DoctorPigs {
     }
 
     /**
-     * Ä¸ÖíÏêÇéµ¼³ö
+     * æ¯çŒªè¯¦æƒ…å¯¼å‡º
      * @param farmId
      * @param pigId
      * @param eventSize
@@ -184,39 +184,30 @@ public class DoctorPigs {
                                                @RequestParam("pigId") Long pigId,
                                                @RequestParam(value = "eventSize", required = false) Integer eventSize,
                                                HttpServletRequest request, HttpServletResponse response){
-        if(null==eventSize){
-            eventSize=0;
-        }
 
         List<Map>  maps= RespHelper.or500(doctorPigReadService.findSowPigDetailExpotr(farmId,pigId,eventSize));
 
-        //Ö»ÊÇÎªÁË»ñµÃÒ»¸ö×´Ì¬ÌìÊı£¬ÎØÎØÎØÎØ£¡£¡£¡£¡£¨Âé·³µÄÒªËÀ£©
-//        DoctorPigInfoDetailDto pigDetail= getPigDetail(farmId, pigId, eventSize);
-//        System.out.println(pigDetail+"aaaaaaaa");
-//        DoctorSowDetailDto doctorSowDetailDto = buildSowDetailDto(pigDetail);
-//
-//        System.out.println(doctorSowDetailDto.getStatusDay()+"AAAAAAAAA");
-        //¿ªÊ¼µ¼³ö
+        //å¼€å§‹å¯¼å‡º
         try {
-            //µ¼³öÃû³Æ
-            exporter.setHttpServletResponse(request,response,"Ä¸ÖíÏêÇéµ¼³ö");
+            //å¯¼å‡ºåç§°
+            exporter.setHttpServletResponse(request,response,"æ¯çŒªè¯¦æƒ…å¯¼å‡º");
             try (XSSFWorkbook workbook = new XSSFWorkbook()) {
-                //±í
+                //è¡¨
                 Sheet sheet = workbook.createSheet();
-                sheet.createRow(0).createCell(5).setCellValue("Ä¸ÖíÏêÇé");
+                sheet.createRow(0).createCell(5).setCellValue("æ¯çŒªè¯¦æƒ…");
 
                 Row title = sheet.createRow(1);
 
-                title.createCell(0).setCellValue("ÖíºÅ");
-                title.createCell(1).setCellValue("ÖíÖ»RFID");
-                title.createCell(2).setCellValue("Ä¸Öí×´Ì¬");
-                title.createCell(3).setCellValue("Ì¥´Î");
-                title.createCell(4).setCellValue("Æ·ÖÖ");
-                title.createCell(5).setCellValue("ÉáºÅ");
-                title.createCell(6).setCellValue("ÌåÖØ-kg");
-                title.createCell(7).setCellValue("½ø³¡ÈÕÆÚ");
-                title.createCell(8).setCellValue("³öÉúÈÕÆÚ");
-//                title.createCell(9).setCellValue("×´Ì¬ÌìÊı");
+                title.createCell(0).setCellValue("çŒªå·");
+                title.createCell(1).setCellValue("çŒªåªRFID");
+                title.createCell(2).setCellValue("æ¯çŒªçŠ¶æ€");
+                title.createCell(3).setCellValue("èƒæ¬¡");
+                title.createCell(4).setCellValue("å“ç§");
+                title.createCell(5).setCellValue("èˆå·");
+                title.createCell(6).setCellValue("ä½“é‡-kg");
+                title.createCell(7).setCellValue("è¿›åœºæ—¥æœŸ");
+                title.createCell(8).setCellValue("å‡ºç”Ÿæ—¥æœŸ");
+//                title.createCell(9).setCellValue("çŠ¶æ€å¤©æ•°");
 
                 Row row = sheet.createRow(2);
                 for (Map m : maps) {
@@ -270,7 +261,7 @@ public class DoctorPigs {
                     }
 
                 }
-                //×´Ì¬ÌìÊı
+                //çŠ¶æ€å¤©æ•°
 //                row.createCell(9).setCellValue(String.valueOf(doctorSowDetailDto.getStatusDay()));
 
                 workbook.write(response.getOutputStream());
@@ -353,8 +344,8 @@ public class DoctorPigs {
     }
 
     /**
-     * »ñÈ¡ÖíÖ»ÌáÊ¾µÄÏûÏ¢
-     * @param pigId Öíid
+     * è·å–çŒªåªæç¤ºçš„æ¶ˆæ¯
+     * @param pigId çŒªid
      * @return
      */
     @RequestMapping(value = "/notify/message", method = RequestMethod.GET)
@@ -386,13 +377,13 @@ public class DoctorPigs {
                     RuleValue ruleValue = ruleValues.get(0);
                     pigMessage.setMessageCategory(Category.SOW_BACK_FAT.getKey());
                     if (doctorMessage.getRuleValueId() == 4) {
-                        pigMessage.setMessageDescribe("¶ÏÄÌ");
+                        pigMessage.setMessageDescribe("æ–­å¥¶");
                     } else {
                         pigMessage.setMessageDescribe(String.valueOf(ruleValue.getValue().intValue()));
                     }
                 } else if (Objects.equals(doctorMessage.getCategory(), Category.SOW_BIRTHDATE.getKey())) {
                     pigMessage.setMessageCategory(Category.SOW_BIRTHDATE.getKey());
-                    pigMessage.setMessageDescribe("»³ÔĞÌìÊı");
+                    pigMessage.setMessageDescribe("æ€€å­•å¤©æ•°");
                     pigMessage.setTimeDiff(doctorMessage.getTimeDiff());
                 }
                 doctorPigMessageList.add(pigMessage);
@@ -404,10 +395,10 @@ public class DoctorPigs {
     }
 
     /**
-     * »ñÈ¡Ä¸ÖíÅäÖÖ´ÎÊıºÍµÚÒ»´ÎÅäÖÖÊ±¼ä
-     * @param farmId Öí³¡id
-     * @param pigId ÖíId
-     * @return Ä¸ÖíÅäÖÖ´ÎÊıºÍµÚÒ»´ÎÅäÖÖÊ±¼ä
+     * è·å–æ¯çŒªé…ç§æ¬¡æ•°å’Œç¬¬ä¸€æ¬¡é…ç§æ—¶é—´
+     * @param farmId çŒªåœºid
+     * @param pigId çŒªId
+     * @return æ¯çŒªé…ç§æ¬¡æ•°å’Œç¬¬ä¸€æ¬¡é…ç§æ—¶é—´
      */
     @RequestMapping(value = "/getMatingDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -454,8 +445,8 @@ public class DoctorPigs {
     }
 
     /**
-     * °ïÖúÇ°Ì¨ÅĞ¶Ï²ÎÊıÖĞµÄÖíÈºÊÇ·ñ¶¼ÊÇºó±¸Èº
-     * @param groupIds ÖíÈºid
+     * å¸®åŠ©å‰å°åˆ¤æ–­å‚æ•°ä¸­çš„çŒªç¾¤æ˜¯å¦éƒ½æ˜¯åå¤‡ç¾¤
+     * @param groupIds çŒªç¾¤id
      * @return
      */
     @RequestMapping(value = "/checkGroupReserve", method = RequestMethod.POST)
@@ -477,10 +468,10 @@ public class DoctorPigs {
     }
 
     /**
-     * ¸ù¾İÖíid²éÑ¯µ±Ç°ÖíÉá
+     * æ ¹æ®çŒªidæŸ¥è¯¢å½“å‰çŒªèˆ
      *
-     * @param pigId Öíid
-     * @return ÖíÉá
+     * @param pigId çŒªid
+     * @return çŒªèˆ
      */
     @RequestMapping(value = "/currentBarn", method = RequestMethod.GET)
     @ResponseBody
@@ -493,7 +484,7 @@ public class DoctorPigs {
     }
 
     /**
-     * ĞŞ¸ÄÖíµÄ¶úºÅ
+     * ä¿®æ”¹çŒªçš„è€³å·
      */
     @RequestMapping(value = "/updateCodes", method = RequestMethod.GET)
     @ResponseBody
