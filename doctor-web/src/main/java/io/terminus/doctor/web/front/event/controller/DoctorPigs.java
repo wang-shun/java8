@@ -184,6 +184,9 @@ public class DoctorPigs {
                                                @RequestParam("pigId") Long pigId,
                                                @RequestParam(value = "eventSize", required = false) Integer eventSize,
                                                HttpServletRequest request, HttpServletResponse response){
+        if(null==eventSize){
+            eventSize=0;
+        }
 
         List<Map>  maps= RespHelper.or500(doctorPigReadService.findSowPigDetailExpotr(farmId,pigId,eventSize));
 

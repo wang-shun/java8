@@ -339,12 +339,14 @@ public class DoctorGroupEvents {
             row.createCell(6).setCellValue(String.valueOf(format));
 
             //枚举类型
-            String b=String.valueOf(groupDetail.getGroup().getStatus());
-            if(b.equals(DoctorGroup.Status.CREATED.getValue())){
+            Integer b=(groupDetail.getGroup().getStatus());
+            if(b==DoctorGroup.Status.CREATED.getValue()){
                 row.createCell(7).setCellValue(DoctorGroup.Status.CREATED.getDesc());
+
             }
-            if(b.equals(DoctorGroup.Status.CLOSED.getValue())){
+            if(b==DoctorGroup.Status.CLOSED.getValue()){
                 row.createCell(7).setCellValue(DoctorGroup.Status.CLOSED.getDesc());
+
             }
 
             row.createCell(8).setCellValue(String.valueOf(groupDetail.getGroup().getStaffName()));
