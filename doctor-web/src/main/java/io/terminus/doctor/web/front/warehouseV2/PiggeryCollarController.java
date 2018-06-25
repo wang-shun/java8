@@ -163,7 +163,7 @@ public class PiggeryCollarController {
         List<Map> maps = RespHelper.or500(doctorWarehouseMaterialApplyReadService.piggeryReport(orgId,date,materialApply));
 
         //开始导出
-        try {
+            try {
             //导出名称
             exporter.setHttpServletResponse(request, response, "猪舍统计报表");
 

@@ -45,6 +45,12 @@ public interface DoctorPigReadService {
     RespWithEx<DoctorPigInfoDetailDto> queryPigDetailInfoByPigId(@NotNull(message = "farmId.not.null") Long farmId, @NotNull(message = "input.pigId.empty") Long pigId, Integer eventSize);
 
     /**
+     * 母猪详情导出
+     * @return
+     */
+    Response<List<Map>> findSowPigDetailExpotr(Long farmId, Long pigId, Integer eventSize);
+
+    /**
      * 通过pigId 查询pig
      * @param pigId
      * @return

@@ -38,6 +38,7 @@ import io.terminus.doctor.event.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
+import io.terminus.doctor.web.core.export.Exporter;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.dto.DoctorBoarDetailDto;
 import io.terminus.doctor.web.front.event.dto.DoctorFosterDetail;
@@ -46,6 +47,9 @@ import io.terminus.doctor.web.front.event.dto.DoctorSowDetailDto;
 import io.terminus.doctor.web.util.TransFromUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +60,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +89,7 @@ public class DoctorPigs {
     private final TransFromUtil transFromUtil;
     private final DoctorFarmAuthCenter doctorFarmAuthCenter;
 
+
     @RpcConsumer
     private DoctorMessageReadService doctorMessageReadService;
     @RpcConsumer
@@ -91,6 +98,9 @@ public class DoctorPigs {
     private DoctorBarnReadService doctorBarnReadService;
     @RpcConsumer
     private DoctorPigEventReadService doctorPigEventReadService;
+
+    @Autowired
+    private Exporter exporter;
 
     @Autowired
     public DoctorPigs(DoctorPigReadService doctorPigReadService,
@@ -124,7 +134,7 @@ public class DoctorPigs {
     }
 
     /**
-     * ç”Ÿæˆçªå·
+     * Éú³ÉÎÑºÅ
      */
     @RequestMapping(value = "/generate/fostersCode", method = RequestMethod.GET)
     @ResponseBody
@@ -135,7 +145,7 @@ public class DoctorPigs {
     }
 
     /**
-     * pig id è·å– pig track ä¿¡æ¯å†…å®¹
+     * pig id »ñÈ¡ pig track ĞÅÏ¢ÄÚÈİ
      * @param pigId
      * @return
      */
@@ -161,6 +171,115 @@ public class DoctorPigs {
                                                        @RequestParam("pigId") Long pigId,
                                                        @RequestParam(value = "eventSize", required = false) Integer eventSize){
             return buildSowDetailDto(getPigDetail(farmId, pigId, eventSize));
+    }
+
+    /**
+     * Ä¸ÖíÏêÇéµ¼³ö
+     * @param farmId
+     * @param pigId
+     * @param eventSize
+     */
+    @RequestMapping(value = "/getSowPigDetail/export", method = RequestMethod.GET)
+    public void querySowPigDetailInfoDtoExpotr(@RequestParam("farmId") Long farmId,
+                                               @RequestParam("pigId") Long pigId,
+                                               @RequestParam(value = "eventSize", required = false) Integer eventSize,
+                                               HttpServletRequest request, HttpServletResponse response){
+        if(null==eventSize){
+            eventSize=0;
+        }
+
+        List<Map>  maps= RespHelper.or500(doctorPigReadService.findSowPigDetailExpotr(farmId,pigId,eventSize));
+
+        //Ö»ÊÇÎªÁË»ñµÃÒ»¸ö×´Ì¬ÌìÊı£¬ÎØÎØÎØÎØ£¡£¡£¡£¡£¨Âé·³µÄÒªËÀ£©
+//        DoctorPigInfoDetailDto pigDetail= getPigDetail(farmId, pigId, eventSize);
+//        System.out.println(pigDetail+"aaaaaaaa");
+//        DoctorSowDetailDto doctorSowDetailDto = buildSowDetailDto(pigDetail);
+//
+//        System.out.println(doctorSowDetailDto.getStatusDay()+"AAAAAAAAA");
+        //¿ªÊ¼µ¼³ö
+        try {
+            //µ¼³öÃû³Æ
+            exporter.setHttpServletResponse(request,response,"Ä¸ÖíÏêÇéµ¼³ö");
+            try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+                //±í
+                Sheet sheet = workbook.createSheet();
+                sheet.createRow(0).createCell(5).setCellValue("Ä¸ÖíÏêÇé");
+
+                Row title = sheet.createRow(1);
+
+                title.createCell(0).setCellValue("ÖíºÅ");
+                title.createCell(1).setCellValue("ÖíÖ»RFID");
+                title.createCell(2).setCellValue("Ä¸Öí×´Ì¬");
+                title.createCell(3).setCellValue("Ì¥´Î");
+                title.createCell(4).setCellValue("Æ·ÖÖ");
+                title.createCell(5).setCellValue("ÉáºÅ");
+                title.createCell(6).setCellValue("ÌåÖØ-kg");
+                title.createCell(7).setCellValue("½ø³¡ÈÕÆÚ");
+                title.createCell(8).setCellValue("³öÉúÈÕÆÚ");
+//                title.createCell(9).setCellValue("×´Ì¬ÌìÊı");
+
+                Row row = sheet.createRow(2);
+                for (Map m : maps) {
+                    row.createCell(0).setCellValue(String.valueOf(m.get("pig_code")));
+                    row.createCell(1).setCellValue(String.valueOf(m.get("rfid")));
+
+                    String a = String.valueOf(m.get("status"));
+                    if (a.equals(String.valueOf(PigStatus.Entry.getKey()))) {
+                        row.createCell(2).setCellValue(String.valueOf(PigStatus.Entry.getName()));
+                    }
+                    if (a.equals(String.valueOf(PigStatus.Removal.getKey()))) {
+                        row.createCell(2).setCellValue(String.valueOf(PigStatus.Removal.getName()));
+                    }
+                    if (a.equals(String.valueOf(PigStatus.Mate.getKey()))) {
+                        row.createCell(2).setCellValue(String.valueOf(PigStatus.Mate.getName()));
+                    }
+                    if (a.equals(String.valueOf(PigStatus.Pregnancy.getKey()))) {
+                        row.createCell(2).setCellValue(String.valueOf(PigStatus.Pregnancy.getName()));
+                    }
+                    if (a.equals(String.valueOf(PigStatus.KongHuai.getKey()))) {
+                        row.createCell(2).setCellValue(String.valueOf(PigStatus.KongHuai.getName()));
+                    }
+                    if (a.equals(String.valueOf(PigStatus.Farrow.getKey()))) {
+                        row.createCell(2).setCellValue(String.valueOf(PigStatus.Farrow.getName()));
+                    }
+                    if (a.equals(String.valueOf(PigStatus.FEED.getKey()))) {
+                        row.createCell(2).setCellValue(String.valueOf(PigStatus.FEED.getName()));
+                    }
+                    if (a.equals(String.valueOf(PigStatus.Wean.getKey()))) {
+                        row.createCell(2).setCellValue(String.valueOf(PigStatus.Wean.getName()));
+                    }
+                    if (a.equals(String.valueOf(PigStatus.CHG_FARM.getKey()))) {
+                        row.createCell(2).setCellValue(String.valueOf(PigStatus.CHG_FARM.getName()));
+                    }
+                    row.createCell(3).setCellValue(String.valueOf(m.get("current_parity")));
+                    row.createCell(4).setCellValue(String.valueOf(m.get("breed_name")));
+                    row.createCell(5).setCellValue(String.valueOf(m.get("init_barn_name")));
+                    String b=String.valueOf(m.get("weight"));
+                    if (null==b){
+                        row.createCell(6).setCellValue(String.valueOf(""));
+                    }
+                    String c=String.valueOf(m.get("in_farm_date"));
+                    if(null !=c){
+                        String[] split=c.split(" ");
+                        row.createCell(7).setCellValue(String.valueOf(split[0]));
+                    }
+                    String d=String.valueOf(m.get("birth_date"));
+                    if(null !=d){
+                        String[] split=d.split(" ");
+                        row.createCell(8).setCellValue(String.valueOf(split[0]));
+                    }
+
+                }
+                //×´Ì¬ÌìÊı
+//                row.createCell(9).setCellValue(String.valueOf(doctorSowDetailDto.getStatusDay()));
+
+                workbook.write(response.getOutputStream());
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     @RequestMapping(value = "/getBoarPigDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -234,8 +353,8 @@ public class DoctorPigs {
     }
 
     /**
-     * è·å–çŒªåªæç¤ºçš„æ¶ˆæ¯
-     * @param pigId çŒªid
+     * »ñÈ¡ÖíÖ»ÌáÊ¾µÄÏûÏ¢
+     * @param pigId Öíid
      * @return
      */
     @RequestMapping(value = "/notify/message", method = RequestMethod.GET)
@@ -267,13 +386,13 @@ public class DoctorPigs {
                     RuleValue ruleValue = ruleValues.get(0);
                     pigMessage.setMessageCategory(Category.SOW_BACK_FAT.getKey());
                     if (doctorMessage.getRuleValueId() == 4) {
-                        pigMessage.setMessageDescribe("æ–­å¥¶");
+                        pigMessage.setMessageDescribe("¶ÏÄÌ");
                     } else {
                         pigMessage.setMessageDescribe(String.valueOf(ruleValue.getValue().intValue()));
                     }
                 } else if (Objects.equals(doctorMessage.getCategory(), Category.SOW_BIRTHDATE.getKey())) {
                     pigMessage.setMessageCategory(Category.SOW_BIRTHDATE.getKey());
-                    pigMessage.setMessageDescribe("æ€€å­•å¤©æ•°");
+                    pigMessage.setMessageDescribe("»³ÔĞÌìÊı");
                     pigMessage.setTimeDiff(doctorMessage.getTimeDiff());
                 }
                 doctorPigMessageList.add(pigMessage);
@@ -285,10 +404,10 @@ public class DoctorPigs {
     }
 
     /**
-     * è·å–æ¯çŒªé…ç§æ¬¡æ•°å’Œç¬¬ä¸€æ¬¡é…ç§æ—¶é—´
-     * @param farmId çŒªåœºid
-     * @param pigId çŒªId
-     * @return æ¯çŒªé…ç§æ¬¡æ•°å’Œç¬¬ä¸€æ¬¡é…ç§æ—¶é—´
+     * »ñÈ¡Ä¸ÖíÅäÖÖ´ÎÊıºÍµÚÒ»´ÎÅäÖÖÊ±¼ä
+     * @param farmId Öí³¡id
+     * @param pigId ÖíId
+     * @return Ä¸ÖíÅäÖÖ´ÎÊıºÍµÚÒ»´ÎÅäÖÖÊ±¼ä
      */
     @RequestMapping(value = "/getMatingDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
@@ -335,8 +454,8 @@ public class DoctorPigs {
     }
 
     /**
-     * å¸®åŠ©å‰å°åˆ¤æ–­å‚æ•°ä¸­çš„çŒªç¾¤æ˜¯å¦éƒ½æ˜¯åå¤‡ç¾¤
-     * @param groupIds çŒªç¾¤id
+     * °ïÖúÇ°Ì¨ÅĞ¶Ï²ÎÊıÖĞµÄÖíÈºÊÇ·ñ¶¼ÊÇºó±¸Èº
+     * @param groupIds ÖíÈºid
      * @return
      */
     @RequestMapping(value = "/checkGroupReserve", method = RequestMethod.POST)
@@ -358,10 +477,10 @@ public class DoctorPigs {
     }
 
     /**
-     * æ ¹æ®çŒªidæŸ¥è¯¢å½“å‰çŒªèˆ
+     * ¸ù¾İÖíid²éÑ¯µ±Ç°ÖíÉá
      *
-     * @param pigId çŒªid
-     * @return çŒªèˆ
+     * @param pigId Öíid
+     * @return ÖíÉá
      */
     @RequestMapping(value = "/currentBarn", method = RequestMethod.GET)
     @ResponseBody
@@ -374,7 +493,7 @@ public class DoctorPigs {
     }
 
     /**
-     * ä¿®æ”¹çŒªçš„è€³å·
+     * ĞŞ¸ÄÖíµÄ¶úºÅ
      */
     @RequestMapping(value = "/updateCodes", method = RequestMethod.GET)
     @ResponseBody
