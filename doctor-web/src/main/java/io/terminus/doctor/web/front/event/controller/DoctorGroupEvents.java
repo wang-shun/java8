@@ -102,11 +102,11 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * Ğ£ÑéÖíÈººÅÊÇ·ñÖØ¸´
+     * æ ¡éªŒçŒªç¾¤å·æ˜¯å¦é‡å¤
      *
-     * @param farmId    Öí³¡id
-     * @param groupCode ÖíÈººÅ
-     * @return true ÖØ¸´, false ²»ÖØ¸´
+     * @param farmId    çŒªåœºid
+     * @param groupCode çŒªç¾¤å·
+     * @return true é‡å¤, false ä¸é‡å¤
      */
     @RequestMapping(value = "/check/groupCode", method = RequestMethod.GET)
     public Boolean checkGroupRepeat(@RequestParam("farmId") Long farmId,
@@ -115,9 +115,9 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * ĞÂ½¨ÖíÈº
+     * æ–°å»ºçŒªç¾¤
      *
-     * @return ÖíÈºid
+     * @return çŒªç¾¤id
      */
     @RequestMapping(value = "/new", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Long createNewGroup(@RequestBody DoctorNewGroupInput newGroupDto) {
@@ -125,9 +125,9 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * ÅúÁ¿ĞÂ½¨ÖíÈº
+     * æ‰¹é‡æ–°å»ºçŒªç¾¤
      *
-     * @param batchNewGroupEventDto ÅúÁ¿ĞÂ½¨ĞÅÏ¢
+     * @param batchNewGroupEventDto æ‰¹é‡æ–°å»ºä¿¡æ¯
      * @return
      */
     @RequestMapping(value = "/batchNew", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -136,12 +136,12 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * Â¼ÈëÖíÈºÊÂ¼ş
+     * å½•å…¥çŒªç¾¤äº‹ä»¶
      *
-     * @param groupId   ÖíÈºid
-     * @param eventType ÊÂ¼şÀàĞÍ
-     * @param data      Èë²Î
-     * @return ÊÇ·ñ³É¹¦
+     * @param groupId   çŒªç¾¤id
+     * @param eventType äº‹ä»¶ç±»å‹
+     * @param data      å…¥å‚
+     * @return æ˜¯å¦æˆåŠŸ
      * @see io.terminus.doctor.event.enums.GroupEventType
      * @see io.terminus.doctor.event.dto.event.group.input.BaseGroupInput
      */
@@ -153,11 +153,11 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * ´´½¨ÖíÈº±à¼­ÇëÇó
-     * @param groupId ÖíÈºid
-     * @param eventType ÊÂ¼şÀàĞÍ
-     * @param eventId ÊÂ¼şid
-     * @param data ÊäÈëÊı¾İ
+     * åˆ›å»ºçŒªç¾¤ç¼–è¾‘è¯·æ±‚
+     * @param groupId çŒªç¾¤id
+     * @param eventType äº‹ä»¶ç±»å‹
+     * @param eventId äº‹ä»¶id
+     * @param data è¾“å…¥æ•°æ®
      * @return
      */
     @RequestMapping(value = "/createGroupModifyRequest", method = RequestMethod.POST)
@@ -169,10 +169,10 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * ÅúÁ¿ÖíÈºÊÂ¼ş
+     * æ‰¹é‡çŒªç¾¤äº‹ä»¶
      *
-     * @param batchGroupEventDto ÅúÁ¿ÊÂ¼şÊäÈë·â×°
-     * @return ÊÇ·ñ³É¹¦
+     * @param batchGroupEventDto æ‰¹é‡äº‹ä»¶è¾“å…¥å°è£…
+     * @return æ˜¯å¦æˆåŠŸ
      */
     @RequestMapping(value = "/batchOther", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean batchCreateGroupEvent(@RequestBody DoctorBatchGroupEventDto batchGroupEventDto) {
@@ -180,10 +180,10 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * ¸ù¾İÖíÈºid²éÑ¯¿ÉÒÔ²Ù×÷µÄÊÂ¼şÀàĞÍ
+     * æ ¹æ®çŒªç¾¤idæŸ¥è¯¢å¯ä»¥æ“ä½œçš„äº‹ä»¶ç±»å‹
      *
-     * @param groupIds ÖíÈºids
-     * @return ÊÂ¼şÀàĞÍs
+     * @param groupIds çŒªç¾¤ids
+     * @return äº‹ä»¶ç±»å‹s
      * @see io.terminus.doctor.event.enums.GroupEventType
      */
     @RequestMapping(value = "/types", method = RequestMethod.POST)
@@ -192,10 +192,10 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * Éú³ÉÖíÈººÅ ÖíÉáÃû(yyyy-MM-dd)
+     * ç”ŸæˆçŒªç¾¤å· çŒªèˆå(yyyy-MM-dd)
      *
-     * @param barnName ÖíÉáÃû³Æ
-     * @return ÖíÈººÅ
+     * @param barnName çŒªèˆåç§°
+     * @return çŒªç¾¤å·
      */
     @RequestMapping(value = "/code", method = RequestMethod.GET)
     public String generateGroupCode(@RequestParam(value = "barnName", required = false) String barnName) {
@@ -203,10 +203,10 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * ¸ù¾İidÉú³ÉÖíÈººÅ(Ö÷ÒªÓÃÓÚ·ÖÃäÉá: Èç¹ûµ±Ç°ÖíÉá´æÔÚÖíÈºÖ±½Ó·µ»Ø´ËÖíÈººÅ, Èç¹û²»´æÔÚ, ĞÂÉú³ÉÖíÈººÅ
+     * æ ¹æ®idç”ŸæˆçŒªç¾¤å·(ä¸»è¦ç”¨äºåˆ†å¨©èˆ: å¦‚æœå½“å‰çŒªèˆå­˜åœ¨çŒªç¾¤ç›´æ¥è¿”å›æ­¤çŒªç¾¤å·, å¦‚æœä¸å­˜åœ¨, æ–°ç”ŸæˆçŒªç¾¤å·
      *
-     * @param pigId Öíid
-     * @return ÖíÈººÅ
+     * @param pigId çŒªid
+     * @return çŒªç¾¤å·
      */
     @RequestMapping(value = "/pigCode", method = RequestMethod.GET)
     public String generateGroupCodeByPigId(@RequestParam(value = "pigId", required = false) Long pigId, @RequestParam String eventAt) {
@@ -222,8 +222,8 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * ÖíËùÔÚÖíÉáÊÇ·ñÓĞÖíÈº
-     * @param pigId Öíid
+     * çŒªæ‰€åœ¨çŒªèˆæ˜¯å¦æœ‰çŒªç¾¤
+     * @param pigId çŒªid
      * @return
      */
     @RequestMapping(value = "/has/group/{pigId}", method = RequestMethod.GET)
@@ -237,18 +237,18 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * ²éÑ¯ÖíÈºÏêÇé
+     * æŸ¥è¯¢çŒªç¾¤è¯¦æƒ…
      *
-     * @param groupId   ÖíÈºid
-     * @param eventSize ÊÂ¼ş´óĞ¡
-     * @return ÖíÈºÏêÇé
+     * @param groupId   çŒªç¾¤id
+     * @param eventSize äº‹ä»¶å¤§å°
+     * @return çŒªç¾¤è¯¦æƒ…
      */
     @RequestMapping(value = "/detail", method = RequestMethod.GET)
     public DoctorGroupDetailEventsDto findGroupDetailByGroupId(@RequestParam("groupId") Long groupId,
                                                                @RequestParam(value = "eventSize", required = false) Integer eventSize) {
         DoctorGroupDetail groupDetail = RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId));
 
-        //²éÑ¯ÖíÈºµÄÊÂ¼ş, Ä¬ÈÏ3Ìõ
+        //æŸ¥è¯¢çŒªç¾¤çš„äº‹ä»¶, é»˜è®¤3æ¡
         List<DoctorGroupEvent> groupEvents = RespHelper.or500(doctorGroupReadService.pagingGroupEventDelWean(
                 groupDetail.getGroup().getFarmId(), groupId, null, null, MoreObjects.firstNonNull(eventSize, 3), null, null)).getData();
 
@@ -262,7 +262,7 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * ÖíÈºÏêÇéµ¼³ö
+     * çŒªç¾¤è¯¦æƒ…å¯¼å‡º
      * @param groupId
      * @param eventSize
      */
@@ -271,7 +271,7 @@ public class DoctorGroupEvents {
                                                @RequestParam(value = "eventSize", required = false) Integer eventSize,
                                                HttpServletRequest request, HttpServletResponse res){
         DoctorGroupDetail groupDetail = RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId));
-        //¼ÆËãÆ½¾ùÌåÖØ
+        //è®¡ç®—å¹³å‡ä½“é‡
         Response<DoctorGroupEvent> response = doctorGroupReadService.findLastGroupEventByType(groupId, GroupEventType.LIVE_STOCK.getValue());
         Double avgWeight = 0.0;
         if (response.isSuccess() && response.getResult() != null) {
@@ -279,32 +279,32 @@ public class DoctorGroupEvents {
         }
 
 
-        //¿ªÊ¼µ¼³ö
+        //å¼€å§‹å¯¼å‡º
         try {
-            //µ¼³öÃû³Æ
-            exporter.setHttpServletResponse(request,res,"ÖíÈºÏêÇé");
+            //å¯¼å‡ºåç§°
+            exporter.setHttpServletResponse(request,res,"çŒªç¾¤è¯¦æƒ…");
             XSSFWorkbook workbook = new XSSFWorkbook();
-            //±í
+            //è¡¨
             Sheet sheet = workbook.createSheet();
-            sheet.createRow(0).createCell(5).setCellValue("ÖíÈºÏêÇé");
+            sheet.createRow(0).createCell(5).setCellValue("çŒªç¾¤è¯¦æƒ…");
 
             Row title = sheet.createRow(1);
 //            int pos = 2;
 
-            title.createCell(0).setCellValue("ÖíÈººÅ");
-            title.createCell(1).setCellValue("ÖíÈºÖÖÀà");
-            title.createCell(2).setCellValue("Öí³¡");
-            title.createCell(3).setCellValue("ÖíÖ»Êı");
-            title.createCell(4).setCellValue("Æ½¾ùÈÕÁä");
-            title.createCell(5).setCellValue("Æ½¾ùÌåÖØ");
-            title.createCell(6).setCellValue("½¨ÈºÈÕÆÚ");
-            title.createCell(7).setCellValue("×´Ì¬");
-            title.createCell(8).setCellValue("ËÇÑøÔ±");
+            title.createCell(0).setCellValue("çŒªç¾¤å·");
+            title.createCell(1).setCellValue("çŒªç¾¤ç§ç±»");
+            title.createCell(2).setCellValue("çŒªåœº");
+            title.createCell(3).setCellValue("çŒªåªæ•°");
+            title.createCell(4).setCellValue("å¹³å‡æ—¥é¾„");
+            title.createCell(5).setCellValue("å¹³å‡ä½“é‡");
+            title.createCell(6).setCellValue("å»ºç¾¤æ—¥æœŸ");
+            title.createCell(7).setCellValue("çŠ¶æ€");
+            title.createCell(8).setCellValue("é¥²å…»å‘˜");
 
             Row row = sheet.createRow(3);
             row.createCell(0).setCellValue(String.valueOf(groupDetail.getGroup().getGroupCode()));
 
-            //Ã¶¾ÙÀàĞÍ
+            //æšä¸¾ç±»å‹
             String a=String.valueOf(groupDetail.getGroup().getPigType());
             if(a.equals(String.valueOf(PigType.NURSERY_PIGLET.getValue()))){
                 row.createCell(1).setCellValue(String.valueOf(PigType.NURSERY_PIGLET.getDesc()));
@@ -331,14 +331,14 @@ public class DoctorGroupEvents {
             row.createCell(2).setCellValue(String.valueOf(groupDetail.getGroup().getFarmName()));
             row.createCell(3).setCellValue(String.valueOf(groupDetail.getGroupTrack().getQuantity()));
             row.createCell(4).setCellValue(String.valueOf(groupDetail.getGroupTrack().getAvgDayAge()));
-            row.createCell(5).setCellValue(String.valueOf(avgWeight+" ¹«½ï"));
+            row.createCell(5).setCellValue(String.valueOf(avgWeight+" å…¬æ–¤"));
 
-            //dateÀàĞÍµÄ×ªyyyyÄêMMÔÂddÈÕ¸ñÊ½
-            SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd-");
+            //dateç±»å‹çš„è½¬yyyyå¹´MMæœˆddæ—¥æ ¼å¼
+            SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
             String format = sdf.format(groupDetail.getGroup().getOpenAt());
             row.createCell(6).setCellValue(String.valueOf(format));
 
-            //Ã¶¾ÙÀàĞÍ
+            //æšä¸¾ç±»å‹
             String b=String.valueOf(groupDetail.getGroup().getStatus());
             if(b.equals(DoctorGroup.Status.CREATED.getValue())){
                 row.createCell(7).setCellValue(DoctorGroup.Status.CREATED.getDesc());
@@ -358,14 +358,14 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * ·ÖÒ³²éÑ¯ÖíÈºÀúÊ·ÊÂ¼ş
+     * åˆ†é¡µæŸ¥è¯¢çŒªç¾¤å†å²äº‹ä»¶
      *
-     * @param farmId  Öí³¡id
-     * @param groupId ÖíÈºid
-     * @param type    ÊÂ¼şÀàĞÍ
-     * @param pageNo  ·ÖÒ³´óĞ¡
-     * @param size    µ±Ç°Ò³Âë
-     * @return ·ÖÒ³½á¹û
+     * @param farmId  çŒªåœºid
+     * @param groupId çŒªç¾¤id
+     * @param type    äº‹ä»¶ç±»å‹
+     * @param pageNo  åˆ†é¡µå¤§å°
+     * @param size    å½“å‰é¡µç 
+     * @return åˆ†é¡µç»“æœ
      */
     @RequestMapping(value = "/paging", method = RequestMethod.GET)
     public Paging<DoctorGroupEvent> pagingGroupEvent(@RequestParam("farmId") Long farmId,
@@ -393,10 +393,10 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * ²éÑ¯ÖíÈºÊÂ¼şÏêÇé
+     * æŸ¥è¯¢çŒªç¾¤äº‹ä»¶è¯¦æƒ…
      *
-     * @param eventId ÊÂ¼şid
-     * @return ÖíÈºÊÂ¼ş
+     * @param eventId äº‹ä»¶id
+     * @return çŒªç¾¤äº‹ä»¶
      */
     @RequestMapping(value = "/event", method = RequestMethod.GET)
     public DoctorGroupEvent findGroupEventById(@RequestParam("eventId") Long eventId) {
@@ -404,10 +404,10 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * ²éÑ¯ÒÑ½¨ÈºµÄÖíÈº
+     * æŸ¥è¯¢å·²å»ºç¾¤çš„çŒªç¾¤
      *
-     * @param farmId Öí³¡id
-     * @return ÖíÈº
+     * @param farmId çŒªåœºid
+     * @return çŒªç¾¤
      */
     @RequestMapping(value = "/open", method = RequestMethod.GET)
     public List<DoctorGroup> findOpenGroupsByFarmId(@RequestParam("farmId") Long farmId) {
@@ -417,10 +417,10 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * ¸ù¾İÖíÉáid²éÑ¯ÒÑ½¨ÈºµÄÖíÈº
+     * æ ¹æ®çŒªèˆidæŸ¥è¯¢å·²å»ºç¾¤çš„çŒªç¾¤
      *
-     * @param barnId ÖíÉáid
-     * @return ÖíÈº
+     * @param barnId çŒªèˆid
+     * @return çŒªç¾¤
      */
     @RequestMapping(value = "/open/barn", method = RequestMethod.GET)
     public List<DoctorGroup> findOpenGroupsByBarnId(@RequestParam(value = "barnId", required = false) Long barnId) {
@@ -433,25 +433,25 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * »Ø¹öÖíÈºÊÂ¼ş
+     * å›æ»šçŒªç¾¤äº‹ä»¶
      *
-     * @param eventId »Ø¹öÊÂ¼şµÄid
-     * @return ÖíÈº¾µÏñ
+     * @param eventId å›æ»šäº‹ä»¶çš„id
+     * @return çŒªç¾¤é•œåƒ
      */
     @RequestMapping(value = "/rollback", method = RequestMethod.GET)
     public Boolean rollbackGroupEvent(@RequestParam("eventId") Long eventId) {
         DoctorGroupEvent event = RespHelper.or500(doctorGroupReadService.findGroupEventById(eventId));
 
-        //È¨ÏŞÖĞĞÄĞ£ÑéÈ¨ÏŞ
+        //æƒé™ä¸­å¿ƒæ ¡éªŒæƒé™
         doctorFarmAuthCenter.checkFarmAuth(event.getFarmId());
         return RespHelper.or500(doctorGroupWriteService.rollbackGroupEvent(event, UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
     }
 
     /**
-     * ²éÑ¯¿ÉÒÔ×ªÈëµÄÆ·ÖÖ
+     * æŸ¥è¯¢å¯ä»¥è½¬å…¥çš„å“ç§
      *
-     * @param groupId ÖíÈºid
-     * @return ¿É×ªÈëÆ·ÖÖ
+     * @param groupId çŒªç¾¤id
+     * @return å¯è½¬å…¥å“ç§
      */
     @RequestMapping(value = "/breeds", method = RequestMethod.GET)
     public List<DoctorBasic> findCanBreed(@RequestParam("groupId") Long groupId) {
@@ -466,11 +466,11 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * ¸ù¾İÖí³¡idºÍÖíÈººÅ²éÑ¯ÖíÈº
+     * æ ¹æ®çŒªåœºidå’ŒçŒªç¾¤å·æŸ¥è¯¢çŒªç¾¤
      *
-     * @param farmId    Öí³¡id
-     * @param groupCode ÖíÈººÅ
-     * @return ÖíÈº
+     * @param farmId    çŒªåœºid
+     * @param groupCode çŒªç¾¤å·
+     * @return çŒªç¾¤
      */
     @RequestMapping(value = "/farmGroupCode", method = RequestMethod.GET)
     public DoctorGroup findGroupByFarmIdAndGroupCode(@RequestParam("farmId") Long farmId,
@@ -479,7 +479,7 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * »ñÈ¡ÖíÈºÊÂ¼şÀàĞÍÁĞ±í
+     * è·å–çŒªç¾¤äº‹ä»¶ç±»å‹åˆ—è¡¨
      *
      * @return
      * @see GroupEventType
@@ -491,7 +491,7 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * ·ÖÒ³²éÑ¯Ä³Ò»ÀàĞÍµÄÖíÈºÊÂ¼ş
+     * åˆ†é¡µæŸ¥è¯¢æŸä¸€ç±»å‹çš„çŒªç¾¤äº‹ä»¶
      *
      * @param params
      * @param pageNo
@@ -516,10 +516,10 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * »ñÈ¡ÖíÈº³õÊ¼ÊÂ¼ş
+     * è·å–çŒªç¾¤åˆå§‹äº‹ä»¶
      *
-     * @param groupId ÖíÈºid
-     * @return ĞÂ½¨ÊÂ¼ş
+     * @param groupId çŒªç¾¤id
+     * @return æ–°å»ºäº‹ä»¶
      */
     @RequestMapping(value = "/find/newGroupEvent", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public DoctorGroupEvent findNewGroupEvent(@RequestParam Long groupId) {
@@ -527,7 +527,7 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * ÖíÈº×ªÈºÊÂ¼şµÄextraÖĞÌí¼Ógroupid(ÔİÊ±)
+     * çŒªç¾¤è½¬ç¾¤äº‹ä»¶çš„extraä¸­æ·»åŠ groupid(æš‚æ—¶)
      *
      * @return
      */
@@ -562,7 +562,7 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * ¸ù¾İÖíÉáid²éÑ¯Öí³¡
+     * æ ¹æ®çŒªèˆidæŸ¥è¯¢çŒªåœº
      * @param farmId
      * @param barnId
      * @return
