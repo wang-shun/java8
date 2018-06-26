@@ -429,7 +429,8 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
                     mm.put("outAmount","--");
                 }
             }
-            Map<String, Object> all = this.countInfo(resultList, (Long) criteria.get("orgId"), date);
+            DoctorWareHouse warehouseId = doctorWareHouseDao.findById((Long) criteria.get("warehouseId"));
+            Map<String, Object> all = this.countInfo(resultList, (Long) criteria.get("orgId"), date,warehouseId.getId());
             resultList.add(all);
             return Response.ok(resultList);
         }catch (Exception e) {
@@ -482,7 +483,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         return criteria;
     }
 
-    private Map<String, Object> countInfo(List<Map> resultList,Long orgId,Date date){
+    private Map<String, Object> countInfo(List<Map> resultList,Long orgId,Date date,Long warehouseId){
         boolean b = doctorWarehouseSettlementService.isSettled(orgId, date);
         BigDecimal allLastQuantity = new BigDecimal(0);
         BigDecimal allLastAmount = new BigDecimal(0);
@@ -493,10 +494,13 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         BigDecimal allBalanceQuantity = new BigDecimal(0);
         BigDecimal allBalanceAmount = new BigDecimal(0);
         for(Map map : resultList){
-            allLastQuantity = allLastQuantity.add(new BigDecimal(map.get("lastQuantity").toString()));
-            allInQuantity = allInQuantity.add(new BigDecimal(map.get("inQuantity").toString()));
-            allOutQuantity = allOutQuantity.add(new BigDecimal(map.get("outQuantity").toString()));
-            allBalanceQuantity = allBalanceQuantity.add(new BigDecimal(map.get("balanceQuantity").toString()));
+            if(warehouseId==1||warehouseId==2){
+                allLastQuantity = allLastQuantity.add(new BigDecimal(map.get("lastQuantity").toString()));
+                allInQuantity = allInQuantity.add(new BigDecimal(map.get("inQuantity").toString()));
+                allOutQuantity = allOutQuantity.add(new BigDecimal(map.get("outQuantity").toString()));
+                allBalanceQuantity = allBalanceQuantity.add(new BigDecimal(map.get("balanceQuantity").toString()));
+            }
+
             if(b){
                 allLastAmount = allLastAmount.add(new BigDecimal(map.get("lastAmount").toString()));
                 allInAmount = allInAmount.add(new BigDecimal(map.get("inAmount").toString()));
@@ -505,10 +509,17 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
             }
         }
         HashMap<String, Object> map = Maps.newHashMap();
-        map.put("allLastQuantity",allLastQuantity);
-        map.put("allInQuantity",allInQuantity);
-        map.put("allOutQuantity",allOutQuantity);
-        map.put("allBalanceQuantity",allBalanceQuantity);
+        if(warehouseId==1||warehouseId==2) {
+            map.put("allLastQuantity", allLastQuantity);
+            map.put("allInQuantity", allInQuantity);
+            map.put("allOutQuantity", allOutQuantity);
+            map.put("allBalanceQuantity", allBalanceQuantity);
+        }else{
+            map.put("allLastQuantity", "--");
+            map.put("allInQuantity", "--");
+            map.put("allOutQuantity", "--");
+            map.put("allBalanceQuantity", "--");
+        }
 
         if(!b){
             map.put("allLastAmount","--");
