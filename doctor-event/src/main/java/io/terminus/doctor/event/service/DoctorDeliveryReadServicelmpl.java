@@ -32,7 +32,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             List<Map<String,Object>> deliveryBarn = doctorReportDeliverDao.deliveryBarn((BigInteger)map.get("pig_id"), (Date)map.get("event_at"));
             if(deliveryBarn.size() != 0){
                 map.put("deliveryBarn",(String)deliveryBarn.get(0).get("barn_name"));
-                map.put("deliveryDate",(Date)deliveryBarn.get(0).get("evenet_at"));
+                map.put("deliveryDate",(Date)deliveryBarn.get(0).get("event_at"));
             } else{
                 map.put("deliveryBarn","");
                 map.put("deliveryDate","");
