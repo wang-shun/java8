@@ -5,7 +5,11 @@ import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.model.DoctorReportDeliver;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigInteger;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc:
@@ -28,5 +32,19 @@ public class DoctorReportDeliverDao extends MyBatisDao<DoctorReportDeliver> {
 
     public DoctorReportDeliver sumBy(DoctorDimensionCriteria dimensionCriteria) {
         return getSqlSession().selectOne(sqlId("sumBy"), dimensionCriteria);
+    }
+    public List<Map<String,Object>> getMating(Long farmId , Date beginDate, Date endDate){
+        Map<String,Object> map = new HashMap<>();
+        map.put("farmId",farmId);
+        map.put("beginDate",beginDate);
+        map.put("endDate",endDate);
+        return getSqlSession().selectList(sqlId("deliveryReport"), map);
+    }
+    public List<Map<String,Object>> deliveryBarn(BigInteger pigId , Date eventAt,int parity){
+        Map<String,Object> map = new HashMap<>();
+        map.put("pigId",pigId);
+        map.put("eventAt",eventAt);
+        map.put("parity",parity);
+        return getSqlSession().selectList(sqlId("deliveryBarn"), map);
     }
 }
