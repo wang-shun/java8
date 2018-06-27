@@ -40,11 +40,10 @@ public class DoctorReportDeliverDao extends MyBatisDao<DoctorReportDeliver> {
         map.put("endDate",endDate);
         return getSqlSession().selectList(sqlId("deliveryReport"), map);
     }
-    public List<Map<String,Object>> deliveryBarn(BigInteger pigId , Date eventAt,int parity){
+    public List<Map<String,Object>> deliveryBarn(BigInteger pigId , Date eventAt){
         Map<String,Object> map = new HashMap<>();
         map.put("pigId",pigId);
         map.put("eventAt",eventAt);
-        map.put("parity",parity);
         return getSqlSession().selectList(sqlId("deliveryBarn"), map);
     }
 }
