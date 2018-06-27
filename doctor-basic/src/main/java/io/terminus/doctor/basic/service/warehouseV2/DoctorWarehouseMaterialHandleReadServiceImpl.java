@@ -430,7 +430,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
                 }
             }
             DoctorWareHouse warehouseId = doctorWareHouseDao.findById((Long) criteria.get("warehouseId"));
-            Map<String, Object> all = this.countInfo(resultList, (Long) criteria.get("orgId"), date,warehouseId.getId());
+            Map<String, Object> all = this.countInfo(resultList, (Long) criteria.get("orgId"), date,warehouseId.getType());
             resultList.add(all);
             return Response.ok(resultList);
         }catch (Exception e) {
@@ -483,7 +483,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         return criteria;
     }
 
-    private Map<String, Object> countInfo(List<Map> resultList,Long orgId,Date date,Long warehouseId){
+    private Map<String, Object> countInfo(List<Map> resultList,Long orgId,Date date,Integer warehouseType){
         boolean b = doctorWarehouseSettlementService.isSettled(orgId, date);
         BigDecimal allLastQuantity = new BigDecimal(0);
         BigDecimal allLastAmount = new BigDecimal(0);
@@ -494,7 +494,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         BigDecimal allBalanceQuantity = new BigDecimal(0);
         BigDecimal allBalanceAmount = new BigDecimal(0);
         for(Map map : resultList){
-            if(warehouseId==1||warehouseId==2){
+            if(warehouseType==1||warehouseType==2){
                 allLastQuantity = allLastQuantity.add(new BigDecimal(map.get("lastQuantity").toString()));
                 allInQuantity = allInQuantity.add(new BigDecimal(map.get("inQuantity").toString()));
                 allOutQuantity = allOutQuantity.add(new BigDecimal(map.get("outQuantity").toString()));
@@ -509,7 +509,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
             }
         }
         HashMap<String, Object> map = Maps.newHashMap();
-        if(warehouseId==1||warehouseId==2) {
+        if(warehouseType==1||warehouseType==2) {
             map.put("allLastQuantity", allLastQuantity);
             map.put("allInQuantity", allInQuantity);
             map.put("allOutQuantity", allOutQuantity);
