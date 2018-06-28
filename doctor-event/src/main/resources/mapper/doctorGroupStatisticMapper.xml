@@ -433,6 +433,8 @@
             OR (`type` = 3
             and change_type_id = 109
             )
+            OR (`type` = 9
+            )
             )
         </where>
     </select>
