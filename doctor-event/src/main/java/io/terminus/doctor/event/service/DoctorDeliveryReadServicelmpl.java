@@ -26,8 +26,8 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
     }
 
     @Override
-    public List<Map<String,Object>> getMating(Long farmId, Date beginDate, Date endDate){
-        List<Map<String,Object>> matingList = doctorReportDeliverDao.getMating(farmId, beginDate, endDate);
+    public List<Map<String,Object>> getMating(Long farmId, Date beginDate, Date endDate,String pigCode,String operatorName){
+        List<Map<String,Object>> matingList = doctorReportDeliverDao.getMating(farmId, beginDate, endDate,pigCode,operatorName);
         for(Map map : matingList){
             List<Map<String,Object>> deliveryBarn = doctorReportDeliverDao.deliveryBarn((BigInteger)map.get("id"),(BigInteger)map.get("pig_id"), (Date)map.get("event_at"));
             if(deliveryBarn.size() != 0){

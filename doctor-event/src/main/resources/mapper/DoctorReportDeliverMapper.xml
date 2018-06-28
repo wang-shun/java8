@@ -344,7 +344,7 @@
     <select id="deliveryReport" parameterType="map" resultType="map">
         select a.*,b.status as pig_status
         FROM doctor_pig_events a left join doctor_pig_tracks b on a.pig_id = b.pig_id
-        where
+        <where>
             a.farm_id = #{farmId}
             and a.`type` = 9
             and a.current_mating_count = 1
@@ -352,6 +352,9 @@
             and a.event_at &lt;= #{endDate}
             and a.status = 1
             AND a.event_source != 5
+            <if test="pigCode != null"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
+            <if test="operatorName != null"> AND a.operator_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
+        </where>
     </select>
     <select id="deliveryBarn" parameterType="map" resultType="map">
         select barn_name,event_at
@@ -359,8 +362,5 @@
         where pig_id = #{pigId}
         and type=15
         and rel_event_id = #{id}
-        and event_at &gt; #{eventAt}
-        order by event_at
-        asc limit 1
     </select>
 </mapper>

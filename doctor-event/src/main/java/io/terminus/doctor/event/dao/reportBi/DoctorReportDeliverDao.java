@@ -33,11 +33,13 @@ public class DoctorReportDeliverDao extends MyBatisDao<DoctorReportDeliver> {
     public DoctorReportDeliver sumBy(DoctorDimensionCriteria dimensionCriteria) {
         return getSqlSession().selectOne(sqlId("sumBy"), dimensionCriteria);
     }
-    public List<Map<String,Object>> getMating(Long farmId , Date beginDate, Date endDate){
+    public List<Map<String,Object>> getMating(Long farmId , Date beginDate, Date endDate,String pigCode,String operatorName){
         Map<String,Object> map = new HashMap<>();
         map.put("farmId",farmId);
         map.put("beginDate",beginDate);
         map.put("endDate",endDate);
+        map.put("pigCode",pigCode);
+        map.put("operatorName",operatorName);
         return getSqlSession().selectList(sqlId("deliveryReport"), map);
     }
     public List<Map<String,Object>> deliveryBarn(BigInteger id,BigInteger pigId , Date eventAt){

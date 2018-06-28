@@ -5,5 +5,5 @@ import java.util.List;
 import java.util.Map;
 
 public interface DoctorDeliveryReadService {
-    List<Map<String,Object>> getMating(Long farmId, Date beginDate, Date endDate);
+    List<Map<String,Object>> getMating(Long farmId, Date beginDate, Date endDate,String pigCode,String operatorName);
 }
