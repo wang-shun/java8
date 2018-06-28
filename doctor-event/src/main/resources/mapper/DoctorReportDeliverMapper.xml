@@ -358,6 +358,7 @@
         from doctor_pig_events
         where pig_id = #{pigId}
         and type=15
+        and rel_event_id = #{id}
         and event_at &gt; #{eventAt}
         order by event_at
         asc limit 1
