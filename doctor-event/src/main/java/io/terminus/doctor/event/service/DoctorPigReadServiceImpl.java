@@ -115,6 +115,19 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
         }
     }
 
+    /**
+     * 母猪详情页的导出
+     * @param farmId
+     * @param pigId
+     * @param eventSize
+     * @return
+     */
+    @Override
+    public Response<List<Map>> findSowPigDetailExpotr(Long farmId, Long pigId, Integer eventSize) {
+        List<Map> maps = doctorPigTrackDao.findSowPigDetailExpotr(farmId, pigId, eventSize);
+        return Response.ok(maps);
+    }
+
     @Override
     public RespWithEx<DoctorPigInfoDetailDto> queryPigDetailInfoByPigId(Long farmId, Long pigId, Integer eventSize) {
         try {

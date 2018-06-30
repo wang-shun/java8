@@ -229,8 +229,8 @@
     </select>
 
     <select id="monthWarehouseDetail" parameterType="map" resultType="map">
-       select a.material_name as materialName,b.code as code,a.vendor_name as vendorName,
-        b.specification as specification,a.warehouse_type as warehouseType,
+       select b.id as materialId,b.name as materialName,b.code as code,a.vendor_name as vendorName,
+        b.specification as specification,a.warehouse_id as warehouseId,a.warehouse_type as warehouseType,
         ifnull(round(temp1.balance_quantity,2),0) as lastQuantity,
         ifnull(round(temp1.balance_amount),0) as lastAmount,
         ifnull(round(temp2.balance_quantity,2),0) as balanceQuantity,

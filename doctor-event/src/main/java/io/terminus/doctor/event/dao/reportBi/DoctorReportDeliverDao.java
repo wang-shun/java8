@@ -5,7 +5,15 @@ import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.model.DoctorReportDeliver;
 import org.springframework.stereotype.Repository;
 
+<<<<<<< HEAD
 import java.util.List;
+=======
+import java.math.BigInteger;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+>>>>>>> origin/feature/warehouse-v2
 
 /**
  * Desc:
@@ -29,4 +37,23 @@ public class DoctorReportDeliverDao extends MyBatisDao<DoctorReportDeliver> {
     public DoctorReportDeliver sumBy(DoctorDimensionCriteria dimensionCriteria) {
         return getSqlSession().selectOne(sqlId("sumBy"), dimensionCriteria);
     }
+<<<<<<< HEAD
+=======
+    public List<Map<String,Object>> getMating(Long farmId , Date beginDate, Date endDate,String pigCode,String operatorName){
+        Map<String,Object> map = new HashMap<>();
+        map.put("farmId",farmId);
+        map.put("beginDate",beginDate);
+        map.put("endDate",endDate);
+        map.put("pigCode",pigCode);
+        map.put("operatorName",operatorName);
+        return getSqlSession().selectList(sqlId("deliveryReport"), map);
+    }
+    public List<Map<String,Object>> deliveryBarn(BigInteger id,BigInteger pigId , Date eventAt){
+        Map<String,Object> map = new HashMap<>();
+        map.put("id",id);
+        map.put("pigId",pigId);
+        map.put("eventAt",eventAt);
+        return getSqlSession().selectList(sqlId("deliveryBarn"), map);
+    }
+>>>>>>> origin/feature/warehouse-v2
 }

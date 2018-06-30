@@ -12,6 +12,7 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.RespWithExHelper;
@@ -28,6 +29,7 @@ import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.web.core.export.Exporter;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.dto.DoctorBatchGroupEventDto;
 import io.terminus.doctor.web.front.event.dto.DoctorBatchNewGroupEventDto;
@@ -36,6 +38,9 @@ import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.util.TransFromUtil;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -47,10 +52,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -77,6 +82,9 @@ public class DoctorGroupEvents {
     private DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService;
     @RpcConsumer
     private DoctorEventModifyRequestReadService doctorEventModifyRequestReadService;
+
+    @Autowired
+    private Exporter exporter;
 
     @Autowired
     public DoctorGroupEvents(DoctorGroupWebService doctorGroupWebService,
@@ -251,6 +259,104 @@ public class DoctorGroupEvents {
         }
         return new DoctorGroupDetailEventsDto(groupDetail.getGroup(), groupDetail.getGroupTrack()
                 , transFromUtil.transFromGroupEvents(groupEvents), avgWeight);
+    }
+
+    /**
+     * 猪群详情导出
+     * @param groupId
+     * @param eventSize
+     */
+    @RequestMapping(value = "/detail/export", method = RequestMethod.GET)
+    public void findGroupDetailByGroupIdExport(@RequestParam("groupId") Long groupId,
+                                               @RequestParam(value = "eventSize", required = false) Integer eventSize,
+                                               HttpServletRequest request, HttpServletResponse res){
+        DoctorGroupDetail groupDetail = RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId));
+        //计算平均体重
+        Response<DoctorGroupEvent> response = doctorGroupReadService.findLastGroupEventByType(groupId, GroupEventType.LIVE_STOCK.getValue());
+        Double avgWeight = 0.0;
+        if (response.isSuccess() && response.getResult() != null) {
+            avgWeight = response.getResult().getAvgWeight();
+        }
+
+
+        //开始导出
+        try {
+            //导出名称
+            exporter.setHttpServletResponse(request,res,"猪群详情");
+            XSSFWorkbook workbook = new XSSFWorkbook();
+            //表
+            Sheet sheet = workbook.createSheet();
+            sheet.createRow(0).createCell(5).setCellValue("猪群详情");
+
+            Row title = sheet.createRow(1);
+//            int pos = 2;
+
+            title.createCell(0).setCellValue("猪群号");
+            title.createCell(1).setCellValue("猪群种类");
+            title.createCell(2).setCellValue("猪场");
+            title.createCell(3).setCellValue("猪只数");
+            title.createCell(4).setCellValue("平均日龄");
+            title.createCell(5).setCellValue("平均体重");
+            title.createCell(6).setCellValue("建群日期");
+            title.createCell(7).setCellValue("状态");
+            title.createCell(8).setCellValue("饲养员");
+
+            Row row = sheet.createRow(3);
+            row.createCell(0).setCellValue(String.valueOf(groupDetail.getGroup().getGroupCode()));
+
+            //枚举类型
+            String a=String.valueOf(groupDetail.getGroup().getPigType());
+            if(a.equals(String.valueOf(PigType.NURSERY_PIGLET.getValue()))){
+                row.createCell(1).setCellValue(String.valueOf(PigType.NURSERY_PIGLET.getDesc()));
+            }
+            if(a.equals(String.valueOf(PigType.FATTEN_PIG.getValue()))){
+                row.createCell(1).setCellValue(String.valueOf(PigType.FATTEN_PIG.getDesc()));
+            }
+            if(a.equals(String.valueOf(PigType.RESERVE.getValue()))){
+                row.createCell(1).setCellValue(String.valueOf(PigType.RESERVE.getDesc()));
+            }
+            if(a.equals(String.valueOf(PigType.MATE_SOW.getValue()))){
+                row.createCell(1).setCellValue(String.valueOf(PigType.MATE_SOW.getDesc()));
+            }
+            if(a.equals(String.valueOf(PigType.PREG_SOW.getValue()))){
+                row.createCell(1).setCellValue(String.valueOf(PigType.PREG_SOW.getDesc()));
+            }
+            if(a.equals(String.valueOf(PigType.DELIVER_SOW.getValue()))){
+                row.createCell(1).setCellValue(String.valueOf(PigType.DELIVER_SOW.getDesc()));
+            }
+            if(a.equals(String.valueOf(PigType.BOAR.getValue()))){
+                row.createCell(1).setCellValue(String.valueOf(PigType.BOAR.getDesc()));
+            }
+
+            row.createCell(2).setCellValue(String.valueOf(groupDetail.getGroup().getFarmName()));
+            row.createCell(3).setCellValue(String.valueOf(groupDetail.getGroupTrack().getQuantity()));
+            row.createCell(4).setCellValue(String.valueOf(groupDetail.getGroupTrack().getAvgDayAge()));
+            row.createCell(5).setCellValue(String.valueOf(avgWeight+" 公斤"));
+
+            //date类型的转yyyy年MM月dd日格式
+            SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+            String format = sdf.format(groupDetail.getGroup().getOpenAt());
+            row.createCell(6).setCellValue(String.valueOf(format));
+
+            //枚举类型
+            Integer b=(groupDetail.getGroup().getStatus());
+            if(b==DoctorGroup.Status.CREATED.getValue()){
+                row.createCell(7).setCellValue(DoctorGroup.Status.CREATED.getDesc());
+
+            }
+            if(b==DoctorGroup.Status.CLOSED.getValue()){
+                row.createCell(7).setCellValue(DoctorGroup.Status.CLOSED.getDesc());
+
+            }
+
+            row.createCell(8).setCellValue(String.valueOf(groupDetail.getGroup().getStaffName()));
+
+            workbook.write(res.getOutputStream());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**

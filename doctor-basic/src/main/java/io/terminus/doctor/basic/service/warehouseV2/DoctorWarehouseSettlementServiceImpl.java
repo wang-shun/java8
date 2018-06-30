@@ -113,23 +113,36 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
         try {
             DoctorWarehouseOrgSettlement settlement = doctorWarehouseOrgSettlementDao.findByOrg(orgId);
             if (null != settlement) {
+<<<<<<< HEAD
                 if (settlementDate.after(DateUtils.addMonths(settlement.getLastSettlementDate(), 1))) {
+=======
+                log.error("settlement:"+DateUtils.addDays(settlement.getLastSettlementDate(), 1).toGMTString());
+                log.error("settlementDate:"+settlementDate.toGMTString());
+                if (settlementDate.after(DateUtils.addDays(settlement.getLastSettlementDate(), 1))) {
+>>>>>>> origin/feature/warehouse-v2
                     throw new ServiceException("settlement.future");
                 }
             }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/feature/warehouse-v2
             //每个仓库下每个物料在该会计年月之前的余额和余量
 //            Map<Long/*warehouseId*/, AmountAndQuantityDto> eachWarehouseBalance = doctorWarehouseMaterialHandleDao.findEachWarehouseBalanceBySettlementDate(orgId, settlementDate);
             Map<String/*warehouseId-materialId*/, AmountAndQuantityDto> eachWarehouseBalance = doctorWarehouseStockMonthlyDao.findEachWarehouseBalanceBySettlementDate(orgId, DateUtils.addMonths(settlementDate, -1));
 
             //已结算的单据明细
             Map<Long/*materialHandleId*/, DoctorWarehouseMaterialHandle> settlementMaterialHandles = new HashMap<>();
+            Stopwatch stopwatch = Stopwatch.createStarted();
 
+<<<<<<< HEAD
 
             Stopwatch stopwatch = Stopwatch.createStarted();
 
 
+=======
+>>>>>>> origin/feature/warehouse-v2
             log.info("start to settlement org {} material handle for {}", settlementDate);
             List<DoctorWarehouseMaterialHandle> materialHandles = doctorWarehouseMaterialHandleDao.findByOrgAndSettlementDate(orgId, settlementDate);
 
@@ -240,7 +253,11 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 //            });
 
             log.info("update or create stock monthly balance under org {} use :{}ms", orgId, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> origin/feature/warehouse-v2
             if (null == settlement) {
                 settlement = new DoctorWarehouseOrgSettlement();
                 settlement.setOrgId(orgId);

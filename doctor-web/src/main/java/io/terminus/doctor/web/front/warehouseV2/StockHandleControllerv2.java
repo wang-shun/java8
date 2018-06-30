@@ -98,11 +98,13 @@ public class StockHandleControllerv2 {
     //仓库月报
     @RequestMapping(value = "/monthWarehouseDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response<List<Map>> warehouseReport(@RequestParam(required = true,value = "warehouseId") Long warehouseId,
+                                                @RequestParam(required = false,value = "orgId") Long orgId,
                                                 @RequestParam(required = false,value = "settlementDate") String settlementDate,
                                                 @RequestParam(required = false,value = "materialName") String materialName
                                                 ){
         Map<String, Object> params = new HashMap<>();
         params.put("warehouseId",warehouseId);
+        params.put("orgId",orgId);
         params.put("settlementDate",settlementDate);
         params.put("materialName",materialName);
         return doctorWarehouseMaterialHandleReadService.monthWarehouseDetail(params);
