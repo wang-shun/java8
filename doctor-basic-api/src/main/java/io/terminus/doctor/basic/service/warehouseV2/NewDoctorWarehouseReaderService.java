@@ -6,6 +6,7 @@ import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
 import io.terminus.doctor.basic.dto.DoctorWareHouseCriteria;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 
@@ -72,7 +73,8 @@ public interface NewDoctorWarehouseReaderService {
                                                         Integer isSettled);
 
 
-
+    Response<DoctorWareHouse> findWareHousesByFarmAndWareHousesName(@NotNull(message = "farmId.can.not.be.null") Long farmId,
+                                                                    @NotNull(message = "wareHouse.name.not.empty") String wareHouseName);
 
 
 }

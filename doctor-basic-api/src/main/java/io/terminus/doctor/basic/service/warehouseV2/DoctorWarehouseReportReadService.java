@@ -167,10 +167,6 @@ public interface DoctorWarehouseReportReadService {
      * 获取会计年月里面所有物料数据
      * @param farmId
      * @param settlementDate
-     * @param pigBarnType
-     * @param pigBarnId
-     * @param pigGroupId
-     * @param handlerType
      * @param type
      * @param warehouseId
      * @param materialName
@@ -179,10 +175,6 @@ public interface DoctorWarehouseReportReadService {
     List<Map<String,Object>> getMeterails(
             Long farmId,
             String settlementDate,
-            Integer pigBarnType,
-            Long pigBarnId,
-            Long pigGroupId,
-            Integer handlerType,
             Integer type,
             Long warehouseId,
             String materialName);
@@ -193,10 +185,6 @@ public interface DoctorWarehouseReportReadService {
     Map<String,Object> lastWlbdReport(
             Long farmId,
             String settlementDate,
-            Integer pigBarnType,
-            Long pigBarnId,
-            Long pigGroupId,
-            Integer handlerType,
             Integer type,
             Long warehouseId,
             String materialName);
@@ -208,10 +196,6 @@ public interface DoctorWarehouseReportReadService {
     List<Map<String,Object>> wlbdReport(
             Long farmId,
             String settlementDate,
-            Integer pigBarnType,
-            Long pigBarnId,
-            Long pigGroupId,
-            Integer handlerType,
             Integer type,
             Long warehouseId,
             String materialName);

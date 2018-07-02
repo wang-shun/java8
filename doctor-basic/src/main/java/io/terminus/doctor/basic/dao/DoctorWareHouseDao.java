@@ -75,4 +75,8 @@ public class DoctorWareHouseDao extends MyBatisDao<DoctorWareHouse>{
     public Date findMaxTimeByFarmId(List<Long> farms) {
         return this.sqlSession.selectOne(this.sqlId("findMaxTimeByFarmId"),farms);
     }
+
+    public DoctorWareHouse findWareHousesByFarmAndWareHousesName(Map<String, Object> criteria) {
+        return getSqlSession().selectOne("findWareHousesByFarmAndWareHousesName", criteria);
+    }
 }

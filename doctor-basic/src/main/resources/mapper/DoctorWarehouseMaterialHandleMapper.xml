@@ -717,18 +717,6 @@
         <if test="materialName != null">
             and d.`name` like CONCAT('%',#{materialName},'%')
         </if>
-        <if test="pigBarnType != null">
-            and f.pig_type=#{pigBarnType}
-        </if>
-        <if test="pigBarnId != null">
-            and f.pig_barn_id=#{pigBarnId}
-        </if>
-        <if test="pigGroupId != null">
-            and f.pig_group_id=#{pigGroupId}
-        </if>
-        <if test="handlerType != null">
-            and b.type=#{handlerType}
-        </if>
         <if test="type != null">
             and d.type=#{type}
         </if>
