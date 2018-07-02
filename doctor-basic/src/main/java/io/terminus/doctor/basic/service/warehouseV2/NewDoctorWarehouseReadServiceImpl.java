@@ -20,6 +20,7 @@ import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -175,5 +176,15 @@ public class NewDoctorWarehouseReadServiceImpl implements NewDoctorWarehouseRead
         param.put("settlementDate",settlementDate);
         return doctorWareHouseDao.listDetailTypeMap(
                 pageInfo.getOffset(), pageInfo.getLimit(), param);
+    }
+
+    @Override
+    public Response<DoctorWareHouse> findWareHousesByFarmAndWareHousesName(@NotNull(message = "farmId.can.not.be.null")Long farmId, @NotNull(message = "wareHouse.name.not.empty") String wareHouseName) {
+        try {
+            return Response.ok(doctorWareHouseDao.findWareHousesByFarmAndWareHousesName(ImmutableMap.of("farmId", farmId, "name", wareHouseName)));
+        } catch (Exception e) {
+            log.error("find WareHouse by farm and wareHouse name failed, farmId:{}, wareHouseName:{}, cause:{}", farmId, wareHouseName, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.WareHouse.by.farm.and.wareHouse.name.failed");
+        }
     }
 }

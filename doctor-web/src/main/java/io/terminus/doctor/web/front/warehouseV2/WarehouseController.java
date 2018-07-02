@@ -46,6 +46,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Created by sunbo@terminus.io on 2017/8/8.
@@ -143,6 +144,11 @@ public class WarehouseController {
         if (null == currentUser)
             throw new JsonResponseException("user.not.login");
 
+        DoctorWareHouse wareHouse = RespHelper.or500(doctorWarehouseReaderService.findWareHousesByFarmAndWareHousesName(warehouseDto.getFarmId(), warehouseDto.getName()));
+        if (notNull(wareHouse)) {
+            throw new JsonResponseException("wareHouse.name.has.existed");
+        }
+
         DoctorWareHouse doctorWareHouse = DoctorWareHouse.builder()
                 .wareHouseName(warehouseDto.getName())
                 .farmId(warehouseDto.getFarmId()).farmName(doctorFarm.getName())
@@ -152,6 +158,8 @@ public class WarehouseController {
                 .build();
         //调创建仓库的方法
         Response<Long> warehouseCreateResponse = doctorWareHouseWriteService.createWareHouse(doctorWareHouse);
+
+
         if (!warehouseCreateResponse.isSuccess())
             throw new JsonResponseException(warehouseCreateResponse.getError());
         return true;
@@ -187,6 +195,11 @@ public class WarehouseController {
         User currentUser = currentUserResponse.getResult();
         if (null == currentUser)
             throw new JsonResponseException("user.not.login");
+
+        DoctorWareHouse wareHouse = RespHelper.or500(doctorWarehouseReaderService.findWareHousesByFarmAndWareHousesName(warehouseDto.getFarmId(), warehouseDto.getName()));
+        if (notNull(wareHouse) && !Objects.equals(wareHouse.getId(), warehouseDto.getId())) {
+            throw new JsonResponseException("wareHouse.name.has.existed");
+        }
 
         // warehouse 信息, 修改ManagerId, ManagerName, address 地址信息， WareHouseName 仓库名称
         DoctorWareHouse doctorWareHouse = DoctorWareHouse.builder()

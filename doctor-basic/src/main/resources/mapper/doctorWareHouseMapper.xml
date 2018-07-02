@@ -424,4 +424,12 @@
         </foreach>
     </select>
 
+    <select id="findWareHousesByFarmAndWareHousesName" parameterType="map" resultType="DoctorWareHouse" >
+        SELECT * FROM doctor_ware_houses
+        <where>
+            farm_id=#{farmId} AND ware_house_name = #{name}
+        </where>
+
+    </select>
+
 </mapper>
