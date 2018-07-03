@@ -709,7 +709,7 @@
             and b.farm_id=#{farmId}
         </if>
         <if test="settlementDate != null">
-            and date_format(b.settlement_date,'%Y-%m') = #{settlementDate}
+            and date_format(b.settlement_date,'%Y-%m') = date_format(#{settlementDate},'%Y-%m')
         </if>
         <if test="warehouseId != null">
             and b.warehouse_id=#{warehouseId}

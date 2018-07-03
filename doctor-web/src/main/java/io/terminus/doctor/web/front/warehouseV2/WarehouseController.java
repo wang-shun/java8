@@ -146,7 +146,7 @@ public class WarehouseController {
 
         DoctorWareHouse wareHouse = RespHelper.or500(doctorWarehouseReaderService.findWareHousesByFarmAndWareHousesName(warehouseDto.getFarmId(), warehouseDto.getName()));
         if (notNull(wareHouse)) {
-            throw new JsonResponseException("wareHouse.name.has.existed");
+            throw new JsonResponseException("仓库名已存在");
         }
 
         DoctorWareHouse doctorWareHouse = DoctorWareHouse.builder()
@@ -198,7 +198,7 @@ public class WarehouseController {
 
         DoctorWareHouse wareHouse = RespHelper.or500(doctorWarehouseReaderService.findWareHousesByFarmAndWareHousesName(warehouseDto.getFarmId(), warehouseDto.getName()));
         if (notNull(wareHouse) && !Objects.equals(wareHouse.getId(), warehouseDto.getId())) {
-            throw new JsonResponseException("wareHouse.name.has.existed");
+            throw new JsonResponseException("仓库名已存在");
         }
 
         // warehouse 信息, 修改ManagerId, ManagerName, address 地址信息， WareHouseName 仓库名称
