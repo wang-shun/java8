@@ -156,12 +156,8 @@ public class StockHandleController {
                 mpp.put("applyGroupName",materialApply.getPigGroupName());
 
             //判断猪群是否关闭：如果领用到猪群,并且猪群已经关闭，则不能退料入库
-<<<<<<< HEAD
 
-            if((materialApply.getPigGroupId()!=null||!materialApply.getPigGroupId().equals(""))&&materialApply.getApplyType()==1){
-=======
             if((materialApply.getPigGroupId()!=null&&!materialApply.getPigGroupId().equals(""))&&materialApply.getApplyType()==1){
->>>>>>> feature/warehouse-v2
                 DoctorGroup doctorGroup = RespHelper.or500(doctorGroupReadService.findGroupById(materialApply.getPigGroupId()));
                 if(doctorGroup.getStatus()!=-1){
                     maps.add(mpp);
@@ -283,12 +279,9 @@ public class StockHandleController {
                                     log.warn("material apply not found,by material handle {}", mh.getId());
 
                                 //判断猪群是否关闭
-<<<<<<< HEAD
 
-                                if((apply.getPigGroupId()!=null||!apply.getPigGroupId().equals(""))&&apply.getApplyType()==1){
-=======
                                 if((apply.getPigGroupId()!=null&&!apply.getPigGroupId().equals(""))&&apply.getApplyType()==1){
->>>>>>> feature/warehouse-v2
+
                                     DoctorGroup doctorGroup = RespHelper.or500(doctorGroupReadService.findGroupById(apply.getPigGroupId()));
                                     detail.setGroupStatus(doctorGroup.getStatus());
                                     if(doctorGroup.getStatus()==-1){
@@ -326,13 +319,9 @@ public class StockHandleController {
                                 detail.setRefundableQuantity(RefundableNumber.doubleValue());
 
                                 //判断猪群是否关闭
-<<<<<<< HEAD
 
-                                if((apply.getPigGroupId()!=null||!apply.getPigGroupId().equals(""))&&apply.getApplyType()==1){
-
-=======
                                 if((apply.getPigGroupId()!=null&&!apply.getPigGroupId().equals(""))&&apply.getApplyType()==1){
->>>>>>> feature/warehouse-v2
+
                                     DoctorGroup doctorGroup = RespHelper.or500(doctorGroupReadService.findGroupById(apply.getPigGroupId()));
                                     detail.setGroupStatus(doctorGroup.getStatus());
                                     if(doctorGroup.getStatus()==-1){
