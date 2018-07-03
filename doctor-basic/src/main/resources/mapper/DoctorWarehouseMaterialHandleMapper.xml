@@ -714,10 +714,10 @@
         <if test="warehouseId != null">
             and b.warehouse_id=#{warehouseId}
         </if>
-        <if test="materialName != null">
+        <if test="materialName != null and materialName!='' ">
             and d.`name` like CONCAT('%',#{materialName},'%')
         </if>
-        <if test="type != null">
+        <if test="type != null and type!='' ">
             and d.type=#{type}
         </if>
         order by b.handle_date,b.id,f.pig_group_name
