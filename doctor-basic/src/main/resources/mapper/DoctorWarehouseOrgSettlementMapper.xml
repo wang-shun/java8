@@ -108,7 +108,7 @@
         ORDER BY `id` DESC
     </select>
 
-    <select id="findByOrg" parameterType="map" resultMap="DoctorWarehouseOrgSettlementMap">
+    <select id="findDoctorWarehouseOrgSettlementByOrg" parameterType="long" resultMap="DoctorWarehouseOrgSettlementMap">
         SELECT id,`org_id`,date_format(last_settlement_date,'%Y-%m') as `last_settlement_date`, created_at, updated_at
         FROM <include refid="tb"/>
         where org_id=#{orgId}
