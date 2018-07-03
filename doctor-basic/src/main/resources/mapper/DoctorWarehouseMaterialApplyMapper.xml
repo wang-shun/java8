@@ -484,12 +484,9 @@
         s.`name` as material_name,
         db.name as unit,
         format(ifnull(sum(ma.quantity)+'',0),3) as sum_quantity,
-<<<<<<< HEAD
-        format(ifnull(sum(ma.unit_price)+'',0),4) as sum_unit_price,
-=======
+
 --         format(ifnull(sum(ma.unit_price)+'',0),4) as sum_unit_price,
         format(ifnull((sum(ma.amount)/sum(ma.quantity))+'',0),4) as sum_unit_price,
->>>>>>> origin/feature/warehouse-v2
         format(ifnull(sum(ma.amount)+'',0),2) as sum_amount,
         s.type as material_type,
         v.`name` as vendor_name,

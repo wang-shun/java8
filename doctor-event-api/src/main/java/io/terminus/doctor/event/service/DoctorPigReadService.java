@@ -43,15 +43,13 @@ public interface DoctorPigReadService {
      * @return
      */
     RespWithEx<DoctorPigInfoDetailDto> queryPigDetailInfoByPigId(@NotNull(message = "farmId.not.null") Long farmId, @NotNull(message = "input.pigId.empty") Long pigId, Integer eventSize);
-<<<<<<< HEAD
-=======
+
 
     /**
      * 母猪详情导出
      * @return
      */
     Response<List<Map>> findSowPigDetailExpotr(Long farmId, Long pigId, Integer eventSize);
->>>>>>> origin/feature/warehouse-v2
 
     /**
      * 通过pigId 查询pig

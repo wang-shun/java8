@@ -341,8 +341,6 @@
             <if test="endAt != null"> AND sum_at &lt;= date_format(#{endAt}, '%y-%m-%d')</if>
         </where>
     </select>
-<<<<<<< HEAD
-=======
     <select id="deliveryReport" parameterType="map" resultType="map">
         select a.*,b.status as pig_status
         FROM doctor_pig_events a left join doctor_pig_tracks b on a.pig_id = b.pig_id
@@ -365,5 +363,4 @@
         and type=15
         and rel_event_id = #{id}
     </select>
->>>>>>> origin/feature/warehouse-v2
 </mapper>

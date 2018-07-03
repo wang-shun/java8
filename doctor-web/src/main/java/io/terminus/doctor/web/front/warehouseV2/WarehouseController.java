@@ -278,10 +278,7 @@ public class WarehouseController {
 
         //根据猪场得到orgId
         DoctorFarm doctorFarm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
-<<<<<<< HEAD
-        //判断是否结算
-        boolean b = doctorWarehouseSettlementService.isSettled(doctorFarm.getOrgId(), settlementDate);
-=======
+
         //取上个月
         Date newDate = null;
         if (settlementDate != null)
@@ -293,7 +290,6 @@ public class WarehouseController {
         }
         //判断上个月是否结算
         boolean b = doctorWarehouseSettlementService.isSettled(doctorFarm.getOrgId(), newDate);
->>>>>>> origin/feature/warehouse-v2
         List<Map<String, Object>> maps = RespHelper.or500(doctorWarehouseReaderService.listTypeMap(farmId, type));
         if(!b){
             //未结算：上月结存数量实时计算 findWJSQuantity

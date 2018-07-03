@@ -50,8 +50,5 @@ public class DoctorChgFarmInfo implements Serializable {
     private Date createdAt;
 
     private Date updatedAt;
-<<<<<<< HEAD
+
 }
-=======
-}
->>>>>>> origin/feature/warehouse-v2

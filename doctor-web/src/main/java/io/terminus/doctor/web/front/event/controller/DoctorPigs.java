@@ -171,8 +171,7 @@ public class DoctorPigs {
                                                        @RequestParam("pigId") Long pigId,
                                                        @RequestParam(value = "eventSize", required = false) Integer eventSize){
             return buildSowDetailDto(getPigDetail(farmId, pigId, eventSize));
-<<<<<<< HEAD
-=======
+
     }
 
     /**
@@ -276,7 +275,6 @@ public class DoctorPigs {
             e.printStackTrace();
         }
 
->>>>>>> origin/feature/warehouse-v2
     }
 
     @RequestMapping(value = "/getBoarPigDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
