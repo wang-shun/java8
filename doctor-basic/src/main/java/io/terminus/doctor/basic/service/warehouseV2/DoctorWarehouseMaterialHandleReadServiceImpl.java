@@ -415,19 +415,43 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
                 criteria.put("settlementDate",date);
             }
             List<Map> resultList = doctorWarehouseStockMonthlyDao.monthWarehouseDetail(criteria);
+            //本月是否结算
             boolean b = doctorWarehouseSettlementService.isSettled((Long)criteria.get("orgId"), date);
             if(!b){
                 //未结算：上月结存数量实时计算 findWJSQuantity
-                for(Map mm:resultList){
-                    BigDecimal quantity = doctorWarehouseMaterialHandleDao.findWJSQuantity(BigInteger.valueOf((Long) mm.get("warehouseId")), null, (Long) mm.get("materialId"), null, null, date);
-                    mm.put("lastQuantity",quantity);
-                    BigDecimal balanceQuantity=quantity.add((BigDecimal)mm.get("inQuantity")).subtract((BigDecimal)mm.get("outQuantity"));
-                    mm.put("balanceQuantity",balanceQuantity);
-                    mm.put("lastAmount","--");
-                    mm.put("balanceAmount","--");
-                    mm.put("inAmount","--");
-                    mm.put("outAmount","--");
+                //取上个月
+                Date newDate = null;
+                if (date != null) {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(date);
+                    calendar.add(Calendar.MONTH, -1);
+                    newDate = calendar.getTime();
                 }
+                //上月是否结算
+                boolean bb = doctorWarehouseSettlementService.isSettled((Long)criteria.get("orgId"), newDate);
+                if(!bb){
+                    //假如上月未结算，仓库月报期初数量显示，金额不显示，本月入库数量金额都显示，本月出库数量显示 金额不显示 ，期末数量显示 金额不显示
+                    for(Map mm:resultList){
+                        BigDecimal quantity = doctorWarehouseMaterialHandleDao.findWJSQuantity(BigInteger.valueOf((Long) mm.get("warehouseId")), null, (Long) mm.get("materialId"), null, null, date);
+                        mm.put("lastQuantity",quantity);
+                        BigDecimal balanceQuantity=quantity.add((BigDecimal)mm.get("inQuantity")).subtract((BigDecimal)mm.get("outQuantity"));
+                        mm.put("balanceQuantity",balanceQuantity);
+                        mm.put("lastAmount","--");
+                        mm.put("balanceAmount","--");
+                        mm.put("outAmount","--");
+                    }
+                }else{
+                    //假如上月已结算，仓库月报期初数量、金额有数据，本月入库数量、金额有数据，本月出库数量显示，金额不显示，期末数量显示，金额不显示；
+                    for(Map mm:resultList){
+                        BigDecimal quantity = doctorWarehouseMaterialHandleDao.findWJSQuantity(BigInteger.valueOf((Long) mm.get("warehouseId")), null, (Long) mm.get("materialId"), null, null, date);
+                        mm.put("lastQuantity",quantity);
+                        BigDecimal balanceQuantity=quantity.add((BigDecimal)mm.get("inQuantity")).subtract((BigDecimal)mm.get("outQuantity"));
+                        mm.put("balanceQuantity",balanceQuantity);
+                        mm.put("balanceAmount","--");
+                        mm.put("outAmount","--");
+                    }
+                }
+
             }
             DoctorWareHouse warehouseId = doctorWareHouseDao.findById((Long) criteria.get("warehouseId"));
             Map<String, Object> all = this.countInfo(resultList, (Long) criteria.get("orgId"), date,warehouseId.getType());
