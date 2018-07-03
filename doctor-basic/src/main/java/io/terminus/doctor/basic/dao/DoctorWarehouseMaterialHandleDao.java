@@ -333,18 +333,11 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     }
 
     public Map<String, Object> lastWlbdReport(
-            Long farmId,
-            String settlementDate, Integer pigBarnType,
-            Long pigBarnId, Long pigGroupId, Integer handlerType,
-            Integer type, Long warehouseId, String materialName
+            Long farmId, String settlementDate, Integer type, Long warehouseId, String materialName
     ) {
         Map<String, Object> params = new HashMap<>();
         params.put("farmId", farmId);
         params.put("settlementDate", settlementDate);
-        params.put("pigBarnType", pigBarnType);
-        params.put("pigBarnId", pigBarnId);
-        params.put("pigGroupId", pigGroupId);
-        params.put("handlerType", handlerType);
         params.put("type", type);
         params.put("warehouseId", warehouseId);
         params.put("materialName", materialName);
@@ -352,18 +345,12 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     }
 
     public List<Map<String, Object>> getMeterails(
-            Long farmId,
-            String settlementDate, Integer pigBarnType,
-            Long pigBarnId, Long pigGroupId, Integer handlerType,
+            Long farmId, String settlementDate,
             Integer type, Long warehouseId, String materialName
     ) {
         Map<String, Object> params = new HashMap<>();
         params.put("farmId", farmId);
         params.put("settlementDate", settlementDate);
-        params.put("pigBarnType", pigBarnType);
-        params.put("pigBarnId", pigBarnId);
-        params.put("pigGroupId", pigGroupId);
-        params.put("handlerType", handlerType);
         params.put("type", type);
         params.put("warehouseId", warehouseId);
         params.put("materialName", materialName);
@@ -371,18 +358,11 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     }
 
     public List<Map<String, Object>> wlbdReport(
-            Long farmId,
-            String settlementDate, Integer pigBarnType,
-            Long pigBarnId, Long pigGroupId, Integer handlerType,
-            Integer type, Long warehouseId, String materialName
+            Long farmId, String settlementDate, Integer type, Long warehouseId, String materialName
     ) {
         Map<String, Object> params = new HashMap<>();
         params.put("farmId", farmId);
         params.put("settlementDate", settlementDate);
-        params.put("pigBarnType", pigBarnType);
-        params.put("pigBarnId", pigBarnId);
-        params.put("pigGroupId", pigGroupId);
-        params.put("handlerType", handlerType);
         params.put("type", type);
         params.put("warehouseId", warehouseId);
         params.put("materialName", materialName);

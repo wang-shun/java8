@@ -188,7 +188,7 @@ public class StockHandleControllerv2 {
                                 //月份
                                 Cell cell = row.createCell(0);
                                 if (cell.getStringCellValue() == null || cell.getStringCellValue().equals("")) {
-                                    cell.setCellValue(lists.get(lists.size() - 1).get("month").toString() + "月");
+                                    cell.setCellValue(lists.get(lists.size() - 1).get("year").toString()+"年"+lists.get(lists.size() - 1).get("month").toString() + "月");
                                 }
 
 
@@ -288,7 +288,7 @@ public class StockHandleControllerv2 {
                                 //月份
                                 Cell cell = row.createCell(0);
                                 if (cell.getStringCellValue() == null || cell.getStringCellValue().equals("")) {
-                                    cell.setCellValue(lists.get(lists.size() - 1).get("month").toString() + "月");
+                                    cell.setCellValue(lists.get(lists.size() - 1).get("year").toString()+"年"+lists.get(lists.size() - 1).get("month").toString() + "月");
                                 }
 
                                 if (sheet.getRow(sheet.getLastRowNum()-1) != null&&sheet.getRow(sheet.getLastRowNum()-1).getCell(1)!=null &&"结余".equals(sheet.getRow(sheet.getLastRowNum()-1).getCell(1).getStringCellValue())) {

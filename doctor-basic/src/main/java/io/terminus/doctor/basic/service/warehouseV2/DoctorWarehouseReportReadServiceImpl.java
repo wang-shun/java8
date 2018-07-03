@@ -472,27 +472,17 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
 
     @Override
     public Map<String, Object> lastWlbdReport(
-            Long farmId,
-            String settlementDate, Integer pigBarnType,
-            Long pigBarnId, Long pigGroupId, Integer handlerType,
-            Integer type, Long warehouseId, String materialName) {
+            Long farmId, String settlementDate, Integer type, Long warehouseId, String materialName) {
         Map<String,Object> lists = doctorWarehouseMaterialHandleDao.lastWlbdReport(
-                farmId, settlementDate, pigBarnType,
-                pigBarnId, pigGroupId, handlerType,
-                type, warehouseId, materialName);
+                farmId, settlementDate, type, warehouseId, materialName);
         return lists;
     }
 
     @Override
     public List<Map<String, Object>> wlbdReport(
-            Long farmId,
-            String settlementDate, Integer pigBarnType,
-            Long pigBarnId, Long pigGroupId, Integer handlerType,
-            Integer type, Long warehouseId, String materialName) {
+            Long farmId, String settlementDate, Integer type, Long warehouseId, String materialName) {
         List<Map<String,Object>> lists = doctorWarehouseMaterialHandleDao.wlbdReport(
-                farmId, settlementDate, pigBarnType,
-                pigBarnId, pigGroupId, handlerType,
-                type, warehouseId, materialName);
+                farmId, settlementDate, type, warehouseId, materialName);
         return lists;
     }
 
@@ -500,10 +490,6 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
      * 获取会计年月里面所有物料数据
      * @param farmId
      * @param settlementDate
-     * @param pigBarnType
-     * @param pigBarnId
-     * @param pigGroupId
-     * @param handlerType
      * @param type
      * @param warehouseId
      * @param materialName
@@ -513,17 +499,11 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
     public List<Map<String,Object>> getMeterails(
             Long farmId,
             String settlementDate,
-            Integer pigBarnType,
-            Long pigBarnId,
-            Long pigGroupId,
-            Integer handlerType,
             Integer type,
             Long warehouseId,
             String materialName){
         List<Map<String,Object>> lists = doctorWarehouseMaterialHandleDao.getMeterails(
-                farmId, settlementDate, pigBarnType,
-                pigBarnId, pigGroupId, handlerType,
-                type, warehouseId, materialName);
+                farmId, settlementDate, type, warehouseId, materialName);
         return lists;
     }
 

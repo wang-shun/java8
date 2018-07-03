@@ -357,7 +357,7 @@
         </where>
     </select>
     <select id="deliveryBarn" parameterType="map" resultType="map">
-        select barn_name,event_at
+        select barn_name,event_at,farm_name
         from doctor_pig_events
         where pig_id = #{pigId}
         and type=15
