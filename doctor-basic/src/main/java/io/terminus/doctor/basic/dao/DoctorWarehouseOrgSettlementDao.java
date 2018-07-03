@@ -30,16 +30,23 @@ public class DoctorWarehouseOrgSettlementDao extends MyBatisDao<DoctorWarehouseO
         return count > 0;
     }
 
-    public DoctorWarehouseOrgSettlement findByOrg(Long orgId) {
+//    public DoctorWarehouseOrgSettlement findByOrg(Long orgId) {
+//
+//        Map<String, Object> params = new HashMap<>();
+//        params.put("orgId", orgId);
+//
+//        List<DoctorWarehouseOrgSettlement> results = this.list(params);
+//        if (results.isEmpty())
+//            return null;
+//
+//        return results.get(0);
+//    }
 
+
+    public DoctorWarehouseOrgSettlement findByOrg(Long orgId) {
         Map<String, Object> params = new HashMap<>();
         params.put("orgId", orgId);
-
-        List<DoctorWarehouseOrgSettlement> results = this.list(params);
-        if (results.isEmpty())
-            return null;
-
-        return results.get(0);
+        return this.sqlSession.selectOne(this.sqlId("findByOrg"), params);
     }
 
 
