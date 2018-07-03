@@ -605,7 +605,7 @@
             and farm_id=#{farmId}
         </if>
         <if test="settlementDate != null">
-            and date_format(settlement_date,'%Y-%m') = date_format(#{settlementDate},'%Y-%m')
+            and date_format(settlement_date,'%Y-%m') = date_format(CONCAT(#{settlementDate},'-01'),'%Y-%m')
         </if>
         <if test="warehouseId != null">
             and warehouse_id=#{warehouseId}
@@ -709,7 +709,7 @@
             and b.farm_id=#{farmId}
         </if>
         <if test="settlementDate != null">
-            and date_format(b.settlement_date,'%Y-%m') = date_format(#{settlementDate},'%Y-%m')
+            and date_format(b.settlement_date,'%Y-%m') = date_format(CONCAT(#{settlementDate},'-01'),'%Y-%m')
         </if>
         <if test="warehouseId != null">
             and b.warehouse_id=#{warehouseId}
