@@ -113,11 +113,17 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
         try {
             DoctorWarehouseOrgSettlement settlement = doctorWarehouseOrgSettlementDao.findByOrg(orgId);
             if (null != settlement) {
+<<<<<<< HEAD
 
                 log.error("settlement:"+DateUtils.addDays(settlement.getLastSettlementDate(), 1).toGMTString());
                 log.error("settlementDate:"+settlementDate.toGMTString());
                 if (settlementDate.after(DateUtils.addDays(settlement.getLastSettlementDate(), 1))) {
 
+=======
+                log.error("settlement:"+DateUtils.addMonths(settlement.getLastSettlementDate(), 1).toGMTString());
+                log.error("settlementDate:"+settlementDate.toGMTString());
+                if (settlementDate.after(DateUtils.addMonths(settlement.getLastSettlementDate(), 1))) {
+>>>>>>> feature/warehouse-v2
                     throw new ServiceException("settlement.future");
                 }
             }
