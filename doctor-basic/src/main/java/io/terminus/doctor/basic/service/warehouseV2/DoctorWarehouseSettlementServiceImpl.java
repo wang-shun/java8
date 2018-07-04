@@ -400,9 +400,4 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
         doctorWarehouseOrgSettlementDao.update(settlement);
         return Response.ok();
     }
-
-    public static void main(String[] args) {
-        System.out.println(DateUtil.toYYYYMM("2018-08"));
-    }
-
 }
