@@ -106,9 +106,9 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
     public Response<Boolean> settlement(Long orgId, List<Long> farmIds, Date settlementDate) {
 
         Lock lock = lockRegistry.obtain("settlement/" + orgId);
-
         if (!lock.tryLock())
             throw new ServiceException("under.settlement");
+
         try {
             DoctorWarehouseOrgSettlement settlement = doctorWarehouseOrgSettlementDao.findByOrg(orgId);
             if (null != settlement) {
