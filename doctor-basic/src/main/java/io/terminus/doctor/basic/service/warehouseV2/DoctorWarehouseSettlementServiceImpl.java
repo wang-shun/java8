@@ -109,13 +109,12 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 
         if (!lock.tryLock())
             throw new ServiceException("under.settlement");
-
         try {
             DoctorWarehouseOrgSettlement settlement = doctorWarehouseOrgSettlementDao.findByOrg(orgId);
             if (null != settlement) {
                 log.error("settlement:"+DateUtils.addMonths(settlement.getLastSettlementDate(), 1).toGMTString());
                 log.error("settlementDate:"+settlementDate.toGMTString());
-                if (DateUtil.toDate(settlementDate + "-01 00:00:00").after(DateUtils.addMonths(settlement.getLastSettlementDate(), 1))) {
+                if (DateUtil.toDate(DateUtil.getYearMonth(settlementDate) + "-01 00:00:00").after(DateUtils.addMonths(settlement.getLastSettlementDate(), 1))) {
                     throw new ServiceException("settlement.future");
                 }
             }
@@ -400,6 +399,10 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
         settlement.setLastSettlementDate(DateUtils.addMonths(settlement.getLastSettlementDate(), -1));
         doctorWarehouseOrgSettlementDao.update(settlement);
         return Response.ok();
+    }
+
+    public static void main(String[] args) {
+        System.out.println(DateUtil.toYYYYMM("2018-08"));
     }
 
 }
