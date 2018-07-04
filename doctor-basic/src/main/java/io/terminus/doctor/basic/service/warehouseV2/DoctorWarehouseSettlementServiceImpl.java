@@ -114,7 +114,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             if (null != settlement) {
                 log.error("settlement:"+DateUtils.addMonths(settlement.getLastSettlementDate(), 1).toGMTString());
                 log.error("settlementDate:"+settlementDate.toGMTString());
-                if (DateUtil.toDate(DateUtil.getYearMonth(settlementDate) + "-01 00:00:00").after(DateUtils.addMonths(settlement.getLastSettlementDate(), 1))) {
+                if (DateUtil.toDate(DateUtil.getYearMonth(settlementDate) + "-01").after(DateUtils.addMonths(settlement.getLastSettlementDate(), 1))) {
                     throw new ServiceException("settlement.future");
                 }
             }
