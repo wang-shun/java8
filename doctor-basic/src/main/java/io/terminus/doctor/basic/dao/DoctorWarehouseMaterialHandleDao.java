@@ -26,6 +26,11 @@ import java.util.*;
 @Repository
 public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouseMaterialHandle> {
 
+    //更改物料有关的信息
+    public Boolean updateWarehouseMaterialHandle(DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle) {
+        return  this.sqlSession.update(this.sqlId("updateWarehouseMaterialHandle"), doctorWarehouseMaterialHandle)>=1;
+    }
+
     //根据类型和RelMaterialHandleId得到对应的数据
     public DoctorWarehouseMaterialHandle findByRelMaterialHandleId(Long relMaterialHandleId, int type) {
         Map<String, Object> criteria = Maps.newHashMap();

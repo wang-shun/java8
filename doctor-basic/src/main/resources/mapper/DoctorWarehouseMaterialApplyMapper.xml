@@ -261,6 +261,10 @@
         WHERE id = #{id}
     </update>
 
+    <update id="updateWarehouseMaterialApply" parameterType="DoctorWarehouseMaterialApply">
+        update doctor_warehouse_material_apply set `material_name` = #{materialName},`type` = #{type},`unit` = #{unit},updated_at = now() where `material_id` = #{materialId}
+    </update>
+
     <delete id="delete" parameterType="long">
         DELETE FROM
         <include refid="tb"/>
