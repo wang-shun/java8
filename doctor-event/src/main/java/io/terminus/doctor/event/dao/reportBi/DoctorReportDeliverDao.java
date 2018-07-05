@@ -51,10 +51,28 @@ public class DoctorReportDeliverDao extends MyBatisDao<DoctorReportDeliver> {
         map.put("eventAt",eventAt);
         return getSqlSession().selectList(sqlId("deliveryBarn"), map);
     }
-    public Map<String,Object> notdelivery(BigInteger pigId , int parity){
+    public Map<String,Object> notdelivery(BigInteger pigId , int parity , Date event_at, Date event_at1){
         Map<String,Object> map = new HashMap<>();
         map.put("parity",parity);
         map.put("pigId",pigId);
+        map.put("event_at",event_at);
+        map.put("event_at1",event_at1);
         return getSqlSession().selectOne(sqlId("notdelivery"), map);
     }
+    public Map<String,Object> leave(BigInteger pigId , int parity , Date event_at, Date event_at1){
+        Map<String,Object> map = new HashMap<>();
+        map.put("parity",parity);
+        map.put("pigId",pigId);
+        map.put("event_at",event_at);
+        map.put("event_at1",event_at1);
+        return getSqlSession().selectOne(sqlId("leave"), map);
+    }
+    public Map<String,Object> idsameparity(BigInteger pigId , int parity, Date eventAt){
+        Map<String,Object> map = new HashMap<>();
+        map.put("parity",parity);
+        map.put("pigId",pigId);
+        map.put("eventAt",eventAt);
+        return getSqlSession().selectOne(sqlId("idsameparity"), map);
+    }
+
 }
