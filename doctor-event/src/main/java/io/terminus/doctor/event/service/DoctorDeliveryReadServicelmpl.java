@@ -84,6 +84,8 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 if (a == 4) {
                     map.put("notdelivery", "返情");
                 }
+            }else{
+                map.put("notdelivery", "");
             }
         }
         return matingList;
