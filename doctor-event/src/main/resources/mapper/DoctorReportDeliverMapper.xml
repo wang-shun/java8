@@ -355,6 +355,7 @@
             <if test="pigCode != null"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
             <if test="operatorName != null"> AND a.operator_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
         </where>
+        ORDER  BY  a.barn_name
     </select>
     <select id="deliveryBarn" parameterType="map" resultType="map">
         select barn_name,event_at,farm_name
