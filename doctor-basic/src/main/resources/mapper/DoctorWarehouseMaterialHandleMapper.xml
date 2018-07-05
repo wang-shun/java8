@@ -205,7 +205,7 @@
     </update>
 
     <update id="updateWarehouseMaterialHandle" parameterType="DoctorWarehouseMaterialHandle">
-        update doctor_warehouse_material_handle set `vendor_name` = #{vendorName},`material_name` = #{materialName},`unit` = #{unit} where `material_id` = #{materialId}
+        update doctor_warehouse_material_handle set `vendor_name` = #{vendorName},`material_name` = #{materialName},`unit` = #{unit},updated_at = now() where `material_id` = #{materialId}
     </update>
 
     <update id="updates" parameterType="list">
