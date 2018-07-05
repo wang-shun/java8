@@ -23,6 +23,10 @@ import java.util.*;
 @Repository
 public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseMaterialApply> {
 
+    //更改物料有关的信息
+    public Boolean updateWarehouseMaterialApply(DoctorWarehouseMaterialApply doctorWarehouseMaterialApply) {
+       return  this.sqlSession.update(this.sqlId("updateWarehouseMaterialApply"), doctorWarehouseMaterialApply)>=1;
+    }
 
     public List<DoctorWarehouseMaterialApply> listAndOrderByHandleDate(DoctorWarehouseMaterialApply criteria, Integer limit) {
 
