@@ -58,14 +58,32 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 map.put("pig_status",PigStatus.CHG_FARM.getName());
             }
             List<Map<String,Object>> deliveryBarn = doctorReportDeliverDao.deliveryBarn((BigInteger)map.get("id"),(BigInteger)map.get("pig_id"), (Date)map.get("event_at"));
-            if(deliveryBarn.size() != 0){
-                map.put("deliveryFarm",(String)deliveryBarn.get(0).get("farm_name"));
-                map.put("deliveryBarn",(String)deliveryBarn.get(0).get("barn_name"));
-                map.put("deliveryDate",(Date)deliveryBarn.get(0).get("event_at"));
-            } else{
-                map.put("deliveryBarn","未分娩");
-                map.put("deliveryDate","");
-                map.put("deliveryFarm","未分娩");
+            if(deliveryBarn != null) {
+                if (deliveryBarn.size() != 0) {
+                    map.put("deliveryFarm", (String) deliveryBarn.get(0).get("farm_name"));
+                    map.put("deliveryBarn", (String) deliveryBarn.get(0).get("barn_name"));
+                    map.put("deliveryDate", (Date) deliveryBarn.get(0).get("event_at"));
+                } else {
+                    map.put("deliveryBarn", "未分娩");
+                    map.put("deliveryDate", "");
+                    map.put("deliveryFarm", "未分娩");
+                }
+            }
+            Map<String,Object> notdelivery = doctorReportDeliverDao.notdelivery((BigInteger)map.get("pig_id"), (int)map.get("parity"));
+            if(notdelivery != null) {
+                int a = (int) notdelivery.get("preg_check_result");
+                if (a == 1) {
+                    map.put("notdelivery", "阳性");
+                }
+                if (a == 2) {
+                    map.put("notdelivery", "阴性");
+                }
+                if (a == 3) {
+                    map.put("notdelivery", "流产");
+                }
+                if (a == 4) {
+                    map.put("notdelivery", "返情");
+                }
             }
         }
         return matingList;

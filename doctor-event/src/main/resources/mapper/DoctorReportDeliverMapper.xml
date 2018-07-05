@@ -363,4 +363,12 @@
         and type=15
         and rel_event_id = #{id}
     </select>
+    <select id="notdelivery" parameterType="map" resultType="map">
+        select preg_check_result
+        from doctor_pig_events
+        where pig_id = #{pigId}
+        and type=11
+        and parity = #{parity}
+        order by event_at desc limit 1
+    </select>
 </mapper>
