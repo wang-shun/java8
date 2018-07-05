@@ -63,6 +63,8 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map.put("deliveryFarm", (String) deliveryBarn.get(0).get("farm_name"));
                     map.put("deliveryBarn", (String) deliveryBarn.get(0).get("barn_name"));
                     map.put("deliveryDate", (Date) deliveryBarn.get(0).get("event_at"));
+                    map.put("notdelivery", "");
+                    map.put("deadorescape", "");
                 } else {
                     map.put("deliveryBarn", "未分娩");
                     map.put("deliveryDate", "");
@@ -94,7 +96,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     //死逃的
                     Map<String,Object> leave = doctorReportDeliverDao.leave((BigInteger)map.get("pig_id"), (int)map.get("parity"),(Date)map.get("event_at"), event_at1);
                     if(leave != null) {
-                        Long b = (Long) leave.get("change_type_id");
+                        long b = (long) leave.get("change_type_id");
                         if (b == 110) {
                             map.put("deadorescape", "死亡");
                         }else if (b == 111) {
