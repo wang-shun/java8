@@ -211,8 +211,8 @@ public class DoctorBarns {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "/using")
-    public List<SearchedBarn> findBarnsByFarmId(@RequestParam Long farmId) {
-
+    public List<SearchedBarn> findBarnsByEnums(@RequestParam Long farmId) {
+        //得到猪场下正在使用的猪舍
         List<DoctorBarn> barns = RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, null, null, DoctorBarn.Status.USING.getValue(), null));
         List<SearchedBarn> notEmptyBarns=doctorSearches.getSearchedBarn(barns).stream().filter(b -> b.getPigCount() > 0 || b.getPigGroupCount() > 0).collect(Collectors.toList());
         return notEmptyBarns;
