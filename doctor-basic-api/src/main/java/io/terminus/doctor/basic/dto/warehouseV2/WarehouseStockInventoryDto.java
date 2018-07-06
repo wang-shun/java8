@@ -37,8 +37,6 @@ public class WarehouseStockInventoryDto extends AbstractWarehouseStockDto implem
       //  @NotNull(message = "stock.unit.price.null", groups = StockDefaultValid.class)
         private BigDecimal unitPrice;
 
-        @NotNull(message = "stock.amount.null", groups = StockDefaultValid.class)
-        @DecimalMin(inclusive = false, value = "0", message = "stock.amount.small.then.zero", groups = StockDefaultValid.class)
         private BigDecimal amount;
 //        @NotNull(message = "stock.quantity.null")
 //        @DecimalMin.List(
