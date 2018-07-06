@@ -270,11 +270,12 @@ public class DoctorGroupEvents {
     public void findGroupDetailByGroupIdExport(@RequestParam("groupId") Long groupId,
                                                @RequestParam(value = "eventSize", required = false) Integer eventSize,
                                                HttpServletRequest request, HttpServletResponse res){
+
         DoctorGroupDetail groupDetail1 = RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId));
 
         //查询猪群的事件, 默认3条
         List<DoctorGroupEvent> groupEvents = RespHelper.or500(doctorGroupReadService.pagingGroupEventDelWean(
-                groupDetail1.getGroup().getFarmId(), groupId, null, null, MoreObjects.firstNonNull(eventSize, 3), null, null)).getData();
+                groupDetail1.getGroup().getFarmId(), groupId, null, null, MoreObjects.firstNonNull(eventSize, 200), null, null)).getData();
 
         Response<DoctorGroupEvent> response1 = doctorGroupReadService.findLastGroupEventByType(groupId, GroupEventType.LIVE_STOCK.getValue());
         Double avgWeight1 = 0.0;

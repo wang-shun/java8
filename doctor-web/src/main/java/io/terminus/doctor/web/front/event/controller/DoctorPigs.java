@@ -62,6 +62,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -223,12 +224,14 @@ public class DoctorPigs {
                 row2.createCell(8).setCellValue("出生日期");
                 row2.createCell(9).setCellValue("状态天数");
 
-                Row row3 = sheet.createRow(2);
+                Row row3 = sheet.createRow(3);
                 row3.createCell(0).setCellValue(String.valueOf(doctorSowDetailDto.getPigSowCode()));
                 String rfid=String.valueOf(doctorSowDetailDto.getRfid());
+                System.out.println("AAA"+rfid);
                 if(null==rfid){
                     rfid="";
                 }
+                System.out.println("AAA"+rfid);
                 row3.createCell(1).setCellValue(rfid);
                 String pigStatus = String.valueOf(doctorSowDetailDto.getPigStatus());
                 if(pigStatus.equals(String.valueOf(PigStatus.Entry.getKey()))){
@@ -261,24 +264,23 @@ public class DoctorPigs {
                 row3.createCell(4).setCellValue(String.valueOf(doctorSowDetailDto.getBreedName()));
                 row3.createCell(5).setCellValue(String.valueOf(doctorSowDetailDto.getBarnCode()));
                 String pigWeight=String.valueOf(doctorSowDetailDto.getPigWeight());
+                System.out.println("VVVV"+pigWeight);
                 if(null==pigWeight){
                     pigWeight="";
                 }
+                System.out.println("CCCC"+pigWeight);
                 row3.createCell(6).setCellValue(pigWeight);
-                String entryDate=String.valueOf(doctorSowDetailDto.getEntryDate());
-                if(null==entryDate){
-                    row3.createCell(7).setCellValue("");
-                }else {
-                    String[] eDate=entryDate.split(" ");
-                    row3.createCell(7).setCellValue(eDate[0]);
-                }
-                String BirthDate=String.valueOf(doctorSowDetailDto.getBirthDate());
-                if(null==BirthDate){
-                    row3.createCell(8).setCellValue("");
-                }else {
-                    String[] bDate=BirthDate.split(" ");
-                    row3.createCell(8).setCellValue(bDate[0]);
-                }
+
+                //date类型的转yyyy年MM月dd日格式
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                String format = sdf.format(String.valueOf(doctorSowDetailDto.getEntryDate()));
+                System.out.println("进场日期"+doctorSowDetailDto.getEntryDate());
+                row3.createCell(7).setCellValue(String.valueOf(format));
+
+                //date类型的转yyyy年MM月dd日格式
+                SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+                String format1 = sdf.format(String.valueOf(doctorSowDetailDto.getBirthDate()));
+                row3.createCell(8).setCellValue(format1);
 
                 row3.createCell(9).setCellValue(String.valueOf(doctorSowDetailDto.getStatusDay()));
 
@@ -299,9 +301,14 @@ public class DoctorPigs {
                     Row rowadd = sheet.createRow(addRow++);
                     rowadd.createCell(0).setCellValue(String.valueOf(s.getParity()));
                     rowadd.createCell(1).setCellValue(String.valueOf(s.getName()));
-                    rowadd.createCell(2).setCellValue(String.valueOf(s.getEventAt()));
+
+                    //date类型的转yyyy年MM月dd日格式
+                    SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
+                    String format2 = sdf.format(String.valueOf(s.getEventAt()));
+                    rowadd.createCell(2).setCellValue(format2);
+
                     rowadd.createCell(3).setCellValue(String.valueOf(s.getDesc()));
-                    rowadd.createCell(4).setCellValue(String.valueOf(doctorSowDetailDto.getBarnCode()));
+                    rowadd.createCell(4).setCellValue(String.valueOf(s.getFarmName()));
                     rowadd.createCell(5).setCellValue(String.valueOf(s.getBarnName()));
                 }
 
