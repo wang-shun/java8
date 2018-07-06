@@ -373,17 +373,17 @@ public class DoctorGroupEvents {
                 row5.createCell(4).setCellValue("所属猪舍");
 
                 int addRow=7;
-                for (DoctorGroupEvent groupEvent : doctorGroupDetailEventsDto.getGroupEvents()) {
-                    Row row6 = sheet.createRow(addRow++);
-                    row6.createCell(0).setCellValue(String.valueOf(groupEvent.getName()));
-                    //date类型的转yyyy年MM月dd日格式
-                    SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
-                    String format1 = sdf1.format(groupEvent.getEventAt());
-                    row6.createCell(1).setCellValue(String.valueOf(format1));
-                    row6.createCell(2).setCellValue(String.valueOf(groupEvent.getDesc()));
-                    row6.createCell(3).setCellValue(String.valueOf(groupEvent.getFarmName()));
-                    row6.createCell(4).setCellValue(String.valueOf(groupEvent.getBarnName()));
-                }
+//                for (DoctorGroupEvent groupEvent : doctorGroupDetailEventsDto.getGroupEvents()) {
+//                    Row row6 = sheet.createRow(addRow++);
+//                    row6.createCell(0).setCellValue(String.valueOf(groupEvent.getName()));
+//                    //date类型的转yyyy年MM月dd日格式
+//                    SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+//                    String format1 = sdf1.format(groupEvent.getEventAt());
+//                    row6.createCell(1).setCellValue(String.valueOf(format1));
+//                    row6.createCell(2).setCellValue(String.valueOf(groupEvent.getDesc()));
+//                    row6.createCell(3).setCellValue(String.valueOf(groupEvent.getFarmName()));
+//                    row6.createCell(4).setCellValue(String.valueOf(groupEvent.getBarnName()));
+//                }
 
 
                 workbook.write(res.getOutputStream());
