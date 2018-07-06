@@ -29,7 +29,7 @@ session:
   cookie-name: msid
   source: redis
   serialize-type: json
-  redis-host: 127.0.0.1
+  redis-host: 101.201.44.35
   redis-port: 6379
   redis-index: 1
   redis-cluster: false
@@ -45,6 +45,7 @@ rpc.dubbo:
     module: doctor-web
     registryAddress: 101.201.44.35:2181
     version: 1.0.0
+    timeout: 20000
 
 # zookeeper
 zookeeper:
@@ -110,3 +111,4 @@ msg:
       appSecret: ws685rsevimn8fgx6mmxzzgx7bs1y9pn
 
 openApi.url: http://doctor-test.xrnm.com
+
