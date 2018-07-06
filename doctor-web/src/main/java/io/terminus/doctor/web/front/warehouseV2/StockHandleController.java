@@ -228,23 +228,25 @@ public class StockHandleController {
                             //单据明细里面的值全部复制到detail里面去
                             BeanUtils.copyProperties(mh, detail);
 
-                            try {
-                                //会计年月支持选择未结算过的会计年月，如果选择未结算的会计区间，则报表不显示金额和单价
-                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
-                                boolean b;
-                                if(orgId != null && date!=null) {
-                                     b = doctorWarehouseSettlementService.isSettled(orgId, sdf.parse(date));
-                                }else{
-                                    b = doctorWarehouseSettlementService.isSettled(mh.getOrgId(), mh.getSettlementDate());
-                                }
-                                if (!b) {
-                                    if (!stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.IN.getValue()) || stockHandle.getHandleSubType() != WarehouseMaterialHandleType.IN.getValue()) {
-                                        detail.setUnitPrice(BigDecimal.ZERO);
-                                        detail.setAmount(BigDecimal.ZERO);
+                            if ((!stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.IN.getValue()))&&(!stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue()))) {
+                                try {
+                                    //会计年月支持选择未结算过的会计年月，如果选择未结算的会计区间，则报表不显示金额和单价
+                                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+                                    boolean b;
+                                    if (orgId != null && date != null) {
+                                        b = doctorWarehouseSettlementService.isSettled(orgId, sdf.parse(date));
+                                    } else {
+                                        b = doctorWarehouseSettlementService.isSettled(mh.getOrgId(), mh.getSettlementDate());
                                     }
+                                    if (!b) {
+                                        if (!stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.IN.getValue()) || stockHandle.getHandleSubType() != WarehouseMaterialHandleType.IN.getValue()) {
+                                            detail.setUnitPrice(BigDecimal.ZERO);
+                                            detail.setAmount(BigDecimal.ZERO);
+                                        }
+                                    }
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
                                 }
-                            } catch (ParseException e) {
-                                e.printStackTrace();
                             }
 
                             //物料表
