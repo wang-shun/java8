@@ -226,11 +226,11 @@ public class DoctorPigs {
 
                 Row row3 = sheet.createRow(3);
                 row3.createCell(0).setCellValue(String.valueOf(doctorSowDetailDto.getPigSowCode()));
-//                String rfid=String.valueOf(doctorSowDetailDto.getRfid());
-//                if(rfid.equals("null")){
-//                    rfid="";
-//                }
-//                row3.createCell(1).setCellValue(rfid);
+                String rfid=String.valueOf(doctorSowDetailDto.getRfid());
+                if(rfid.equals("null")){
+                    rfid="";
+                }
+                row3.createCell(1).setCellValue(rfid);
                 String pigStatus = String.valueOf(doctorSowDetailDto.getPigStatus());
                 if(pigStatus.equals(String.valueOf(PigStatus.Entry.getKey()))){
                     row3.createCell(2).setCellValue(String.valueOf(PigStatus.Entry.getName()));
@@ -261,20 +261,20 @@ public class DoctorPigs {
                 row3.createCell(3).setCellValue(String.valueOf(doctorSowDetailDto.getParity()));
                 row3.createCell(4).setCellValue(String.valueOf(doctorSowDetailDto.getBreedName()));
                 row3.createCell(5).setCellValue(String.valueOf(doctorSowDetailDto.getBarnCode()));
-//                String pigWeight=String.valueOf(doctorSowDetailDto.getPigWeight());
-//                if(pigWeight.equals("null")){
-//                    pigWeight="";
-//                }
-//                row3.createCell(6).setCellValue(pigWeight);
+                String pigWeight=String.valueOf(doctorSowDetailDto.getPigWeight());
+                if(pigWeight.equals("null")){
+                    pigWeight="";
+                }
+                row3.createCell(6).setCellValue(pigWeight);
                 //date类型的转yyyy年MM月dd日格式
-//                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-//                String format = sdf.format(String.valueOf(doctorSowDetailDto.getEntryDate()));
-//                row3.createCell(7).setCellValue(String.valueOf(format));
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                String format = sdf.format(String.valueOf(doctorSowDetailDto.getEntryDate()));
+                row3.createCell(7).setCellValue(format);
 
                 //date类型的转yyyy年MM月dd日格式
-//                SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
-//                String format1 = sdf.format(String.valueOf(doctorSowDetailDto.getBirthDate()));
-//                row3.createCell(8).setCellValue(format1);
+                SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+                String format1 = sdf1.format(String.valueOf(doctorSowDetailDto.getBirthDate()));
+                row3.createCell(8).setCellValue(format1);
 
                 row3.createCell(9).setCellValue(String.valueOf(doctorSowDetailDto.getStatusDay()));
 
@@ -291,20 +291,20 @@ public class DoctorPigs {
 
 
                 int addRow=8;
-//                for (DoctorPigEvent s: doctorSowDetailDto.getDoctorPigEvents()){
-//                    Row rowadd = sheet.createRow(addRow++);
-//                    rowadd.createCell(0).setCellValue(String.valueOf(s.getParity()));
-//                    rowadd.createCell(1).setCellValue(String.valueOf(s.getName()));
-//
-//                    //date类型的转yyyy年MM月dd日格式
-//                    SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
-//                    String format2 = sdf.format(String.valueOf(s.getEventAt()));
-//                    rowadd.createCell(2).setCellValue(format2);
-//
-//                    rowadd.createCell(3).setCellValue(String.valueOf(s.getDesc()));
-//                    rowadd.createCell(4).setCellValue(String.valueOf(s.getFarmName()));
-//                    rowadd.createCell(5).setCellValue(String.valueOf(s.getBarnName()));
-//                }
+                for (DoctorPigEvent s: doctorSowDetailDto.getDoctorPigEvents()){
+                    Row rowadd = sheet.createRow(addRow++);
+                    rowadd.createCell(0).setCellValue(String.valueOf(s.getParity()));
+                    rowadd.createCell(1).setCellValue(String.valueOf(s.getName()));
+
+                    //date类型的转yyyy年MM月dd日格式
+                    SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
+                    String format2 = sdf2.format(String.valueOf(s.getEventAt()));
+                    rowadd.createCell(2).setCellValue(format2);
+
+                    rowadd.createCell(3).setCellValue(String.valueOf(s.getDesc()));
+                    rowadd.createCell(4).setCellValue(String.valueOf(s.getFarmName()));
+                    rowadd.createCell(5).setCellValue(String.valueOf(s.getBarnName()));
+                }
 
                 workbook.write(response.getOutputStream());
             }
@@ -312,107 +312,6 @@ public class DoctorPigs {
         }catch (Exception e){
             e.printStackTrace();
         }
-
-//        System.out.println("猪号"+doctorSowDetailDto.getPigSowCode()+"猪只RFID"+doctorSowDetailDto.getRfid()
-//                +"母猪猪状态"+doctorSowDetailDto.getPigStatus()+"舍号"+doctorSowDetailDto.getBarnCode()
-//                +"胎次"+doctorSowDetailDto.getParity()+"进场日期"+doctorSowDetailDto.getEntryDate()
-//                +"体重"+doctorSowDetailDto.getPigWeight()+"品种"+doctorSowDetailDto.getBreedName()
-//                +"出生日期"+doctorSowDetailDto.getBirthDate()+"状态天数"+doctorSowDetailDto.getStatusDay());
-//        for (DoctorPigEvent s: doctorSowDetailDto.getDoctorPigEvents()){
-//            System.out.println(s+"SSSSSSSSSSS");
-//        }
-
-//----------------------------------------------------------------------------------
-
-//        if(null==eventSize){
-//            eventSize=0;
-//        }
-//
-//        List<Map>  maps= RespHelper.or500(doctorPigReadService.findSowPigDetailExpotr(farmId,pigId,eventSize));
-//
-//        //开始导出
-//        try {
-//            //导出名称
-//            exporter.setHttpServletResponse(request,response,"母猪详情导出");
-//            try (XSSFWorkbook workbook = new XSSFWorkbook()) {
-//                //表
-//                Sheet sheet = workbook.createSheet();
-//                sheet.createRow(0).createCell(5).setCellValue("母猪详情");
-//
-//                Row title = sheet.createRow(1);
-//
-//                title.createCell(0).setCellValue("猪号");
-//                title.createCell(1).setCellValue("猪只RFID");
-//                title.createCell(2).setCellValue("母猪状态");
-//                title.createCell(3).setCellValue("胎次");
-//                title.createCell(4).setCellValue("品种");
-//                title.createCell(5).setCellValue("舍号");
-//                title.createCell(6).setCellValue("体重-kg");
-//                title.createCell(7).setCellValue("进场日期");
-//                title.createCell(8).setCellValue("出生日期");
-////                title.createCell(9).setCellValue("状态天数");
-//
-//                Row row = sheet.createRow(2);
-//                for (Map m : maps) {
-//                    row.createCell(0).setCellValue(String.valueOf(m.get("pig_code")));
-//                    row.createCell(1).setCellValue(String.valueOf(m.get("rfid")));
-//
-//                    String a = String.valueOf(m.get("status"));
-//                    if (a.equals(String.valueOf(PigStatus.Entry.getKey()))) {
-//                        row.createCell(2).setCellValue(String.valueOf(PigStatus.Entry.getName()));
-//                    }
-//                    if (a.equals(String.valueOf(PigStatus.Removal.getKey()))) {
-//                        row.createCell(2).setCellValue(String.valueOf(PigStatus.Removal.getName()));
-//                    }
-//                    if (a.equals(String.valueOf(PigStatus.Mate.getKey()))) {
-//                        row.createCell(2).setCellValue(String.valueOf(PigStatus.Mate.getName()));
-//                    }
-//                    if (a.equals(String.valueOf(PigStatus.Pregnancy.getKey()))) {
-//                        row.createCell(2).setCellValue(String.valueOf(PigStatus.Pregnancy.getName()));
-//                    }
-//                    if (a.equals(String.valueOf(PigStatus.KongHuai.getKey()))) {
-//                        row.createCell(2).setCellValue(String.valueOf(PigStatus.KongHuai.getName()));
-//                    }
-//                    if (a.equals(String.valueOf(PigStatus.Farrow.getKey()))) {
-//                        row.createCell(2).setCellValue(String.valueOf(PigStatus.Farrow.getName()));
-//                    }
-//                    if (a.equals(String.valueOf(PigStatus.FEED.getKey()))) {
-//                        row.createCell(2).setCellValue(String.valueOf(PigStatus.FEED.getName()));
-//                    }
-//                    if (a.equals(String.valueOf(PigStatus.Wean.getKey()))) {
-//                        row.createCell(2).setCellValue(String.valueOf(PigStatus.Wean.getName()));
-//                    }
-//                    if (a.equals(String.valueOf(PigStatus.CHG_FARM.getKey()))) {
-//                        row.createCell(2).setCellValue(String.valueOf(PigStatus.CHG_FARM.getName()));
-//                    }
-//                    row.createCell(3).setCellValue(String.valueOf(m.get("current_parity")));
-//                    row.createCell(4).setCellValue(String.valueOf(m.get("breed_name")));
-//                    row.createCell(5).setCellValue(String.valueOf(m.get("init_barn_name")));
-//                    String b=String.valueOf(m.get("weight"));
-//                    if (null==b){
-//                        row.createCell(6).setCellValue(String.valueOf(""));
-//                    }
-//                    String c=String.valueOf(m.get("in_farm_date"));
-//                    if(null !=c){
-//                        String[] split=c.split(" ");
-//                        row.createCell(7).setCellValue(String.valueOf(split[0]));
-//                    }
-//                    String d=String.valueOf(m.get("birth_date"));
-//                    if(null !=d){
-//                        String[] split=d.split(" ");
-//                        row.createCell(8).setCellValue(String.valueOf(split[0]));
-//                    }
-//
-//                }
-//                //状态天数
-////                row.createCell(9).setCellValue(String.valueOf(doctorSowDetailDto.getStatusDay()));
-//
-//                workbook.write(response.getOutputStream());
-//            }
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
 
     }
 
