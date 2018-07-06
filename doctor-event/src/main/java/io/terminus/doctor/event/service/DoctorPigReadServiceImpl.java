@@ -148,7 +148,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
                 dayAge = (int) (DateTime.now()
                         .minus(doctorPig.getBirthDate().getTime()).getMillis() / (1000 * 60 * 60 * 24) + 1);
             }
-            Integer targetEventSize = MoreObjects.firstNonNull(eventSize, 200);
+            Integer targetEventSize = MoreObjects.firstNonNull(eventSize, 3);
 
             List<DoctorPigEvent> doctorPigEvents;
             if (isNull(doctorChgFarmInfo)) {

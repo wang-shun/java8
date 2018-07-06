@@ -226,11 +226,11 @@ public class DoctorPigs {
 
                 Row row3 = sheet.createRow(3);
                 row3.createCell(0).setCellValue(String.valueOf(doctorSowDetailDto.getPigSowCode()));
-//                String rfid=String.valueOf(doctorSowDetailDto.getRfid());
-//                if(rfid.equals("null")){
-//                    rfid="";
-//                }
-//                row3.createCell(1).setCellValue(rfid);
+                String rfid=String.valueOf(doctorSowDetailDto.getRfid());
+                if(rfid.equals("null")){
+                    rfid="";
+                }
+                row3.createCell(1).setCellValue(rfid);
                 String pigStatus = String.valueOf(doctorSowDetailDto.getPigStatus());
                 if(pigStatus.equals(String.valueOf(PigStatus.Entry.getKey()))){
                     row3.createCell(2).setCellValue(String.valueOf(PigStatus.Entry.getName()));
@@ -268,13 +268,13 @@ public class DoctorPigs {
 //                row3.createCell(6).setCellValue(pigWeight);
                 //date类型的转yyyy年MM月dd日格式
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                String format = sdf.format(String.valueOf(doctorSowDetailDto.getEntryDate()));
-                row3.createCell(7).setCellValue(format);
+                String format = sdf.format(doctorSowDetailDto.getEntryDate());
+                row3.createCell(7).setCellValue(String.valueOf(format));
 
                 //date类型的转yyyy年MM月dd日格式
                 SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
-                String format1 = sdf1.format(String.valueOf(doctorSowDetailDto.getBirthDate()));
-                row3.createCell(8).setCellValue(format1);
+                String format1 = sdf1.format(doctorSowDetailDto.getBirthDate());
+                row3.createCell(8).setCellValue(String.valueOf(format1));
 
                 row3.createCell(9).setCellValue(String.valueOf(doctorSowDetailDto.getStatusDay()));
 
