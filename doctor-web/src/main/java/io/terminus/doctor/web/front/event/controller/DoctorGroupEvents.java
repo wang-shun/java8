@@ -363,6 +363,8 @@ public class DoctorGroupEvents {
                 }
                 row.createCell(8).setCellValue(String.valueOf(doctorGroupDetailEventsDto.getGroup().getStaffName()));
 
+                Row row4 = sheet.createRow(5);
+                row4.createCell(0).setCellValue("历史事件");
                 Row row5 = sheet.createRow(6);
                 row5.createCell(0).setCellValue("事件名称");
                 row5.createCell(1).setCellValue("事件时间");

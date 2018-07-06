@@ -226,11 +226,11 @@ public class DoctorPigs {
 
                 Row row3 = sheet.createRow(3);
                 row3.createCell(0).setCellValue(String.valueOf(doctorSowDetailDto.getPigSowCode()));
-                String rfid=String.valueOf(doctorSowDetailDto.getRfid());
-                if(rfid.equals("null")){
-                    rfid="";
-                }
-                row3.createCell(1).setCellValue(rfid);
+//                String rfid=String.valueOf(doctorSowDetailDto.getRfid());
+//                if(rfid.equals("null")){
+//                    rfid="";
+//                }
+//                row3.createCell(1).setCellValue(rfid);
                 String pigStatus = String.valueOf(doctorSowDetailDto.getPigStatus());
                 if(pigStatus.equals(String.valueOf(PigStatus.Entry.getKey()))){
                     row3.createCell(2).setCellValue(String.valueOf(PigStatus.Entry.getName()));
@@ -261,21 +261,20 @@ public class DoctorPigs {
                 row3.createCell(3).setCellValue(String.valueOf(doctorSowDetailDto.getParity()));
                 row3.createCell(4).setCellValue(String.valueOf(doctorSowDetailDto.getBreedName()));
                 row3.createCell(5).setCellValue(String.valueOf(doctorSowDetailDto.getBarnCode()));
-                String pigWeight=String.valueOf(doctorSowDetailDto.getPigWeight());
-                if(pigWeight.equals("null")){
-                    pigWeight="";
-                }
-                row3.createCell(6).setCellValue(pigWeight);
+//                String pigWeight=String.valueOf(doctorSowDetailDto.getPigWeight());
+//                if(pigWeight.equals("null")){
+//                    pigWeight="";
+//                }
+//                row3.createCell(6).setCellValue(pigWeight);
                 //date类型的转yyyy年MM月dd日格式
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                String format = sdf.format(String.valueOf(doctorSowDetailDto.getEntryDate()));
-                System.out.println("进场日期"+doctorSowDetailDto.getEntryDate());
-                row3.createCell(7).setCellValue(String.valueOf(format));
+//                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//                String format = sdf.format(String.valueOf(doctorSowDetailDto.getEntryDate()));
+//                row3.createCell(7).setCellValue(String.valueOf(format));
 
                 //date类型的转yyyy年MM月dd日格式
-                SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
-                String format1 = sdf.format(String.valueOf(doctorSowDetailDto.getBirthDate()));
-                row3.createCell(8).setCellValue(format1);
+//                SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+//                String format1 = sdf.format(String.valueOf(doctorSowDetailDto.getBirthDate()));
+//                row3.createCell(8).setCellValue(format1);
 
                 row3.createCell(9).setCellValue(String.valueOf(doctorSowDetailDto.getStatusDay()));
 
@@ -292,20 +291,20 @@ public class DoctorPigs {
 
 
                 int addRow=8;
-                for (DoctorPigEvent s: doctorSowDetailDto.getDoctorPigEvents()){
-                    Row rowadd = sheet.createRow(addRow++);
-                    rowadd.createCell(0).setCellValue(String.valueOf(s.getParity()));
-                    rowadd.createCell(1).setCellValue(String.valueOf(s.getName()));
-
-                    //date类型的转yyyy年MM月dd日格式
-                    SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
-                    String format2 = sdf.format(String.valueOf(s.getEventAt()));
-                    rowadd.createCell(2).setCellValue(format2);
-
-                    rowadd.createCell(3).setCellValue(String.valueOf(s.getDesc()));
-                    rowadd.createCell(4).setCellValue(String.valueOf(s.getFarmName()));
-                    rowadd.createCell(5).setCellValue(String.valueOf(s.getBarnName()));
-                }
+//                for (DoctorPigEvent s: doctorSowDetailDto.getDoctorPigEvents()){
+//                    Row rowadd = sheet.createRow(addRow++);
+//                    rowadd.createCell(0).setCellValue(String.valueOf(s.getParity()));
+//                    rowadd.createCell(1).setCellValue(String.valueOf(s.getName()));
+//
+//                    //date类型的转yyyy年MM月dd日格式
+//                    SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
+//                    String format2 = sdf.format(String.valueOf(s.getEventAt()));
+//                    rowadd.createCell(2).setCellValue(format2);
+//
+//                    rowadd.createCell(3).setCellValue(String.valueOf(s.getDesc()));
+//                    rowadd.createCell(4).setCellValue(String.valueOf(s.getFarmName()));
+//                    rowadd.createCell(5).setCellValue(String.valueOf(s.getBarnName()));
+//                }
 
                 workbook.write(response.getOutputStream());
             }
