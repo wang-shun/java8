@@ -19,6 +19,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.ResponseUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -66,7 +67,8 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         mh.setMaterialId(materialId);
         SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
         try {
-            mh.setHandleDate(sdf.parse(handleDate));
+            Date dd = sdf.parse(handleDate);
+            mh.setHandleDate(DateUtils.addDays(dd,1));
         } catch (ParseException e) {
             e.printStackTrace();
         }
