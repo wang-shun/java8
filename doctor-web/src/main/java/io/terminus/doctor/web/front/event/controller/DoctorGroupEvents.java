@@ -270,11 +270,12 @@ public class DoctorGroupEvents {
     public void findGroupDetailByGroupIdExport(@RequestParam("groupId") Long groupId,
                                                @RequestParam(value = "eventSize", required = false) Integer eventSize,
                                                HttpServletRequest request, HttpServletResponse res){
+
         DoctorGroupDetail groupDetail1 = RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId));
 
         //查询猪群的事件, 默认3条
         List<DoctorGroupEvent> groupEvents = RespHelper.or500(doctorGroupReadService.pagingGroupEventDelWean(
-                groupDetail1.getGroup().getFarmId(), groupId, null, null, MoreObjects.firstNonNull(eventSize, 3), null, null)).getData();
+                groupDetail1.getGroup().getFarmId(), groupId, null, null, MoreObjects.firstNonNull(eventSize, 200), null, null)).getData();
 
         Response<DoctorGroupEvent> response1 = doctorGroupReadService.findLastGroupEventByType(groupId, GroupEventType.LIVE_STOCK.getValue());
         Double avgWeight1 = 0.0;
@@ -362,6 +363,8 @@ public class DoctorGroupEvents {
                 }
                 row.createCell(8).setCellValue(String.valueOf(doctorGroupDetailEventsDto.getGroup().getStaffName()));
 
+                Row row4 = sheet.createRow(5);
+                row4.createCell(0).setCellValue("历史事件");
                 Row row5 = sheet.createRow(6);
                 row5.createCell(0).setCellValue("事件名称");
                 row5.createCell(1).setCellValue("事件时间");
@@ -391,94 +394,6 @@ public class DoctorGroupEvents {
         }catch (Exception e){
             e.printStackTrace();
         }
-
-//--------------------------------------------------------------------------------------------------------------------------------------------
-/*        DoctorGroupDetail groupDetail = RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId));
-        //计算平均体重
-        Response<DoctorGroupEvent> response = doctorGroupReadService.findLastGroupEventByType(groupId, GroupEventType.LIVE_STOCK.getValue());
-        Double avgWeight = 0.0;
-        if (response.isSuccess() && response.getResult() != null) {
-            avgWeight = response.getResult().getAvgWeight();
-        }
-
-
-        //开始导出
-        try {
-            //导出名称
-            exporter.setHttpServletResponse(request,res,"猪群详情");
-            XSSFWorkbook workbook = new XSSFWorkbook();
-            //表
-            Sheet sheet = workbook.createSheet();
-            sheet.createRow(0).createCell(5).setCellValue("猪群详情");
-
-            Row title = sheet.createRow(1);
-//            int pos = 2;
-
-            title.createCell(0).setCellValue("猪群号");
-            title.createCell(1).setCellValue("猪群种类");
-            title.createCell(2).setCellValue("猪场");
-            title.createCell(3).setCellValue("猪只数");
-            title.createCell(4).setCellValue("平均日龄");
-            title.createCell(5).setCellValue("平均体重");
-            title.createCell(6).setCellValue("建群日期");
-            title.createCell(7).setCellValue("状态");
-            title.createCell(8).setCellValue("饲养员");
-
-            Row row = sheet.createRow(3);
-            row.createCell(0).setCellValue(String.valueOf(groupDetail.getGroup().getGroupCode()));
-
-            //枚举类型
-            String a=String.valueOf(groupDetail.getGroup().getPigType());
-            if(a.equals(String.valueOf(PigType.NURSERY_PIGLET.getValue()))){
-                row.createCell(1).setCellValue(String.valueOf(PigType.NURSERY_PIGLET.getDesc()));
-            }
-            if(a.equals(String.valueOf(PigType.FATTEN_PIG.getValue()))){
-                row.createCell(1).setCellValue(String.valueOf(PigType.FATTEN_PIG.getDesc()));
-            }
-            if(a.equals(String.valueOf(PigType.RESERVE.getValue()))){
-                row.createCell(1).setCellValue(String.valueOf(PigType.RESERVE.getDesc()));
-            }
-            if(a.equals(String.valueOf(PigType.MATE_SOW.getValue()))){
-                row.createCell(1).setCellValue(String.valueOf(PigType.MATE_SOW.getDesc()));
-            }
-            if(a.equals(String.valueOf(PigType.PREG_SOW.getValue()))){
-                row.createCell(1).setCellValue(String.valueOf(PigType.PREG_SOW.getDesc()));
-            }
-            if(a.equals(String.valueOf(PigType.DELIVER_SOW.getValue()))){
-                row.createCell(1).setCellValue(String.valueOf(PigType.DELIVER_SOW.getDesc()));
-            }
-            if(a.equals(String.valueOf(PigType.BOAR.getValue()))){
-                row.createCell(1).setCellValue(String.valueOf(PigType.BOAR.getDesc()));
-            }
-
-            row.createCell(2).setCellValue(String.valueOf(groupDetail.getGroup().getFarmName()));
-            row.createCell(3).setCellValue(String.valueOf(groupDetail.getGroupTrack().getQuantity()));
-            row.createCell(4).setCellValue(String.valueOf(groupDetail.getGroupTrack().getAvgDayAge()));
-            row.createCell(5).setCellValue(String.valueOf(avgWeight+" 公斤"));
-
-            //date类型的转yyyy年MM月dd日格式
-            SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
-            String format = sdf.format(groupDetail.getGroup().getOpenAt());
-            row.createCell(6).setCellValue(String.valueOf(format));
-
-            //枚举类型
-            Integer b=(groupDetail.getGroup().getStatus());
-            if(b==DoctorGroup.Status.CREATED.getValue()){
-                row.createCell(7).setCellValue(DoctorGroup.Status.CREATED.getDesc());
-
-            }
-            if(b==DoctorGroup.Status.CLOSED.getValue()){
-                row.createCell(7).setCellValue(DoctorGroup.Status.CLOSED.getDesc());
-
-            }
-
-            row.createCell(8).setCellValue(String.valueOf(groupDetail.getGroup().getStaffName()));
-
-            workbook.write(res.getOutputStream());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
 
     }
 

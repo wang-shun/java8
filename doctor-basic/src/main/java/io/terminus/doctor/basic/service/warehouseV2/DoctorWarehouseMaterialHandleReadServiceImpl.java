@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Function;
@@ -57,6 +58,21 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
     @Autowired
     private DoctorWarehouseMaterialApplyDao doctorWarehouseMaterialApplyDao;
+
+    @Override
+    public Response<BigDecimal> getPDPrice(Long warehouseId, Long materialId, String handleDate){
+        DoctorWarehouseMaterialHandle mh=new DoctorWarehouseMaterialHandle();
+        mh.setWarehouseId(warehouseId);
+        mh.setMaterialId(materialId);
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            mh.setHandleDate(sdf.parse(handleDate));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        DoctorWarehouseMaterialHandle previous = doctorWarehouseMaterialHandleDao.findPrevious(mh, WarehouseMaterialHandleType.IN);
+        return Response.ok(previous.getUnitPrice());
+    }
 
     @Override
     public Response<BigDecimal> findWJSQuantity(BigInteger warehouseId,Integer warehouseType,Long materialId,Integer materialType,String materialName, Date settlementDate) {

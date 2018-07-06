@@ -242,7 +242,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
 
         Map<String, Object> criteria = Maps.newHashMap();
         criteria.put("warehouseId", materialHandle.getWarehouseId());
-        criteria.put("materialHandleId", materialHandle.getId());
+        criteria.put("materialId", materialHandle.getMaterialId());
         criteria.put("handleDate", materialHandle.getHandleDate());
         if (null != handleType)
             criteria.put("type", handleType.getValue());

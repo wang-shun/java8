@@ -479,6 +479,7 @@
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         WHERE warehouse_id=#{warehouseId}
+        AND material_id=#{materialId}
         AND type=#{type}
         AND <![CDATA[ handle_date <= #{handleDate}]]>
         AND delete_flag=1
