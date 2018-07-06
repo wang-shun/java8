@@ -227,9 +227,9 @@ public class DoctorPigs {
                 Row row3 = sheet.createRow(3);
                 row3.createCell(0).setCellValue(String.valueOf(doctorSowDetailDto.getPigSowCode()));
                 String rfid=String.valueOf(doctorSowDetailDto.getRfid());
-                if(rfid.equals("null")){
-                    rfid="";
-                }
+//                if(rfid.equals("null")){
+//                    rfid="";
+//                }
                 row3.createCell(1).setCellValue(rfid);
                 String pigStatus = String.valueOf(doctorSowDetailDto.getPigStatus());
                 if(pigStatus.equals(String.valueOf(PigStatus.Entry.getKey()))){
@@ -262,9 +262,9 @@ public class DoctorPigs {
                 row3.createCell(4).setCellValue(String.valueOf(doctorSowDetailDto.getBreedName()));
                 row3.createCell(5).setCellValue(String.valueOf(doctorSowDetailDto.getBarnCode()));
                 String pigWeight=String.valueOf(doctorSowDetailDto.getPigWeight());
-                if(pigWeight.equals("null")){
-                    pigWeight="";
-                }
+//                if(pigWeight.equals("null")){
+//                    pigWeight="";
+//                }
                 row3.createCell(6).setCellValue(pigWeight);
                 //date类型的转yyyy年MM月dd日格式
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -298,8 +298,8 @@ public class DoctorPigs {
 
                     //date类型的转yyyy年MM月dd日格式
                     SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
-                    String format2 = sdf2.format(String.valueOf(s.getEventAt()));
-                    rowadd.createCell(2).setCellValue(format2);
+                    String format2 = sdf2.format(s.getEventAt());
+                    rowadd.createCell(2).setCellValue(String.valueOf(format2));
 
                     rowadd.createCell(3).setCellValue(String.valueOf(s.getDesc()));
                     rowadd.createCell(4).setCellValue(String.valueOf(s.getFarmName()));
