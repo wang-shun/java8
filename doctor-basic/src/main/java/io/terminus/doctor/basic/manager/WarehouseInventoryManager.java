@@ -31,6 +31,7 @@ public class WarehouseInventoryManager extends AbstractStockManager<WarehouseSto
         if (profit) {
             materialHandle.setType(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue());
             materialHandle.setUnitPrice(detail.getUnitPrice());
+            materialHandle.setAmount(detail.getAmount());
         } else {
             materialHandle.setType(WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue());
         }

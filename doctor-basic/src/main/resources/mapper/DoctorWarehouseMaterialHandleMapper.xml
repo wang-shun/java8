@@ -204,6 +204,10 @@
         WHERE id = #{id}
     </update>
 
+    <update id="updateWarehouseMaterialHandle" parameterType="DoctorWarehouseMaterialHandle">
+        update doctor_warehouse_material_handle set `vendor_name` = #{vendorName},`material_name` = #{materialName},`unit` = #{unit},updated_at = now() where `material_id` = #{materialId}
+    </update>
+
     <update id="updates" parameterType="list">
         <foreach collection="list" item="m" separator=";">
             UPDATE
@@ -475,6 +479,7 @@
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         WHERE warehouse_id=#{warehouseId}
+        AND material_id=#{materialId}
         AND type=#{type}
         AND <![CDATA[ handle_date <= #{handleDate}]]>
         AND delete_flag=1

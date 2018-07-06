@@ -778,6 +778,13 @@
         WHERE `pig_id` = #{pigId} AND status =1
     </update>
 
+    <!--<update id="updateAmountPigEventByPigId" parameterType="map">-->
+        <!--UPDATE-->
+        <!--<include refid="tb"/>-->
+        <!--SET amount = #{amount}-->
+        <!--WHERE `pig_id` = #{pigId} AND status =1-->
+    <!--</update>-->
+
     <update id="update" parameterType="DoctorPigEvent">
         UPDATE
         <include refid="tb"/>

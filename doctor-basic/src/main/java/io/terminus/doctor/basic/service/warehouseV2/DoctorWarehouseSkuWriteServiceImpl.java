@@ -3,12 +3,11 @@ package io.terminus.doctor.basic.service.warehouseV2;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
-import io.terminus.doctor.basic.dao.DoctorFarmBasicDao;
-import io.terminus.doctor.basic.dao.DoctorWarehouseSkuDao;
-import io.terminus.doctor.basic.dao.DoctorWarehouseStockDao;
+import io.terminus.doctor.basic.dao.*;
 import io.terminus.doctor.basic.enums.WarehouseSkuStatus;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.common.exception.InvalidException;
@@ -39,7 +38,10 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
     private DoctorBasicMaterialDao doctorBasicMaterialDao;
     @Autowired
     private DoctorFarmBasicDao doctorFarmBasicDao;
-
+    @Autowired
+    private DoctorWarehouseMaterialApplyDao doctorWarehouseMaterialApplyDao;
+    @Autowired
+    private DoctorWarehouseMaterialHandleDao doctorWarehouseMaterialHandleDao;
     @Autowired
     private DoctorWarehouseStockDao doctorWarehouseStockDao;
 
@@ -85,7 +87,7 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
 
     @Override
     @ExceptionHandle("doctor.warehouse.sku.update.fail")
-    public Response<Boolean> update(DoctorWarehouseSku doctorWarehouseSku) {
+    public Response<Boolean> update(DoctorWarehouseSku doctorWarehouseSku,String vendorName) {
 
         DoctorBasicMaterial item = doctorBasicMaterialDao.findById(doctorWarehouseSku.getItemId());
         if (null == item)
@@ -103,14 +105,35 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
                 throw new InvalidException("warehouse.sku.code.existed", doctorWarehouseSku.getCode());
         }
 
-//        DoctorFarmBasic doctorFarmBasic = doctorFarmBasicDao.findByFarmId(doctorWarehouseSku.getFarmId());
-//        if (null == doctorFarmBasic)
-//            throw new InvalidException("farm.basic.not.found", doctorWarehouseSku.getFarmId());
+        Boolean update = doctorWarehouseSkuDao.update(doctorWarehouseSku);
+        boolean ff=false;
+        if(update){
+            //type name unit
+            //update doctor_warehouse_material_apply set material_name='1022',type=2,unit=101 where material_id=12;
+            DoctorWarehouseMaterialApply ma=new DoctorWarehouseMaterialApply();
+            ma.setMaterialName(doctorWarehouseSku.getName());
+            ma.setUnit(doctorWarehouseSku.getUnit());
+            ma.setType(doctorWarehouseSku.getType());
+            ma.setMaterialId(doctorWarehouseSku.getId());
+            Boolean maBoolean = doctorWarehouseMaterialApplyDao.updateWarehouseMaterialApply(ma);
 
-//        if (!doctorFarmBasic.getMaterialIdList().contains(doctorWarehouseSku.getItemId()))
-//            throw new InvalidException("basic.material.not.allow.in.this.warehouse");
+            //update doctor_warehouse_material_handle set vendor_name= ,material_name= ,unit= where material_id=;
+            DoctorWarehouseMaterialHandle mh=new DoctorWarehouseMaterialHandle();
+            mh.setVendorName(vendorName);
+            mh.setMaterialName(doctorWarehouseSku.getName());
+            mh.setUnit(doctorWarehouseSku.getUnit());
+            mh.setMaterialId(doctorWarehouseSku.getId());
+            Boolean mhBoolean = doctorWarehouseMaterialHandleDao.updateWarehouseMaterialHandle(mh);
 
-        return Response.ok(doctorWarehouseSkuDao.update(doctorWarehouseSku));
+            //update doctor_warehouse_stock set sku_name= where sku_id=;
+            DoctorWarehouseStock s=new DoctorWarehouseStock();
+            s.setSkuName(doctorWarehouseSku.getName());
+            s.setSkuId(doctorWarehouseSku.getId());
+            Boolean sBoolean = doctorWarehouseStockDao.updateWarehouseStock(s);
+            ff=true;
+        }
+
+        return Response.ok(ff);
     }
 
     @Override
