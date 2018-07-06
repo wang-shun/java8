@@ -69,13 +69,15 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map.put("deliveryBarn", "未分娩");
                     map.put("deliveryDate", "");
                     map.put("deliveryFarm", "未分娩");
-                    Map<String,Object> idsameparity = doctorReportDeliverDao.idsameparity((BigInteger)map.get("pig_id"), (int)map.get("parity"),(Date)map.get("event_at"));//判断是否存在同一胎次多次配种
+                    Map<String,Object> idsameparity = doctorReportDeliverDao.idsameparity((BigInteger)map.get("id"),(BigInteger)map.get("pig_id"), (int)map.get("parity"),(Date)map.get("event_at"));//判断是否存在同一胎次多次配种
                     Date event_at1 = null;//存在同一胎次多次配种情况下的最近一次配种
+                    BigInteger id1 = null;
                     if(idsameparity != null){
                         event_at1 = (Date)idsameparity.get("event_at");
+                        id1 = (BigInteger)idsameparity.get("id");
                     }
                     //查询妊娠检查结果
-                    Map<String,Object> notdelivery = doctorReportDeliverDao.notdelivery((BigInteger)map.get("pig_id"), (int)map.get("parity"),(Date)map.get("event_at"), event_at1);
+                    Map<String,Object> notdelivery = doctorReportDeliverDao.notdelivery((BigInteger)map.get("id"),(BigInteger)map.get("pig_id"), (int)map.get("parity"),(Date)map.get("event_at"), event_at1,id1);
                     if(notdelivery != null) {
                         int a = (int) notdelivery.get("preg_check_result");
                         if (a == 1) {
@@ -94,7 +96,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         map.put("notdelivery", "");
                     }
                     //死逃的
-                    Map<String,Object> leave = doctorReportDeliverDao.leave((BigInteger)map.get("pig_id"), (int)map.get("parity"),(Date)map.get("event_at"), event_at1);
+                    Map<String,Object> leave = doctorReportDeliverDao.leave((BigInteger)map.get("id"),(BigInteger)map.get("pig_id"), (int)map.get("parity"),(Date)map.get("event_at"), event_at1,id1);
                     if(leave != null) {
                         long b = (long) leave.get("change_type_id");
                         if (b == 110) {

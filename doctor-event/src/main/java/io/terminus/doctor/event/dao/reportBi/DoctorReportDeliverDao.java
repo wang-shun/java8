@@ -51,24 +51,29 @@ public class DoctorReportDeliverDao extends MyBatisDao<DoctorReportDeliver> {
         map.put("eventAt",eventAt);
         return getSqlSession().selectList(sqlId("deliveryBarn"), map);
     }
-    public Map<String,Object> notdelivery(BigInteger pigId , int parity , Date event_at, Date event_at1){
+    public Map<String,Object> notdelivery(BigInteger id,BigInteger pigId , int parity , Date event_at, Date event_at1,BigInteger id1 ){
         Map<String,Object> map = new HashMap<>();
         map.put("parity",parity);
         map.put("pigId",pigId);
         map.put("event_at",event_at);
         map.put("event_at1",event_at1);
+        map.put("id1",id1);
+        map.put("id",id);
         return getSqlSession().selectOne(sqlId("notdelivery"), map);
     }
-    public Map<String,Object> leave(BigInteger pigId , int parity , Date event_at, Date event_at1){
+    public Map<String,Object> leave(BigInteger id,BigInteger pigId , int parity , Date event_at, Date event_at1,BigInteger id1){
         Map<String,Object> map = new HashMap<>();
         map.put("parity",parity);
         map.put("pigId",pigId);
         map.put("event_at",event_at);
         map.put("event_at1",event_at1);
+        map.put("id1",id1);
+        map.put("id",id);
         return getSqlSession().selectOne(sqlId("leave"), map);
     }
-    public Map<String,Object> idsameparity(BigInteger pigId , int parity, Date eventAt){
+    public Map<String,Object> idsameparity(BigInteger id ,BigInteger pigId , int parity, Date eventAt){
         Map<String,Object> map = new HashMap<>();
+        map.put("id",id);
         map.put("parity",parity);
         map.put("pigId",pigId);
         map.put("eventAt",eventAt);
