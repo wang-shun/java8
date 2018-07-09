@@ -20,8 +20,8 @@
                 #{type}
             </foreach>
         </if>
-
-        <if test="statuses != null">
+        <if test="status != null and status != '' ">AND b.status = #{status}</if>
+        <if test="statuses != null and statuses != '' ">
             and b.status in
             <foreach collection="statuses" item="item" open="(" separator="," close=")">
                 #{item}
