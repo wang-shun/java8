@@ -370,11 +370,9 @@
         where pig_id = #{pigId}
         and type=11
         and parity = #{parity}
-        and event_at >= #{event_at}
         and id > #{id}
-        <if test="event_at1 != null"> AND event_at &lt;= #{event_at1}</if>
         <if test="id1 != null"> AND id &lt;= #{id1}</if>
-        order by event_at desc limit 1
+        order by id desc limit 1
     </select>
     <select id="leave" parameterType="map" resultType="map">
         select change_type_id
@@ -382,11 +380,9 @@
         where pig_id = #{pigId}
         and type=6
         and parity = #{parity}
-        and event_at >= #{event_at}
         and id > #{id}
-        <if test="event_at1 != null"> AND event_at &lt;= #{event_at1}</if>
         <if test="id1 != null"> AND id &lt;= #{id1}</if>
-        order by event_at desc limit 1
+        order by id desc limit 1
     </select>
     <select id="idsameparity" parameterType="map" resultType="map">
         select event_at,id
@@ -394,8 +390,7 @@
         where pig_id = #{pigId}
         and type=9
         and parity = #{parity}
-        and event_at >= #{eventAt}
         and id > #{id}
-        order by event_at asc limit 1
+        order by id asc limit 1
     </select>
 </mapper>
