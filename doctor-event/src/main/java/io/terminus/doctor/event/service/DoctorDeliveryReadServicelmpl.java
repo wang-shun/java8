@@ -29,7 +29,8 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
     @Override
     public List<Map<String,Object>> getMating(Long farmId, Date beginDate, Date endDate,String pigCode,String operatorName){
         List<Map<String,Object>> matingList = doctorReportDeliverDao.getMating(farmId, beginDate, endDate,pigCode,operatorName);
-        for(Map map : matingList){
+        for(int i = 0; i<matingList.size(); i++){
+            Map map = matingList.get(i);
             String a = String.valueOf(map.get("pig_status"));
             if(a.equals(String.valueOf(PigStatus.Entry.getKey()))){
                 map.put("pig_status",PigStatus.Entry.getName());
@@ -58,7 +59,11 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             if(a.equals(String.valueOf(PigStatus.CHG_FARM.getKey()))){
                 map.put("pig_status",PigStatus.CHG_FARM.getName());
             }
-            List<Map<String,Object>> deliveryBarn = doctorReportDeliverDao.deliveryBarn((BigInteger)map.get("id"),(BigInteger)map.get("pig_id"), (Date)map.get("event_at"));//判断是否分娩以及查询分娩猪舍
+            BigInteger id = (BigInteger)map.get("id");
+            BigInteger pig_id = (BigInteger)map.get("pig_id");
+            int parity = (int)map.get("parity");
+            Date event_at = (Date)map.get("event_at");
+            List<Map<String,Object>> deliveryBarn = doctorReportDeliverDao.deliveryBarn(id,pig_id, event_at);//判断是否分娩以及查询分娩猪舍
             if(deliveryBarn != null) {
                 if (deliveryBarn.size() != 0) {
                     map.put("deliveryFarm", (String) deliveryBarn.get(0).get("farm_name"));
@@ -70,10 +75,6 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map.put("deliveryBarn", "未分娩");
                     map.put("deliveryDate", "");
                     map.put("deliveryFarm", "未分娩");
-                    BigInteger id = (BigInteger)map.get("id");
-                    BigInteger pig_id = (BigInteger)map.get("pig_id");
-                    int parity = (int)map.get("parity");
-                    Date event_at = (Date)map.get("event_at");
                     Map<String,Object> idsameparity = doctorReportDeliverDao.idsameparity(id,pig_id, parity,event_at);//判断是否存在同一胎次多次配种
                     Date event_at1 = null;//存在同一胎次多次配种情况下的最近一次配种
                     BigInteger id1 = null;
