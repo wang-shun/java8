@@ -73,8 +73,8 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
         return doctorPigEvent;
     }
 
-    //因为不允许修改初配日期，不会影响track，所以注释，如果以后可以编辑初配事件再打开
-    @Override
+    //因为不允许修改初配日期，不会影响track，所以注释，如果以后可以编辑初配事件再打开aaa
+    @Overs
     public DoctorPigTrack buildNewTrack(DoctorPigTrack oldPigTrack, DoctorEventChangeDto changeDto) {
         DoctorPigEvent firstMateEvent = doctorPigEventDao.getFirstMateEvent(oldPigTrack.getPigId(), new Date());
         if (Objects.equals(firstMateEvent.getId(), changeDto.getEventId()) && oldPigTrack.getExtraMap().containsKey("judgePregDate")) {
