@@ -19,11 +19,13 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.ResponseUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Function;
@@ -57,6 +59,22 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
     @Autowired
     private DoctorWarehouseMaterialApplyDao doctorWarehouseMaterialApplyDao;
+
+    @Override
+    public Response<BigDecimal> getPDPrice(Long warehouseId, Long materialId, String handleDate){
+        DoctorWarehouseMaterialHandle mh=new DoctorWarehouseMaterialHandle();
+        mh.setWarehouseId(warehouseId);
+        mh.setMaterialId(materialId);
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            Date dd = sdf.parse(handleDate);
+            mh.setHandleDate(DateUtils.addDays(dd,1));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        DoctorWarehouseMaterialHandle previous = doctorWarehouseMaterialHandleDao.findPrevious(mh, WarehouseMaterialHandleType.IN);
+        return Response.ok(previous.getUnitPrice());
+    }
 
     @Override
     public Response<BigDecimal> findWJSQuantity(BigInteger warehouseId,Integer warehouseType,Long materialId,Integer materialType,String materialName, Date settlementDate) {

@@ -124,6 +124,10 @@
         WHERE id = #{id}
     </update>
 
+    <update id="updateWarehouseStock" parameterType="DoctorWarehouseStock">
+        update doctor_warehouse_stock set `sku_name` = #{skuName},updated_at = now() where `sku_id` = #{skuId}
+    </update>
+
     <delete id="delete" parameterType="long">
         DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
