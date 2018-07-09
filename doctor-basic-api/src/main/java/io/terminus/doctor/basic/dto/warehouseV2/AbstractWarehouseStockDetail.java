@@ -2,6 +2,7 @@ package io.terminus.doctor.basic.dto.warehouseV2;
 
 import lombok.Data;
 
+import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -23,6 +24,7 @@ public abstract class AbstractWarehouseStockDetail {
             @DecimalMin(value = "0", inclusive = true, message = "stock.quantity.small.then.zero", groups = StockInventoryValid.class),
             @DecimalMin(value = "0", inclusive = false, message = "stock.quantity.small.then.zero", groups = {StockOtherValid.class, StockFormulaValid.class})
     })
+    @DecimalMax(value = "0",inclusive = false, message = "stock.quantity.big.then.zero",groups = {StockRefundValid.class})
     private BigDecimal quantity;
 
     private String remark;
@@ -40,7 +42,9 @@ public abstract class AbstractWarehouseStockDetail {
     }
 
     public static interface StockFormulaValid {
+    }
 
+    public static interface StockRefundValid {
     }
 
 }
