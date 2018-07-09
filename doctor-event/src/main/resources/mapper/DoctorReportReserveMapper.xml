@@ -169,6 +169,7 @@
             </if>
             <if test="dateType == 5">AND date_format(sum_at, '%y') = date_format(#{sumAt}, '%y')</if>
         </where>
+        limit 1
     </select>
 
     <select id="findBy" parameterType="map" resultMap="DoctorReportReserveMap">
