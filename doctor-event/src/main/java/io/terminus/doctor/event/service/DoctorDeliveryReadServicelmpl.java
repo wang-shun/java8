@@ -62,8 +62,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             BigInteger id = (BigInteger)map.get("id");
             BigInteger pig_id = (BigInteger)map.get("pig_id");
             int parity = (int)map.get("parity");
-            Date event_at = (Date)map.get("event_at");
-            List<Map<String,Object>> deliveryBarn = doctorReportDeliverDao.deliveryBarn(id,pig_id, event_at);//判断是否分娩以及查询分娩猪舍
+            List<Map<String,Object>> deliveryBarn = doctorReportDeliverDao.deliveryBarn(id,pig_id);//判断是否分娩以及查询分娩猪舍
             if(deliveryBarn != null) {
                 if (deliveryBarn.size() != 0) {
                     map.put("deliveryFarm", (String) deliveryBarn.get(0).get("farm_name"));
@@ -75,15 +74,14 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map.put("deliveryBarn", "未分娩");
                     map.put("deliveryDate", "");
                     map.put("deliveryFarm", "未分娩");
-                    Map<String,Object> idsameparity = doctorReportDeliverDao.idsameparity(id,pig_id, parity,event_at);//判断是否存在同一胎次多次配种
-                    Date event_at1 = null;//存在同一胎次多次配种情况下的最近一次配种
+                    Map<String,Object> idsameparity = doctorReportDeliverDao.idsameparity(id,pig_id, parity);//判断是否存在同一胎次多次配种
+                    //存在同一胎次多次配种情况下的最近一次配种
                     BigInteger id1 = null;
                     if(idsameparity != null){
-                        event_at1 = (Date)idsameparity.get("event_at");
                         id1 = (BigInteger)idsameparity.get("id");
                     }
                     //查询妊娠检查结果
-                    Map<String,Object> notdelivery = doctorReportDeliverDao.notdelivery(id,pig_id, parity,event_at, event_at1,id1);
+                    Map<String,Object> notdelivery = doctorReportDeliverDao.notdelivery(id,pig_id, parity,id1);
                     if(notdelivery != null) {
                         int b = (int) notdelivery.get("preg_check_result");
                         if (b == 1) {
@@ -102,7 +100,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         map.put("notdelivery", "");
                     }
                     //死逃的
-                    Map<String,Object> leave = doctorReportDeliverDao.leave(id,pig_id, parity,event_at, event_at1,id1);
+                    Map<String,Object> leave = doctorReportDeliverDao.leave(id,pig_id, parity,id1);
                     if(leave != null) {
                         long b = (long) leave.get("change_type_id");
                         if (b == 110) {

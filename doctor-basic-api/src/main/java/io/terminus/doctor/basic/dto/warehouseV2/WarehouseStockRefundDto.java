@@ -21,7 +21,7 @@ public class WarehouseStockRefundDto extends AbstractWarehouseStockDto implement
     private Long outStockHandleId;
 
     @Valid
-    @NotEmpty(message = "stock.detail.empty", groups = AbstractWarehouseStockDetail.StockDefaultValid.class)
+    @NotEmpty(message = "stock.detail.empty", groups = AbstractWarehouseStockDetail.StockRefundValid.class)
     private List<WarehouseStockRefundDto.WarehouseStockRefundDetailDto> details;
 
 

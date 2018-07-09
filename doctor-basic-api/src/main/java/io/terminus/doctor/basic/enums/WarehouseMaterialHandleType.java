@@ -105,15 +105,15 @@ public enum WarehouseMaterialHandleType {
         return WarehouseMaterialHandleType.OUT.getValue() == value
                 || WarehouseMaterialHandleType.INVENTORY_DEFICIT.getValue() == value
                 || WarehouseMaterialHandleType.TRANSFER_OUT.getValue() == value
-                || WarehouseMaterialHandleType.FORMULA_OUT.getValue() == value;
+                || WarehouseMaterialHandleType.FORMULA_OUT.getValue() == value
+                || WarehouseMaterialHandleType.RETURN.getValue() == value;
     }
 
     public static boolean isBigIn(int value) {
         return WarehouseMaterialHandleType.IN.getValue() == value
                 || WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue() == value
                 || WarehouseMaterialHandleType.TRANSFER_IN.getValue() == value
-                || WarehouseMaterialHandleType.FORMULA_IN.getValue() == value
-                || WarehouseMaterialHandleType.RETURN.getValue() == value;
+                || WarehouseMaterialHandleType.FORMULA_IN.getValue() == value;
     }
 
     public static List<Integer> getGroupType(Integer type) {
