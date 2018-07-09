@@ -389,7 +389,7 @@
         order by event_at desc limit 1
     </select>
     <select id="idsameparity" parameterType="map" resultType="map">
-        select event_at
+        select event_at,id
         from doctor_pig_events
         where pig_id = #{pigId}
         and type=9
