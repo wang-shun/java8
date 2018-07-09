@@ -218,14 +218,24 @@ public class DoctorSearches {
             objectMap.put("statuses", Splitters.splitToInteger(objectMap.get("statuses").toString(), Splitters.UNDERSCORE));
         }
 
-        Paging<SearchedPig> paging;
-        if(objectMap.containsKey("statuses")
-                && ((List)objectMap.get("statuses")).contains(PigStatus.CHG_FARM.getKey())){
-            log.error("pagePigs:"+1+":"+objectMap.toString());
-            paging = RespHelper.or500(doctorPigReadService.pagingChgFarmPig(objectMap, pageNo, pageSize));
-        } else {
-            log.error("pagePigs:"+2+":"+objectMap.toString());
-            paging = RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
+        Paging<SearchedPig> paging = null;
+        if(objectMap.containsKey("statuses") && !((List)objectMap.get("statuses")).contains(0)){
+            if(objectMap.containsKey("statuses")
+                    && ((List)objectMap.get("statuses")).contains(PigStatus.CHG_FARM.getKey())){
+                log.error("pagePigs:"+1+":"+objectMap.toString());
+                paging = RespHelper.or500(doctorPigReadService.pagingChgFarmPig(objectMap, pageNo, pageSize));
+            } else {
+                log.error("pagePigs:"+2+":"+objectMap.toString());
+                paging = RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
+            }
+        } else{
+            Paging<SearchedPig> paging2 = RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
+            Paging<SearchedPig> paging1 = RespHelper.or500(doctorPigReadService.pagingChgFarmPig(objectMap, pageNo, pageSize));
+            List<SearchedPig> a = paging1.getData();
+            List<SearchedPig> b =  paging2.getData();
+            a.addAll(b);
+            paging.setData(a);
+            paging.setTotal(paging1.getTotal() + paging2.getTotal());
         }
         paging.getData().forEach(searchedPig -> {
             if(searchedPig.getPigType() != null){
