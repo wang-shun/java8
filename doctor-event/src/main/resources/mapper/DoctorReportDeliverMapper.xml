@@ -356,6 +356,7 @@
             <if test="operatorName != null"> AND a.operator_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
         </where>
         ORDER  BY  a.barn_name
+        limit 20
     </select>
     <select id="deliveryBarn" parameterType="map" resultType="map">
         select barn_name,event_at,farm_name
