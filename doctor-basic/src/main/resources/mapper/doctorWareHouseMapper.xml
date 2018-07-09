@@ -231,7 +231,7 @@
                 when '10' then -quantity
                 when '11' then quantity
                 when '12' then -quantity
-                when '13' then quantity end
+                when '13' then -quantity end
                 ),0) as lastmonth_sum_quantity
                 FROM doctor_warehouse_material_handle
                 WHERE warehouse_id=#{warehouseId}
@@ -362,7 +362,7 @@
             when '10' then -quantity
             when '11' then quantity
             when '12' then -quantity
-            when '13' then quantity end
+            when '13' then -quantity end
             ),0) as lastmonth_sum_quantity
             FROM doctor_warehouse_material_handle
             WHERE warehouse_id=#{warehouseId}
