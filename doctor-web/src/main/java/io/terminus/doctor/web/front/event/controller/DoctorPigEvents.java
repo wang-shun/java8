@@ -594,7 +594,7 @@ public class DoctorPigEvents {
     @RequestMapping(value = "/list/sales", method = RequestMethod.GET)
     @ResponseBody
     public List<DoctorPigSalesExportDto> listPigSales(@RequestParam(required = false) Map<String, Object> pigEventCriteria,
-                                                      @RequestParam String date) {
+                                                      @RequestParam(required = false) String date) {
 
         pigEventCriteria = Params.filterNullOrEmpty(pigEventCriteria);
         DateTime dateTime = DateTime.parse(date);

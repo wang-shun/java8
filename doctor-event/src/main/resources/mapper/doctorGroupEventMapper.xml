@@ -801,7 +801,7 @@
         event_at as salesDate,
         sum(quantity) as pigNumber,
         sum(weight) as pigWeight,
-        sum(amount)/sum(quantity) as pigPrice,
+        sum(amount)/sum(weight) as pigPrice,
         sum(amount) as pigAmount,
         customer_name as client
         from <include refid="tb"/>
@@ -822,7 +822,7 @@
         event_at as salesDate,
         sum(quantity) as pigNumber,
         sum(weight) as pigWeight,
-        sum(amount)/sum(quantity) as pigPrice,
+        sum(amount)/sum(weight) as pigPrice,
         sum(amount) as pigAmount,
         customer_name AS client
         from <include refid="tb"/>
@@ -843,7 +843,7 @@
         event_at as salesDate,
         sum(quantity) as pigNumber,
         sum(weight) as pigWeight,
-        sum(amount)/sum(quantity) as pigPrice,
+        sum(amount)/sum(weight) as pigPrice,
         sum(amount) as pigAmount,
         customer_name AS client
         from <include refid="tb"/>
