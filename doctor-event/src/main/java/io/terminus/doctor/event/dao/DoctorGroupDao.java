@@ -29,6 +29,10 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
         return getSqlSession().selectList(sqlId("findByCurrentBarnId"), currentBarnId);
     }
 
+    public List<DoctorGroup> findByCurrentBarnIdAndQuantity(Long currentBarnId) {
+        return getSqlSession().selectList(sqlId("findByCurrentBarnIdAndQuantity"), currentBarnId);
+    }
+
     public List<DoctorGroup> findByFarmId(Long farmId) {
         return getSqlSession().selectList(sqlId("findByFarmId"), farmId);
     }

@@ -467,9 +467,7 @@ public class DoctorGroupEvents {
         if (barnId == null) {
             return Lists.newArrayList();
         }
-        return RespHelper.or500(doctorGroupReadService.findGroupByCurrentBarnId(barnId)).stream()
-                .filter(group -> Objects.equals(DoctorGroup.Status.CREATED.getValue(), group.getStatus()))
-                .collect(Collectors.toList());
+        return RespHelper.or500(doctorGroupReadService.findByCurrentBarnIdAndQuantity(barnId));
     }
 
     /**
