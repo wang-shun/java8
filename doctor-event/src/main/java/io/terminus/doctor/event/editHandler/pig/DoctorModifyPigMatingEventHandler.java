@@ -115,7 +115,7 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
             return oldPigTrack;
         }
 
-        //之前,事件妊娠检查
+        //之前,事件妊娠检查aaa
         if (Objects.equals(beforeStatusEvent.getType(), PigEvent.PREG_CHECK.getKey())) {
             DoctorPigEvent firstMateEvent = doctorPigEventDao.getFirstMateEvent(deletePigEvent.getPigId(), deletePigEvent.getEventAt());
             oldPigTrack.setStatus(PigStatus.KongHuai.getKey());
