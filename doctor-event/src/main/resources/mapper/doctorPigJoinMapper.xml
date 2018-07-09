@@ -20,15 +20,8 @@
                 #{type}
             </foreach>
         </if>
-        <if test="status != null"> AND b.status = #{status}</if>
-        <if test="status == ''"> AND 1 = 1 </if>
-        <if test="statuses != null">
-             and b.status in
-            <foreach collection="statuses" item="item" open="(" separator="," close=")">
-                #{item}
-            </foreach>
-        </if>
-        <if test="statuses == ''"> AND 2 = 2 </if>
+        <if test="statuses != null"> AND b.status = #{status}</if>
+
         <if test="all == null">
             <if test="isRemoval != null">
                 and b.is_removal = #{isRemoval}
