@@ -9,6 +9,7 @@ import io.terminus.doctor.common.utils.ResponseUtil;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.Map;
 import java.util.List;
@@ -20,6 +21,9 @@ import java.util.List;
  * Created by [ your name ]
  */
 public interface DoctorWarehouseMaterialHandleReadService {
+
+    //盘盈的时候得到最近一次的采购单价
+    Response<BigDecimal> getPDPrice(Long warehouseId,Long materialId,String handleDate);
 
     /**
      * 未结算：上月结存数量实时计算

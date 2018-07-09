@@ -355,6 +355,8 @@
             <if test="pigCode != null"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
             <if test="operatorName != null"> AND a.operator_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
         </where>
+        ORDER  BY  a.barn_name
+        limit 20
     </select>
     <select id="deliveryBarn" parameterType="map" resultType="map">
         select barn_name,event_at,farm_name
@@ -362,5 +364,39 @@
         where pig_id = #{pigId}
         and type=15
         and rel_event_id = #{id}
+    </select>
+    <select id="notdelivery" parameterType="map" resultType="map">
+        select preg_check_result
+        from doctor_pig_events
+        where pig_id = #{pigId}
+        and type=11
+        and parity = #{parity}
+        and event_at >= #{event_at}
+        and id > #{id}
+        <if test="event_at1 != null"> AND event_at &lt;= #{event_at1}</if>
+        <if test="id1 != null"> AND id &lt;= #{id1}</if>
+        order by event_at desc limit 1
+    </select>
+    <select id="leave" parameterType="map" resultType="map">
+        select change_type_id
+        from doctor_pig_events
+        where pig_id = #{pigId}
+        and type=6
+        and parity = #{parity}
+        and event_at >= #{event_at}
+        and id > #{id}
+        <if test="event_at1 != null"> AND event_at &lt;= #{event_at1}</if>
+        <if test="id1 != null"> AND id &lt;= #{id1}</if>
+        order by event_at desc limit 1
+    </select>
+    <select id="idsameparity" parameterType="map" resultType="map">
+        select event_at
+        from doctor_pig_events
+        where pig_id = #{pigId}
+        and type=9
+        and parity = #{parity}
+        and event_at >= #{eventAt}
+        and id > #{id}
+        order by event_at asc limit 1
     </select>
 </mapper>

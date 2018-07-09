@@ -1019,21 +1019,22 @@ public class ReportController {
 
                         tempmap.put("jcsl",singleJcsl.compareTo(BigDecimal.ZERO) == 0 ? "" :
                                 singleJcsl.setScale(3, BigDecimal.ROUND_HALF_UP)); //单笔记录的结存数量
-                        if(byjsflag) {
-                            tempmap.put("jcje", singleJcje.compareTo(BigDecimal.ZERO) == 0 ? "" :
-                                    singleJcje.setScale(2, BigDecimal.ROUND_HALF_UP)); //单笔记录的结存金额
-                        }else{
-                            tempmap.put("jcje","--");
-                        }
-                        if(byjsflag) {
-                            if (singleJcsl.compareTo(BigDecimal.ZERO) == 0 || singleJcje.compareTo(BigDecimal.ZERO) == 0) {
-                                tempmap.put("jcdj", "");
+                        //物料变动报表结存的数量为0的之后，单价和金额也展示0
+                        if(singleJcsl.compareTo(BigDecimal.ZERO) == 0||singleJcje.compareTo(BigDecimal.ZERO) == 0){
+                            tempmap.put("jcje","");
+                            tempmap.put("jcdj", "");
+                        }else {
+                            if (byjsflag) {
+                                tempmap.put("jcje", singleJcje.compareTo(BigDecimal.ZERO) == 0 ? "" :
+                                        singleJcje.setScale(2, BigDecimal.ROUND_HALF_UP)); //单笔记录的结存金额
                             } else {
-                                tempmap.put("jcdj", singleJcje.divide(singleJcsl, 4, BigDecimal.ROUND_HALF_UP));
+                                tempmap.put("jcje", "--");
                             }
-                        }
-                        else{
-                            tempmap.put("jcdj", "--");
+                            if (byjsflag) {
+                                tempmap.put("jcdj", singleJcje.divide(singleJcsl, 4, BigDecimal.ROUND_HALF_UP));
+                            } else {
+                                tempmap.put("jcdj", "--");
+                            }
                         }
                         resultNewMap.add(tempmap);
                         tempsinglejcsl = singleJcsl;

@@ -292,6 +292,16 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
+    public Response<List<DoctorGroup>> findByCurrentBarnIdAndQuantity(Long barnId) {
+        try {
+            return Response.ok(doctorGroupDao.findByCurrentBarnIdAndQuantity(barnId));
+        } catch (Exception e) {
+            log.error("find group by current barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.find.fail");
+        }
+    }
+
+    @Override
     public Response<Long> findGroupPigQuantityByBarnId(Long barnId) {
         try {
             Integer groupQuantity =
@@ -300,7 +310,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
 
             long pigQuantity = doctorPigTrackDao.findByBarnId(barnId).stream().filter(p -> p.getIsRemoval() == IsOrNot.NO.getValue().intValue()).count();
 
-            return Response.ok(groupQuantity + pigQuantity);
+            return Response.ok(pigQuantity);
         } catch (Exception e) {
             log.error("find group by current barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
             return Response.fail("group.find.fail");
