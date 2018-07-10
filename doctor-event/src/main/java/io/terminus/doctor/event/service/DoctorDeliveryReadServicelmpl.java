@@ -96,8 +96,10 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         if (b == 4) {
                             map.put("notdelivery", "返情");
                         }
+                        map.put("check_event_at",notdelivery.get("event_at"));
                     }else{
                         map.put("notdelivery", "");
+                        map.put("check_event_at", "");
                     }
                     //死逃的
                     Map<String,Object> leave = doctorReportDeliverDao.leave(id,pig_id, parity,id1);
@@ -110,8 +112,10 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         }else{
                             map.put("deadorescape", "");
                         }
+                        map.put("leave_event_at",leave.get("event_at"));
                     }else{
                         map.put("deadorescape", "");
+                        map.put("leave_event_at", "");
                     }
                 }
             }

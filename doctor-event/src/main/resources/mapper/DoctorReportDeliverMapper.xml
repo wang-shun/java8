@@ -366,7 +366,7 @@
         and rel_event_id = #{id}
     </select>
     <select id="notdelivery" parameterType="map" resultType="map">
-        select preg_check_result
+        select preg_check_result,event_at
         from doctor_pig_events
         where pig_id = #{pigId}
         and type=11
@@ -376,7 +376,7 @@
         order by id desc limit 1
     </select>
     <select id="leave" parameterType="map" resultType="map">
-        select change_type_id
+        select change_type_id,event_at
         from doctor_pig_events
         where pig_id = #{pigId}
         and type=6
