@@ -13,18 +13,25 @@ import java.io.Serializable;
 public class DoctorPigSalesExportDto implements Serializable{
 
     private static final long serialVersionUID = -6251193009963881402L;
-    /**
-     * 批次
-     */
-    private String batch;
+
+     /*  批次*/
+     private String batch;
     /**
      * 猪舍名
      */
     private String barnName;
     /**
+     * 猪品种
+     */
+    private String breedName;
+    /**
+     * 猪场名称
+     */
+    private String farmName;
+    /**
      * 销售时间
      */
-    private Date salesDate;
+    private Date e;
     /**
      * 猪的日龄
      */
@@ -57,4 +64,5 @@ public class DoctorPigSalesExportDto implements Serializable{
      * 客户
      */
     private String client;
+
 }

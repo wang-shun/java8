@@ -793,39 +793,40 @@
     
     <select id="findNurseSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
         select
-        group_code as batch,
+      /*  group_code as batch,*/
+        event_at as salesDate,
+        customer_name as client,
         '7_2' as pigType,
         "仔猪" as pigTypeName,
-        sum(avg_day_age*quantity)/sum(quantity) as ages,
         barn_name as barnName,
-        event_at as salesDate,
+         breed_name as breedName,
+        sum(avg_day_age*quantity)/sum(quantity) as ages,
         sum(quantity) as pigNumber,
         sum(weight) as pigWeight,
         sum(amount)/sum(weight) as pigPrice,
-        sum(amount) as pigAmount,
-        customer_name as client
-        from <include refid="tb"/>
+        sum(amount) as pigAmount
+        from <include refid="tb" /> ,doctor_groups
         where type = 3
         and pig_type in ( 2,7 )
         and change_type_id = 109
         <include refid="saleCriteria"/>
-        group by group_id, event_at, customer_id;
+        group by group_id, event_at, customer_id ;
     </select>
 
     <select id="findReverseSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
         select
-        group_code as batch,
+        event_at as salesDate,
+        customer_name AS client,
         pig_type as pigType,
         "后备猪" as pigTypeName,
-        sum(avg_day_age*quantity)/sum(quantity) as ages,
         barn_name as barnName,
-        event_at as salesDate,
+        breed_name as breedName,
+        sum(avg_day_age*quantity)/sum(quantity) as ages,
         sum(quantity) as pigNumber,
         sum(weight) as pigWeight,
         sum(amount)/sum(weight) as pigPrice,
-        sum(amount) as pigAmount,
-        customer_name AS client
-        from <include refid="tb"/>
+        sum(amount) as pigAmount
+        from <include refid="tb"/>,doctor_groups
         where type = 3
         and pig_type = 4
         and change_type_id = 109
@@ -835,18 +836,18 @@
 
     <select id="findFattenSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
         select
-        group_code as batch,
+        event_at as salesDate,
+        customer_name AS client
         pig_type as pigType,
         "育肥猪" as pigTypeName,
+         barn_name as barnName,
+        breed_name as breedName,
         sum(avg_day_age*quantity)/sum(quantity) as ages,
-        barn_name as barnName,
-        event_at as salesDate,
         sum(quantity) as pigNumber,
         sum(weight) as pigWeight,
         sum(amount)/sum(weight) as pigPrice,
-        sum(amount) as pigAmount,
-        customer_name AS client
-        from <include refid="tb"/>
+        sum(amount) as pigAmount
+        from <include refid="tb"/>,doctor_groups
         where type = 3
         and pig_type = 3
         and change_type_id = 109
