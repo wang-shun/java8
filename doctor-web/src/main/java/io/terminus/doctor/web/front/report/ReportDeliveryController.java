@@ -35,8 +35,8 @@ public class ReportDeliveryController {
                                                    @RequestParam(required = false) int isdelivery) {
         return doctorDeliveryReadService.getMating(farmId,beginDate,endDate,pigCode,operatorName,isdelivery);
     }
-
-    @RequestMapping(method = RequestMethod.GET, value = "delivery/report")
+    //导出excel
+    @RequestMapping(method = RequestMethod.GET, value = "delivery/export")
     public void deliveryReports(@RequestParam(required = true) Long farmId,
                                 @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beginDate,
                                 @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
