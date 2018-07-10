@@ -9,11 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -28,10 +26,17 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
     }
 
     @Override
-    public List<Map<String,Object>> getMating(Long farmId, Date beginDate, Date endDate,String pigCode,String operatorName,int isdelivery){
+    public Map<String,Object> getMating(Long farmId, Date beginDate, Date endDate,String pigCode,String operatorName,int isdelivery){
         List<Map<String,Object>> matingList = doctorReportDeliverDao.getMating(farmId, beginDate, endDate,pigCode,operatorName);
         List<Map<String,Object>> delivery = new ArrayList<>(); //分娩了
         List<Map<String,Object>> nodeliver = new ArrayList<>();//未分娩
+        int deliverycount = 0;//分娩数
+        int yangxcount = 0;//阳性数
+        int fqcount = 0;//返情数
+        int lccount = 0;//流产数
+        int yxcount = 0;//阴性数
+        int swcount = 0;//死亡数
+        int ttcount = 0;//淘汰数
         for(int i = 0; i<matingList.size(); i++){
             Map map = matingList.get(i);
             String a = String.valueOf(map.get("pig_status"));
@@ -76,6 +81,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map.put("check_event_at", "");
                     map.put("leave_event_at", "");
                     delivery.add(map);
+                    deliverycount = deliverycount + 1;
                 } else {
                     map.put("deliveryBarn", "未分娩");
                     map.put("deliveryDate", "");
@@ -92,15 +98,19 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         int b = (int) notdelivery.get("preg_check_result");
                         if (b == 1) {
                             map.put("notdelivery", "阳性");
+                            yangxcount = yangxcount + 1;
                         }
                         if (b == 2) {
                             map.put("notdelivery", "阴性");
+                            yxcount = yxcount + 1;
                         }
                         if (b == 3) {
                             map.put("notdelivery", "流产");
+                            lccount = lccount + 1;
                         }
                         if (b == 4) {
                             map.put("notdelivery", "返情");
+                            fqcount = fqcount + 1;
                         }
                         map.put("check_event_at",notdelivery.get("event_at"));
                     }else{
@@ -113,8 +123,10 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         long b = (long) leave.get("change_type_id");
                         if (b == 110) {
                             map.put("deadorescape", "死亡");
+                            swcount = swcount + 1;
                         }else if (b == 111) {
                             map.put("deadorescape", "淘汰");
+                            ttcount = ttcount + 1;
                         }else{
                             map.put("deadorescape", "");
                         }
@@ -127,11 +139,44 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 }
             }
         }
+        int matingcount = matingList.size();
+        String deliveryrate =  divide(deliverycount,matingcount);//分娩率
+        String yangxrate =  divide(yangxcount,matingcount);//阳性率
+        String fqrate =  divide(fqcount,matingcount);//返情率
+        String lcrate =  divide(lccount,matingcount);//流产率
+        String yxrate =  divide(yxcount,matingcount);//阴性率
+        String swrate =  divide(swcount,matingcount);//死亡率
+        String ttrate =  divide(ttcount,matingcount);//淘汰率
+
+        Map<String,Object> list = new HashMap<>();
+        list.put("matingcount",matingcount);
+        list.put("deliverycount",deliverycount);
+        list.put("yangxcount",yangxcount);
+        list.put("fqcount",fqcount);
+        list.put("lccount",lccount);
+        list.put("yxcount",yxcount);
+        list.put("swcount",swcount);
+        list.put("ttcount",ttcount);
+        list.put("deliveryrate",deliveryrate);
+        list.put("yangxrate",yangxrate);
+        list.put("fqrate",fqrate);
+        list.put("lcrate",lcrate);
+        list.put("yxrate",yxrate);
+        list.put("swrate",swrate);
+        list.put("ttrate",ttrate);
         if(isdelivery == 1){
-            return delivery;
+            list.put("data",delivery);
         }else if(isdelivery == 2){
-            return nodeliver;
-        }else
-            return matingList;
+            list.put("data",nodeliver);
+        }else{
+            list.put("data",matingList);
+        }
+            return list;
+    }
+    private String divide(int i,int j){
+        double k = (double)i/j*100;
+        BigDecimal big   =   new  BigDecimal(k);
+        String  l = big.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue() +"%";
+        return l;
     }
 }

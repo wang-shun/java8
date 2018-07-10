@@ -16,7 +16,7 @@ public class ReportDeliveryController {
     private DoctorDeliveryReadService doctorDeliveryReadService;
 
     @RequestMapping(method = RequestMethod.GET, value = "delivery")
-    public List<Map<String,Object>> deliveryReport(@RequestParam(required = true) Long farmId,
+    public Map<String,Object> deliveryReport(@RequestParam(required = true) Long farmId,
                                                    @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beginDate,
                                                    @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
                                                    @RequestParam(required = false) String pigCode,
