@@ -1,6 +1,7 @@
 package io.terminus.doctor.basic.manager;
 
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialApplyDao;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockRefundDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
@@ -72,6 +73,7 @@ public class WarehouseReturnManager extends AbstractStockManager<WarehouseStockR
 
             //已退数量
             BigDecimal alreadyRefundQuantity = doctorWarehouseMaterialHandleDao.countQuantityAlreadyRefund(outMaterialHandle.getId());
+//            BigDecimal alreadyRefundQuantity = doctorWarehouseMaterialHandleDao.findRetreatingById(outMaterialHandle.getId(), null, stockHandleId);
             //计算可退数量
             if (outMaterialHandle.getQuantity().add(alreadyRefundQuantity).compareTo(d.getQuantity().multiply(BigDecimal.valueOf(-1))) < 0)
                 throw new InvalidException("quantity.not.enough.to.refund", outMaterialHandle.getQuantity().add(alreadyRefundQuantity));

@@ -538,7 +538,11 @@
 
     <select id="findRetreatingById" parameterType="map" resultType="BigDecimal">
         select ifnull(sum(quantity),0) from <include refid="tb"/>
-        where type=13 and delete_flag = 1 and rel_material_handle_id=#{relMaterialHandleId} and material_name=#{materialName} and stock_handle_id!=#{stockHandleId}
+        where type=13 and delete_flag = 1 and rel_material_handle_id=#{relMaterialHandleId}
+        <if test="materialName != null">
+          and material_name=#{materialName}
+        </if>
+        and stock_handle_id!=#{stockHandleId}
         order by settlement_date ,id desc;
     </select>
 
