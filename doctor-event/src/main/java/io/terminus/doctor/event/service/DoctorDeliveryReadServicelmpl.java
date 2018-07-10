@@ -70,6 +70,8 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map.put("deliveryDate", (Date) deliveryBarn.get(0).get("event_at"));
                     map.put("notdelivery", "");
                     map.put("deadorescape", "");
+                    map.put("check_event_at", "");
+                    map.put("leave_event_at", "");
                 } else {
                     map.put("deliveryBarn", "未分娩");
                     map.put("deliveryDate", "");
