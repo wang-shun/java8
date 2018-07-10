@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +28,10 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
     }
 
     @Override
-    public List<Map<String,Object>> getMating(Long farmId, Date beginDate, Date endDate,String pigCode,String operatorName){
+    public List<Map<String,Object>> getMating(Long farmId, Date beginDate, Date endDate,String pigCode,String operatorName,int isdelivery){
         List<Map<String,Object>> matingList = doctorReportDeliverDao.getMating(farmId, beginDate, endDate,pigCode,operatorName);
+        List<Map<String,Object>> delivery = new ArrayList<>(); //分娩了
+        List<Map<String,Object>> nodeliver = new ArrayList<>();//未分娩
         for(int i = 0; i<matingList.size(); i++){
             Map map = matingList.get(i);
             String a = String.valueOf(map.get("pig_status"));
@@ -72,6 +75,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map.put("deadorescape", "");
                     map.put("check_event_at", "");
                     map.put("leave_event_at", "");
+                    delivery.add(map);
                 } else {
                     map.put("deliveryBarn", "未分娩");
                     map.put("deliveryDate", "");
@@ -119,10 +123,15 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         map.put("deadorescape", "");
                         map.put("leave_event_at", "");
                     }
+                    nodeliver.add(map);
                 }
             }
-
         }
-        return matingList;
+        if(isdelivery == 1){
+            return delivery;
+        }else if(isdelivery == 2){
+            return nodeliver;
+        }else
+            return matingList;
     }
 }

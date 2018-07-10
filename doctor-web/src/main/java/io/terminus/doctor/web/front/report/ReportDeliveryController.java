@@ -20,7 +20,8 @@ public class ReportDeliveryController {
                                                    @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beginDate,
                                                    @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
                                                    @RequestParam(required = false) String pigCode,
-                                                   @RequestParam(required = false) String operatorName) {
-        return doctorDeliveryReadService.getMating(farmId,beginDate,endDate,pigCode,operatorName);
+                                                   @RequestParam(required = false) String operatorName,
+                                                   @RequestParam(required = false) int isdelivery) {
+        return doctorDeliveryReadService.getMating(farmId,beginDate,endDate,pigCode,operatorName,isdelivery);
     }
 }
