@@ -604,7 +604,6 @@ public class DoctorPigEvents {
         pigEventCriteria.put("endDate", endDate);
         return RespHelper.or500(doctorPigEventReadService.listFindSales(pigEventCriteria));
     }
-
     /**
      * 获取某一头某一胎次下未断奶数量
      * @param pigId 猪id
