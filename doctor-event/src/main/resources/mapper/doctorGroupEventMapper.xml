@@ -795,7 +795,7 @@
         select
         a.event_at as salesDate,
         a.customer_name as client,
-        a.pig_type as pigType,
+        '7_2' as pigType,
         "仔猪" as pigTypeName,
         a.barn_name as barnName,
         sum(a.avg_day_age*a.quantity)/sum(a.quantity) as ages,
@@ -806,9 +806,9 @@
         b.breed_id as breedId,
         b.breed_name as breedName
         from doctor_group_events a left join doctor_groups b on a.group_id = b.id
-        where type = 3
-        and pig_type in ( 2,7 )
-        and change_type_id = 109
+        where a.type = 3
+        and a.pig_type in ( 2,7 )
+        and a.change_type_id = 109
         <if test="farmId != null">AND a.farm_id = #{farmId}</if>
         <if test="batch != null">AND a.group_code = #{batch}</if>
         <if test="barnId != null">AND a.barn_id = #{barnId}</if>
@@ -834,9 +834,9 @@
         b.breed_id as breedId,
         b.breed_name as breedName
         from doctor_group_events a left join doctor_groups b on a.group_id = b.id
-        where type = 3
-        and pig_type = 4
-        and change_type_id = 109
+        where a.type = 3
+        and a.pig_type = 4
+        and a.change_type_id = 109
         <if test="farmId != null">AND a.farm_id = #{farmId}</if>
         <if test="batch != null">AND a.group_code = #{batch}</if>
         <if test="barnId != null">AND a.barn_id = #{barnId}</if>
