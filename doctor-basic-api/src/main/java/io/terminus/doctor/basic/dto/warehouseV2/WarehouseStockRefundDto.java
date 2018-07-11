@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -41,5 +42,8 @@ public class WarehouseStockRefundDto extends AbstractWarehouseStockDto implement
          * 领用猪群
          */
         private Long applyGroupId;
+
+        //上次的退料入库数量
+        private BigDecimal formerQuantity;
     }
 }

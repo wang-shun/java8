@@ -75,8 +75,8 @@ public class WarehouseReturnManager extends AbstractStockManager<WarehouseStockR
             BigDecimal alreadyRefundQuantity = doctorWarehouseMaterialHandleDao.countQuantityAlreadyRefund(outMaterialHandle.getId());
 //            BigDecimal alreadyRefundQuantity = doctorWarehouseMaterialHandleDao.findRetreatingById(outMaterialHandle.getId(), null, stockHandleId);
             //计算可退数量
-            if (outMaterialHandle.getQuantity().add(alreadyRefundQuantity).compareTo(d.getQuantity().multiply(BigDecimal.valueOf(-1))) < 0)
-                throw new InvalidException("quantity.not.enough.to.refund", outMaterialHandle.getQuantity().add(alreadyRefundQuantity));
+            if (outMaterialHandle.getQuantity().add(alreadyRefundQuantity).subtract(d.getFormerQuantity()).compareTo(d.getQuantity().multiply(BigDecimal.valueOf(-1))) < 0)
+                throw new InvalidException("quantity.not.enough.to.refund", outMaterialHandle.getQuantity().add(alreadyRefundQuantity).subtract(d.getFormerQuantity()));
 
             DoctorWarehouseMaterialHandle materialHandle = buildMaterialHandle(d, stockDto, stockHandle, wareHouse);
             materialHandle.setType(WarehouseMaterialHandleType.RETURN.getValue());

@@ -197,7 +197,7 @@
         select DISTINCT warehouse_id from doctor_warehouse_stock_monthly where org_id=#{orgId} and settlement_date = #{settlementDate}
     </select>
 
-    <select id="copyDoctorWarehouseWtockMonthly" parameterType="map" resultType="DoctorWarehouseStockMonthly">
+    <select id="copyDoctorWarehouseWtockMonthly" parameterType="map" resultMap="DoctorWarehouseStockMonthlyMap">
         select * from doctor_warehouse_stock_monthly where warehouse_id=#{warehouseId} and settlement_date = #{lastSettlementDate} and material_id not in(
 	      select DISTINCT material_id from doctor_warehouse_material_handle where settlement_date = #{settlementDate} and warehouse_id=#{warehouseId})
     </select>
