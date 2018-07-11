@@ -591,8 +591,8 @@ public class DoctorPigEvents {
     @RequestMapping(value = "/list/sales", method = RequestMethod.GET)
     @ResponseBody
     public List<DoctorPigSalesExportDto> listPigSales(@RequestParam(required = false) Map<String, Object> pigEventCriteria,
-                                                      @RequestParam(required = false,value = "startDate") Date startDate,
-                                                      @RequestParam(required = false,value = "endDate") Date endDate) {
+                                                      @RequestParam(required = false,value = "startDate") @org.springframework.format.annotation.DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+                                                      @RequestParam(required = false,value = "endDate") @org.springframework.format.annotation.DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
         pigEventCriteria = Params.filterNullOrEmpty(pigEventCriteria);
         if (null != startDate && null != endDate && startDate.after(endDate))
             throw new JsonResponseException("start.date.after.end.date");
