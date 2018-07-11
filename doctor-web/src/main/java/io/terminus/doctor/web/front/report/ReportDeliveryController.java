@@ -100,7 +100,7 @@ public class ReportDeliveryController {
                     row.createCell(11).setCellValue(String.valueOf(a.get("deliveryDate")));
                     String check_event_at = "";
                     String leave_event_at = "";
-                    if (!String.valueOf(a.get("check_event_at")).equals("")) {
+                    if (!String.valueOf(a.get("check_event_at")).equals("") && !String.valueOf(a.get("notdelivery")).equals("阳性")) {
                         check_event_at = "("+String.valueOf(a.get("check_event_at"))+")";
                     }
                     if (!String.valueOf(a.get("leave_event_at")).equals("")) {
