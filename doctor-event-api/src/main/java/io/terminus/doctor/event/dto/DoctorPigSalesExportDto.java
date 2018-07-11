@@ -31,7 +31,7 @@ public class DoctorPigSalesExportDto implements Serializable{
     /**
      * 销售时间
      */
-    private Date e;
+    private Date salesDate;
     /**
      * 猪的日龄
      */
@@ -64,5 +64,8 @@ public class DoctorPigSalesExportDto implements Serializable{
      * 客户
      */
     private String client;
+
+    private Integer breedId;
+
 
 }

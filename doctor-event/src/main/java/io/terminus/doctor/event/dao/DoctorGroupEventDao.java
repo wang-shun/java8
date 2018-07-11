@@ -303,11 +303,6 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
         return sqlSession.selectList(sqlId("findReverseSales"), map);
     }
 
-    //查询销售猪的品种
-    public List<DoctorPigSalesExportDto> findBreedSales(Map<String, Object> map) {
-        return sqlSession.selectList(sqlId("findBreedSales"), map);
-    }
-
     public List<DoctorPigSalesExportDto> findFattenSales(Map<String, Object> map) {
         return sqlSession.selectList(sqlId("findFattenSales"), map);
     }

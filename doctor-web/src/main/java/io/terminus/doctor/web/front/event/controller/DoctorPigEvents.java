@@ -53,10 +53,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -594,12 +591,11 @@ public class DoctorPigEvents {
     @RequestMapping(value = "/list/sales", method = RequestMethod.GET)
     @ResponseBody
     public List<DoctorPigSalesExportDto> listPigSales(@RequestParam(required = false) Map<String, Object> pigEventCriteria,
-                                                      @RequestParam String date) {
-
+                                                      @RequestParam(required = false,value = "startDate") Date startDate,
+                                                      @RequestParam(required = false,value = "endDate") Date endDate) {
         pigEventCriteria = Params.filterNullOrEmpty(pigEventCriteria);
-        DateTime dateTime = DateTime.parse(date);
-        String startDate = dateTime.toString(DateUtil.DATE);
-        String endDate = DateUtil.getMonthEnd(dateTime).toString(DateUtil.DATE);
+        if (null != startDate && null != endDate && startDate.after(endDate))
+            throw new JsonResponseException("start.date.after.end.date");
         pigEventCriteria.put("startDate", startDate);
         pigEventCriteria.put("endDate", endDate);
         return RespHelper.or500(doctorPigEventReadService.listFindSales(pigEventCriteria));

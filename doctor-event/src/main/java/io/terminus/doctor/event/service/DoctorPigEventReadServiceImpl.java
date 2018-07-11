@@ -481,15 +481,11 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
                 List<Integer> pigTypes = Splitters.splitToInteger((String)map.get("pigTypeId"), Splitters.UNDERSCORE);
                 if (pigTypes.contains(PigType.FATTEN_PIG.getValue())) {
                     list.addAll(doctorGroupEventDao.findFattenSales(map));
-                    list.addAll(doctorGroupEventDao.findBreedSales(map));
                 } else if (pigTypes.contains(PigType.NURSERY_PIGLET.getValue())
                         || pigTypes.contains(PigType.DELIVER_SOW.getValue())) {
                     list.addAll(doctorGroupEventDao.findNurseSales(map));
-                    list.addAll(doctorGroupEventDao.findBreedSales(map));
                 } else if (pigTypes.contains(PigType.RESERVE.getValue())) {
                     list.addAll(doctorGroupEventDao.findReverseSales(map));
-                    list.addAll(doctorGroupEventDao.findBreedSales(map));
-
                 } else {
                     list.addAll(doctorPigEventDao.findSales(map));
                 }
@@ -498,7 +494,6 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
                 list.addAll(doctorGroupEventDao.findFattenSales(map));
                 list.addAll(doctorGroupEventDao.findNurseSales(map));
                 list.addAll(doctorGroupEventDao.findReverseSales(map));
-                list.addAll(doctorGroupEventDao.findBreedSales(map));
             }
             return Response.ok(list);
         } catch (Exception e) {
