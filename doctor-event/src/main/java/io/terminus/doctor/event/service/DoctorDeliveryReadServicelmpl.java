@@ -140,14 +140,24 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 }
             }
         }
-        int matingcount = matingList.size();
-        String deliveryrate =  divide(deliverycount,matingcount);//分娩率
-        String yangxrate =  divide(yangxcount,matingcount);//阳性率
-        String fqrate =  divide(fqcount,matingcount);//返情率
-        String lcrate =  divide(lccount,matingcount);//流产率
-        String yxrate =  divide(yxcount,matingcount);//阴性率
-        String swrate =  divide(swcount,matingcount);//死亡率
-        String ttrate =  divide(ttcount,matingcount);//淘汰率
+        int matingcount = 0;
+        String deliveryrate = "0";
+        String yangxrate = "0";
+        String fqrate = "0";
+        String lcrate = "0";
+        String yxrate = "0";
+        String swrate = "0";
+        String ttrate = "0";
+        if(matingList.size()!=0) {
+            matingcount = matingList.size();
+            deliveryrate = divide(deliverycount, matingcount);//分娩率
+            yangxrate = divide(yangxcount, matingcount);//阳性率
+            fqrate = divide(fqcount, matingcount);//返情率
+            lcrate = divide(lccount, matingcount);//流产率
+            yxrate = divide(yxcount, matingcount);//阴性率
+            swrate = divide(swcount, matingcount);//死亡率
+            ttrate = divide(ttcount, matingcount);//淘汰率
+        }
 
         Map<String,Object> list = new HashMap<>();
         list.put("matingcount",matingcount);
