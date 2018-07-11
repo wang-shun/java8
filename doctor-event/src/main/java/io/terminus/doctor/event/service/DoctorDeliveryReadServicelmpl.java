@@ -76,12 +76,13 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map.put("deliveryFarm", (String) deliveryBarn.get(0).get("farm_name"));
                     map.put("deliveryBarn", (String) deliveryBarn.get(0).get("barn_name"));
                     map.put("deliveryDate", (Date) deliveryBarn.get(0).get("event_at"));
-                    map.put("notdelivery", "");
+                    map.put("notdelivery", "阳性");
                     map.put("deadorescape", "");
                     map.put("check_event_at", "");
                     map.put("leave_event_at", "");
                     delivery.add(map);
                     deliverycount = deliverycount + 1;
+                    yangxcount = yangxcount + 1;
                 } else {
                     map.put("deliveryBarn", "未分娩");
                     map.put("deliveryDate", "");
