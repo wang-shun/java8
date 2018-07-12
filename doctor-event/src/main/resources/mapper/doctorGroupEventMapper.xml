@@ -809,6 +809,7 @@
         where a.type = 3
         and a.pig_type in ( 2,7 )
         and a.change_type_id = 109
+        <if test="breedsId != null">AND b.breed_id = #{breedsId}</if>
         <if test="farmId != null">AND a.farm_id = #{farmId}</if>
         <if test="batch != null">AND a.group_code = #{batch}</if>
         <if test="barnId != null">AND a.barn_id = #{barnId}</if>
@@ -837,6 +838,7 @@
         where a.type = 3
         and a.pig_type = 4
         and a.change_type_id = 109
+        <if test="breedsId != null">AND b.breed_id = #{breedsId}</if>
         <if test="farmId != null">AND a.farm_id = #{farmId}</if>
         <if test="batch != null">AND a.group_code = #{batch}</if>
         <if test="barnId != null">AND a.barn_id = #{barnId}</if>
@@ -865,6 +867,7 @@
         where a.type = 3
         and a.pig_type = 3
         and a.change_type_id = 109
+        <if test="breedsId != null">AND b.breed_id = #{breedsId}</if>
         <if test="farmId != null">AND a.farm_id = #{farmId}</if>
         <if test="batch != null">AND a.group_code = #{batch}</if>
         <if test="barnId != null">AND a.barn_id = #{barnId}</if>
