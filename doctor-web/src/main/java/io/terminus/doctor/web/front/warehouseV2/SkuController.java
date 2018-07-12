@@ -196,7 +196,7 @@ public class SkuController {
         DoctorWarehouseSku sku = new DoctorWarehouseSku();
         BeanUtils.copyProperties(skuDto, sku);
         sku.setUnit(skuDto.getUnitId().toString());
-        return RespHelper.or500(doctorWarehouseSkuWriteService.update(sku,skuDto.getVendorName()));
+        return RespHelper.or500(doctorWarehouseSkuWriteService.update(sku));
     }
 
 

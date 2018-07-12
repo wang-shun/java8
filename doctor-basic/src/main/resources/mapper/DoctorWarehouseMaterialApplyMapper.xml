@@ -398,7 +398,7 @@
         ifnull(sum( a.unit_price * a.quantity ) / sum( a.quantity ),0) AS unit_price,
         sum(a.amount) AS amount,
         c.type as sku_type,
-        b.name as vendor_name,
+        b.short_name as vendor_name,
         c.specification,
         date_format(d.open_at,'%Y-%m-%d') as open_at,
         date_format(d.close_at,'%Y-%m-%d') as close_at,
@@ -441,7 +441,7 @@
         CAST(ifnull(sum( a.unit_price * a.quantity ) / sum( a.quantity ),0) AS CHAR) AS unit_price,
         CAST(sum(a.amount) AS CHAR) AS amount,
         c.type as sku_type,
-        b.name as vendor_name,
+        b.short_name as vendor_name,
         c.specification,
         date_format(d.open_at,'%Y-%m-%d') as open_at,
         date_format(d.close_at,'%Y-%m-%d') as close_at,
@@ -493,7 +493,7 @@
         format(ifnull((sum(ma.amount)/sum(ma.quantity))+'',0),4) as sum_unit_price,
         format(ifnull(sum(ma.amount)+'',0),2) as sum_amount,
         s.type as material_type,
-        v.`name` as vendor_name,
+        v.short_name as vendor_name,
         s.specification as specification,
         f.`name` as farm_name,
         f.org_id as org_id
@@ -670,7 +670,7 @@
         b.staff_name as staff_name,
         f.`name` as farm_name,
         db.name as unit ,
-        v.`name` as vendor_name,
+        v.short_name as vendor_name,
         s.specification as specification
         from doctor_warehouse_material_apply as ma
         inner join doctor_warehouse_material_handle as mh

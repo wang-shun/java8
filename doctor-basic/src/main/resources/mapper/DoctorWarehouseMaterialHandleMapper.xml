@@ -692,7 +692,7 @@
         ifnull(f.apply_staff_name,'') as apply_staff_name,
         ifnull(c.`name`,'') as farm_name,
         ifnull(db.name,'') as unit,
-        ifnull(e.`name`,'') as provider_name,
+        ifnull(e.short_name,'') as provider_name,
         ifnull(d.specification,'') as specification
         from doctor_warehouse_material_handle b
         join doctor_ware_houses a
@@ -847,7 +847,7 @@
     <!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，备注-->
     <select id="getDataByMaterialName"  parameterType="Long" resultType="map">
         select mh.id as material_handle_id, mh.material_id as material_id, mh.material_name as material_name,s.code as material_code,
-        v.name as vendor_name,s.specification as specification,db.name as unit,mh.unit_price as unit_price,
+        v.short_name as vendor_name,s.specification as specification,db.name as unit,mh.unit_price as unit_price,
         mh.remark as remark,mh.farm_id as farm_id
         from doctor_warehouse_material_handle as mh
         inner join doctor_warehouse_sku as s

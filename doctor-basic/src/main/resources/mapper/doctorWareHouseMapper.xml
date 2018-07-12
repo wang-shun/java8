@@ -279,7 +279,7 @@
         <!--已结算-->
         <if test="isSettled!=null and isSettled==0">
         select  a.id,b.id as material_id,b.`code`,b.`name` as material_name,
-        c.`name` as vendor_name,
+        c.short_name as vendor_name,
         b.specification,db.name as unit,
         ifnull(round(tmp1.lastmonth_sum_amount,4),0) as lastmonth_sum_amount,
         ifnull(round(tmp1.lastmonth_sum_quantity ,3),0) as lastmonth_sum_quantity,
@@ -337,7 +337,7 @@
         <!--未结算-->
         <if test="isSettled!=null and isSettled==1">
             select  a.id,b.id as material_id,b.`code`,b.`name` as material_name,
-            c.`name` as vendor_name,
+            c.short_name as vendor_name,
             b.specification,db.name as unit,
             '--' as lastmonth_sum_amount,
             ifnull(round(tmp1.lastmonth_sum_quantity ,3),0) as lastmonth_sum_quantity,
