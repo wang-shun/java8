@@ -218,6 +218,7 @@
         WHERE relEventIds = #{relEventIds};
     </select>
 
+
     <select id="count" parameterType="map" resultType="long">
         SELECT count(1) FROM <include refid="tb"/>
         <where>
@@ -413,5 +414,11 @@
         select pig_id as id from doctor_pig_tracks
         where farm_id = #{farmId}
         and status != 7
+    </select>
+
+    <select id="queryCurrentEventId" parameterType="long" resultMap="long">
+        SELECT current_event_id AS currentEventId
+        FROM doctor_pig_tracks
+        WHERE pig_id = #{pigId}
     </select>
 </mapper>

@@ -37,16 +37,15 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
     @Override
     protected void modifyHandleCheck(DoctorPigEvent oldPigEvent, BasePigEventInputDto inputDto) {
         super.modifyHandleCheck(oldPigEvent, inputDto);
-        DoctorPigTrack doctorPigTrack = null;
+        Long currentEventId = doctorPigTrackDao.queryCurrentEventId(oldPigEvent.getPigId());
         //不允许修改初配事件日期，初配事件还要影响其他复配事件的预产期，track中预产期，比较麻烦
-//        if( !doctorPigTrack.getCurrentEventId().equals(oldPigEvent.getId())) {
-//            if (Objects.equals(oldPigEvent.getCurrentMatingCount(), 1)) {
-//                expectTrue(Objects.equals(new DateTime(oldPigEvent.getEventAt()).withTimeAtStartOfDay(),
-//                        new DateTime(inputDto.eventAt()).withTimeAtStartOfDay()),
-//                        "first.mate.date.is.not.modify");
-//            }
-//        }
-
+        if( currentEventId != oldPigEvent.getId()){
+            if (Objects.equals(oldPigEvent.getCurrentMatingCount(), 1)) {
+                expectTrue(Objects.equals(new DateTime(oldPigEvent.getEventAt()).withTimeAtStartOfDay(),
+                        new DateTime(inputDto.eventAt()).withTimeAtStartOfDay()),
+                        "first.mate.date.is.not.modify");
+            }
+        }
         if (oldPigEvent.getCurrentMatingCount() >= 1) {
             serialMateValid(oldPigEvent.getPigId(), oldPigEvent.getParity(), inputDto.eventAt());
         }
