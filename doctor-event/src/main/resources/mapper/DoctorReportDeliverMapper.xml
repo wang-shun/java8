@@ -343,7 +343,7 @@
         </where>
     </select>
     <select id="deliveryReport" parameterType="map" resultType="map">
-        select a.id,a.pig_id,a.pig_code,a.barn_name,a.event_at,a.current_mating_count, a.boar_code, a.operator_name,a.parity,a.judge_preg_date,b.status as pig_status
+        select a.id,a.pig_id,a.pig_code,a.barn_name,a.event_at,a.current_mating_count, a.boar_code, a.operator_name,a.parity,a.judge_preg_date,b.status as pig_status,b.current_barn_name as current_barn_name
         FROM doctor_pig_events a left join doctor_pig_tracks b on a.pig_id = b.pig_id
         <where>
             a.farm_id = #{farmId}
