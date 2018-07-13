@@ -121,7 +121,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 
             //每个仓库下每个物料在该会计年月之前的余额和余量
 //            Map<Long/*warehouseId*/, AmountAndQuantityDto> eachWarehouseBalance = doctorWarehouseMaterialHandleDao.findEachWarehouseBalanceBySettlementDate(orgId, settlementDate);
-            Map<String/*warehouseId-materialId*/, AmountAndQuantityDto> eachWarehouseBalance = doctorWarehouseStockMonthlyDao.findEachWarehouseBalanceBySettlementDate(orgId, DateUtils.addMonths(settlementDate, -1));
+            Map<String/*warehouseId-materialId*/, AmountAndQuantityDto> eachWarehouseBalance = doctorWarehouseStockMonthlyDao.findWarehouseBalanceBySettlementDate(orgId, DateUtils.addMonths(settlementDate, -1));
 
             //已结算的单据明细
             Map<Long/*materialHandleId*/, DoctorWarehouseMaterialHandle> settlementMaterialHandles = new HashMap<>();
@@ -140,7 +140,6 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                     log.warn("no balance found for warehouse:{},material:{},init amount to 0,quantity to 0", materialHandle.getWarehouseId(), materialHandle.getMaterialId());
                     lastSettlementBalance = new AmountAndQuantityDto();
                 } else {
-
                     log.debug("start calc unit price for material {},history amount {},history quantity {}", materialHandle.getId(), lastSettlementBalance.getAmount(), lastSettlementBalance.getQuantity());
                 }
 
@@ -161,6 +160,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             log.info("update material handle unit price and amount under org {} use :{}ms", orgId, stopwatch.elapsed(TimeUnit.MILLISECONDS));
 
 
+            //结算本月有出入库的物料
             Map<Long/*farmId*/, List<DoctorWarehouseMaterialHandle>> warehouseMaterialHandleMap = materialHandles.
                     stream().collect(Collectors.groupingBy(DoctorWarehouseMaterialHandle::getWarehouseId));
 
@@ -199,43 +199,25 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 
             });
 
-            //统计各个仓库下各个物料余额和余量
-//            farmIds.stream().forEach(f -> {
-//                doctorWareHouseDao.findByFarmId(f).forEach(wareHouse -> {
-//                    doctorWarehouseStockDao.findSkuIds(wareHouse.getId()).forEach(sku -> {
-//
-//                        log.info("start record farm {},warehouse {},sku {}", f, wareHouse.getId(), sku);
-//
-//                        //上一个会计年月的余额和余量
-//                        DoctorWarehouseStockMonthly balance = doctorWarehouseStockMonthlyDao.findBalanceBySettlementDate(wareHouse.getId(), sku, DateUtils.addMonths(settlementDate, -1));
-//                        BigDecimal balanceAmount, balanceQuantity;
-//                        if (null == balance || null == balance.getBalanceAmount())
-//                            balanceAmount = new BigDecimal(0);
-//                        else balanceAmount = balance.getBalanceAmount();
-//                        if (null == balance || null == balance.getBalanceQuantity())
-//                            balanceQuantity = new BigDecimal(0);
-//                        else balanceQuantity = balance.getBalanceQuantity();
-//
-//                        //本会计年月发生额和发生量
-//                        AmountAndQuantityDto thisSettlementAmountAndQuantity = doctorWarehouseMaterialHandleDao.findBalanceBySettlementDate(wareHouse.getId(), sku, settlementDate);
-//
-//                        //创建或更新月度统计
-//                        DoctorWarehouseStockMonthly stockMonthly = doctorWarehouseStockMonthlyDao.findBalanceBySettlementDate(wareHouse.getId(), sku, settlementDate);
-//                        if (null == stockMonthly)
-//                            stockMonthly = new DoctorWarehouseStockMonthly();
-//                        stockMonthly.setOrgId(orgId);
-//                        stockMonthly.setFarmId(f);
-//                        stockMonthly.setWarehouseId(wareHouse.getId());
-//                        stockMonthly.setMaterialId(sku);
-//                        stockMonthly.setSettlementDate(settlementDate);
-//                        stockMonthly.setBalanceAmount(balanceAmount.add(thisSettlementAmountAndQuantity.getAmount()));
-//                        stockMonthly.setBalanceQuantity(balanceQuantity.add(thisSettlementAmountAndQuantity.getQuantity()));
-//                        if (null == stockMonthly.getId())
-//                            doctorWarehouseStockMonthlyDao.create(stockMonthly);
-//                        else doctorWarehouseStockMonthlyDao.update(stockMonthly);
-//                    });
-//                });
-//            });
+            // 结算本月无出入库，但上月有出入库的物料
+            List<Map> warehouseIdByOrgId = doctorWarehouseStockMonthlyDao.findWarehouseIdByOrgId(orgId, DateUtils.addMonths(settlementDate, -1));
+            for (Map ww:warehouseIdByOrgId) {
+                Long warehouseId = (Long) ww.get("warehouse_id");
+                List<DoctorWarehouseStockMonthly> maps = doctorWarehouseStockMonthlyDao.copyDoctorWarehouseWtockMonthly(warehouseId, DateUtils.addMonths(settlementDate, -1), settlementDate);
+                if(maps.size()>0) {
+                    for (DoctorWarehouseStockMonthly sm : maps) {
+                        DoctorWarehouseStockMonthly stockMonthly = new DoctorWarehouseStockMonthly();
+                        stockMonthly.setOrgId(sm.getOrgId());
+                        stockMonthly.setFarmId(sm.getFarmId());
+                        stockMonthly.setWarehouseId(sm.getWarehouseId());
+                        stockMonthly.setMaterialId(sm.getMaterialId());
+                        stockMonthly.setBalanceQuantity(sm.getBalanceQuantity());
+                        stockMonthly.setBalanceAmount(sm.getBalanceAmount());
+                        stockMonthly.setSettlementDate(DateUtils.addMonths(sm.getSettlementDate(), 1));
+                        doctorWarehouseStockMonthlyDao.create(stockMonthly);
+                    }
+                }
+            }
 
             log.info("update or create stock monthly balance under org {} use :{}ms", orgId, stopwatch.elapsed(TimeUnit.MILLISECONDS));
 

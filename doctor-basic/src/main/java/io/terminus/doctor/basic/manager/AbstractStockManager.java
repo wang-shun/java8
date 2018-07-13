@@ -312,7 +312,8 @@ public abstract class AbstractStockManager<T extends AbstractWarehouseStockDetai
         DoctorWarehouseVendor vendor = doctorWarehouseVendorDao.findById(sku.getVendorId());
         if (null == vendor)
             throw new InvalidException("doctor.vendor.not.found", sku.getVendorId());
-        materialHandle.setVendorName(vendor.getName());
+//        materialHandle.setVendorName(vendor.getName());
+        materialHandle.setVendorName(vendor.getShortName());
 
         materialHandle.setDeleteFlag(WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
 //        materialHandle.setBeforeStockQuantity(getHistoryQuantity(stockHandle.getHandleDate(), wareHouse.getId()));

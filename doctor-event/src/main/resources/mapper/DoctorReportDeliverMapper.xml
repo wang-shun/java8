@@ -286,7 +286,7 @@
             </if>
             <if test="dateType == 5">AND date_format(sum_at, '%y') = date_format(#{sumAt}, '%y')</if>
         </where>
-        limit 1
+        LIMIT 1
     </select>
 
     <select id="findBy" parameterType="map" resultMap="DoctorReportDeliverMap">
@@ -343,7 +343,7 @@
         </where>
     </select>
     <select id="deliveryReport" parameterType="map" resultType="map">
-        select a.*,b.status as pig_status
+        select a.id,a.pig_id,a.pig_code,a.barn_name,a.event_at,a.current_mating_count, a.boar_code, a.operator_name,a.parity,a.judge_preg_date,b.status as pig_status,b.current_barn_name as current_barn_name
         FROM doctor_pig_events a left join doctor_pig_tracks b on a.pig_id = b.pig_id
         <where>
             a.farm_id = #{farmId}
@@ -366,7 +366,7 @@
         and rel_event_id = #{id}
     </select>
     <select id="notdelivery" parameterType="map" resultType="map">
-        select preg_check_result
+        select preg_check_result,event_at
         from doctor_pig_events
         where pig_id = #{pigId}
         and type=11
@@ -376,17 +376,18 @@
         order by id desc limit 1
     </select>
     <select id="leave" parameterType="map" resultType="map">
-        select change_type_id
+        select change_type_id,event_at
         from doctor_pig_events
         where pig_id = #{pigId}
         and type=6
+        and change_type_id in (110,111)
         and parity = #{parity}
         and id > #{id}
         <if test="id1 != null"> AND id &lt;= #{id1}</if>
         order by id desc limit 1
     </select>
     <select id="idsameparity" parameterType="map" resultType="map">
-        select event_at,id
+        select id
         from doctor_pig_events
         where pig_id = #{pigId}
         and type=9

@@ -140,7 +140,7 @@ public class StockHandleController {
             BigDecimal LibraryQuantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findLibraryById((Long) mpp.get("material_handle_id"),(String) mpp.get("material_name")));
             //得到在此之前退料入库的数量和
             BigDecimal RetreatingQuantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findRetreatingById((Long) mpp.get("material_handle_id"),(String) mpp.get("material_name"),id));
-            RefundableNumber = LibraryQuantity.subtract(RetreatingQuantity);
+            RefundableNumber = LibraryQuantity.add(RetreatingQuantity);
             mpp.put("refundableQuantity",RefundableNumber.doubleValue());
 
             DoctorWarehouseMaterialApply materialApply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.findByMaterialHandleAndFarmId((Long) mpp.get("material_handle_id"),(Long)mpp.get("farm_id")));
@@ -317,7 +317,7 @@ public class StockHandleController {
                                 BigDecimal LibraryQuantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findLibraryById(mh.getRelMaterialHandleId(),mh.getMaterialName()));
                                 //得到在此之前退料入库的数量和
                                 BigDecimal RetreatingQuantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findRetreatingById(mh.getRelMaterialHandleId(),mh.getMaterialName(),stockHandle.getId()));
-                                RefundableNumber = LibraryQuantity.subtract(RetreatingQuantity);
+                                RefundableNumber = LibraryQuantity.add(RetreatingQuantity);
                                 detail.setRefundableQuantity(RefundableNumber.doubleValue());
 
                                 //判断猪群是否关闭
@@ -546,7 +546,7 @@ public class StockHandleController {
                         BigDecimal LibraryQuantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findLibraryById(mh.getRelMaterialHandleId(),mh.getMaterialName()));
                         //得到在此之前退料入库的数量和
                         BigDecimal RetreatingQuantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findRetreatingById(mh.getRelMaterialHandleId(),mh.getMaterialName(),stockHandle.getId()));
-                        RefundableNumber = LibraryQuantity.subtract(RetreatingQuantity);
+                        RefundableNumber = LibraryQuantity.add(RetreatingQuantity);
                         vo.setBeforeInventoryQuantity(RefundableNumber);
                     }
 

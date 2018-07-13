@@ -58,7 +58,7 @@ public class DoctorReportDeliverDao extends MyBatisDao<DoctorReportDeliver> {
         map.put("id",id);
         return getSqlSession().selectOne(sqlId("notdelivery"), map);
     }
-    public Map<String,Object> leave(BigInteger id,BigInteger pigId , int parity ,BigInteger id1){
+    public Map<String,Object> leave(BigInteger id,BigInteger pigId , int parity , BigInteger id1){
         Map<String,Object> map = new HashMap<>();
         map.put("parity",parity);
         map.put("pigId",pigId);

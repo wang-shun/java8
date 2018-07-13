@@ -123,12 +123,54 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
         return balances;
     }
 
+    public Map<String, AmountAndQuantityDto> findWarehouseBalanceBySettlementDate(Long orgId, Date settlementDate) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("orgId", orgId);
+        params.put("settlementDate", settlementDate);
+
+        List<Map<String, Object>> result = this.sqlSession.selectList(this.sqlId("findWarehouseBalanceBySettlementDate"), params);
+
+        log.debug("get balance for org {} and settlement date {}", orgId, settlementDate);
+
+        Map<String, AmountAndQuantityDto> balances = new HashMap<>();
+
+        result.forEach(r -> {
+            Long warehouseId = (Long) r.get("warehouseId");
+            Long materialId = (Long) r.get("materialId");
+            BigDecimal amount = (BigDecimal) r.get("amount");
+            BigDecimal quantity = (BigDecimal) r.get("quantity");
+
+            log.debug("warehouse:{},material:{},amount:{},quantity:{}", warehouseId, materialId, amount, quantity);
+
+            String key = warehouseId + "-" + materialId;
+
+            balances.put(key, new AmountAndQuantityDto(amount, quantity));
+        });
+
+        return balances;
+    }
+
     public void reverseSettlement(Long orgId, Date settlementDate) {
         Map<String, Object> params = new HashMap<>();
         params.put("warehouseId", orgId);
         params.put("handleDate", settlementDate);
 
         this.sqlSession.delete(this.sqlId("reverseSettlement"), params);
+    }
+
+    public List<Map> findWarehouseIdByOrgId(Long orgId, Date settlementDate) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("orgId", orgId);
+        params.put("settlementDate", settlementDate);
+       return this.sqlSession.selectList(this.sqlId("findWarehouseIdByOrgId"), params);
+    }
+
+    public List<DoctorWarehouseStockMonthly> copyDoctorWarehouseWtockMonthly(Long warehouseId,Date lastSettlementDate, Date settlementDate) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("warehouseId", warehouseId);
+        params.put("lastSettlementDate", lastSettlementDate);
+        params.put("settlementDate", settlementDate);
+        return this.sqlSession.selectList(this.sqlId("copyDoctorWarehouseWtockMonthly"), params);
     }
 
     public List<Map> listByHouseIdTime(Map<String, Object> criteria) {

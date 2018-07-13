@@ -187,7 +187,7 @@ public class StockController {
      */
     @RequestMapping(method = RequestMethod.PUT, value = "refund")
     public Long refund(@RequestBody
-                       @Validated(AbstractWarehouseStockDetail.StockOtherValid.class)
+                       @Validated(AbstractWarehouseStockDetail.StockRefundValid.class)
                                WarehouseStockRefundDto stockRefund,
                        Errors errors) {
         if (errors.hasErrors())

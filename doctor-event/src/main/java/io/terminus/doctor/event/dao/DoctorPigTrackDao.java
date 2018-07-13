@@ -36,6 +36,7 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
         getSqlSession().delete(sqlId("deleteByFarmId"), farmId);
     }
 
+
     /**
      * 查询猪舍内猪状态
      * @param barnId 猪舍id
@@ -211,5 +212,9 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
      */
     public List<Long> selectPigIds(Long farmId) {
         return getSqlSession().selectList(sqlId("selectPigIds"),farmId);
+    }
+
+    public Long queryCurrentEventId(Long pigId){
+        return getSqlSession().selectOne(sqlId("queryCurrentEventId"), pigId);
     }
 }

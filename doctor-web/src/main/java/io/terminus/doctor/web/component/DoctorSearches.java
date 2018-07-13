@@ -200,7 +200,7 @@ public class DoctorSearches {
             }
             eventCriteria.put("beginDate", params.get("beginDate"));
             eventCriteria.put("endDate", params.get("endDate"));
-            eventCriteria.put("farmId", params.get("farmId"));
+            //eventCriteria.put("farmId", params.get("farmId"));
             eventCriteria = Params.filterNullOrEmpty(eventCriteria);
             List<Long> pigIds = RespHelper.or(doctorPigEventReadService.findPigIdsBy(eventCriteria), null);
             if (CollectionUtils.isEmpty(pigIds)) {

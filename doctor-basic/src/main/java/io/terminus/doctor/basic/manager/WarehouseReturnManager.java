@@ -1,6 +1,7 @@
 package io.terminus.doctor.basic.manager;
 
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialApplyDao;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockRefundDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleDeleteFlag;
@@ -67,14 +68,15 @@ public class WarehouseReturnManager extends AbstractStockManager<WarehouseStockR
                 throw new ServiceException("material.handle.not.found");
 
 //            DoctorWarehouseMaterialHandle outMaterialHandle = outMaterialHandleMap.get(d.getMaterialId()).get(0);
-            if (outMaterialHandle.getQuantity().compareTo(d.getQuantity()) < 0)
+            if (outMaterialHandle.getQuantity().compareTo(d.getQuantity().multiply(BigDecimal.valueOf(-1))) < 0)
                 throw new InvalidException("quantity.not.enough.to.refund", outMaterialHandle.getQuantity());
 
             //已退数量
             BigDecimal alreadyRefundQuantity = doctorWarehouseMaterialHandleDao.countQuantityAlreadyRefund(outMaterialHandle.getId());
+//            BigDecimal alreadyRefundQuantity = doctorWarehouseMaterialHandleDao.findRetreatingById(outMaterialHandle.getId(), null, stockHandleId);
             //计算可退数量
-            if (outMaterialHandle.getQuantity().subtract(alreadyRefundQuantity).compareTo(d.getQuantity()) < 0)
-                throw new InvalidException("quantity.not.enough.to.refund", outMaterialHandle.getQuantity().subtract(alreadyRefundQuantity));
+            if (outMaterialHandle.getQuantity().add(alreadyRefundQuantity).subtract(d.getFormerQuantity()).compareTo(d.getQuantity().multiply(BigDecimal.valueOf(-1))) < 0)
+                throw new InvalidException("quantity.not.enough.to.refund", outMaterialHandle.getQuantity().add(alreadyRefundQuantity).subtract(d.getFormerQuantity()));
 
             DoctorWarehouseMaterialHandle materialHandle = buildMaterialHandle(d, stockDto, stockHandle, wareHouse);
             materialHandle.setType(WarehouseMaterialHandleType.RETURN.getValue());
@@ -95,7 +97,7 @@ public class WarehouseReturnManager extends AbstractStockManager<WarehouseStockR
 
                 materialHandle.setBeforeStockQuantity(historyQuantity);
 
-                historyQuantity = historyQuantity.subtract(d.getQuantity());
+                historyQuantity = historyQuantity.add(d.getQuantity());
 
                 //该笔单据明细之后单据明细需要重算
                 recalculate(materialHandle.getHandleDate(), false, wareHouse.getId(), d.getMaterialId(), historyQuantity);
@@ -111,7 +113,7 @@ public class WarehouseReturnManager extends AbstractStockManager<WarehouseStockR
                 //退料数量记录为负数
                 if (apply.getRefundQuantity() == null)
                     apply.setRefundQuantity(new BigDecimal(0));
-                apply.setRefundQuantity(apply.getRefundQuantity().subtract(d.getQuantity()));
+                apply.setRefundQuantity(apply.getRefundQuantity().add(d.getQuantity()));
                 doctorWarehouseMaterialApplyDao.update(apply);
             });
 

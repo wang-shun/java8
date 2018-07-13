@@ -286,14 +286,14 @@ public class DoctorGroupEvents {
         DoctorGroupDetailEventsDto doctorGroupDetailEventsDto=new DoctorGroupDetailEventsDto(groupDetail1.getGroup(), groupDetail1.getGroupTrack()
                 , transFromUtil.transFromGroupEvents(groupEvents), avgWeight1);
 
-        System.out.println("猪群号:"+doctorGroupDetailEventsDto.getGroup().getGroupCode()+"猪群种类:"+doctorGroupDetailEventsDto.getGroup().getPigType()
-        +"猪场:"+doctorGroupDetailEventsDto.getGroup().getFarmName()+"猪只数:"+doctorGroupDetailEventsDto.getGroupTrack().getQuantity()
-        +"平均日龄:"+doctorGroupDetailEventsDto.getGroupTrack().getAvgDayAge()+"平均体重；"+doctorGroupDetailEventsDto.getAvgWeight()
-        +"建群日期:"+doctorGroupDetailEventsDto.getGroup().getOpenAt()+"状态:"+doctorGroupDetailEventsDto.getGroup().getStatus()
-        +"饲养员:"+doctorGroupDetailEventsDto.getGroup().getStaffName());
-        for (DoctorGroupEvent groupEvent : doctorGroupDetailEventsDto.getGroupEvents()) {
-            System.out.println("AAAAAAAAAAAAA"+groupEvent);
-        }
+//        System.out.println("猪群号:"+doctorGroupDetailEventsDto.getGroup().getGroupCode()+"猪群种类:"+doctorGroupDetailEventsDto.getGroup().getPigType()
+//        +"猪场:"+doctorGroupDetailEventsDto.getGroup().getFarmName()+"猪只数:"+doctorGroupDetailEventsDto.getGroupTrack().getQuantity()
+//        +"平均日龄:"+doctorGroupDetailEventsDto.getGroupTrack().getAvgDayAge()+"平均体重；"+doctorGroupDetailEventsDto.getAvgWeight()
+//        +"建群日期:"+doctorGroupDetailEventsDto.getGroup().getOpenAt()+"状态:"+doctorGroupDetailEventsDto.getGroup().getStatus()
+//        +"饲养员:"+doctorGroupDetailEventsDto.getGroup().getStaffName());
+//        for (DoctorGroupEvent groupEvent : doctorGroupDetailEventsDto.getGroupEvents()) {
+//            System.out.println("AAAAAAAAAAAAA"+groupEvent);
+//        }
 
         //开始导出
         try{
@@ -467,9 +467,7 @@ public class DoctorGroupEvents {
         if (barnId == null) {
             return Lists.newArrayList();
         }
-        return RespHelper.or500(doctorGroupReadService.findGroupByCurrentBarnId(barnId)).stream()
-                .filter(group -> Objects.equals(DoctorGroup.Status.CREATED.getValue(), group.getStatus()))
-                .collect(Collectors.toList());
+        return RespHelper.or500(doctorGroupReadService.findByCurrentBarnIdAndQuantity(barnId));
     }
 
     /**

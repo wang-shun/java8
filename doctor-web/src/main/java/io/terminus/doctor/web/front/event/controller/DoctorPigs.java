@@ -261,11 +261,11 @@ public class DoctorPigs {
                 row3.createCell(3).setCellValue(String.valueOf(doctorSowDetailDto.getParity()));
                 row3.createCell(4).setCellValue(String.valueOf(doctorSowDetailDto.getBreedName()));
                 row3.createCell(5).setCellValue(String.valueOf(doctorSowDetailDto.getBarnCode()));
-//                String pigWeight=String.valueOf(doctorSowDetailDto.getPigWeight());
-//                if(pigWeight.equals("null")){
-//                    pigWeight="";
-//                }
-//                row3.createCell(6).setCellValue(pigWeight);
+                String pigWeight=String.valueOf(doctorSowDetailDto.getPigWeight());
+                if(pigWeight.equals("null")){
+                    pigWeight="";
+                }
+                row3.createCell(6).setCellValue(pigWeight);
                 //date类型的转yyyy年MM月dd日格式
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 String format = sdf.format(doctorSowDetailDto.getEntryDate());
@@ -290,7 +290,7 @@ public class DoctorPigs {
                 row5.createCell(5).setCellValue("所属猪舍");
 
 
-                int addRow=8;
+                int addRow=7;
                 for (DoctorPigEvent s: doctorSowDetailDto.getDoctorPigEvents()){
                     Row rowadd = sheet.createRow(addRow++);
                     rowadd.createCell(0).setCellValue(String.valueOf(s.getParity()));
