@@ -51,6 +51,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
@@ -599,7 +600,7 @@ public class DoctorPigEvents {
             throw new JsonResponseException("start.date.after.end.date");
            pigEventCriteria.put("startDate", startDate);
            pigEventCriteria.put("endDate", endDate);
-           pigEventCriteria.put("breedId", breedsId);
+           pigEventCriteria.put("breedsId", breedsId);
         return RespHelper.or500(doctorPigEventReadService.listFindSales(pigEventCriteria));
     }
     /**
