@@ -899,10 +899,4 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public Long queryEventId(Long pigId){
         return getSqlSession().selectOne(sqlId("queryEventId"), pigId);
     }
-    /**
-     * 查询猪的最新配种
-     **/
-    public Long queryCurrentMatCount(Long pigId){
-        return getSqlSession().selectOne(sqlId("queryCurrentMatCount"), pigId);
-    }
 }
