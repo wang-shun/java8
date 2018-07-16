@@ -3,6 +3,7 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
@@ -24,6 +25,7 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -63,6 +65,31 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
     @Autowired
     public DoctorModifyEventServiceImpl(CoreEventDispatcher coreEventDispatcher) {
         this.coreEventDispatcher = coreEventDispatcher;
+    }
+
+    @Override
+    public Response<String> findGroupEvents(Long farmId, Long relPigEventId,Integer tt) {
+        String str=new String();
+        String str2=new String();
+        List<DoctorGroupEvent> groupEvents = doctorGroupEventDao.findGroupEvents(farmId, relPigEventId);
+        if(groupEvents.size()!=0){
+            if(groupEvents.get(0).getType()==10){
+                str="该猪群已经关闭，不可删除";
+                str2="该猪群已经关闭，不可编辑";
+            }else if(groupEvents.get(0).getType()!=10){
+                str="该母猪断奶之后有"+groupEvents.get(0).getName()+"事件，不可删除";
+                str2="该母猪断奶之后有"+groupEvents.get(0).getName()+"事件，不可编辑";
+            }
+        }else{
+            return Response.ok();
+        }
+        if(tt==1){//删除
+            return Response.fail(str);
+        }else if(tt==2){//编辑
+            return Response.fail(str2);
+        }else{
+            return Response.ok();
+        }
     }
 
     @Override

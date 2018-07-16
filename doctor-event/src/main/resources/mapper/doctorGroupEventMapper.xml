@@ -896,4 +896,13 @@
         from <include refid="tb"/>
         group by farm_id
     </select>
+
+    <select id="findGroupEvents" parameterType="map" resultMap="DoctorGroupEventMap">
+        select * from doctor_group_events where farm_id = #{farmId} and group_id=(
+        select group_id from doctor_group_events where rel_pig_event_id = #{relPigEventId} and farm_id = #{farmId}
+        ) and id>(
+        select id from doctor_group_events where rel_pig_event_id = #{relPigEventId} and farm_id = #{farmId}
+        )ORDER BY event_at DESC,id DESC
+    </select>
+
 </mapper>

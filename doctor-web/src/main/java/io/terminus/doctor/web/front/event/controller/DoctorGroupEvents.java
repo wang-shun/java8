@@ -24,11 +24,7 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.service.DoctorEventModifyRequestReadService;
-import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.event.service.DoctorGroupWriteService;
-import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.event.service.*;
 import io.terminus.doctor.web.core.export.Exporter;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.dto.DoctorBatchGroupEventDto;
@@ -82,6 +78,8 @@ public class DoctorGroupEvents {
     private DoctorEventModifyRequestWriteService doctorEventModifyRequestWriteService;
     @RpcConsumer
     private DoctorEventModifyRequestReadService doctorEventModifyRequestReadService;
+    @RpcConsumer
+    private DoctorModifyEventService doctorModifyEventService;
 
     @Autowired
     private Exporter exporter;
@@ -237,10 +235,18 @@ public class DoctorGroupEvents {
     }
 
     /**
+     * 母猪断奶之后所在猪群发生的事件
+     */
+    @RequestMapping(value = "/findGroupEvents", method = RequestMethod.GET)
+    public Response<String> findGroupEvents(@RequestParam("farmId") Long farmId,@RequestParam("relPigEventId") Long relPigEventId,@RequestParam("tt") Integer tt) {
+        return doctorModifyEventService.findGroupEvents(farmId,relPigEventId,tt);
+    }
+
+    /**
      * 查询猪群详情
      *
      * @param groupId   猪群id
-     * @param eventSize 事件大小
+     * @param eventSize 事件大小R
      * @return 猪群详情
      */
     @RequestMapping(value = "/detail", method = RequestMethod.GET)

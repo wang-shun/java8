@@ -160,6 +160,8 @@ public class WarehouseInventoryStockService extends
 
             materialHandle.setRemark(detail.getRemark());
             materialHandle.setSettlementDate(stockDto.getSettlementDate());
+            materialHandle.setUnitPrice(detail.getUnitPrice());
+            materialHandle.setAmount(detail.getAmount());
 
             boolean changeHandleDate = !DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
 
