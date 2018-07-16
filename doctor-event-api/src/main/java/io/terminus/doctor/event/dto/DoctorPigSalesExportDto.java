@@ -67,5 +67,4 @@ public class DoctorPigSalesExportDto implements Serializable{
 
     private Integer breedId;
 
-
 }

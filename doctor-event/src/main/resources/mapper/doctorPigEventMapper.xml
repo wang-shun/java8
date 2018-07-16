@@ -1399,6 +1399,7 @@
         '种猪' AS pigTypeName,
         a.barn_name AS barnName,
         count(1) AS pigNumber,
+        DATEDIFF(a.event_at,b.birth_date)as age,
         ifnull(sum(a.weight), 0) AS pigWeight,
         ifnull(sum(a.amount)/sum(a.weight),0) AS pigPrice,
         ifnull(sum(a.amount), 0) AS pigAmount,
