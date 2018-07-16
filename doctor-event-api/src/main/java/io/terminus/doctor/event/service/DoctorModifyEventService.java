@@ -1,16 +1,27 @@
 package io.terminus.doctor.event.service;
 
+import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 
+import java.util.List;
+
 /**
  * Created by xjn on 17/4/14.
  * 编辑与回滚处理
  */
 public interface DoctorModifyEventService {
+
+    /**
+     * 母猪断奶之后所在猪群发生的事件
+     * @param farmId
+     * @param relPigEventId
+     * @return
+     */
+    Response<String> findGroupEvents(Long farmId, Long relPigEventId,Integer tt);
 
     /**
      * 编辑猪事件
