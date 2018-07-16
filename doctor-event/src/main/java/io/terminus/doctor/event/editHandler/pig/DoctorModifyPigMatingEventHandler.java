@@ -249,9 +249,11 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
     public void serialMateValid(Long pigId, Integer parity, Date eventAt) {
         DoctorPigEvent firstMatingEvent = doctorPigEventDao.queryLastFirstMate(pigId
                 , parity);
+        long currMatCount = doctorPigEventDao.queryCurrentMatCount(pigId);
         expectNotNull(firstMatingEvent, "first.mate.not.null", pigId);
-        expectTrue(DateUtil.getDeltaDays(firstMatingEvent.getEventAt(), eventAt) <= 3,
-                "serial.mating.over.three.day", DateUtil.toDateString(firstMatingEvent.getEventAt()));
+        if(!Objects.equals(currMatCount, 1)){
+            expectTrue(DateUtil.getDeltaDays(firstMatingEvent.getEventAt(), eventAt) <= 3,
+                    "serial.mating.over.three.day", DateUtil.toDateString(firstMatingEvent.getEventAt()));
+        }
     }
-
 }
