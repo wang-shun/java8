@@ -1395,6 +1395,7 @@
     <select id="findSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
         SELECT
         a.event_at AS salesDate,
+        a.customer_id as customerId,
         a.customer_name as client,
         b.pig_type as pigType,
         '种猪' AS pigTypeName,
