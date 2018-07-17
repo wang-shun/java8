@@ -1396,7 +1396,7 @@
         SELECT
         a.event_at AS salesDate,
         a.customer_id as customerId,
-        a.customer_name as client,
+        c.name as client,
         b.pig_type as pigType,
         '种猪' AS pigTypeName,
         a.barn_name AS barnName,
@@ -1408,6 +1408,7 @@
         b.breed_id as breedId,
         b.breed_name as breedName
         from doctor_pig_events a left join doctor_pigs b on a.pig_id = b.id
+        left join doctor_customers c on a.customer_id = c.id
         where a.type = 6
         and a.change_type_id = 109
         and b.pig_type in ( 1,2 )
