@@ -1,10 +1,9 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
-import io.terminus.doctor.event.dao.DoctorDataFactorDao;
+import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportDeliverDao;
 import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.manager.FactorManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,10 +18,12 @@ import java.util.*;
 public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
 
     private final DoctorReportDeliverDao doctorReportDeliverDao;
+    private final DoctorPigEventDao doctorPigEventDao;
 
     @Autowired
-    public DoctorDeliveryReadServicelmpl(DoctorReportDeliverDao doctorReportDeliverDao) {
+    public DoctorDeliveryReadServicelmpl(DoctorReportDeliverDao doctorReportDeliverDao,DoctorPigEventDao doctorPigEventDao) {
         this.doctorReportDeliverDao = doctorReportDeliverDao;
+        this.doctorPigEventDao = doctorPigEventDao;
     }
 
     @Override
@@ -189,5 +190,10 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         BigDecimal big   =   new  BigDecimal(k);
         String  l = big.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue() +"%";
         return l;
+    }
+
+    @Override
+    public List<Map<String,Object>> sowsReport(Long farmId,Date time,String pigCode,String operatorName,Long barnId,int breed,int parity,int pigStatus,Date inFarmTime){
+        return null;
     }
 }
