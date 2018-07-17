@@ -198,6 +198,8 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
                 //校验track
                 doctorEventBaseHelper.validTrackAfterUpdate(newTrack);
 
+                Long eventId = doctorPigEventDao.queryEventId(deletePigEvent.getPigId());
+                newTrack.setCurrentEventId(eventId);
                 //更新track
                 doctorPigTrackDao.update(newTrack);
 

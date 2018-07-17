@@ -896,4 +896,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         return this.sqlSession.selectOne(this.sqlId("queryBeforeEvent"), params);
     }
 
+    public Long queryEventId(Long pigId){
+        return getSqlSession().selectOne(sqlId("queryEventId"), pigId);
+    }
 }

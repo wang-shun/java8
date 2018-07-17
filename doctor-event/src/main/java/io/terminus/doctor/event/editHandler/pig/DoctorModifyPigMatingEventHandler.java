@@ -46,7 +46,7 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
                         "first.mate.date.is.not.modify");
             }
         }
-        if (oldPigEvent.getCurrentMatingCount() >= 1) {
+        if (oldPigEvent.getCurrentMatingCount() > 1) {
             serialMateValid(oldPigEvent.getPigId(), oldPigEvent.getParity(), inputDto.eventAt());
         }
     }
@@ -253,5 +253,4 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
         expectTrue(DateUtil.getDeltaDays(firstMatingEvent.getEventAt(), eventAt) <= 3,
                 "serial.mating.over.three.day", DateUtil.toDateString(firstMatingEvent.getEventAt()));
     }
-
 }
