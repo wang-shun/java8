@@ -825,7 +825,7 @@
         select
         a.event_at as salesDate,
         a.customer_name as client,
-        '7_2' as pigType,
+        a.pig_type as pigType,
         "仔猪" as pigTypeName,
         a.barn_name as barnName,
         sum(a.avg_day_age*a.quantity)/sum(a.quantity) as ages,
