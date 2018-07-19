@@ -136,7 +136,7 @@ public class DoctorReportJobs {
         }
     }
 
-    @Scheduled(cron = "0 0 2 * * ?")
+    @Scheduled(cron = "0 0 5 * * ?")
     @RequestMapping(value = "/deliver/rate", method = RequestMethod.GET)
     public void deliverRate() {
         try {
