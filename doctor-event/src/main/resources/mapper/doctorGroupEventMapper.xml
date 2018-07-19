@@ -794,7 +794,8 @@
     <select id="findCareSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
         select
         a.event_at as salesDate,
-        a.customer_name as client,
+        a.customer_id as customerId,
+        c.name as client,
         a.pig_type as pigType,
         "保育猪" as pigTypeName,
         a.barn_name as barnName,
@@ -806,6 +807,7 @@
         b.breed_id as breedId,
         b.breed_name as breedName
         from doctor_group_events a left join doctor_groups b on a.group_id = b.id
+        left join doctor_customers c on a.customer_id = c.id
         where a.type = 3
         and a.pig_type = 2
         and a.change_type_id = 109
@@ -824,7 +826,8 @@
     <select id="findNurseSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
         select
         a.event_at as salesDate,
-        a.customer_name as client,
+        a.customer_id as customerId,
+        c.name as client,
         a.pig_type as pigType,
         "仔猪" as pigTypeName,
         a.barn_name as barnName,
@@ -836,6 +839,7 @@
         b.breed_id as breedId,
         b.breed_name as breedName
         from doctor_group_events a left join doctor_groups b on a.group_id = b.id
+        left join doctor_customers c on a.customer_id = c.id
         where a.type = 3
         and a.pig_type = 7
         and a.change_type_id = 109
@@ -854,7 +858,8 @@
     <select id="findReverseSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
         select
         a.event_at as salesDate,
-        a.customer_name as client,
+        a.customer_id as customerId,
+        c.name as client,
         a.pig_type as pigType,
         "后备猪" as pigTypeName,
         a.barn_name as barnName,
@@ -866,6 +871,7 @@
         b.breed_id as breedId,
         b.breed_name as breedName
         from doctor_group_events a left join doctor_groups b on a.group_id = b.id
+        left join doctor_customers c on a.customer_id = c.id
         where a.type = 3
         and a.pig_type = 4
         and a.change_type_id = 109
@@ -884,7 +890,8 @@
     <select id="findFattenSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
         select
         a.event_at as salesDate,
-        a.customer_name as client,
+        a.customer_id as customerId,
+        c.name as client,
         a.pig_type as pigType,
         "育肥猪" as pigTypeName,
         a.barn_name as barnName,
@@ -896,6 +903,7 @@
         b.breed_id as breedId,
         b.breed_name as breedName
         from doctor_group_events a left join doctor_groups b on a.group_id = b.id
+        left join doctor_customers c on a.customer_id = c.id
         where a.type = 3
         and a.pig_type = 3
         and a.change_type_id = 109
