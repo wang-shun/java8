@@ -525,6 +525,9 @@ public class DoctorSearches {
         if (barnDto.getFarmId() == null) {
             return new Paging<>(0L, Collections.emptyList());
         }
+        if (barnDto.getStatus() == null){
+            barnDto.setStatus(1);
+        }
 
         Paging<DoctorBarn> barns = RespHelper.or500(doctorBarnReadService.pagingBarn(barnDto, pageNo, pageSize));
         return new Paging<>(barns.getTotal(), getSearchedBarn(barns.getData()));

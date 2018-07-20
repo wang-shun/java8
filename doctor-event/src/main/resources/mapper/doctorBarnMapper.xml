@@ -61,7 +61,7 @@
         </if>
 
         <if test="canOpenGroup != null">AND can_open_group = #{canOpenGroup}</if>
-        <if test="status != null">AND status = #{status}</if>
+        <if test="status != null">AND status in (1,#{status})</if>
         <if test="capacity != null">AND capacity = #{capacity}</if>
         <if test="staffId != null">AND staff_id = #{staffId}</if>
         <if test="staffName != null">AND staff_name like concat('%',#{staffName},'%')</if>
