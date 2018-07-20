@@ -111,9 +111,9 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
             doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig, changeDto2));
 
             //旧版
-            DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getOldEventAt());
-            oldBuildDailyPig(oldDailyReport, changeDto1);
-            oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto2));
+          //  DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getOldEventAt());
+           // oldBuildDailyPig(oldDailyReport, changeDto1);
+           // oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto2));
 
             //更新配种、空怀、怀孕母猪数量
             if (!PigType.MATING_TYPES.contains(oldPigEvent.getBarnType())) {
@@ -177,8 +177,8 @@ public class DoctorModifyPigPregCheckEventHandler extends DoctorAbstractModifyPi
                 .build();
         doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig1, changeDto1));
         //旧版
-        DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
-        oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto1));
+      //  DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
+       // oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto1));
 
 
         //更新配种、空怀、怀孕母猪数量

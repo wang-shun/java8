@@ -96,8 +96,8 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
             doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig, changeDto));
 
             //旧版
-            DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getOldEventAt());
-            oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto));
+            //DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(changeDto.getFarmId(), changeDto.getOldEventAt());
+           // oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto));
 
         } else {
             updateDailyOfDelete(oldPigEvent);
@@ -153,8 +153,8 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
         doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig1, changeDto1));
 
         //旧版
-        DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
-        oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto1));
+        //DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
+       // oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto1));
 
     }
 
@@ -172,8 +172,8 @@ public class DoctorModifyPigWeanEventHandler extends DoctorAbstractModifyPigEven
         doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig2, changeDto2));
 
         //旧版
-        DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
-        oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto2));
+        //DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
+        //oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto2));
 
     }
 

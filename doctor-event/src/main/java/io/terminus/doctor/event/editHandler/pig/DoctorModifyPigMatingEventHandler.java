@@ -151,8 +151,8 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
                 .build();
         doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig1, changeDto1));
         //旧版
-        DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
-        oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto1));
+       // DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(oldPigEvent.getFarmId(), oldPigEvent.getEventAt());
+       // oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto1));
 
         //更新配种母猪数与空怀母猪数
         Integer sowPhKonghuaiChangeCount = 0;
@@ -179,8 +179,8 @@ public class DoctorModifyPigMatingEventHandler extends DoctorAbstractModifyPigEv
                 .build();
         doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig2, changeDto2));
         //旧版
-        DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
-        oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto2));
+      //  DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
+      //  oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto2));
 
         //更新配种母猪数与空怀母猪数
         Integer sowPhKonghuaiChangeCount = 0;
