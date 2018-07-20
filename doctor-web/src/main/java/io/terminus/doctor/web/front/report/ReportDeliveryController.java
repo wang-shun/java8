@@ -57,7 +57,6 @@ public class ReportDeliveryController {
                 Row count = sheet.createRow(0);
                 count.createCell(0).setCellValue("总配种数:"+String.valueOf(map.get("matingcount"))
                         +"  分娩数/分娩率:"+String.valueOf(map.get("deliverycount"))+"/"+String.valueOf(map.get("deliveryrate"))
-                        +"  阳性数/阳性率:"+String.valueOf(map.get("yangxcount"))+"/"+String.valueOf(map.get("yangxrate"))
                         +"  返情数/返情率:"+String.valueOf(map.get("fqcount"))+"/"+String.valueOf(map.get("fqrate"))
                         +"  流产数/流产率:"+String.valueOf(map.get("lccount"))+"/"+String.valueOf(map.get("lcrate"))
                         +"  阴性数/阴性率:"+String.valueOf(map.get("yxcount"))+"/"+String.valueOf(map.get("yxrate"))

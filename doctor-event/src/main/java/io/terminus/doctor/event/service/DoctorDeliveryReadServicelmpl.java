@@ -32,7 +32,6 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         List<Map<String,Object>> delivery = new ArrayList<>(); //分娩了
         List<Map<String,Object>> nodeliver = new ArrayList<>();//未分娩
         int deliverycount = 0;//分娩数
-        int yangxcount = 0;//阳性数
         int fqcount = 0;//返情数
         int lccount = 0;//流产数
         int yxcount = 0;//阴性数
@@ -88,7 +87,6 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map.put("leave_event_at", "");
                     delivery.add(map);
                     deliverycount = deliverycount + 1;
-                    yangxcount = yangxcount + 1;
                 } else {
                     map.put("deliveryBarn", "未分娩");
                     map.put("deliveryDate", "");
@@ -105,7 +103,6 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         int b = (int) notdelivery.get("preg_check_result");
                         if (b == 1) {
                             map.put("notdelivery", "阳性");
-                            yangxcount = yangxcount + 1;
                         }
                         if (b == 2) {
                             map.put("notdelivery", "阴性");
@@ -148,7 +145,6 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         }
         int matingcount = 0;
         String deliveryrate = "0";
-        String yangxrate = "0";
         String fqrate = "0";
         String lcrate = "0";
         String yxrate = "0";
@@ -157,7 +153,6 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         if(matingList.size()!=0) {
             matingcount = matingList.size();
             deliveryrate = divide(deliverycount, matingcount);//分娩率
-            yangxrate = divide(yangxcount, matingcount);//阳性率
             fqrate = divide(fqcount, matingcount);//返情率
             lcrate = divide(lccount, matingcount);//流产率
             yxrate = divide(yxcount, matingcount);//阴性率
@@ -168,14 +163,12 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         Map<String,Object> list = new HashMap<>();
         list.put("matingcount",matingcount);
         list.put("deliverycount",deliverycount);
-        list.put("yangxcount",yangxcount);
         list.put("fqcount",fqcount);
         list.put("lccount",lccount);
         list.put("yxcount",yxcount);
         list.put("swcount",swcount);
         list.put("ttcount",ttcount);
         list.put("deliveryrate",deliveryrate);
-        list.put("yangxrate",yangxrate);
         list.put("fqrate",fqrate);
         list.put("lcrate",lcrate);
         list.put("yxrate",yxrate);
