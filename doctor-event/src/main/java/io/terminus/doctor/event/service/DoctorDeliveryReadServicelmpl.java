@@ -71,6 +71,11 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             BigInteger id = (BigInteger)map.get("id");
             BigInteger pig_id = (BigInteger)map.get("pig_id");
             int parity = (int)map.get("parity");
+
+            Map<String,Object> matingCount =  doctorReportDeliverDao.getMatingCount(pig_id,(Date)map.get("event_at"));
+            if(matingCount != null){
+                map.put("current_mating_count",matingCount);
+            }
             List<Map<String,Object>> deliveryBarn = doctorReportDeliverDao.deliveryBarn(id,pig_id);//判断是否分娩以及查询分娩猪舍
             if(deliveryBarn != null) {
                 if (deliveryBarn.size() != 0) {
