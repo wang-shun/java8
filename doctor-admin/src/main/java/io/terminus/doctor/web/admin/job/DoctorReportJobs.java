@@ -7,6 +7,7 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
 import io.terminus.doctor.event.service.DoctorDailyReportV2Service;
@@ -25,9 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -137,7 +136,7 @@ public class DoctorReportJobs {
         }
     }
 
-    @Scheduled(cron = "0 0 5 * * ?")
+    @Scheduled(cron = "0 0 6 * * ?")
     @RequestMapping(value = "/deliver/rate", method = RequestMethod.GET)
     public void deliverRate() {
         try {
@@ -145,13 +144,31 @@ public class DoctorReportJobs {
                 log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
                 return;
             }
-            log.info("deliver rate report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
+           /* log.info("deliver rate report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
 
             //获取昨天的天初
             Date yesterday = DateTime.now().minusDays(1).toDate();
             RespHelper.or500(doctorDailyReportV2Service.generateDeliverRate(getAllFarmIds(), yesterday));
 
-            log.info("deliver rate report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+            log.info("deliver rate report job end, now is:{}", DateUtil.toDateTimeString(new Date()));*/
+            log.info("synchronize all deliver rate starting start:{}");
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(new Date());
+            cal.add(Calendar.MONTH, -1);
+            cal.set(Calendar.DAY_OF_MONTH,cal.getActualMinimum(Calendar.DAY_OF_MONTH));
+            Date start = cal.getTime();
+            start.setHours(0);
+            start.setMinutes(0);
+            start.setSeconds(0);
+            List<DoctorFarm> doctorFarms = RespHelper.orServEx(doctorFarmReadService.findAllFarms());
+            Set<Long> orzList = doctorFarms.stream().map(DoctorFarm::getId).collect(Collectors.toSet());
+            orzList.parallelStream().forEach(orzId ->
+                    doctorDailyReportV2Service.flushDeliverRate(orzId, OrzDimension.FARM.getValue(), start));
+
+            orzList = doctorFarms.stream().map(DoctorFarm::getOrgId).collect(Collectors.toSet());
+            orzList.parallelStream().forEach(orzId ->
+                    doctorDailyReportV2Service.flushDeliverRate(orzId, OrzDimension.ORG.getValue(), start));
+            log.info("synchronize all deliver rate end");
         } catch (Exception e) {
             log.error("deliver rate  report job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
