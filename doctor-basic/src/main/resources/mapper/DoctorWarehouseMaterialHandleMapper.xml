@@ -675,16 +675,16 @@
         date_format(b.settlement_date,'%Y-%m') as settlement_date,
         ifnull(b.type,'') as handler_type,
         case when
-        b.type in (1,7,9,11,13)
+        b.type in (1,7,9,11)
         then ifnull(b.quantity,0) else '' end as rksl,
         case when
-        b.type in (1,7,9,11,13)
+        b.type in (1,7,9,11)
         then ifnull(b.amount,0) else '' end as rkje,
         case when
-        b.type in (2,8,10,12)
+        b.type in (2,8,10,12,13)
         then ifnull(b.quantity,0) else '' end as cksl,
         case when
-        b.type in (2,8,10,12)
+        b.type in (2,8,10,12,13)
         then ifnull(b.amount,0) else '' end as ckje,
         ifnull(f.pig_barn_name,'') as pig_barn_name,
         ifnull(f.pig_type,'') as pig_type,

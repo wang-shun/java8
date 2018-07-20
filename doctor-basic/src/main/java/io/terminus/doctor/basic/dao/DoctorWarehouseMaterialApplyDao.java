@@ -252,6 +252,23 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
     }
 
     /**
+     * 猪舍退料领用详情
+     * @param criteria
+     * @return
+     */
+    public List<Map> piggeryRetreatingDetails(DoctorWarehouseMaterialApply criteria) {
+        Map<String, Object> params = Maps.newHashMap();
+        if (criteria != null) {
+            params.put("applyYear", criteria.getApplyYear());
+            params.put("applyMonth", criteria.getApplyMonth());
+            params.put("pigBarnId", criteria.getPigBarnId());
+            params.put("materialName", criteria.getMaterialName());
+            params.put("materialHandleId", criteria.getMaterialHandleId());
+        }
+        return sqlSession.selectList(sqlId("piggeryRetreatingDetails"), params);
+    }
+
+    /**
      * 猪群领用报表详情
      *
      * @param pigGroupId
@@ -263,6 +280,20 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         map.put("pigGroupId", pigGroupId);
         map.put("skuId", skuId);
         return this.sqlSession.selectList(this.sqlId("selectPigGroupApplyDetail"), map);
+    }
+
+    /**
+     * 猪群退料入库详情
+     * @param pigGroupId
+     * @param skuId
+     * @return
+     */
+    public List<DoctorWarehouseMaterialApplyPigGroupDetail> selectPigGroupApplyRetreatingDetail(Long pigGroupId, Long skuId,Long materialHandleId) {
+        Map<String, Long> map = Maps.newHashMap();
+        map.put("pigGroupId", pigGroupId);
+        map.put("skuId", skuId);
+        map.put("materialHandleId", materialHandleId);
+        return this.sqlSession.selectList(this.sqlId("selectPigGroupApplyRetreatingDetail"), map);
     }
 
     public List<DoctorWarehouseMaterialApplyPigGroup> selectPigGroupApply1(Integer farmId, String pigType, String pigName, String pigGroupName, Integer skuType, String skuName, String openAtStart, String openAtEnd, String closeAtStart, String closeAtEnd) {

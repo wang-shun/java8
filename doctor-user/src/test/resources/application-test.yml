@@ -4,7 +4,7 @@
 
 datasource:
 #  url: jdbc:mysql://127.0.0.1:3306/pig_doctor1?useUnicode=true&characterEncoding=UTF8
-  url: jdbc:mysql://101.201.44.35:3306/pig_doctor_v2?useUnicode=true&characterEncoding=UTF8
+  url: jdbc:mysql://101.201.44.35:3306/pig_doctor_v4?useUnicode=true&characterEncoding=UTF8
   username: root
   password: anywhere
 
