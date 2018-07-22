@@ -248,17 +248,20 @@ public class WarehouseController {
     public List<WarehouseVo> sameTypeWarehouse(@PathVariable Integer type,
                                                @RequestParam(required = false) Long orgId,
                                                @RequestParam(required = false) Long farmId) {
+        System.out.println("AAA"+farmId+"BB"+type);
         if (null == orgId && null == farmId)
             throw new JsonResponseException("missing parameter,orgId or farmId must pick one");
 
         List<DoctorWareHouse> wareHouses;
         if (null != orgId) {
             wareHouses = RespHelper.or500(doctorWarehouseReaderService.findByOrgId(RespHelper.or500(doctorFarmReadService.findFarmsByOrgId(orgId)).stream().map(DoctorFarm::getId).collect(Collectors.toList()), type));
+            System.out.println("CCC"+wareHouses);
         } else {
             DoctorWareHouse criteria = new DoctorWareHouse();
             criteria.setType(type);
             criteria.setFarmId(farmId);
             wareHouses = RespHelper.or500(doctorWarehouseReaderService.list(criteria));
+            System.out.println("DDD"+wareHouses);
         }
 
         List<WarehouseVo> vos = new ArrayList<>(wareHouses.size());
@@ -271,6 +274,7 @@ public class WarehouseController {
             vo.setManagerId(wareHouse.getManagerId());
             vos.add(vo);
         });
+        System.out.println("EEE"+vos);
         return vos;
     }
 
