@@ -155,7 +155,7 @@ public class DoctorSearches {
     public GroupPigPaging<SearchedPig> searchSowPigs(@RequestParam(required = false) Integer pageNo,
                                              @RequestParam(required = false) Integer pageSize,
                                              @RequestParam Map<String, String> params) {
-        Paging<SearchedPig> paging = pageSowPigs(pageNo, pageSize, params, DoctorPig.PigSex.SOW);
+        Paging<SearchedPig> paging = pagePigs(pageNo, pageSize, params, DoctorPig.PigSex.SOW);
         Long groupCount = getGroupCountWhenFarrow(params);
         return new GroupPigPaging<>(paging, groupCount, paging.getTotal());
     }
@@ -755,115 +755,6 @@ public class DoctorSearches {
 
 
 
-    // -------------- 新增代码-----------------------
-
-    private Paging<SearchedPig> pageSowPigs (Integer pageNo, Integer pageSize, Map<String,String> params, DoctorPig.PigSex pigType){
-
-        if (farmIdNotExist(params)) {
-            return new Paging<>(0L, Collections.emptyList());
-        }
-        searchFromMessage(params);
-        params.put("pigCode", params.get("q"));
-        params.put("pigType", pigType.getKey().toString());
-        Map<String, Object> objectMap = transMapType(params);
-
-        BaseUser user = UserUtil.getCurrentUser();
-        if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){
-            objectMap.put("barnIds", RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId())).getBarnIdsList());
-        }
-
-        if(objectMap.containsKey("statuses")){
-            objectMap.put("statuses", Splitters.splitToInteger(objectMap.get("statuses").toString(), Splitters.UNDERSCORE));
-        }
-
-        Paging<SearchedPig> paging;
-
-        /**
-         * 查询未转场和已转场的母猪ID
-         * 未转场事件ID：为pig_track表当前事件id
-         * 已转场事件ID：为chg_into表事件id
-         * 根据事件id 到event表中去查小于id 数值的全部数据
-         */
-        if(true){
-            Long farmId = Long.parseLong(params.get("farmId"));
-            Long barnId = Long.parseLong(params.get("barnId"));
-            Integer status = Integer.parseInt(params.get("statuses"));
-            String pigCode = params.get("q");
-            String rfid = params.get("rfid");
-            List<Long> notList = RespHelper.or500(doctorPigReadService.findNotTransitionsSow(farmId,barnId,status,pigCode,rfid));
-            List<Long> haveList = RespHelper.or500(doctorPigReadService.findHaveTransitionsSow(farmId,barnId,pigCode,rfid));
-            notList.addAll(haveList);
-
-            //再根据事件去筛选
-            boolean searchEvent = !Strings.isNullOrEmpty(params.get("types"))
-                    || !Strings.isNullOrEmpty(params.get("beginDate"))
-                    || !Strings.isNullOrEmpty(params.get("endDate"));
-            if (searchEvent) {
-                Map<String, Object> eventCriteria = Maps.newHashMap();
-                if (!Strings.isNullOrEmpty(params.get("types"))){
-                    eventCriteria.put("types", Splitters.splitToInteger(params.get("types"), Splitters.COMMA));
-                }
-                eventCriteria.put("beginDate", params.get("beginDate"));
-                eventCriteria.put("endDate", params.get("endDate"));
-                eventCriteria.put("farmId", params.get("farmId"));
-                eventCriteria.put("notList",notList);
-                eventCriteria = Params.filterNullOrEmpty(eventCriteria);
-                List<Long> pigIds = RespHelper.or(doctorPigEventReadService.findPigIdsByEvent(eventCriteria), null);
-                if (CollectionUtils.isEmpty(pigIds)) {
-                    return new Paging<SearchedPig>();
-                }
-                objectMap.put("pigIds", pigIds);
-            }else{
-                objectMap.put("pigIds", notList);
-            }
-        }
-
-        if(objectMap.containsKey("statuses")
-                && ((List)objectMap.get("statuses")).contains(PigStatus.CHG_FARM.getKey())){
-            log.error("pagePigs:"+1+":"+objectMap.toString());
-            paging = RespHelper.or500(doctorPigReadService.pagingChgFarmPig(objectMap, pageNo, pageSize));
-        } else {
-            log.error("pagePigs:"+2+":"+objectMap.toString());
-            paging = RespHelper.or500(doctorPigReadService.pagesSowPigById(objectMap, pageNo, pageSize));
-        }
-
-        paging.getData().forEach(searchedPig -> {
-            if(searchedPig.getPigType() != null){
-                DoctorPig.PigSex pigSex = DoctorPig.PigSex.from(searchedPig.getPigType());
-                if(pigSex != null){
-                    searchedPig.setPigTypeName(pigSex.getDesc());
-                }
-            }
-            Integer status = searchedPig.getStatus();
-            Date eventAt;
-            if (Objects.equals(status, PigStatus.CHG_FARM.getKey())) {
-                try {
-                    DoctorChgFarmInfo doctorChgFarmInfo = RespHelper.or500(doctorPigReadService.findByFarmIdAndPigId(searchedPig.getFarmId(), searchedPig.getId()));
-                    DoctorPigEvent chgFarm = RespHelper.or500(doctorPigEventReadService.findById(doctorChgFarmInfo.getEventId()));
-                    eventAt = chgFarm.getEventAt();
-                }catch(Exception e){
-                    log.error(e.getMessage());
-                    eventAt = new Date();
-                }
-            } else {
-                KongHuaiPregCheckResult result = KongHuaiPregCheckResult.from(searchedPig.getStatus());
-                if (result != null) {
-                    status = PigStatus.KongHuai.getKey();
-                }
-
-                if (Objects.equals(status, PigStatus.Pregnancy.getKey())) {
-                    status = PigStatus.Mate.getKey();
-                }
-                eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(searchedPig.getId()
-                        , status));
-            }
-            Integer statusDay = DateUtil.getDeltaDays(eventAt, new Date());
-            searchedPig.setStatusDay(statusDay);
-        });
-
-        log.error("pagePigs:size"+paging.getData().size());
-        return paging;
-    }
 
 
 }

@@ -142,6 +142,12 @@
         <if test="status != null "> AND b.status = #{status} </if>
         <if test="pigCode != null and pigCode != '' "> AND a.pig_code like concat('%', #{pigCode}, '%') </if>
         <if test="rfid != null and rfid != '' "> AND a.rfid = #{rfid} </if>
+        <if test="statuses != null">
+            and b.status in
+            <foreach collection="statuses" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
     </sql>
 
     <select id="findNotTransitionsSow" parameterType="map" resultType="Long" >
