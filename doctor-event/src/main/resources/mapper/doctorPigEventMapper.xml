@@ -1971,4 +1971,47 @@
         SELECT id FROM doctor_pig_events
         WHERE pig_id = #{pigId}  ORDER BY event_at DESC ,id DESC limit 1
     </select>
+
+
+    <!--            ============       新增SQL      ============           -->
+    <sql id="where_sql">
+        <if test="type != null"> AND `type` = #{type} </if>
+        <if test="types != null &amp;&amp; types.size() > 0">
+            AND `type` IN
+            <foreach collection="types" item="i" open="(" close=")" separator=",">
+                #{i}
+            </foreach>
+        </if>
+        <if test="farmId != null"> AND farm_id = #{farmId} </if>
+        <if test="beginDate != null"> AND <![CDATA[ event_at >= #{beginDate} ]]> </if>
+        <if test="endDate != null"> AND <![CDATA[ event_at <= #{endDate} ]]> </if>
+        <if test="notList != null &amp;&amp; notList.size() > 0">
+            AND `pig_id` IN
+            <foreach collection="notList" item="i" open="(" close=")" separator=",">
+                #{i}
+            </foreach>
+        </if>
+    </sql>
+
+    <select id="findPigIdsByEvent" parameterType="map" resultType="Long">
+        SELECT DISTINCT(pig_id) FROM doctor_pig_events
+        WHERE 1=1
+        <if test="farmId != null"> AND farm_id = #{farmId} </if>
+        <if test="type != null"> AND type = #{type} </if>
+        <if test="types != null &amp;&amp; types.size()>0">
+            AND type IN
+            <foreach collection="types" item="i" open="(" close=")" separator=",">
+                #{i}
+            </foreach>
+        </if>
+        <if test="notList != null &amp;&amp; notList.size() > 0">
+            AND pig_id IN
+            <foreach collection="notList" item="i" open="(" close=")" separator=",">
+                #{i}
+            </foreach>
+        </if>
+        <if test="beginDate != null"> AND <![CDATA[ event_at >= #{beginDate} ]]> </if>
+        <if test="endDate != null"> AND <![CDATA[ event_at <= #{endDate} ]]> </if>
+    </select>
+
 </mapper>

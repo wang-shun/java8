@@ -77,4 +77,59 @@ public class DoctorPigJoinDao extends MyBatisDao<SearchedPig> {
     public List<DoctorPig> findUnRemovalPigsBy(Long barnId){
         return getSqlSession().selectList(sqlId("findUnRemovalPigsBy"), barnId);
     }
+
+
+    // -------------------- 新增代码-----------------------
+    /**
+     * 未转场的母猪
+     * @param farmId
+     * @param barnId
+     * @param status
+     * @param pigCode
+     * @param rfid
+     * @return
+     */
+    public List<Long> findNotTransitionsSow(Long farmId,Long barnId,Integer status,String pigCode,String rfid){
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("farmId", farmId);
+        map.put("barnId", barnId);
+        map.put("status", status);
+        map.put("pigCode", pigCode);
+        map.put("rfid", rfid);
+        return getSqlSession().selectList(sqlId("findNotTransitionsSow"), map);
+    }
+
+    /**
+     * 已转场的母猪
+     * @param farmId
+     * @param pigCode
+     * @return
+     */
+    public List<Long> findHaveTransitionsSow(Long farmId,Long barnId,String pigCode,String rfid){
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("farmId", farmId);
+        map.put("barnId", barnId);
+        map.put("pigCode", pigCode);
+        map.put("rfid", rfid);
+        return  getSqlSession().selectList(sqlId("findHaveTransitionsSow"),map);
+    }
+
+
+    public Paging<SearchedPig> pagesSowPig(Map<String, Object> params, Integer offset, Integer limit) {
+        if (params == null) {    //如果查询条件为空
+            params = Maps.newHashMap();
+        }
+        log.info("pagesSowPig"+params.toString());
+        Long total = sqlSession.selectOne(sqlId(COUNT), params);
+        log.error("pagesSowPig"+total.toString());
+        if (total <= 0){
+            return new Paging<>(0L, Collections.emptyList());
+        }
+        params.put(Constants.VAR_OFFSET, offset);
+        params.put(Constants.VAR_LIMIT, limit);
+        List<SearchedPig> datas = sqlSession.selectList(sqlId(PAGING), params);
+        log.error("pagesSowPig"+datas.toString());
+        return new Paging<>(total, datas);
+    }
+
 }

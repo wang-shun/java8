@@ -899,4 +899,16 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public Long queryEventId(Long pigId){
         return getSqlSession().selectOne(sqlId("queryEventId"), pigId);
     }
+
+
+
+    /**
+     * 实现层：事件筛选母猪的ID
+     * @param criteria
+     * @return
+     */
+    public List<Long> findPigIdsByEvent(Map<String, Object> criteria) {
+        return getSqlSession().selectList(sqlId("findPigIdsByEvent"), criteria);
+    }
+
 }

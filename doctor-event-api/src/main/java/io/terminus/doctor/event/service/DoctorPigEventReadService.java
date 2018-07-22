@@ -298,4 +298,15 @@ public interface DoctorPigEventReadService {
      */
     Response<Date> findEventAtLeadToStatus(Long pigId, Integer status);
 
+
+
+    /**
+     *                              新增代码
+     * 根据事件筛选出母猪ID
+     * @param criteria
+     * @return
+     */
+    Response<List<Long>> findPigIdsByEvent(Map<String, Object> criteria);
+
+
 }
