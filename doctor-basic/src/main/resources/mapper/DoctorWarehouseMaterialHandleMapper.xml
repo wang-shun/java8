@@ -675,16 +675,16 @@
         date_format(b.settlement_date,'%Y-%m') as settlement_date,
         ifnull(b.type,'') as handler_type,
         case when
-        b.type in (1,7,9,11,13)
+        b.type in (1,7,9,11)
         then ifnull(b.quantity,0) else '' end as rksl,
         case when
-        b.type in (1,7,9,11,13)
+        b.type in (1,7,9,11)
         then ifnull(b.amount,0) else '' end as rkje,
         case when
-        b.type in (2,8,10,12)
+        b.type in (2,8,10,12,13)
         then ifnull(b.quantity,0) else '' end as cksl,
         case when
-        b.type in (2,8,10,12)
+        b.type in (2,8,10,12,13)
         then ifnull(b.amount,0) else '' end as ckje,
         ifnull(f.pig_barn_name,'') as pig_barn_name,
         ifnull(f.pig_type,'') as pig_type,
@@ -692,7 +692,7 @@
         ifnull(f.apply_staff_name,'') as apply_staff_name,
         ifnull(c.`name`,'') as farm_name,
         ifnull(db.name,'') as unit,
-        ifnull(e.`name`,'') as provider_name,
+        ifnull(e.short_name,'') as provider_name,
         ifnull(d.specification,'') as specification
         from doctor_warehouse_material_handle b
         join doctor_ware_houses a
@@ -847,7 +847,7 @@
     <!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，备注-->
     <select id="getDataByMaterialName"  parameterType="Long" resultType="map">
         select mh.id as material_handle_id, mh.material_id as material_id, mh.material_name as material_name,s.code as material_code,
-        v.name as vendor_name,s.specification as specification,db.name as unit,mh.unit_price as unit_price,
+        v.short_name as vendor_name,s.specification as specification,db.name as unit,mh.unit_price as unit_price,
         mh.remark as remark,mh.farm_id as farm_id
         from doctor_warehouse_material_handle as mh
         inner join doctor_warehouse_sku as s

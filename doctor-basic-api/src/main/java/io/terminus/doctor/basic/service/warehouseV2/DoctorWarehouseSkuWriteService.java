@@ -25,7 +25,7 @@ public interface DoctorWarehouseSkuWriteService {
      * @param doctorWarehouseSku
      * @return Boolean
      */
-    Response<Boolean> update(DoctorWarehouseSku doctorWarehouseSku,String vendorName);
+    Response<Boolean> update(DoctorWarehouseSku doctorWarehouseSku);
 
     /**
      * 删除

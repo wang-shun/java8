@@ -200,7 +200,7 @@ public class DoctorSearches {
             }
             eventCriteria.put("beginDate", params.get("beginDate"));
             eventCriteria.put("endDate", params.get("endDate"));
-            //eventCriteria.put("farmId", params.get("farmId"));
+            eventCriteria.put("farmId", params.get("farmId"));
             eventCriteria = Params.filterNullOrEmpty(eventCriteria);
             List<Long> pigIds = RespHelper.or(doctorPigEventReadService.findPigIdsBy(eventCriteria), null);
             if (CollectionUtils.isEmpty(pigIds)) {
@@ -524,6 +524,9 @@ public class DoctorSearches {
         DoctorBarnDto barnDto = getBarnSearchMap(params);
         if (barnDto.getFarmId() == null) {
             return new Paging<>(0L, Collections.emptyList());
+        }
+        if (barnDto.getStatus() == null){
+            barnDto.setStatus(1);
         }
 
         Paging<DoctorBarn> barns = RespHelper.or500(doctorBarnReadService.pagingBarn(barnDto, pageNo, pageSize));

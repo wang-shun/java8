@@ -48,8 +48,8 @@ public class DoctorModifyPigChgFarmInEventV2Handler extends DoctorAbstractModify
         }
         doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig, changeDto2));
         //旧版
-        DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(deletePigEvent.getFarmId(), deletePigEvent.getEventAt());
-        oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto2));
+      //  DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(deletePigEvent.getFarmId(), deletePigEvent.getEventAt());
+       // oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto2));
 
         if (Objects.equals(deletePigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
             updateDailySowPigLiveStock(deletePigEvent.getFarmId(), getAfterDay(deletePigEvent.getEventAt()),
@@ -79,8 +79,8 @@ public class DoctorModifyPigChgFarmInEventV2Handler extends DoctorAbstractModify
         doctorDailyReportManager.createOrUpdatePigDaily(buildDailyPig(oldDailyPig, changeDto2));
 
         //旧版
-        DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
-        oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto2));
+       // DoctorDailyReport oldDailyReport = oldDailyReportDao.findByFarmIdAndSumAt(newPigEvent.getFarmId(), inputDto.eventAt());
+        //oldDailyReportManager.createOrUpdateDailyPig(oldBuildDailyPig(oldDailyReport, changeDto2));
 
         if (Objects.equals(newPigEvent.getKind(), DoctorPig.PigSex.SOW.getKey())) {
             updateDailySowPigLiveStock(newPigEvent.getFarmId(), getAfterDay(inputDto.eventAt())

@@ -57,7 +57,6 @@ public class ReportDeliveryController {
                 Row count = sheet.createRow(0);
                 count.createCell(0).setCellValue("总配种数:"+String.valueOf(map.get("matingcount"))
                         +"  分娩数/分娩率:"+String.valueOf(map.get("deliverycount"))+"/"+String.valueOf(map.get("deliveryrate"))
-                        +"  阳性数/阳性率:"+String.valueOf(map.get("yangxcount"))+"/"+String.valueOf(map.get("yangxrate"))
                         +"  返情数/返情率:"+String.valueOf(map.get("fqcount"))+"/"+String.valueOf(map.get("fqrate"))
                         +"  流产数/流产率:"+String.valueOf(map.get("lccount"))+"/"+String.valueOf(map.get("lcrate"))
                         +"  阴性数/阴性率:"+String.valueOf(map.get("yxcount"))+"/"+String.valueOf(map.get("yxrate"))
@@ -70,34 +69,36 @@ public class ReportDeliveryController {
 
                 title.createCell(0).setCellValue("序号");
                 title.createCell(1).setCellValue("母猪号");
-                title.createCell(2).setCellValue("配种猪舍");
-                title.createCell(3).setCellValue("当前状态");
-                title.createCell(4).setCellValue("配种日期");
-                title.createCell(5).setCellValue("配种次数");
-                title.createCell(6).setCellValue("公猪耳号");
-                title.createCell(7).setCellValue("配种员");
-                title.createCell(8).setCellValue("分娩猪场");
-                title.createCell(9).setCellValue("分娩猪舍");
-                title.createCell(10).setCellValue("预产日期");
-                title.createCell(11).setCellValue("实产日期");
-                title.createCell(12).setCellValue("妊娠检查结果");
-                title.createCell(13).setCellValue("是否死淘");
+                title.createCell(2).setCellValue("当前猪舍");
+                title.createCell(3).setCellValue("配种猪舍");
+                title.createCell(4).setCellValue("当前状态");
+                title.createCell(5).setCellValue("配种日期");
+                title.createCell(6).setCellValue("配种次数");
+                title.createCell(7).setCellValue("公猪耳号");
+                title.createCell(8).setCellValue("配种员");
+                title.createCell(9).setCellValue("分娩猪场");
+                title.createCell(10).setCellValue("分娩猪舍");
+                title.createCell(11).setCellValue("预产日期");
+                title.createCell(12).setCellValue("实产日期");
+                title.createCell(13).setCellValue("妊娠检查结果");
+                title.createCell(14).setCellValue("是否死淘");
 
                 for(int i = 0;i<list.size();i++) {
                     Map a = list.get(i);
                     Row row = sheet.createRow(pos++);
                     row.createCell(0).setCellValue(String.valueOf(i+1));
                     row.createCell(1).setCellValue(String.valueOf(a.get("pig_code")));
-                    row.createCell(2).setCellValue(String.valueOf(a.get("barn_name")));
-                    row.createCell(3).setCellValue(String.valueOf(a.get("pig_status")));
-                    row.createCell(4).setCellValue(String.valueOf(a.get("event_at")));
-                    row.createCell(5).setCellValue(String.valueOf(a.get("current_mating_count")));
-                    row.createCell(6).setCellValue(String.valueOf(a.get("boar_code")));
-                    row.createCell(7).setCellValue(String.valueOf(a.get("operator_name")));
-                    row.createCell(8).setCellValue(String.valueOf(a.get("deliveryFarm")));
-                    row.createCell(9).setCellValue(String.valueOf(a.get("deliveryBarn")));
-                    row.createCell(10).setCellValue(String.valueOf(a.get("judge_preg_date")));
-                    row.createCell(11).setCellValue(String.valueOf(a.get("deliveryDate")));
+                    row.createCell(2).setCellValue(String.valueOf(a.get("current_barn_name")));
+                    row.createCell(3).setCellValue(String.valueOf(a.get("barn_name")));
+                    row.createCell(4).setCellValue(String.valueOf(a.get("pig_status")));
+                    row.createCell(5).setCellValue(String.valueOf(a.get("event_at")));
+                    row.createCell(6).setCellValue(String.valueOf(a.get("current_mating_count")));
+                    row.createCell(7).setCellValue(String.valueOf(a.get("boar_code")));
+                    row.createCell(8).setCellValue(String.valueOf(a.get("operator_name")));
+                    row.createCell(9).setCellValue(String.valueOf(a.get("deliveryFarm")));
+                    row.createCell(10).setCellValue(String.valueOf(a.get("deliveryBarn")));
+                    row.createCell(11).setCellValue(String.valueOf(a.get("judge_preg_date")));
+                    row.createCell(12).setCellValue(String.valueOf(a.get("deliveryDate")));
                     String check_event_at = "";
                     String leave_event_at = "";
                     if (!String.valueOf(a.get("check_event_at")).equals("") && !String.valueOf(a.get("notdelivery")).equals("阳性")) {
@@ -106,13 +107,39 @@ public class ReportDeliveryController {
                     if (!String.valueOf(a.get("leave_event_at")).equals("")) {
                         leave_event_at = "("+String.valueOf(a.get("leave_event_at"))+")";
                     }
-                    row.createCell(12).setCellValue(String.valueOf(a.get("notdelivery"))+check_event_at);
-                    row.createCell(13).setCellValue(String.valueOf(a.get("deadorescape"))+leave_event_at);
+                    row.createCell(13).setCellValue(String.valueOf(a.get("notdelivery"))+check_event_at);
+                    row.createCell(14).setCellValue(String.valueOf(a.get("deadorescape"))+leave_event_at);
                 }
                 workbook.write(response.getOutputStream());
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 母猪存栏报表
+     * @param farmId 猪场id
+     * @param time  查询时间
+     * @param pigCode   耳号
+     * @param operatorName  饲养员
+     * @param barnId    猪舍id
+     * @param breed     品种
+     * @param parity    胎次
+     * @param pigStatus 猪状态
+     * @param inFarmTime 进场时间
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "sows")
+    public List<Map<String,Object>> sowsReport(@RequestParam(required = true) Long farmId,
+                                             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date time,
+                                             @RequestParam(required = false) String pigCode,
+                                             @RequestParam(required = false) String operatorName,
+                                             @RequestParam(required = false) Long barnId,
+                                             @RequestParam(required = false) int breed,
+                                             @RequestParam(required = false) int parity,
+                                             @RequestParam(required = false) int pigStatus,
+                                             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date inFarmTime) {
+        return doctorDeliveryReadService.sowsReport(farmId,time,pigCode,operatorName,barnId,breed,parity,pigStatus,inFarmTime);
     }
 }

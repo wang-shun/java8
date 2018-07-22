@@ -1,10 +1,9 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
-import io.terminus.doctor.event.dao.DoctorDataFactorDao;
+import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportDeliverDao;
 import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.manager.FactorManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,10 +18,12 @@ import java.util.*;
 public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
 
     private final DoctorReportDeliverDao doctorReportDeliverDao;
+    private final DoctorPigEventDao doctorPigEventDao;
 
     @Autowired
-    public DoctorDeliveryReadServicelmpl(DoctorReportDeliverDao doctorReportDeliverDao) {
+    public DoctorDeliveryReadServicelmpl(DoctorReportDeliverDao doctorReportDeliverDao,DoctorPigEventDao doctorPigEventDao) {
         this.doctorReportDeliverDao = doctorReportDeliverDao;
+        this.doctorPigEventDao = doctorPigEventDao;
     }
 
     @Override
@@ -31,7 +32,6 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         List<Map<String,Object>> delivery = new ArrayList<>(); //分娩了
         List<Map<String,Object>> nodeliver = new ArrayList<>();//未分娩
         int deliverycount = 0;//分娩数
-        int yangxcount = 0;//阳性数
         int fqcount = 0;//返情数
         int lccount = 0;//流产数
         int yxcount = 0;//阴性数
@@ -70,6 +70,11 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             BigInteger id = (BigInteger)map.get("id");
             BigInteger pig_id = (BigInteger)map.get("pig_id");
             int parity = (int)map.get("parity");
+
+            Map<String,Object> matingCount =  doctorReportDeliverDao.getMatingCount(pig_id,(Date)map.get("event_at"));
+            if(matingCount != null){
+                map.put("current_mating_count",matingCount.get("current_mating_count"));
+            }
             List<Map<String,Object>> deliveryBarn = doctorReportDeliverDao.deliveryBarn(id,pig_id);//判断是否分娩以及查询分娩猪舍
             if(deliveryBarn != null) {
                 if (deliveryBarn.size() != 0) {
@@ -82,7 +87,6 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map.put("leave_event_at", "");
                     delivery.add(map);
                     deliverycount = deliverycount + 1;
-                    yangxcount = yangxcount + 1;
                 } else {
                     map.put("deliveryBarn", "未分娩");
                     map.put("deliveryDate", "");
@@ -99,7 +103,6 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         int b = (int) notdelivery.get("preg_check_result");
                         if (b == 1) {
                             map.put("notdelivery", "阳性");
-                            yangxcount = yangxcount + 1;
                         }
                         if (b == 2) {
                             map.put("notdelivery", "阴性");
@@ -142,7 +145,6 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         }
         int matingcount = 0;
         String deliveryrate = "0";
-        String yangxrate = "0";
         String fqrate = "0";
         String lcrate = "0";
         String yxrate = "0";
@@ -151,7 +153,6 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         if(matingList.size()!=0) {
             matingcount = matingList.size();
             deliveryrate = divide(deliverycount, matingcount);//分娩率
-            yangxrate = divide(yangxcount, matingcount);//阳性率
             fqrate = divide(fqcount, matingcount);//返情率
             lcrate = divide(lccount, matingcount);//流产率
             yxrate = divide(yxcount, matingcount);//阴性率
@@ -162,14 +163,12 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         Map<String,Object> list = new HashMap<>();
         list.put("matingcount",matingcount);
         list.put("deliverycount",deliverycount);
-        list.put("yangxcount",yangxcount);
         list.put("fqcount",fqcount);
         list.put("lccount",lccount);
         list.put("yxcount",yxcount);
         list.put("swcount",swcount);
         list.put("ttcount",ttcount);
         list.put("deliveryrate",deliveryrate);
-        list.put("yangxrate",yangxrate);
         list.put("fqrate",fqrate);
         list.put("lcrate",lcrate);
         list.put("yxrate",yxrate);
@@ -189,5 +188,10 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         BigDecimal big   =   new  BigDecimal(k);
         String  l = big.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue() +"%";
         return l;
+    }
+
+    @Override
+    public List<Map<String,Object>> sowsReport(Long farmId,Date time,String pigCode,String operatorName,Long barnId,int breed,int parity,int pigStatus,Date inFarmTime){
+        return null;
     }
 }

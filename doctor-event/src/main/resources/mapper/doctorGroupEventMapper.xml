@@ -791,11 +791,44 @@
         WHERE id = #{id}
     </update>
 
+    <select id="findCareSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
+        select
+        a.event_at as salesDate,
+        a.customer_id as customerId,
+        c.name as client,
+        a.pig_type as pigType,
+        "保育猪" as pigTypeName,
+        a.barn_name as barnName,
+        sum(a.avg_day_age*a.quantity)/sum(a.quantity) as ages,
+        sum(a.quantity) as pigNumber,
+        sum(a.weight) as pigWeight,
+        sum(a.amount)/sum(a.weight) as pigPrice,
+        sum(a.amount) as pigAmount,
+        b.breed_id as breedId,
+        b.breed_name as breedName
+        from doctor_group_events a left join doctor_groups b on a.group_id = b.id
+        left join doctor_customers c on a.customer_id = c.id
+        where a.type = 3
+        and a.pig_type = 2
+        and a.change_type_id = 109
+        <if test="breedsId != null">AND b.breed_id = #{breedsId}</if>
+        <if test="farmId != null">AND a.farm_id = #{farmId}</if>
+        <if test="batch != null">AND a.group_code = #{batch}</if>
+        <if test="barnId != null">AND a.barn_id = #{barnId}</if>
+        <if test="barnName != null">AND a.barn_name = #{barnName}</if>
+        <if test="client != null">AND a.customer_id = #{client}</if>
+        <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
+        <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
+        group by a.group_id, a.event_at, a.customer_id
+        order by a.event_at ASC ;
+    </select>
+
     <select id="findNurseSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
         select
         a.event_at as salesDate,
-        a.customer_name as client,
-        '7_2' as pigType,
+        a.customer_id as customerId,
+        c.name as client,
+        a.pig_type as pigType,
         "仔猪" as pigTypeName,
         a.barn_name as barnName,
         sum(a.avg_day_age*a.quantity)/sum(a.quantity) as ages,
@@ -806,9 +839,11 @@
         b.breed_id as breedId,
         b.breed_name as breedName
         from doctor_group_events a left join doctor_groups b on a.group_id = b.id
+        left join doctor_customers c on a.customer_id = c.id
         where a.type = 3
-        and a.pig_type in ( 2,7 )
+        and a.pig_type = 7
         and a.change_type_id = 109
+        <if test="breedsId != null">AND b.breed_id = #{breedsId}</if>
         <if test="farmId != null">AND a.farm_id = #{farmId}</if>
         <if test="batch != null">AND a.group_code = #{batch}</if>
         <if test="barnId != null">AND a.barn_id = #{barnId}</if>
@@ -816,13 +851,15 @@
         <if test="client != null">AND a.customer_id = #{client}</if>
         <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
-        group by a.group_id, a.event_at, a.customer_id;
+        group by a.group_id, a.event_at, a.customer_id
+        order by a.event_at ASC ;
     </select>
 
     <select id="findReverseSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
         select
         a.event_at as salesDate,
-        a.customer_name as client,
+        a.customer_id as customerId,
+        c.name as client,
         a.pig_type as pigType,
         "后备猪" as pigTypeName,
         a.barn_name as barnName,
@@ -834,9 +871,11 @@
         b.breed_id as breedId,
         b.breed_name as breedName
         from doctor_group_events a left join doctor_groups b on a.group_id = b.id
+        left join doctor_customers c on a.customer_id = c.id
         where a.type = 3
         and a.pig_type = 4
         and a.change_type_id = 109
+        <if test="breedsId != null">AND b.breed_id = #{breedsId}</if>
         <if test="farmId != null">AND a.farm_id = #{farmId}</if>
         <if test="batch != null">AND a.group_code = #{batch}</if>
         <if test="barnId != null">AND a.barn_id = #{barnId}</if>
@@ -844,13 +883,15 @@
         <if test="client != null">AND a.customer_id = #{client}</if>
         <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
-        group by a.group_id, a.event_at, a.customer_id;
+        group by a.group_id, a.event_at, a.customer_id
+        order by a.event_at ASC ;
     </select>
 
     <select id="findFattenSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
         select
         a.event_at as salesDate,
-        a.customer_name as client,
+        a.customer_id as customerId,
+        c.name as client,
         a.pig_type as pigType,
         "育肥猪" as pigTypeName,
         a.barn_name as barnName,
@@ -862,9 +903,11 @@
         b.breed_id as breedId,
         b.breed_name as breedName
         from doctor_group_events a left join doctor_groups b on a.group_id = b.id
+        left join doctor_customers c on a.customer_id = c.id
         where a.type = 3
         and a.pig_type = 3
         and a.change_type_id = 109
+        <if test="breedsId != null">AND b.breed_id = #{breedsId}</if>
         <if test="farmId != null">AND a.farm_id = #{farmId}</if>
         <if test="batch != null">AND a.group_code = #{batch}</if>
         <if test="barnId != null">AND a.barn_id = #{barnId}</if>
@@ -872,7 +915,8 @@
         <if test="client != null">AND a.customer_id = #{client}</if>
         <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
-        group by a.group_id, a.event_at, a.customer_id;
+        group by a.group_id, a.event_at, a.customer_id
+        order by a.event_at ASC;
     </select>
 
     <sql id="saleCriteria">
@@ -890,4 +934,13 @@
         from <include refid="tb"/>
         group by farm_id
     </select>
+
+    <select id="findGroupEvents" parameterType="map" resultMap="DoctorGroupEventMap">
+        select * from doctor_group_events where farm_id = #{farmId} and (type=3 or type=4 or type=5 or type=9 or type=10) and group_id=(
+        select group_id from doctor_group_events where rel_pig_event_id = #{relPigEventId} and farm_id = #{farmId}
+        ) and id>(
+        select id from doctor_group_events where rel_pig_event_id = #{relPigEventId} and farm_id = #{farmId}
+        )ORDER BY event_at DESC,id DESC
+    </select>
+
 </mapper>

@@ -90,7 +90,8 @@ public class DoctorWarehouseMaterialHandleManager {
         if (null != unit)
             materialHandle.setUnit(unit.getName());
 
-        materialHandle.setVendorName(doctorVendorManager.findById(materialHandleContext.getSku().getVendorId()).getName());
+//        materialHandle.setVendorName(doctorVendorManager.findById(materialHandleContext.getSku().getVendorId()).getName());
+        materialHandle.setVendorName(doctorVendorManager.findById(materialHandleContext.getSku().getVendorId()).getShortName());
         materialHandle.setHandleYear(materialHandleContext.getStockDto().getHandleDate().get(Calendar.YEAR));
         materialHandle.setHandleMonth(materialHandleContext.getStockDto().getHandleDate().get(Calendar.MONTH) + 1);
         materialHandle.setRemark(materialHandleContext.getStockDetail().getRemark());

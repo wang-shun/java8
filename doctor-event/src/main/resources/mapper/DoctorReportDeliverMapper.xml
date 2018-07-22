@@ -343,7 +343,7 @@
         </where>
     </select>
     <select id="deliveryReport" parameterType="map" resultType="map">
-        select a.id,a.pig_id,a.pig_code,a.barn_name,a.event_at,a.current_mating_count, a.boar_code, a.operator_name,a.parity,a.judge_preg_date,b.status as pig_status
+        select a.id,a.pig_id,a.pig_code,a.barn_name,a.event_at,a.current_mating_count, a.boar_code, a.operator_name,a.parity,a.judge_preg_date,b.status as pig_status,b.current_barn_name as current_barn_name
         FROM doctor_pig_events a left join doctor_pig_tracks b on a.pig_id = b.pig_id
         <where>
             a.farm_id = #{farmId}
@@ -394,5 +394,15 @@
         and parity = #{parity}
         and id > #{id}
         order by id asc limit 1
+    </select>
+    <select id="getMatingCount" parameterType="map" resultType="map">
+        select current_mating_count
+        from doctor_pig_events
+        where pig_id = #{pigId}
+        and type = 9
+        and status = 1
+        AND event_source != 5
+        and event_at >= #{event_at} and event_at &lt;= date_sub(#{event_at}, INTERVAL -3 DAY )
+        order by id DESC limit 1
     </select>
 </mapper>

@@ -6,6 +6,7 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialApplyDao;
+import io.terminus.doctor.basic.dao.DoctorWarehouseMaterialHandleDao;
 import io.terminus.doctor.basic.dao.DoctorWarehouseOrgSettlementDao;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApplyPigGroup;
@@ -20,6 +21,7 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +43,9 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
     @Autowired
     private DoctorWarehouseOrgSettlementDao doctorWarehouseOrgSettlementDao;
+
+    @Autowired
+    private DoctorWarehouseMaterialHandleDao doctorWarehouseMaterialHandleDao;
 
     @Override
     public Response<DoctorWarehouseMaterialApply> findById(Long id) {
@@ -201,7 +206,18 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
     @Override
     public Response<List<Map>> piggeryDetails(Long orgId,String date,DoctorWarehouseMaterialApply criteria) {
+        List<Map> map=new ArrayList<Map>();
         List<Map> maps = doctorWarehouseMaterialApplyDao.piggeryDetails(criteria);
+        map.addAll(maps);
+        for (Map mm: maps) {
+            //判断领料出库的物料是否有退料入库
+            Integer count = doctorWarehouseMaterialHandleDao.findCountByRelMaterialHandleId((Long) mm.get("id"), (Long) mm.get("farm_id"));
+            if(count>0){
+                criteria.setMaterialHandleId((Long) mm.get("id"));
+                List<Map> maps2 = doctorWarehouseMaterialApplyDao.piggeryRetreatingDetails(criteria);
+                map.addAll(maps2);
+            }
+        }
 
         try {
             //会计年月支持选择未结算过的会计年月，如果选择未结算的会计区间，则报表不显示金额和单价
@@ -209,40 +225,50 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
             boolean  b = doctorWarehouseOrgSettlementDao.isSettled(orgId, sdf.parse(date));
             if(!b){
                 BigDecimal allQuantity = new BigDecimal(0);
-                for(int i = 0;i<maps.size(); i++){
-                    maps.get(i).put("unit_price","--");
-                    maps.get(i).put("amount","--");
+                for(int i = 0;i<map.size(); i++){
+                    map.get(i).put("unit_price","--");
+                    map.get(i).put("amount","--");
                 }
             }
         } catch (ParseException e) {
             e.printStackTrace();
         }
 
-        return Response.ok(maps);
+        return Response.ok(map);
     }
 
     @Override
     public Response<List<DoctorWarehouseMaterialApplyPigGroupDetail>> selectPigGroupApplyDetail(Long orgId,Long pigGroupId, Long skuId){
+        List<DoctorWarehouseMaterialApplyPigGroupDetail> maps=new ArrayList<DoctorWarehouseMaterialApplyPigGroupDetail>();
         List<DoctorWarehouseMaterialApplyPigGroupDetail> ApplyPigGroupDetails = doctorWarehouseMaterialApplyDao.selectPigGroupApplyDetail(pigGroupId, skuId);
+        maps.addAll(ApplyPigGroupDetails);
+        for (DoctorWarehouseMaterialApplyPigGroupDetail gd: ApplyPigGroupDetails) {
+            //判断领料出库的物料是否有退料入库
+            Integer count = doctorWarehouseMaterialHandleDao.findCountByRelMaterialHandleId(gd.getMaterialHandleId(),gd.getFarmId());
+            if(count>0){
+                List<DoctorWarehouseMaterialApplyPigGroupDetail> doctorWarehouseMaterialApplyPigGroupDetails = doctorWarehouseMaterialApplyDao.selectPigGroupApplyRetreatingDetail(pigGroupId, skuId, gd.getMaterialHandleId());
+                maps.addAll(doctorWarehouseMaterialApplyPigGroupDetails);
+            }
+        }
 
-        for (int i = 0; i < ApplyPigGroupDetails.size(); i++) {
-            ApplyPigGroupDetails.get(i).setQuantity(new BigDecimal(Double.parseDouble(ApplyPigGroupDetails.get(i).getQuantity())).setScale(3, BigDecimal.ROUND_HALF_UP).toString());
-            ApplyPigGroupDetails.get(i).setUnitPrice(new BigDecimal(Double.parseDouble(ApplyPigGroupDetails.get(i).getUnitPrice())).setScale(4, BigDecimal.ROUND_HALF_UP).toString());
-            ApplyPigGroupDetails.get(i).setAmount(new BigDecimal(Double.parseDouble(ApplyPigGroupDetails.get(i).getAmount())).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+        for (int i = 0; i < maps.size(); i++) {
+            maps.get(i).setQuantity(new BigDecimal(Double.parseDouble(maps.get(i).getQuantity())).setScale(3, BigDecimal.ROUND_HALF_UP).toString());
+            maps.get(i).setUnitPrice(new BigDecimal(Double.parseDouble(maps.get(i).getUnitPrice())).setScale(4, BigDecimal.ROUND_HALF_UP).toString());
+            maps.get(i).setAmount(new BigDecimal(Double.parseDouble(maps.get(i).getAmount())).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
             try {
             //会计年月支持选择未结算过的会计年月，如果选择未结算的会计区间，则报表不显示金额和单价
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
-            boolean b = doctorWarehouseOrgSettlementDao.isSettled(orgId, sdf.parse(ApplyPigGroupDetails.get(i).getSettlementDate()));
+            boolean b = doctorWarehouseOrgSettlementDao.isSettled(orgId, sdf.parse(maps.get(i).getSettlementDate()));
             if(!b){
-                ApplyPigGroupDetails.get(i).setUnitPrice("--");
-                ApplyPigGroupDetails.get(i).setAmount("--");
+                maps.get(i).setUnitPrice("--");
+                maps.get(i).setAmount("--");
             }
             } catch (ParseException e) {
                 e.printStackTrace();
             }
         }
 
-        return Response.ok(ApplyPigGroupDetails);
+        return Response.ok(maps);
     }
 
     @Override

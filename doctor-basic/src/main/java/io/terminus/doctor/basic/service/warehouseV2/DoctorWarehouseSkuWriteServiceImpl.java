@@ -11,6 +11,7 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.common.utils.RespHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -44,6 +45,9 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
     private DoctorWarehouseMaterialHandleDao doctorWarehouseMaterialHandleDao;
     @Autowired
     private DoctorWarehouseStockDao doctorWarehouseStockDao;
+
+    @Autowired
+    private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
 
     @Override
     @ExceptionHandle("doctor.warehouse.sku.create.fail")
@@ -87,7 +91,7 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
 
     @Override
     @ExceptionHandle("doctor.warehouse.sku.update.fail")
-    public Response<Boolean> update(DoctorWarehouseSku doctorWarehouseSku,String vendorName) {
+    public Response<Boolean> update(DoctorWarehouseSku doctorWarehouseSku) {
 
         DoctorBasicMaterial item = doctorBasicMaterialDao.findById(doctorWarehouseSku.getItemId());
         if (null == item)
@@ -119,7 +123,7 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
 
             //update doctor_warehouse_material_handle set vendor_name= ,material_name= ,unit= where material_id=;
             DoctorWarehouseMaterialHandle mh=new DoctorWarehouseMaterialHandle();
-            mh.setVendorName(vendorName);
+            mh.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(doctorWarehouseSku.getVendorId())));
             mh.setMaterialName(doctorWarehouseSku.getName());
             mh.setUnit(doctorWarehouseSku.getUnit());
             mh.setMaterialId(doctorWarehouseSku.getId());

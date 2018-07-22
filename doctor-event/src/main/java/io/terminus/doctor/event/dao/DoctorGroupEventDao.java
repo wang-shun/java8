@@ -297,7 +297,9 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
     public List<DoctorPigSalesExportDto> findNurseSales(Map<String, Object> map) {
         return sqlSession.selectList(sqlId("findNurseSales"), map);
     }
-
+    public List<DoctorPigSalesExportDto> findCareSales(Map<String, Object> map) {
+        return sqlSession.selectList(sqlId("findCareSales"), map);
+    }
 
     public List<DoctorPigSalesExportDto> findReverseSales(Map<String, Object> map) {
         return sqlSession.selectList(sqlId("findReverseSales"), map);
@@ -309,5 +311,12 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
 
     public List<DoctorFarmEarlyEventAtDto> findEarLyAt(){
         return sqlSession.selectList(sqlId("findEarLyAt"));
+    }
+
+    public List<DoctorGroupEvent> findGroupEvents(Long farmId,Long relPigEventId){
+        Map<String, Object> param = new HashMap<>();
+        param.put("farmId", farmId);
+        param.put("relPigEventId", relPigEventId);
+        return sqlSession.selectList(sqlId("findGroupEvents"),param);
     }
 }
