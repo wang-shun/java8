@@ -958,11 +958,18 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
          map.put("pigId",pigId);
          return this.sqlSession.selectOne(this.sqlId("findPigInfo"), map);
      }*/
-    public Map<String,Object> frontEvent(BigInteger pigId,Date time,Integer parity){
+
+    /*public Map<String,Object> frontEventId(BigInteger pigId,Date time){
         Map<String, Object> map = new HashMap<>();
         map.put("pigId",pigId);
         map.put("time",time);
+        return this.sqlSession.selectOne(this.sqlId("frontEventId"), map);
+    }*/
+    public Map<String,Object> frontEvent(Integer parity,BigInteger pigId, Date time){
+        Map<String, Object> map = new HashMap<>();
+        map.put("pigId",pigId);
         map.put("parity",parity);
+        map.put("time",time);
         return this.sqlSession.selectOne(this.sqlId("frontEvent"), map);
     }
     public Map<String,Object> findBarns(BigInteger pigId,String operatorName,Integer barnType){
@@ -971,5 +978,18 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         map.put("operatorName",operatorName);
         map.put("barnType",barnType);
         return this.sqlSession.selectOne(this.sqlId("findBarns"), map);
+    }
+    public List<Map<String,Object>> getdaizaishu(BigInteger pigId,Date time,Date nearDeliverDate){
+        Map<String, Object> map = new HashMap<>();
+        map.put("pigId",pigId);
+        map.put("time",time);
+        map.put("nearDeliverDate",nearDeliverDate);
+        return this.sqlSession.selectList(this.sqlId("getdaizaishu"), map);
+    }
+    public Map<String,Object> nearDeliver(BigInteger pigId,Date time){
+        Map<String, Object> map = new HashMap<>();
+        map.put("pigId",pigId);
+        map.put("time",time);
+        return this.sqlSession.selectOne(this.sqlId("nearDeliver"), map);
     }
 }

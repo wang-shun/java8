@@ -2063,11 +2063,17 @@
          FROM doctor_pigs a join doctor_pig_tracks b on a.id = b.pig_id join doctor_barns c on b.current_barn_id = c.id
          WHERE a.id = #{pigId}
      </select>-->
-    <select id="frontEvent" parameterType="map" resultType="map">
-        select parity, pig_status_after
+    <select id="frontEventId" parameterType="map" resultType="map">
+        select id,type
         from doctor_pig_events
-        where id =
-        (select id
+        where event_at &lt; #{time}
+        and pig_id = #{pigId}
+        order by id desc limit 1
+    </select>
+    <select id="frontEvent" parameterType="map" resultType="map">
+        select parity, pig_status_after,event_at,live_count,type
+        from doctor_pig_events
+        where id = (select id
         from doctor_pig_events
         where event_at &lt; #{time}
         and pig_id = #{pigId}
@@ -2083,4 +2089,17 @@
         <if test="operatorName != null"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
         <if test="barnType != null"> and c.pig_type = #{barnType} </if>
     </select>
+    <select id="getdaizaishu" parameterType="map" resultType="map">
+        select type,sum(quantity) as quantity
+        from doctor_pig_events
+        where pig_id = #{pigId}
+        and event_at >= #{nearDeliverDate}
+        and event_at &lt; #{time}
+        group by type
+        HAVING type in (17,18,19)
+    </select>
+    <select id="nearDeliver" parameterType="map" resultType="map">
+        select event_at,live_count from doctor_pig_events where event_at &lt; #{time} and pig_id = #{pigId} and type = 15 order by id desc limit 1
+    </select>
+
 </mapper>

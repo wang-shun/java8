@@ -230,14 +230,50 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     it.remove();
                 }
             }
-            Map<String,Object> frontEvent = doctorPigEventDao.frontEvent(pigId,time,parity);//利用前一个事件来求母猪的胎次和状态
-            if(frontEvent != null) {
-                map.put("parity", frontEvent.get("parity"));//母猪胎次
-                map.put("status", frontEvent.get("pig_status_after"));//母猪状态
-            } else{
-                it.remove();
+            //Map<String,Object> frontEventId = doctorPigEventDao.frontEventId(pigId,time);//利用前一个事件来求母猪的胎次和状态
+            //if(frontEventId != null) {
+                Map<String,Object> frontEvent = doctorPigEventDao.frontEvent(parity,pigId,time);
+                if(frontEvent != null) {
+                    map.put("parity", frontEvent.get("parity"));//母猪胎次
+                    map.put("status", frontEvent.get("pig_status_after"));//母猪状态
+
+                    if(frontEvent.get("type") != null){
+                        int a = (int)frontEvent.get("type");
+                        if(a == 15 || a == 17 || a == 18 ||a == 19 ){
+                            if(a == 15){
+                                if(frontEvent.get("live_count") != null) {
+                                    map.put("daizaishu", frontEvent.get("live_count"));//如果前一個事件是分娩事件，带仔数就是分娩事件的活仔数
+                                }else{
+                                    map.put("daizaishu",0);
+                                }
+                            }else{
+                                Map<String,Object> nearDeliver = doctorPigEventDao.nearDeliver(pigId,time);
+                                BigDecimal daizaishu = new BigDecimal((int)nearDeliver.get("live_count"));
+                                List<Map<String,Object>> b = doctorPigEventDao.getdaizaishu(pigId,time,(Date)nearDeliver.get("event_at"));//如果是拼窝或者仔猪变动则需计算
+                                for(int i = 0;i < b.size(); i++){
+                                    if((int)b.get(i).get("type") == 17){
+                                        daizaishu = daizaishu.subtract((BigDecimal)b.get(i).get("quantity"));
+                                    }
+                                    if((int)b.get(i).get("type") == 18){
+                                        daizaishu = daizaishu.subtract((BigDecimal)b.get(i).get("quantity"));
+                                    }
+                                    if((int)b.get(i).get("type") == 19){
+                                        daizaishu = daizaishu.add((BigDecimal)b.get(i).get("quantity"));
+                                    }
+                                }
+                                map.put("daizaishu",daizaishu);
+                            }
+                        }else{
+                            map.put("daizaishu",0);
+                        }
+                    }else{
+                        map.put("daizaishu",0);
+                    }
+                }else{
+                    it.remove();
+                }
             }
-        }
+       // }
         //}
         return inFarmPigId;
     }
