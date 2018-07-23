@@ -15,6 +15,7 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigInteger;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -910,5 +911,65 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public List<Long> findPigIdsByEvent(Map<String, Object> criteria) {
         return getSqlSession().selectList(sqlId("findPigIdsByEvent"), criteria);
     }
-
+    public List<Map<String,Object>> getInFarmPigId(Long farmId, Date time,Integer barnType,String pigCode,Integer breed,String operatorName,Date beginInFarmTime, Date endInFarmTime){
+        Map<String, Object> map = new HashMap<>();
+        map.put("farmId",farmId);
+        map.put("time",time);
+        map.put("barnType",barnType);
+        map.put("pigCode",pigCode);
+        map.put("breed",breed);
+        map.put("operatorName",operatorName);
+        map.put("beginInFarmTime",beginInFarmTime);
+        map.put("endInFarmTime",endInFarmTime);
+        return this.sqlSession.selectList(this.sqlId("getInFarmPigId"), map);
+    }
+    /* public Integer isOutFarm(BigInteger id, BigInteger pigId, Date eventAt, Long farmId, Date time){
+         Map<String, Object> map = new HashMap<>();
+         map.put("id",id);
+         map.put("pigId",pigId);
+         map.put("eventAt",eventAt);
+         map.put("farmId",farmId);
+         map.put("time",time);
+         return this.sqlSession.selectOne(this.sqlId("isOutFarm"), map);
+     }*/
+    public BigInteger isBarn(BigInteger id, BigInteger pigId, Date eventAt, Long farmId, Date time){
+        Map<String, Object> map = new HashMap<>();
+        map.put("id",id);
+        map.put("pigId",pigId);
+        map.put("eventAt",eventAt);
+        map.put("farmId",farmId);
+        map.put("time",time);
+        return this.sqlSession.selectOne(this.sqlId("isBarn"), map);
+    }
+    public Map<String,Object> findBarn(BigInteger isBarn,BigInteger id, BigInteger pigId, Date eventAt, Long farmId, Date time,String operatorName,Integer barnType){
+        Map<String, Object> map = new HashMap<>();
+        map.put("id",id);
+        map.put("pigId",pigId);
+        map.put("eventAt",eventAt);
+        map.put("farmId",farmId);
+        map.put("time",time);
+        map.put("operatorName",operatorName);
+        map.put("barnType",barnType);
+        map.put("isBarn",isBarn);
+        return this.sqlSession.selectOne(this.sqlId("findBarn"), map);
+    }
+    /* public Map<String,Object> findPigInfo(Long pigId){
+         Map<String, Object> map = new HashMap<>();
+         map.put("pigId",pigId);
+         return this.sqlSession.selectOne(this.sqlId("findPigInfo"), map);
+     }*/
+    public Map<String,Object> frontEvent(BigInteger pigId,Date time,Integer parity){
+        Map<String, Object> map = new HashMap<>();
+        map.put("pigId",pigId);
+        map.put("time",time);
+        map.put("parity",parity);
+        return this.sqlSession.selectOne(this.sqlId("frontEvent"), map);
+    }
+    public Map<String,Object> findBarns(BigInteger pigId,String operatorName,Integer barnType){
+        Map<String, Object> map = new HashMap<>();
+        map.put("pigId",pigId);
+        map.put("operatorName",operatorName);
+        map.put("barnType",barnType);
+        return this.sqlSession.selectOne(this.sqlId("findBarns"), map);
+    }
 }

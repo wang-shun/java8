@@ -2014,4 +2014,73 @@
         <if test="endDate != null"> AND <![CDATA[ event_at <= #{endDate} ]]> </if>
     </select>
 
+
+    <select id="getInFarmPigId" parameterType="map" resultType="map">
+        SELECT d.id as id, d.pig_id as pig_id , max(d.event_at) as event_at, a.pig_code as pig_code,a.breed_id as breed_id,a.breed_name as breed_name,a.source as source,a.in_farm_date as in_farm_date,a.birth_date as birth_date
+        FROM doctor_pig_events d
+        join doctor_pigs a on d.pig_id = a.id
+        WHERE d.farm_id = #{farmId}
+        and d.kind = 1
+        and d.type in (7,20)
+        and d.event_at &lt; #{time}
+        <if test="pigCode != null"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
+        <if test="breed != null"> and a.breed_id = #{breed} </if>
+        <if test="beginInFarmTime != null"> and a.in_farm_date > #{beginInFarmTime} </if>
+        <if test="endInFarmTime != null"> and a.in_farm_date &lt; #{endInFarmTime} </if>
+        group by d.pig_id
+        HAVING  d.id not in
+        (SELECT d.id
+        FROM doctor_pig_events
+        WHERE farm_id = #{farmId}
+        and pig_id = d.pig_id
+        and kind = 1
+        and type in (2,6)
+        and event_at &lt; #{time}
+        and event_at >= max(d.event_at)
+        and id > d.id)
+    </select>
+    <!--<select id="isOutFarm" parameterType="map" resultType="Integer">
+        SELECT count(*)
+        FROM doctor_pig_events
+        WHERE farm_id = #{farmId} and pig_id = #{pigId} and kind = 1 and type in (2,6) and event_at &lt; #{time} and event_at >= #{eventAt} and id > #{id}
+    </select>-->
+
+    <select id="findBarn" parameterType="map" resultType="map">
+        SELECT a.barn_id as barn_id, a.barn_name as barn_name, b.staff_name as staff_name
+        FROM doctor_pig_events a join doctor_barns b on a.barn_id = b.id
+        where a.id = #{isBarn}
+        <if test="operatorName != null"> AND b.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
+        <if test="barnType != null"> and b.pig_type = #{barnType} </if>
+    </select>
+    <select id="isBarn" parameterType="map" resultType="BigInteger">
+        select id from doctor_pig_events
+        WHERE farm_id = #{farmId} and pig_id = #{pigId} and kind = 1 and type in (1,10,12,14) and event_at &lt; #{time} and event_at >= #{eventAt} and id > #{id}
+        order by id
+        limit 1
+    </select>
+    <!-- <select id="findPigInfo" parameterType="map" resultType="map">
+         SELECT b.current_barn_id as current_barn_id, b.current_barn_name as current_barn_name,a.pig_code as pig_code,a.breed_id as breed_id,a.breed_name as breed_name,a.source as source,a.in_farm_date as in_farm_date,a.birth_date as birth_date,c.staff_name as staff_name
+         FROM doctor_pigs a join doctor_pig_tracks b on a.id = b.pig_id join doctor_barns c on b.current_barn_id = c.id
+         WHERE a.id = #{pigId}
+     </select>-->
+    <select id="frontEvent" parameterType="map" resultType="map">
+        select parity, pig_status_after
+        from doctor_pig_events
+        where id =
+        (select id
+        from doctor_pig_events
+        where event_at &lt; #{time}
+        and pig_id = #{pigId}
+        order by id desc limit 1)
+        <if test="parity != null and parity == 1"> and parity &lt;= 10 and parity> 1 </if>
+        <if test="parity != null and parity == 2"> and  parity> 11 </if>
+    </select>
+    <select id="findBarns" parameterType="map" resultType="map">
+        select b.current_barn_id, b.current_barn_name, c.staff_name as staff_name
+        from doctor_pig_tracks b
+        join doctor_barns c on b.current_barn_id = c.id
+        where pig_id = #{pigId}
+        <if test="operatorName != null"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
+        <if test="barnType != null"> and c.pig_type = #{barnType} </if>
+    </select>
 </mapper>

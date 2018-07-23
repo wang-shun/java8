@@ -191,7 +191,54 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
     }
 
     @Override
-    public List<Map<String,Object>> sowsReport(Long farmId,Date time,String pigCode,String operatorName,Long barnId,int breed,int parity,int pigStatus,Date inFarmTime){
-        return null;
+    public List<Map<String,Object>> sowsReport(Long farmId,Date time,String pigCode,String operatorName,Integer barnType,Integer breed,Integer parity,Integer pigStatus,Date beginInFarmTime, Date endInFarmTime){
+        List<Map<String,Object>> inFarmPigId = doctorPigEventDao.getInFarmPigId(farmId,time,barnType,pigCode,breed,operatorName, beginInFarmTime,endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
+        for(Iterator<Map<String,Object>> it = inFarmPigId.iterator();it.hasNext();){
+            Map map = it.next();
+            BigInteger id = (BigInteger)map.get("id");
+            BigInteger pigId = (BigInteger)map.get("pig_id");
+            Date eventAt = (Date)map.get("event_at");
+            //Integer a = doctorPigEventDao.isOutFarm(id,pigId,eventAt,farmId,time);//判断后面是否有离场或者转场
+            /*if(a != null && a >= 1){
+                inFarmPigId.remove(i); //如果后面还有离场或者转场删除
+            } else{*/
+                /*Map<String,Object> pigInfo = doctorPigEventDao.findPigInfo(pigId);
+                if(pigInfo != null) {
+                    map.put("current_barn_name", pigInfo.get("current_barn_name"));//猪舍(如果后面没有转舍事件就为当前猪舍)
+                    map.put("pig_code", pigInfo.get("pig_code"));//猪耳号
+                    map.put("breed_name", pigInfo.get("breed_name"));//品种
+                    map.put("source", pigInfo.get("source"));//来源
+                    map.put("in_farm_date", pigInfo.get("in_farm_date"));//进场时间
+                    map.put("birth_date", pigInfo.get("birth_date"));//出生日期
+                    map.put("staff_name", pigInfo.get("staff_name"));//饲养员
+                }*/
+            BigInteger isBarn = doctorPigEventDao.isBarn(id,pigId,eventAt,farmId,time);//如果后面又转舍事件
+            if(isBarn != null) {
+                Map<String,Object> currentBarn = doctorPigEventDao.findBarn(isBarn,id,pigId,eventAt,farmId,time,operatorName,barnType);//如果后面又转舍事件,去后面事件的猪舍
+                if(currentBarn != null) {
+                    map.put("current_barn_name", currentBarn.get("barn_name"));
+                    map.put("staff_name", currentBarn.get("staff_name"));//饲养员
+                } else{
+                    it.remove();
+                }
+            }else{
+                Map<String,Object> currentBarns = doctorPigEventDao.findBarns(pigId,operatorName,barnType);//否则取当前猪舍
+                if(currentBarns != null) {
+                    map.put("current_barn_name", currentBarns.get("barn_name"));
+                    map.put("staff_name", currentBarns.get("staff_name"));//饲养员
+                } else{
+                    it.remove();
+                }
+            }
+            Map<String,Object> frontEvent = doctorPigEventDao.frontEvent(pigId,time,parity);//利用前一个事件来求母猪的胎次和状态
+            if(frontEvent != null) {
+                map.put("parity", frontEvent.get("parity"));//母猪胎次
+                map.put("status", frontEvent.get("pig_status_after"));//母猪状态
+            } else{
+                it.remove();
+            }
+        }
+        //}
+        return inFarmPigId;
     }
 }
