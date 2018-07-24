@@ -2139,7 +2139,7 @@
         <if test="barnId != null"> and t6.breed_id = #{barnId} </if>
         <if test="breedId != null"> and t6.breed_id = #{breedId} </if>
         <if test="staffName != null"> and t6.staff_name = #{staffName} </if>
-        <if test="pigStatus != null"> and t6.status = #{status} </if>
+        <if test="pigStatus != null"> and t6.status = #{pigStatus} </if>
         <if test="beginDate != null"> and t6.in_farm_date > #{beginDate} </if>
         <if test="endDate != null"> and t6.out_farm_date &lt; #{endDate} </if>
     </select>
