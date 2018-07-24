@@ -833,7 +833,10 @@ public class DoctorSearches {
         }
 
         List<Long> eventList;
-        if(!Strings.isNullOrEmpty(params.get("types")) || !Strings.isNullOrEmpty(params.get("beginDate")) || !Strings.isNullOrEmpty(params.get("endDate"))){
+        boolean searchEvent = !Strings.isNullOrEmpty(params.get("types"))
+                || !Strings.isNullOrEmpty(params.get("beginDate"))
+                || !Strings.isNullOrEmpty(params.get("endDate"));
+        if(searchEvent){
             Map<String, Object> eventCriteria = Maps.newHashMap();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             if (!Strings.isNullOrEmpty(params.get("types"))){
@@ -861,6 +864,24 @@ public class DoctorSearches {
         if(eventList.size()>0){
             objectMap.put("pigIds",eventList);
             paging = RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
+            paging.getData().forEach(searchedPig -> {
+                Integer status = searchedPig.getStatus();
+                Date eventAt;
+
+                KongHuaiPregCheckResult result = KongHuaiPregCheckResult.from(searchedPig.getStatus());
+                if (result != null) {
+                    status = PigStatus.KongHuai.getKey();
+                }
+
+                if (Objects.equals(status, PigStatus.Pregnancy.getKey())) {
+                    status = PigStatus.Mate.getKey();
+                }
+                eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(searchedPig.getId()
+                        , status));
+
+                Integer statusDay = DateUtil.getDeltaDays(eventAt, new Date());
+                searchedPig.setStatusDay(statusDay);
+            });
         }
 
         log.error("pagePigs:size"+paging.getData().size());
