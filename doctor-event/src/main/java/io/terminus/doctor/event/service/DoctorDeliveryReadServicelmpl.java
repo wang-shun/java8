@@ -219,9 +219,9 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map.put("birth_date", pigInfo.get("birth_date"));//出生日期
                     map.put("staff_name", pigInfo.get("staff_name"));//饲养员
                 }*/
-            BigInteger isBarn = doctorPigEventDao.isBarn(id,pigId,eventAt,farmId,time);//如果后面又转舍事件
+            BigInteger isBarn = doctorPigEventDao.isBarn(id,pigId,eventAt,time);//如果后面又转舍事件
             if(isBarn != null) {
-                Map<String,Object> currentBarn = doctorPigEventDao.findBarn(isBarn,id,pigId,eventAt,farmId,time,operatorName,barnType);//如果后面又转舍事件,去后面事件的猪舍
+                Map<String,Object> currentBarn = doctorPigEventDao.findBarn(isBarn,id,pigId,eventAt,time,operatorName,barnType);//如果后面又转舍事件,去后面事件的猪舍
                 if(currentBarn != null) {
                     map.put("current_barn_name", currentBarn.get("barn_name"));
                     map.put("staff_name", currentBarn.get("staff_name"));//饲养员

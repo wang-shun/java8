@@ -945,21 +945,19 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
          map.put("time",time);
          return this.sqlSession.selectOne(this.sqlId("isOutFarm"), map);
      }*/
-    public BigInteger isBarn(BigInteger id, BigInteger pigId, Date eventAt, Long farmId, Date time){
+    public BigInteger isBarn(BigInteger id, BigInteger pigId, Date eventAt,  Date time){
         Map<String, Object> map = new HashMap<>();
         map.put("id",id);
         map.put("pigId",pigId);
         map.put("eventAt",eventAt);
-        map.put("farmId",farmId);
         map.put("time",time);
         return this.sqlSession.selectOne(this.sqlId("isBarn"), map);
     }
-    public Map<String,Object> findBarn(BigInteger isBarn,BigInteger id, BigInteger pigId, Date eventAt, Long farmId, Date time,String operatorName,Integer barnType){
+    public Map<String,Object> findBarn(BigInteger isBarn,BigInteger id, BigInteger pigId, Date eventAt, Date time,String operatorName,Integer barnType){
         Map<String, Object> map = new HashMap<>();
         map.put("id",id);
         map.put("pigId",pigId);
         map.put("eventAt",eventAt);
-        map.put("farmId",farmId);
         map.put("time",time);
         map.put("operatorName",operatorName);
         map.put("barnType",barnType);
