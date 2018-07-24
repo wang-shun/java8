@@ -2054,7 +2054,7 @@
 
     <select id="isBarn" parameterType="map" resultType="BigInteger">
         select id from doctor_pig_events
-        WHEREpig_id = #{pigId} and kind = 1 and type in (1,10,12,14) and event_at &lt; #{time} and event_at >= #{eventAt} and id > #{id}
+        where pig_id = #{pigId} and kind = 1 and type in (1,10,12,14) and event_at &lt; #{time} and event_at >= #{eventAt} and id > #{id}
         order by id
         limit 1
     </select>
