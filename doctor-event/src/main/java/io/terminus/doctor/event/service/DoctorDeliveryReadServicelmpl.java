@@ -192,7 +192,14 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
 
     @Override
     public List<Map<String,Object>> sowsReport(Long farmId,Date time,String pigCode,String operatorName,Integer barnType,Integer breed,Integer parity,Integer pigStatus,Date beginInFarmTime, Date endInFarmTime){
-        List<Map<String,Object>> inFarmPigId = doctorPigEventDao.getInFarmPigId(farmId,time,barnType,pigCode,breed,operatorName, beginInFarmTime,endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
+        List<Map<String,Object>> inFarmPigId = null;
+        if(pigStatus == 0){
+            inFarmPigId = doctorPigEventDao.getInFarmPigId1(farmId,time,barnType,pigCode,breed,operatorName, beginInFarmTime,endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
+        } else if(pigStatus == 2){
+            inFarmPigId = doctorPigEventDao.getInFarmPigId2(farmId,time,barnType,pigCode,breed,operatorName, beginInFarmTime,endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
+        }else {
+            inFarmPigId = doctorPigEventDao.getInFarmPigId(farmId, time, barnType, pigCode, breed, operatorName, beginInFarmTime, endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
+        }
         for(Iterator<Map<String,Object>> it = inFarmPigId.iterator();it.hasNext();){
             Map map = it.next();
             int source = (int)map.get("source");
