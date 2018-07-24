@@ -156,7 +156,7 @@ public class DoctorSearches {
     public GroupPigPaging<SearchedPig> searchSowPigs(@RequestParam(required = false) Integer pageNo,
                                              @RequestParam(required = false) Integer pageSize,
                                              @RequestParam Map<String, String> params) throws ParseException {
-        Paging<SearchedPig> paging = pagePigs(pageNo, pageSize, params, DoctorPig.PigSex.SOW);
+        Paging<SearchedPig> paging = pageSowPigs(pageNo, pageSize, params);
         Long groupCount = getGroupCountWhenFarrow(params);
         return new GroupPigPaging<>(paging, groupCount, paging.getTotal());
     }

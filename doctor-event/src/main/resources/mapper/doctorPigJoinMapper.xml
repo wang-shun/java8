@@ -163,9 +163,7 @@
 
     <select id="findNotTransitionsSow" parameterType="map" resultType="Long" >
         SELECT a.id AS id FROM doctor_pigs a, doctor_pig_tracks b where a.id = b.pig_id
-        <where>
             <include refid="where_sql"/>
-        </where>
         AND a.pig_type = 1
     </select>
 
