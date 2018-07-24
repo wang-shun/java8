@@ -607,7 +607,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             return Response.ok(doctorPigEventDao.findPigIdsByEvent(criteria));
         } catch (Exception e) {
             log.error("find.pigIds.by.event, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("find pigIds by type failed");
+            return Response.fail("event:find pigIds by type failed");
         }
     }
 

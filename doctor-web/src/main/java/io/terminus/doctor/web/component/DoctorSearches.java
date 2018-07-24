@@ -59,6 +59,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
@@ -154,8 +155,8 @@ public class DoctorSearches {
     @RequestMapping(value = "/sowpigs", method = RequestMethod.GET)
     public GroupPigPaging<SearchedPig> searchSowPigs(@RequestParam(required = false) Integer pageNo,
                                              @RequestParam(required = false) Integer pageSize,
-                                             @RequestParam Map<String, String> params) {
-        Paging<SearchedPig> paging = pagePigs(pageNo, pageSize, params, DoctorPig.PigSex.SOW);
+                                             @RequestParam Map<String, String> params) throws ParseException {
+        Paging<SearchedPig> paging = pageSowPigs(pageNo, pageSize, params);
         Long groupCount = getGroupCountWhenFarrow(params);
         return new GroupPigPaging<>(paging, groupCount, paging.getTotal());
     }
@@ -754,7 +755,123 @@ public class DoctorSearches {
     }
 
 
+    // -------------- 新增代码-----------------------
+    @RequestMapping(value = "/notTransitionsSow", method = RequestMethod.GET)
+    public List<Long> notTransitionsSow(@RequestParam Long farmId,@RequestParam Long barnId,
+                                        @RequestParam String status,@RequestParam String pigCode,
+                                        @RequestParam String rfid,@RequestParam Integer isRemoval){
+        Map<String,Object> valueMap = new HashMap<>();
+        valueMap.put("statuses", Splitters.splitToInteger(status, Splitters.UNDERSCORE));
+        return RespHelper.or500(doctorPigReadService.findNotTransitionsSow(farmId,barnId,valueMap,pigCode,rfid,isRemoval));
+    }
+
+    @RequestMapping(value = "/haveTransitionsSow", method = RequestMethod.GET)
+    public List<Long> haveTransitionsSow(@RequestParam Long farmId,@RequestParam Long barnId,
+                                         @RequestParam String pigCode,@RequestParam String rfid){
+        return RespHelper.or500(doctorPigReadService.findHaveTransitionsSow(farmId,barnId,pigCode,rfid));
+    }
+
+    @RequestMapping(value = "/eventTransitionsSow", method = RequestMethod.GET)
+    public List<Long> eventTransitionsSow(@RequestParam Long farmId,@RequestParam Long barnId,
+                                          @RequestParam String status,@RequestParam String pigCode,
+                                          @RequestParam String rfid,@RequestParam Integer types,
+                                          @RequestParam Integer isRemoval,@RequestParam String beginDate,
+                                          @RequestParam String endDate) throws ParseException {
+        Map<String,Object> valueMap = new HashMap<>();
+        valueMap.put("statuses", Splitters.splitToInteger(status, Splitters.UNDERSCORE));
+        List<Long> notList = RespHelper.or500(doctorPigReadService.findNotTransitionsSow(farmId,barnId,valueMap,pigCode,rfid,isRemoval));
+        List<Long> haveList = RespHelper.or500(doctorPigReadService.findHaveTransitionsSow(farmId,barnId,pigCode,rfid));
+        notList.addAll(haveList);
+        Map<String, Object> eventCriteria = Maps.newHashMap();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        eventCriteria.put("types", types);
+        eventCriteria.put("beginDate",sdf.parse(beginDate));
+        eventCriteria.put("endDate", sdf.parse(endDate));
+        eventCriteria.put("farmId", farmId);
+        eventCriteria.put("notList",notList);
+        eventCriteria = Params.filterNullOrEmpty(eventCriteria);
+        return RespHelper.or500(doctorPigEventReadService.findPigIdsByEvent(eventCriteria));
+    }
 
 
+    @RequestMapping(value = "/pageSowPigs",method = RequestMethod.GET)
+    private Paging<SearchedPig> pageSowPigs (Integer pageNo, Integer pageSize,Map<String, String> params) throws ParseException {
+        if (farmIdNotExist(params)) {
+            return new Paging<>(0L, Collections.emptyList());
+        }
+        searchFromMessage(params);
+        Map<String,Object> valueMap = new HashMap<>();
+
+        Long farmId = null;
+        Long barnId = null;
+        Integer status = null;
+        Integer isRemoval = null;
+        Integer types = null;
+        String pigCode = null;
+        String rfid = null;
+        if(!Strings.isNullOrEmpty(params.get("farmId"))){
+            farmId = Long.parseLong(params.get("farmId"));
+        }
+        if(!Strings.isNullOrEmpty(params.get("barnId"))){
+            barnId = Long.parseLong(params.get("barnId"));
+        }
+        if(!Strings.isNullOrEmpty(params.get("statuses"))){
+            valueMap.put("statuses", Splitters.splitToInteger(params.get("statuses").toString(), Splitters.UNDERSCORE));
+        }
+        if(!Strings.isNullOrEmpty(params.get("q"))){
+            pigCode = params.get("q");
+        }
+        if(!Strings.isNullOrEmpty(params.get("isRemoval"))){
+            isRemoval = Integer.parseInt(params.get("isRemoval"));
+        }
+        if(!Strings.isNullOrEmpty(params.get("types"))){
+            types = Integer.parseInt(params.get("types"));
+        }
+        if(!Strings.isNullOrEmpty(params.get("rfid"))){
+            rfid = params.get("rfid");
+        }
+
+        List<Long> notList = RespHelper.or500(doctorPigReadService.findNotTransitionsSow(farmId,barnId,valueMap,pigCode,rfid,isRemoval));
+        if(!Strings.isNullOrEmpty(params.get("statuses")) && !Strings.isNullOrEmpty(params.get("types")) || ("13").equals(params.get("statuses"))){
+            List<Long> haveList = RespHelper.or500(doctorPigReadService.findHaveTransitionsSow(farmId,barnId,pigCode,rfid));
+            notList.addAll(haveList);
+        }
+
+        List<Long> eventList = null;
+        if(!Strings.isNullOrEmpty(params.get("types"))
+                || !Strings.isNullOrEmpty(params.get("beginDate"))
+                || !Strings.isNullOrEmpty(params.get("endDate"))){
+            Map<String, Object> eventCriteria = Maps.newHashMap();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            //eventCriteria.put("types", types);
+            if (!Strings.isNullOrEmpty(params.get("types"))){
+                eventCriteria.put("types", Splitters.splitToInteger(params.get("types"), Splitters.COMMA));
+            }
+            String beginDate = params.get("beginDate");
+            String endDate = params.get("endDate");
+            if(!beginDate.isEmpty()){
+                eventCriteria.put("beginDate",sdf.parse(beginDate));
+            }
+            if(!endDate.isEmpty()){
+                eventCriteria.put("endDate", sdf.parse(endDate));
+            }
+            eventCriteria.put("farmId", farmId);
+            eventCriteria.put("notList",notList);
+            eventCriteria = Params.filterNullOrEmpty(eventCriteria);
+            eventList = RespHelper.or500(doctorPigEventReadService.findPigIdsByEvent(eventCriteria));
+        }else{
+            eventList = notList;
+        }
+
+        Map<String,Object> objectMap = new HashMap<>();
+        objectMap.put("pigIds",eventList);
+
+        Paging<SearchedPig> paging;
+        paging = RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
+
+        log.error("pagePigs:size"+paging.getData().size());
+        return paging;
+
+    }
 
 }

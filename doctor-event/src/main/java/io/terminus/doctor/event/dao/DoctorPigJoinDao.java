@@ -84,18 +84,19 @@ public class DoctorPigJoinDao extends MyBatisDao<SearchedPig> {
      * 未转场的母猪
      * @param farmId
      * @param barnId
-     * @param status
+     * @param valueMap
      * @param pigCode
      * @param rfid
      * @return
      */
-    public List<Long> findNotTransitionsSow(Long farmId,Long barnId,Integer status,String pigCode,String rfid){
+    public List<Long> findNotTransitionsSow(Long farmId,Long barnId,Map<String,Object> valueMap,String pigCode,String rfid,Integer isRemoval){
         Map<String, Object> map = Maps.newHashMap();
         map.put("farmId", farmId);
         map.put("barnId", barnId);
-        map.put("status", status);
+        map.put("statuses", valueMap.get("statuses"));
         map.put("pigCode", pigCode);
         map.put("rfid", rfid);
+        map.put("isRemoval",isRemoval);
         return getSqlSession().selectList(sqlId("findNotTransitionsSow"), map);
     }
 

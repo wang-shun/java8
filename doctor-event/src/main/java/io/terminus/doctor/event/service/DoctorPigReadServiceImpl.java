@@ -608,15 +608,12 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
 
     // -------------------- 新增代码-----------------------
     @Override
-    public Response<List<Long>> findNotTransitionsSow(Long farmId, Long barnId, Integer status, String pigCode, String rfid) {
+    public Response<List<Long>> findNotTransitionsSow(Long farmId, Long barnId, Map<String,Object> valueMap, String pigCode, String rfid,Integer isRemoval) {
         try {
-            //if(pigCode!=null && pigCode!=""){
-            //    pigCode="%"+pigCode+"%";
-            //}
-            return Response.ok(doctorPigJoinDao.findNotTransitionsSow(farmId,barnId,status,pigCode,rfid));
+            return Response.ok(doctorPigJoinDao.findNotTransitionsSow(farmId,barnId,valueMap,pigCode,rfid,isRemoval));
         }catch (Exception e){
             e.printStackTrace();
-            return Response.fail("find.farms.by.userId.failed");
+            return Response.fail("find.farms.by.userId.failed 1");
         }
     }
 
@@ -626,7 +623,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             return Response.ok(doctorPigJoinDao.findHaveTransitionsSow(farmId,barnId,pigCode,rfid));
         }catch (Exception e){
             e.printStackTrace();
-            return Response.fail("find.farms.by.userId.failed");
+            return Response.fail("find.farms.by.userId.failed 2");
         }
     }
 

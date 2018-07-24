@@ -222,7 +222,7 @@ public interface DoctorPigReadService {
     /**
      * 未转场的母猪
      */
-    Response<List<Long>> findNotTransitionsSow(Long farmId,Long barnId,Integer status,String pigCode,String rfid);
+    Response<List<Long>> findNotTransitionsSow(Long farmId,Long barnId,Map<String,Object> valueMap,String pigCode,String rfid,Integer isRemoval);
 
 
     /**
