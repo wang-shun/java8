@@ -143,4 +143,23 @@ public class ReportDeliveryController {
                                                @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endInFarmTime) {
         return doctorDeliveryReadService.sowsReport(farmId,time,pigCode,operatorName,barnType,breedId,parity,pigStatus,beginInFarmTime,endInFarmTime);
     }
+
+    /**
+     * 获取公猪存栏报表
+     */
+    @RequestMapping(value = "boarReport", method = RequestMethod.GET)
+    public List<Map<String,Object>> listBoarReport(@RequestParam Long farmId,
+                                                   @RequestParam (required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date queryDate,
+                                                   @RequestParam (required = false) String staffName,
+                                                   @RequestParam (required = false) String pigCode,
+                                                   @RequestParam (required = false) Integer barnId,
+                                                   @RequestParam (required = false) Integer breedId,
+                                                   @RequestParam (required = false) Integer pigStatus,
+                                                   @RequestParam (required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beginDate,
+                                                   @RequestParam (required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate){
+//        if(null != beginDate && null != endDate && beginDate.after(endDate))
+//            throw new JsonResponseException("start.date.after.end.date");
+        return doctorDeliveryReadService.boarReport(farmId,queryDate,pigCode,staffName,barnId,breedId,pigStatus,beginDate,endDate);
+
+    }
 }

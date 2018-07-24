@@ -277,4 +277,25 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         //}
         return inFarmPigId;
     }
+
+    @Override
+    public List<Map<String, Object>> boarReport(Long farmId, Date queryDate, String pigCode, String staffName, Integer barnId, Integer breedId, Integer pigStatus, Date beginDate, Date endDate) {
+        List<Map<String, Object>> inFarmBoarId = doctorPigEventDao.getInFarmBoarId(farmId,queryDate,barnId,pigCode,breedId,staffName,pigStatus, beginDate,endDate);
+        for (Iterator<Map<String,Object>> it = inFarmBoarId.iterator();it.hasNext();) {
+            Map map = it.next();
+            BigInteger pigId = (BigInteger)map.get("pig_id");
+            Date eventAt = (Date)map.get("event_at");
+            BigInteger isBoarBarn = doctorPigEventDao.isBoarBarn(pigId,eventAt,farmId);
+            if (null != isBoarBarn){
+                Map<String,Object> currentBoarBarn = doctorPigEventDao.findBoarBarn(isBoarBarn);//如果后面又转舍事件,去后面事件的猪舍
+                if(currentBoarBarn != null) {
+                    map.put("barn_name", currentBoarBarn.get("barn_name"));
+                    map.put("staff_name", currentBoarBarn.get("staff_name"));//饲养员
+                } else{
+                    it.remove();
+                }
+            }
+        }
+        return inFarmBoarId;
+    }
 }
