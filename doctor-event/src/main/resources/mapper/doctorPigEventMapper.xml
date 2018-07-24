@@ -2080,6 +2080,7 @@
         order by id desc limit 1)
         <if test="parity != null and parity == 1"> and parity &lt;= 10 and parity> 1 </if>
         <if test="parity != null and parity == 2"> and  parity> 11 </if>
+        <if test="pigStatus"> and  pig_status_after = #{pigStatus} </if>
     </select>
     <select id="findBarns" parameterType="map" resultType="map">
         select b.current_barn_id, b.current_barn_name, c.staff_name as staff_name

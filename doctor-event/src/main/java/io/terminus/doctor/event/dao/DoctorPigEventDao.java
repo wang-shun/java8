@@ -965,11 +965,12 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         map.put("time",time);
         return this.sqlSession.selectOne(this.sqlId("frontEventId"), map);
     }*/
-    public Map<String,Object> frontEvent(Integer parity,BigInteger pigId, Date time){
+    public Map<String,Object> frontEvent(Integer parity,BigInteger pigId, Date time ,Integer pigStatus){
         Map<String, Object> map = new HashMap<>();
         map.put("pigId",pigId);
         map.put("parity",parity);
         map.put("time",time);
+        map.put("pigStatus",pigStatus);
         return this.sqlSession.selectOne(this.sqlId("frontEvent"), map);
     }
     public Map<String,Object> findBarns(BigInteger pigId,String operatorName,Integer barnType){

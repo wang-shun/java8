@@ -232,7 +232,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             }
             //Map<String,Object> frontEventId = doctorPigEventDao.frontEventId(pigId,time);//利用前一个事件来求母猪的胎次和状态
             //if(frontEventId != null) {
-                Map<String,Object> frontEvent = doctorPigEventDao.frontEvent(parity,pigId,time);
+                Map<String,Object> frontEvent = doctorPigEventDao.frontEvent(parity,pigId,time,pigStatus);
                 if(frontEvent != null) {
                     map.put("parity", frontEvent.get("parity"));//母猪胎次
                     map.put("status", frontEvent.get("pig_status_after"));//母猪状态
