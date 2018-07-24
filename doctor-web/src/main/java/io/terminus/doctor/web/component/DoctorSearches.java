@@ -156,7 +156,7 @@ public class DoctorSearches {
     public GroupPigPaging<SearchedPig> searchSowPigs(@RequestParam(required = false) Integer pageNo,
                                              @RequestParam(required = false) Integer pageSize,
                                              @RequestParam Map<String, String> params) throws ParseException {
-        Paging<SearchedPig> paging = pageSowPigs(pageNo, pageSize, params);
+        Paging<SearchedPig> paging = pagePigs(pageNo, pageSize, params, DoctorPig.PigSex.SOW);
         Long groupCount = getGroupCountWhenFarrow(params);
         return new GroupPigPaging<>(paging, groupCount, paging.getTotal());
     }
@@ -804,9 +804,7 @@ public class DoctorSearches {
 
         Long farmId = null;
         Long barnId = null;
-        Integer status = null;
         Integer isRemoval = null;
-        Integer types = null;
         String pigCode = null;
         String rfid = null;
         if(!Strings.isNullOrEmpty(params.get("farmId"))){
@@ -816,7 +814,7 @@ public class DoctorSearches {
             barnId = Long.parseLong(params.get("barnId"));
         }
         if(!Strings.isNullOrEmpty(params.get("statuses"))){
-            valueMap.put("statuses", Splitters.splitToInteger(params.get("statuses").toString(), Splitters.UNDERSCORE));
+            valueMap.put("statuses", Splitters.splitToInteger(params.get("statuses"), Splitters.UNDERSCORE));
         }
         if(!Strings.isNullOrEmpty(params.get("q"))){
             pigCode = params.get("q");
@@ -824,26 +822,20 @@ public class DoctorSearches {
         if(!Strings.isNullOrEmpty(params.get("isRemoval"))){
             isRemoval = Integer.parseInt(params.get("isRemoval"));
         }
-        if(!Strings.isNullOrEmpty(params.get("types"))){
-            types = Integer.parseInt(params.get("types"));
-        }
         if(!Strings.isNullOrEmpty(params.get("rfid"))){
             rfid = params.get("rfid");
         }
 
         List<Long> notList = RespHelper.or500(doctorPigReadService.findNotTransitionsSow(farmId,barnId,valueMap,pigCode,rfid,isRemoval));
-        if(!Strings.isNullOrEmpty(params.get("statuses")) && !Strings.isNullOrEmpty(params.get("types")) || ("13").equals(params.get("statuses"))){
+        if( !Strings.isNullOrEmpty(params.get("types")) || ("13").equals(params.get("statuses"))){
             List<Long> haveList = RespHelper.or500(doctorPigReadService.findHaveTransitionsSow(farmId,barnId,pigCode,rfid));
             notList.addAll(haveList);
         }
 
-        List<Long> eventList = null;
-        if(!Strings.isNullOrEmpty(params.get("types"))
-                || !Strings.isNullOrEmpty(params.get("beginDate"))
-                || !Strings.isNullOrEmpty(params.get("endDate"))){
+        List<Long> eventList;
+        if(!Strings.isNullOrEmpty(params.get("types")) || !Strings.isNullOrEmpty(params.get("beginDate")) || !Strings.isNullOrEmpty(params.get("endDate"))){
             Map<String, Object> eventCriteria = Maps.newHashMap();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            //eventCriteria.put("types", types);
             if (!Strings.isNullOrEmpty(params.get("types"))){
                 eventCriteria.put("types", Splitters.splitToInteger(params.get("types"), Splitters.COMMA));
             }
@@ -864,14 +856,15 @@ public class DoctorSearches {
         }
 
         Map<String,Object> objectMap = new HashMap<>();
-        objectMap.put("pigIds",eventList);
+        Paging<SearchedPig> paging = null;
 
-        Paging<SearchedPig> paging;
-        paging = RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
+        if(eventList.size()>0){
+            objectMap.put("pigIds",eventList);
+            paging = RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
+        }
 
         log.error("pagePigs:size"+paging.getData().size());
         return paging;
-
     }
 
 }
