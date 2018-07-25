@@ -202,10 +202,10 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         }else {
             inFarmPigId = doctorPigEventDao.getInFarmPigId(farmId, time, barnType, pigCode, breed, operatorName, beginInFarmTime, endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
         }
-        boolean f = true;
+        /*boolean f = true;
         boolean g = true;
         boolean h = true;
-        List<Map<String,Object>> j = new ArrayList<>();
+        List<Map<String,Object>> j = new ArrayList<>();*/
         for(Iterator<Map<String,Object>> it = inFarmPigId.iterator();it.hasNext();){
             Map map = it.next();
             int source = (int)map.get("source");
@@ -240,7 +240,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map.put("staff_name", currentBarn.get("staff_name"));//饲养员
                 } else{
                     it.remove();
-                    f = false;
+                    //f = false;
                 }
             }else{
                 Map<String,Object> currentBarns = doctorPigEventDao.findBarns(pigId,operatorName,barnType);//否则取当前猪舍
@@ -249,7 +249,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map.put("staff_name", currentBarns.get("staff_name"));//饲养员
                 } else{
                     it.remove();
-                    g = false;
+                    //g = false;
                 }
             }
             //Map<String,Object> frontEventId = doctorPigEventDao.frontEventId(pigId,time);//利用前一个事件来求母猪的胎次和状态
@@ -327,18 +327,18 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     }
                 }else{
                     it.remove();
-                    h = false;
+                    //h = false;
                 }
-                if(f && g && h){
+                /*if(f && g && h){
                     j.add(map);
                 }
                 if(j.size() == 20){
                     break;
-                }
+                }*/
             }
        // }
         //}
-        return j;
+        return inFarmPigId;
     }
 
     @Override
