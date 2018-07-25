@@ -2144,7 +2144,7 @@
     <select id="afterEvent" parameterType="map" resultType="Long">
         select farm_id
         from doctor_pig_events
-        where event_at >= #{time}
+        where id > #{id}
         and pig_id = #{pigId}
         order by id limit 1
     </select>
