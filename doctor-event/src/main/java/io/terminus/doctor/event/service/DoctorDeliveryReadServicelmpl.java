@@ -330,9 +330,19 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         List<Map<String, Object>> inFarmBoarId = doctorPigEventDao.getInFarmBoarId(farmId,queryDate,barnId,pigCode,breedId,staffName,pigStatus, beginDate,endDate);
         for (Iterator<Map<String,Object>> it = inFarmBoarId.iterator();it.hasNext();) {
             Map map = it.next();
+            if (map.get("source") != null){
+                int source = (int)map.get("source");
+                if (source == 1) {
+                    map.put("source","本厂");
+                }
+                if (source == 2) {
+                    map.put("source","外购");
+                }
+            }
             BigInteger pigId = (BigInteger)map.get("pig_id");
             Date eventAt = (Date)map.get("event_at");
-            BigInteger isBoarBarn = doctorPigEventDao.isBoarBarn(pigId,eventAt,farmId);
+            BigInteger isBoarBarn = doctorPigEventDao.isBoarBarn(pigId,eventAt,farmId); //该时间点后是否有转舍事件发生
+            BigInteger isBoarLeave = doctorPigEventDao.isBoarLeave(pigId,eventAt,farmId);//该时间点后是否有转场离场事件发生
             if (null != isBoarBarn){
                 Map<String,Object> currentBoarBarn = doctorPigEventDao.findBoarBarn(isBoarBarn);//如果后面又转舍事件,去后面事件的猪舍
                 if(currentBoarBarn != null) {
@@ -341,6 +351,24 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 } else{
                     it.remove();
                 }
+            }
+            if (null != isBoarLeave){
+                Map<String,Object> boarLeave = doctorPigEventDao.findBoarLeave(isBoarLeave);
+                if (boarLeave != null){
+                    map.put("status",boarLeave.get("pig_status_before"));
+                } else {
+                    it.remove();
+                }
+            }
+            int status = (int)map.get("status");
+            if (status == 11) {
+                map.put("status","进场");
+            }
+            if (status == 12) {
+                map.put("status","离场");
+            }
+            if (status == 13) {
+                map.put("status","转场");
             }
         }
         return inFarmBoarId;

@@ -2195,17 +2195,24 @@
         where
         1 = 1
         <if test="pigCode != null"> and t6.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
-        <if test="barnId != null"> and t6.breed_id = #{barnId} </if>
+        <if test="barnId != null"> and t6.barn_id = #{barnId} </if>
         <if test="breedId != null"> and t6.breed_id = #{breedId} </if>
-        <if test="staffName != null"> and t6.staff_name = #{staffName} </if>
+        <if test="staffName != null"> and t6.staff_name like CONCAT(CONCAT('%',#{staffName}),'%') </if>
         <if test="pigStatus != null"> and t6.status = #{pigStatus} </if>
-        <if test="beginDate != null"> and t6.in_farm_date > #{beginDate} </if>
-        <if test="endDate != null"> and t6.out_farm_date &lt; #{endDate} </if>
+        <if test="beginDate != null"> and t6.in_farm_date >= #{beginDate} </if>
+        <if test="endDate != null"> and t6.out_farm_date &lt;= #{endDate} </if>
     </select>
 
     <select id="isBoarBarn" parameterType="map" resultType="BigInteger" >
         select id from doctor_pig_events
-        where farm_id = #{farmId} and pig_id = #{pigId} and kind = 2 and type = 1 and event_at >= #{eventAt}
+        where farm_id = #{farmId} and pig_id = #{pigId} and kind = 2 and type = 1 and event_at > #{eventAt}
+        order by id
+        limit 1
+    </select>
+
+    <select id="isBoarLeave" parameterType="map" resultType="BigInteger" >
+        select id from doctor_pig_events
+        where farm_id = #{farmId} and pig_id = #{pigId} and kind = 2 and (type = 6 or type = 2) and event_at > #{eventAt}
         order by id
         limit 1
     </select>
@@ -2214,7 +2221,13 @@
         SELECT  a.barn_name as barn_name, b.staff_name as staff_name
         FROM doctor_pig_events a , doctor_barns b
         where a.id = #{isBoarBarn}
-               and
-               a.barn_id = b.id
+        and
+        a.barn_id = b.id
+    </select>
+
+    <select id="findBoarLeave" parameterType="map" resultType="map">
+        SELECT  pig_status_before
+        FROM doctor_pig_events
+        where id = #{isBoarLeave}
     </select>
 </mapper>

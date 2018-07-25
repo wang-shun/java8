@@ -1049,10 +1049,21 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         map.put("farmId",farmId);
         return this.sqlSession.selectOne(this.sqlId("isBoarBarn"), map);
     }
+    public BigInteger isBoarLeave(BigInteger pigId, Date eventAt, Long farmId){
+        Map<String, Object> map = new HashMap<>();
+        map.put("pigId",pigId);
+        map.put("eventAt",eventAt);
+        map.put("farmId",farmId);
+        return this.sqlSession.selectOne(this.sqlId("isBoarLeave"), map);
+    }
     public Map<String,Object> findBoarBarn(BigInteger isBoarBarn){
         Map<String, Object> map = new HashMap<>();
         map.put("isBoarBarn",isBoarBarn);
         return this.sqlSession.selectOne(this.sqlId("findBoarBarn"), map);
-
+    }
+    public Map<String,Object> findBoarLeave(BigInteger isBoarLeave){
+        Map<String, Object> map = new HashMap<>();
+        map.put("isBoarLeave",isBoarLeave);
+        return this.sqlSession.selectOne(this.sqlId("findBoarLeave"), map);
     }
 }
