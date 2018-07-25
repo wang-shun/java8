@@ -65,7 +65,7 @@ public class Operators {
         }
         if (!Objects.equals(user.getType(), UserType.ADMIN.value())) {
 //            throw new JsonResponseException(403, "user.no.permission");
-            throw new JsonResponseException(403, "user.no.permission");
+            throw new JsonResponseException(403, "user.no.Operators.permission");
         }
         return user.getId();
     }
