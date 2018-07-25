@@ -325,11 +325,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             }
        // }
         //}
-        List<Map<String, Object>> a = new ArrayList<>();
-        for(int i = 0;i<20;i++){
-            a.add(inFarmPigId.get(i));
-        }
-        return a;
+        return inFarmPigId;
     }
 
     @Override
