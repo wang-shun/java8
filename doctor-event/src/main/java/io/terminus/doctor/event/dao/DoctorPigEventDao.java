@@ -1035,6 +1035,12 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         map.put("nearDeliverDate",nearDeliverDate);
         return this.sqlSession.selectList(this.sqlId("getdaizaishu"), map);
     }
+    public Long afterEvent(BigInteger pigId,BigInteger id){
+        Map<String, Object> map = new HashMap<>();
+        map.put("pigId",pigId);
+        map.put("id",id);
+        return this.sqlSession.selectOne(this.sqlId("afterEvent"), map);
+    }
     public Map<String,Object> nearDeliver(BigInteger pigId,Date time){
         Map<String, Object> map = new HashMap<>();
         map.put("pigId",pigId);
