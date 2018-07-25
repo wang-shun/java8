@@ -762,9 +762,7 @@ public class DoctorSearches {
                                         @RequestParam String rfid,@RequestParam Integer isRemoval){
         Map<String,Object> valueMap = new HashMap<>();
         valueMap.put("statuses", Splitters.splitToInteger(status, Splitters.UNDERSCORE));
-        if("2".equals(status)){
-            isRemoval = 1;
-        }
+        if("2".equals(status)){ isRemoval = 1; }
         return RespHelper.or500(doctorPigReadService.findNotTransitionsSow(farmId,barnId,valueMap,pigCode,rfid,isRemoval));
     }
 
@@ -777,21 +775,28 @@ public class DoctorSearches {
     @RequestMapping(value = "/eventTransitionsSow", method = RequestMethod.GET)
     public List<Long> eventTransitionsSow(@RequestParam Long farmId,@RequestParam Long barnId,
                                           @RequestParam String status,@RequestParam String pigCode,
-                                          @RequestParam String rfid,@RequestParam Integer types,
+                                          @RequestParam String rfid,@RequestParam String types,
                                           @RequestParam Integer isRemoval,@RequestParam String beginDate,
                                           @RequestParam String endDate) throws ParseException {
         Map<String,Object> valueMap = new HashMap<>();
-        valueMap.put("statuses", Splitters.splitToInteger(status, Splitters.UNDERSCORE));
+        if(status!=null && !"".equals(status)) {
+            valueMap.put("statuses", Splitters.splitToInteger(status, Splitters.UNDERSCORE));
+        }
+        if("2".equals(status)){ isRemoval = 1; }
         List<Long> notList = RespHelper.or500(doctorPigReadService.findNotTransitionsSow(farmId,barnId,valueMap,pigCode,rfid,isRemoval));
-        List<Long> haveList = RespHelper.or500(doctorPigReadService.findHaveTransitionsSow(farmId,barnId,pigCode,rfid));
-        notList.addAll(haveList);
+        if( (types != null || !"".equals(types) || ("13").equals(status)) &&  !"2".equals(status) ) {
+            List<Long> haveList = RespHelper.or500(doctorPigReadService.findHaveTransitionsSow(farmId, barnId, pigCode, rfid));
+            notList.addAll(haveList);
+        }
         Map<String, Object> eventCriteria = Maps.newHashMap();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        eventCriteria.put("types", types);
-        if(!"".equals(beginDate)){
+        if (!Strings.isNullOrEmpty(types)){
+            eventCriteria.put("types", Splitters.splitToInteger(types, Splitters.COMMA));
+        }
+        if(!beginDate.isEmpty()){
             eventCriteria.put("beginDate",sdf.parse(beginDate));
         }
-        if(!"".equals(endDate)){
+        if(!endDate.isEmpty()){
             eventCriteria.put("endDate", sdf.parse(endDate));
         }
         eventCriteria.put("farmId", farmId);
@@ -847,7 +852,7 @@ public class DoctorSearches {
                 || !Strings.isNullOrEmpty(params.get("beginDate"))
                 || !Strings.isNullOrEmpty(params.get("endDate"));
         if(searchEvent){
-            Map<String, Object> eventCriteria = new HashMap<>();
+            Map<String, Object> eventCriteria = Maps.newHashMap();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             if (!Strings.isNullOrEmpty(params.get("types"))){
                 eventCriteria.put("types", Splitters.splitToInteger(params.get("types"), Splitters.COMMA));

@@ -602,9 +602,9 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
 
 
     @Override
-    public Response<List<Long>> findPigIdsByEvent(Map<String, Object> eventCriteria) {
+    public Response<List<Long>> findPigIdsByEvent(Map<String, Object> criteria) {
         try {
-            return Response.ok(doctorPigEventDao.findPigIdsByEvent(eventCriteria));
+            return Response.ok(doctorPigEventDao.findPigIdsByEvent(criteria));
         } catch (Exception e) {
             log.error("find.pigIds.by.event, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("event:find pigIds by type failed");

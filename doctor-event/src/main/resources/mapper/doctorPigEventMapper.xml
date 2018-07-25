@@ -1977,7 +1977,7 @@
     <sql id="where_sql">
         <if test="type != null"> AND `type` = #{type} </if>
         <if test="types != null &amp;&amp; types.size() > 0">
-            AND `type` IN
+             AND `type` IN
             <foreach collection="types" item="i" open="(" close=")" separator=",">
                 #{i}
             </foreach>
@@ -1996,22 +1996,7 @@
     <select id="findPigIdsByEvent" parameterType="map" resultType="Long">
         SELECT DISTINCT(pig_id) FROM doctor_pig_events
         WHERE 1=1
-        <if test="farmId != null"> AND farm_id = #{farmId} </if>
-        <if test="type != null"> AND type = #{type} </if>
-        <if test="types != null &amp;&amp; types.size()>0">
-            AND type IN
-            <foreach collection="types" item="i" open="(" close=")" separator=",">
-                #{i}
-            </foreach>
-        </if>
-        <if test="notList != null &amp;&amp; notList.size() > 0">
-            AND pig_id IN
-            <foreach collection="notList" item="i" open="(" close=")" separator=",">
-                #{i}
-            </foreach>
-        </if>
-        <if test="beginDate != null and beginDate!= '' "> AND <![CDATA[ event_at >= #{beginDate} ]]> </if>
-        <if test="endDate != null and endDate != '' "> AND <![CDATA[ event_at <= #{endDate} ]]> </if>
+        <include refid="where_sql"/>
     </select>
 
     <select id="getInFarmPigId" parameterType="map" resultType="map">
