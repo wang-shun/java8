@@ -124,7 +124,7 @@ public class Subs {
         //校验是否拥有猪场权限
         DoctorUserDataPermission permission = RespHelper.or500(permissionReadService.findDataPermissionByUserId(UserUtil.getUserId()));
         if (isNull(permission) || Arguments.isNullOrEmpty(permission.getFarmIdsList()) || !permission.getFarmIdsList().contains(farmId)) {
-            throw new JsonResponseException(403, "user.no.permission");
+            throw new JsonResponseException(403, "user.no.farm.permission");
         }
 
         return RespHelper.or500(subService.pagingSubs(farmId, UserUtil.getCurrentUser(), roleId, roleName, username, realName, status, pageNo, pageSize));
