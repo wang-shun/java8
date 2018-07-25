@@ -762,6 +762,9 @@ public class DoctorSearches {
                                         @RequestParam String rfid,@RequestParam Integer isRemoval){
         Map<String,Object> valueMap = new HashMap<>();
         valueMap.put("statuses", Splitters.splitToInteger(status, Splitters.UNDERSCORE));
+        if("2".equals(status)){
+            isRemoval = 1;
+        }
         return RespHelper.or500(doctorPigReadService.findNotTransitionsSow(farmId,barnId,valueMap,pigCode,rfid,isRemoval));
     }
 
@@ -785,8 +788,12 @@ public class DoctorSearches {
         Map<String, Object> eventCriteria = Maps.newHashMap();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         eventCriteria.put("types", types);
-        eventCriteria.put("beginDate",sdf.parse(beginDate));
-        eventCriteria.put("endDate", sdf.parse(endDate));
+        if(!"".equals(beginDate)){
+            eventCriteria.put("beginDate",sdf.parse(beginDate));
+        }
+        if(!"".equals(endDate)){
+            eventCriteria.put("endDate", sdf.parse(endDate));
+        }
         eventCriteria.put("farmId", farmId);
         eventCriteria.put("notList",notList);
         eventCriteria = Params.filterNullOrEmpty(eventCriteria);
@@ -826,6 +833,10 @@ public class DoctorSearches {
             rfid = params.get("rfid");
         }
 
+        if("2".equals(valueMap.get("statuses").toString())){
+            isRemoval = 1;
+        }
+
         List<Long> notList = RespHelper.or500(doctorPigReadService.findNotTransitionsSow(farmId,barnId,valueMap,pigCode,rfid,isRemoval));
         if( !Strings.isNullOrEmpty(params.get("types")) || ("13").equals(params.get("statuses"))){
             List<Long> haveList = RespHelper.or500(doctorPigReadService.findHaveTransitionsSow(farmId,barnId,pigCode,rfid));
@@ -834,8 +845,8 @@ public class DoctorSearches {
 
         List<Long> eventList;
         boolean searchEvent = !Strings.isNullOrEmpty(params.get("types"))
-                || !Strings.isNullOrEmpty(params.get("beginDate"))
-                || !Strings.isNullOrEmpty(params.get("endDate"));
+            || !Strings.isNullOrEmpty(params.get("beginDate"))
+            || !Strings.isNullOrEmpty(params.get("endDate"));
         if(searchEvent){
             Map<String, Object> eventCriteria = Maps.newHashMap();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
