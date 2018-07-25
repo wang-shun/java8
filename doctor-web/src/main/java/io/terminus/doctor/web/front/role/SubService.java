@@ -224,7 +224,8 @@ public class SubService {
         List<Long> primaryFarms = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(currentUser.getId())).getFarmIdsList();
         for(Long farmId : farmIds){
             if(!primaryFarms.contains(farmId)){
-                throw new ServiceException("authorize.fail");
+//                throw new ServiceException("authorize.fail");
+                throw new ServiceException("SubService.authorize.fail1");
             }
         }
         //先查再改
@@ -252,7 +253,8 @@ public class SubService {
             List<Long> primaryFarms = permission.getFarmIdsList();
             for(Long farmId : sub.getFarmIds()){
                 if(!primaryFarms.contains(farmId)){
-                    throw new ServiceException("authorize.fail");
+//                    throw new ServiceException("authorize.fail");
+                    throw new ServiceException("SubService.authorize.fail2");
                 }
             }
 
@@ -479,7 +481,8 @@ public class SubService {
         }else if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){
             parentUserId = RespHelper.orServEx(primaryUserReadService.findSubByUserId(user.getId())).getParentUserId();
         }else{
-            throw new ServiceException("authorize.fail");
+//            throw new ServiceException("authorize.fail");
+            throw new ServiceException("SubService.authorize.fail3");
         }
         return parentUserId;
     }

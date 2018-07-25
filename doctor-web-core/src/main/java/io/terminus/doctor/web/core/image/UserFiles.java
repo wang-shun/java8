@@ -172,7 +172,8 @@ public class UserFiles {
 
         if(Objects.equals(folderRes.getResult().get().getCreateBy() , user.getId())){
             log.error("Can't delete folder={}, by userId={}", folderId, user.getId());
-            throw new JsonResponseException("authorize.fail");
+//            throw new JsonResponseException("authorize.fail");
+            throw new JsonResponseException("UserFiles.authorize.fail1");
         }
 
         Response<Boolean> result = userFileService.moveFile(id, folderId);
@@ -224,7 +225,8 @@ public class UserFiles {
 
         if(Objects.equals(fileRes.getResult().get().getCreateBy() , userId)){
             log.error("Can't delete folder={}, by userId={}", folderId, userId);
-            throw new JsonResponseException("authorize.fail");
+//            throw new JsonResponseException("authorize.fail");
+            throw new JsonResponseException("UserFiles.authorize.fail2");
         }
     }
     private String get(String code) {

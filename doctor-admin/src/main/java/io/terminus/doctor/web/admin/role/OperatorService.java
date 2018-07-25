@@ -82,7 +82,8 @@ public class OperatorService {
             throw new ServiceException("user.not.login");
         }
         if (!Objects.equals(user.getType(), UserType.ADMIN.value())) {
-            throw new ServiceException("user.no.permission");
+//            throw new ServiceException("user.no.permission");
+            throw new ServiceException("OperatorService.user.no.permission");
         }
         return user.getId();
     }
