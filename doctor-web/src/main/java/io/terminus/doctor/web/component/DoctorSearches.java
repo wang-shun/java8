@@ -784,7 +784,7 @@ public class DoctorSearches {
         }
         if("2".equals(status)){ isRemoval = 1; }
         List<Long> notList = RespHelper.or500(doctorPigReadService.findNotTransitionsSow(farmId,barnId,valueMap,pigCode,rfid,isRemoval));
-        if( ("13").equals(status) ) {
+        if( "13".equals(status) ) {
             List<Long> haveList = RespHelper.or500(doctorPigReadService.findHaveTransitionsSow(farmId, barnId, pigCode, rfid));
             notList.addAll(haveList);
         }
