@@ -2057,7 +2057,7 @@
         WHERE farm_id = #{farmId}
         and pig_id = d.pig_id
         and kind = 1
-        and type in (6)
+        and type = 6
         and event_at &lt; #{time}
         and event_at >= max(d.event_at)
         and id > d.id)
