@@ -947,6 +947,18 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         map.put("endInFarmTime",endInFarmTime);
         return this.sqlSession.selectList(this.sqlId("getInFarmPigId2"), map);
     }
+    public List<Map<String,Object>> getInFarmPigId3(Long farmId, Date time,Integer barnType,String pigCode,Integer breed,String operatorName,Date beginInFarmTime, Date endInFarmTime){
+        Map<String, Object> map = new HashMap<>();
+        map.put("farmId",farmId);
+        map.put("time",time);
+        map.put("barnType",barnType);
+        map.put("pigCode",pigCode);
+        map.put("breed",breed);
+        map.put("operatorName",operatorName);
+        map.put("beginInFarmTime",beginInFarmTime);
+        map.put("endInFarmTime",endInFarmTime);
+        return this.sqlSession.selectList(this.sqlId("getInFarmPigId3"), map);
+    }
     public List<Map<String,Object>> getInFarmBoarId(Long farmId,Date queryDate,Integer barnId,String pigCode,Integer breedId,String staffName,Integer pigStatus, Date beginDate,Date endDate) {
         Map<String, Object> map = new HashMap<>();
         map.put("farmId",farmId);

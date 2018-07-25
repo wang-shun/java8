@@ -193,10 +193,12 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
     @Override
     public List<Map<String,Object>> sowsReport(Long farmId,Date time,String pigCode,String operatorName,Integer barnType,Integer breed,Integer parity,Integer pigStatus,Date beginInFarmTime, Date endInFarmTime){
         List<Map<String,Object>> inFarmPigId = null;
-        if(pigStatus == 0){
+        if(pigStatus == 0){//全部
             inFarmPigId = doctorPigEventDao.getInFarmPigId1(farmId,time,barnType,pigCode,breed,operatorName, beginInFarmTime,endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
-        } else if(pigStatus == 2){
+        } else if(pigStatus == 2){//离场
             inFarmPigId = doctorPigEventDao.getInFarmPigId2(farmId,time,barnType,pigCode,breed,operatorName, beginInFarmTime,endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
+        } else if(pigStatus == 10){//转场
+            inFarmPigId = doctorPigEventDao.getInFarmPigId3(farmId,time,barnType,pigCode,breed,operatorName, beginInFarmTime,endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
         }else {
             inFarmPigId = doctorPigEventDao.getInFarmPigId(farmId, time, barnType, pigCode, breed, operatorName, beginInFarmTime, endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
         }
@@ -249,34 +251,39 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 Map<String,Object> frontEvent = doctorPigEventDao.frontEvent(parity,pigId,time,pigStatus);
                 if(frontEvent != null) {
                     map.put("parity", frontEvent.get("parity"));//母猪胎次
-                    int status = (int)frontEvent.get("pig_status_after");
                     String Status = null;
-                    if(status == PigStatus.Entry.getKey()){
-                        Status = PigStatus.Entry.getName();
-                    }
-                    if(status == PigStatus.Removal.getKey()){
-                        Status = PigStatus.Removal.getName();
-                    }
-                    if(status == PigStatus.Mate.getKey()){
-                        Status = PigStatus.Mate.getName();
-                    }
-                    if(status == PigStatus.Pregnancy.getKey()){
-                        Status = PigStatus.Pregnancy.getName();
-                    }
-                    if(status == PigStatus.KongHuai.getKey()){
-                        Status = PigStatus.KongHuai.getName();
-                    }
-                    if(status == PigStatus.Farrow.getKey()){
-                        Status = PigStatus.Farrow.getName();
-                    }
-                    if(status == PigStatus.FEED.getKey()){
-                        Status = PigStatus.FEED.getName();
-                    }
-                    if(status == PigStatus.Wean.getKey()){
-                        Status = PigStatus.Wean.getName();
-                    }
-                    if(status == PigStatus.CHG_FARM.getKey()){
-                        Status = PigStatus.CHG_FARM.getName();
+                    if(pigStatus != 10) {
+                        int status = (int) frontEvent.get("pig_status_after");
+
+                        if (status == PigStatus.Entry.getKey()) {
+                            Status = PigStatus.Entry.getName();
+                        }
+                        if (status == PigStatus.Removal.getKey()) {
+                            Status = PigStatus.Removal.getName();
+                        }
+                        if (status == PigStatus.Mate.getKey()) {
+                            Status = PigStatus.Mate.getName();
+                        }
+                        if (status == PigStatus.Pregnancy.getKey()) {
+                            Status = PigStatus.Pregnancy.getName();
+                        }
+                        if (status == PigStatus.KongHuai.getKey()) {
+                            Status = PigStatus.KongHuai.getName();
+                        }
+                        if (status == PigStatus.Farrow.getKey()) {
+                            Status = PigStatus.Farrow.getName();
+                        }
+                        if (status == PigStatus.FEED.getKey()) {
+                            Status = PigStatus.FEED.getName();
+                        }
+                        if (status == PigStatus.Wean.getKey()) {
+                            Status = PigStatus.Wean.getName();
+                        }
+                        if (status == PigStatus.CHG_FARM.getKey()) {
+                            Status = PigStatus.CHG_FARM.getName();
+                        }
+                    } else {
+                        Status = "转场";
                     }
                     map.put("status", Status);//母猪状态
                     if(frontEvent.get("type") != null){
