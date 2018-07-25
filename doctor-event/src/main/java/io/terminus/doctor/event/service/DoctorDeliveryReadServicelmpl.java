@@ -325,7 +325,11 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             }
        // }
         //}
-        return inFarmPigId;
+        List<Map<String, Object>> a = new ArrayList<>();
+        for(int i = 0;i<20;i++){
+            a.add(inFarmPigId.get(i));
+        }
+        return a;
     }
 
     @Override
@@ -374,10 +378,6 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 map.put("status","转场");
             }
         }
-        List<Map<String, Object>> a = new ArrayList<>();
-        for(int i = 0;i<20;i++){
-            a.add(inFarmBoarId.get(i));
-        }
-        return a;
+        return inFarmBoarId;
     }
 }
