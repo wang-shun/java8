@@ -117,18 +117,18 @@ public class DoctorPigJoinDao extends MyBatisDao<SearchedPig> {
 
 
     public Paging<SearchedPig> pagesSowPig(Map<String, Object> params, Integer offset, Integer limit) {
-        if (params == null) {    //如果查询条件为空
+        if (params == null) {
             params = Maps.newHashMap();
         }
         log.info("pagesSowPig"+params.toString());
-        Long total = sqlSession.selectOne(sqlId(COUNT), params);
+        Long total = sqlSession.selectOne(sqlId("leaveCount"), params);
         log.error("pagesSowPig"+total.toString());
         if (total <= 0){
             return new Paging<>(0L, Collections.emptyList());
         }
         params.put(Constants.VAR_OFFSET, offset);
         params.put(Constants.VAR_LIMIT, limit);
-        List<SearchedPig> datas = sqlSession.selectList(sqlId(PAGING), params);
+        List<SearchedPig> datas = sqlSession.selectList(sqlId("leavePaging"), params);
         log.error("pagesSowPig"+datas.toString());
         return new Paging<>(total, datas);
     }

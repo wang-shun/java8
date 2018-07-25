@@ -232,7 +232,7 @@ public interface DoctorPigReadService {
 
 
     /**
-     * 查询猪的信息 By Pigs_Id
+     * 查询离场猪的信息 By Pigs_Id
      */
     Response<Paging<SearchedPig>> pagesSowPigById(Map<String, Object> params, Integer pageNo, Integer pageSize);
 

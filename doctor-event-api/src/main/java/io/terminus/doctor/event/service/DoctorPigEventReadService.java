@@ -303,10 +303,10 @@ public interface DoctorPigEventReadService {
     /**
      *                              新增代码
      * 根据事件筛选出母猪ID
-     * @param criteria
+     * @param eventCriteria
      * @return
      */
-    Response<List<Long>> findPigIdsByEvent(Map<String, Object> criteria);
+    Response<List<Long>> findPigIdsByEvent(Map<String, Object> eventCriteria);
 
 
 }

@@ -905,11 +905,11 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 实现层：事件筛选母猪的ID
-     * @param criteria
+     * @param eventCriteria
      * @return
      */
-    public List<Long> findPigIdsByEvent(Map<String, Object> criteria) {
-        return getSqlSession().selectList(sqlId("findPigIdsByEvent"), criteria);
+    public List<Long> findPigIdsByEvent(Map<String, Object> eventCriteria) {
+        return getSqlSession().selectList(sqlId("findPigIdsByEvent"), eventCriteria);
     }
     public List<Map<String,Object>> getInFarmPigId(Long farmId, Date time,Integer barnType,String pigCode,Integer breed,String operatorName,Date beginInFarmTime, Date endInFarmTime){
         Map<String, Object> map = new HashMap<>();

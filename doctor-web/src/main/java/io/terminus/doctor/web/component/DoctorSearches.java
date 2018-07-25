@@ -800,8 +800,6 @@ public class DoctorSearches {
         return RespHelper.or500(doctorPigEventReadService.findPigIdsByEvent(eventCriteria));
     }
 
-
-    @RequestMapping(value = "/pageSowPigs",method = RequestMethod.GET)
     private Paging<SearchedPig> pageSowPigs (Integer pageNo, Integer pageSize,Map<String, String> params) throws ParseException {
         if (farmIdNotExist(params)) {
             return new Paging<>(0L, Collections.emptyList());
@@ -833,18 +831,23 @@ public class DoctorSearches {
             rfid = params.get("rfid");
         }
 
+        String leave = String.valueOf(valueMap.get("statuses"));
+        if(leave!=null && "[2]".equals(leave)){
+            isRemoval = 1;
+        }
+
         List<Long> notList = RespHelper.or500(doctorPigReadService.findNotTransitionsSow(farmId,barnId,valueMap,pigCode,rfid,isRemoval));
-        if( !Strings.isNullOrEmpty(params.get("types")) || ("13").equals(params.get("statuses"))){
+        if( (!Strings.isNullOrEmpty(params.get("types")) || ("13").equals(params.get("statuses"))) &&  !"[2]".equals(leave) ){
             List<Long> haveList = RespHelper.or500(doctorPigReadService.findHaveTransitionsSow(farmId,barnId,pigCode,rfid));
             notList.addAll(haveList);
         }
 
         List<Long> eventList;
         boolean searchEvent = !Strings.isNullOrEmpty(params.get("types"))
-            || !Strings.isNullOrEmpty(params.get("beginDate"))
-            || !Strings.isNullOrEmpty(params.get("endDate"));
+                || !Strings.isNullOrEmpty(params.get("beginDate"))
+                || !Strings.isNullOrEmpty(params.get("endDate"));
         if(searchEvent){
-            Map<String, Object> eventCriteria = Maps.newHashMap();
+            Map<String, Object> eventCriteria = new HashMap<>();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             if (!Strings.isNullOrEmpty(params.get("types"))){
                 eventCriteria.put("types", Splitters.splitToInteger(params.get("types"), Splitters.COMMA));
@@ -870,7 +873,11 @@ public class DoctorSearches {
 
         if(eventList.size()>0){
             objectMap.put("pigIds",eventList);
-            paging = RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
+            if("[2]".equals(leave)){
+                paging = RespHelper.or500(doctorPigReadService.pagesSowPigById(objectMap, pageNo, pageSize));
+            }else {
+                paging = RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
+            }
             paging.getData().forEach(searchedPig -> {
                 Integer status = searchedPig.getStatus();
                 Date eventAt;
