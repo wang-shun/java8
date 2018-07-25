@@ -259,7 +259,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map.put("parity", frontEvent.get("parity"));//母猪胎次
                     String Status = null;
                     Long afterEventFarmId = doctorPigEventDao.afterEvent(pigId,id);//查后面一个事件，如果后面一个事件不是这个猪场说明转场了,如果为空则为离场
-                    if(afterEventFarmId == null || afterEventFarmId == farmId) {
+                    if(afterEventFarmId == null || afterEventFarmId.equals(farmId)) {
                         int status = (int) frontEvent.get("pig_status_after");
 
                         if (status == PigStatus.Entry.getKey()) {
