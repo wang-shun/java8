@@ -215,8 +215,7 @@ public class Folders {
 
         if(!Objects.equals(folderRes.getResult().get().getCreateBy() , userId)){
             log.error("Can't delete folder={}, by userId={}", folderId, userId);
-//            throw new JsonResponseException("authorize.fail");
-            throw new JsonResponseException("Folders");
+            throw new JsonResponseException("authorize.fail");
         }
     }
 

@@ -155,8 +155,7 @@ public class OPDoctorUsers {
                 return dto;
             }
 
-//            throw new OPClientException("authorize.fail");
-            throw new OPClientException("OPDoctorUsers1");
+            throw new OPClientException("authorize.fail");
         }
         DoctorServiceReviewDto dto = new DoctorServiceReviewDto();
         dto.setUserId(primaryUserId);
@@ -210,8 +209,7 @@ public class OPDoctorUsers {
         BaseUser baseUser = UserUtil.getCurrentUser();
         if (!Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), baseUser.getType())) {
             //只有主账号(猪场管理员)才能申请开通服务
-//            throw new OPClientException("authorize.fail");
-            throw new OPClientException("OPDoctorUsers2");
+            throw new OPClientException("authorize.fail");
         }
         ServiceBetaStatusToken token = serviceBetaStatusHandler.getServiceBetaStatusToken();
         if (token.inBeta(DoctorServiceReview.Type.from(serviceApplyDto.getType()))) {
