@@ -833,10 +833,6 @@ public class DoctorSearches {
             rfid = params.get("rfid");
         }
 
-        if("2".equals(valueMap.get("statuses").toString())){
-            isRemoval = 1;
-        }
-
         List<Long> notList = RespHelper.or500(doctorPigReadService.findNotTransitionsSow(farmId,barnId,valueMap,pigCode,rfid,isRemoval));
         if( !Strings.isNullOrEmpty(params.get("types")) || ("13").equals(params.get("statuses"))){
             List<Long> haveList = RespHelper.or500(doctorPigReadService.findHaveTransitionsSow(farmId,barnId,pigCode,rfid));
