@@ -132,13 +132,13 @@ public class ReportDeliveryController {
      */
     @RequestMapping(method = RequestMethod.GET, value = "sows")
     public List<Map<String,Object>> sowsReport(@RequestParam(required = true) Long farmId,
-                                               @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date time,
+                                               @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date time,
                                                @RequestParam(required = false) String pigCode,
                                                @RequestParam(required = false) String operatorName,
                                                @RequestParam(required = false) Integer barnType,
                                                @RequestParam(required = false) Integer breedId,
                                                @RequestParam(required = false) Integer parity,
-                                               @RequestParam(required = false) Integer pigStatus,
+                                               @RequestParam(required = true) Integer pigStatus,
                                                @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beginInFarmTime,
                                                @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endInFarmTime) {
         return doctorDeliveryReadService.sowsReport(farmId,time,pigCode,operatorName,barnType,breedId,parity,pigStatus,beginInFarmTime,endInFarmTime);
