@@ -146,7 +146,7 @@ public class Users {
         //判断下user type, 只允许admin和运维能登录
         if(!Objects.equal(user.getType(), UserType.ADMIN.value()) && !Objects.equal(user.getType(), UserType.OPERATOR.value())){
 //            throw new JsonResponseException("authorize.fail");
-            throw new JsonResponseException("Users.authorize.fail");
+            throw new JsonResponseException("Users");
         }
 
         //判断当前用户是否激活

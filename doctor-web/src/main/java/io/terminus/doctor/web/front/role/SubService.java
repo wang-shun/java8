@@ -225,7 +225,7 @@ public class SubService {
         for(Long farmId : farmIds){
             if(!primaryFarms.contains(farmId)){
 //                throw new ServiceException("authorize.fail");
-                throw new ServiceException("SubService.authorize.fail1");
+                throw new ServiceException("SubService1");
             }
         }
         //先查再改
@@ -254,7 +254,7 @@ public class SubService {
             for(Long farmId : sub.getFarmIds()){
                 if(!primaryFarms.contains(farmId)){
 //                    throw new ServiceException("authorize.fail");
-                    throw new ServiceException("SubService.authorize.fail2");
+                    throw new ServiceException("SubService2");
                 }
             }
 
@@ -482,7 +482,7 @@ public class SubService {
             parentUserId = RespHelper.orServEx(primaryUserReadService.findSubByUserId(user.getId())).getParentUserId();
         }else{
 //            throw new ServiceException("authorize.fail");
-            throw new ServiceException("SubService.authorize.fail3");
+            throw new ServiceException("SubService3");
         }
         return parentUserId;
     }

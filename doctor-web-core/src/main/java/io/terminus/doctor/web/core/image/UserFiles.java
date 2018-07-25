@@ -173,7 +173,7 @@ public class UserFiles {
         if(Objects.equals(folderRes.getResult().get().getCreateBy() , user.getId())){
             log.error("Can't delete folder={}, by userId={}", folderId, user.getId());
 //            throw new JsonResponseException("authorize.fail");
-            throw new JsonResponseException("UserFiles.authorize.fail1");
+            throw new JsonResponseException("UserFiles");
         }
 
         Response<Boolean> result = userFileService.moveFile(id, folderId);

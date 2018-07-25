@@ -293,7 +293,7 @@ public class FarmController {
         BaseUser baseUser = UserUtil.getCurrentUser();
         if(!Objects.equals(UserType.ADMIN.value(), baseUser.getType())){
 //            throw new JsonResponseException("authorize.fail");
-            throw new JsonResponseException("FarmController.authorize.fail");
+            throw new JsonResponseException("FarmController");
         }
         return baseUser;
     }

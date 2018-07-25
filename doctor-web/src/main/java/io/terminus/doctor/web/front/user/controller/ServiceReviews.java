@@ -92,7 +92,7 @@ public class ServiceReviews {
             primaryUserId = RespHelper.or500(primaryUserReadService.findSubByUserId(baseUser.getId())).getParentUserId();
         }else{
 //            throw new JsonResponseException("authorize.fail");
-            throw new JsonResponseException("ServiceReviews.authorize.fail1");
+            throw new JsonResponseException("ServiceReviews1");
         }
         return RespHelper.or500(doctorServiceStatusReadService.findByUserId(primaryUserId));
     }
@@ -109,7 +109,7 @@ public class ServiceReviews {
         if(!Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), baseUser.getType())){
             //只有主账号(猪场管理员)才能申请开通服务
 //            throw new JsonResponseException("authorize.fail");
-            throw new JsonResponseException("ServiceReviews.authorize.fail2");
+            throw new JsonResponseException("ServiceReviews2");
         }
         ServiceBetaStatusToken dto = serviceBetaStatusHandler.getServiceBetaStatusToken();
         if(dto.inBeta(DoctorServiceReview.Type.from(serviceApplyDto.getType()))){

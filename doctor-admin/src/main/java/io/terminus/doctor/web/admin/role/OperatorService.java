@@ -83,7 +83,7 @@ public class OperatorService {
         }
         if (!Objects.equals(user.getType(), UserType.ADMIN.value())) {
 //            throw new ServiceException("user.no.permission");
-            throw new ServiceException("OperatorService.user.no.permission");
+            throw new ServiceException("OperatorService");
         }
         return user.getId();
     }
