@@ -125,6 +125,7 @@ public class Subs {
         DoctorUserDataPermission permission = RespHelper.or500(permissionReadService.findDataPermissionByUserId(UserUtil.getUserId()));
         if (isNull(permission) || Arguments.isNullOrEmpty(permission.getFarmIdsList()) || !permission.getFarmIdsList().contains(farmId)) {
 //            throw new JsonResponseException(403, "user.no.permission");
+            log.info("Subs.user.no.farm.permission");
             throw new JsonResponseException(403, "user.no.farm.permission");
         }
 
