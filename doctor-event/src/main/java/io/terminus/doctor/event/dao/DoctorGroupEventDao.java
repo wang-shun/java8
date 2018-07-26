@@ -319,4 +319,42 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
         param.put("relPigEventId", relPigEventId);
         return sqlSession.selectList(sqlId("findGroupEvents"),param);
     }
+
+    public List<Map<String,Object>> groupList(Long farmId,Date time,Integer barnType,String groupCode,String operatorName,Integer groupType,Date buildBeginGroupTime,Date buildEndGroupTime){
+        Map<String, Object> param = new HashMap<>();
+        param.put("farmId", farmId);
+        param.put("time", time);
+        param.put("barnType", barnType);
+        param.put("groupCode", groupCode);
+        param.put("operatorName", operatorName);
+        param.put("groupType", groupType);
+        param.put("buildBeginGroupTime", buildBeginGroupTime);
+        param.put("buildEndGroupTime", buildEndGroupTime);
+        return sqlSession.selectList(sqlId("groupList"),param);
+    }
+
+    public int getCunlan(Long groupId,Date time){
+        Map<String, Object> param = new HashMap<>();
+        param.put("groupId", groupId);
+        param.put("time", time);
+        return sqlSession.selectOne(sqlId("getCunlan"),param);
+    }
+    public double getInAvgweight(Long groupId,Date time){
+        Map<String, Object> param = new HashMap<>();
+        param.put("groupId", groupId);
+        param.put("time", time);
+        return sqlSession.selectOne(sqlId("getInAvgweight"),param);
+    }
+    public double getOutAvgweight(Long groupId,Date time){
+        Map<String, Object> param = new HashMap<>();
+        param.put("groupId", groupId);
+        param.put("time", time);
+        return sqlSession.selectOne(sqlId("getOutAvgweight"),param);
+    }
+    public double getAvgDayAge(Long groupId,Date time){
+        Map<String, Object> param = new HashMap<>();
+        param.put("groupId", groupId);
+        param.put("time", time);
+        return sqlSession.selectOne(sqlId("getAvgDayAge"),param);
+    }
 }

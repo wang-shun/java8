@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportDeliverDao;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -19,11 +20,13 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
 
     private final DoctorReportDeliverDao doctorReportDeliverDao;
     private final DoctorPigEventDao doctorPigEventDao;
+    private final DoctorGroupEventDao doctorGroupEventDao;
 
     @Autowired
-    public DoctorDeliveryReadServicelmpl(DoctorReportDeliverDao doctorReportDeliverDao,DoctorPigEventDao doctorPigEventDao) {
+    public DoctorDeliveryReadServicelmpl(DoctorReportDeliverDao doctorReportDeliverDao,DoctorPigEventDao doctorPigEventDao,DoctorGroupEventDao doctorGroupEventDao) {
         this.doctorReportDeliverDao = doctorReportDeliverDao;
         this.doctorPigEventDao = doctorPigEventDao;
+        this.doctorGroupEventDao = doctorGroupEventDao;
     }
 
     @Override
@@ -403,5 +406,23 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
 
         }
         return inFarmBoarId;
+    }
+
+    @Override
+    public List<Map<String,Object>> groupReport(Long farmId,Date time,String groupCode,String operatorName,Integer barnType,Integer groupType,Integer groupStatus,Date buildBeginGroupTime,Date buildEndGroupTime,Date closeBeginGroupTime,Date closeEndGroupTime){
+        List<Map<String,Object>> groupList = doctorGroupEventDao.groupList(farmId,time,barnType,groupCode,operatorName,groupType,buildBeginGroupTime,buildEndGroupTime);
+        for(int i=0;i<groupList.size();i++){
+            Map map = groupList.get(i);
+            Long groupId = (Long)map.get("group_id");
+            int getCunlan = doctorGroupEventDao.getCunlan(groupId,time);
+            map.put("cunlanshu",getCunlan);
+            double getInAvgweight = doctorGroupEventDao.getInAvgweight(groupId,time);
+            map.put("inAvgweight",getInAvgweight);
+            double getOutAvgweight = doctorGroupEventDao.getOutAvgweight(groupId,time);
+            map.put("outAvgweight",getOutAvgweight);
+            double getAvgDayAge = doctorGroupEventDao.getAvgDayAge(groupId,time);
+            map.put("getAvgDayAge",getAvgDayAge/getCunlan);
+        }
+        return groupList;
     }
 }
