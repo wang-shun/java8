@@ -972,6 +972,42 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         map.put("endDate",endDate);
         return this.sqlSession.selectList(this.sqlId("getInFarmBoarId"), map);
     }
+    public List<Map<String,Object>> getInFarmBoarId1(Long farmId,Date queryDate,Integer barnId,String pigCode,Integer breedId,String staffName, Date beginDate,Date endDate) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("farmId",farmId);
+        map.put("queryDate",queryDate);
+        map.put("barnId",barnId);
+        map.put("pigCode",pigCode);
+        map.put("breedId",breedId);
+        map.put("staffName",staffName);
+        map.put("beginDate",beginDate);
+        map.put("endDate",endDate);
+        return this.sqlSession.selectList(this.sqlId("getInFarmBoarId1"), map);
+    }
+    public List<Map<String,Object>> getInFarmBoarId2(Long farmId,Date queryDate,Integer barnId,String pigCode,Integer breedId,String staffName, Date beginDate,Date endDate) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("farmId",farmId);
+        map.put("queryDate",queryDate);
+        map.put("barnId",barnId);
+        map.put("pigCode",pigCode);
+        map.put("breedId",breedId);
+        map.put("staffName",staffName);
+        map.put("beginDate",beginDate);
+        map.put("endDate",endDate);
+        return this.sqlSession.selectList(this.sqlId("getInFarmBoarId2"), map);
+    }
+    public List<Map<String,Object>> getInFarmBoarId3(Long farmId,Date queryDate,Integer barnId,String pigCode,Integer breedId,String staffName, Date beginDate,Date endDate) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("farmId", farmId);
+        map.put("queryDate", queryDate);
+        map.put("barnId", barnId);
+        map.put("pigCode", pigCode);
+        map.put("breedId", breedId);
+        map.put("staffName", staffName);
+        map.put("beginDate", beginDate);
+        map.put("endDate", endDate);
+        return this.sqlSession.selectList(this.sqlId("getInFarmBoarId3"), map);
+    }
     /* public Integer isOutFarm(BigInteger id, BigInteger pigId, Date eventAt, Long farmId, Date time){
          Map<String, Object> map = new HashMap<>();
          map.put("id",id);
@@ -1048,28 +1084,31 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         return this.sqlSession.selectOne(this.sqlId("nearDeliver"), map);
     }
 
-    public BigInteger isBoarBarn(BigInteger pigId, Date eventAt, Long farmId){
+    public BigInteger isBoarBarn(BigInteger id, BigInteger pigId, Date eventAt, Date queryDate){
         Map<String, Object> map = new HashMap<>();
+        map.put("id",id);
         map.put("pigId",pigId);
         map.put("eventAt",eventAt);
-        map.put("farmId",farmId);
+        map.put("queryDate",queryDate);
         return this.sqlSession.selectOne(this.sqlId("isBoarBarn"), map);
     }
-    public BigInteger isBoarLeave(BigInteger pigId, Date eventAt, Long farmId){
-        Map<String, Object> map = new HashMap<>();
-        map.put("pigId",pigId);
-        map.put("eventAt",eventAt);
-        map.put("farmId",farmId);
-        return this.sqlSession.selectOne(this.sqlId("isBoarLeave"), map);
-    }
-    public Map<String,Object> findBoarBarn(BigInteger isBoarBarn){
+    public Map<String,Object> findBoarBarn(BigInteger isBoarBarn,BigInteger id,BigInteger pigId,Date eventAt,Date queryDate,String staffName,Integer barnId){
         Map<String, Object> map = new HashMap<>();
         map.put("isBoarBarn",isBoarBarn);
+        map.put("id",id);
+        map.put("pigId",pigId);
+        map.put("eventAt",eventAt);
+        map.put("queryDate",queryDate);
+        map.put("staffName",staffName);
+        map.put("barnId",barnId);
         return this.sqlSession.selectOne(this.sqlId("findBoarBarn"), map);
     }
-    public Map<String,Object> findBoarLeave(BigInteger isBoarLeave){
+    public Map<String,Object> findBoarBarns(BigInteger pigId,String staffName,Integer barnId){
         Map<String, Object> map = new HashMap<>();
-        map.put("isBoarLeave",isBoarLeave);
-        return this.sqlSession.selectOne(this.sqlId("findBoarLeave"), map);
+        map.put("pigId",pigId);
+        map.put("staffName",staffName);
+        map.put("barnId",barnId);
+        return this.sqlSession.selectOne(this.sqlId("findBoarBarns"), map);
     }
+
 }

@@ -351,7 +351,14 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
 
     @Override
     public List<Map<String, Object>> boarReport(Long farmId, Date queryDate, String pigCode, String staffName, Integer barnId, Integer breedId, Integer pigStatus, Date beginDate, Date endDate) {
-        List<Map<String, Object>> inFarmBoarId = doctorPigEventDao.getInFarmBoarId(farmId,queryDate,barnId,pigCode,breedId,staffName,pigStatus, beginDate,endDate);
+        List<Map<String, Object>> inFarmBoarId = null;
+        if(pigStatus == 11){
+            inFarmBoarId = doctorPigEventDao.getInFarmBoarId1(farmId,queryDate,barnId,pigCode,breedId,staffName,beginDate,endDate);
+        } else if(pigStatus == 12){
+            inFarmBoarId = doctorPigEventDao.getInFarmBoarId2(farmId,queryDate,barnId,pigCode,breedId,staffName,beginDate,endDate);
+        } else if (pigStatus == 13){
+            inFarmBoarId = doctorPigEventDao.getInFarmBoarId3(farmId,queryDate,barnId,pigCode,breedId,staffName,beginDate,endDate);
+        }
         for (Iterator<Map<String,Object>> it = inFarmBoarId.iterator();it.hasNext();) {
             Map map = it.next();
             if (map.get("source") != null){
@@ -363,38 +370,29 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map.put("source","外购");
                 }
             }
+            BigInteger id = (BigInteger)map.get("id");
             BigInteger pigId = (BigInteger)map.get("pig_id");
             Date eventAt = (Date)map.get("event_at");
-            BigInteger isBoarBarn = doctorPigEventDao.isBoarBarn(pigId,eventAt,farmId); //该时间点后是否有转舍事件发生
-            BigInteger isBoarLeave = doctorPigEventDao.isBoarLeave(pigId,eventAt,farmId);//该时间点后是否有转场离场事件发生
-            if (null != isBoarBarn){
-                Map<String,Object> currentBoarBarn = doctorPigEventDao.findBoarBarn(isBoarBarn);//如果后面又转舍事件,去后面事件的猪舍
+            BigInteger isBoarBarn = doctorPigEventDao.isBoarBarn(id,pigId,eventAt,queryDate); //该时间点后是否有转舍事件发生
+            if(isBoarBarn != null) {
+                Map<String,Object> currentBoarBarn = doctorPigEventDao.findBoarBarn(isBoarBarn,id,pigId,eventAt,queryDate,staffName,barnId);//如果后面又转舍事件,去后面事件的猪舍
                 if(currentBoarBarn != null) {
-                    map.put("barn_name", currentBoarBarn.get("barn_name"));
+                    map.put("current_barn_name", currentBoarBarn.get("barn_name"));
+                    map.put("staff_name", currentBoarBarn.get("staff_name"));//饲养员
+                } else{
+                    it.remove();
+                }
+            }else{
+                Map<String,Object> currentBoarBarn = doctorPigEventDao.findBoarBarns(pigId,staffName,barnId);//否则取当前猪舍
+                if(currentBoarBarn != null) {
+                    map.put("current_barn_name", currentBoarBarn.get("current_barn_name"));
                     map.put("staff_name", currentBoarBarn.get("staff_name"));//饲养员
                 } else{
                     it.remove();
                 }
             }
-            if (null != isBoarLeave){
-                Map<String,Object> boarLeave = doctorPigEventDao.findBoarLeave(isBoarLeave);
-                if (boarLeave != null){
-                    map.put("status",boarLeave.get("pig_status_before"));
-                } else {
-                    it.remove();
-                }
-            }
-            int status = (int)map.get("status");
-            if (status == 11) {
-                map.put("status","进场");
-            }
-            if (status == 12) {
-                map.put("status","离场");
-            }
-            if (status == 13) {
-                map.put("status","转场");
-            }
         }
+
         return inFarmBoarId;
     }
 }
