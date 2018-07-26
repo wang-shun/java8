@@ -784,7 +784,7 @@ public class DoctorSearches {
         }
         if("2".equals(status)){ isRemoval = 1; }
         List<Long> notList = RespHelper.or500(doctorPigReadService.findNotTransitionsSow(farmId,barnId,valueMap,pigCode,rfid,isRemoval));
-        if( (types != null || !"".equals(types) || ("13").equals(status)) &&  !"2".equals(status) ) {
+        if( "13".equals(status) ) {
             List<Long> haveList = RespHelper.or500(doctorPigReadService.findHaveTransitionsSow(farmId, barnId, pigCode, rfid));
             notList.addAll(haveList);
         }
@@ -842,7 +842,7 @@ public class DoctorSearches {
         }
 
         List<Long> notList = RespHelper.or500(doctorPigReadService.findNotTransitionsSow(farmId,barnId,valueMap,pigCode,rfid,isRemoval));
-        if( (!Strings.isNullOrEmpty(params.get("types")) || ("13").equals(params.get("statuses"))) &&  !"[2]".equals(leave) ){
+        if( "13".equals(params.get("statuses")) ){
             List<Long> haveList = RespHelper.or500(doctorPigReadService.findHaveTransitionsSow(farmId,barnId,pigCode,rfid));
             notList.addAll(haveList);
         }
