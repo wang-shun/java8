@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -187,14 +188,7 @@ public class ReportDeliveryController {
                 Sheet sheet  =  workbook.createSheet();
                 sheet.addMergedRegion(new CellRangeAddress(0,0,0,20));
                 Row count = sheet.createRow(0);
-//                count.createCell(0).setCellValue("总配种数:"+String.valueOf(map.get("matingcount"))
-//                        +"  分娩数/分娩率:"+String.valueOf(map.get("deliverycount"))+"/"+String.valueOf(map.get("deliveryrate"))
-//                        +"  返情数/返情率:"+String.valueOf(map.get("fqcount"))+"/"+String.valueOf(map.get("fqrate"))
-//                        +"  流产数/流产率:"+String.valueOf(map.get("lccount"))+"/"+String.valueOf(map.get("lcrate"))
-//                        +"  阴性数/阴性率:"+String.valueOf(map.get("yxcount"))+"/"+String.valueOf(map.get("yxrate"))
-//                        +"  死亡数/死亡率:"+String.valueOf(map.get("swcount"))+"/"+String.valueOf(map.get("swrate"))
-//                        +"  淘汰数/淘汰率:"+String.valueOf(map.get("ttcount"))+"/"+String.valueOf(map.get("ttrate"))
-//                );
+
 
                 Row title  =  sheet.createRow(1);
                 int  pos  =  2;
@@ -210,37 +204,43 @@ public class ReportDeliveryController {
                 title.createCell(8).setCellValue("进场日期");
                 title.createCell(9).setCellValue("出生日期");
                 title.createCell(10).setCellValue("饲养员");
-//                title.createCell(11).setCellValue("预产日期");
-//                title.createCell(12).setCellValue("实产日期");
-//                title.createCell(13).setCellValue("妊娠检查结果");
-//                title.createCell(14).setCellValue("是否死淘");
 
                 for(int i = 0;i<ls.size();i++) {
                     Map a = ls.get(i);
                     Row row = sheet.createRow(pos++);
                     row.createCell(0).setCellValue(String.valueOf(i+1));
-                    row.createCell(1).setCellValue(String.valueOf(a.get("current_barn_name")));
+
+                    String rfid=String.valueOf(a.get("current_barn_name"));
+                    if(rfid.equals("null")){
+                        rfid="";
+                    }
+                    row.createCell(1).setCellValue(String.valueOf(rfid));
                     row.createCell(2).setCellValue(String.valueOf(a.get("pig_code")));
                     row.createCell(3).setCellValue(String.valueOf(a.get("parity")));
                     row.createCell(4).setCellValue(String.valueOf(a.get("status")));
                     row.createCell(5).setCellValue(String.valueOf(a.get("breed_name")));
                     row.createCell(6).setCellValue(String.valueOf(a.get("source")));
                     row.createCell(7).setCellValue(String.valueOf(a.get("daizaishu")));
-                    row.createCell(8).setCellValue(String.valueOf(a.get("in_farm_date")));
-                    row.createCell(9).setCellValue(String.valueOf(a.get("birth_date")));
+
+
+                    String str = String.valueOf(a.get("in_farm_date"));
+                    if("null".equals(str)){
+                        row.createCell(8).setCellValue("");
+                    }else {
+                        String[] strs = str.split(" ");
+                        row.createCell(8).setCellValue(String.valueOf(strs[0]));
+                    }
+
+                    String bd=String.valueOf(a.get("birth_date"));
+                    if("null".equals(bd)){
+                        row.createCell(9).setCellValue(" ");
+                    }else {
+                        String str1 = String.valueOf(a.get("birth_date"));
+                        String[] strs1=str1.split(" ");
+                        row.createCell(9).setCellValue(String.valueOf(strs1[0]));
+                    }
                     row.createCell(10).setCellValue(String.valueOf(a.get("staff_name")));
-//                    row.createCell(11).setCellValue(String.valueOf(a.get("judge_preg_date")));
-//                    row.createCell(12).setCellValue(String.valueOf(a.get("deliveryDate")));
-//                    String check_event_at = "";
-//                    String leave_event_at = "";
-//                    if (!String.valueOf(a.get("check_event_at")).equals("") && !String.valueOf(a.get("notdelivery")).equals("阳性")) {
-//                        check_event_at = "("+String.valueOf(a.get("check_event_at"))+")";
-//                    }
-//                    if (!String.valueOf(a.get("leave_event_at")).equals("")) {
-//                        leave_event_at = "("+String.valueOf(a.get("leave_event_at"))+")";
-//                    }
-//                    row.createCell(13).setCellValue(String.valueOf(a.get("notdelivery"))+check_event_at);
-//                    row.createCell(14).setCellValue(String.valueOf(a.get("deadorescape"))+leave_event_at);
+
                 }
                 workbook.write(response.getOutputStream());
             }
