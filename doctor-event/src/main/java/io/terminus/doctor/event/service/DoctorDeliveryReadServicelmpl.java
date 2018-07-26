@@ -391,8 +391,17 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     it.remove();
                 }
             }
-        }
+            if(pigStatus == 11){
+                map.put("status","已进场");
+            }
+            if(pigStatus == 12){
+                map.put("status","已离场");
+            }
+            if(pigStatus == 13){
+                map.put("status","已转场");
+            }
 
+        }
         return inFarmBoarId;
     }
 }
