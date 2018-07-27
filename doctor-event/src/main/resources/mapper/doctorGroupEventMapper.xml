@@ -944,7 +944,7 @@
     </select>
 
     <select id="groupList" parameterType="map" resultType="map">
-        select a.group_id,a.group_code, b.pig_type, b.current_barn_id, b.current_barn_name, c.staff_id, c.staff_name ,a.event_at
+        select a.group_id,a.group_code, b.pig_type, b.current_barn_id, b.current_barn_name, c.staff_id, c.staff_name ,a.event_at as build_event_at
         from doctor_group_events a
         join doctor_groups b on a.group_id = b.id
         join doctor_barns c on b.current_barn_id = c.id
@@ -960,7 +960,7 @@
         (select group_id from doctor_group_events where farm_id = #{farmId} and event_at &lt; #{time} and type = 10 and  status = 1)
     </select>
     <select id="groupList1" parameterType="map" resultType="map">
-        select a.group_id,a.group_code, b.pig_type, b.current_barn_id, b.current_barn_name, c.staff_id, c.staff_name ,a.event_at
+        select a.group_id,a.group_code, b.pig_type, b.current_barn_id, b.current_barn_name, c.staff_id, c.staff_name ,a.event_at as close_event_at
         from doctor_group_events a
         join doctor_groups b on a.group_id = b.id
         join doctor_barns c on b.current_barn_id = c.id
