@@ -168,7 +168,7 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
         if(deletePigEvent.getType()== 1 || deletePigEvent.getType()== 12 || deletePigEvent.getType()== 14){
             Integer status = doctorPigEventDao.checkBarn(deletePigEvent.getBarnId());
             if(status != 1){
-                throw new ServiceException("原猪场已关闭，不能删除");
+                throw new ServiceException("原猪场已关闭");
             }
         }
         log.info("rollback handle starting, deletePigEvent:{}", deletePigEvent);
