@@ -2241,5 +2241,9 @@
         <if test="staffName != null"> AND c.staff_name like CONCAT(CONCAT('%',#{staffName}),'%')</if>
         <if test="barnId != null"> and c.id = #{barnId} </if>
     </select>
-
+    <select id="checkBarn" parameterType="map" resultType="Integer">
+        SELECT status
+        FROM doctor_barns
+        where id = #{barnId}
+    </select>
 </mapper>
