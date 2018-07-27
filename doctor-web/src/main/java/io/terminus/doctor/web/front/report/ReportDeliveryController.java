@@ -252,7 +252,7 @@ public class ReportDeliveryController {
     }
 
     /**
-     *
+     *猪群存栏报表
      * @param farmId
      * @param time
      * @param groupCode
@@ -265,7 +265,7 @@ public class ReportDeliveryController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "group")
-    public List<Map<String,Object>> groupReport(@RequestParam(required = true) Long farmId,
+    public Map<String,Object> groupReport(@RequestParam(required = true) Long farmId,
                                                @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date time,
                                                @RequestParam(required = false) String groupCode,
                                                @RequestParam(required = false) String operatorName,

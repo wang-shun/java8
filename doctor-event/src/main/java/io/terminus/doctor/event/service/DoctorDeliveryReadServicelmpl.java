@@ -409,14 +409,29 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
     }
 
     @Override
-    public List<Map<String,Object>> groupReport(Long farmId,Date time,String groupCode,String operatorName,Integer barnType,Integer groupType,Integer groupStatus,Date buildBeginGroupTime,Date buildEndGroupTime,Date closeBeginGroupTime,Date closeEndGroupTime){
+    public Map<String,Object> groupReport(Long farmId,Date time,String groupCode,String operatorName,Integer barnType,Integer groupType,Integer groupStatus,Date buildBeginGroupTime,Date buildEndGroupTime,Date closeBeginGroupTime,Date closeEndGroupTime){
         List<Map<String,Object>> groupList = doctorGroupEventDao.groupList(farmId,time,barnType,groupCode,operatorName,groupType,buildBeginGroupTime,buildEndGroupTime);
+        int zongcunlan = 0;
         for(int i=0;i<groupList.size();i++){
             Map map = groupList.get(i);
+            int status = (int) map.get("pig_type");
+            if(status == 7){
+                map.put("pig_type","产房仔猪");
+            }
+            if(status == 2){
+                map.put("pig_type","保育猪");
+            }
+            if(status == 3){
+                map.put("pig_type","育肥猪");
+            }
+            if(status == 4){
+                map.put("pig_type","后备猪");
+            }
             Long groupId = (Long)map.get("group_id");
             Integer getCunlan = doctorGroupEventDao.getCunlan(groupId,time);
             if(getCunlan != null) {
                 map.put("cunlanshu", getCunlan);
+                zongcunlan = zongcunlan + getCunlan;
             }else{
                 map.put("cunlanshu", 0);
             }
@@ -439,6 +454,9 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 map.put("getAvgDayAge", 0);
             }
         }
-        return groupList;
+        Map<String,Object> data = new HashMap<>();
+        data.put("data",groupList);
+        data.put("zongcunlan",zongcunlan);
+        return data;
     }
 }
