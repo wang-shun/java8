@@ -2163,7 +2163,7 @@
         WHERE d.farm_id = #{farmId}
         and d.kind = 2
         and d.type in (7,20)
-        and d.event_at &lt; #{queryDate}
+        and d.event_at &lt;= #{queryDate}
         <if test="pigCode != null"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
         <if test="breedId != null"> and a.breed_id = #{breedId} </if>
         <if test="beginDate != null"> and a.in_farm_date > #{beginDate} </if>
@@ -2176,7 +2176,7 @@
         and pig_id = d.pig_id
         and kind = 2
         and type in (2,6)
-        and event_at &lt; #{queryDate}
+        and event_at &lt;= #{queryDate}
         and event_at >= max(d.event_at)
         and id > d.id)
     </select>
@@ -2188,7 +2188,7 @@
         WHERE d.farm_id = #{farmId}
         and d.kind = 2
         and d.type = 6
-        and d.event_at &lt; #{queryDate}
+        and d.event_at &lt;= #{queryDate}
         <if test="pigCode != null"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
         <if test="breedId != null"> and a.breed_id = #{breedId} </if>
         <if test="beginDate != null"> and a.in_farm_date > #{beginDate} </if>
@@ -2203,7 +2203,7 @@
         WHERE d.farm_id = #{farmId}
         and d.kind = 2
         and d.type = 2
-        and d.event_at &lt; #{queryDate}
+        and d.event_at &lt;= #{queryDate}
         <if test="pigCode != null"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
         <if test="breedId != null"> and a.breed_id = #{breedId} </if>
         <if test="beginDate != null"> and a.in_farm_date > #{beginDate} </if>
