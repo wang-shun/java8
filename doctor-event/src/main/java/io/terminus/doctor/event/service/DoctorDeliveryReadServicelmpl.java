@@ -437,6 +437,10 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 map.put("pig_type","后备猪");
             }
             Long groupId = (Long)map.get("group_id");
+            if(map.get("build_event_at") == null){
+                Date buildEventAt =  doctorGroupEventDao.getBuildEventAt(groupId);
+                map.put("build_event_at",buildEventAt);
+            }
             Integer getCunlan = doctorGroupEventDao.getCunlan(groupId,time);
             if(getCunlan != null) {
                 map.put("cunlanshu", getCunlan);

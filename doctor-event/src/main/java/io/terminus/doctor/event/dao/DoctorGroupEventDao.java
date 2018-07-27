@@ -380,4 +380,9 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
         param.put("time", time);
         return sqlSession.selectOne(sqlId("getAvgDayAge"),param);
     }
+    public Date getBuildEventAt(Long groupId){
+        Map<String, Object> param = new HashMap<>();
+        param.put("groupId", groupId);
+        return sqlSession.selectOne(sqlId("getBuildEventAt"),param);
+    }
 }
