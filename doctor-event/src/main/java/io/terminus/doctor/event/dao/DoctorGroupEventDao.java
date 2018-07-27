@@ -342,7 +342,7 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
         param.put("groupType", groupType);
         param.put("buildBeginGroupTime", buildBeginGroupTime);
         param.put("buildEndGroupTime", buildEndGroupTime);
-        return sqlSession.selectList(sqlId("groupList"),param);
+        return sqlSession.selectList(sqlId("groupList1"),param);
     }
     public List<Map<String,Object>> groupList2(Long farmId,Date time,Integer barnType,String groupCode,String operatorName,Integer groupType,Date buildBeginGroupTime,Date buildEndGroupTime){
         Map<String, Object> param = new HashMap<>();
@@ -354,7 +354,7 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
         param.put("groupType", groupType);
         param.put("buildBeginGroupTime", buildBeginGroupTime);
         param.put("buildEndGroupTime", buildEndGroupTime);
-        return sqlSession.selectList(sqlId("groupList"),param);
+        return sqlSession.selectList(sqlId("groupList2"),param);
     }
     public Integer getCunlan(Long groupId,Date time){
         Map<String, Object> param = new HashMap<>();
