@@ -899,4 +899,11 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public Long queryEventId(Long pigId){
         return getSqlSession().selectOne(sqlId("queryEventId"), pigId);
     }
+    public Integer checkBarn(Long barnId){
+        Map<String, Object> map = new HashMap<>();
+        map.put("barnId",barnId);
+        return this.sqlSession.selectOne(this.sqlId("checkBarn"), map);
+    }
+
+
 }

@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.editHandler.pig;
 
 import com.google.common.collect.Lists;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.Checks;
@@ -163,6 +164,13 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     @Override
     public void rollbackHandle(DoctorPigEvent deletePigEvent, Long operatorId, String operatorName) {
+        //如果是转舍事件，原猪舍停用后，不准删除转舍事件
+        if(deletePigEvent.getType()== 1 || deletePigEvent.getType()== 12 || deletePigEvent.getType()== 14){
+            Integer status = doctorPigEventDao.checkBarn(deletePigEvent.getBarnId());
+            if(status != 1){
+                throw new ServiceException("原猪场已关闭");
+            }
+        }
         log.info("rollback handle starting, deletePigEvent:{}", deletePigEvent);
         String key = "pig" + deletePigEvent.getPigId().toString();
         expectTrue(doctorConcurrentControl.setKey(key), "event.concurrent.error", deletePigEvent.getPigCode());
