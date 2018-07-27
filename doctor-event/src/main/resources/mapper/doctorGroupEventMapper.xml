@@ -959,7 +959,34 @@
         and a.group_id  not in
         (select group_id from doctor_group_events where farm_id = #{farmId} and event_at &lt; #{time} and type = 10 and  status = 1)
     </select>
-
+    <select id="groupList1" parameterType="map" resultType="map">
+        select a.group_id,a.group_code, b.pig_type, b.current_barn_id, b.current_barn_name, c.staff_id, c.staff_name ,a.event_at
+        from doctor_group_events a
+        join doctor_groups b on a.group_id = b.id
+        join doctor_barns c on b.current_barn_id = c.id
+        where a.farm_id = #{farmId} and a.type = 10 and a.status = 1
+        <if test="time != null">and a.event_at &lt; #{time}</if>
+        <if test="barnType != null">and c.pig_type = #{barnType}</if>
+        <if test="groupCode != null"> AND a.group_code like CONCAT(CONCAT('%',#{groupCode}),'%')</if>
+        <if test="operatorName != null"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
+        <if test="groupType != null">and c.pig_type = #{groupType}</if>
+        <if test="buildBeginGroupTime != null">and a.event_at >= #{buildBeginGroupTime}</if>
+        <if test="buildEndGroupTime != null">and a.event_at &lt;= #{buildEndGroupTime}</if>
+    </select>
+    <select id="groupList2" parameterType="map" resultType="map">
+        select a.group_id,a.group_code, b.pig_type, b.current_barn_id, b.current_barn_name, c.staff_id, c.staff_name ,a.event_at
+        from doctor_group_events a
+        join doctor_groups b on a.group_id = b.id
+        join doctor_barns c on b.current_barn_id = c.id
+        where a.farm_id = #{farmId} and a.status = 1
+        <if test="time != null">and a.event_at &lt; #{time}</if>
+        <if test="barnType != null">and c.pig_type = #{barnType}</if>
+        <if test="groupCode != null"> AND a.group_code like CONCAT(CONCAT('%',#{groupCode}),'%')</if>
+        <if test="operatorName != null"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
+        <if test="groupType != null">and c.pig_type = #{groupType}</if>
+        <if test="buildBeginGroupTime != null">and a.event_at >= #{buildBeginGroupTime}</if>
+        <if test="buildEndGroupTime != null">and a.event_at &lt;= #{buildEndGroupTime}</if>
+    </select>
     <select id="getCunlan" parameterType="map" resultType="Integer">
         select
         IFNULL((select sum(quantity) from doctor_group_events where group_id = #{groupId} and event_at &lt; #{time} and type in (2)),0)

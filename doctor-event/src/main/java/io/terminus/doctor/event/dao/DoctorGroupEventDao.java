@@ -332,7 +332,30 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
         param.put("buildEndGroupTime", buildEndGroupTime);
         return sqlSession.selectList(sqlId("groupList"),param);
     }
-
+    public List<Map<String,Object>> groupList1(Long farmId,Date time,Integer barnType,String groupCode,String operatorName,Integer groupType,Date buildBeginGroupTime,Date buildEndGroupTime){
+        Map<String, Object> param = new HashMap<>();
+        param.put("farmId", farmId);
+        param.put("time", time);
+        param.put("barnType", barnType);
+        param.put("groupCode", groupCode);
+        param.put("operatorName", operatorName);
+        param.put("groupType", groupType);
+        param.put("buildBeginGroupTime", buildBeginGroupTime);
+        param.put("buildEndGroupTime", buildEndGroupTime);
+        return sqlSession.selectList(sqlId("groupList"),param);
+    }
+    public List<Map<String,Object>> groupList2(Long farmId,Date time,Integer barnType,String groupCode,String operatorName,Integer groupType,Date buildBeginGroupTime,Date buildEndGroupTime){
+        Map<String, Object> param = new HashMap<>();
+        param.put("farmId", farmId);
+        param.put("time", time);
+        param.put("barnType", barnType);
+        param.put("groupCode", groupCode);
+        param.put("operatorName", operatorName);
+        param.put("groupType", groupType);
+        param.put("buildBeginGroupTime", buildBeginGroupTime);
+        param.put("buildEndGroupTime", buildEndGroupTime);
+        return sqlSession.selectList(sqlId("groupList"),param);
+    }
     public Integer getCunlan(Long groupId,Date time){
         Map<String, Object> param = new HashMap<>();
         param.put("groupId", groupId);

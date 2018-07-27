@@ -410,7 +410,14 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
 
     @Override
     public Map<String,Object> groupReport(Long farmId,Date time,String groupCode,String operatorName,Integer barnType,Integer groupType,Integer groupStatus,Date buildBeginGroupTime,Date buildEndGroupTime,Date closeBeginGroupTime,Date closeEndGroupTime){
-        List<Map<String,Object>> groupList = doctorGroupEventDao.groupList(farmId,time,barnType,groupCode,operatorName,groupType,buildBeginGroupTime,buildEndGroupTime);
+        List<Map<String,Object>> groupList = null;
+        if(groupStatus == 1) {
+            groupList = doctorGroupEventDao.groupList(farmId, time, barnType, groupCode, operatorName, groupType, buildBeginGroupTime, buildEndGroupTime);
+        }else if(groupStatus == 2){
+            groupList = doctorGroupEventDao.groupList1(farmId, time, barnType, groupCode, operatorName, groupType, buildBeginGroupTime, buildEndGroupTime);
+        }else{
+            groupList = doctorGroupEventDao.groupList2(farmId, time, barnType, groupCode, operatorName, groupType, buildBeginGroupTime, buildEndGroupTime);
+        }
         int zongcunlan = 0;
         for(int i=0;i<groupList.size();i++){
             Map map = groupList.get(i);
