@@ -414,14 +414,30 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         for(int i=0;i<groupList.size();i++){
             Map map = groupList.get(i);
             Long groupId = (Long)map.get("group_id");
-            int getCunlan = doctorGroupEventDao.getCunlan(groupId,time);
-            map.put("cunlanshu",getCunlan);
-            double getInAvgweight = doctorGroupEventDao.getInAvgweight(groupId,time);
-            map.put("inAvgweight",getInAvgweight);
-            double getOutAvgweight = doctorGroupEventDao.getOutAvgweight(groupId,time);
-            map.put("outAvgweight",getOutAvgweight);
-            double getAvgDayAge = doctorGroupEventDao.getAvgDayAge(groupId,time);
-            map.put("getAvgDayAge",getAvgDayAge/getCunlan);
+            Integer getCunlan = doctorGroupEventDao.getCunlan(groupId,time);
+            if(getCunlan != null) {
+                map.put("cunlanshu", getCunlan);
+            }else{
+                map.put("cunlanshu", 0);
+            }
+            Double getInAvgweight = doctorGroupEventDao.getInAvgweight(groupId,time);
+            if(getInAvgweight != null) {
+                map.put("inAvgweight", (double)Math.round(getInAvgweight*1000)/1000);
+            }else{
+                map.put("inAvgweight", 0);
+            }
+            Double getOutAvgweight = doctorGroupEventDao.getOutAvgweight(groupId,time);
+            if(getOutAvgweight != null) {
+                map.put("outAvgweight", (double)Math.round(getOutAvgweight*1000)/1000);
+            }else{
+                map.put("outAvgweight", 0);
+            }
+            Double getAvgDayAge = doctorGroupEventDao.getAvgDayAge(groupId,time);
+            if(getAvgDayAge != null && getCunlan != null) {
+                map.put("getAvgDayAge", (double)Math.round((getAvgDayAge / getCunlan)*1000)/1000);
+            }else{
+                map.put("getAvgDayAge", 0);
+            }
         }
         return groupList;
     }

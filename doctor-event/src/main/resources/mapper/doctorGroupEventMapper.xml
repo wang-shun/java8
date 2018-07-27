@@ -960,28 +960,28 @@
         (select group_id from doctor_group_events where farm_id = #{farmId} and event_at &lt; #{time} and type = 10 and  status = 1)
     </select>
 
-    <select id="getCunlan" parameterType="map" resultType="int">
+    <select id="getCunlan" parameterType="map" resultType="Integer">
         select
-        (select sum(quantity) from doctor_group_events where group_id = #{groupId} and event_at &lt; #{time} group by type HAVING type in (2))
+        (select sum(quantity) from doctor_group_events where group_id = #{groupId} and event_at &lt; #{time} and type in (2))
         -
-        (select sum(quantity) from doctor_group_events where type in (3,4,5,9)  and event_at &lt; #{time} group by group_id HAVING group_id = #{groupId})
+        (select sum(quantity) from doctor_group_events where type in (3,4,5,9)  and event_at &lt; #{time} and group_id = #{groupId})
         from dual
     </select>
-    <select id="getInAvgweight" parameterType="map" resultType="double">
+    <select id="getInAvgweight" parameterType="map" resultType="Double">
        select
-        (select sum(weight) from doctor_group_events where group_id = #{groupId} and event_at &lt; #{time} group by type HAVING type in (2))
+        (select sum(weight) from doctor_group_events where group_id = #{groupId} and event_at &lt; #{time} and type in (2))
         /
-        (select sum(quantity) from doctor_group_events where group_id = #{groupId} and event_at &lt; #{time} group by type HAVING type in (2))
+        (select sum(quantity) from doctor_group_events where group_id = #{groupId} and event_at &lt; #{time} and type in (2))
         from dual
     </select>
-    <select id="getOutAvgweight" parameterType="map" resultType="double">
+    <select id="getOutAvgweight" parameterType="map" resultType="Double">
         select
-        (select sum(weight) from doctor_group_events where group_id = #{groupId} and event_at &lt; #{time} group by type HAVING type in (3,4,5,9))
+        (select sum(weight) from doctor_group_events where group_id = #{groupId} and event_at &lt; #{time} and type in (3,4,5,9))
         /
-        (select sum(quantity) from doctor_group_events where group_id = #{groupId} and event_at &lt; #{time} group by type HAVING type in (3,4,5,9))
+        (select sum(quantity) from doctor_group_events where group_id = #{groupId} and event_at &lt; #{time} and type in (3,4,5,9))
         from dual
     </select>
-    <select id="getAvgDayAge" parameterType="map" resultType="double">
+    <select id="getAvgDayAge" parameterType="map" resultType="Double">
       select
         ((select sum((DATEDIFF('2018-7-26',event_at)+avg_day_age)*quantity) from doctor_group_events where farm_id = 103 and type = 2 and group_id = 24596)
         -(select sum(quantity*(DATEDIFF('2018-7-26',event_at)+avg_day_age)) from doctor_group_events where farm_id = 103 and type in (3,4,5,9) and group_id = 24596))

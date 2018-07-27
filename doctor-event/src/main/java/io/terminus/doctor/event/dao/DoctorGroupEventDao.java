@@ -333,25 +333,25 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
         return sqlSession.selectList(sqlId("groupList"),param);
     }
 
-    public int getCunlan(Long groupId,Date time){
+    public Integer getCunlan(Long groupId,Date time){
         Map<String, Object> param = new HashMap<>();
         param.put("groupId", groupId);
         param.put("time", time);
         return sqlSession.selectOne(sqlId("getCunlan"),param);
     }
-    public double getInAvgweight(Long groupId,Date time){
+    public Double getInAvgweight(Long groupId,Date time){
         Map<String, Object> param = new HashMap<>();
         param.put("groupId", groupId);
         param.put("time", time);
         return sqlSession.selectOne(sqlId("getInAvgweight"),param);
     }
-    public double getOutAvgweight(Long groupId,Date time){
+    public Double getOutAvgweight(Long groupId,Date time){
         Map<String, Object> param = new HashMap<>();
         param.put("groupId", groupId);
         param.put("time", time);
         return sqlSession.selectOne(sqlId("getOutAvgweight"),param);
     }
-    public double getAvgDayAge(Long groupId,Date time){
+    public Double getAvgDayAge(Long groupId,Date time){
         Map<String, Object> param = new HashMap<>();
         param.put("groupId", groupId);
         param.put("time", time);
