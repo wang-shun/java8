@@ -299,6 +299,12 @@ public interface DoctorPigEventReadService {
     Response<Date> findEventAtLeadToStatus(Long pigId, Integer status);
 
 
+    /**
+     * 查询猪最近初配事件的时间
+     */
+    Response<Date> findMateEventToPigId(Long pigId);
+
+
 
     /**
      *                              新增代码
@@ -307,6 +313,8 @@ public interface DoctorPigEventReadService {
      * @return
      */
     Response<List<Long>> findPigIdsByEvent(Map<String, Object> criteria);
+
+
 
 
 }

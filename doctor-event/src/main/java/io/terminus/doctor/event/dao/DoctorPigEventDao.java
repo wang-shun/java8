@@ -724,6 +724,13 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
 
     /**
+     *
+     */
+    public Date findMateEventToPigId(Long pigId) {
+        return getSqlSession().selectOne(sqlId("findMateEventToPigId"),pigId);
+    }
+
+    /**
      * 修复窝号临时创建请勿使用
      *
      * @return
