@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -118,4 +119,37 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
         map.put("farmId", farmId);
         return getSqlSession().selectList(sqlId("selectBarns"), map);
     }
+    public Map<String,Object> findBarnTypeById(Long barnId) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("barnId", barnId);
+        return getSqlSession().selectOne(sqlId("findBarnTypeById"), map);
+    }
+    public Integer qichucunlan(Long farmId,Long barnId,Date beginTime) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("barnId", barnId);
+        map.put("farmId", farmId);
+        map.put("beginTime", beginTime);
+        return getSqlSession().selectOne(sqlId("qichucunlan"), map);
+    }
+    public List<Map<Integer,Long>> jianshao(Long barnId,Date beginTime,Date endTime) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("barnId", barnId);
+        map.put("endTime", endTime);
+        map.put("beginTime", beginTime);
+        return getSqlSession().selectList(sqlId("jianshao"), map);
+    }
+    public Integer zhuanchu(Long barnId,Date beginTime,Date endTime) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("barnId", barnId);
+        map.put("endTime", endTime);
+        map.put("beginTime", beginTime);
+        return getSqlSession().selectOne(sqlId("zhuanchu"), map);
+    }
+    public List<Long> findBarnIdsByfarmId(Long farmId,String operatorName) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("farmId", farmId);
+        map.put("operatorName", operatorName);
+        return getSqlSession().selectOne(sqlId("findBarnIdsByfarmId"), map);
+    }
+
 }

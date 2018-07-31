@@ -279,4 +279,21 @@ public class ReportDeliveryController {
         return doctorDeliveryReadService.groupReport(farmId,time,groupCode,operatorName,barnType,groupType,groupStatus,buildBeginGroupTime,buildEndGroupTime,closeBeginGroupTime,closeEndGroupTime);
     }
 
+    /**
+     * 猪舍存栏报表
+     * @param farmId
+     * @param operatorName
+     * @param barnId
+     * @param beginTime
+     * @param endTime
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "barns")
+    public List<Map<String,Object>> barnsReport(@RequestParam(required = true) Long farmId,
+                                               @RequestParam(required = false) String operatorName,
+                                               @RequestParam(required = false) Long barnId,
+                                               @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beginTime,
+                                               @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endTime) {
+        return doctorDeliveryReadService.barnsReport(farmId,operatorName,barnId,beginTime,endTime);
+    }
 }

@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportDeliverDao;
@@ -21,12 +22,14 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
     private final DoctorReportDeliverDao doctorReportDeliverDao;
     private final DoctorPigEventDao doctorPigEventDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
+    private final DoctorBarnDao doctorBarnDao;
 
     @Autowired
-    public DoctorDeliveryReadServicelmpl(DoctorReportDeliverDao doctorReportDeliverDao,DoctorPigEventDao doctorPigEventDao,DoctorGroupEventDao doctorGroupEventDao) {
+    public DoctorDeliveryReadServicelmpl(DoctorReportDeliverDao doctorReportDeliverDao,DoctorPigEventDao doctorPigEventDao,DoctorGroupEventDao doctorGroupEventDao,DoctorBarnDao doctorBarnDao) {
         this.doctorReportDeliverDao = doctorReportDeliverDao;
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
+        this.doctorBarnDao = doctorBarnDao;
     }
 
     @Override
@@ -248,7 +251,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             }else{
                 Map<String,Object> currentBarns = doctorPigEventDao.findBarns(pigId,operatorName,barnType);//否则取当前猪舍
                 if(currentBarns != null) {
-                    map.put("current_barn_name", currentBarns.get("barn_name"));
+                    map.put("current_barn_name", currentBarns.get("current_barn_name"));
                     map.put("staff_name", currentBarns.get("staff_name"));//饲养员
                 } else{
                     it.remove();
@@ -472,4 +475,76 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         data.put("zongcunlan",zongcunlan);
         return data;
     }
+    public List<Map<String,Object>> barnsReport(Long farmId,String operatorName,Long isbarnId,Date beginTime,Date endTime){
+        List<Long> barnIds = new ArrayList<>();
+        if(isbarnId == 0) {
+            barnIds = doctorBarnDao.findBarnIdsByfarmId(farmId, operatorName);
+        }else{
+             barnIds.add(isbarnId);
+        }
+        if(barnIds != null) {
+            for(Long barnId: barnIds) {
+                Map map = new HashMap();
+                Map<String, Object> barn = doctorBarnDao.findBarnTypeById(barnId);
+                int barnType = (int) (barn.get("pig_type"));
+                map.put("barn", barn.get("name"));
+                map.put("staffname", barn.get("staff_name"));
+                if (barnType == 5 || barnType == 6 || barnType == 7 || barnType == 9) {
+                    Integer qichucunlan = doctorBarnDao.qichucunlan(farmId, barnId, beginTime);
+                    Integer qimucunlan = doctorBarnDao.qichucunlan(farmId, barnId, endTime);
+                    if (qichucunlan != null) {
+                        map.put("qichucunlan", qichucunlan);
+                    } else {
+                        map.put("qichucunlan", 0);
+                    }
+                    if (qimucunlan != null) {
+                        map.put("qimucunlan", qimucunlan);
+                    } else {
+                        map.put("qimucunlan", 0);
+                    }
+                    List<Map<Integer, Long>> jianshao = doctorBarnDao.jianshao(barnId, beginTime, endTime);
+                    Long qitajianshao = 0L;
+                    if (jianshao != null) {
+                        for (int i = 0; i < jianshao.size(); i++) {
+                            Long a = jianshao.get(i).get("change_type_id");
+                            if (a == 109) {
+                                map.put("xiaoshou", jianshao.get(i).get("count"));
+                            }
+                            if (a == 110) {
+                                map.put("siwang", jianshao.get(i).get("count"));
+                            }
+                            if (a == 111) {
+                                map.put("taotai", jianshao.get(i).get("count"));
+                            }
+                            if (a == 112 || a == 113 || a == 114) {
+                                qitajianshao = qitajianshao + jianshao.get(i).get("count");
+                            }
+                        }
+                        map.put("qitajianshao", qitajianshao);
+                    } else {
+                        map.put("xiaoshou", 0);
+                        map.put("siwang", 0);
+                        map.put("taotai", 0);
+                        map.put("qitajianshao", 0);
+                    }
+                    Integer zhuanchu = doctorBarnDao.zhuanchu(barnId, beginTime, endTime);
+                    if (zhuanchu != null) {
+                        map.put("zhuanchu", zhuanchu);
+                    } else {
+                        map.put("zhuanchu", 0);
+                    }
+                    Long zhuanru = qimucunlan - qichucunlan + (map.get("xiaoshou") == null ? 0 : (Long) map.get("xiaoshou")) + (map.get("siwang") == null ? 0 : (Long) map.get("siwang")) + (map.get("taotai") == null ? 0 : (Long) map.get("taotai")) + (map.get("qitajianshao") == null ? 0 : (Long) map.get("qitajianshao"));
+                    map.put("zhuanru", zhuanru);
+                }
+                if (barnType == 2 || barnType == 3 || barnType == 4) {
+
+                }
+
+            }
+            return null;
+        } else{
+            return null;
+        }
+    }
+
 }

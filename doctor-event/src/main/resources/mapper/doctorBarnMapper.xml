@@ -295,4 +295,40 @@
         ORDER BY instr(`name`, #{name}) ASC, length(`name`) ASC, `name` ASC
         limit #{count}
     </select>
+    <select id="findBarnTypeById" parameterType="map" resultType="map">
+        SELECT pig_type,name,staff_name
+        from doctor_barns
+        where id = #{barnId}
+    </select>
+    <select id="qichucunlan" parameterType="map" resultType="Integer">
+        select count(DISTINCT(c.pig_id)) from
+        ((select a.pig_id
+          from doctor_pig_events a
+          join (select min(id) id,pig_id from doctor_pig_events a where farm_id = #{farmId} and event_at >= #{beginTime} group by pig_id) b
+                on a.pig_id = b.pig_id and a.barn_id = #{barnId} and farm_id = #{farmId} and a.id = b.id)
+        UNION all
+        (select a.pig_id from doctor_pig_events a join (select current_event_id from doctor_pig_tracks where current_barn_id = #{barnId} and is_removal=0) b on a.id = b.current_event_id where a.event_at &lt; #{beginTime})) c
+    </select>
+    <select id="jianshao" parameterType="map" resultType="map">
+        SELECT change_type_id,count(*) as count
+        from doctor_pig_events
+        where barn_id = #{barnId}
+        and event_at >= #{beginTime}
+        and event_at&lt; #{endTime}
+        and type = 6
+        group by change_type_id
+    </select>
+    <select id="zhuanchu" parameterType="map" resultType="Integer">
+        SELECT count(*)
+        from doctor_pig_events
+        where barn_id = #{barnId}
+        and event_at >= #{beginTime}
+        and event_at&lt; #{endTime}
+        and type in (1,10,12,14)
+    </select>
+    <select id="findBarnIdsByfarmId" parameterType="map" resultType="Long">
+        select * from doctor_barns
+        where farm_id = #{farmId}
+        <if test="operatorName != null">AND staff_name like concat('%',#{operatorName},'%')</if>
+    </select>
 </mapper>

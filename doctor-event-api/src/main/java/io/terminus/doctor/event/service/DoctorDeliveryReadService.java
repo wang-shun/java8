@@ -9,4 +9,5 @@ public interface DoctorDeliveryReadService {
     List<Map<String,Object>> sowsReport(Long farmId,Date time,String pigCode,String operatorName,Integer barnType,Integer breed,Integer parity,Integer pigStatus,Date beginInFarmTime, Date endInFarmTime);
     List<Map<String,Object>> boarReport(Long farmId,Date queryDate,String pigCode,String staffName,Integer barnId,Integer breedId,Integer pigStatus,Date beginDate,Date endDate);
     Map<String,Object> groupReport(Long farmId,Date time,String groupCode,String operatorName,Integer barnType,Integer groupType,Integer groupStatus,Date buildBeginGroupTime,Date buildEndGroupTime,Date closeBeginGroupTime,Date closeEndGroupTime);
+    List<Map<String,Object>> barnsReport(Long farmId,String operatorName,Long barnId,Date beginTime,Date endTime);
 }
