@@ -20,6 +20,7 @@ import org.apache.commons.collections.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -156,22 +157,34 @@ public class NewDoctorWarehouseReadServiceImpl implements NewDoctorWarehouseRead
     }
 
     @Override
-    public Response<Paging<Map<String, Object>>> listDetailTypeMap(Integer type,
+    public Paging<Map<String, Object>> listDetailTypeMap(Integer type,
                                                                  String materialName,
                                                                  Long warehouseId,
                                                                  Integer pageNo,
                                                                  Integer pageSize,
-                                                                 String showZero) {
+                                                                 String showZero,
+                                                         Integer isSettled) {
         PageInfo pageInfo = new PageInfo(pageNo, pageSize);
         Map<String, Object> param = new HashedMap();
         param.put("type", type);
         param.put("materialName", materialName);
         param.put("warehouseId", warehouseId);
         param.put("showZero",showZero);
+        param.put("isSettled",isSettled);
         //会计年月
         Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(new Date());
         param.put("settlementDate",settlementDate);
-        return Response.ok(doctorWareHouseDao.listDetailTypeMap(
-                pageInfo.getOffset(), pageInfo.getLimit(), param));
+        return doctorWareHouseDao.listDetailTypeMap(
+                pageInfo.getOffset(), pageInfo.getLimit(), param);
+    }
+
+    @Override
+    public Response<DoctorWareHouse> findWareHousesByFarmAndWareHousesName(@NotNull(message = "farmId.can.not.be.null")Long farmId, @NotNull(message = "wareHouse.name.not.empty") String wareHouseName) {
+        try {
+            return Response.ok(doctorWareHouseDao.findWareHousesByFarmAndWareHousesName(ImmutableMap.of("farmId", farmId, "name", wareHouseName)));
+        } catch (Exception e) {
+            log.error("find WareHouse by farm and wareHouse name failed, farmId:{}, wareHouseName:{}, cause:{}", farmId, wareHouseName, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.WareHouse.by.farm.and.wareHouse.name.failed");
+        }
     }
 }

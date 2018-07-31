@@ -51,12 +51,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -289,6 +287,121 @@ public class DoctorPigEvents {
         return result;
     }
 
+    /**
+     * 合计分娩事件
+     * @param params
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    @RequestMapping(value = "/getabosum", method = RequestMethod.GET)
+    @ResponseBody
+    public DoctorPigEvent getabosum(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+        params.put("ordered",0);
+        params = Params.filterNullOrEmpty(params);
+        if (params.get("eventTypes") != null) {
+            params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
+            params.remove("eventTypes");
+        }
+
+        if (StringUtils.isNotBlank((String)params.get("barnTypes"))) {
+            params.put("barnTypes", Splitters.UNDERSCORE.splitToList((String) params.get("barnTypes")));
+        }
+
+        if (StringUtils.isNotBlank((String) params.get("pigCode"))) {
+            params.put("pigCodeFuzzy", params.get("pigCode"));
+            params.remove("pigCode");
+        }
+        Response<DoctorPigEvent> pigEventPagingResponse = doctorPigEventReadService.getabosum(params, pageNo, pageSize);
+        return pigEventPagingResponse.getResult();
+    }
+
+    /**
+     * 合计断奶事件
+     * @param params
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    @RequestMapping(value = "/getweansum", method = RequestMethod.GET)
+    @ResponseBody
+    public DoctorPigEvent getweansum(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+        params.put("ordered",0);
+        params = Params.filterNullOrEmpty(params);
+        if (params.get("eventTypes") != null) {
+            params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
+            params.remove("eventTypes");
+        }
+
+        if (StringUtils.isNotBlank((String)params.get("barnTypes"))) {
+            params.put("barnTypes", Splitters.UNDERSCORE.splitToList((String) params.get("barnTypes")));
+        }
+
+        if (StringUtils.isNotBlank((String) params.get("pigCode"))) {
+            params.put("pigCodeFuzzy", params.get("pigCode"));
+            params.remove("pigCode");
+        }
+        Response<DoctorPigEvent> pigEventPagingResponse = doctorPigEventReadService.getweansum(params, pageNo, pageSize);
+        return pigEventPagingResponse.getResult();
+    }
+
+    /**
+     * 合计拼窝事件
+     * @param params
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    @RequestMapping(value = "/getfosterssum", method = RequestMethod.GET)
+    @ResponseBody
+    public DoctorPigEvent getfosterssum(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+        params.put("ordered",0);
+        params = Params.filterNullOrEmpty(params);
+        if (params.get("eventTypes") != null) {
+            params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
+            params.remove("eventTypes");
+        }
+
+        if (StringUtils.isNotBlank((String)params.get("barnTypes"))) {
+            params.put("barnTypes", Splitters.UNDERSCORE.splitToList((String) params.get("barnTypes")));
+        }
+
+        if (StringUtils.isNotBlank((String) params.get("pigCode"))) {
+            params.put("pigCodeFuzzy", params.get("pigCode"));
+            params.remove("pigCode");
+        }
+        Response<DoctorPigEvent> pigEventPagingResponse = doctorPigEventReadService.getfosterssum(params, pageNo, pageSize);
+        return pigEventPagingResponse.getResult();
+    }
+
+    /**
+     * 合计仔猪变动事件
+     * @param params
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    @RequestMapping(value = "/getpigletssum", method = RequestMethod.GET)
+    @ResponseBody
+    public DoctorPigEvent getpigletssum(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+        params.put("ordered",0);
+        params = Params.filterNullOrEmpty(params);
+        if (params.get("eventTypes") != null) {
+            params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
+            params.remove("eventTypes");
+        }
+
+        if (StringUtils.isNotBlank((String)params.get("barnTypes"))) {
+            params.put("barnTypes", Splitters.UNDERSCORE.splitToList((String) params.get("barnTypes")));
+        }
+
+        if (StringUtils.isNotBlank((String) params.get("pigCode"))) {
+            params.put("pigCodeFuzzy", params.get("pigCode"));
+            params.remove("pigCode");
+        }
+        Response<DoctorPigEvent> pigEventPagingResponse = doctorPigEventReadService.getpigletssum(params, pageNo, pageSize);
+        return pigEventPagingResponse.getResult();
+    }
 
     /**
      * 获取相应的猪类型事件列表
@@ -479,17 +592,17 @@ public class DoctorPigEvents {
     @RequestMapping(value = "/list/sales", method = RequestMethod.GET)
     @ResponseBody
     public List<DoctorPigSalesExportDto> listPigSales(@RequestParam(required = false) Map<String, Object> pigEventCriteria,
-                                                      @RequestParam String date) {
-
+                                                      @RequestParam(required = false) Integer breedsId,
+                                                      @RequestParam(required = false,value = "startDate") @org.springframework.format.annotation.DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+                                                      @RequestParam(required = false,value = "endDate") @org.springframework.format.annotation.DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
         pigEventCriteria = Params.filterNullOrEmpty(pigEventCriteria);
-        DateTime dateTime = DateTime.parse(date);
-        String startDate = dateTime.toString(DateUtil.DATE);
-        String endDate = DateUtil.getMonthEnd(dateTime).toString(DateUtil.DATE);
-        pigEventCriteria.put("startDate", startDate);
-        pigEventCriteria.put("endDate", endDate);
+        if (null != startDate && null != endDate && startDate.after(endDate))
+            throw new JsonResponseException("start.date.after.end.date");
+           pigEventCriteria.put("startDate", startDate);
+           pigEventCriteria.put("endDate", endDate);
+           pigEventCriteria.put("breedsId", breedsId);
         return RespHelper.or500(doctorPigEventReadService.listFindSales(pigEventCriteria));
     }
-
     /**
      * 获取某一头某一胎次下未断奶数量
      * @param pigId 猪id

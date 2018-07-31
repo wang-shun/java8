@@ -43,6 +43,11 @@ public class DoctorWarehouseOrgSettlementDao extends MyBatisDao<DoctorWarehouseO
     }
 
 
+    public DoctorWarehouseOrgSettlement findDoctorWarehouseOrgSettlementByOrg(Long orgId) {
+        return this.sqlSession.selectOne(this.sqlId("findDoctorWarehouseOrgSettlementByOrg"), orgId);
+    }
+
+
     public void deleteByOrg(Long orgId) {
         this.sqlSession.delete(this.sqlId("deleteByOrg"), orgId);
     }

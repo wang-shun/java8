@@ -21,6 +21,11 @@ import java.util.Optional;
 @Repository
 public class DoctorWarehouseStockDao extends MyBatisDao<DoctorWarehouseStock> {
 
+    //更改物料有关的信息
+    public Boolean updateWarehouseStock(DoctorWarehouseStock doctorWarehouseStock) {
+        return  this.sqlSession.update(this.sqlId("updateWarehouseStock"), doctorWarehouseStock)>=1;
+    }
+
     public List<DoctorWarehouseStock> listMergeVendor(DoctorWarehouseStock criteria) {
         return this.sqlSession.selectList(this.sqlId("listMergeVendor"), criteria);
     }

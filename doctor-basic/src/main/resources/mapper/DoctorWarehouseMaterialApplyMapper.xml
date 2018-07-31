@@ -3,7 +3,7 @@
 <!--
  ~ Desc:
  ~ Mail: [ your email ]
- ~ Date: 2018-05-17 10:46:41
+ ~ Date: 2018-05-17 10:46:41map
  ~ Created by [ your name ]
 -->
 
@@ -261,6 +261,10 @@
         WHERE id = #{id}
     </update>
 
+    <update id="updateWarehouseMaterialApply" parameterType="DoctorWarehouseMaterialApply">
+        update doctor_warehouse_material_apply set `material_name` = #{materialName},`type` = #{type},`unit` = #{unit},updated_at = now() where `material_id` = #{materialId}
+    </update>
+
     <delete id="delete" parameterType="long">
         DELETE FROM
         <include refid="tb"/>
@@ -329,10 +333,14 @@
     </delete>
 
     <select id="findByMaterialHandle" parameterType="long" resultMap="DoctorWarehouseMaterialApplyMap">
-        SELECT *
-        FROM
-        <include refid="tb"/>
-        WHERE delete_flag=1 and material_handle_id= #{materialHandleId}
+        SELECT * FROM <include refid="tb"/>
+        WHERE material_handle_id= #{materialHandleId}
+        ORDER BY id DESC LIMIT 1
+    </select>
+
+    <select id="findByMaterialHandleAndFarmId" parameterType="map" resultMap="DoctorWarehouseMaterialApplyMap">
+        SELECT * FROM <include refid="tb"/>
+        WHERE material_handle_id= #{materialHandleId} and farm_id=#{farmId}
         ORDER BY id DESC LIMIT 1
     </select>
 
@@ -390,7 +398,7 @@
         ifnull(sum( a.unit_price * a.quantity ) / sum( a.quantity ),0) AS unit_price,
         sum(a.amount) AS amount,
         c.type as sku_type,
-        b.name as vendor_name,
+        b.short_name as vendor_name,
         c.specification,
         date_format(d.open_at,'%Y-%m-%d') as open_at,
         date_format(d.close_at,'%Y-%m-%d') as close_at,
@@ -433,7 +441,7 @@
         CAST(ifnull(sum( a.unit_price * a.quantity ) / sum( a.quantity ),0) AS CHAR) AS unit_price,
         CAST(sum(a.amount) AS CHAR) AS amount,
         c.type as sku_type,
-        b.name as vendor_name,
+        b.short_name as vendor_name,
         c.specification,
         date_format(d.open_at,'%Y-%m-%d') as open_at,
         date_format(d.close_at,'%Y-%m-%d') as close_at,
@@ -480,10 +488,12 @@
         s.`name` as material_name,
         db.name as unit,
         format(ifnull(sum(ma.quantity)+'',0),3) as sum_quantity,
-        format(ifnull(sum(ma.unit_price)+'',0),4) as sum_unit_price,
+
+--         format(ifnull(sum(ma.unit_price)+'',0),4) as sum_unit_price,
+        format(ifnull((sum(ma.amount)/sum(ma.quantity))+'',0),4) as sum_unit_price,
         format(ifnull(sum(ma.amount)+'',0),2) as sum_amount,
         s.type as material_type,
-        v.`name` as vendor_name,
+        v.short_name as vendor_name,
         s.specification as specification,
         f.`name` as farm_name,
         f.org_id as org_id
@@ -660,7 +670,7 @@
         b.staff_name as staff_name,
         f.`name` as farm_name,
         db.name as unit ,
-        v.`name` as vendor_name,
+        v.short_name as vendor_name,
         s.specification as specification
         from doctor_warehouse_material_apply as ma
         inner join doctor_warehouse_material_handle as mh

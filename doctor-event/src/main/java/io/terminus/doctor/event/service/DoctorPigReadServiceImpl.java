@@ -115,6 +115,19 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
         }
     }
 
+    /**
+     * 母猪详情页的导出
+     * @param farmId
+     * @param pigId
+     * @param eventSize
+     * @return
+     */
+    @Override
+    public Response<List<Map>> findSowPigDetailExpotr(Long farmId, Long pigId, Integer eventSize) {
+        List<Map> maps = doctorPigTrackDao.findSowPigDetailExpotr(farmId, pigId, eventSize);
+        return Response.ok(maps);
+    }
+
     @Override
     public RespWithEx<DoctorPigInfoDetailDto> queryPigDetailInfoByPigId(Long farmId, Long pigId, Integer eventSize) {
         try {
@@ -135,7 +148,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
                 dayAge = (int) (DateTime.now()
                         .minus(doctorPig.getBirthDate().getTime()).getMillis() / (1000 * 60 * 60 * 24) + 1);
             }
-            Integer targetEventSize = MoreObjects.firstNonNull(eventSize, 3);
+            Integer targetEventSize = MoreObjects.firstNonNull(eventSize, 199);
 
             List<DoctorPigEvent> doctorPigEvents;
             if (isNull(doctorChgFarmInfo)) {
@@ -555,6 +568,10 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     public Response<Paging<SearchedPig>> pagingChgFarmPig(Map<String, Object> params, Integer pageNo, Integer pageSize) {
         try {
             PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
+            //查猪场中存在的猪Id
+            List<Long> ids = doctorPigTrackDao.selectPigIds(Long.valueOf(params.get("farmId").toString()));
+            log.error("pagingChgFarmPig:-------------"+ids.size());
+            params.put("ids",ids);
             Paging<DoctorChgFarmInfo> paging = doctorChgFarmInfoDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), params);
             if (paging.isEmpty()) {
                 return Response.ok(Paging.empty());

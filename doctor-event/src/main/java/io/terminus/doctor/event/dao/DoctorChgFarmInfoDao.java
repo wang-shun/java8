@@ -20,4 +20,5 @@ public class DoctorChgFarmInfoDao extends MyBatisDao<DoctorChgFarmInfo>{
     public List<DoctorChgFarmInfo> findByPigId(Long pigId) {
         return getSqlSession().selectList(sqlId("findByPigId"), pigId);
     }
+
 }

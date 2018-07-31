@@ -190,6 +190,13 @@
         WHERE current_barn_id = #{currentBarnId} AND status = 1
     </select>
 
+    <select id="findByCurrentBarnIdAndQuantity" parameterType="long" resultMap="DoctorGroupMap">
+        SELECT g.* FROM doctor_groups as g
+        inner join doctor_group_tracks as gt
+        on g.id=gt.group_id
+        WHERE g.current_barn_id = #{currentBarnId} AND g.status = 1
+    </select>
+
     <select id="findByFarmIdAndGroupCode" parameterType="map" resultMap="DoctorGroupMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>

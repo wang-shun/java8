@@ -286,6 +286,7 @@
             </if>
             <if test="dateType == 5">AND date_format(sum_at, '%y') = date_format(#{sumAt}, '%y')</if>
         </where>
+        LIMIT 1
     </select>
 
     <select id="findBy" parameterType="map" resultMap="DoctorReportDeliverMap">
@@ -340,5 +341,58 @@
             <if test="startAt != null"> AND sum_at &gt;= date_format(#{startAt}, '%y-%m-%d')</if>
             <if test="endAt != null"> AND sum_at &lt;= date_format(#{endAt}, '%y-%m-%d')</if>
         </where>
+    </select>
+    <select id="deliveryReport" parameterType="map" resultType="map">
+        select a.id,a.pig_id,a.pig_code,a.barn_name,a.event_at,a.current_mating_count, a.boar_code, a.operator_name,a.parity,a.judge_preg_date,b.status as pig_status,b.current_barn_name as current_barn_name
+        FROM doctor_pig_events a left join doctor_pig_tracks b on a.pig_id = b.pig_id
+        <where>
+            a.farm_id = #{farmId}
+            and a.`type` = 9
+            and a.current_mating_count = 1
+            and a.event_at &gt;= #{beginDate}
+            and a.event_at &lt;= #{endDate}
+            and a.status = 1
+            AND a.event_source != 5
+            <if test="pigCode != null"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
+            <if test="operatorName != null"> AND a.operator_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
+        </where>
+        ORDER  BY  a.barn_name
+    </select>
+    <select id="deliveryBarn" parameterType="map" resultType="map">
+        select barn_name,event_at,farm_name
+        from doctor_pig_events
+        where pig_id = #{pigId}
+        and type=15
+        and rel_event_id = #{id}
+    </select>
+    <select id="notdelivery" parameterType="map" resultType="map">
+        select preg_check_result,event_at
+        from doctor_pig_events
+        where pig_id = #{pigId}
+        and type=11
+        and parity = #{parity}
+        and id > #{id}
+        <if test="id1 != null"> AND id &lt;= #{id1}</if>
+        order by id desc limit 1
+    </select>
+    <select id="leave" parameterType="map" resultType="map">
+        select change_type_id,event_at
+        from doctor_pig_events
+        where pig_id = #{pigId}
+        and type=6
+        and change_type_id in (110,111)
+        and parity = #{parity}
+        and id > #{id}
+        <if test="id1 != null"> AND id &lt;= #{id1}</if>
+        order by id desc limit 1
+    </select>
+    <select id="idsameparity" parameterType="map" resultType="map">
+        select id
+        from doctor_pig_events
+        where pig_id = #{pigId}
+        and type=9
+        and parity = #{parity}
+        and id > #{id}
+        order by id asc limit 1
     </select>
 </mapper>

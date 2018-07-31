@@ -6,6 +6,7 @@ import io.terminus.doctor.basic.dto.warehouseV2.AmountAndQuantityDto;
 import io.terminus.doctor.basic.dto.DoctorWareHouseCriteria;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 
@@ -62,16 +63,18 @@ public interface NewDoctorWarehouseReaderService {
     /**
      * 展示该仓库所有物料结存数量和结存金额明细
      */
-    Response<Paging<Map<String,Object>>> listDetailTypeMap(
+    Paging<Map<String,Object>> listDetailTypeMap(
                                                         Integer type,
                                                          String materialName,
                                                          Long warehouseId,
                                                          Integer pageNo,
                                                          Integer pageSize,
-                                                         String showZero);
+                                                         String showZero,
+                                                        Integer isSettled);
 
 
-
+    Response<DoctorWareHouse> findWareHousesByFarmAndWareHousesName(@NotNull(message = "farmId.can.not.be.null") Long farmId,
+                                                                    @NotNull(message = "wareHouse.name.not.empty") String wareHouseName);
 
 
 }

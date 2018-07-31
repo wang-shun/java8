@@ -98,11 +98,13 @@ public class StockHandleControllerv2 {
     //仓库月报
     @RequestMapping(value = "/monthWarehouseDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response<List<Map>> warehouseReport(@RequestParam(required = true,value = "warehouseId") Long warehouseId,
+                                                @RequestParam(required = false,value = "orgId") Long orgId,
                                                 @RequestParam(required = false,value = "settlementDate") String settlementDate,
                                                 @RequestParam(required = false,value = "materialName") String materialName
                                                 ){
         Map<String, Object> params = new HashMap<>();
         params.put("warehouseId",warehouseId);
+        params.put("orgId",orgId);
         params.put("settlementDate",settlementDate);
         params.put("materialName",materialName);
         return doctorWarehouseMaterialHandleReadService.monthWarehouseDetail(params);
@@ -186,7 +188,7 @@ public class StockHandleControllerv2 {
                                 //月份
                                 Cell cell = row.createCell(0);
                                 if (cell.getStringCellValue() == null || cell.getStringCellValue().equals("")) {
-                                    cell.setCellValue(lists.get(lists.size() - 1).get("month").toString() + "月");
+                                    cell.setCellValue(lists.get(lists.size() - 1).get("year").toString()+"年"+lists.get(lists.size() - 1).get("month").toString() + "月");
                                 }
 
 
@@ -286,7 +288,7 @@ public class StockHandleControllerv2 {
                                 //月份
                                 Cell cell = row.createCell(0);
                                 if (cell.getStringCellValue() == null || cell.getStringCellValue().equals("")) {
-                                    cell.setCellValue(lists.get(lists.size() - 1).get("month").toString() + "月");
+                                    cell.setCellValue(lists.get(lists.size() - 1).get("year").toString()+"年"+lists.get(lists.size() - 1).get("month").toString() + "月");
                                 }
 
                                 if (sheet.getRow(sheet.getLastRowNum()-1) != null&&sheet.getRow(sheet.getLastRowNum()-1).getCell(1)!=null &&"结余".equals(sheet.getRow(sheet.getLastRowNum()-1).getCell(1).getStringCellValue())) {

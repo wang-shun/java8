@@ -105,13 +105,14 @@ public class DoctorNurserySynchronizer {
     private Double outAvgWeight70(DoctorGroupDailyExtend dailyExtend) {
         Integer STANDARD_AGE = 70;
         Double FACTOR = 1.55;
-//        (±ê×¼ÈÕÁä-Êµ¼ÊÈÕÁä+Êµ¼ÊÖØÁ¿*ÏµÊı)/ÏµÊı
-//        ±ê×¼ÈÕÁä=70£»ÏµÊı=1.55£»
-//        Êµ¼ÊÖØÁ¿ÊÇÖ¸±£Óı³öÀ¸Í·¾ùÖØ£»
-//        Êµ¼ÊÈÕÁäÊÇÖ¸±£Óı³öÀ¸Æ½¾ùÈÕÁä
-//        Êµ¼ÊÈÕÁä = Æ½¾ù×ª³öÈÕÆÚ - Æ½¾ù³öÉúÈÕÆÚ - 1
-//        Êµ¼ÊÈÕÁä=½áÊøÖíÈº×ª³öÊµ¼Ê×ÜÈÕÁä/½áÊøÖíÈº×ª³öÊµ¼ÊÊıÁ¿
-//        Êµ¼ÊÖØÁ¿ = ×ª³ö×ÜÖØÁ¿ / ×ª³ö×ÜÍ·Êı
+
+//        (æ ‡å‡†æ—¥é¾„-å®é™…æ—¥é¾„+å®é™…é‡é‡*ç³»æ•°)/ç³»æ•°
+//        æ ‡å‡†æ—¥é¾„=70ï¼›ç³»æ•°=1.55ï¼›
+//        å®é™…é‡é‡æ˜¯æŒ‡ä¿è‚²å‡ºæ å¤´å‡é‡ï¼›
+//        å®é™…æ—¥é¾„æ˜¯æŒ‡ä¿è‚²å‡ºæ å¹³å‡æ—¥é¾„
+//        å®é™…æ—¥é¾„ = å¹³å‡è½¬å‡ºæ—¥æœŸ - å¹³å‡å‡ºç”Ÿæ—¥æœŸ - 1
+//        å®é™…æ—¥é¾„=ç»“æŸçŒªç¾¤è½¬å‡ºå®é™…æ€»æ—¥é¾„/ç»“æŸçŒªç¾¤è½¬å‡ºå®é™…æ•°é‡
+//        å®é™…é‡é‡ = è½¬å‡ºæ€»é‡é‡ / è½¬å‡ºæ€»å¤´æ•°
         if(FieldHelper.get(dailyExtend.getTurnActualAge(), dailyExtend.getTurnActualCount()) == 0&&EventUtil.getAvgWeight(dailyExtend.getTurnActualWeight(), dailyExtend.getTurnActualCount())==0){
             return 0.0;
         }else {

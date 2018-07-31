@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -194,7 +195,7 @@ public class DoctorMessage implements Serializable {
     /**
      * 消耗剂量
      */
-    private Long dose;
+    private BigDecimal dose;
 
     /**
      * 疫苗Id

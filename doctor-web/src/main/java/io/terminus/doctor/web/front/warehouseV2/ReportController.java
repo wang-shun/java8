@@ -425,12 +425,6 @@ public class ReportController {
         if (!materialHandleResponse.isSuccess())
             throw new JsonResponseException(materialHandleResponse.getError());
 
-//        List<DoctorWarehouseMaterialApply> applies = RespHelper.or500(doctorWarehouseMaterialApplyReadService.month(warehouseId, date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1, null));
-//
-//        Map<Long/*MaterialHandleId*/, DoctorWarehouseMaterialApply> handleApply = new HashMap<>();
-//        for (DoctorWarehouseMaterialApply apply : applies) {
-//            handleApply.put(apply.getMaterialHandleId(), apply);
-//        }
         Map<Long, List<DoctorWarehouseMaterialApply>> handleApply = RespHelper.or500(doctorWarehouseMaterialApplyReadService.month(warehouseId, date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1, null)).stream().collect(Collectors.groupingBy(DoctorWarehouseMaterialApply::getMaterialHandleId));
 
 
@@ -715,19 +709,23 @@ public class ReportController {
     /**
      * 物料变动报表
      */
+    // var params = {farmId:farmId,settlementDate:settlementDate,orgId:orgId,warehouseId:warehouseId,materialName:materialName,type:type};
     @RequestMapping(method = RequestMethod.GET, value = "/wlbdReport")
     public List<Map<String,Object>> wlbdReport(
             Long orgId,
             Long farmId,
             String settlementDate,
-            Integer pigBarnType,
-            Long pigBarnId,
-            Long pigGroupId,
-            Integer handlerType,
+//            Integer pigBarnType,
+//            Long pigBarnId,
+//            Long pigGroupId,
+//            Integer handlerType,
             Integer type,
             Long warehouseId,
             String materialName
-    ) {
+    ) throws ParseException {
+
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM");
+        Date dd = sdf.parse(settlementDate);
 
         if(ObjectUtils.isEmpty(farmId))
         {
@@ -745,10 +743,8 @@ public class ReportController {
         }
 
         boolean byjsflag = false; //默认没结算
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM");
         try {
-            Date ddate = simpleDateFormat.parse(settlementDate);
-            if (doctorWarehouseSettlementService.isSettled(orgId, ddate)) {
+            if (doctorWarehouseSettlementService.isSettled(orgId, dd)) {
                 byjsflag = true; //表示已经结算了
             }
         } catch (Exception e){
@@ -762,9 +758,7 @@ public class ReportController {
         if(StringUtils.isBlank(materialName))
         {
             List<Map<String,Object>> resultMap = doctorWarehouseReportReadService.getMeterails(
-                    farmId,settlementDate,pigBarnType,
-                    pigBarnId,pigGroupId,handlerType,
-                    type,warehouseId,materialName
+                    farmId,settlementDate, type,warehouseId,materialName
             );
 
             if(resultMap.size() > 0)
@@ -785,9 +779,7 @@ public class ReportController {
             for(String str : materials) {
 
                 // 查出上月结存数据
-                Map<String, Object> lastMap = doctorWarehouseReportReadService.lastWlbdReport(farmId, settlementDate, pigBarnType,
-                        pigBarnId, pigGroupId, handlerType,
-                        type, warehouseId, str);
+                Map<String, Object> lastMap = doctorWarehouseReportReadService.lastWlbdReport(farmId, settlementDate, type, warehouseId, str);
                 if (lastMap == null) {
                     // 构造上月结存新map数据
                     lastMap = Maps.newHashMap();
@@ -833,13 +825,13 @@ public class ReportController {
                             lastMap.put("ckdj", "");
                         } else {
                             lastMap.put("ckdj",
-                                    new BigDecimal(Double.parseDouble(lckdj.toString())).setScale(4, BigDecimal.ROUND_DOWN));
+                                    new BigDecimal(Double.parseDouble(lckdj.toString())).setScale(4, BigDecimal.ROUND_HALF_UP));
                         }
                         if (isNull(lckje)) {
                             lastMap.put("ckje", "");
                         } else {
                             lastMap.put("ckje",
-                                    new BigDecimal(Double.parseDouble(lckje.toString())).setScale(2, BigDecimal.ROUND_DOWN));
+                                    new BigDecimal(Double.parseDouble(lckje.toString())).setScale(2, BigDecimal.ROUND_HALF_UP));
                         }
                     } else { //结算前
                         lastMap.put("ckdj", "--");
@@ -850,23 +842,24 @@ public class ReportController {
                     Object ljcdj = lastMap.get("jcdj");
                     Object ljcje = lastMap.get("jcje");
                     if(isNull(ljcsl)){
-                        lastMap.put("jcsl","");
+                        BigDecimal quantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findWJSQuantity(BigInteger.valueOf(warehouseId),null,null,type,str,dd));
+                        lastMap.put("jcsl",quantity);
                     } else {
                         lastMap.put("jcsl",
-                                new BigDecimal(Double.parseDouble(ljcsl.toString())).setScale(3, BigDecimal.ROUND_DOWN));
+                                new BigDecimal(Double.parseDouble(ljcsl.toString())).setScale(3, BigDecimal.ROUND_HALF_UP));
                     }
                     if(byjsflag) {
                         if (isNull(ljcdj)) {
                             lastMap.put("jcdj", "");
                         } else {
                             lastMap.put("jcdj",
-                                    new BigDecimal(Double.parseDouble(ljcdj.toString())).setScale(4, BigDecimal.ROUND_DOWN));
+                                    new BigDecimal(Double.parseDouble(ljcdj.toString())).setScale(4, BigDecimal.ROUND_HALF_UP));
                         }
                         if (isNull(ljcje)) {
                             lastMap.put("jcje", "");
                         } else {
                             lastMap.put("jcje",
-                                    new BigDecimal(Double.parseDouble(ljcje.toString())).setScale(2, BigDecimal.ROUND_DOWN));
+                                    new BigDecimal(Double.parseDouble(ljcje.toString())).setScale(2, BigDecimal.ROUND_HALF_UP));
                         }
                     } else {
                         lastMap.put("jcdj", "--");
@@ -876,9 +869,7 @@ public class ReportController {
                 resultNewMap.add(lastMap);
 
                 List<Map<String, Object>> resultMap = doctorWarehouseReportReadService.wlbdReport(
-                        farmId, settlementDate, pigBarnType,
-                        pigBarnId, pigGroupId, handlerType,
-                        type, warehouseId, str
+                        farmId, settlementDate, type, warehouseId, str
                 );
 
                 // 计算这条物料的结存数据与汇总数据
@@ -967,12 +958,12 @@ public class ReportController {
                         BigDecimal drkje = isNull(rkje) ? new BigDecimal(0d) :  new BigDecimal(rkje.toString());
                         BigDecimal dcksl = isNull(cksl) ? new BigDecimal(0d) :  new BigDecimal(cksl.toString());
                         BigDecimal dckje = isNull(ckje) ? new BigDecimal(0d) :  new BigDecimal(ckje.toString());
-                        tempmap.put("rksl",isNull(rksl) ? "" :  new BigDecimal(rksl.toString()).setScale(3, BigDecimal.ROUND_DOWN));
-                        tempmap.put("cksl",isNull(cksl) ? "" :  new BigDecimal(cksl.toString()).setScale(3, BigDecimal.ROUND_DOWN));
-                        tempmap.put("rkje",isNull(rkje) ? "" :  new BigDecimal(rkje.toString()).setScale(2, BigDecimal.ROUND_DOWN));
+                        tempmap.put("rksl",isNull(rksl) ? "" :  new BigDecimal(rksl.toString()).setScale(3, BigDecimal.ROUND_HALF_UP));
+                        tempmap.put("cksl",isNull(cksl) ? "" :  new BigDecimal(cksl.toString()).setScale(3, BigDecimal.ROUND_HALF_UP));
+                        tempmap.put("rkje",isNull(rkje) ? "" :  new BigDecimal(rkje.toString()).setScale(2, BigDecimal.ROUND_HALF_UP));
 
                         if(byjsflag) {
-                            tempmap.put("ckje", isNull(ckje) ? "" : new BigDecimal(ckje.toString()).setScale(2, BigDecimal.ROUND_DOWN));
+                            tempmap.put("ckje", isNull(ckje) ? "" : new BigDecimal(ckje.toString()).setScale(2, BigDecimal.ROUND_HALF_UP));
                         } else {
                             tempmap.put("ckje","--");
                         }
@@ -983,7 +974,7 @@ public class ReportController {
                         if(drksl.compareTo(BigDecimal.ZERO) == 0 || drkje.compareTo(BigDecimal.ZERO) == 0){
                             tempmap.put("rkdj","");
                         } else {
-                            tempmap.put("rkdj", drkje.divide(drksl, 4, BigDecimal.ROUND_DOWN));
+                            tempmap.put("rkdj", drkje.divide(drksl, 4, BigDecimal.ROUND_HALF_UP));
                         }
 
                         thisMonthTotalCksl.add(dcksl); //出库数量累加
@@ -997,7 +988,7 @@ public class ReportController {
                             }
                         } else {
                             if(byjsflag) {
-                                tempmap.put("ckdj", dckje.divide(dcksl, 4, BigDecimal.ROUND_DOWN));
+                                tempmap.put("ckdj", dckje.divide(dcksl, 4, BigDecimal.ROUND_HALF_UP));
                             }else {
                                 tempmap.put("ckdj", "--");
                             }
@@ -1027,22 +1018,23 @@ public class ReportController {
                         }
 
                         tempmap.put("jcsl",singleJcsl.compareTo(BigDecimal.ZERO) == 0 ? "" :
-                                singleJcsl.setScale(3, BigDecimal.ROUND_DOWN)); //单笔记录的结存数量
-                        if(byjsflag) {
-                            tempmap.put("jcje", singleJcje.compareTo(BigDecimal.ZERO) == 0 ? "" :
-                                    singleJcje.setScale(2, BigDecimal.ROUND_DOWN)); //单笔记录的结存金额
-                        }else{
-                            tempmap.put("jcje","--");
-                        }
-                        if(byjsflag) {
-                            if (singleJcsl.compareTo(BigDecimal.ZERO) == 0 || singleJcje.compareTo(BigDecimal.ZERO) == 0) {
-                                tempmap.put("jcdj", "");
+                                singleJcsl.setScale(3, BigDecimal.ROUND_HALF_UP)); //单笔记录的结存数量
+                        //物料变动报表结存的数量为0的之后，单价和金额也展示0
+                        if(singleJcsl.compareTo(BigDecimal.ZERO) == 0||singleJcje.compareTo(BigDecimal.ZERO) == 0){
+                            tempmap.put("jcje","");
+                            tempmap.put("jcdj", "");
+                        }else {
+                            if (byjsflag) {
+                                tempmap.put("jcje", singleJcje.compareTo(BigDecimal.ZERO) == 0 ? "" :
+                                        singleJcje.setScale(2, BigDecimal.ROUND_HALF_UP)); //单笔记录的结存金额
                             } else {
-                                tempmap.put("jcdj", singleJcje.divide(singleJcsl, 4, BigDecimal.ROUND_DOWN));
+                                tempmap.put("jcje", "--");
                             }
-                        }
-                        else{
-                            tempmap.put("jcdj", "--");
+                            if (byjsflag) {
+                                tempmap.put("jcdj", singleJcje.divide(singleJcsl, 4, BigDecimal.ROUND_HALF_UP));
+                            } else {
+                                tempmap.put("jcdj", "--");
+                            }
                         }
                         resultNewMap.add(tempmap);
                         tempsinglejcsl = singleJcsl;
@@ -1062,20 +1054,20 @@ public class ReportController {
                     thisMap.put("settlement_date","");
                     thisMap.put("handler_type","");
                     thisMap.put("rksl",thisMonthTotalRksl.compareTo(BigDecimal.ZERO) == 0
-                                        ? "" : thisMonthTotalRksl.setScale(3, BigDecimal.ROUND_DOWN));
+                                        ? "" : thisMonthTotalRksl.setScale(3, BigDecimal.ROUND_HALF_UP));
                     thisMap.put("rkdj",thisMonthTotalRksl.compareTo(BigDecimal.ZERO) == 0 || thisMonthTotalRkje.compareTo(BigDecimal.ZERO) == 0
-                                        ? "" : thisMonthTotalRkje.divide(thisMonthTotalRksl, 4, BigDecimal.ROUND_DOWN));
+                                        ? "" : thisMonthTotalRkje.divide(thisMonthTotalRksl, 4, BigDecimal.ROUND_HALF_UP));
                     thisMap.put("rkje",thisMonthTotalRkje.compareTo(BigDecimal.ZERO) == 0
-                                    ? "" : thisMonthTotalRkje.setScale(2, BigDecimal.ROUND_DOWN));
+                                    ? "" : thisMonthTotalRkje.setScale(2, BigDecimal.ROUND_HALF_UP));
                     thisMap.put("cksl",
                             thisMonthTotalCksl.compareTo(BigDecimal.ZERO) == 0
-                                    ? "" : thisMonthTotalCksl.setScale(3, BigDecimal.ROUND_DOWN));
+                                    ? "" : thisMonthTotalCksl.setScale(3, BigDecimal.ROUND_HALF_UP));
                     if(byjsflag) {
                         thisMap.put("ckdj", thisMonthTotalCksl.compareTo(BigDecimal.ZERO) == 0
                                 || thisMonthTotalCkje.compareTo(BigDecimal.ZERO) == 0 ? "" :
-                                thisMonthTotalCkje.divide(thisMonthTotalCksl, 4, BigDecimal.ROUND_DOWN));
+                                thisMonthTotalCkje.divide(thisMonthTotalCksl, 4, BigDecimal.ROUND_HALF_UP));
                         thisMap.put("ckje", thisMonthTotalCkje.compareTo(BigDecimal.ZERO) == 0 ? "" :
-                                thisMonthTotalCkje.setScale(2, BigDecimal.ROUND_DOWN));
+                                thisMonthTotalCkje.setScale(2, BigDecimal.ROUND_HALF_UP));
                     }
                     else {
                         thisMap.put("ckdj","--");
@@ -1083,12 +1075,12 @@ public class ReportController {
                     }
 
                     thisMap.put("jcsl", thisMonthTotalJcsl.compareTo(BigDecimal.ZERO) == 0 ? "" :
-                            thisMonthTotalJcsl.setScale(3, BigDecimal.ROUND_DOWN));
+                            thisMonthTotalJcsl.setScale(3, BigDecimal.ROUND_HALF_UP));
                     if(byjsflag) {
                         thisMap.put("jcdj", thisMonthTotalJcsl.compareTo(BigDecimal.ZERO) == 0 || thisMonthTotalJcje.compareTo(BigDecimal.ZERO) == 0 ? "" :
-                                thisMonthTotalJcje.divide(thisMonthTotalJcsl, 4, BigDecimal.ROUND_DOWN));
+                                thisMonthTotalJcje.divide(thisMonthTotalJcsl, 4, BigDecimal.ROUND_HALF_UP));
                         thisMap.put("jcje", thisMonthTotalJcje.compareTo(BigDecimal.ZERO) == 0 ? "" :
-                                thisMonthTotalJcje.setScale(2, BigDecimal.ROUND_DOWN));
+                                thisMonthTotalJcje.setScale(2, BigDecimal.ROUND_HALF_UP));
                     }
                     else{
                         thisMap.put("jcdj","--");
@@ -1441,9 +1433,7 @@ public class ReportController {
                     sheet.addMergedRegion(cra);
                 }
 
-                List<Map<String,Object>> exportVos = wlbdReport(orgId,farmId,settlementDate,pigBarnType,
-                        pigBarnId,pigGroupId,handlerType,
-                        type,warehouseId,materialName);
+                List<Map<String,Object>> exportVos = wlbdReport(orgId,farmId,settlementDate, type,warehouseId,materialName);
 
                 //往excel表中写入数据
                 if(null != exportVos && !CollectionUtils.isEmpty(exportVos)) {

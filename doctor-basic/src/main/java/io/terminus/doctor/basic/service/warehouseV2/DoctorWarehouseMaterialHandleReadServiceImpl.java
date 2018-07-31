@@ -15,14 +15,17 @@ import io.terminus.doctor.basic.model.DoctorWarehouseOrgSettlement;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.ResponseUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Function;
@@ -56,6 +59,27 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
     @Autowired
     private DoctorWarehouseMaterialApplyDao doctorWarehouseMaterialApplyDao;
+
+    @Override
+    public Response<BigDecimal> getPDPrice(Long warehouseId, Long materialId, String handleDate){
+        DoctorWarehouseMaterialHandle mh=new DoctorWarehouseMaterialHandle();
+        mh.setWarehouseId(warehouseId);
+        mh.setMaterialId(materialId);
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            Date dd = sdf.parse(handleDate);
+            mh.setHandleDate(DateUtils.addDays(dd,1));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        DoctorWarehouseMaterialHandle previous = doctorWarehouseMaterialHandleDao.findPrevious(mh, WarehouseMaterialHandleType.IN);
+        return Response.ok(previous.getUnitPrice());
+    }
+
+    @Override
+    public Response<BigDecimal> findWJSQuantity(BigInteger warehouseId,Integer warehouseType,Long materialId,Integer materialType,String materialName, Date settlementDate) {
+        return Response.ok(doctorWarehouseMaterialHandleDao.findWJSQuantity(warehouseId,warehouseType,materialId,materialType,materialName,settlementDate));
+    }
 
     @Override
     public Response<BigDecimal> findLibraryById(Long id,String materialName) {
@@ -395,18 +419,61 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     @Override
     public Response<List<Map>> monthWarehouseDetail(Map<String, Object> criteria) {
         try {
+            Date date=null;
             if(criteria.get("settlementDate")==null) {
-                Date date = new Date();
+                date = new Date();
                 /*SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM");
                 String dateString = formatter.format(date);*/
                 criteria.put("settlementDate", date);
             }else {
                 String settlementDate = (String)criteria.get("settlementDate");
-                Date date = DateUtil.formatToDate(DateUtil.YYYYMM, settlementDate);
+//                Date date = DateUtil.formatToDate(DateUtil.YYYYMM, settlementDate);
+                SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM");
+                date  = sdf.parse(settlementDate);
                 criteria.put("settlementDate",date);
             }
             List<Map> resultList = doctorWarehouseStockMonthlyDao.monthWarehouseDetail(criteria);
-            resultList.add(this.countInfo(resultList));
+            //本月是否结算
+            boolean b = doctorWarehouseSettlementService.isSettled((Long)criteria.get("orgId"), date);
+            if(!b){
+                //未结算：上月结存数量实时计算 findWJSQuantity
+                //取上个月
+                Date newDate = null;
+                if (date != null) {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTime(date);
+                    calendar.add(Calendar.MONTH, -1);
+                    newDate = calendar.getTime();
+                }
+                //上月是否结算
+                boolean bb = doctorWarehouseSettlementService.isSettled((Long)criteria.get("orgId"), newDate);
+                if(!bb){
+                    //假如上月未结算，仓库月报期初数量显示，金额不显示，本月入库数量金额都显示，本月出库数量显示 金额不显示 ，期末数量显示 金额不显示
+                    for(Map mm:resultList){
+                        BigDecimal quantity = doctorWarehouseMaterialHandleDao.findWJSQuantity(BigInteger.valueOf((Long) mm.get("warehouseId")), null, (Long) mm.get("materialId"), null, null, date);
+                        mm.put("lastQuantity",quantity);
+                        BigDecimal balanceQuantity=quantity.add((BigDecimal)mm.get("inQuantity")).subtract((BigDecimal)mm.get("outQuantity"));
+                        mm.put("balanceQuantity",balanceQuantity);
+                        mm.put("lastAmount","--");
+                        mm.put("balanceAmount","--");
+                        mm.put("outAmount","--");
+                    }
+                }else{
+                    //假如上月已结算，仓库月报期初数量、金额有数据，本月入库数量、金额有数据，本月出库数量显示，金额不显示，期末数量显示，金额不显示；
+                    for(Map mm:resultList){
+                        BigDecimal quantity = doctorWarehouseMaterialHandleDao.findWJSQuantity(BigInteger.valueOf((Long) mm.get("warehouseId")), null, (Long) mm.get("materialId"), null, null, date);
+                        mm.put("lastQuantity",quantity);
+                        BigDecimal balanceQuantity=quantity.add((BigDecimal)mm.get("inQuantity")).subtract((BigDecimal)mm.get("outQuantity"));
+                        mm.put("balanceQuantity",balanceQuantity);
+                        mm.put("balanceAmount","--");
+                        mm.put("outAmount","--");
+                    }
+                }
+
+            }
+            DoctorWareHouse warehouseId = doctorWareHouseDao.findById((Long) criteria.get("warehouseId"));
+            Map<String, Object> all = this.countInfo(resultList, (Long) criteria.get("orgId"), date,warehouseId.getType());
+            resultList.add(all);
             return Response.ok(resultList);
         }catch (Exception e) {
             log.error("failed to list doctor warehouse material handle, cause:{}", Throwables.getStackTraceAsString(e));
@@ -430,23 +497,9 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     }
 
     @Override
-    public Response<List<Map>> getDataByMaterialName(Long stockHandleId, String materialName) {
-        List<Map> dataByMaterialName = doctorWarehouseMaterialHandleDao.getDataByMaterialName(stockHandleId, materialName);
-//        dataByMaterialName.forEach( map ->{
-//            DoctorWarehouseMaterialApply materialApply = doctorWarehouseMaterialApplyDao.findMaterialHandle((Long) map.get("material_handle_id"));
-//            map.put("applyBarnId",materialApply.getPigBarnId());
-//            map.put("applyGroupId",materialApply.getPigGroupId());
-//            if(materialApply.getPigBarnName()==null)
-//                map.put("applyBarnName","--");
-//            else
-//                map.put("applyBarnName",materialApply.getPigBarnName());
-//            if(materialApply.getPigGroupName()==null)
-//                map.put("applyGroupName","--");
-//            else
-//                map.put("applyGroupName",materialApply.getPigGroupName());
-//
-//        });
-        return Response.ok(dataByMaterialName);
+    public Response<List<Map>> getDataByMaterialName(Long id) {
+//        List<Map> dataByMaterialName = doctorWarehouseMaterialHandleDao.getDataByMaterialName(id);
+        return Response.ok(doctorWarehouseMaterialHandleDao.getDataByMaterialName(id));
     }
 
     private Map<String, Object> getMonth(Map<String, Object> criteria){
@@ -472,7 +525,8 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         return criteria;
     }
 
-    private Map<String, Object> countInfo(List<Map> resultList){
+    private Map<String, Object> countInfo(List<Map> resultList,Long orgId,Date date,Integer warehouseType){
+        boolean b = doctorWarehouseSettlementService.isSettled(orgId, date);
         BigDecimal allLastQuantity = new BigDecimal(0);
         BigDecimal allLastAmount = new BigDecimal(0);
         BigDecimal allInAmount = new BigDecimal(0);
@@ -482,25 +536,50 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         BigDecimal allBalanceQuantity = new BigDecimal(0);
         BigDecimal allBalanceAmount = new BigDecimal(0);
         for(Map map : resultList){
-            allLastQuantity = allLastQuantity.add(new BigDecimal(map.get("lastQuantity").toString()));
-            allLastAmount = allLastAmount.add(new BigDecimal(map.get("lastAmount").toString()));
-            allInAmount = allInAmount.add(new BigDecimal(map.get("inAmount").toString()));
-            allInQuantity = allInQuantity.add(new BigDecimal(map.get("inQuantity").toString()));
-            allOutAmount = allOutAmount.add(new BigDecimal(map.get("outAmount").toString()));
-            allOutQuantity = allOutQuantity.add(new BigDecimal(map.get("outQuantity").toString()));
-            allBalanceQuantity = allBalanceQuantity.add(new BigDecimal(map.get("balanceQuantity").toString()));
-            allBalanceAmount = allBalanceAmount.add(new BigDecimal(map.get("balanceAmount").toString()));
+            if(warehouseType==1||warehouseType==2){
+                allLastQuantity = allLastQuantity.add(new BigDecimal(map.get("lastQuantity").toString()));
+                allInQuantity = allInQuantity.add(new BigDecimal(map.get("inQuantity").toString()));
+                allOutQuantity = allOutQuantity.add(new BigDecimal(map.get("outQuantity").toString()));
+                allBalanceQuantity = allBalanceQuantity.add(new BigDecimal(map.get("balanceQuantity").toString()));
+            }
+
+            if(b){
+                allLastAmount = allLastAmount.add(new BigDecimal(map.get("lastAmount").toString()));
+                allInAmount = allInAmount.add(new BigDecimal(map.get("inAmount").toString()));
+                allOutAmount = allOutAmount.add(new BigDecimal(map.get("outAmount").toString()));
+                allBalanceAmount = allBalanceAmount.add(new BigDecimal(map.get("balanceAmount").toString()));
+            }
         }
         HashMap<String, Object> map = Maps.newHashMap();
-        map.put("allLastQuantity",allLastQuantity);
-        map.put("allLastAmount",allLastAmount);
-        map.put("allInAmount",allInAmount);
-        map.put("allInQuantity",allInQuantity);
-        map.put("allOutAmount",allOutAmount);
-        map.put("allOutQuantity",allOutQuantity);
-        map.put("allBalanceQuantity",allBalanceQuantity);
-        map.put("allBalanceAmount",allBalanceAmount);
+        if(warehouseType==1||warehouseType==2) {
+            map.put("allLastQuantity", allLastQuantity);
+            map.put("allInQuantity", allInQuantity);
+            map.put("allOutQuantity", allOutQuantity);
+            map.put("allBalanceQuantity", allBalanceQuantity);
+        }else{
+            map.put("allLastQuantity", "--");
+            map.put("allInQuantity", "--");
+            map.put("allOutQuantity", "--");
+            map.put("allBalanceQuantity", "--");
+        }
+
+        if(!b){
+            map.put("allLastAmount","--");
+            map.put("allInAmount","--");
+            map.put("allOutAmount","--");
+            map.put("allBalanceAmount","--");
+        }else{
+            map.put("allLastAmount",allLastAmount);
+            map.put("allInAmount",allInAmount);
+            map.put("allOutAmount",allOutAmount);
+            map.put("allBalanceAmount",allBalanceAmount);
+        }
         return map;
     }
 
+    //根据id判断是否有退料入库
+    @Override
+    public Response<Integer> findCountByRelMaterialHandleId(Long id,Long farmId) {
+        return  Response.ok(doctorWarehouseMaterialHandleDao.findCountByRelMaterialHandleId(id,farmId));
+    }
 }

@@ -12,6 +12,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -34,6 +35,7 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
     public void deleteByFarmId(Long farmId) {
         getSqlSession().delete(sqlId("deleteByFarmId"), farmId);
     }
+
 
     /**
      * 查询猪舍内猪状态
@@ -77,6 +79,17 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
             return pigs.get(0);
         }
         return null;
+    }
+
+    /**
+     * 母猪详情页的导出
+     * @param farmId
+     * @param pigId
+     * @param eventSize
+     * @return
+     */
+    public List<Map> findSowPigDetailExpotr(Long farmId, Long pigId, Integer eventSize){
+        return this.getSqlSession().selectList(sqlId("findSowPigDetailExpotr"),ImmutableMap.of("farmId",farmId,"pigId",pigId,"eventSize",eventSize));
     }
 
     public DoctorPigTrack findByEventId(Long relEventId){
@@ -190,5 +203,18 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
 
     public Boolean flushCurrentParity(Long pigId, Integer parity) {
         return getSqlSession().update(sqlId("flushCurrentParity"), ImmutableMap.of("pigId", pigId, "parity", parity)) == 1;
+    }
+
+    /**
+     * 通过猪场id查猪场存在的猪
+     * @param farmId
+     * @return
+     */
+    public List<Long> selectPigIds(Long farmId) {
+        return getSqlSession().selectList(sqlId("selectPigIds"),farmId);
+    }
+
+    public Long queryCurrentEventId(Long pigId){
+        return getSqlSession().selectOne(sqlId("queryCurrentEventId"), pigId);
     }
 }

@@ -110,7 +110,7 @@ public class DoctorMatingSynchronizer {
     }
 
     private Double matingRate(DoctorPigDailyExtend dailyExtend) {
-        return FieldHelper.get(dailyExtend.getWeanMate(), (dailyExtend.getWeanNest() - dailyExtend.getWeanDeadWeedOut()));
+        return FieldHelper.get((dailyExtend.getWeanMate()-dailyExtend.getWeanDeadWeedOut()), (dailyExtend.getWeanNest() - dailyExtend.getWeanDeadWeedOut()));
     }
 
     public void deleteAll() {

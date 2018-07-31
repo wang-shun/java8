@@ -221,6 +221,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         Date startAt = Dates.startOfDay(dto.getEventAt());
         Date endAt = Dates.startOfDay(new Date());
         Long farmId = dto.getFarmId();
+        Long orgId = doctorKpiDao.getOrgIdByFarmId(farmId);
 
         //更新 PigTypeStatistic
         doctorPigTypeStatisticWriteService.statisticGroup(dto.getOrgId(), dto.getFarmId());
@@ -237,8 +238,8 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             liveStock.setFatten(doctorKpiDao.realTimeLiveStockFatten(farmId, startAt));
 
             //猪存栏
-            liveStock.setBuruSow(doctorKpiDao.realTimeLiveStockFarrowSow(farmId, startAt));    //产房母猪
-            liveStock.setPeihuaiSow(doctorKpiDao.realTimeLiveStockSow(farmId, startAt) - liveStock.getBuruSow());    //配怀 = 总存栏 - 产房母猪
+            liveStock.setBuruSow(doctorKpiDao.realTimeLiveStockFarrowSow(orgId,farmId, startAt));    //产房母猪
+            liveStock.setPeihuaiSow(doctorKpiDao.realTimeLiveStockPHSow(orgId,farmId, startAt));    //配怀 = 总存栏 - 产房母猪
             liveStock.setKonghuaiSow(0);                                                       //空怀猪作废, 置成0
             liveStock.setBoar(doctorKpiDao.realTimeLiveStockBoar(farmId, startAt));            //公猪
 

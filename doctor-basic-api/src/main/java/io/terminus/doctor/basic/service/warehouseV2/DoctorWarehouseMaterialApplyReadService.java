@@ -28,6 +28,8 @@ public interface DoctorWarehouseMaterialApplyReadService {
 
     Response<DoctorWarehouseMaterialApply> findByMaterialHandle(Long materialHandleId);
 
+    Response<DoctorWarehouseMaterialApply> findByMaterialHandleAndFarmId(Long materialHandleId,Long farmId);
+
     Response<List<DoctorWarehouseMaterialApply>> findByFarmAndPigGroup(Long farmId, Long groupId);
 
     /**

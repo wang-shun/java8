@@ -38,6 +38,7 @@ import io.terminus.doctor.event.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
+import io.terminus.doctor.web.core.export.Exporter;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.dto.DoctorBoarDetailDto;
 import io.terminus.doctor.web.front.event.dto.DoctorFosterDetail;
@@ -46,6 +47,9 @@ import io.terminus.doctor.web.front.event.dto.DoctorSowDetailDto;
 import io.terminus.doctor.web.util.TransFromUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +60,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +90,7 @@ public class DoctorPigs {
     private final TransFromUtil transFromUtil;
     private final DoctorFarmAuthCenter doctorFarmAuthCenter;
 
+
     @RpcConsumer
     private DoctorMessageReadService doctorMessageReadService;
     @RpcConsumer
@@ -91,6 +99,9 @@ public class DoctorPigs {
     private DoctorBarnReadService doctorBarnReadService;
     @RpcConsumer
     private DoctorPigEventReadService doctorPigEventReadService;
+
+    @Autowired
+    private Exporter exporter;
 
     @Autowired
     public DoctorPigs(DoctorPigReadService doctorPigReadService,
@@ -160,7 +171,148 @@ public class DoctorPigs {
     public DoctorSowDetailDto querySowPigDetailInfoDto(@RequestParam("farmId") Long farmId,
                                                        @RequestParam("pigId") Long pigId,
                                                        @RequestParam(value = "eventSize", required = false) Integer eventSize){
+
             return buildSowDetailDto(getPigDetail(farmId, pigId, eventSize));
+    }
+
+    /**
+     * 与母猪详情导出配合用的
+     * @param farmId
+     * @param pigId
+     * @param eventSize
+     * @return
+     */
+    private DoctorPigInfoDetailDto getPigDetail2(Long farmId, Long pigId, Integer eventSize) {
+        DoctorPigInfoDetailDto pigDetail = RespWithExHelper.orInvalid(doctorPigReadService.queryPigDetailInfoByPigId(farmId, pigId, eventSize));
+        return pigDetail;
+
+    }
+
+    /**
+     * 母猪详情导出
+     * @param farmId
+     * @param pigId
+     * @param eventSize
+     */
+    @RequestMapping(value = "/getSowPigDetail/export", method = RequestMethod.GET)
+    public void querySowPigDetailInfoDtoExpotr(@RequestParam("farmId") Long farmId,
+                                               @RequestParam("pigId") Long pigId,
+                                               @RequestParam(value = "eventSize", required = false) Integer eventSize,
+                                               HttpServletRequest request, HttpServletResponse response){
+
+        DoctorSowDetailDto doctorSowDetailDto = buildSowDetailDto(getPigDetail2(farmId, pigId, eventSize));
+
+        //开始导出
+        try{
+            //导出名称
+            exporter.setHttpServletResponse(request,response,"母猪详情导出");
+            try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+                //表
+                Sheet sheet = workbook.createSheet();
+                sheet.createRow(0).createCell(5).setCellValue("母猪详情");
+
+                //
+                Row row2 = sheet.createRow(2);
+                row2.createCell(0).setCellValue("猪号");
+                row2.createCell(1).setCellValue("猪只RFID");
+                row2.createCell(2).setCellValue("母猪状态");
+                row2.createCell(3).setCellValue("胎次");
+                row2.createCell(4).setCellValue("品种");
+                row2.createCell(5).setCellValue("舍号");
+                row2.createCell(6).setCellValue("体重-kg");
+                row2.createCell(7).setCellValue("进场日期");
+                row2.createCell(8).setCellValue("出生日期");
+                row2.createCell(9).setCellValue("状态天数");
+
+                Row row3 = sheet.createRow(3);
+                row3.createCell(0).setCellValue(String.valueOf(doctorSowDetailDto.getPigSowCode()));
+                String rfid=String.valueOf(doctorSowDetailDto.getRfid());
+                if(rfid.equals("null")){
+                    rfid="";
+                }
+                row3.createCell(1).setCellValue(rfid);
+                String pigStatus = String.valueOf(doctorSowDetailDto.getPigStatus());
+                if(pigStatus.equals(String.valueOf(PigStatus.Entry.getKey()))){
+                    row3.createCell(2).setCellValue(String.valueOf(PigStatus.Entry.getName()));
+                }if (pigStatus.equals(String.valueOf(PigStatus.Removal.getKey()))) {
+                    row3.createCell(2).setCellValue(String.valueOf(PigStatus.Removal.getName()));
+                }
+                if (pigStatus.equals(String.valueOf(PigStatus.Mate.getKey()))) {
+                    row3.createCell(2).setCellValue(String.valueOf(PigStatus.Mate.getName()));
+                }
+                if (pigStatus.equals(String.valueOf(PigStatus.Pregnancy.getKey()))) {
+                    row3.createCell(2).setCellValue(String.valueOf(PigStatus.Pregnancy.getName()));
+                }
+                if (pigStatus.equals(String.valueOf(PigStatus.KongHuai.getKey()))) {
+                    row3.createCell(2).setCellValue(String.valueOf(PigStatus.KongHuai.getName()));
+                }
+                if (pigStatus.equals(String.valueOf(PigStatus.Farrow.getKey()))) {
+                    row3.createCell(2).setCellValue(String.valueOf(PigStatus.Farrow.getName()));
+                }
+                if (pigStatus.equals(String.valueOf(PigStatus.FEED.getKey()))) {
+                    row3.createCell(2).setCellValue(String.valueOf(PigStatus.FEED.getName()));
+                }
+                if (pigStatus.equals(String.valueOf(PigStatus.Wean.getKey()))) {
+                    row3.createCell(2).setCellValue(String.valueOf(PigStatus.Wean.getName()));
+                }
+                if (pigStatus.equals(String.valueOf(PigStatus.CHG_FARM.getKey()))) {
+                    row3.createCell(2).setCellValue(String.valueOf(PigStatus.CHG_FARM.getName()));
+                }
+                row3.createCell(3).setCellValue(String.valueOf(doctorSowDetailDto.getParity()));
+                row3.createCell(4).setCellValue(String.valueOf(doctorSowDetailDto.getBreedName()));
+                row3.createCell(5).setCellValue(String.valueOf(doctorSowDetailDto.getBarnCode()));
+                String pigWeight=String.valueOf(doctorSowDetailDto.getPigWeight());
+                if(pigWeight.equals("null")){
+                    pigWeight="";
+                }
+                row3.createCell(6).setCellValue(pigWeight);
+                //date类型的转yyyy年MM月dd日格式
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                String format = sdf.format(doctorSowDetailDto.getEntryDate());
+                row3.createCell(7).setCellValue(String.valueOf(format));
+
+                //date类型的转yyyy年MM月dd日格式
+                SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd");
+                String format1 = sdf1.format(doctorSowDetailDto.getBirthDate());
+                row3.createCell(8).setCellValue(String.valueOf(format1));
+
+                row3.createCell(9).setCellValue(String.valueOf(doctorSowDetailDto.getStatusDay()));
+
+                Row row4 = sheet.createRow(5);
+                row4.createCell(0).setCellValue("历史事件");
+
+                Row row5 = sheet.createRow(6);
+                row5.createCell(0).setCellValue("胎次");
+                row5.createCell(1).setCellValue("事件名称");
+                row5.createCell(2).setCellValue("事件时间");
+                row5.createCell(3).setCellValue("事件描述");
+                row5.createCell(4).setCellValue("所属猪场");
+                row5.createCell(5).setCellValue("所属猪舍");
+
+
+                int addRow=7;
+                for (DoctorPigEvent s: doctorSowDetailDto.getDoctorPigEvents()){
+                    Row rowadd = sheet.createRow(addRow++);
+                    rowadd.createCell(0).setCellValue(String.valueOf(s.getParity()));
+                    rowadd.createCell(1).setCellValue(String.valueOf(s.getName()));
+
+                    //date类型的转yyyy年MM月dd日格式
+                    SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd");
+                    String format2 = sdf2.format(s.getEventAt());
+                    rowadd.createCell(2).setCellValue(String.valueOf(format2));
+
+                    rowadd.createCell(3).setCellValue(String.valueOf(s.getDesc()));
+                    rowadd.createCell(4).setCellValue(String.valueOf(s.getFarmName()));
+                    rowadd.createCell(5).setCellValue(String.valueOf(s.getBarnName()));
+                }
+
+                workbook.write(response.getOutputStream());
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 
     @RequestMapping(value = "/getBoarPigDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

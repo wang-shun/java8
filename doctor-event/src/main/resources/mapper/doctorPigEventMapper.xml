@@ -687,6 +687,86 @@
         LIMIT #{offset}, #{limit}
     </select>
 
+    <select id="getabosum" parameterType="map" resultMap="DoctorPigEventMap">
+        SELECT
+        sum(farrow_weight) farrowWeight,sum(live_count) liveCount,sum(health_count) healthCount,sum(weak_count) weakCount,sum(dead_count) deadCount,sum(black_count) blackCount,sum(mny_count) mnyCount,sum(jx_count) jxCount
+        from
+        <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        <if test="ordered!=null">
+            ORDER BY DATE_FORMAT(event_at,'%Y-%m-%d')
+            <if test="ordered == 0">
+                DESC
+            </if>
+            , id
+            <if test="ordered == 0">
+                DESC
+            </if>
+        </if>
+    </select>
+
+    <select id="getweansum" parameterType="map" resultMap="DoctorPigEventMap">
+        SELECT
+        sum(wean_count) weanCount,sum(health_count) healthCount,sum(weak_count) weakCount
+        from
+        <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        <if test="ordered!=null">
+            ORDER BY DATE_FORMAT(event_at,'%Y-%m-%d')
+            <if test="ordered == 0">
+                DESC
+            </if>
+            , id
+            <if test="ordered == 0">
+                DESC
+            </if>
+        </if>
+    </select>
+
+    <select id="getfosterssum" parameterType="map" resultMap="DoctorPigEventMap">
+        SELECT
+        sum(quantity) quantity
+        from
+        <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        <if test="ordered!=null">
+            ORDER BY DATE_FORMAT(event_at,'%Y-%m-%d')
+            <if test="ordered == 0">
+                DESC
+            </if>
+            , id
+            <if test="ordered == 0">
+                DESC
+            </if>
+        </if>
+    </select>
+
+    <select id="getpigletssum" parameterType="map" resultMap="DoctorPigEventMap">
+        SELECT
+        sum(quantity) quantity,sum(weight) weight,sum(amount) amount
+        from
+        <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        <if test="ordered!=null">
+            ORDER BY DATE_FORMAT(event_at,'%Y-%m-%d')
+            <if test="ordered == 0">
+                DESC
+            </if>
+            , id
+            <if test="ordered == 0">
+                DESC
+            </if>
+        </if>
+    </select>
+
     <update id="updatePigEventFarmIdByPigId" parameterType="map">
         UPDATE
         <include refid="tb"/>
@@ -697,6 +777,13 @@
         </set>
         WHERE `pig_id` = #{pigId} AND status =1
     </update>
+
+    <!--<update id="updateAmountPigEventByPigId" parameterType="map">-->
+        <!--UPDATE-->
+        <!--<include refid="tb"/>-->
+        <!--SET amount = #{amount}-->
+        <!--WHERE `pig_id` = #{pigId} AND status =1-->
+    <!--</update>-->
 
     <update id="update" parameterType="DoctorPigEvent">
         UPDATE
@@ -1307,29 +1394,34 @@
 
     <select id="findSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
         SELECT
-        pig_code AS batch,
-        barn_name AS barnName,
-        event_at AS salesDate,
-        count(1) AS pigNumber,
+        a.event_at AS salesDate,
+        a.customer_id as customerId,
+        c.name as client,
+        b.pig_type as pigType,
         '种猪' AS pigTypeName,
-        ifnull(sum(weight), 0) AS pigWeight,
-        ifnull(sum(amount)/count(1),0) AS pigPrice,
-        ifnull(sum(amount), 0) AS pigAmount,
-        customer_name AS client
-        FROM
-        <include refid="tb"/>
-        where
-        `type` = 6
-        and change_type_id = 109
-        <if test="farmId != null">AND farm_id = #{farmId}</if>
-        <if test="batch != null">AND pig_code = #{batch}</if>
-        <if test="barnId != null">AND barn_id = #{barnId}</if>
-        <if test="barnName != null">AND barn_name = #{barnName}</if>
-        <if test="client != null">AND customer_id = #{client}</if>
-        <if test="startDate != null">AND <![CDATA[ event_at >= #{startDate} ]]> </if>
-        <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
-        group by barn_id, event_at, customer_id
-
+        a.barn_name AS barnName,
+        count(1) AS pigNumber,
+        DATEDIFF(a.event_at,b.birth_date)as ages,
+        ifnull(sum(a.weight), 0) AS pigWeight,
+        ifnull(sum(a.amount)/sum(a.weight),0) AS pigPrice,
+        ifnull(sum(a.amount), 0) AS pigAmount,
+        b.breed_id as breedId,
+        b.breed_name as breedName
+        from doctor_pig_events a left join doctor_pigs b on a.pig_id = b.id
+        left join doctor_customers c on a.customer_id = c.id
+        where a.type = 6
+        and a.change_type_id = 109
+        and b.pig_type in ( 1,2 )
+        <if test="breedsId != null">AND b.breed_id = #{breedsId}</if>
+        <if test="farmId != null">AND a.farm_id = #{farmId}</if>
+        <if test="batch != null">AND a.pig_code = #{batch}</if>
+        <if test="barnId != null">AND a.barn_id = #{barnId}</if>
+        <if test="barnName != null">AND a.barn_name = #{barnName}</if>
+        <if test="client != null">AND  a.customer_id = #{client}</if>
+        <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
+        <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
+        group by a.barn_id, a.event_at, a.customer_id
+        order by a.event_at ASC;
     </select>
 
     <select id="getFarrowEventByParity" parameterType="map" resultMap="DoctorPigEventMap">
@@ -1718,15 +1810,10 @@
 
     <select id="findForNPD" parameterType="map" resultMap="DoctorPigEventMap">
 
-        SELECT farm_id,t1.pig_id,type,preg_check_result,event_at,id,t1.current_mating_count
+        SELECT farm_id,pig_id,type,preg_check_result,event_at,id,current_mating_count
         FROM
         <include refid="tb"/>
-        t1
-        JOIN
-        (SELECT pig_id
-        FROM
-        <include refid="tb"/>
-        where
+       where
         farm_id=#{farmId}
         and kind=1
         <if test="beginDate !=null">
@@ -1735,10 +1822,7 @@
         <if test="endDate !=null">
             AND <![CDATA[ event_at <= #{endDate} ]]>
         </if>
-        GROUP BY pig_id
-        ) t2
-        on t1.pig_id=t2.pig_id where
-        type!=3
+        and type!=3
         and type!=4
         and type!=5
         and type!=17
@@ -1848,5 +1932,48 @@
             AND status = 1
             order by event_at desc, id desc
         </where>
+    </select>
+
+    <select id="queryBeforeEvent" parameterType="map" resultMap="DoctorPigEventMap">
+        select * from doctor_pig_events where id =
+        (
+          select max(id) from doctor_pig_events b where b.id &lt; #{id}
+            and b.pig_id = #{pigId}
+            <choose>
+                <when test="type==15">
+                    and b.type in (9,20)
+                </when>
+                <when test="type==16">
+                    and b.type in (15,20)
+                </when>
+                <when test="type==9">
+                    and b.type in (7,11,20,16)
+                </when>
+                <when test="type==11">
+                    and b.type in (9)
+                </when>
+                <otherwise>
+                    and b.type!=3
+                    and b.type!=4
+                    and b.type!=5
+                    and b.type!=17
+                    and b.type!=18
+                    and b.type!=19
+                    and b.type!=1
+                    and b.type!=10
+                    and b.type!=12
+                    and b.type!=14
+                </otherwise>
+            </choose>
+        )
+    </select>
+    <select id="queryEventId" parameterType="long" resultType="long">
+        SELECT id FROM doctor_pig_events
+        WHERE pig_id = #{pigId}  ORDER BY event_at DESC ,id DESC limit 1
+    </select>
+    <select id="checkBarn" parameterType="map" resultType="Integer">
+        SELECT status
+        FROM doctor_barns
+        where id = #{barnId}
     </select>
 </mapper>

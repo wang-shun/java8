@@ -14,6 +14,7 @@ import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSettlementSer
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -24,6 +25,11 @@ import java.util.*;
  */
 @Repository
 public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouseMaterialHandle> {
+
+    //更改物料有关的信息
+    public Boolean updateWarehouseMaterialHandle(DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle) {
+        return  this.sqlSession.update(this.sqlId("updateWarehouseMaterialHandle"), doctorWarehouseMaterialHandle)>=1;
+    }
 
     //根据类型和RelMaterialHandleId得到对应的数据
     public DoctorWarehouseMaterialHandle findByRelMaterialHandleId(Long relMaterialHandleId, int type) {
@@ -212,6 +218,20 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return new AmountAndQuantityDto((result.get("amount")), result.get("quantity"));
     }
 
+    //未结算：上月结存数量实时计算
+    public BigDecimal findWJSQuantity(BigInteger warehouseId,Integer warehouseType,Long materialId,Integer materialType,String materialName, Date settlementDate) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("warehouseType", warehouseType);
+        criteria.put("materialId", materialId);
+        criteria.put("materialType", materialType);
+        criteria.put("materialName", materialName);
+        criteria.put("settlementDate", settlementDate);
+
+        BigDecimal quantity = this.sqlSession.selectOne(this.sqlId("findWJSQuantity"), criteria);
+        return quantity;
+    }
+
     /**
      * 获取指定明细获取上一笔明细
      *
@@ -222,7 +242,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
 
         Map<String, Object> criteria = Maps.newHashMap();
         criteria.put("warehouseId", materialHandle.getWarehouseId());
-        criteria.put("materialHandleId", materialHandle.getId());
+        criteria.put("materialId", materialHandle.getMaterialId());
         criteria.put("handleDate", materialHandle.getHandleDate());
         if (null != handleType)
             criteria.put("type", handleType.getValue());
@@ -318,18 +338,11 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     }
 
     public Map<String, Object> lastWlbdReport(
-            Long farmId,
-            String settlementDate, Integer pigBarnType,
-            Long pigBarnId, Long pigGroupId, Integer handlerType,
-            Integer type, Long warehouseId, String materialName
+            Long farmId, String settlementDate, Integer type, Long warehouseId, String materialName
     ) {
         Map<String, Object> params = new HashMap<>();
         params.put("farmId", farmId);
         params.put("settlementDate", settlementDate);
-        params.put("pigBarnType", pigBarnType);
-        params.put("pigBarnId", pigBarnId);
-        params.put("pigGroupId", pigGroupId);
-        params.put("handlerType", handlerType);
         params.put("type", type);
         params.put("warehouseId", warehouseId);
         params.put("materialName", materialName);
@@ -337,18 +350,12 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     }
 
     public List<Map<String, Object>> getMeterails(
-            Long farmId,
-            String settlementDate, Integer pigBarnType,
-            Long pigBarnId, Long pigGroupId, Integer handlerType,
+            Long farmId, String settlementDate,
             Integer type, Long warehouseId, String materialName
     ) {
         Map<String, Object> params = new HashMap<>();
         params.put("farmId", farmId);
         params.put("settlementDate", settlementDate);
-        params.put("pigBarnType", pigBarnType);
-        params.put("pigBarnId", pigBarnId);
-        params.put("pigGroupId", pigGroupId);
-        params.put("handlerType", handlerType);
         params.put("type", type);
         params.put("warehouseId", warehouseId);
         params.put("materialName", materialName);
@@ -356,18 +363,11 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     }
 
     public List<Map<String, Object>> wlbdReport(
-            Long farmId,
-            String settlementDate, Integer pigBarnType,
-            Long pigBarnId, Long pigGroupId, Integer handlerType,
-            Integer type, Long warehouseId, String materialName
+            Long farmId, String settlementDate, Integer type, Long warehouseId, String materialName
     ) {
         Map<String, Object> params = new HashMap<>();
         params.put("farmId", farmId);
         params.put("settlementDate", settlementDate);
-        params.put("pigBarnType", pigBarnType);
-        params.put("pigBarnId", pigBarnId);
-        params.put("pigGroupId", pigGroupId);
-        params.put("handlerType", handlerType);
         params.put("type", type);
         params.put("warehouseId", warehouseId);
         params.put("materialName", materialName);
@@ -413,12 +413,17 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     }
 
     //<!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注-->
-    public List<Map> getDataByMaterialName(Long id, String materialName) {
-        Map<String, Object> map = Maps.newHashMap();
-        map.put("stockHandleId", id);
-        map.put("materialName", materialName);
-        List<Map> getDataByMaterialName = this.sqlSession.selectList(this.sqlId("getDataByMaterialName"), map);
+    public List<Map> getDataByMaterialName(Long id) {
+        List<Map> getDataByMaterialName = this.sqlSession.selectList(this.sqlId("getDataByMaterialName"), id);
         return getDataByMaterialName;
     }
 
+    //根据id判断是否有退料入库
+    public Integer findCountByRelMaterialHandleId(Long id,Long farmId) {
+        Map<String, Long> params = Maps.newHashMap();
+        params.put("farmId", farmId);
+        params.put("id", id);
+        Integer count = this.sqlSession.selectOne(this.sqlId("findCountByRelMaterialHandleId"), params);
+        return count;
+    }
 }

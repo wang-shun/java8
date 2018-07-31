@@ -41,10 +41,12 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Created by sunbo@terminus.io on 2017/8/8.
@@ -53,6 +55,8 @@ import static com.google.common.base.Preconditions.checkState;
 @RequestMapping("api/doctor/warehouse")
 public class WarehouseController {
 
+    @Autowired
+    private DoctorWarehouseSettlementService doctorWarehouseSettlementService;
 
     @Autowired
     private DoctorFarmReadService doctorFarmReadService;
@@ -140,6 +144,11 @@ public class WarehouseController {
         if (null == currentUser)
             throw new JsonResponseException("user.not.login");
 
+        DoctorWareHouse wareHouse = RespHelper.or500(doctorWarehouseReaderService.findWareHousesByFarmAndWareHousesName(warehouseDto.getFarmId(), warehouseDto.getName()));
+        if (notNull(wareHouse)) {
+            throw new JsonResponseException("仓库名已存在");
+        }
+
         DoctorWareHouse doctorWareHouse = DoctorWareHouse.builder()
                 .wareHouseName(warehouseDto.getName())
                 .farmId(warehouseDto.getFarmId()).farmName(doctorFarm.getName())
@@ -149,6 +158,8 @@ public class WarehouseController {
                 .build();
         //调创建仓库的方法
         Response<Long> warehouseCreateResponse = doctorWareHouseWriteService.createWareHouse(doctorWareHouse);
+
+
         if (!warehouseCreateResponse.isSuccess())
             throw new JsonResponseException(warehouseCreateResponse.getError());
         return true;
@@ -184,6 +195,11 @@ public class WarehouseController {
         User currentUser = currentUserResponse.getResult();
         if (null == currentUser)
             throw new JsonResponseException("user.not.login");
+
+        DoctorWareHouse wareHouse = RespHelper.or500(doctorWarehouseReaderService.findWareHousesByFarmAndWareHousesName(warehouseDto.getFarmId(), warehouseDto.getName()));
+        if (notNull(wareHouse) && !Objects.equals(wareHouse.getId(), warehouseDto.getId())) {
+            throw new JsonResponseException("仓库名已存在");
+        }
 
         // warehouse 信息, 修改ManagerId, ManagerName, address 地址信息， WareHouseName 仓库名称
         DoctorWareHouse doctorWareHouse = DoctorWareHouse.builder()
@@ -267,10 +283,39 @@ public class WarehouseController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "/sameTypeWarehouse")
-    public Response<List<Map<String, Object>>> sameTypeWarehouse(Integer type, Long farmId) {
+    public List<Map<String, Object>> sameTypeWarehouse(Integer type, Long farmId) {
         if (null == farmId)
             throw new JsonResponseException("missing parameter,farmId must pick one");
-        return doctorWarehouseReaderService.listTypeMap(farmId, type);
+        //会计年月
+        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(new Date());
+
+        //根据猪场得到orgId
+        DoctorFarm doctorFarm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+
+        //取上个月
+        Date newDate = null;
+        if (settlementDate != null)
+        {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(settlementDate);
+            calendar.add(Calendar.MONTH, -1);
+            newDate = calendar.getTime();
+        }
+        //判断上个月是否结算
+        boolean b = doctorWarehouseSettlementService.isSettled(doctorFarm.getOrgId(), newDate);
+        List<Map<String, Object>> maps = RespHelper.or500(doctorWarehouseReaderService.listTypeMap(farmId, type));
+        if(!b){
+            //未结算：上月结存数量实时计算 findWJSQuantity
+            for(Map mm:maps){
+                BigDecimal quantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findWJSQuantity((BigInteger) mm.get("id"),type,null,null,null, settlementDate));
+                mm.put("lastmonth_sum_quantity",quantity);
+                mm.put("lastmonth_sum_amount","--");
+                BigDecimal nowSumQuantity=quantity.add((BigDecimal)mm.get("thismonth_sum_rk_quantity")).subtract((BigDecimal)mm.get("thismonth_sum_ck_quantity"));
+                mm.put("now_sum_quantity",nowSumQuantity);
+            }
+        }
+
+        return maps;
     }
 
     /**
@@ -279,7 +324,7 @@ public class WarehouseController {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "/sameDetailTypeWarehouse")
-    public Response<Paging<Map<String,Object>>> sameDetailTypeWarehouse(Integer type,
+    public Paging<Map<String,Object>> sameDetailTypeWarehouse(Integer type,
                                                                       String materialName,
                                                                       Long warehouseId,
                                                                       String showZero,
@@ -288,7 +333,20 @@ public class WarehouseController {
 
 //        if (null == farmId)
 //            throw new JsonResponseException("missing parameter,farmId must pick one");
-        return doctorWarehouseReaderService.listDetailTypeMap(type,materialName,warehouseId,pageNo,pageSize,showZero);
+        //会计年月
+        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(new Date());
+
+        DoctorWareHouse doctorWareHouse = RespHelper.or500(doctorWarehouseReaderService.findById(warehouseId));
+        //根据猪场得到orgId
+        DoctorFarm doctorFarm = RespHelper.or500(doctorFarmReadService.findFarmById(doctorWareHouse.getFarmId()));
+        //判断是否结算
+        boolean b = doctorWarehouseSettlementService.isSettled(doctorFarm.getOrgId(), settlementDate);
+        Integer isSettled=0;//已结算
+        if(!b){
+            isSettled=1;//未计算
+        }
+        Paging<Map<String, Object>> map = doctorWarehouseReaderService.listDetailTypeMap(type, materialName, warehouseId, pageNo, pageSize, showZero,isSettled);
+        return map;
     }
 
     /*************************    2018/04/18  end         ******************************/

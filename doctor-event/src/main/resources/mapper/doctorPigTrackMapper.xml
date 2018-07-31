@@ -196,6 +196,15 @@
             #{i}
         </foreach>
     </select>
+    <!--母猪详情导出-->
+    <select id="findSowPigDetailExpotr" parameterType="map" resultType="map">
+        select a.id as id,pig_code as pig_code,a.rfid as rfid,a.birth_date as birth_date,
+        a.in_farm_date as in_farm_date,a.breed_name as breed_name,a.init_barn_name as init_barn_name,
+        b.status as status,b.weight as weight,b.current_parity as current_parity from doctor_pigs as a
+        inner join  doctor_pig_tracks as b
+        on a.id=b.pig_id
+        where a.id=#{pigId}
+    </select>
 
     <select id="list" resultMap="DoctorPigTrackMap">
         SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
@@ -208,6 +217,7 @@
         SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
         WHERE relEventIds = #{relEventIds};
     </select>
+
 
     <select id="count" parameterType="map" resultType="long">
         SELECT count(1) FROM <include refid="tb"/>
@@ -399,4 +409,16 @@
         set current_parity = #{parity}
         where pig_id = #{pigId}
     </update>
+
+    <select id="selectPigIds" parameterType="Long" resultType="Long">
+        select pig_id as id from doctor_pig_tracks
+        where farm_id = #{farmId}
+        and status != 7
+    </select>
+
+    <select id="queryCurrentEventId" parameterType="long" resultType="long">
+        SELECT current_event_id AS currentEventId
+        FROM doctor_pig_tracks
+        WHERE pig_id = #{pigId}
+    </select>
 </mapper>

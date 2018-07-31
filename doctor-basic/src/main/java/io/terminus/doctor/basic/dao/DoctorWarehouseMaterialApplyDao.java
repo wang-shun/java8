@@ -23,6 +23,10 @@ import java.util.*;
 @Repository
 public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseMaterialApply> {
 
+    //更改物料有关的信息
+    public Boolean updateWarehouseMaterialApply(DoctorWarehouseMaterialApply doctorWarehouseMaterialApply) {
+       return  this.sqlSession.update(this.sqlId("updateWarehouseMaterialApply"), doctorWarehouseMaterialApply)>=1;
+    }
 
     public List<DoctorWarehouseMaterialApply> listAndOrderByHandleDate(DoctorWarehouseMaterialApply criteria, Integer limit) {
 
@@ -64,6 +68,24 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         return groupApply.orElse(applies.get(0));
 
 //        return sqlSession.selectOne("findByMaterialHandle", materialHandleId);
+    }
+
+    public DoctorWarehouseMaterialApply findByMaterialHandleAndFarmId(Long materialHandleId,Long farmId) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("materialHandleId", materialHandleId);
+        map.put("farmId", farmId);
+        DoctorWarehouseMaterialApply ma=new DoctorWarehouseMaterialApply();
+        List<DoctorWarehouseMaterialApply> getDataByMaterialName = this.sqlSession.selectList(this.sqlId("findByMaterialHandleAndFarmId"), map);
+        if(getDataByMaterialName.size()>1){
+            for(DoctorWarehouseMaterialApply dd:getDataByMaterialName){
+                if(dd.getPigGroupId()!=null){
+                    ma=dd;
+                }
+            }
+        }else{
+           ma=getDataByMaterialName.get(0);
+        }
+        return ma;
     }
 
     public List<DoctorWarehouseMaterialApply> findAllByMaterialHandle(Long materialHandleId) {

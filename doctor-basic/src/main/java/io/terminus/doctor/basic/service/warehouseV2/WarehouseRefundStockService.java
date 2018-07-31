@@ -52,7 +52,7 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
         warehouseReturnManager.create(stockDto.getDetails(), stockDto, stockHandle, wareHouse);
 
         stockDto.getDetails().forEach(detail -> {
-            doctorWarehouseStockManager.in(detail.getMaterialId(), detail.getQuantity(), wareHouse);
+            doctorWarehouseStockManager.in(detail.getMaterialId(), detail.getQuantity().multiply(BigDecimal.valueOf(-1)), wareHouse);
         });
 
         return stockHandle;
@@ -96,14 +96,14 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
             if (detail.getQuantity().compareTo(materialHandle.getQuantity()) != 0) {
                 //可退数量
                 BigDecimal alreadyRefundQuantity = doctorWarehouseMaterialHandleDao.countQuantityAlreadyRefund(materialHandle.getRelMaterialHandleId());
-                if (outMaterialHandle.getQuantity().subtract(alreadyRefundQuantity).compareTo(detail.getQuantity()) < 0)
-                    throw new InvalidException("quantity.not.enough.to.refund", outMaterialHandle.getQuantity().subtract(alreadyRefundQuantity));
+                if (outMaterialHandle.getQuantity().add(alreadyRefundQuantity).compareTo((detail.getQuantity().multiply(BigDecimal.valueOf(-1)))) < 0)
+                    throw new InvalidException("quantity.not.enough.to.refund", outMaterialHandle.getQuantity().add(alreadyRefundQuantity));
 
                 BigDecimal changedQuantity = detail.getQuantity().subtract(materialHandle.getQuantity());
-                if (changedQuantity.compareTo(new BigDecimal(0)) > 0) {//退料数量改大
-                    doctorWarehouseStockManager.in(detail.getMaterialId(), changedQuantity, wareHouse);
+                if (changedQuantity.compareTo(new BigDecimal(0)) < 0) {//退料数量改大
+                    doctorWarehouseStockManager.in(detail.getMaterialId(), changedQuantity.multiply(BigDecimal.valueOf(-1)), wareHouse);
                 } else {
-                    doctorWarehouseStockManager.out(detail.getMaterialId(), changedQuantity.negate(), wareHouse);
+                    doctorWarehouseStockManager.out(detail.getMaterialId(), changedQuantity.multiply(BigDecimal.valueOf(-1)).negate(), wareHouse);
                 }
                 materialHandle.setQuantity(detail.getQuantity());
 
@@ -112,7 +112,7 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
                     if (apply.getRefundQuantity() == null)
                         apply.setRefundQuantity(new BigDecimal(0));
 
-                    apply.setRefundQuantity(apply.getRefundQuantity().subtract(changedQuantity));
+                    apply.setRefundQuantity(apply.getRefundQuantity().add(changedQuantity));
                 });
             }
 

@@ -92,10 +92,10 @@ public class DoctorStatisticDaoTest extends BaseDaoTest {
     public void phStockLive() {
         DoctorStatisticCriteria criteria = new DoctorStatisticCriteria(404L, "2018-01-23");
         String date = "2017-08-31";
-        System.out.println(doctorPigStatisticDao.phLiveStock(404L, date));
-        System.out.println(doctorPigStatisticDao.cfLiveStock(404L, date));
-        System.out.println(doctorKpiDao.realTimeLiveStockSow(404L, DateUtil.toDate(date)));
-        System.out.println(doctorKpiDao.realTimeLiveStockFarrowSow(404L, DateUtil.toDate(date)));
+        System.out.println(doctorPigStatisticDao.phLiveStock(188L,404L,date));
+        System.out.println(doctorPigStatisticDao.cfLiveStock(188L,404L, date));
+        System.out.println(doctorKpiDao.realTimeLiveStockSow(188L,404L, DateUtil.toDate(date)));
+        System.out.println(doctorKpiDao.realTimeLiveStockFarrowSow(188L,404L, DateUtil.toDate(date)));
     }
 
     @Test

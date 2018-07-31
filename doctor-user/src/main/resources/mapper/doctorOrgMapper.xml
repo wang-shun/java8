@@ -65,6 +65,12 @@
         WHERE `name` = #{name}
     </select>
 
+    <select id="findName" parameterType="long" resultMap="DoctorOrgMap" >
+        SELECT name
+        FROM doctor_orgs
+        WHERE id = #{id}
+    </select>
+
     <update id="update" parameterType="DoctorOrg">
         UPDATE
         <include refid="tb"/>
@@ -79,6 +85,66 @@
             updated_at=now()
         </set>
         WHERE id = #{id}
+    </update>
+
+    <update id="updateName" parameterType="map">
+        UPDATE doctor_orgs
+        set name = #{name}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateBarnName" parameterType="map">
+        UPDATE doctor_barns
+        set  org_name = #{name}
+        WHERE org_id = #{id}
+    </update>
+
+    <update id="updateFarmsName" parameterType="map">
+        UPDATE doctor_farms
+        set  org_name = #{name}
+        WHERE org_id = #{id}
+    </update>
+
+    <update id="updateGroupEventName" parameterType="map">
+        UPDATE doctor_group_events
+        set  org_name = #{name}
+        WHERE org_id = #{id}
+    </update>
+
+    <update id="updateGroupName" parameterType="map">
+        UPDATE doctor_groups
+        set  org_name = #{name}
+        WHERE org_id = #{id}
+    </update>
+
+    <update id="updatePigEventsName" parameterType="map">
+        UPDATE doctor_pig_events
+        set  org_name = #{name}
+        WHERE org_id = #{id}
+    </update>
+
+    <update id="updatePigScoreApplyName" parameterType="map">
+        UPDATE doctor_pig_score_applys
+        set  org_name = #{name}
+        WHERE org_id = #{id}
+    </update>
+
+    <update id="updatePigName" parameterType="map">
+        UPDATE doctor_pigs
+        set  org_name = #{name}
+        WHERE org_id = #{id}
+    </update>
+
+    <update id="updateGroupDaileName" parameterType="map">
+        UPDATE doctor_group_dailies
+        set  org_name = #{name}
+        WHERE org_id = #{id}
+    </update>
+
+    <update id="updatePigDailieName" parameterType="map">
+        UPDATE doctor_pig_dailies
+        set  org_name = #{name}
+        WHERE org_id = #{id}
     </update>
 
     <delete id="delete" parameterType="long">

@@ -50,4 +50,5 @@ public class DoctorChgFarmInfo implements Serializable {
     private Date createdAt;
 
     private Date updatedAt;
+
 }

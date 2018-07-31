@@ -84,6 +84,8 @@ public class StockController {
     private DoctorFarmReadService doctorFarmReadService;
     @RpcConsumer
     private DoctorWarehouseVendorReadService doctorWarehouseVendorReadService;
+    @RpcConsumer
+    private DoctorWarehouseMaterialHandleReadService doctorWarehouseMaterialHandleReadService;
 
     @RpcConsumer
     private DoctorBasicReadService doctorBasicReadService;
@@ -185,7 +187,7 @@ public class StockController {
      */
     @RequestMapping(method = RequestMethod.PUT, value = "refund")
     public Long refund(@RequestBody
-                       @Validated(AbstractWarehouseStockDetail.StockOtherValid.class)
+                       @Validated(AbstractWarehouseStockDetail.StockRefundValid.class)
                                WarehouseStockRefundDto stockRefund,
                        Errors errors) {
         if (errors.hasErrors())
@@ -211,6 +213,13 @@ public class StockController {
 
 
         return RespHelper.or500(doctorWarehouseStockWriteService.refund(stockRefund));
+    }
+
+    //盘盈的时候得到最近一次的采购单价
+    @RequestMapping(method = RequestMethod.GET, value = "getPDPrice")
+    public BigDecimal getPDPrice(@RequestParam Long warehouseId, @RequestParam Long materialId, @RequestParam String handleDate){
+        BigDecimal bigDecimal = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getPDPrice(warehouseId, materialId, handleDate));
+        return bigDecimal;
     }
 
     /**
