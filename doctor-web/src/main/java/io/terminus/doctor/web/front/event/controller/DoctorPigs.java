@@ -345,7 +345,7 @@ public class DoctorPigs {
             if (Objects.equals(dto.getIsChgFarm(), true)) {
                 DoctorChgFarmInfo doctorChgFarmInfo = RespHelper.or500(doctorPigReadService.findByFarmIdAndPigId(doctorPigTrack.getFarmId(), doctorPigTrack.getPigId()));
                 DoctorPigEvent chgFarm = RespHelper.or500(doctorPigEventReadService.findById(doctorChgFarmInfo.getEventId()));
-                statusDay = DateUtil.getDeltaDays(chgFarm.getEventAt(), new Date());
+                statusDay = DateUtil.getDeltaDays(chgFarm.getEventAt(), new Date()) + 1;
             } else {
                 String extra = doctorPigTrack.getExtra();
                 Integer status = dto.getDoctorPigTrack().getStatus();
