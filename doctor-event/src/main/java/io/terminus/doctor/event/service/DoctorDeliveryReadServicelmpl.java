@@ -197,16 +197,16 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
     }
 
     @Override
-    public List<Map<String,Object>> sowsReport(Long farmId,Date time,String pigCode,String operatorName,Integer barnType,Integer breed,Integer parity,Integer pigStatus,Date beginInFarmTime, Date endInFarmTime){
+    public List<Map<String,Object>> sowsReport(Long farmId,Date time,String pigCode,String operatorName,Long barnId,Integer breed,Integer parity,Integer pigStatus,Date beginInFarmTime, Date endInFarmTime){
         List<Map<String,Object>> inFarmPigId = null;
         if(pigStatus == 0){//全部
-            inFarmPigId = doctorPigEventDao.getInFarmPigId1(farmId,time,barnType,pigCode,breed,operatorName, beginInFarmTime,endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
+            inFarmPigId = doctorPigEventDao.getInFarmPigId1(farmId,time,pigCode,breed, beginInFarmTime,endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
         }else if(pigStatus == 2){//离场
-            inFarmPigId = doctorPigEventDao.getInFarmPigId2(farmId,time,barnType,pigCode,breed,operatorName, beginInFarmTime,endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
+            inFarmPigId = doctorPigEventDao.getInFarmPigId2(farmId,time,pigCode,breed, beginInFarmTime,endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
         } else if(pigStatus == 10){//转场
-            inFarmPigId = doctorPigEventDao.getInFarmPigId3(farmId,time,barnType,pigCode,breed,operatorName, beginInFarmTime,endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
+            inFarmPigId = doctorPigEventDao.getInFarmPigId3(farmId,time,pigCode,breed, beginInFarmTime,endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
         }else {
-            inFarmPigId = doctorPigEventDao.getInFarmPigId(farmId, time, barnType, pigCode, breed, operatorName, beginInFarmTime, endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
+            inFarmPigId = doctorPigEventDao.getInFarmPigId(farmId, time, pigCode, breed, beginInFarmTime, endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
         }
         /*boolean f = true;
         boolean g = true;
@@ -240,7 +240,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 }*/
             BigInteger isBarn = doctorPigEventDao.isBarn(id,pigId,eventAt,time);//如果后面又转舍事件
             if(isBarn != null) {
-                Map<String,Object> currentBarn = doctorPigEventDao.findBarn(isBarn,id,pigId,eventAt,time,operatorName,barnType);//如果后面又转舍事件,去后面事件的猪舍
+                Map<String,Object> currentBarn = doctorPigEventDao.findBarn(isBarn,id,pigId,eventAt,time,operatorName,barnId);//如果后面又转舍事件,去后面事件的猪舍
                 if(currentBarn != null) {
                     map.put("current_barn_name", currentBarn.get("barn_name"));
                     map.put("staff_name", currentBarn.get("staff_name"));//饲养员
@@ -249,7 +249,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     //f = false;
                 }
             }else{
-                Map<String,Object> currentBarns = doctorPigEventDao.findBarns(pigId,operatorName,barnType);//否则取当前猪舍
+                Map<String,Object> currentBarns = doctorPigEventDao.findBarns(pigId,operatorName,barnId);//否则取当前猪舍
                 if(currentBarns != null) {
                     map.put("current_barn_name", currentBarns.get("current_barn_name"));
                     map.put("staff_name", currentBarns.get("staff_name"));//饲养员

@@ -2106,7 +2106,7 @@
         FROM doctor_pig_events a join doctor_barns b on a.barn_id = b.id
         where a.id = #{isBarn}
         <if test="operatorName != null"> AND b.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
-        <if test="barnType != null"> and b.pig_type = #{barnType} </if>
+        <if test="barnId != null"> and b.id = #{barnId} </if>
     </select>
 
     <select id="isBarn" parameterType="map" resultType="BigInteger">
@@ -2135,8 +2135,8 @@
         where event_at &lt; #{time}
         and pig_id = #{pigId}
         order by id desc limit 1)
-        <if test="parity != null and parity == 1"> and parity &lt;= 10 and parity> 1 </if>
-        <if test="parity != null and parity == 2"> and  parity> 11 </if>
+        <if test="parity != null and parity != 11"> and parity = #{parity} </if>
+        <if test="parity != null and parity == 11"> and  parity> 11 </if>
         <if test="pigStatus != null and pigStatus !=10 and  pigStatus !=0"> and  pig_status_after = #{pigStatus} </if>
     </select>
     <select id="afterEvent" parameterType="map" resultType="map">
@@ -2151,7 +2151,7 @@
         join doctor_barns c on b.current_barn_id = c.id
         where pig_id = #{pigId}
         <if test="operatorName != null"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
-        <if test="barnType != null"> and c.pig_type = #{barnType} </if>
+        <if test="barnId != null"> and c.id = #{barnId} </if>
     </select>
     <select id="getdaizaishu" parameterType="map" resultType="map">
         select type,sum(quantity) as quantity

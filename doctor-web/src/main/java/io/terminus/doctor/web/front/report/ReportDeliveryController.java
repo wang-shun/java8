@@ -124,7 +124,7 @@ public class ReportDeliveryController {
      * @param time  查询时间
      * @param pigCode   耳号
      * @param operatorName  饲养员
-     * @param barnType    猪舍id
+     * @param barnId    猪舍id
      * @param breedId     品种
      * @param parity    胎次
      * @param pigStatus 猪状态
@@ -136,13 +136,13 @@ public class ReportDeliveryController {
                                                @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date time,
                                                @RequestParam(required = false) String pigCode,
                                                @RequestParam(required = false) String operatorName,
-                                               @RequestParam(required = false) Integer barnType,
+                                               @RequestParam(required = false) Long barnId,
                                                @RequestParam(required = false) Integer breedId,
                                                @RequestParam(required = false) Integer parity,
                                                @RequestParam(required = true) Integer pigStatus,
                                                @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beginInFarmTime,
                                                @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endInFarmTime) {
-        return doctorDeliveryReadService.sowsReport(farmId,time,pigCode,operatorName,barnType,breedId,parity,pigStatus,beginInFarmTime,endInFarmTime);
+        return doctorDeliveryReadService.sowsReport(farmId,time,pigCode,operatorName,barnId,breedId,parity,pigStatus,beginInFarmTime,endInFarmTime);
     }
 
     /**
@@ -170,14 +170,14 @@ public class ReportDeliveryController {
                             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date time,
                             @RequestParam(required = false) String pigCode,
                             @RequestParam(required = false) String operatorName,
-                            @RequestParam(required = false) Integer barnType,
+                            @RequestParam(required = false) Long barnId,
                             @RequestParam(required = false) Integer breedId,
                             @RequestParam(required = false) Integer parity,
                             @RequestParam(required = false) Integer pigStatus,
                             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beginInFarmTime,
                             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endInFarmTime,
                             HttpServletRequest request, HttpServletResponse response) {
-        List<Map<String,Object>> ls=doctorDeliveryReadService.sowsReport(farmId,time,pigCode,operatorName,barnType,breedId,parity,pigStatus,beginInFarmTime,endInFarmTime);
+        List<Map<String,Object>> ls=doctorDeliveryReadService.sowsReport(farmId,time,pigCode,operatorName,barnId,breedId,parity,pigStatus,beginInFarmTime,endInFarmTime);
 
         //开始导出
         try  {
