@@ -194,22 +194,25 @@ public class ReportDeliveryController {
                 int  pos  =  2;
 
                 title.createCell(0).setCellValue("序号");
-//                title.createCell(1).setCellValue("猪舍");
-//                title.createCell(2).setCellValue("耳号");
+
+//                title.createCell(1).setCellValue("耳号");
+//                title.createCell(2).setCellValue("品种");
 //                title.createCell(3).setCellValue("胎次");
 //                title.createCell(4).setCellValue("母猪状态");
-//                title.createCell(5).setCellValue("品种");
-//                title.createCell(6).setCellValue("来源");
-//                title.createCell(7).setCellValue("当前带仔数");
-//                title.createCell(8).setCellValue("进场日期");
-//                title.createCell(9).setCellValue("出生日期");
-//                title.createCell(10).setCellValue("饲养员");
+//                title.createCell(5).setCellValue("猪舍");
+//                title.createCell(6).setCellValue("饲养员");
+//                title.createCell(7).setCellValue("带仔数");
+//                title.createCell(8).setCellValue("来源");
+//                title.createCell(9).setCellValue("进场日期");
+//                title.createCell(10).setCellValue("出生日期");
 
                 title.createCell(1).setCellValue("耳号");
-                title.createCell(2).setCellValue("品种");
-                title.createCell(3).setCellValue("胎次");
-                title.createCell(4).setCellValue("母猪状态");
-                title.createCell(5).setCellValue("猪舍");
+                title.createCell(2).setCellValue("猪舍");
+
+                title.createCell(3).setCellValue("品种");
+                title.createCell(4).setCellValue("胎次");
+                title.createCell(5).setCellValue("母猪状态");
+
                 title.createCell(6).setCellValue("饲养员");
                 title.createCell(7).setCellValue("带仔数");
                 title.createCell(8).setCellValue("来源");
@@ -224,14 +227,16 @@ public class ReportDeliveryController {
 
 
                     row.createCell(1).setCellValue(String.valueOf(a.get("pig_code")));
-                    row.createCell(2).setCellValue(String.valueOf(a.get("breed_name")));
-                    row.createCell(3).setCellValue(String.valueOf(a.get("parity")));
-                    row.createCell(4).setCellValue(String.valueOf(a.get("status")));
                     String rfid=String.valueOf(a.get("current_barn_name"));
                     if(rfid.equals("null")){
                         rfid="";
                     }
-                    row.createCell(5).setCellValue(String.valueOf(rfid));
+                    row.createCell(2).setCellValue(String.valueOf(rfid));
+
+                    row.createCell(3).setCellValue(String.valueOf(a.get("breed_name")));
+                    row.createCell(4).setCellValue(String.valueOf(a.get("parity")));
+                    row.createCell(5).setCellValue(String.valueOf(a.get("status")));
+
                     row.createCell(6).setCellValue(String.valueOf(a.get("staff_name")));
                     row.createCell(7).setCellValue(String.valueOf(a.get("daizaishu")));
                     row.createCell(8).setCellValue(String.valueOf(a.get("source")));
