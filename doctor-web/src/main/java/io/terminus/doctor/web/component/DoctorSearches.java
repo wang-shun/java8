@@ -895,10 +895,12 @@ public class DoctorSearches {
                 if (Objects.equals(status, PigStatus.Pregnancy.getKey())) {
                     status = PigStatus.Mate.getKey();
                 }
-                eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(searchedPig.getId()
-                        , status));
-
-                Integer statusDay = DateUtil.getDeltaDays(eventAt, new Date());
+                if (status == 4 || status == 7){
+                    eventAt = RespHelper.or500(doctorPigEventReadService.findMateEventToPigId(searchedPig.getId()));
+                } else {
+                    eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(searchedPig.getId(), status));
+                }
+                Integer statusDay = DateUtil.getDeltaDays(eventAt, new Date()) + 1;
                 searchedPig.setStatusDay(statusDay);
             });
         }
