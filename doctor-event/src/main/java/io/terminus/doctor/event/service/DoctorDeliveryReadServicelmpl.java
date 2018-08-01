@@ -224,55 +224,40 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             BigInteger id = (BigInteger)map.get("id");
             BigInteger pigId = (BigInteger)map.get("pig_id");
             Date eventAt = (Date)map.get("event_at");
-            //Integer a = doctorPigEventDao.isOutFarm(id,pigId,eventAt,farmId,time);//判断后面是否有离场或者转场
-            /*if(a != null && a >= 1){
-                inFarmPigId.remove(i); //如果后面还有离场或者转场删除
-            } else{*/
-                /*Map<String,Object> pigInfo = doctorPigEventDao.findPigInfo(pigId);
-                if(pigInfo != null) {
-                    map.put("current_barn_name", pigInfo.get("current_barn_name"));//猪舍(如果后面没有转舍事件就为当前猪舍)
-                    map.put("pig_code", pigInfo.get("pig_code"));//猪耳号
-                    map.put("breed_name", pigInfo.get("breed_name"));//品种
-                    map.put("source", pigInfo.get("source"));//来源
-                    map.put("in_farm_date", pigInfo.get("in_farm_date"));//进场时间
-                    map.put("birth_date", pigInfo.get("birth_date"));//出生日期
-                    map.put("staff_name", pigInfo.get("staff_name"));//饲养员
-                }*/
-            BigInteger isBarn = doctorPigEventDao.isBarn(id,pigId,eventAt,time);//如果后面又转舍事件
-            if(isBarn != null) {
-                Map<String,Object> currentBarn = doctorPigEventDao.findBarn(isBarn,id,pigId,eventAt,time,operatorName,barnId);//如果后面又转舍事件,去后面事件的猪舍
+            //BigInteger isBarn = doctorPigEventDao.isBarn(id,pigId,eventAt,time);//如果后面又转舍事件
+            Map<String,Object> afterEvent = doctorPigEventDao.afterEvent(pigId,time);//查当前时间后面的第一个事件，利用这个时间求当前猪舍和猪场，如果没有则按当前猪场和猪舍
+            BigInteger afterEventFarmId = null;
+            if(afterEvent != null) {
+                afterEventFarmId = (BigInteger) afterEvent.get("farm_id");
+           // }
+            //if(isBarn != null) {
+                Map<String,Object> currentBarn = doctorPigEventDao.findBarn((BigInteger)afterEvent.get("id"),id,pigId,eventAt,time,operatorName,barnId);//如果后面又转舍事件,去后面事件的猪舍
                 if(currentBarn != null) {
                     map.put("current_barn_name", currentBarn.get("barn_name"));
                     map.put("staff_name", currentBarn.get("staff_name"));//饲养员
                 } else{
                     it.remove();
+                    continue;
                     //f = false;
                 }
             }else{
                 Map<String,Object> currentBarns = doctorPigEventDao.findBarns(pigId,operatorName,barnId);//否则取当前猪舍
+                afterEventFarmId = (BigInteger)doctorPigEventDao.findBarns(pigId,null,null).get("farm_id");
                 if(currentBarns != null) {
                     map.put("current_barn_name", currentBarns.get("current_barn_name"));
                     map.put("staff_name", currentBarns.get("staff_name"));//饲养员
                 } else{
                     it.remove();
+                    continue;
                     //g = false;
                 }
             }
-            //Map<String,Object> frontEventId = doctorPigEventDao.frontEventId(pigId,time);//利用前一个事件来求母猪的胎次和状态
-            //if(frontEventId != null) {
+
                 Map<String,Object> frontEvent = doctorPigEventDao.frontEvent(parity,pigId,time,pigStatus);
                 if(frontEvent != null) {
                     map.put("parity", frontEvent.get("parity"));//母猪胎次
                     String Status = null;
-                    Map<String,Object> afterEvent = doctorPigEventDao.afterEvent(pigId,time);//查后面一个事件，如果后面一个事件不是这个猪场说明转场了,如果为空则为离场
-                    BigInteger afterEventFarmId = null;
-                    if(afterEvent != null) {
-                        if (afterEvent.get("farm_id1") != null) {
-                            afterEventFarmId = (BigInteger) afterEvent.get("farm_id1");
-                        } else {
-                            afterEventFarmId = (BigInteger) afterEvent.get("farm_id2");
-                        }
-                    }
+
                     if(afterEventFarmId == null || afterEventFarmId.equals(new BigInteger(farmId.toString()))) {
                         int status = (int) frontEvent.get("pig_status_after");
 
@@ -341,7 +326,6 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     }
                 }else{
                     it.remove();
-                    //h = false;
                 }
                 /*if(f && g && h){
                     j.add(map);

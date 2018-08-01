@@ -2136,17 +2136,14 @@
         and pig_id = #{pigId}
         order by id desc limit 1)
         <if test="parity != null and parity != 11"> and parity = #{parity} </if>
-        <if test="parity != null and parity == 11"> and  parity> 11 </if>
+        <if test="parity != null and parity == 11"> and  parity >= 11 </if>
         <if test="pigStatus != null and pigStatus !=10 and  pigStatus !=0"> and  pig_status_after = #{pigStatus} </if>
     </select>
     <select id="afterEvent" parameterType="map" resultType="map">
-         select
-        (select farm_id from doctor_pig_events where pig_id = #{pigId} and event_at >= #{time} order by id  limit 1) farm_id1,
-        (select farm_id from doctor_pig_events where pig_id = #{pigId} order by id desc limit 1) farm_id2
-        from dual
+        select min(id) as id,farm_id from doctor_pig_events where event_at >= #{time} and pig_id = #{pigId}
     </select>
     <select id="findBarns" parameterType="map" resultType="map">
-        select b.current_barn_id, b.current_barn_name, c.staff_name as staff_name
+        select b.current_barn_id, b.current_barn_name, c.staff_name as staff_name, b.farm_id as farm_id
         from doctor_pig_tracks b
         join doctor_barns c on b.current_barn_id = c.id
         where pig_id = #{pigId}
