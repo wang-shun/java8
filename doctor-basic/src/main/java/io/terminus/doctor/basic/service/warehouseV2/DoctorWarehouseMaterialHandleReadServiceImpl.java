@@ -240,7 +240,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
                 List<Map> lists = doctorWarehouseMaterialHandleDao.listByFarmIdTime(criteria);
                 Date time = (Date) criteria.get("settlementDate");
 //                if (time.getTime() < System.currentTimeMillis()&&time.getTime()>maxTime.getTime()) {
-                if (time.getTime() < System.currentTimeMillis()&&(time.getYear()>=maxTime.getYear()&&time.getMonth()>=maxTime.getMonth())) {
+                if (time.getTime() < System.currentTimeMillis()&&(time.equals(DateUtil.toDate(DateUtil.getYearMonth(maxTime) + "-01"))||time.after(DateUtil.toDate(DateUtil.getYearMonth(maxTime) + "-01")))) {
                     if (lists == null || lists.size() == 0) {
                         lists = Lists.newArrayList();
                     }
