@@ -2023,16 +2023,15 @@
         <if test="beginInFarmTime != null"> and a.in_farm_date > #{beginInFarmTime} </if>
         <if test="endInFarmTime != null"> and a.in_farm_date &lt; #{endInFarmTime} </if>
         group by d.pig_id
-        HAVING  d.id not in
-        (SELECT d.id
+        HAVING  max(d.id) not in
+        (SELECT max(d.id)
         FROM doctor_pig_events
         WHERE farm_id = #{farmId}
         and pig_id = d.pig_id
         and kind = 1
         and type in (2,6)
         and event_at &lt; #{time}
-        and event_at >= max(d.event_at)
-        and id > d.id)
+        and id > max(d.id))
     </select>
 
     <select id="getInFarmPigId1" parameterType="map" resultType="map">
@@ -2048,16 +2047,15 @@
         <if test="beginInFarmTime != null"> and a.in_farm_date > #{beginInFarmTime} </if>
         <if test="endInFarmTime != null"> and a.in_farm_date &lt; #{endInFarmTime} </if>
         group by d.pig_id
-        HAVING  d.id not in
-        (SELECT d.id
+        HAVING  max(d.id) not in
+        (SELECT max(d.id)
         FROM doctor_pig_events
         WHERE farm_id = #{farmId}
         and pig_id = d.pig_id
         and kind = 1
         and type = 6
         and event_at &lt; #{time}
-        and event_at >= max(d.event_at)
-        and id > d.id)
+        and id > max(d.id))
     </select>
 
     <select id="getInFarmPigId2" parameterType="map" resultType="map">
@@ -2088,12 +2086,11 @@
         <if test="endInFarmTime != null"> and a.in_farm_date &lt; #{endInFarmTime} </if>
         group by d.pig_id
         HAVING  d.id =
-        (SELECT id
+        (SELECT max(id)
         FROM doctor_pig_events
         WHERE farm_id = #{farmId}
         and pig_id = d.pig_id
-        and kind = 1
-        order by id desc limit 1)
+        and kind = 1)
     </select>
     <!--<select id="isOutFarm" parameterType="map" resultType="Integer">
         SELECT count(*)
