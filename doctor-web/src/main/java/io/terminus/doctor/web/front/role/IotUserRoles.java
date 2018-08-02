@@ -82,9 +82,12 @@ public class IotUserRoles {
     public Boolean createOrUpdateIotUserRole(@RequestBody @ApiParam("物联网运营用户") IotUserDto iotUserDto) {
         if (isNull(iotUserDto.getUserId())) {
 
+            log.info("start to create iot user");
             Response<Boolean> checkUser = doctorUserReadService.checkExist(iotUserDto.getMobile(), iotUserDto.getUserName());
-            if (!checkUser.isSuccess())
+            if (!checkUser.isSuccess()) {
+                log.warn("user name :{} or mobile :{} already existed", iotUserDto.getUserName(), iotUserDto.getMobile());
                 return false;
+            }
 
             return RespHelper.or500(roleWriteService.createIotUser(iotUserDto));
         }
