@@ -870,4 +870,14 @@
         select min(settlement_date) from doctor_warehouse_material_handle where org_id=#{orgId}
     </select>
 
+    <select id="findMinTimeByFarmId" parameterType="list" resultType="Date">
+        select min(handle_date) as time
+        from doctor_warehouse_material_handle
+        where 1=1
+        and farm_id in
+        <foreach collection="list" open="(" separator="," close=")" item="i">
+            #{i}
+        </foreach>
+    </select>
+
 </mapper>

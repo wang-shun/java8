@@ -221,7 +221,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         farms.forEach(stringObjectMap -> {
             ids.add((Long)stringObjectMap.get("id"));
         });
-        Date maxTime = this.doctorWareHouseDao.findMaxTimeByFarmId(ids);
+        Date maxTime = this.doctorWarehouseMaterialHandleDao.findMinTimeByFarmId(ids);
         if(maxTime==null)
             return ResponseUtil.isOk(resultList,farms);
         try {

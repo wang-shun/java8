@@ -436,4 +436,13 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectOne(this.sqlId("findSettlementDate"), orgId);
     }
 
+    /**
+     * 根据framId查最早生成单据的时间
+     * @param farms
+     * @return
+     */
+    public Date findMinTimeByFarmId(List<Long> farms) {
+        return this.sqlSession.selectOne(this.sqlId("findMinTimeByFarmId"),farms);
+    }
+
 }
