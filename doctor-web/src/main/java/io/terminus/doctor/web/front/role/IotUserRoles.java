@@ -4,6 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -85,7 +86,7 @@ public class IotUserRoles {
             Response<Boolean> checkUser = doctorUserReadService.checkExist(iotUserDto.getMobile(), iotUserDto.getUserName());
             if (!checkUser.isSuccess()) {
                 log.warn("user name :{} or mobile :{} already existed", iotUserDto.getUserName(), iotUserDto.getMobile());
-                return false;
+                throw new JsonResponseException(checkUser.getError());
             }
 
             return RespHelper.or500(roleWriteService.createIotUser(iotUserDto));
