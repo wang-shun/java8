@@ -992,32 +992,32 @@
     </select>
     <select id="getCunlan" parameterType="map" resultType="Integer">
         select
-        IFNULL((select sum(quantity) from doctor_group_events where group_id = #{groupId} and event_at &lt; #{time} and type in (2)),0)
+        IFNULL((select sum(quantity) from doctor_group_events where group_id = #{groupId} and status = 1 and event_at &lt; #{time} and type in (2)),0)
         -
-        IFNULL((select sum(quantity) from doctor_group_events where type in (3,4,5,9)  and event_at &lt; #{time} and group_id = #{groupId}),0)
+        IFNULL((select sum(quantity) from doctor_group_events where type in (3,4,5,9) and status = 1  and event_at &lt; #{time} and group_id = #{groupId}),0)
         from dual
     </select>
     <select id="getInAvgweight" parameterType="map" resultType="Double">
        select
-        IFNULL((select sum(weight) from doctor_group_events where group_id = #{groupId} and event_at &lt; #{time} and type in (2)),0)
+        IFNULL((select sum(weight) from doctor_group_events where group_id = #{groupId} and status = 1 and event_at &lt; #{time} and type in (2)),0)
         /
-        IFNULL((select sum(quantity) from doctor_group_events where group_id = #{groupId} and event_at &lt; #{time} and type in (2)),0)
+        IFNULL((select sum(quantity) from doctor_group_events where group_id = #{groupId} and status = 1 and event_at &lt; #{time} and type in (2)),0)
         from dual
     </select>
     <select id="getOutAvgweight" parameterType="map" resultType="Double">
         select
-        IFNULL((select sum(weight) from doctor_group_events where group_id = #{groupId} and event_at &lt; #{time} and type in (3,4,5,9)),0)
+        IFNULL((select sum(weight) from doctor_group_events where group_id = #{groupId} and status = 1 and event_at &lt; #{time} and type in (3,4,5,9)),0)
         /
-        IFNULL((select sum(quantity) from doctor_group_events where group_id = #{groupId} and event_at &lt; #{time} and type in (3,4,5,9)),0)
+        IFNULL((select sum(quantity) from doctor_group_events where group_id = #{groupId} and status = 1 and event_at &lt; #{time} and type in (3,4,5,9)),0)
         from dual
     </select>
     <select id="getAvgDayAge" parameterType="map" resultType="Double">
       select
-        (IFNULL((select sum((DATEDIFF(#{time},event_at)+avg_day_age)*quantity) from doctor_group_events where type = 2 and group_id = #{groupId}),0)
-        -IFNULL((select sum(quantity*(DATEDIFF(#{time},event_at)+avg_day_age)) from doctor_group_events where type in (3,4,5,9) and group_id = #{groupId}),0))
+        (IFNULL((select sum((DATEDIFF(#{time},event_at)+avg_day_age)*quantity) from doctor_group_events where type = 2 and status = 1 and group_id = #{groupId}),0)
+        -IFNULL((select sum(quantity*(DATEDIFF(#{time},event_at)+avg_day_age)) from doctor_group_events where type in (3,4,5,9) and status = 1 and group_id = #{groupId}),0))
       from dual
     </select>
     <select id="getBuildEventAt" parameterType="map" resultType="Date">
-       select event_at from doctor_group_events where group_id = #{groupId} and type = 1
+       select event_at from doctor_group_events where group_id = #{groupId} and type = 1 and status = 1
     </select>
 </mapper>

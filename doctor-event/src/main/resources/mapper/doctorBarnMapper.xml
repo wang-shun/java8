@@ -324,10 +324,10 @@
         select count(DISTINCT(c.pig_id)) from
         ((select a.pig_id
           from doctor_pig_events a
-          join (select min(id) id,pig_id from doctor_pig_events a where farm_id = #{farmId} and event_at >= #{beginTime} group by pig_id) b
-                on a.pig_id = b.pig_id and a.barn_id = #{barnId} and farm_id = #{farmId} and a.id = b.id)
+          join (select min(id) id,pig_id from doctor_pig_events where farm_id = #{farmId} and  status = 1 and event_at >= #{beginTime} group by pig_id) b
+                on a.pig_id = b.pig_id and a.barn_id = #{barnId} and a.farm_id = #{farmId} and a.id = b.id and a.status = 1)
         UNION all
-        (select a.pig_id from doctor_pig_events a join (select current_event_id from doctor_pig_tracks where current_barn_id = #{barnId} and is_removal=0) b on a.id = b.current_event_id where a.event_at &lt; #{beginTime})) c
+        (select a.pig_id from doctor_pig_events a join (select current_event_id from doctor_pig_tracks where current_barn_id = #{barnId} and is_removal=0) b on a.id = b.current_event_id where a.event_at &lt; #{beginTime} and a.status = 1)) c
     </select>
     <select id="jianshao" parameterType="map" resultType="map">
         SELECT change_type_id,count(*) as count
@@ -336,6 +336,7 @@
         and event_at >= #{beginTime}
         and event_at&lt; #{endTime}
         and type = 6
+        and status = 1
         group by change_type_id
     </select>
     <select id="zhuanchu" parameterType="map" resultType="Integer">
@@ -344,6 +345,7 @@
         where barn_id = #{barnId}
         and event_at >= #{beginTime}
         and event_at&lt; #{endTime}
+        and status = 1
         and type in (1,10,12,14)
     </select>
     <select id="findBarnIdsByfarmId" parameterType="map" resultType="Long">
@@ -353,19 +355,19 @@
     </select>
     <select id="groupqichucunlan" parameterType="map" resultType="Integer">
         select
-        IFNULL((select sum(quantity) from doctor_group_events where barn_id = #{barnId} and event_at &lt; #{beginTime} and type in (2)),0)
+        IFNULL((select sum(quantity) from doctor_group_events where barn_id = #{barnId} and status = 1 and event_at &lt; #{beginTime} and type in (2)),0)
         -
-        IFNULL((select sum(quantity) from doctor_group_events where type in (3,4,5,9)  and event_at &lt; #{beginTime} and barn_id = #{barnId}),0)
+        IFNULL((select sum(quantity) from doctor_group_events where type in (3,4,5,9) and status = 1  and event_at &lt; #{beginTime} and barn_id = #{barnId}),0)
         from dual
     </select>
     <select id="groupzhuanru" parameterType="map" resultType="Integer">
         select
-        IFNULL((select sum(quantity) from doctor_group_events where barn_id = #{barnId} and event_at &lt; #{endTime} and event_at >= #{beginTime} and type in (2)),0)
+        IFNULL((select sum(quantity) from doctor_group_events where barn_id = #{barnId} and status = 1 and event_at &lt; #{endTime} and event_at >= #{beginTime} and type in (2)),0)
         from dual
     </select>
     <select id="groupzhuanchu" parameterType="map" resultType="Integer">
         select
-          IFNULL((select sum(quantity) from doctor_group_events where type in (4,5,9)  and event_at &lt; #{endTime} and event_at >= #{beginTime} and barn_id = #{barnId}),0)
+          IFNULL((select sum(quantity) from doctor_group_events where type in (4,5,9) and status = 1  and event_at &lt; #{endTime} and event_at >= #{beginTime} and barn_id = #{barnId}),0)
         from dual
     </select>
     <select id="groupjianshao" parameterType="map" resultType="map">
@@ -375,6 +377,7 @@
         and event_at >= #{beginTime}
         and event_at&lt; #{endTime}
         and type = 3
+        and status = 1
         group by change_type_id
     </select>
 </mapper>
