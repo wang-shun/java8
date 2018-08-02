@@ -45,13 +45,23 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
     }
 
     public List<DoctorBarn> findByEnums(@NotNull Long farmId, List<Integer> pigTypes, Integer canOpenGroup, Integer status, List<Long> barnIds) {
-        return getSqlSession().selectList(sqlId("findByEnums"), MapBuilder.<String, Object>newHashMap()
-                .put("farmId", farmId)
-                .put("pigTypes", Iters.emptyToNull(pigTypes))
-                .put("canOpenGroup", canOpenGroup)
-                .put("status", status)
-                .put("barnIds", Iters.emptyToNull(barnIds))
-                .map());
+        if(status == 5){
+            return getSqlSession().selectList(sqlId("findByEnums1"), MapBuilder.<String, Object>newHashMap()
+                    .put("farmId", farmId)
+                    .put("pigTypes", Iters.emptyToNull(pigTypes))
+                    .put("canOpenGroup", canOpenGroup)
+                    .put("status", status)
+                    .put("barnIds", Iters.emptyToNull(barnIds))
+                    .map());
+        }else {
+            return getSqlSession().selectList(sqlId("findByEnums"), MapBuilder.<String, Object>newHashMap()
+                    .put("farmId", farmId)
+                    .put("pigTypes", Iters.emptyToNull(pigTypes))
+                    .put("canOpenGroup", canOpenGroup)
+                    .put("status", status)
+                    .put("barnIds", Iters.emptyToNull(barnIds))
+                    .map());
+        }
     }
 
     /**
