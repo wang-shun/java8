@@ -351,4 +351,30 @@
         where farm_id = #{farmId}
         <if test="operatorName != null">AND staff_name like concat('%',#{operatorName},'%')</if>
     </select>
+    <select id="groupqichucunlan" parameterType="map" resultType="Integer">
+        select
+        IFNULL((select sum(quantity) from doctor_group_events where barn_id = #{barnId} and event_at &lt; #{beginTime} and type in (2)),0)
+        -
+        IFNULL((select sum(quantity) from doctor_group_events where type in (3,4,5,9)  and event_at &lt; #{beginTime} and barn_id = #{barnId}),0)
+        from dual
+    </select>
+    <select id="groupzhuanru" parameterType="map" resultType="Integer">
+        select
+        IFNULL((select sum(quantity) from doctor_group_events where barn_id = #{barnId} and event_at &lt; #{endTime} and event_at >= #{beginTime} and type in (2)),0)
+        from dual
+    </select>
+    <select id="groupzhuanchu" parameterType="map" resultType="Integer">
+        select
+          IFNULL((select sum(quantity) from doctor_group_events where type in (4,5,9)  and event_at &lt; #{endTime} and event_at >= #{beginTime} and barn_id = #{barnId}),0)
+        from dual
+    </select>
+    <select id="groupjianshao" parameterType="map" resultType="map">
+        SELECT change_type_id,sum(quantity) as count
+        from doctor_group_events
+        where barn_id = #{barnId}
+        and event_at >= #{beginTime}
+        and event_at&lt; #{endTime}
+        and type = 3
+        group by change_type_id
+    </select>
 </mapper>

@@ -468,12 +468,12 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
              barnIds.add(isbarnId);
         }
         if(barnIds != null) {
+            List<Map<String,Object>> list = new ArrayList<>();
+            //Map map = new HashMap();
             for(Long barnId: barnIds) {
-                Map map = new HashMap();
-                Map<String, Object> barn = doctorBarnDao.findBarnTypeById(barnId);
-                int barnType = (int) (barn.get("pig_type"));
-                map.put("barn", barn.get("name"));
-                map.put("staffname", barn.get("staff_name"));
+
+                Map<String, Object> map = doctorBarnDao.findBarnTypeById(barnId);
+                int barnType = (int) (map.get("pig_type"));
                 if (barnType == 5 || barnType == 6 || barnType == 7 || barnType == 9) {
                     Integer qichucunlan = doctorBarnDao.qichucunlan(farmId, barnId, beginTime);
                     Integer qimucunlan = doctorBarnDao.qichucunlan(farmId, barnId, endTime);
@@ -501,7 +501,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                             if (a == 111) {
                                 map.put("taotai", jianshao.get(i).get("count"));
                             }
-                            if (a == 112 || a == 113 || a == 114) {
+                            if (a == 112 || a == 113 || a == 114 || a == 115) {
                                 qitajianshao = qitajianshao + jianshao.get(i).get("count");
                             }
                         }
@@ -522,11 +522,57 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map.put("zhuanru", zhuanru);
                 }
                 if (barnType == 2 || barnType == 3 || barnType == 4) {
-
+                    Integer qichucunlan = doctorBarnDao.groupqichucunlan(farmId, barnId, beginTime);
+                    Integer qimucunlan = doctorBarnDao.groupqichucunlan(farmId, barnId, endTime);
+                    if (qichucunlan != null) {
+                        map.put("qichucunlan", qichucunlan);
+                    } else {
+                        map.put("qichucunlan", 0);
+                    }
+                    if (qimucunlan != null) {
+                        map.put("qimucunlan", qimucunlan);
+                    } else {
+                        map.put("qimucunlan", 0);
+                    }
+                    Integer zhuanru = doctorBarnDao.groupzhuanru(barnId,beginTime,endTime);
+                    map.put("zhuanru", zhuanru);
+                    Integer zhuanchu = doctorBarnDao.groupzhuanchu(barnId,beginTime,endTime);
+                    if (zhuanchu != null) {
+                        map.put("zhuanchu", zhuanchu);
+                    } else {
+                        map.put("zhuanchu", 0);
+                    }
+                    List<Map<Integer, Long>> jianshao = doctorBarnDao.groupjianshao(barnId, beginTime, endTime);
+                    int qitajianshao = 0;
+                    if (jianshao != null) {
+                        for (int i = 0; i < jianshao.size(); i++) {
+                            Long a = jianshao.get(i).get("change_type_id");
+                            if (a == 109) {
+                                map.put("xiaoshou", jianshao.get(i).get("count"));
+                            }
+                            if (a == 110) {
+                                map.put("siwang", jianshao.get(i).get("count"));
+                            }
+                            if (a == 111) {
+                                map.put("taotai", jianshao.get(i).get("count"));
+                            }
+                            if (a == 112 || a == 113 || a == 114 || a == 115) {
+                                Object  ob = jianshao.get(i).get("count");
+                                int b =Integer.parseInt(ob.toString());
+                               qitajianshao = qitajianshao+b;
+                            }
+                        }
+                        map.put("qitajianshao", qitajianshao);
+                    } else {
+                        map.put("xiaoshou", 0);
+                        map.put("siwang", 0);
+                        map.put("taotai", 0);
+                        //map.put("qitajianshao", 0);
+                    }
                 }
-
+                list.add(map);
             }
-            return null;
+            return list;
         } else{
             return null;
         }

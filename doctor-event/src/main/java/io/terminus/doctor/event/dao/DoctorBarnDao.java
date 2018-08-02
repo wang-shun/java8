@@ -11,6 +11,7 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import org.springframework.stereotype.Repository;
 
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -45,7 +46,7 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
     }
 
     public List<DoctorBarn> findByEnums(@NotNull Long farmId, List<Integer> pigTypes, Integer canOpenGroup, Integer status, List<Long> barnIds) {
-        if(status == 5){
+        if(status != null && status == 5){
             return getSqlSession().selectList(sqlId("findByEnums1"), MapBuilder.<String, Object>newHashMap()
                     .put("farmId", farmId)
                     .put("pigTypes", Iters.emptyToNull(pigTypes))
@@ -159,7 +160,34 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
         Map<String, Object> map = Maps.newHashMap();
         map.put("farmId", farmId);
         map.put("operatorName", operatorName);
-        return getSqlSession().selectOne(sqlId("findBarnIdsByfarmId"), map);
+        return getSqlSession().selectList(sqlId("findBarnIdsByfarmId"), map);
     }
-
+    public Integer groupqichucunlan(Long farmId,Long barnId,Date beginTime) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("barnId", barnId);
+        map.put("farmId", farmId);
+        map.put("beginTime", beginTime);
+        return getSqlSession().selectOne(sqlId("groupqichucunlan"), map);
+    }
+    public Integer groupzhuanru(Long barnId,Date beginTime,Date endTime) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("barnId", barnId);
+        map.put("endTime", endTime);
+        map.put("beginTime", beginTime);
+        return getSqlSession().selectOne(sqlId("groupzhuanru"), map);
+    }
+    public Integer groupzhuanchu(Long barnId,Date beginTime,Date endTime) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("barnId", barnId);
+        map.put("endTime", endTime);
+        map.put("beginTime", beginTime);
+        return getSqlSession().selectOne(sqlId("groupzhuanchu"), map);
+    }
+    public List<Map<Integer, Long>> groupjianshao(Long barnId, Date beginTime, Date endTime) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("barnId", barnId);
+        map.put("endTime", endTime);
+        map.put("beginTime", beginTime);
+        return getSqlSession().selectList(sqlId("groupjianshao"), map);
+    }
 }
