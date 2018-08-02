@@ -5,10 +5,12 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.dto.IotUserDto;
 import io.terminus.doctor.user.model.IotRole;
 import io.terminus.doctor.user.model.IotUser;
+import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.IotUserRoleReadService;
 import io.terminus.doctor.user.service.IotUserRoleWriteService;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +39,8 @@ public class IotUserRoles {
     @RpcConsumer
     private IotUserRoleWriteService roleWriteService;
 
+    @RpcConsumer
+    private DoctorUserReadService doctorUserReadService;
     /**
      * 分页查询物联网运营账户
      * @param realName 用户真实姓名
@@ -73,6 +77,11 @@ public class IotUserRoles {
     @RequestMapping(value = "/createOrUpdate/iotUserRole", method = RequestMethod.POST)
     public Boolean createOrUpdateIotUserRole(@RequestBody @ApiParam("物联网运营用户") IotUserDto iotUserDto) {
         if (isNull(iotUserDto.getUserId())) {
+
+            Response<Boolean> checkUser = doctorUserReadService.checkExist(iotUserDto.getMobile(), iotUserDto.getUserName());
+            if (!checkUser.isSuccess())
+                return false;
+
             return RespHelper.or500(roleWriteService.createIotUser(iotUserDto));
         }
         return RespHelper.or500(roleWriteService.updateIotUser(iotUserDto));
