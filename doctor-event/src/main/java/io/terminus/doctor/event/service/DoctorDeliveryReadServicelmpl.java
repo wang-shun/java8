@@ -97,6 +97,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map.put("deliveryBarn", "未分娩");
                     map.put("deliveryDate", "");
                     map.put("deliveryFarm", "未分娩");
+
                     Map<String,Object> idsameparity = doctorReportDeliverDao.idsameparity(id,pig_id, parity);//判断是否存在同一胎次多次配种
                     //存在同一胎次多次配种情况下的最近一次配种
                     BigInteger id1 = null;

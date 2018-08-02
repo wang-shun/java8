@@ -26,6 +26,7 @@ import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.model.SubRole;
 import io.terminus.doctor.user.service.SubRoleReadService;
+import io.terminus.parana.common.utils.EncryptUtil;
 import io.terminus.parana.common.utils.Iters;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
 import io.terminus.parana.user.model.User;
@@ -288,7 +289,8 @@ public class DoctorUserManager {
     public User createIotUser(IotUserDto iotUserDto) {
         User user = new User();
         user.setName(iotUserDto.getUserName());
-        user.setPassword(iotUserDto.getPassword());
+
+        user.setPassword(EncryptUtil.encrypt(iotUserDto.getPassword()));
         user.setType(UserType.IOT_OPERATOR.value());
         user.setStatus(UserStatus.NORMAL.value());
         user.setMobile(iotUserDto.getMobile());

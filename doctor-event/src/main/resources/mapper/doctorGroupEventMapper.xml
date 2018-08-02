@@ -935,6 +935,7 @@
         group by farm_id
     </select>
 
+
     <select id="findGroupEvents" parameterType="map" resultMap="DoctorGroupEventMap">
         select * from doctor_group_events where farm_id = #{farmId} and (type=3 or type=4 or type=5 or type=9 or type=10) and group_id=(
         select group_id from doctor_group_events where rel_pig_event_id = #{relPigEventId} and farm_id = #{farmId}
