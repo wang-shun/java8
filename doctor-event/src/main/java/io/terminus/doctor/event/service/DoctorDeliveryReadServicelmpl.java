@@ -383,6 +383,15 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     it.remove();
                 }
             }
+            if(pigStatus == 13){
+                Map<String,Object> currentBoarBarn = doctorPigEventDao.findBoarBarn1(pigId,staffName,barnId,farmId,queryDate);//取转场前猪舍
+                if(currentBoarBarn != null) {
+                    map.put("current_barn_name", currentBoarBarn.get("barn_name"));
+                    map.put("staff_name", currentBoarBarn.get("staff_name"));//饲养员
+                } else{
+                    it.remove();
+                }
+            }
             if(pigStatus == 11){
                 map.put("status","已进场");
             }
