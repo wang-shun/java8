@@ -239,7 +239,8 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
                 List<Map> lists = doctorWarehouseMaterialHandleDao.listByFarmIdTime(criteria);
                 Date time = (Date) criteria.get("settlementDate");
-                if (time.getTime() < System.currentTimeMillis()&&time.getTime()>maxTime.getTime()) {
+//                if (time.getTime() < System.currentTimeMillis()&&time.getTime()>maxTime.getTime()) {
+                if (time.getTime() < System.currentTimeMillis()&&(time.getYear()>=maxTime.getYear()&&time.getMonth()>=maxTime.getMonth())) {
                     if (lists == null || lists.size() == 0) {
                         lists = Lists.newArrayList();
                     }
@@ -581,5 +582,11 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     @Override
     public Response<Integer> findCountByRelMaterialHandleId(Long id,Long farmId) {
         return  Response.ok(doctorWarehouseMaterialHandleDao.findCountByRelMaterialHandleId(id,farmId));
+    }
+
+    //得到该公司第一笔单据的会计年月，用来结算的时候做判断
+    @Override
+    public Response<Date> findSettlementDate(Long orgId) {
+        return Response.ok(doctorWarehouseMaterialHandleDao.findSettlementDate(orgId));
     }
 }

@@ -426,4 +426,14 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         Integer count = this.sqlSession.selectOne(this.sqlId("findCountByRelMaterialHandleId"), params);
         return count;
     }
+
+    /**
+     * 得到该公司第一笔单据的会计年月，用来结算的时候做判断
+     * @param orgId
+     * @return
+     */
+    public Date findSettlementDate(Long orgId) {
+        return this.sqlSession.selectOne(this.sqlId("findSettlementDate"), orgId);
+    }
+
 }

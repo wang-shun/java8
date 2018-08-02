@@ -71,6 +71,16 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 
 
     @Override
+    public Boolean findByOrgId(Long orgId) {
+        DoctorWarehouseOrgSettlement list = doctorWarehouseOrgSettlementDao.findByOrgId(orgId);
+        if(list!=null){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    @Override
     public boolean isUnderSettlement(Long orgId) {
 
         Lock lock = lockRegistry.obtain("settlement/" + orgId);

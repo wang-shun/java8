@@ -199,7 +199,7 @@
 
     <select id="copyDoctorWarehouseWtockMonthly" parameterType="map" resultMap="DoctorWarehouseStockMonthlyMap">
         select * from doctor_warehouse_stock_monthly where warehouse_id=#{warehouseId} and settlement_date = #{lastSettlementDate} and material_id not in(
-	      select DISTINCT material_id from doctor_warehouse_material_handle where settlement_date = #{settlementDate} and warehouse_id=#{warehouseId})
+	      select DISTINCT material_id from doctor_warehouse_material_handle where delete_flag=1 and  settlement_date = #{settlementDate} and warehouse_id=#{warehouseId})
     </select>
 
     <select id="listByHouseIdTime" parameterType="map" resultType="map">

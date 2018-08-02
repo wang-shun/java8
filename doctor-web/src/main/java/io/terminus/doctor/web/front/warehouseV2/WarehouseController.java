@@ -32,6 +32,7 @@ import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -337,8 +338,9 @@ public class WarehouseController {
 
 //        if (null == farmId)
 //            throw new JsonResponseException("missing parameter,farmId must pick one");
-        //会计年月
-        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(new Date());
+        //会计年月DateUtils.addMonths(settlementDate, -1)
+//        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(new Date());
+        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(DateUtils.addMonths(new Date(), -1));
 
         DoctorWareHouse doctorWareHouse = RespHelper.or500(doctorWarehouseReaderService.findById(warehouseId));
         //根据猪场得到orgId
