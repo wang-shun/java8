@@ -174,7 +174,6 @@
             </if>
 
             <if test="canOpenGroup != null">AND can_open_group = #{canOpenGroup}</if>
-            <if test="status != null and status == 5">AND status in (0,1,-1) </if>
             <if test="status != null">AND status = #{status}</if>
             <if test="status == null">AND status = 1</if>
         </where>
