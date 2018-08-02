@@ -2137,8 +2137,8 @@
     <select id="frontEvent" parameterType="map" resultType="map">
         select parity, pig_status_after,event_at,live_count,type
         from doctor_pig_events
-        and status=1
-        where id = (select id
+        where status=1
+        and id = (select id
         from doctor_pig_events
         where event_at &lt; #{time}
         and status=1
