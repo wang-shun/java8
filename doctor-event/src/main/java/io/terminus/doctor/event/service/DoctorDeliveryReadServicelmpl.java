@@ -217,9 +217,10 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             int source = (int)map.get("source");
             if (source == 1) {
                 map.put("source","本厂");
-            }
-            if (source == 2) {
+            }else if (source == 2) {
                 map.put("source","外购");
+            }else{
+                map.put("source","");
             }
             BigInteger id = (BigInteger)map.get("id");
             BigInteger pigId = (BigInteger)map.get("pig_id");
