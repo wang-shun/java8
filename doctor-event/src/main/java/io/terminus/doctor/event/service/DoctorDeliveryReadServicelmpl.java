@@ -577,7 +577,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         map.put("xiaoshou", 0);
                         map.put("siwang", 0);
                         map.put("taotai", 0);
-                        //map.put("qitajianshao", 0);
+                        map.put("qitajianshao", 0);
                     }
                 }
                 list.add(map);
