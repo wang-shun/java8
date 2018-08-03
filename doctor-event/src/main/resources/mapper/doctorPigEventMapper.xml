@@ -2034,7 +2034,7 @@
         and status=1
         and type in (2,6)
         and event_at &lt; #{time}
-        and id > max(d.id))
+        and (id > max(d.id) or event_at >= max(d.event_at)))
     </select>
 
     <select id="getInFarmPigId1" parameterType="map" resultType="map">
@@ -2060,7 +2060,7 @@
         and type = 6
         and status=1
         and event_at &lt; #{time}
-        and id > max(d.id))
+        and (id > max(d.id) or event_at >= max(d.event_at)))
     </select>
 
     <select id="getInFarmPigId2" parameterType="map" resultType="map">
