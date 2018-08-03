@@ -2179,6 +2179,7 @@
         FROM doctor_pig_events d
         join doctor_pigs a on d.pig_id = a.id
         WHERE d.farm_id = #{farmId}
+        and d.status = 1
         and d.kind = 2
         and d.type in (7,20)
         and d.event_at &lt;= #{queryDate}
@@ -2193,6 +2194,7 @@
         WHERE farm_id = #{farmId}
         and pig_id = d.pig_id
         and kind = 2
+        and status = 1
         and type in (2,6)
         and event_at &lt;= #{queryDate}
         and event_at >= max(d.event_at)
@@ -2204,6 +2206,7 @@
         FROM doctor_pig_events d
         join doctor_pigs a on d.pig_id = a.id
         WHERE d.farm_id = #{farmId}
+        and d.status = 1
         and d.kind = 2
         and d.type = 6
         and d.event_at &lt;= #{queryDate}
@@ -2219,6 +2222,7 @@
         FROM doctor_pig_events d
         join doctor_pigs a on d.pig_id = a.id
         WHERE d.farm_id = #{farmId}
+        and d.status = 1
         and d.kind = 2
         and d.type = 2
         and d.event_at &lt;= #{queryDate}
@@ -2232,13 +2236,14 @@
         FROM doctor_pig_events
         WHERE farm_id = #{farmId}
         and pig_id = d.pig_id
+        and status = 1
         and kind = 2
         order by id desc limit 1)
     </select>
 
     <select id="isBoarBarn" parameterType="map" resultType="BigInteger">
         select id from doctor_pig_events
-        where pig_id = #{pigId} and kind = 2 and type = 1 and event_at > #{queryDate} and event_at >= #{eventAt} and id > #{id}
+        where pig_id = #{pigId} and kind = 2 and type = 1 and status = 1 and event_at > #{queryDate} and event_at >= #{eventAt} and id > #{id}
         order by id
         limit 1
     </select>
@@ -2247,6 +2252,7 @@
         SELECT a.barn_id as barn_id, a.barn_name as barn_name, b.staff_name as staff_name
         FROM doctor_pig_events a join doctor_barns b on a.barn_id = b.id
         where a.id = #{isBoarBarn}
+        and a.status = 1
         <if test="staffName != null"> AND b.staff_name like CONCAT(CONCAT('%',#{staffName}),'%')</if>
         <if test="barnId != null"> and b.id = #{barnId} </if>
     </select>
@@ -2264,7 +2270,7 @@
         SELECT a.barn_id as barn_id, a.barn_name as barn_name, b.staff_name as staff_name
         FROM doctor_pig_events a
         join doctor_barns b on a.barn_id = b.id
-        where a.farm_id = #{farmId} and a.type = 2 and a.pig_id = #{pigId} and a.event_at &lt;= #{queryDate}
+        where a.farm_id = #{farmId} and a.type = 2 and a.pig_id = #{pigId} and a.event_at &lt;= #{queryDate} and a.status = 1
         <if test="staffName != null"> AND b.staff_name like CONCAT(CONCAT('%',#{staffName}),'%')</if>
         <if test="barnId != null"> and b.id = #{barnId} </if>
     </select>
