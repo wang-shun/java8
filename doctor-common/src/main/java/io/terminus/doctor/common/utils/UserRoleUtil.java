@@ -78,6 +78,10 @@ public class UserRoleUtil {
         return type != null && type == UserType.FARM_ADMIN_PRIMARY.value();
     }
 
+    public static boolean isIOT(Integer type) {
+        return type != null && type == UserType.IOT_ADMIN.value();
+    }
+
     // TODO: 只考虑最规范的语法
     public static List<String> roleConsFrom(String str) {
         if (Strings.isNullOrEmpty(str)) {

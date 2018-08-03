@@ -68,6 +68,7 @@ public class DoctorUserRoleLoaderImpl implements UserRoleLoader {
             forPrimary(user, roleBuilder);
             forSub(user, roleBuilder);
             forPigScore(user, roleBuilder);
+            forIot(user, roleBuilder);
             Set<String> originRoles = new HashSet<>();
             if (user.getRoles() != null) {
                 originRoles.addAll(user.getRoles());
@@ -114,25 +115,34 @@ public class DoctorUserRoleLoaderImpl implements UserRoleLoader {
         mutableRoles.add("PRIMARY(OWNER)");
     }
 
-    protected void forPigScore(User user, Collection<String> mutableRoles){
+    protected void forIot(User user, Collection<String> mutableRoles) {
+        if (user == null || !isIOT(user.getType())) {
+            return;
+        }
+        log.info("user is iot type,add PRIMARY and PRIMARY(OWNER) role");
+        mutableRoles.add("PRIMARY");
+        mutableRoles.add("PRIMARY(OWNER)");
+    }
+
+    protected void forPigScore(User user, Collection<String> mutableRoles) {
         if (user == null) {
             return;
         }
 
         User u = userDao.findById(user.getId());
 
-        if(u.getExtra() == null || u.getExtra().isEmpty()){
+        if (u.getExtra() == null || u.getExtra().isEmpty()) {
             return;
         }
         Long farmId = null;
         Long orgId = null;
-        if(u.getExtra().containsKey("farmId")){
+        if (u.getExtra().containsKey("farmId")) {
             farmId = Long.parseLong(u.getExtra().get("farmId"));
         }
-        if(u.getExtra().containsKey("orgId")){
+        if (u.getExtra().containsKey("orgId")) {
             orgId = Long.parseLong(u.getExtra().get("orgId"));
         }
-        if(farmId == null|| orgId == null){
+        if (farmId == null || orgId == null) {
             return;
         }
         PigScoreApply apply = pigScoreApplyDao.findByOrgAndFarmId(orgId, farmId);
