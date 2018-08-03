@@ -14,7 +14,9 @@ import io.terminus.doctor.user.model.IotUser;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.IotUserRoleReadService;
 import io.terminus.doctor.user.service.IotUserRoleWriteService;
+import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,6 +44,10 @@ public class IotUserRoles {
 
     @RpcConsumer
     private DoctorUserReadService doctorUserReadService;
+
+
+    @Autowired
+    private SubService subService;
 
     /**
      * 分页查询物联网运营账户
@@ -92,6 +98,17 @@ public class IotUserRoles {
             return RespHelper.or500(roleWriteService.createIotUser(iotUserDto));
         }
         return RespHelper.or500(roleWriteService.updateIotUser(iotUserDto));
+    }
+
+    /**
+     * 重置员工密码
+     * @param userId 员工用户ID
+     * @param resetPassword 重置的密码
+     * @return
+     */
+    @RequestMapping(value = "/reset/{userId}", method = RequestMethod.POST)
+    public Boolean resetPassword(@PathVariable Long userId, @RequestParam String resetPassword){
+        return RespHelper.or500(subService.resetPassword(UserUtil.getCurrentUser(), userId, resetPassword));
     }
 
     /**
