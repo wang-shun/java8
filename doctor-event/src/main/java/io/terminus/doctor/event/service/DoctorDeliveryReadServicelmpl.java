@@ -342,15 +342,16 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
     }
 
     @Override
-    public List<Map<String, Object>> boarReport(Long farmId, Date queryDate, String pigCode, String staffName, Integer barnId, Integer breedId, Integer pigStatus, Date beginDate, Date endDate) {
+    public List<Map<String, Object>> boarReport(Long farmId, Date queryDate, String pigCode, String staffName, Integer barnId, Integer breedId, Date beginDate, Date endDate) {
         List<Map<String, Object>> inFarmBoarId = null;
-        if(pigStatus == 11){
-            inFarmBoarId = doctorPigEventDao.getInFarmBoarId1(farmId,queryDate,barnId,pigCode,breedId,staffName,beginDate,endDate);
-        } else if(pigStatus == 12){
-            inFarmBoarId = doctorPigEventDao.getInFarmBoarId2(farmId,queryDate,barnId,pigCode,breedId,staffName,beginDate,endDate);
-        } else if (pigStatus == 13){
-            inFarmBoarId = doctorPigEventDao.getInFarmBoarId3(farmId,queryDate,barnId,pigCode,breedId,staffName,beginDate,endDate);
-        }
+        inFarmBoarId = doctorPigEventDao.getInFarmBoarId1(farmId,queryDate,barnId,pigCode,breedId,staffName,beginDate,endDate);
+//        if(pigStatus == 11){
+//            inFarmBoarId = doctorPigEventDao.getInFarmBoarId1(farmId,queryDate,barnId,pigCode,breedId,staffName,beginDate,endDate);
+//        } else if(pigStatus == 12){
+//            inFarmBoarId = doctorPigEventDao.getInFarmBoarId2(farmId,queryDate,barnId,pigCode,breedId,staffName,beginDate,endDate);
+//        } else if (pigStatus == 13){
+//            inFarmBoarId = doctorPigEventDao.getInFarmBoarId3(farmId,queryDate,barnId,pigCode,breedId,staffName,beginDate,endDate);
+//        }
         for (Iterator<Map<String,Object>> it = inFarmBoarId.iterator();it.hasNext();) {
             Map map = it.next();
             if (map.get("source") != null){
@@ -383,24 +384,25 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     it.remove();
                 }
             }
-            if(pigStatus == 13){
-                Map<String,Object> currentBoarBarn = doctorPigEventDao.findBoarBarn1(pigId,staffName,barnId,farmId,queryDate);//取转场前猪舍
-                if(currentBoarBarn != null) {
-                    map.put("current_barn_name", currentBoarBarn.get("barn_name"));
-                    map.put("staff_name", currentBoarBarn.get("staff_name"));//饲养员
-                } else{
-                    it.remove();
-                }
-            }
-            if(pigStatus == 11){
-                map.put("status","已进场");
-            }
-            if(pigStatus == 12){
-                map.put("status","已离场");
-            }
-            if(pigStatus == 13){
-                map.put("status","已转场");
-            }
+//            if(pigStatus == 13){
+//                Map<String,Object> currentBoarBarn = doctorPigEventDao.findBoarBarn1(pigId,staffName,barnId,farmId,queryDate);//取转场前猪舍
+//                if(currentBoarBarn != null) {
+//                    map.put("current_barn_name", currentBoarBarn.get("barn_name"));
+//                    map.put("staff_name", currentBoarBarn.get("staff_name"));//饲养员
+//                } else{
+//                    it.remove();
+//                }
+//            }
+//            if(pigStatus == 11){
+//                map.put("status","已进场");
+//            }
+//            if(pigStatus == 12){
+//                map.put("status","已离场");
+//            }
+//            if(pigStatus == 13){
+//                map.put("status","已转场");
+//            }
+            map.put("status","已进场");
 
         }
         return inFarmBoarId;
