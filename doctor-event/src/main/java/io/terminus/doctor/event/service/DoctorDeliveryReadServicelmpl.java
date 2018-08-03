@@ -488,7 +488,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 int barnType = (int) (map.get("pig_type"));
                 if (barnType == 5 || barnType == 6 || barnType == 7 || barnType == 9) {
                     Integer qichucunlan = doctorBarnDao.qichucunlan(farmId, barnId, beginTime);
-                    Integer qimucunlan = doctorBarnDao.qichucunlan(farmId, barnId, endTime);
+                    Integer qimucunlan = doctorBarnDao.qimucunlan(farmId, barnId, endTime);
                     if (qichucunlan != null) {
                         map.put("qichucunlan", qichucunlan);
                     } else {
@@ -535,7 +535,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 }
                 if (barnType == 2 || barnType == 3 || barnType == 4) {
                     Integer qichucunlan = doctorBarnDao.groupqichucunlan(farmId, barnId, beginTime);
-                    Integer qimucunlan = doctorBarnDao.groupqichucunlan(farmId, barnId, endTime);
+                    Integer qimucunlan = doctorBarnDao.groupqimucunlan(farmId, barnId, endTime);
                     if (qichucunlan != null) {
                         map.put("qichucunlan", qichucunlan);
                     } else {

@@ -142,6 +142,13 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
         map.put("beginTime", beginTime);
         return getSqlSession().selectOne(sqlId("qichucunlan"), map);
     }
+    public Integer qimucunlan(Long farmId,Long barnId,Date endTime) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("barnId", barnId);
+        map.put("farmId", farmId);
+        map.put("endTime", endTime);
+        return getSqlSession().selectOne(sqlId("qimucunlan"), map);
+    }
     public List<Map<Integer,Long>> jianshao(Long barnId,Date beginTime,Date endTime) {
         Map<String, Object> map = Maps.newHashMap();
         map.put("barnId", barnId);
@@ -168,6 +175,13 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
         map.put("farmId", farmId);
         map.put("beginTime", beginTime);
         return getSqlSession().selectOne(sqlId("groupqichucunlan"), map);
+    }
+    public Integer groupqimucunlan(Long farmId,Long barnId,Date endTime) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("barnId", barnId);
+        map.put("farmId", farmId);
+        map.put("endTime", endTime);
+        return getSqlSession().selectOne(sqlId("groupqimucunlan"), map);
     }
     public Integer groupzhuanru(Long barnId,Date beginTime,Date endTime) {
         Map<String, Object> map = Maps.newHashMap();
