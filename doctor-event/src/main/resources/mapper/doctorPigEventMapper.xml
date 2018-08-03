@@ -2018,7 +2018,7 @@
         WHERE d.farm_id = #{farmId}
         and d.kind = 1
         and d.type in (7,20)
-        and d.event_at &lt; #{time}
+        and d.event_at &lt;= #{time}
         and d.status = 1
         <if test="pigCode != null"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
         <if test="breed != null"> and a.breed_id = #{breed} </if>
@@ -2033,7 +2033,7 @@
         and kind = 1
         and status=1
         and type in (2,6)
-        and event_at &lt; #{time}
+        and event_at &lt;= #{time}
         and (id > max(d.id) or event_at >= max(d.event_at)))
     </select>
 
@@ -2044,7 +2044,7 @@
         WHERE d.farm_id = #{farmId}
         and d.kind = 1
         and d.type in (7,20)
-        and d.event_at &lt; #{time}
+        and d.event_at &lt;= #{time}
         and d.status = 1
         <if test="pigCode != null"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
         <if test="breed != null"> and a.breed_id = #{breed} </if>
@@ -2059,7 +2059,7 @@
         and kind = 1
         and type = 6
         and status=1
-        and event_at &lt; #{time}
+        and event_at &lt;= #{time}
         and (id > max(d.id) or event_at >= max(d.event_at)))
     </select>
 
@@ -2070,7 +2070,7 @@
         WHERE d.farm_id = #{farmId}
         and d.kind = 1
         and d.type = 6
-        and d.event_at &lt; #{time}
+        and d.event_at &lt;= #{time}
         and d.status = 1
         <if test="pigCode != null"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
         <if test="breed != null"> and a.breed_id = #{breed} </if>
@@ -2086,7 +2086,7 @@
         and d.kind = 1
         and d.type = 2
         and d.status = 1
-        and d.event_at &lt; #{time}
+        and d.event_at &lt;= #{time}
         <if test="pigCode != null"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
         <if test="breed != null"> and a.breed_id = #{breed} </if>
         <if test="beginInFarmTime != null"> and a.in_farm_date > #{beginInFarmTime} </if>
@@ -2117,7 +2117,7 @@
 
     <select id="isBarn" parameterType="map" resultType="BigInteger">
         select id from doctor_pig_events
-        where pig_id = #{pigId} and kind = 1 and status=1 and type in (1,10,12,14) and event_at &lt; #{time} and event_at >= #{eventAt} and id > #{id}
+        where pig_id = #{pigId} and kind = 1 and status=1 and type in (1,10,12,14) and event_at &lt;= #{time} and event_at >= #{eventAt} and id > #{id}
         order by id
         limit 1
     </select>
@@ -2129,7 +2129,7 @@
     <select id="frontEventId" parameterType="map" resultType="map">
         select id,type
         from doctor_pig_events
-        where event_at &lt; #{time}
+        where event_at &lt;= #{time}
         and pig_id = #{pigId}
         and status=1
         order by id desc limit 1
@@ -2140,7 +2140,7 @@
         where status=1
         and id = (select id
         from doctor_pig_events
-        where event_at &lt; #{time}
+        where event_at &lt;= #{time}
         and status=1
         and pig_id = #{pigId}
         order by id desc limit 1)
@@ -2149,7 +2149,7 @@
         <if test="pigStatus != null and pigStatus !=10 and  pigStatus !=0"> and  pig_status_after = #{pigStatus} </if>
     </select>
     <select id="afterEvent" parameterType="map" resultType="map">
-        select min(id) as id,farm_id from doctor_pig_events where event_at >= #{time} and pig_id = #{pigId}
+        select min(id) as id,farm_id from doctor_pig_events where event_at > #{time} and pig_id = #{pigId}
     </select>
     <select id="findBarns" parameterType="map" resultType="map">
         select b.current_barn_id, b.current_barn_name, c.staff_name as staff_name, b.farm_id as farm_id
@@ -2165,12 +2165,12 @@
         where pig_id = #{pigId}
         and status=1
         and event_at >= #{nearDeliverDate}
-        and event_at &lt; #{time}
+        and event_at &lt;= #{time}
         group by type
         HAVING type in (17,18,19)
     </select>
     <select id="nearDeliver" parameterType="map" resultType="map">
-        select event_at,live_count from doctor_pig_events where event_at &lt; #{time} and pig_id = #{pigId} and status=1 and type = 15 order by id desc limit 1
+        select event_at,live_count from doctor_pig_events where event_at &lt;= #{time} and pig_id = #{pigId} and status=1 and type = 15 order by id desc limit 1
     </select>
 
 
