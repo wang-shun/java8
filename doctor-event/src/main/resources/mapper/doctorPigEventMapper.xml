@@ -2197,7 +2197,7 @@
         and status = 1
         and type in (2,6)
         and event_at &lt; #{queryDate}
-        and event_at > max(d.event_at)
+        and event_at >= max(d.event_at)
         and id > d.id)
     </select>
 
