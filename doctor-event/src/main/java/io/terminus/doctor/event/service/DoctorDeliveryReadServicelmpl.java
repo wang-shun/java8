@@ -528,7 +528,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     } else {
                         map.put("zhuanchu", 0);
                     }
-                    Long zhuanru = qimucunlan - qichucunlan + (map.get("xiaoshou") == null ? 0 : (Long) map.get("xiaoshou")) + (map.get("siwang") == null ? 0 : (Long) map.get("siwang")) + (map.get("taotai") == null ? 0 : (Long) map.get("taotai")) + (map.get("qitajianshao") == null ? 0 : (Long) map.get("qitajianshao"));
+                    Long zhuanru = qimucunlan - qichucunlan + (zhuanchu == null ? 0 : zhuanchu) + (map.get("xiaoshou") == null ? 0 : (Long) map.get("xiaoshou")) + (map.get("siwang") == null ? 0 : (Long) map.get("siwang")) + (map.get("taotai") == null ? 0 : (Long) map.get("taotai")) + (map.get("qitajianshao") == null ? 0 : (Long) map.get("qitajianshao"));
                     map.put("zhuanru", zhuanru);
                 }
                 if (barnType == 2 || barnType == 3 || barnType == 4) {
