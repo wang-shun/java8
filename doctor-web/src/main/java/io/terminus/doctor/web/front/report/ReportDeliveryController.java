@@ -358,7 +358,7 @@ public class ReportDeliveryController {
      * @param time
      * @param groupCode
      * @param operatorName
-     * @param barnType
+     * @param barn
      * @param groupType
      * @param groupStatus
      * @param buildBeginGroupTime
@@ -370,14 +370,14 @@ public class ReportDeliveryController {
                                                @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date time,
                                                @RequestParam(required = false) String groupCode,
                                                @RequestParam(required = false) String operatorName,
-                                               @RequestParam(required = false) Integer barnType,
+                                               @RequestParam(required = false) Long barn,
                                                 @RequestParam(required = false) Integer groupType,
                                                @RequestParam(required = false) Integer groupStatus,
                                                @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date buildBeginGroupTime,
                                                 @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date buildEndGroupTime,
                                                 @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date closeBeginGroupTime,
                                                 @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date closeEndGroupTime) {
-        return doctorDeliveryReadService.groupReport(farmId,time,groupCode,operatorName,barnType,groupType,groupStatus,buildBeginGroupTime,buildEndGroupTime,closeBeginGroupTime,closeEndGroupTime);
+        return doctorDeliveryReadService.groupReport(farmId,time,groupCode,operatorName,barn,groupType,groupStatus,buildBeginGroupTime,buildEndGroupTime,closeBeginGroupTime,closeEndGroupTime);
     }
 
     /**

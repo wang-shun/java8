@@ -951,7 +951,7 @@
         join doctor_barns c on b.current_barn_id = c.id
         where a.farm_id = #{farmId} and a.type = 1 and a.status = 1
         <if test="time != null">and a.event_at &lt;= #{time}</if>
-        <if test="barnType != null">and c.pig_type = #{barnType}</if>
+        <if test="barn != null">and c.id = #{barn}</if>
         <if test="groupCode != null"> AND a.group_code like CONCAT(CONCAT('%',#{groupCode}),'%')</if>
         <if test="operatorName != null"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
         <if test="groupType != null">and c.pig_type = #{groupType}</if>
@@ -967,7 +967,7 @@
         join doctor_barns c on b.current_barn_id = c.id
         where a.farm_id = #{farmId} and a.type = 10 and a.status = 1
         <if test="time != null">and a.event_at &lt;= #{time}</if>
-        <if test="barnType != null">and c.pig_type = #{barnType}</if>
+        <if test="barn != null">and c.id = #{barn}</if>
         <if test="groupCode != null"> AND a.group_code like CONCAT(CONCAT('%',#{groupCode}),'%')</if>
         <if test="operatorName != null"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
         <if test="groupType != null">and c.pig_type = #{groupType}</if>
@@ -982,7 +982,7 @@
         join doctor_barns c on b.current_barn_id = c.id
         where a.farm_id = #{farmId} and a.status = 1
         <if test="time != null">and a.event_at &lt;= #{time}</if>
-        <if test="barnType != null">and c.pig_type = #{barnType}</if>
+        <if test="barn != null">and c.id = #{barn}</if>
         <if test="groupCode != null"> AND a.group_code like CONCAT(CONCAT('%',#{groupCode}),'%')</if>
         <if test="operatorName != null"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
         <if test="groupType != null">and c.pig_type = #{groupType}</if>
