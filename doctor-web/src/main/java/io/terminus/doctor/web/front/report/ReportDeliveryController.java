@@ -139,7 +139,7 @@ public class ReportDeliveryController {
                                                @RequestParam(required = false) Long barnId,
                                                @RequestParam(required = false) Integer breedId,
                                                @RequestParam(required = false) Integer parity,
-                                               @RequestParam(required = true) Integer pigStatus,
+                                               @RequestParam(required = false) Integer pigStatus,
                                                @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beginInFarmTime,
                                                @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endInFarmTime) {
         return doctorDeliveryReadService.sowsReport(farmId,time,pigCode,operatorName,barnId,breedId,parity,pigStatus,beginInFarmTime,endInFarmTime);
