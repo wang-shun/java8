@@ -16,11 +16,7 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigInteger;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by yaoqijun.
@@ -1097,6 +1093,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         map.put("queryDate",queryDate);
         return this.sqlSession.selectOne(this.sqlId("isBoarBarn"), map);
     }
+
     public Map<String,Object> findBoarBarn(BigInteger isBoarBarn,BigInteger id,BigInteger pigId,Date eventAt,Date queryDate,String staffName,Integer barnId){
         Map<String, Object> map = new HashMap<>();
         map.put("isBoarBarn",isBoarBarn);
@@ -1115,20 +1112,27 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         map.put("barnId",barnId);
         return this.sqlSession.selectOne(this.sqlId("findBoarBarns"), map);
     }
-    public Map<String,Object> findBoarBarn1(BigInteger pigId,String staffName,Integer barnId,Long farmId,Date queryDate){
-        Map<String, Object> map = new HashMap<>();
-        map.put("pigId",pigId);
-        map.put("staffName",staffName);
-        map.put("barnId",barnId);
-        map.put("farmId", farmId);
-        map.put("queryDate", queryDate);
-        return this.sqlSession.selectOne(this.sqlId("findBoarBarn1"), map);
-    }
+
     public Integer checkBarn(Long barnId){
         Map<String, Object> map = new HashMap<>();
         map.put("barnId",barnId);
         return this.sqlSession.selectOne(this.sqlId("checkBarn"), map);
     }
+    public BigInteger isBoarChgFarm(BigInteger id, BigInteger pigId, Date eventAt, Date queryDate){
+        Map<String, Object> map = new HashMap<>();
+        map.put("id",id);
+        map.put("pigId",pigId);
+        map.put("eventAt",eventAt);
+        map.put("queryDate",queryDate);
+        return this.sqlSession.selectOne(this.sqlId("isBoarChgFarm"), map);
+    }
 
+    public String findStaffName(Long currentBarnId, String staffName,Integer barnId){
+        Map<String, Object> map = new HashMap<>();
+        map.put("currentBarnId",currentBarnId);
+        map.put("staffName",staffName);
+        map.put("barnId",barnId);
+        return this.sqlSession.selectOne(this.sqlId("findStaffName"), map);
+    }
 
 }
