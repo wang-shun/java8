@@ -234,7 +234,7 @@ public class DoctorUserManager {
 
                 //更新用户申请服务中绑定的手机号
                 List<DoctorServiceReview> doctorServiceReviews = doctorServiceReviewDao.findByUserId(user.getId());
-                if(!Arguments.isNullOrEmpty(doctorServiceReviews)) {
+                if (!Arguments.isNullOrEmpty(doctorServiceReviews)) {
                     DoctorServiceReview updateReview = new DoctorServiceReview();
                     doctorServiceReviews.forEach(doctorServiceReview -> {
                         updateReview.setId(doctorServiceReview.getId());
@@ -310,6 +310,12 @@ public class DoctorUserManager {
 
     @Transactional
     public void updateIotUser(IotUserDto iotUserDto) {
+
+        User user = userDao.findById(iotUserDto.getUserId());
+        user.setStatus(iotUserDto.getStatus());
+        userDao.update(user);
+
+
         UserProfile userProfile = userProfileDao.findByUserId(iotUserDto.getUserId());
         UserProfile updateUser = new UserProfile();
         updateUser.setId(userProfile.getId());
