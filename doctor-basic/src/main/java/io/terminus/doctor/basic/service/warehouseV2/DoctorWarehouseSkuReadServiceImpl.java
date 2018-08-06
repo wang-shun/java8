@@ -30,7 +30,7 @@ public class DoctorWarehouseSkuReadServiceImpl implements DoctorWarehouseSkuRead
     private DoctorWarehouseSkuDao doctorWarehouseSkuDao;
 
     @Override
-    public Response<Integer> findWarehouseSkuByOrgAndName(Long orgId, String name) {
+    public Response<List<DoctorWarehouseSku>> findWarehouseSkuByOrgAndName(Long orgId, String name) {
         return Response.ok(doctorWarehouseSkuDao.findWarehouseSkuByOrgAndName(orgId,name));
     }
 

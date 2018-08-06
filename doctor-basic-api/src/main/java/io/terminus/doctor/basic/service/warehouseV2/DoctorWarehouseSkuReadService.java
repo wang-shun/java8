@@ -15,7 +15,7 @@ import java.util.Map;
  */
 public interface DoctorWarehouseSkuReadService {
 
-    Response<Integer> findWarehouseSkuByOrgAndName(Long orgId,String name);
+    Response<List<DoctorWarehouseSku>> findWarehouseSkuByOrgAndName(Long orgId,String name);
 
     /**
      * 查询

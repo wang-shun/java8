@@ -25,7 +25,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * 物料
@@ -180,9 +183,11 @@ public class SkuController {
             skuDto.setOrgId(farm.getOrgId());
         }
 
-        Integer cc = RespHelper.or500(doctorWarehouseSkuReadService.findWarehouseSkuByOrgAndName(skuDto.getOrgId(), skuDto.getName()));
-        if (cc>0) {
-            throw new JsonResponseException("物料名称已存在");
+        List<DoctorWarehouseSku> doctorWarehouseSkus = RespHelper.or500(doctorWarehouseSkuReadService.findWarehouseSkuByOrgAndName(skuDto.getOrgId(), skuDto.getName()));
+        for (DoctorWarehouseSku ws:doctorWarehouseSkus) {
+            if (notNull(ws) && !Objects.equals(ws.getId(),skuDto.getId())) {
+                throw new JsonResponseException("物料名称已存在");
+            }
         }
 
         if (skuDto.getStatus().equals(WarehouseSkuStatus.FORBIDDEN.getValue())) {
@@ -219,8 +224,8 @@ public class SkuController {
             skuDto.setOrgId(farm.getOrgId());
         }
 
-        Integer cc = RespHelper.or500(doctorWarehouseSkuReadService.findWarehouseSkuByOrgAndName(skuDto.getOrgId(), skuDto.getName()));
-        if (cc>0) {
+        List<DoctorWarehouseSku> doctorWarehouseSkus = RespHelper.or500(doctorWarehouseSkuReadService.findWarehouseSkuByOrgAndName(skuDto.getOrgId(), skuDto.getName()));
+        if (doctorWarehouseSkus.size()>0) {
             throw new JsonResponseException("物料名称已存在");
         }
 

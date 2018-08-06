@@ -6,6 +6,7 @@ import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,10 +27,10 @@ public class DoctorWarehouseSkuDao extends MyBatisDao<DoctorWarehouseSku> {
         return this.sqlSession.selectOne(this.sqlId("findLastCode"), params);
     }
 
-    public Integer findWarehouseSkuByOrgAndName(Long orgId,String name) {
+    public List<DoctorWarehouseSku> findWarehouseSkuByOrgAndName(Long orgId, String name) {
         Map<String, Object> params = new HashMap<>(2);
         params.put("orgId", orgId);
         params.put("name", name);
-        return getSqlSession().selectOne("findWarehouseSkuByOrgAndName", params);
+        return getSqlSession().selectList("findWarehouseSkuByOrgAndName", params);
     }
 }
