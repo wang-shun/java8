@@ -159,4 +159,9 @@
         LIMIT 1
     </select>
 
+    <select id="findWarehouseSkuByOrgAndName" parameterType="map" resultType="Integer">
+        select count(*) from doctor_warehouse_sku
+        where org_id = #{orgId}  and `name` = #{name}
+    </select>
+
 </mapper>
