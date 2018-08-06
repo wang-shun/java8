@@ -377,7 +377,14 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             BigInteger id = (BigInteger)map.get("id");
             BigInteger pigId = (BigInteger)map.get("pig_id");
             Date eventAt = (Date)map.get("event_at");
-            BigInteger isBoarBarn = doctorPigEventDao.isBoarBarn(id,pigId,eventAt,queryDate); //该时间点后是否有转舍事件发生
+         //   BigInteger isBoarBarn = doctorPigEventDao.isBoarBarn(id,pigId,eventAt,queryDate,farmId); //该时间点后是否有转舍事件发生
+            Map<String,Object> isBoarBarn1 = doctorPigEventDao.isBoarBarn(id,pigId,eventAt,queryDate,farmId);
+            BigInteger isBoarBarn = null;
+            Date chgBarnEventAt = null;
+            if (isBoarBarn1 != null){
+                isBoarBarn = (BigInteger) isBoarBarn1.get("id");
+                chgBarnEventAt = (Date)isBoarBarn1.get("event_at");
+            }
             if(isBoarBarn != null) {
                 Map<String,Object> currentBoarBarn = doctorPigEventDao.findBoarBarn(isBoarBarn,id,pigId,eventAt,queryDate,staffName,barnId);//如果后面又转舍事件,去后面事件的猪舍
                 if(currentBoarBarn != null) {
@@ -395,11 +402,11 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     it.remove();
                 }
             }
-            BigInteger isBoarChgFarm = doctorPigEventDao.isBoarChgFarm(id, pigId, eventAt, queryDate); //该时间点后是否有转场事件发生
+           BigInteger isBoarChgFarm = doctorPigEventDao.isBoarChgFarm(id, pigId, eventAt, queryDate,chgBarnEventAt); //该时间点后是否有转场事件发生
             DoctorChgFarmInfo doctorChgFarmInfo;
             DoctorPigTrack doctorPigTrack;
             DoctorPig doctorPig;
-            if (isBoarChgFarm != null) {
+            if (isBoarChgFarm != null ) {
                 doctorChgFarmInfo = doctorChgFarmInfoDao.findBoarChgFarm(farmId, pigId, isBoarChgFarm);
                 if (doctorChgFarmInfo != null){
                     doctorPigTrack = JSON_MAPPER.fromJson(doctorChgFarmInfo.getTrack(), DoctorPigTrack.class);

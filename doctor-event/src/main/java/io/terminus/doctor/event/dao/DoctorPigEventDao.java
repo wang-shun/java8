@@ -1085,12 +1085,13 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         return this.sqlSession.selectOne(this.sqlId("nearDeliver"), map);
     }
 
-    public BigInteger isBoarBarn(BigInteger id, BigInteger pigId, Date eventAt, Date queryDate){
+    public Map<String, Object> isBoarBarn(BigInteger id, BigInteger pigId, Date eventAt, Date queryDate, Long farmId){
         Map<String, Object> map = new HashMap<>();
         map.put("id",id);
         map.put("pigId",pigId);
         map.put("eventAt",eventAt);
         map.put("queryDate",queryDate);
+        map.put("farmId",farmId);
         return this.sqlSession.selectOne(this.sqlId("isBoarBarn"), map);
     }
 
@@ -1118,12 +1119,13 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         map.put("barnId",barnId);
         return this.sqlSession.selectOne(this.sqlId("checkBarn"), map);
     }
-    public BigInteger isBoarChgFarm(BigInteger id, BigInteger pigId, Date eventAt, Date queryDate){
+    public BigInteger isBoarChgFarm(BigInteger id, BigInteger pigId, Date eventAt, Date queryDate,Date chgBarnEventAt){
         Map<String, Object> map = new HashMap<>();
         map.put("id",id);
         map.put("pigId",pigId);
         map.put("eventAt",eventAt);
         map.put("queryDate",queryDate);
+        map.put("chgBarnEventAt",chgBarnEventAt);
         return this.sqlSession.selectOne(this.sqlId("isBoarChgFarm"), map);
     }
 
