@@ -33,7 +33,9 @@ import java.util.Date;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
+
 
 
 /**

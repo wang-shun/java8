@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.front.event.controller;
 
+import com.alibaba.dubbo.common.json.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.snakeyaml.serializer.SerializerException;
 import com.google.common.base.Joiner;
@@ -74,6 +75,7 @@ import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -445,6 +447,14 @@ public class DoctorPigCreateEvents {
                                    @RequestParam("sowInfoDtoJson") String sowInfoDtoJson) {
 
         log.info("createSowEventInfo, pigId:{}, farmId:{}, eventType:{}, data:{}", pigId, farmId, eventType, sowInfoDtoJson);
+
+       /* JSONObject  jasonObject = JSONObject.fromObject(sowInfoDtoJson);
+        Map maps = (Map)JSONObject.fromObject(sowInfoDtoJson);
+            for (Object map : maps.entrySet()){
+                System.out.println(((Map.Entry)map).getKey()+"     " + ((Map.Entry)map).getValue());
+            }
+
+        sowInfoDtoJson = jasonObject.fromObject(sowInfoDtoJson).toString();*/
 
         BasePigEventInputDto inputDto = eventInput(PigEvent.from(eventType), sowInfoDtoJson, farmId, DoctorPig.PigSex.SOW.getKey(), pigId);
         return RespWithExHelper.orInvalid(doctorPigEventWriteService.pigEventHandle(buildEventInput(inputDto, pigId, PigEvent.from(eventType)), buildBasicInputInfoDto(farmId, PigEvent.from(eventType))));
