@@ -277,7 +277,8 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         }
                         if (status == PigStatus.KongHuai.getKey()) {
                             if(frontEvent.get("preg_check_result")!= null) {
-                                int pregCheckResult = (int) frontEvent.get("preg_check_result");
+                                //doctorPigEventDao.getPregCheckResult(parity,pigId,time,pigStatus)
+                                int pregCheckResult = doctorPigEventDao.getPregCheckResult(parity,pigId,time,pigStatus);
                                 if (pregCheckResult == 2) {
                                     Status = "阴性";
                                 } else if (pregCheckResult == 3) {

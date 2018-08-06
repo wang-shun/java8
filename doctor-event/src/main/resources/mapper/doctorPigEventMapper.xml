@@ -2140,7 +2140,19 @@
         order by id desc limit 1)
         <if test="parity != null and parity != 11"> and parity = #{parity} </if>
         <if test="parity != null and parity == 11"> and  parity >= 11 </if>
-        <if test="pigStatus != null"> and  pig_status_after = #{pigStatus} </if>
+        <if test="pigStatus != null and pigStatus != 5"> and  pig_status_after = #{pigStatus} </if>
+        <if test="pigStatus != null and pigStatus == 5"> and  pig_status_after in (1,5,9) </if>
+    </select>
+    <select id="getPregCheckResult" parameterType="map" resultType="int">
+        select preg_check_result
+        from doctor_pig_events
+        where status=1
+        and id = (select id
+        from doctor_pig_events
+        where event_at &lt;= #{time}
+        and status=1
+        and pig_id = #{pigId} and type = 11
+        order by id desc limit 1)
     </select>
     <select id="afterEvent" parameterType="map" resultType="map">
         select min(id) as id,farm_id from doctor_pig_events where event_at > #{time} and pig_id = #{pigId}
