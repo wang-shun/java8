@@ -886,6 +886,10 @@ public class DoctorSearches {
             }
 
             paging.getData().forEach(searchedPig -> {
+                if ( "13".equals(params.get("statuses")) ) {
+                    searchedPig.setStatus(13);
+                    searchedPig.setStatusName("已转场");
+                }
                 Integer status = searchedPig.getStatus();
                 Date eventAt;
 
@@ -916,10 +920,6 @@ public class DoctorSearches {
 
                 Integer statusDay = DateUtil.getDeltaDays(eventAt, new Date()) + 1;
                 searchedPig.setStatusDay(statusDay);
-                if ( "13".equals(params.get("statuses")) ) {
-                    searchedPig.setStatus(13);
-                    searchedPig.setStatusName("已转场");
-                }
             });
         }
 
