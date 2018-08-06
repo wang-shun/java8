@@ -2258,7 +2258,7 @@
         SELECT staff_name
         FROM doctor_barns
         where id = #{currentBarnId}
-        <if test="staffName != null"> AND b.staff_name like CONCAT(CONCAT('%',#{staffName}),'%')</if>
-        <if test="barnId != null"> and b.id = #{barnId} </if>
+        <if test="staffName != null"> AND staff_name like CONCAT(CONCAT('%',#{staffName}),'%')</if>
+        <if test="barnId != null"> and id = #{barnId} </if>
     </select>
 </mapper>
