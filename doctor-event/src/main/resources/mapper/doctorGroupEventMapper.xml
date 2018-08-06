@@ -957,8 +957,9 @@
         <if test="groupType != null">and c.pig_type = #{groupType}</if>
         <if test="buildBeginGroupTime != null">and a.event_at >= #{buildBeginGroupTime}</if>
         <if test="buildEndGroupTime != null">and a.event_at &lt;= #{buildEndGroupTime}</if>
-        and a.group_id  not in
-        (select group_id from doctor_group_events where farm_id = #{farmId}  and type = 10 and  status = 1)
+        group by a.group_id
+        having a.group_id not in
+        (select group_id from doctor_group_events where farm_id = #{farmId}  and type = 10)
     </select>
     <select id="groupList1" parameterType="map" resultType="map">
         select a.group_id,a.group_code, b.pig_type, b.current_barn_id, b.current_barn_name, c.staff_id, c.staff_name ,a.event_at as close_event_at
