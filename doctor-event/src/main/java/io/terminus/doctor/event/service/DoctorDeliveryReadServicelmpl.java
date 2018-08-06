@@ -276,9 +276,10 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                             Status = PigStatus.Pregnancy.getName();
                         }
                         if (status == PigStatus.KongHuai.getKey()) {
-                            if(frontEvent.get("preg_check_result")!= null) {
+                            int pregCheckResult = doctorPigEventDao.getPregCheckResult(parity,pigId,time,pigStatus);
+
                                 //doctorPigEventDao.getPregCheckResult(parity,pigId,time,pigStatus)
-                                int pregCheckResult = doctorPigEventDao.getPregCheckResult(parity,pigId,time,pigStatus);
+
                                 if (pregCheckResult == 2) {
                                     Status = "阴性";
                                 } else if (pregCheckResult == 3) {
@@ -288,7 +289,6 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                                 } else {
                                     Status = PigStatus.KongHuai.getName();
                                 }
-                            }
                         }
                         if (status == PigStatus.Farrow.getKey()) {
                             Status = PigStatus.Farrow.getName();
