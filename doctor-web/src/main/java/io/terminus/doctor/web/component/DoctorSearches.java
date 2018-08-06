@@ -899,10 +899,6 @@ public class DoctorSearches {
                 }
                 if (status == 4 || status == 7){
                     eventAt = RespHelper.or500(doctorPigEventReadService.findMateEventToPigId(searchedPig.getId()));
-                } else if ( "13".equals(params.get("statuses")) ){
-                    DoctorChgFarmInfo doctorChgFarmInfo = RespHelper.or500(doctorPigReadService.findByFarmIdAndPigId(searchedPig.getFarmId(), searchedPig.getId()));
-                    DoctorPigEvent chgFarm = RespHelper.or500(doctorPigEventReadService.findById(doctorChgFarmInfo.getEventId()));
-                    eventAt = chgFarm.getEventAt();
                 } else {
                     eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(searchedPig.getId(), status));
                 }
