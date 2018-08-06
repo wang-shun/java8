@@ -889,35 +889,26 @@ public class DoctorSearches {
                 Integer status = searchedPig.getStatus();
                 Date eventAt;
 
-                if ( "13".equals(params.get("statuses")) ) {
-                    try {
-                        DoctorChgFarmInfo doctorChgFarmInfo = RespHelper.or500(doctorPigReadService.findByFarmIdAndPigId(searchedPig.getFarmId(), searchedPig.getId()));
-                        DoctorPigEvent chgFarm = RespHelper.or500(doctorPigEventReadService.findById(doctorChgFarmInfo.getEventId()));
-                        eventAt = chgFarm.getEventAt();
-                        searchedPig.setStatus(13);
-                        searchedPig.setStatusName("已转场");
-                    }catch(Exception e){
-                        log.error(e.getMessage());
-                        eventAt = new Date();
-                    }
-                }else{
-                    KongHuaiPregCheckResult result = KongHuaiPregCheckResult.from(searchedPig.getStatus());
-                    if (result != null) {
-                        status = PigStatus.KongHuai.getKey();
-                    }
+                KongHuaiPregCheckResult result = KongHuaiPregCheckResult.from(searchedPig.getStatus());
+                if (result != null) {
+                    status = PigStatus.KongHuai.getKey();
+                }
 
-                    if (Objects.equals(status, PigStatus.Pregnancy.getKey())) {
-                        status = PigStatus.Mate.getKey();
-                    }
-                    if (status == 4 || status == 7){
-                        eventAt = RespHelper.or500(doctorPigEventReadService.findMateEventToPigId(searchedPig.getId()));
-                    } else {
-                        eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(searchedPig.getId(), status));
-                    }
+                if (Objects.equals(status, PigStatus.Pregnancy.getKey())) {
+                    status = PigStatus.Mate.getKey();
+                }
+                if (status == 4 || status == 7){
+                    eventAt = RespHelper.or500(doctorPigEventReadService.findMateEventToPigId(searchedPig.getId()));
+                } else {
+                    eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(searchedPig.getId(), status));
                 }
 
                 Integer statusDay = DateUtil.getDeltaDays(eventAt, new Date()) + 1;
                 searchedPig.setStatusDay(statusDay);
+                if ( "13".equals(params.get("statuses")) ) {
+                    searchedPig.setStatus(13);
+                    searchedPig.setStatusName("已转场");
+                }
             });
         }
 
