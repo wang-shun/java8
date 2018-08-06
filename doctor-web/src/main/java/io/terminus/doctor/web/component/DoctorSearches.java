@@ -806,6 +806,7 @@ public class DoctorSearches {
     }
 
     private Paging<SearchedPig> pageSowPigs (Integer pageNo, Integer pageSize,Map<String, String> params) throws ParseException {
+
         if (farmIdNotExist(params)) {
             return new Paging<>(0L, Collections.emptyList());
         }
@@ -883,6 +884,7 @@ public class DoctorSearches {
             }else {
                 paging = RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
             }
+
             paging.getData().forEach(searchedPig -> {
                 Integer status = searchedPig.getStatus();
                 Date eventAt;
@@ -902,6 +904,10 @@ public class DoctorSearches {
                 }
                 Integer statusDay = DateUtil.getDeltaDays(eventAt, new Date()) + 1;
                 searchedPig.setStatusDay(statusDay);
+                if ( "13".equals(params.get("statuses")) ) {
+                    searchedPig.setStatus(13);
+                    searchedPig.setStatusName("已转场");
+                }
             });
         }
 

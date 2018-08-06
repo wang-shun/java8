@@ -1994,7 +1994,7 @@
                 #{i}
             </foreach>
         </if>
-        <if test="farmId != null"> AND farm_id = #{farmId} </if>
+        <!-- <if test="farmId != null"> AND farm_id = #{farmId} </if> -->
         <if test="beginDate != null"> AND <![CDATA[ event_at >= #{beginDate} ]]> </if>
         <if test="endDate != null"> AND <![CDATA[ event_at <= #{endDate} ]]> </if>
         <if test="notList != null &amp;&amp; notList.size() > 0">
