@@ -57,6 +57,10 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
         params.put("orgId", doctorWarehouseSku.getOrgId());
         params.put("code", doctorWarehouseSku.getCode());
         params.put("status", WarehouseSkuStatus.NORMAL.getValue());
+<<<<<<< HEAD
+=======
+
+>>>>>>> 新增物料时判断物料名称是否已存在
         if (!doctorWarehouseSkuDao.list(params).isEmpty())
             throw new InvalidException("warehouse.sku.code.existed", doctorWarehouseSku.getCode());
 

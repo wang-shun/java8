@@ -7,7 +7,6 @@ import io.terminus.common.model.Paging;
 import io.terminus.doctor.basic.enums.WarehouseSkuStatus;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuWriteService;
@@ -181,6 +180,11 @@ public class SkuController {
             skuDto.setOrgId(farm.getOrgId());
         }
 
+        Integer cc = RespHelper.or500(doctorWarehouseSkuReadService.findWarehouseSkuByOrgAndName(skuDto.getOrgId(), skuDto.getName()));
+        if (cc>0) {
+            throw new JsonResponseException("物料名称已存在");
+        }
+
         if (skuDto.getStatus().equals(WarehouseSkuStatus.FORBIDDEN.getValue())) {
             //改成停用需要检查一下该物料是否有在仓库中
             Map<String, Object> params = new HashMap<>();
@@ -213,6 +217,11 @@ public class SkuController {
             if (null == farm)
                 throw new JsonResponseException("farm.not.found");
             skuDto.setOrgId(farm.getOrgId());
+        }
+
+        Integer cc = RespHelper.or500(doctorWarehouseSkuReadService.findWarehouseSkuByOrgAndName(skuDto.getOrgId(), skuDto.getName()));
+        if (cc>0) {
+            throw new JsonResponseException("物料名称已存在");
         }
 
         DoctorWarehouseSku sku = new DoctorWarehouseSku();
