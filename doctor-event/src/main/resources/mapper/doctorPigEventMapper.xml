@@ -2140,7 +2140,7 @@
         order by id desc limit 1)
         <if test="parity != null and parity != 11"> and parity = #{parity} </if>
         <if test="parity != null and parity == 11"> and  parity >= 11 </if>
-        <if test="pigStatus != null and pigStatus !=10 and  pigStatus !=0"> and  pig_status_after = #{pigStatus} </if>
+        <if test="pigStatus != null"> and  pig_status_after = #{pigStatus} </if>
     </select>
     <select id="afterEvent" parameterType="map" resultType="map">
         select min(id) as id,farm_id from doctor_pig_events where event_at > #{time} and pig_id = #{pigId}
