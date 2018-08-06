@@ -276,7 +276,18 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                             Status = PigStatus.Pregnancy.getName();
                         }
                         if (status == PigStatus.KongHuai.getKey()) {
-                            Status = PigStatus.KongHuai.getName();
+                            if(frontEvent.get("preg_check_result")!= null) {
+                                int pregCheckResult = (int) frontEvent.get("preg_check_result");
+                                if (pregCheckResult == 2) {
+                                    Status = "阴性";
+                                } else if (pregCheckResult == 3) {
+                                    Status = "流产";
+                                } else if (pregCheckResult == 4) {
+                                    Status = "返情";
+                                } else {
+                                    Status = PigStatus.KongHuai.getName();
+                                }
+                            }
                         }
                         if (status == PigStatus.Farrow.getKey()) {
                             Status = PigStatus.Farrow.getName();

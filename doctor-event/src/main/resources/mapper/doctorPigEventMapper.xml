@@ -2129,7 +2129,7 @@
         order by id desc limit 1
     </select>
     <select id="frontEvent" parameterType="map" resultType="map">
-        select parity, pig_status_after,event_at,live_count,type
+        select `type`,preg_check_result,parity, pig_status_after,event_at,live_count,type
         from doctor_pig_events
         where status=1
         and id = (select id
