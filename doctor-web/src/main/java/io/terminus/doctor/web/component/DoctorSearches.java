@@ -886,18 +886,16 @@ public class DoctorSearches {
             }
 
             paging.getData().forEach(searchedPig -> {
-                if ( "13".equals(params.get("statuses")) ) {
-                    searchedPig.setStatus(13);
-                    searchedPig.setStatusName("已转场");
-                }
                 Integer status = searchedPig.getStatus();
                 Date eventAt;
 
-                if (Objects.equals(status, PigStatus.CHG_FARM.getKey())) {
+                if ( "13".equals(params.get("statuses")) ) {
                     try {
                         DoctorChgFarmInfo doctorChgFarmInfo = RespHelper.or500(doctorPigReadService.findByFarmIdAndPigId(searchedPig.getFarmId(), searchedPig.getId()));
                         DoctorPigEvent chgFarm = RespHelper.or500(doctorPigEventReadService.findById(doctorChgFarmInfo.getEventId()));
                         eventAt = chgFarm.getEventAt();
+                        searchedPig.setStatus(13);
+                        searchedPig.setStatusName("已转场");
                     }catch(Exception e){
                         log.error(e.getMessage());
                         eventAt = new Date();
