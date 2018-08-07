@@ -65,7 +65,6 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         DateTime farrowingDate = new DateTime(farrowingDto.eventAt());
         Date farrowingDate1 = farrowingDate.toDate();
 
-
         //计算孕期
         Integer lastParity = doctorPigEventDao.findLastParity(doctorPigTrack.getPigId());
         doctorPigEvent.setPregDays(doctorModifyPigFarrowEventHandler.getPregDays(doctorPigEvent.getPigId(), lastParity, farrowingDto.eventAt()));
@@ -77,7 +76,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         //计算分娩日期与配种日期相差天数
         int between1 = (int)((farrowingDate1.getTime()- firstMate.getMattingDate().getTime())/(1000*3600*24));
         if (between1 > 100 ){
-            doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
+            doctorPigEvent.setFarrowingDate(farrowingDate1);
         }else {
             expectTrue(notNull(doctorPigTrack), "last.farrow.not.null", inputDto.getPigId());
         }
