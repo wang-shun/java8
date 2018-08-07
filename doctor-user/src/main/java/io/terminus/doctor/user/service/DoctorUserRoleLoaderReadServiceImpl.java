@@ -91,7 +91,7 @@ public class DoctorUserRoleLoaderReadServiceImpl implements DoctorUserRoleLoader
             forSub(user, roleContent);
             forPigScore(user, roleContent);
             forSubNoRole(roleContent);
-
+            forIot(user, roleContent);
             return Response.ok(roleContent);
         } catch (Exception e) {
             log.error("hard load roles failed, userId={}, cause:{}", userId, Throwables.getStackTraceAsString(e));
