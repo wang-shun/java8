@@ -885,19 +885,13 @@ public class DoctorSearches {
                 paging = RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
             }
 
+            Long finalFarmId = farmId;
             paging.getData().forEach(searchedPig -> {
                 Integer status = searchedPig.getStatus();
                 Date eventAt;
 
                 if ( "13".equals(params.get("statuses")) ) {
-                    try {
-                        DoctorChgFarmInfo doctorChgFarmInfo = RespHelper.or500(doctorPigReadService.findByFarmIdAndPigId(searchedPig.getFarmId(), searchedPig.getId()));
-                        DoctorPigEvent chgFarm = RespHelper.or500(doctorPigEventReadService.findById(doctorChgFarmInfo.getEventId()));
-                        eventAt = chgFarm.getEventAt();
-                    }catch(Exception e){
-                        log.error(e.getMessage());
-                        eventAt = new Date();
-                    }
+                    eventAt = RespHelper.or500(doctorPigEventReadService.findFarmSowEventAt(searchedPig.getId(), finalFarmId));
                 }else{
                     KongHuaiPregCheckResult result = KongHuaiPregCheckResult.from(searchedPig.getStatus());
                     if (result != null) {

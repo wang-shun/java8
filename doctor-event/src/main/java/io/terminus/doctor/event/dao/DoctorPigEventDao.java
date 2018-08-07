@@ -914,6 +914,12 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public List<Long> findPigIdsByEvent(Map<String, Object> criteria) {
         return getSqlSession().selectList(sqlId("findPigIdsByEvent"), criteria);
     }
+
+    public Date findFarmSowEventAt(Long pigId, Long farmId) {
+        return getSqlSession().selectOne(sqlId("findFarmSowEventAt"),
+                ImmutableMap.of("pigId", pigId, "farmId", farmId));
+    }
+
     public List<Map<String,Object>> getInFarmPigId(Long farmId, Date time,String pigCode,Integer breed,Date beginInFarmTime, Date endInFarmTime){
         Map<String, Object> map = new HashMap<>();
         map.put("farmId",farmId);
