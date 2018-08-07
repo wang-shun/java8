@@ -108,7 +108,7 @@ public class SkuController {
 
 
     @RequestMapping(method = RequestMethod.GET, value = "pagingWarehouseSku")
-    public Paging<Map> pagingWarehouseSku(@RequestParam(required = false) Long orgId,
+    public Paging<WarehouseSkuDto> pagingWarehouseSku(@RequestParam(required = false) Long orgId,
                                          @RequestParam(required = false) Integer type,
                                          @RequestParam(required = false) String name,
                                          @RequestParam(required = false) String vendorName,
@@ -128,9 +128,19 @@ public class SkuController {
         if (null != vendorName)
             params.put("vendorName", vendorName);
 
-        Paging<Map> mapPaging = RespHelper.or500(doctorWarehouseSkuReadService.pagingWarehouseSku(pageNo, pageSize, params));
+        Paging<DoctorWarehouseSku> skuPaging = RespHelper.or500(doctorWarehouseSkuReadService.pagingWarehouseSku(pageNo, pageSize, params));
 
-        return mapPaging;
+        return new Paging<WarehouseSkuDto>(skuPaging.getTotal(),
+                skuPaging.getData().stream().map(sku -> {
+                    WarehouseSkuDto skuDto = new WarehouseSkuDto();
+                    skuDto.copyFrom(sku);
+                    skuDto.setUnitId(Long.parseLong(sku.getUnit()));
+                    DoctorBasic unit = RespHelper.or500(doctorBasicReadService.findBasicById(skuDto.getUnitId()));
+                    if (null != unit)
+                        skuDto.setUnit(unit.getName());
+                    skuDto.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())));
+                    return skuDto;
+                }).collect(Collectors.toList()));
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "all")

@@ -38,7 +38,7 @@ public class DoctorWarehouseSkuDao extends MyBatisDao<DoctorWarehouseSku> {
         return getSqlSession().selectList("findWarehouseSkuByOrgAndName", params);
     }
 
-    public Paging<Map> pagingWarehouseSku(Integer offset, Integer limit, Map<String, Object> criteria) {
+    public Paging<DoctorWarehouseSku> pagingWarehouseSku(Integer offset, Integer limit, Map<String, Object> criteria) {
 
         if (criteria == null) {
             criteria = Maps.newHashMap();

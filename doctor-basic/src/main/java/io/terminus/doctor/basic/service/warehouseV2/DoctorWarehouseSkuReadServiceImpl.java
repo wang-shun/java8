@@ -30,7 +30,7 @@ public class DoctorWarehouseSkuReadServiceImpl implements DoctorWarehouseSkuRead
     private DoctorWarehouseSkuDao doctorWarehouseSkuDao;
 
     @Override
-    public Response<Paging<Map>> pagingWarehouseSku(Integer pageNo, Integer pageSize, Map<String, Object> criteria) {
+    public Response<Paging<DoctorWarehouseSku>> pagingWarehouseSku(Integer pageNo, Integer pageSize, Map<String, Object> criteria) {
         try {
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
             return Response.ok(doctorWarehouseSkuDao.pagingWarehouseSku(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
