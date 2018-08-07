@@ -364,9 +364,9 @@
     </select>
     <select id="groupqichucunlan" parameterType="map" resultType="Integer">
         select
-        IFNULL((select sum(quantity) from doctor_group_events where barn_id = #{barnId} and status = 1 and event_at &lt; #{beginTime} and type in (2)),0)
+        IFNULL((select sum(a.quantity) from doctor_group_events a join doctor_groups b on a.group_id = b.id where a.barn_id = #{barnId} and a.status = 1 and b.close_at > #{beginTime} and a.event_at &lt; #{beginTime} and a.type in (2)),0)
         -
-        IFNULL((select sum(quantity) from doctor_group_events where type in (3,4,5,9) and status = 1  and event_at &lt; #{beginTime} and barn_id = #{barnId}),0)
+        IFNULL((select sum(a.quantity) from doctor_group_events  a join doctor_groups b on a.group_id = b.id where a.type in (3,4,5,9) and a.status = 1 and b.close_at > #{beginTime}  and a.event_at &lt; #{beginTime} and a.barn_id = #{barnId}),0)
         from dual
     </select>
     <select id="groupqimucunlan" parameterType="map" resultType="Integer">
