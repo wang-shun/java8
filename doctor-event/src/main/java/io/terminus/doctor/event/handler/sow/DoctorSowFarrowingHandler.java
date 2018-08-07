@@ -83,6 +83,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
             expectTrue(notNull(doctorPigTrack), "last.farrow.not.null", inputDto.getPigId());
         }
 
+
         //分娩窝重
         doctorPigEvent.setFarrowWeight(farrowingDto.getBirthNestAvg());
 
