@@ -355,7 +355,7 @@
         and event_at > #{beginTime}
         and event_at&lt;= #{endTime}
         and status = 1
-        and type in (1,10,12,14)
+        and type in (1,2,10,12,14)
     </select>
     <select id="findBarnIdsByfarmId" parameterType="map" resultType="Long">
         select * from doctor_barns
