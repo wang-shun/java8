@@ -364,16 +364,16 @@
     </select>
     <select id="groupqichucunlan" parameterType="map" resultType="Integer">
         select
-        IFNULL((select sum(a.quantity) from doctor_group_events a join doctor_groups b on a.group_id = b.id where a.barn_id = #{barnId} and a.status = 1 and b.close_at > #{beginTime} and a.event_at &lt; #{beginTime} and a.type in (2)),0)
+        IFNULL((select sum(a.quantity) from doctor_group_events a join doctor_groups b on a.group_id = b.id where a.barn_id = #{barnId} and a.status = 1 and (b.close_at > #{beginTime} or b.close_at is null) and a.event_at &lt; #{beginTime} and a.type in (2)),0)
         -
-        IFNULL((select sum(a.quantity) from doctor_group_events  a join doctor_groups b on a.group_id = b.id where a.type in (3,4,5,9) and a.status = 1 and b.close_at > #{beginTime}  and a.event_at &lt; #{beginTime} and a.barn_id = #{barnId}),0)
+        IFNULL((select sum(a.quantity) from doctor_group_events  a join doctor_groups b on a.group_id = b.id where a.type in (3,4,5,9) and a.status = 1 and (b.close_at > #{beginTime} or b.close_at is null)  and a.event_at &lt; #{beginTime} and a.barn_id = #{barnId}),0)
         from dual
     </select>
     <select id="groupqimucunlan" parameterType="map" resultType="Integer">
         select
-        IFNULL((select sum(a.quantity) from doctor_group_events a join doctor_groups b on a.group_id = b.id where a.barn_id = #{barnId} and a.status = 1 and b.close_at > #{endTime} and a.event_at &lt;= #{endTime} and a.type in (2)),0)
+        IFNULL((select sum(a.quantity) from doctor_group_events a join doctor_groups b on a.group_id = b.id where a.barn_id = #{barnId} and a.status = 1 and (b.close_at > #{endTime} or b.close_at is null) and a.event_at &lt;= #{endTime} and a.type in (2)),0)
         -
-        IFNULL((select sum(a.quantity) from doctor_group_events a join doctor_groups b on a.group_id = b.id where a.type in (3,4,5,9) and a.status = 1  and b.close_at > #{endTime} and a.event_at &lt;= #{endTime} and a.barn_id = #{barnId}),0)
+        IFNULL((select sum(a.quantity) from doctor_group_events a join doctor_groups b on a.group_id = b.id where a.type in (3,4,5,9) and a.status = 1  and (b.close_at > #{endTime} or b.close_at is null) and a.event_at &lt;= #{endTime} and a.barn_id = #{barnId}),0)
         from dual
     </select>
     <select id="groupzhuanru" parameterType="map" resultType="Integer">
