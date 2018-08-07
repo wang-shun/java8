@@ -106,6 +106,33 @@ public class SkuController {
                 }).collect(Collectors.toList()));
     }
 
+
+    @RequestMapping(method = RequestMethod.GET, value = "pagingWarehouseSku")
+    public Paging<Map> pagingWarehouseSku(@RequestParam(required = false) Long orgId,
+                                         @RequestParam(required = false) Integer type,
+                                         @RequestParam(required = false) String name,
+                                         @RequestParam(required = false) String vendorName,
+                                         @RequestParam(required = false) Integer pageNo,
+                                         @RequestParam(required = false) Integer pageSize) {
+
+        if (null == orgId )
+            throw new JsonResponseException("warehouse.sku.org.id.null");
+
+        Map<String, Object> params = new HashMap<>();
+        if (null != orgId)
+            params.put("orgId", orgId);
+        if (null != type)
+            params.put("type", type);
+        if (null != name)
+            params.put("name", name);
+        if (null != vendorName)
+            params.put("vendorName", vendorName);
+
+        Paging<Map> mapPaging = RespHelper.or500(doctorWarehouseSkuReadService.pagingWarehouseSku(pageNo, pageSize, params));
+
+        return mapPaging;
+    }
+
     @RequestMapping(method = RequestMethod.GET, value = "all")
     public List<WarehouseSkuDto> query(@RequestParam(required = false) Long orgId,
                                        @RequestParam(required = false) Long farmId,

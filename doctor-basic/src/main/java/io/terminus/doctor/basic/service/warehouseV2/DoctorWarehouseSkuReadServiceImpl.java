@@ -30,6 +30,17 @@ public class DoctorWarehouseSkuReadServiceImpl implements DoctorWarehouseSkuRead
     private DoctorWarehouseSkuDao doctorWarehouseSkuDao;
 
     @Override
+    public Response<Paging<Map>> pagingWarehouseSku(Integer pageNo, Integer pageSize, Map<String, Object> criteria) {
+        try {
+            PageInfo pageInfo = new PageInfo(pageNo, pageSize);
+            return Response.ok(doctorWarehouseSkuDao.pagingWarehouseSku(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
+        } catch (Exception e) {
+            log.error("failed to paging doctor warehouse sku by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.warehouse.sku.paging.fail");
+        }
+    }
+
+    @Override
     public Response<List<DoctorWarehouseSku>> findWarehouseSkuByOrgAndName(Long orgId, String name) {
         return Response.ok(doctorWarehouseSkuDao.findWarehouseSkuByOrgAndName(orgId,name));
     }
