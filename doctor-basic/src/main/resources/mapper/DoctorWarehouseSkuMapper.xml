@@ -180,8 +180,9 @@
     </select>
 
     <select id="pagingWarehouseSku" parameterType="map" resultType="map">
-        select s.`name` as `name`,s.`code` as `code`,db.`name` as unit,s.specification as specification,e.short_name as vendorName,s.srm as srm,s.item_name as itemName,s.`status` as `status`
-        from doctor_warehouse_sku as s
+        select s.id as id,s.org_id as orgId,s.item_id as itemId,s.item_name as itemName,s.type as type,s.`name` as `name`,s.`code` as `code`,
+        s.`status` as `status`,s.srm as srm,s.vendor_id as vendorId,e.short_name as vendorName,s.unit as unitId,db.`name` as unit,
+        s.specification as specification,s.created_at as createdAt, s.updated_at as updatedAt from doctor_warehouse_sku as s
         inner join doctor_basics as db on db.id=s.unit
         inner join doctor_warehouse_vendor e on s.vendor_id=e.id
         where s.org_id = #{orgId}
