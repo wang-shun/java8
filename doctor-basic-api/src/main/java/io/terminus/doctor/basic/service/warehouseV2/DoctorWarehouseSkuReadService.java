@@ -15,6 +15,8 @@ import java.util.Map;
  */
 public interface DoctorWarehouseSkuReadService {
 
+    Response<Paging<Map>> pagingWarehouseSku(Integer pageNo, Integer pageSize, Map<String, Object> criteria);
+
     Response<List<DoctorWarehouseSku>> findWarehouseSkuByOrgAndName(Long orgId,String name);
 
     /**
