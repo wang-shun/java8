@@ -74,12 +74,12 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         doctorPigEvent.setRelEventId(firstMate.getId());
 
         //计算分娩日期与配种日期相差天数
-        long between1 = farrowingDate1.getTime()- firstMate.getMattingDate().getTime();
-        if (between1 > (2400 * 3600000)){
+        /*long between1 = farrowingDate1.getTime()- firstMate.getMattingDate().getTime();
+        if (between1 > (24 * 3600 * 1000 * 100)){
             doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
         }else {
             expectTrue(notNull(doctorPigTrack), "last.farrow.not.null", inputDto.getPigId());
-        }
+        }*/
 
 
         //分娩窝重
