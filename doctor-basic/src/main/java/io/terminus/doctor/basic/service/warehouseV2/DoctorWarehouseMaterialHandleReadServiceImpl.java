@@ -221,7 +221,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         farms.forEach(stringObjectMap -> {
             ids.add((Long)stringObjectMap.get("id"));
         });
-        Date maxTime = this.doctorWareHouseDao.findMaxTimeByFarmId(ids);
+        Date maxTime = this.doctorWarehouseMaterialHandleDao.findMinTimeByFarmId(ids);
         if(maxTime==null)
             return ResponseUtil.isOk(resultList,farms);
         try {
@@ -239,7 +239,8 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
                 List<Map> lists = doctorWarehouseMaterialHandleDao.listByFarmIdTime(criteria);
                 Date time = (Date) criteria.get("settlementDate");
-                if (time.getTime() < System.currentTimeMillis()&&time.getTime()>maxTime.getTime()) {
+//                if (time.getTime() < System.currentTimeMillis()&&time.getTime()>maxTime.getTime()) {
+                if (time.getTime() < System.currentTimeMillis()&&(time.equals(DateUtil.toDate(DateUtil.getYearMonth(maxTime) + "-01"))||time.after(DateUtil.toDate(DateUtil.getYearMonth(maxTime) + "-01")))) {
                     if (lists == null || lists.size() == 0) {
                         lists = Lists.newArrayList();
                     }
@@ -581,5 +582,11 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     @Override
     public Response<Integer> findCountByRelMaterialHandleId(Long id,Long farmId) {
         return  Response.ok(doctorWarehouseMaterialHandleDao.findCountByRelMaterialHandleId(id,farmId));
+    }
+
+    //得到该公司第一笔单据的会计年月，用来结算的时候做判断
+    @Override
+    public Response<Date> findSettlementDate(Long orgId) {
+        return Response.ok(doctorWarehouseMaterialHandleDao.findSettlementDate(orgId));
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -89,17 +90,17 @@ public class DoctorVaccinationsTest extends BaseFrontWebTest {
 
 
     private DoctorVaccinationPigWarn create() {
-        Long random = (long) RandomUtil.random(1, 9);
+        BigDecimal random = BigDecimal.valueOf(RandomUtil.random(1, 9));
         return DoctorVaccinationPigWarn.builder()
                 .farmId(1L)
                 .farmName("猪场" + random)
                 .pigType(random.intValue())
                 .startDate(new Date())
                 .endDate(new Date())
-                .materialId(random)
+//                .materialId(random)
                 .materialName("疫苗" + random)
                 .inputValue(random.intValue() + 20)
-                .dose(random + 10)
+                .dose(random)
                 .remark("测试测试测试")
                 .build();
     }

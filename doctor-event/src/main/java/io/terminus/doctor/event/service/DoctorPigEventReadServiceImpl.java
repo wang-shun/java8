@@ -598,4 +598,28 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             return Response.fail("find.eventAt.lead.to.status.failed");
         }
     }
+
+    @Override
+    public Response<Date> findMateEventToPigId(Long pigId) {
+        try {
+            return Response.ok(doctorPigEventDao.findMateEventToPigId(pigId));
+        } catch (Exception e) {
+            log.error("find event at lead to pigId failed ,pigId:{, cause:{}",
+                    pigId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.eventAt.lead.to.pigId.failed");
+        }
+    }
+
+
+    @Override
+    public Response<List<Long>> findPigIdsByEvent(Map<String, Object> criteria) {
+        try {
+            return Response.ok(doctorPigEventDao.findPigIdsByEvent(criteria));
+        } catch (Exception e) {
+            log.error("find.pigIds.by.event, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("event:find pigIds by type failed");
+        }
+    }
+
+
 }

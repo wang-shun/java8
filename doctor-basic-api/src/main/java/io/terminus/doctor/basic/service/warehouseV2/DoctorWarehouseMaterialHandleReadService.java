@@ -182,4 +182,6 @@ public interface DoctorWarehouseMaterialHandleReadService {
     //根据id判断是否有退料入库
     Response<Integer> findCountByRelMaterialHandleId(Long id,Long farmId);
 
+    //
+    Response<Date> findSettlementDate(Long orgId);
 }

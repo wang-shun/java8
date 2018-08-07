@@ -713,8 +713,8 @@
         FROM
         <include refid="tb"/>
         WHERE group_id = #{groupId}
-        AND type = 1
         AND status = 1
+        order by event_at desc limit 1
     </select>
 
     <select id="findCloseGroupByGroupId" parameterType="long" resultMap="DoctorGroupEventMap" >
@@ -935,6 +935,7 @@
         group by farm_id
     </select>
 
+
     <select id="findGroupEvents" parameterType="map" resultMap="DoctorGroupEventMap">
         select * from doctor_group_events where farm_id = #{farmId} and (type=3 or type=4 or type=5 or type=9 or type=10) and group_id=(
         select group_id from doctor_group_events where rel_pig_event_id = #{relPigEventId} and farm_id = #{farmId}
@@ -943,4 +944,80 @@
         )ORDER BY event_at DESC,id DESC
     </select>
 
+    <select id="groupList" parameterType="map" resultType="map">
+        select b.id as group_id,b.group_code, b.pig_type, b.current_barn_id, b.current_barn_name, c.staff_id, c.staff_name ,b.open_at as build_event_at,b.close_at as close_event_at
+        from doctor_groups b
+        join doctor_barns c on b.current_barn_id = c.id
+        where b.farm_id = #{farmId} and b.status = 1
+        <if test="time != null">and b.open_at &lt;= #{time}</if>
+        <if test="barn != null">and c.id = #{barn}</if>
+        <if test="groupCode != null"> AND b.group_code like CONCAT(CONCAT('%',#{groupCode}),'%')</if>
+        <if test="operatorName != null"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
+        <if test="groupType != null">and c.pig_type = #{groupType}</if>
+        <if test="buildBeginGroupTime != null">and b.open_at >= #{buildBeginGroupTime}</if>
+        <if test="buildEndGroupTime != null">and b.open_at &lt;= #{buildEndGroupTime}</if>
+        <if test="closeBeginGroupTime != null">and b.close_at >= #{closeBeginGroupTime}</if>
+        <if test="closeEndGroupTime != null">and b.close_at &lt;= #{closeEndGroupTime}</if>
+    </select>
+    <select id="groupList1" parameterType="map" resultType="map">
+        select b.id as group_id,b.group_code, b.pig_type, b.current_barn_id, b.current_barn_name, c.staff_id, c.staff_name ,b.close_at as close_event_at,b.open_at as build_event_at
+        from doctor_groups b
+        join doctor_barns c on b.current_barn_id = c.id
+        where b.farm_id = #{farmId} and b.status = -1
+        <if test="time != null">and b.open_at &lt;= #{time}</if>
+        <if test="time != null">and b.close_at >= #{time}</if>
+        <if test="barn != null">and c.id = #{barn}</if>
+        <if test="groupCode != null"> AND b.group_code like CONCAT(CONCAT('%',#{groupCode}),'%')</if>
+        <if test="operatorName != null"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
+        <if test="groupType != null">and c.pig_type = #{groupType}</if>
+        <if test="buildBeginGroupTime != null">and b.open_at >= #{buildBeginGroupTime}</if>
+        <if test="buildEndGroupTime != null">and b.open_at &lt;= #{buildEndGroupTime}</if>
+        <if test="closeBeginGroupTime != null">and b.close_at >= #{closeBeginGroupTime}</if>
+        <if test="closeEndGroupTime != null">and b.close_at &lt;= #{closeEndGroupTime}</if>
+    </select>
+    <select id="groupList2" parameterType="map" resultType="map">
+        select a.group_id,a.group_code, b.pig_type, b.current_barn_id, b.current_barn_name, c.staff_id, c.staff_name ,a.event_at
+        from doctor_group_events a
+        join doctor_groups b on a.group_id = b.id
+        join doctor_barns c on b.current_barn_id = c.id
+        where a.farm_id = #{farmId} and a.status = 1
+        <if test="time != null">and a.event_at &lt;= #{time}</if>
+        <if test="barn != null">and c.id = #{barn}</if>
+        <if test="groupCode != null"> AND a.group_code like CONCAT(CONCAT('%',#{groupCode}),'%')</if>
+        <if test="operatorName != null"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
+        <if test="groupType != null">and c.pig_type = #{groupType}</if>
+        <if test="buildBeginGroupTime != null">and a.event_at >= #{buildBeginGroupTime}</if>
+        <if test="buildEndGroupTime != null">and a.event_at &lt;= #{buildEndGroupTime}</if>
+        group by a.group_id
+    </select>
+    <select id="getCunlan" parameterType="map" resultType="Integer">
+        select
+        IFNULL((select sum(quantity) from doctor_group_events where group_id = #{groupId} and status = 1 and event_at &lt;= #{time} and type in (2)),0)
+        -
+        IFNULL((select sum(quantity) from doctor_group_events where type in (3,4,5,9) and status = 1  and event_at &lt;= #{time} and group_id = #{groupId}),0)
+        from dual
+    </select>
+    <select id="getInAvgweight" parameterType="map" resultType="Double">
+       select
+        IFNULL((select sum(weight) from doctor_group_events where group_id = #{groupId} and status = 1 and event_at &lt;= #{time} and type in (2)),0)
+        /
+        IFNULL((select sum(quantity) from doctor_group_events where group_id = #{groupId} and status = 1 and event_at &lt;= #{time} and type in (2)),0)
+        from dual
+    </select>
+    <select id="getOutAvgweight" parameterType="map" resultType="Double">
+        select
+        IFNULL((select sum(weight) from doctor_group_events where group_id = #{groupId} and status = 1 and event_at &lt;= #{time} and type in (3,4,5,9)),0)
+        /
+        IFNULL((select sum(quantity) from doctor_group_events where group_id = #{groupId} and status = 1 and event_at &lt;= #{time} and type in (3,4,5,9)),0)
+        from dual
+    </select>
+    <select id="getAvgDayAge" parameterType="map" resultType="Double">
+      select
+        (IFNULL((select sum((DATEDIFF(#{time},event_at)+avg_day_age)*quantity) from doctor_group_events where type = 2 and status = 1 and group_id = #{groupId}),0)
+        -IFNULL((select sum(quantity*(DATEDIFF(#{time},event_at)+avg_day_age)) from doctor_group_events where type in (3,4,5,9) and status = 1 and group_id = #{groupId}),0))
+      from dual
+    </select>
+    <select id="getBuildEventAt" parameterType="map" resultType="Date">
+       select event_at from doctor_group_events where group_id = #{groupId} and type = 1 and status = 1
+    </select>
 </mapper>

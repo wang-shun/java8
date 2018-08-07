@@ -216,4 +216,24 @@ public interface DoctorPigReadService {
     Response<DoctorChgFarmInfo> findByFarmIdAndPigId(Long farmId, Long pigId);
 
     Response<Paging<SearchedPig>> pagingChgFarmPig(Map<String, Object> params, Integer pageNo, Integer pageSize);
+
+
+    // -------------------- 新增代码-----------------------
+    /**
+     * 未转场的母猪
+     */
+    Response<List<Long>> findNotTransitionsSow(Long farmId,Long barnId,Map<String,Object> valueMap,String pigCode,String rfid,Integer isRemoval);
+
+
+    /**
+     * 已转场的母猪
+     */
+    Response<List<Long>> findHaveTransitionsSow(Long farmId,Long barnId,String pigCode,String rfid);
+
+
+    /**
+     * 查询离场猪的信息 By Pigs_Id
+     */
+    Response<Paging<SearchedPig>> pagesSowPigById(Map<String, Object> params, Integer pageNo, Integer pageSize);
+
 }

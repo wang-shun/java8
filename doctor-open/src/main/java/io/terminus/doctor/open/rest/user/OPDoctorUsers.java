@@ -53,6 +53,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.validation.Valid;
@@ -136,8 +137,10 @@ public class OPDoctorUsers {
      *
      * @return 服务开通情况
      */
-    @OpenMethod(key = "get.user.service.status")
-    public DoctorServiceReviewDto getUserServiceStatus() {
+    @OpenMethod(key = "get.user.service.status", paramNames = {"appKey"})
+    public DoctorServiceReviewDto getUserServiceStatus(String appKey) {
+
+
         BaseUser baseUser = UserUtil.getCurrentUser();
         Long primaryUserId; //主账号id
 
@@ -193,7 +196,7 @@ public class OPDoctorUsers {
             }
         });
         dto.setPigTrade(getPigIot(baseUser));
-        dto.setPigJxy(getPigJxy(baseUser));
+        dto.setPigJxy(getPigJxy(baseUser, appKey));
         log.info("========userId:{}, dto:{}", baseUser.getId(), dto);
         return dto;
     }
@@ -224,7 +227,7 @@ public class OPDoctorUsers {
 
         Response<DoctorOrg> orgResponse = doctorOrgReadService.findByName(serviceApplyDto.getOrg().getName());
         if (orgResponse.isSuccess() && orgResponse.getResult() != null) {
-           throw new OPClientException("org.name.has.existed");
+            throw new OPClientException("org.name.has.existed");
         }
 
         if (StringUtils.isBlank(serviceApplyDto.getOrg().getLicense())) {
@@ -330,9 +333,22 @@ public class OPDoctorUsers {
         return null;
     }
 
-    private ServiceReviewOpenDto getPigJxy(BaseUser baseUser) {
+    private ServiceReviewOpenDto getPigJxy(BaseUser baseUser, String appKey) {
         ServiceReviewOpenDto openDto = new ServiceReviewOpenDto();
-        openDto.setServiceStatus(DoctorServiceStatus.Status.BETA.value());
+
+        if (StringUtils.isNotBlank(appKey)) {
+            log.info(appKey);
+            if (appKey.toUpperCase().contains("IOS") || appKey.toUpperCase().contains("ANDROID")) {
+                log.info("is app");
+                openDto.setServiceStatus(DoctorServiceStatus.Status.CLOSED.value());
+            }
+
+        } else {
+            log.info("missing appKey");
+            openDto.setServiceStatus(DoctorServiceStatus.Status.BETA.value());
+        }
+
+
         openDto.setUserId(baseUser.getId());
         openDto.setType(DoctorServiceReview.Type.PIG_JXY.getValue());
         openDto.setStatus(DoctorServiceReview.Status.NOT_OK.getValue());
