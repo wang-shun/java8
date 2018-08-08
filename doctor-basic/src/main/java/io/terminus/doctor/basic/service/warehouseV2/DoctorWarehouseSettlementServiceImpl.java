@@ -200,7 +200,11 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                     stockMonthly.setWarehouseId(warehouseId);
                     stockMonthly.setMaterialId(sku);
                     stockMonthly.setSettlementDate(settlementDate);
-                    stockMonthly.setBalanceAmount(balanceAmount.add(thisSettlementAmountAndQuantity.getAmount()));
+                    if((balanceQuantity.add(thisSettlementAmountAndQuantity.getQuantity()).compareTo(BigDecimal.ZERO)==0)&&(balanceAmount.add(thisSettlementAmountAndQuantity.getAmount()).compareTo(BigDecimal.ZERO)==-1)){
+                        stockMonthly.setBalanceAmount(new BigDecimal(0));
+                    }else {
+                        stockMonthly.setBalanceAmount(balanceAmount.add(thisSettlementAmountAndQuantity.getAmount()));
+                    }
                     stockMonthly.setBalanceQuantity(balanceQuantity.add(thisSettlementAmountAndQuantity.getQuantity()));
                     if (null == stockMonthly.getId())
                         doctorWarehouseStockMonthlyDao.create(stockMonthly);

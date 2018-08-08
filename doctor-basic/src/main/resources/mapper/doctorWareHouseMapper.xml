@@ -172,25 +172,19 @@
         )temp1 on a.id = temp1.warehouse_id
 
         left join (
-        select sum(b.quantity) as thismonth_sum_rk_quantity,b.warehouse_id
-        from doctor_warehouse_material_handle b,doctor_warehouse_stock_handle b1
-        where b.stock_handle_id=b1.id
-        and b.delete_flag=1
-        and b.farm_id=#{farmId}
-        and date_format(b.handle_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
-        and b1.handle_type =1
-        GROUP BY b.warehouse_id
+            SELECT ifnull(sum(case type	when '1' then amount	when '7' then amount	when '9' then amount
+            when '11' then amount end	),0) as thismonth_sum_rk_quantity,
+            warehouse_id FROM doctor_warehouse_material_handle
+            WHERE farm_id = #{farmId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
+            group by warehouse_id
         )temp2 on a.id = temp2.warehouse_id
 
         left join (
-        select sum(b.quantity) as thismonth_sum_ck_quantity,b.warehouse_id
-        from doctor_warehouse_material_handle b,doctor_warehouse_stock_handle b1
-        where b.stock_handle_id=b1.id
-        and b.delete_flag=1
-        and b.farm_id=#{farmId}
-        and date_format(b.handle_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
-        and b1.handle_type =2
-        GROUP BY b.warehouse_id
+            SELECT ifnull(sum(case type	when '1' then amount	when '7' then amount	when '9' then amount
+            when '11' then amount end	),0) as thismonth_sum_ck_quantity,
+            warehouse_id FROM doctor_warehouse_material_handle
+            WHERE farm_id = #{farmId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
+            group by warehouse_id
         )temp3 on a.id = temp3.warehouse_id
 
         where a.farm_id=#{farmId}
@@ -241,24 +235,16 @@
                 ) tmp1 on a.material_id = tmp1.material_id
             </if>
             left join (
-            select j.material_id,sum(j.quantity) as thismonth_sum_rk_quantity
-            from doctor_warehouse_material_handle j,doctor_warehouse_stock_handle j1
-            where j.stock_handle_id = j1.id
-            and j.warehouse_id= #{warehouseId}
-            and j.delete_flag=1
-            and date_format(j.handle_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
-            and j1.handle_type =1
-            GROUP BY j.material_id
+                SELECT material_id,ifnull(sum(case type	when '1' then amount	when '7' then amount	when '9' then amount
+                when '11' then amount end	),0) as thismonth_sum_rk_quantity FROM doctor_warehouse_material_handle
+                WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
+                group by material_id
             )tmp2 on a.material_id = tmp2.material_id
             left join(
-            select k.material_id,sum(k.quantity) as thismonth_sum_ck_quantity
-            from doctor_warehouse_material_handle k,doctor_warehouse_stock_handle k1
-            where k.stock_handle_id = k1.id
-            and k.warehouse_id= #{warehouseId}
-            and k.delete_flag=1
-            and date_format(k.handle_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
-            and k1.handle_type = 2
-            GROUP BY k.material_id
+                SELECT material_id,ifnull(sum(case type	when '2' then amount	when '8' then amount	when '10' then amount
+                when '12' then amount	when '13' then amount end	),0) as thismonth_sum_ck_quantity FROM doctor_warehouse_material_handle
+                WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
+                group by material_id
             )tmp3 on a.material_id = tmp3.material_id
 
         </if>
@@ -300,25 +286,17 @@
         ) tmp1 on a.material_id = tmp1.material_id
 
         left join (
-        select j.material_id,sum(j.quantity) as thismonth_sum_rk_quantity
-        from doctor_warehouse_material_handle j,doctor_warehouse_stock_handle j1
-        where j.stock_handle_id = j1.id
-        and j.warehouse_id= #{warehouseId}
-        and j.delete_flag=1
-        and date_format(j.handle_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
-        and j1.handle_type =1
-        GROUP BY j.material_id
+            SELECT material_id,ifnull(sum(case type	when '1' then amount	when '7' then amount	when '9' then amount
+            when '11' then amount end	),0) as thismonth_sum_rk_quantity FROM doctor_warehouse_material_handle
+            WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
+            group by material_id
         )tmp2 on a.material_id = tmp2.material_id
 
         left join(
-        select k.material_id,sum(k.quantity) as thismonth_sum_ck_quantity
-        from doctor_warehouse_material_handle k,doctor_warehouse_stock_handle k1
-        where k.stock_handle_id = k1.id
-        and k.warehouse_id= #{warehouseId}
-        and k.delete_flag=1
-        and date_format(k.handle_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
-        and k1.handle_type = 2
-        GROUP BY k.material_id
+            SELECT material_id,ifnull(sum(case type	when '2' then amount	when '8' then amount	when '10' then amount
+            when '12' then amount	when '13' then amount end	),0) as thismonth_sum_ck_quantity FROM doctor_warehouse_material_handle
+            WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
+            group by material_id
         )tmp3 on a.material_id = tmp3.material_id
 
         left join doctor_basics db on db.id = b.unit
@@ -372,25 +350,17 @@
             ) tmp1 on a.material_id = tmp1.material_id
 
             left join (
-            select j.material_id,sum(j.quantity) as thismonth_sum_rk_quantity
-            from doctor_warehouse_material_handle j,doctor_warehouse_stock_handle j1
-            where j.stock_handle_id = j1.id
-            and j.warehouse_id= #{warehouseId}
-            and j.delete_flag=1
-            and date_format(j.handle_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
-            and j1.handle_type =1
-            GROUP BY j.material_id
+                SELECT material_id,ifnull(sum(case type	when '1' then amount	when '7' then amount	when '9' then amount
+                when '11' then amount end	),0) as thismonth_sum_rk_quantity FROM doctor_warehouse_material_handle
+                WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
+                group by material_id
             )tmp2 on a.material_id = tmp2.material_id
 
             left join(
-            select k.material_id,sum(k.quantity) as thismonth_sum_ck_quantity
-            from doctor_warehouse_material_handle k,doctor_warehouse_stock_handle k1
-            where k.stock_handle_id = k1.id
-            and k.warehouse_id= #{warehouseId}
-            and k.delete_flag=1
-            and date_format(k.handle_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
-            and k1.handle_type = 2
-            GROUP BY k.material_id
+                SELECT material_id,ifnull(sum(case type	when '2' then amount	when '8' then amount	when '10' then amount
+                when '12' then amount	when '13' then amount end	),0) as thismonth_sum_ck_quantity FROM doctor_warehouse_material_handle
+                WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
+                group by material_id
             )tmp3 on a.material_id = tmp3.material_id
 
             left join doctor_basics db on db.id = b.unit

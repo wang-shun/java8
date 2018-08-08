@@ -789,7 +789,8 @@
         f.id as farm_id,
         f.`name` as farm_name,
         db.name as unit,
-        b.vendor_name,
+--         b.vendor_name,
+        v.short_name as vendor_name,
         c.specification
         FROM
         doctor_warehouse_material_apply a
@@ -799,6 +800,7 @@
         JOIN doctor_barns e ON e.id = a.pig_barn_id
         JOIN doctor_basics as db on db.id=c.unit
         JOIN doctor_farms as f on f.id=b.farm_id
+        JOIN doctor_warehouse_vendor as v on v.id=c.vendor_id
         WHERE
         a.apply_type = 1 and b.delete_flag=1
         <if test="pigGroupId != null"> AND a.pig_group_id = #{pigGroupId}</if>
@@ -823,12 +825,14 @@
         f.id as farm_id,
         f.`name` as farm_name,
         db.name as unit,
-        b.vendor_name,
+--         b.vendor_name,
+        v.short_name as vendor_name,
         c.specification
         FROM doctor_warehouse_material_handle b
         JOIN doctor_warehouse_sku c ON b.material_id = c.id
         JOIN doctor_basics as db on db.id=c.unit
         JOIN doctor_farms as f on f.id=b.farm_id
+        JOIN doctor_warehouse_vendor as v on v.id=c.vendor_id
         inner join (
             select DISTINCT ma.material_handle_id,ma.warehouse_name,ma.pig_barn_name,ma.pig_type,ma.pig_group_name,bb.staff_name from doctor_warehouse_material_apply as ma
             inner join doctor_barns as bb on bb.id=ma.pig_barn_id
