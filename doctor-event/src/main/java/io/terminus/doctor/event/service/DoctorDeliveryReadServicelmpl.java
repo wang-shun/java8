@@ -586,19 +586,22 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     Long groupsiwang = 0L;
                     Long grouptaotai = 0L;
                     if (jianshao1 != null) {
-                        for (int i = 0; i < jianshao.size(); i++) {
+                        for (int i = 0; i < jianshao1.size(); i++) {
                             Long a = jianshao1.get(i).get("change_type_id");
                             if (a == 109) {
-                                groupxiaoshou = jianshao1.get(i).get("count");
+                                Object h = jianshao1.get(i).get("count");
+                                groupxiaoshou = Long.parseLong(h.toString());
                             }
                             if (a == 110) {
-                                groupsiwang = jianshao1.get(i).get("count");
+                                Object h = jianshao1.get(i).get("count");
+                                groupsiwang = Long.parseLong(h.toString());
                             }
                             if (a == 111) {
-                                grouptaotai = jianshao1.get(i).get("count");
+                                Object h = jianshao1.get(i).get("count");
+                                grouptaotai = Long.parseLong(h.toString());
                             }
                             if (a == 112 || a == 113 || a == 114 || a == 115) {
-                                Object  ob = jianshao.get(i).get("count");
+                                Object  ob = jianshao1.get(i).get("count");
                                 int b =Integer.parseInt(ob.toString());
                                 groupqitajianshao = groupqitajianshao+b;
                             }
