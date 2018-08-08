@@ -521,13 +521,13 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         for (int i = 0; i < jianshao.size(); i++) {
                             Long a = jianshao.get(i).get("change_type_id");
                             if (a == 109) {
-                                map.put("xiaoshou", jianshao.get(i).get("count"));
+                                map.put("xiaoshou", jianshao.get(i).get("count") == null ? 0 : jianshao.get(i).get("count"));
                             }
                             if (a == 110) {
-                                map.put("siwang", jianshao.get(i).get("count"));
+                                map.put("siwang", jianshao.get(i).get("count")==null ? 0 : jianshao.get(i).get("count"));
                             }
                             if (a == 111) {
-                                map.put("taotai", jianshao.get(i).get("count"));
+                                map.put("taotai", jianshao.get(i).get("count")==null ? 0 : jianshao.get(i).get("count"));
                             }
                             if (a == 112 || a == 113 || a == 114 || a == 115) {
                                 qitajianshao = qitajianshao + jianshao.get(i).get("count");
@@ -642,13 +642,13 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         for (int i = 0; i < jianshao.size(); i++) {
                             Long a = jianshao.get(i).get("change_type_id");
                             if (a == 109) {
-                                map.put("xiaoshou", jianshao.get(i).get("count"));
+                                map.put("xiaoshou", jianshao.get(i).get("count")==null ? 0 : jianshao.get(i).get("count"));
                             }
                             if (a == 110) {
-                                map.put("siwang", jianshao.get(i).get("count"));
+                                map.put("siwang", jianshao.get(i).get("count")==null ? 0 : jianshao.get(i).get("count"));
                             }
                             if (a == 111) {
-                                map.put("taotai", jianshao.get(i).get("count"));
+                                map.put("taotai", jianshao.get(i).get("count")==null ? 0 : jianshao.get(i).get("count"));
                             }
                             if (a == 112 || a == 113 || a == 114 || a == 115) {
                                 Object  ob = jianshao.get(i).get("count");
