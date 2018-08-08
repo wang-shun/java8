@@ -1014,7 +1014,7 @@
     <select id="getAvgDayAge" parameterType="map" resultType="Double">
       select
         (IFNULL((select sum((DATEDIFF(#{time},event_at)+avg_day_age)*quantity) from doctor_group_events where type = 2 and status = 1 and group_id = #{groupId}),0)
-        -IFNULL((select sum(quantity*(DATEDIFF(#{time},event_at)+avg_day_age)) from doctor_group_events where type in (3,4,5,9) and status = 1 and group_id = #{groupId}),0))
+        -IFNULL((select sum(quantity*(DATEDIFF(#{time},event_at)+(avg_day_age-(DATEDIFF(updated_at,event_at))))) from doctor_group_events where type in (3,4,5,9) and status = 1 and group_id = #{groupId}),0))
       from dual
     </select>
     <select id="getBuildEventAt" parameterType="map" resultType="Date">
