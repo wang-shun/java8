@@ -502,7 +502,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
 
                 Map<String, Object> map = doctorBarnDao.findBarnTypeById(barnId);
                 int barnType = (int) (map.get("pig_type"));
-                if (barnType == 5 || barnType == 6 || barnType == 7 || barnType == 9) {
+                if (barnType == 5 || barnType == 6 || barnType == 9) {
                     Integer qichucunlan = doctorBarnDao.qichucunlan(farmId, barnId, beginTime);
                     Integer qimucunlan = doctorBarnDao.qimucunlan(farmId, barnId, endTime);
                     if (qichucunlan != null) {
@@ -549,7 +549,73 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     Long zhuanru = qimucunlan - qichucunlan + (zhuanchu == null ? 0 : zhuanchu) + (map.get("xiaoshou") == null ? 0 : (Long) map.get("xiaoshou")) + (map.get("siwang") == null ? 0 : (Long) map.get("siwang")) + (map.get("taotai") == null ? 0 : (Long) map.get("taotai")) + (map.get("qitajianshao") == null ? 0 : (Long) map.get("qitajianshao"));
                     map.put("zhuanru", zhuanru);
                 }
-                if (barnType == 2 || barnType == 3 || barnType == 4) {
+                if(barnType == 7){
+                    Integer pigqichucunlan = doctorBarnDao.qichucunlan(farmId, barnId, beginTime);
+                    Integer groupqichucunlan = doctorBarnDao.groupqichucunlan(farmId, barnId, beginTime);
+                    Integer pigqimucunlan = doctorBarnDao.qimucunlan(farmId, barnId, beginTime);
+                    Integer groupqimucunlan = doctorBarnDao.groupqimucunlan(farmId, barnId, beginTime);
+                    Integer qichucunlan = (pigqichucunlan == null? 0 : pigqichucunlan) + (groupqichucunlan == null ? 0:groupqichucunlan);
+                    Integer qimucunlan = (pigqimucunlan == null? 0 : pigqimucunlan) + (groupqimucunlan == null ? 0:groupqimucunlan);
+                    map.put("qichucunlan",qichucunlan);
+                    map.put("qimucunlan",qimucunlan);
+                    List<Map<Integer, Long>> jianshao = doctorBarnDao.jianshao(barnId, beginTime, endTime);
+                    Long pigqitajianshao = 0L;
+                    Long pigxiaoshou = 0L;
+                    Long pigsiwang = 0L;
+                    Long pigtaotai = 0L;
+                    if (jianshao != null) {
+                        for (int i = 0; i < jianshao.size(); i++) {
+                            Long a = jianshao.get(i).get("change_type_id");
+                            if (a == 109) {
+                                pigxiaoshou = jianshao.get(i).get("count");
+                            }
+                            if (a == 110) {
+                                pigsiwang = jianshao.get(i).get("count");
+                            }
+                            if (a == 111) {
+                                pigtaotai = jianshao.get(i).get("count");
+                            }
+                            if (a == 112 || a == 113 || a == 114 || a == 115) {
+                                pigqitajianshao = pigqitajianshao + jianshao.get(i).get("count");
+                            }
+                        }
+                    }
+                    List<Map<Integer, Long>> jianshao1 = doctorBarnDao.groupjianshao(barnId, beginTime, endTime);
+                    int groupqitajianshao = 0;
+                    Long groupxiaoshou = 0L;
+                    Long groupsiwang = 0L;
+                    Long grouptaotai = 0L;
+                    if (jianshao1 != null) {
+                        for (int i = 0; i < jianshao.size(); i++) {
+                            Long a = jianshao1.get(i).get("change_type_id");
+                            if (a == 109) {
+                                groupxiaoshou = jianshao1.get(i).get("count");
+                            }
+                            if (a == 110) {
+                                groupsiwang = jianshao1.get(i).get("count");
+                            }
+                            if (a == 111) {
+                                grouptaotai = jianshao1.get(i).get("count");
+                            }
+                            if (a == 112 || a == 113 || a == 114 || a == 115) {
+                                Object  ob = jianshao.get(i).get("count");
+                                int b =Integer.parseInt(ob.toString());
+                                groupqitajianshao = groupqitajianshao+b;
+                            }
+                        }
+                    }
+                    map.put("xiaoshou",pigxiaoshou+groupxiaoshou);
+                    map.put("siwang",pigxiaoshou+groupxiaoshou);
+                    map.put("taotai",pigtaotai+grouptaotai);
+                    map.put("qitajianshao",pigqitajianshao+groupqitajianshao);
+                    Integer pigzhuanchu = doctorBarnDao.zhuanchu(barnId, beginTime, endTime);
+                    Integer groupzhuanchu = doctorBarnDao.groupzhuanchu(barnId,beginTime,endTime);
+                    int zhuanchu = (pigzhuanchu == null ? 0 : pigzhuanchu) + (groupzhuanchu == null ? 0 : groupzhuanchu);
+                    Long zhuanru = qimucunlan - qichucunlan + zhuanchu + pigxiaoshou+groupxiaoshou + pigxiaoshou+groupxiaoshou + pigtaotai+grouptaotai + pigqitajianshao+groupqitajianshao;
+                    map.put("zhuanru", zhuanru);
+                    map.put("zhuanchu", zhuanchu);
+                }
+                if (barnType == 2 || barnType == 3 || barnType == 4 ) {
                     Integer qichucunlan = doctorBarnDao.groupqichucunlan(farmId, barnId, beginTime);
                     Integer qimucunlan = doctorBarnDao.groupqimucunlan(farmId, barnId, endTime);
                     if (qichucunlan != null) {
