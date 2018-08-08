@@ -321,19 +321,6 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     //查公司结算列表
     public List<Map> listByFarmIdTime(Map<String, Object> criteria) {
         List<Map> resultList = this.sqlSession.selectList("listByFarmIdTime", criteria);
-
-       /* resultList.stream().forEach(map -> {
-
-            map.put("type", WarehouseMaterialHandleType.IN.getValue());
-
-            map.put("inAmount", this.sqlSession.selectOne("selectSumAmount", map));
-
-            map.put("type", WarehouseMaterialHandleType.OUT.getValue());
-
-            map.put("outAmount", this.sqlSession.selectOne("selectSumAmount", map));
-
-        });*/
-
         return resultList;
     }
 

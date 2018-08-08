@@ -165,7 +165,7 @@
     </select>
 
     <select id="warehouseSkuCount" parameterType="map" resultType="Long">
-        select count(*) from doctor_warehouse_sku as s
+        select COUNT(1) from doctor_warehouse_sku as s
         inner join doctor_warehouse_vendor e on s.vendor_id=e.id
         where s.org_id = #{orgId}
         <if test="type != null and ''!=type">
