@@ -949,7 +949,7 @@
         from doctor_groups b
         join doctor_barns c on b.current_barn_id = c.id
         where b.farm_id = #{farmId} and
-        ((b.status = 1 and b.open_at &lt;= #{time}) or (b.status = -1 and b.open_at &lt;= #{time} and b.close_at >= #{time}))
+        ((b.status = 1 and b.open_at &lt;= #{time}) or (b.status = -1 and b.open_at &lt;= #{time} and b.close_at > #{time}))
         <if test="barn != null">and c.id = #{barn}</if>
         <if test="groupCode != null"> AND b.group_code like CONCAT(CONCAT('%',#{groupCode}),'%')</if>
         <if test="operatorName != null"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
@@ -964,8 +964,7 @@
         from doctor_groups b
         join doctor_barns c on b.current_barn_id = c.id
         where b.farm_id = #{farmId} and b.status = -1
-        <if test="time != null">and b.open_at &lt;= #{time}</if>
-        <if test="time != null">and b.close_at >= #{time}</if>
+        and b.close_at &lt; #{time}
         <if test="barn != null">and c.id = #{barn}</if>
         <if test="groupCode != null"> AND b.group_code like CONCAT(CONCAT('%',#{groupCode}),'%')</if>
         <if test="operatorName != null"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>

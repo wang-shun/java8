@@ -434,7 +434,6 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         List<Map<String,Object>> groupList = doctorGroupEventDao.groupList(farmId, time, barn, groupCode, operatorName, groupType, buildBeginGroupTime, buildEndGroupTime,closeBeginGroupTime,closeEndGroupTime);;
         if(groupStatus == 1) {
             List<Map<String,Object>> groupList1 = doctorGroupEventDao.groupList1(farmId, time, barn, groupCode, operatorName, groupType, buildBeginGroupTime, buildEndGroupTime,closeBeginGroupTime,closeEndGroupTime);
-            groupList.addAll(groupList1);
         }
         int zongcunlan = 0;
         for(int i=0;i<groupList.size();i++){
