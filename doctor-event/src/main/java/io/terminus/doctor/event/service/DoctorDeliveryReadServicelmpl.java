@@ -463,7 +463,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 map.put("build_event_at",buildEventAt);
             }
             Integer getCunlan = doctorGroupEventDao.getCunlan(groupId,time);
-            if(getCunlan != null) {
+            if(getCunlan != null && groupStatus == 0) {
                 map.put("cunlanshu", getCunlan);
                 zongcunlan = zongcunlan + getCunlan;
             }else{
