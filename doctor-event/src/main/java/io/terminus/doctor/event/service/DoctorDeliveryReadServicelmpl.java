@@ -204,11 +204,15 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
     }
 
     @Override
-    public List<Map<String,Object>> sowsReport(Long farmId,Date time,String pigCode,String operatorName,Long barnId,Integer breed,Integer parity,Integer pigStatus,Date beginInFarmTime, Date endInFarmTime){
- //       List<Map<String,Object>> inFarmPigId = null;
+    public List<Map<String,Object>> sowsReport(Long farmId,Date time,String pigCode,String operatorName,Long barnId,Integer breed,Integer parity,Integer pigStatus,Date beginInFarmTime, Date endInFarmTime, Integer sowsStatus){
+        List<Map<String,Object>> inFarmPigId = null;
 //        if(pigStatus == 0){//全部
-            List<Map<String,Object>> inFarmPigId = doctorPigEventDao.getInFarmPigId(farmId,time,pigCode,breed, beginInFarmTime,endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
-//        }else if(pigStatus == 2){//离场
+        if(sowsStatus == 0) {
+            inFarmPigId = doctorPigEventDao.getInFarmPigId(farmId, time, pigCode, breed, beginInFarmTime, endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
+        } else{
+            inFarmPigId = doctorPigEventDao.getInFarmPigId3(farmId, time, pigCode, breed, beginInFarmTime, endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
+        }
+// }else if(pigStatus == 2){//离场
 //            inFarmPigId = doctorPigEventDao.getInFarmPigId2(farmId,time,pigCode,breed, beginInFarmTime,endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
 //        } else if(pigStatus == 10){//转场
 //            inFarmPigId = doctorPigEventDao.getInFarmPigId3(farmId,time,pigCode,breed, beginInFarmTime,endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪

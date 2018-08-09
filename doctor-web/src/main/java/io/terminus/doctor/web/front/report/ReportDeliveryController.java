@@ -140,9 +140,10 @@ public class ReportDeliveryController {
                                                @RequestParam(required = false) Integer breedId,
                                                @RequestParam(required = false) Integer parity,
                                                @RequestParam(required = false) Integer pigStatus,
+                                               @RequestParam(required = false) Integer sowsStatus,
                                                @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beginInFarmTime,
                                                @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endInFarmTime) {
-        return doctorDeliveryReadService.sowsReport(farmId,time,pigCode,operatorName,barnId,breedId,parity,pigStatus,beginInFarmTime,endInFarmTime);
+        return doctorDeliveryReadService.sowsReport(farmId,time,pigCode,operatorName,barnId,breedId,parity,pigStatus,beginInFarmTime,endInFarmTime,sowsStatus);
     }
 
     /**
@@ -174,10 +175,11 @@ public class ReportDeliveryController {
                             @RequestParam(required = false) Integer breedId,
                             @RequestParam(required = false) Integer parity,
                             @RequestParam(required = false) Integer pigStatus,
+                            @RequestParam(required = false) Integer sowsStatus,
                             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beginInFarmTime,
                             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endInFarmTime,
                             HttpServletRequest request, HttpServletResponse response) {
-        List<Map<String,Object>> ls=doctorDeliveryReadService.sowsReport(farmId,time,pigCode,operatorName,barnId,breedId,parity,pigStatus,beginInFarmTime,endInFarmTime);
+        List<Map<String,Object>> ls=doctorDeliveryReadService.sowsReport(farmId,time,pigCode,operatorName,barnId,breedId,parity,pigStatus,beginInFarmTime,endInFarmTime,sowsStatus);
 
         //开始导出
         try  {

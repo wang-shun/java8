@@ -2085,7 +2085,7 @@
         join doctor_pigs a on d.pig_id = a.id
         WHERE d.farm_id = #{farmId}
         and d.kind = 1
-        and d.type = 2
+        and d.type in (2,6)
         and d.status = 1
         and d.event_at &lt;= #{time}
         <if test="pigCode != null"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
