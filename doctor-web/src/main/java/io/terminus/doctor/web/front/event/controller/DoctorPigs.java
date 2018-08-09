@@ -170,68 +170,9 @@ public class DoctorPigs {
     @ResponseBody
     public DoctorSowDetailDto querySowPigDetailInfoDto(@RequestParam("farmId") Long farmId,
                                                        @RequestParam("pigId") Long pigId,
-                                                       @RequestParam("status") Long statusNo,
                                                        @RequestParam(value = "eventSize", required = false) Integer eventSize){
 
-            return buildSowDetailDto1(getPigDetail(farmId, pigId, eventSize),statusNo);
-    }
-
-    private DoctorSowDetailDto buildSowDetailDto1(DoctorPigInfoDetailDto dto,Long statusNo){
-        DoctorPigTrack doctorPigTrack = dto.getDoctorPigTrack();
-        Integer pregCheckResult = null;
-        try{
-            String warnMessage = null;
-            Integer statusDay;
-            if (statusNo == 13) {
-                DoctorChgFarmInfo doctorChgFarmInfo = RespHelper.or500(doctorPigReadService.findByFarmIdAndPigId(doctorPigTrack.getFarmId(), doctorPigTrack.getPigId()));
-                DoctorPigEvent chgFarm = RespHelper.or500(doctorPigEventReadService.findById(doctorChgFarmInfo.getEventId()));
-                statusDay = DateUtil.getDeltaDays(chgFarm.getEventAt(), new Date()) + 1;
-            } else {
-                String extra = doctorPigTrack.getExtra();
-                Integer status = dto.getDoctorPigTrack().getStatus();
-                Date eventAt = null;
-                Long pigId = dto.getDoctorPig().getId();
-                // 最近一次的配种时间
-                if (status == 4 || status == 7){
-                    eventAt = RespHelper.or500(doctorPigEventReadService.findMateEventToPigId(pigId));
-                } else {
-                    eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(pigId, status));
-                }
-//                Date eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(dto.getDoctorPig().getId()
-//                        , dto.getDoctorPigTrack().getStatus()));
-                statusDay = DateUtil.getDeltaDays(eventAt, new Date()) + 1;
-
-                if (doctorPigTrack.getStatus() == PigStatus.KongHuai.getKey() && StringUtils.isNotBlank(extra)) {
-                    Map<String, Object> extraMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(extra, JacksonType.MAP_OF_OBJECT);
-                    Object checkResult = extraMap.get("pregCheckResult");
-                    if (checkResult != null) {
-                        pregCheckResult = Integer.parseInt(checkResult.toString());
-                        doctorPigTrack.setStatus(pregCheckResult);
-                    }
-                }
-                warnMessage = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().writeValueAsString(queryPigNotifyMessages(dto.getDoctorPig().getId()));
-            }
-            return DoctorSowDetailDto.builder()
-                    .pigSowCode(dto.getDoctorPig().getPigCode())
-                    .warnMessage(warnMessage)
-                    .breedName(dto.getDoctorPig().getBreedName())
-                    .barnId(dto.getDoctorPigTrack().getCurrentBarnId())
-                    .barnCode(dto.getDoctorPigTrack().getCurrentBarnName())
-                    .pigStatus(dto.getDoctorPigTrack().getStatus())
-                    .dayAge(Days.daysBetween(new DateTime(dto.getDoctorPig().getBirthDate()), DateTime.now()).getDays() + 1)
-                    .parity(doctorPigTrack.getCurrentParity())
-                    .entryDate(dto.getDoctorPig().getInFarmDate())
-                    .birthDate(dto.getDoctorPig().getBirthDate())
-                    .doctorPigEvents(dto.getDoctorPigEvents())
-                    .pregCheckResult(pregCheckResult)
-                    .rfid(dto.getDoctorPig().getRfid())
-                    .statusDay(statusDay)
-                    .pigWeight(dto.getDoctorPigTrack().getWeight())
-                    .build();
-        } catch (Exception e) {
-            log.error("buildSowDetailDto failed cause by {}", Throwables.getStackTraceAsString(e));
-        }
-        return null;
+            return buildSowDetailDto(getPigDetail(farmId, pigId, eventSize));
     }
 
     /**

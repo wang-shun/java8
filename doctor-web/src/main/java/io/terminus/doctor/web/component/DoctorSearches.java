@@ -914,6 +914,7 @@ public class DoctorSearches {
                 if ( "13".equals(params.get("statuses")) ) {
                     searchedPig.setStatus(13);
                     searchedPig.setStatusName("已转场");
+                    searchedPig.setFarmId(Long.parseLong(params.get("farmId")));
                 }
             });
         }
