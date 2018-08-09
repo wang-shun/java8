@@ -1019,4 +1019,18 @@
     <select id="getBuildEventAt" parameterType="map" resultType="Date">
        select event_at from doctor_group_events where group_id = #{groupId} and type = 1 and status = 1
     </select>
+    <select id="findEventIncludeTypes1" parameterType="map" resultMap="DoctorGroupEventMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE status = 1
+        AND group_id = #{groupId}
+        and event_at &lt; #{time}
+        <if test="types != null &amp;&amp; types.size() > 0">
+            AND `type` IN
+            <foreach collection="types" item="i" open="(" close=")" separator=",">
+                #{i}
+            </foreach>
+        </if>
+        ORDER BY date_format(event_at, '%Y-%m-%d') ASC , id ASC
+    </select>
 </mapper>

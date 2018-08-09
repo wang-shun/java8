@@ -1,14 +1,21 @@
 package io.terminus.doctor.event.service;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.event.dao.*;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportDeliverDao;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorChgFarmInfo;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -483,7 +490,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             }
             Double getAvgDayAge = doctorGroupEventDao.getAvgDayAge(groupId,time);
             if(getAvgDayAge != null && getCunlan != null && getCunlan != 0) {
-                map.put("getAvgDayAge", (double)Math.round((getAvgDayAge / getCunlan)*1000)/1000);
+                map.put("getAvgDayAge", (double)Math.round((DateUtil.getDeltaDays(getAvgDay(groupId,time), new Date()))*1000)/1000);
             }else{
                 map.put("getAvgDayAge", 0);
             }
@@ -679,5 +686,32 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             return null;
         }
     }
-
+    /**
+     * 获取猪群的初始日期用于计算日龄
+     *
+     * @param groupId 猪群id
+     * @return 日龄
+     */
+    public Date getAvgDay(Long groupId,Date time) {
+        List<Integer> includeTypes = Lists.newArrayList(GroupEventType.CHANGE.getValue(), GroupEventType.MOVE_IN.getValue(),
+                GroupEventType.TRANS_FARM.getValue(), GroupEventType.TRANS_GROUP.getValue());
+        List<DoctorGroupEvent> groupEventList = doctorGroupEventDao.findEventIncludeTypes1(groupId, includeTypes,time);
+        int currentQuantity = 0;
+        int avgDay = 0;
+        Date lastEvent = new Date();
+        for (DoctorGroupEvent groupEvent : groupEventList) {
+            if (Objects.equals(MoreObjects.firstNonNull(groupEvent.getQuantity(), 0), 0)) {
+                continue;
+            }
+            if (Objects.equals(groupEvent.getType(), GroupEventType.MOVE_IN.getValue())) {
+                avgDay = avgDay + DateUtil.getDeltaDays(lastEvent, groupEvent.getEventAt());
+                avgDay = EventUtil.getAvgDayAge(avgDay, currentQuantity, groupEvent.getAvgDayAge(), groupEvent.getQuantity());
+                currentQuantity += groupEvent.getQuantity();
+                lastEvent = groupEvent.getEventAt();
+            } else {
+                currentQuantity -= groupEvent.getQuantity();
+            }
+        }
+        return new DateTime(lastEvent).minusDays(avgDay).toDate();
+    }
 }
