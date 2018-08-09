@@ -490,7 +490,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             }
             Double getAvgDayAge = doctorGroupEventDao.getAvgDayAge(groupId,time);
             if(getAvgDayAge != null && getCunlan != null && getCunlan != 0) {
-                map.put("getAvgDayAge", (double)Math.round((DateUtil.getDeltaDays(getAvgDay(groupId,time), new Date()))*1000)/1000);
+                map.put("getAvgDayAge", (double)Math.round((DateUtil.getDeltaDays(getAvgDay(groupId,time), time))*1000)/1000);
             }else{
                 map.put("getAvgDayAge", 0);
             }
