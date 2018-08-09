@@ -218,7 +218,7 @@
             group by warehouse_id
         ) temp1 on a.warehouse_id = temp1.warehouse_id
 
-        left join (ifnull(sum(case type	when '2' then amount	when '8' then amount	when '10' then amount
+        left join (SELECT ifnull(sum(case type	when '2' then amount	when '8' then amount	when '10' then amount
 	        when '12' then amount	when '13' then amount end	),0) as outAmount,
             warehouse_id FROM doctor_warehouse_material_handle
             WHERE farm_id = #{farmId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
