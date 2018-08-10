@@ -202,6 +202,8 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                     stockMonthly.setSettlementDate(settlementDate);
                     if(balanceQuantity.add(thisSettlementAmountAndQuantity.getQuantity()).compareTo(BigDecimal.ZERO)==0){
                         stockMonthly.setBalanceAmount(new BigDecimal(0));
+                        log.info("balanceQuantity.add(thisSettlementAmountAndQuantity.getQuantity()).compareTo(BigDecimal.ZERO)==0 WarehouseId{},setMaterialId{}",warehouseId,sku);
+                        throw new ServiceException("balanceQuantity.add(thisSettlementAmountAndQuantity.getQuantity()).compareTo(BigDecimal.ZERO)==0");
                     }else {
                         stockMonthly.setBalanceAmount(balanceAmount.add(thisSettlementAmountAndQuantity.getAmount()));
                     }
@@ -244,7 +246,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                 settlement.setLastSettlementDate(settlementDate);
                 doctorWarehouseOrgSettlementDao.update(settlement);
             }
-
+            log.info("settlement:{}",settlement);
             return Response.ok();
 
         } catch (InvalidException e) {

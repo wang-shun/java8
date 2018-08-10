@@ -298,6 +298,57 @@
         and a.warehouse_id = #{warehouseId}
         and DATE_FORMAT(a.settlement_date,'%Y-%M') = DATE_FORMAT(#{settlementDate},'%Y-%M')
         group by a.material_id
+
+        UNION ALL
+
+		select b.id as materialId,b.name as materialName,b.code as code,v.short_name as vendorName,
+        b.specification as specification,a.warehouse_id as warehouseId,a.warehouse_type as warehouseType,
+        ifnull(round(temp1.balance_quantity,2),0) as lastQuantity,
+        ifnull(round(temp1.balance_amount),0) as lastAmount,
+        ifnull(round(temp2.balance_quantity,2),0) as balanceQuantity,
+        ifnull(round(temp2.balance_amount),0) as balanceAmount,
+
+        0 as inAmount,
+        0 as inQuantity,
+        0 as outAmount,
+        0 as outQuantity,
+
+        db.name as unit
+        from doctor_warehouse_stock_monthly sm
+				left join doctor_warehouse_material_handle a
+				on a.material_id=sm.material_id
+        left join doctor_warehouse_sku b
+        on a.material_id = b.id
+        left join doctor_basics db
+        on a.unit = db.id
+        left join doctor_warehouse_vendor as v
+        on v.id=b.vendor_id
+
+        left join (
+         select c.balance_quantity,c.balance_amount,c.material_id
+         from doctor_warehouse_stock_monthly c
+         where c.warehouse_id = #{warehouseId}
+         and date_format(c.settlement_date,'%Y-%m')=date_format(date_sub(#{settlementDate}, interval 1 month),'%Y-%m')
+				 GROUP BY c.material_id
+        )temp1 on a.material_id = temp1.material_id
+
+        left join (
+         select c.balance_quantity,c.balance_amount,c.material_id
+         from doctor_warehouse_stock_monthly c
+         where c.warehouse_id = #{warehouseId}
+         and date_format(c.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+         GROUP BY c.material_id
+        )temp2 on a.material_id = temp2.material_id
+
+        where sm.warehouse_id = #{warehouseId}
+        and DATE_FORMAT(sm.settlement_date,'%Y-%M') = DATE_FORMAT(#{settlementDate},'%Y-%M')
+        and sm.balance_quantity!=0
+        and sm.material_id not in(
+            select DISTINCT material_id from doctor_warehouse_material_handle
+            where warehouse_id = #{warehouseId} and DATE_FORMAT(settlement_date,'%Y-%M') = DATE_FORMAT(#{settlementDate},'%Y-%M')
+        )
+        group by sm.material_id
+
     </select>
 
     <sql id="detail">
