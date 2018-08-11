@@ -1024,7 +1024,7 @@
         FROM <include refid="tb" />
         WHERE status = 1
         AND group_id = #{groupId}
-        and event_at &lt; #{time}
+        and event_at &lt;= #{time}
         <if test="types != null &amp;&amp; types.size() > 0">
             AND `type` IN
             <foreach collection="types" item="i" open="(" close=")" separator=",">
