@@ -9,11 +9,13 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -156,12 +158,12 @@ public class ReportDeliveryController {
                                                    @RequestParam (required = false) String pigCode,
                                                    @RequestParam (required = false) Integer barnId,
                                                    @RequestParam (required = false) Integer breedId,
-//                                                   @RequestParam (required = false) Integer pigStatus,
+                                                   @RequestParam (required = false) Integer pigStatus,
                                                    @RequestParam (required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beginDate,
                                                    @RequestParam (required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate){
 //        if(null != beginDate && null != endDate && beginDate.after(endDate))
 //            throw new JsonResponseException("start.date.after.end.date");
-        return doctorDeliveryReadService.boarReport(farmId,queryDate,pigCode,staffName,barnId,breedId,beginDate,endDate);
+        return doctorDeliveryReadService.boarReport(farmId,pigStatus,queryDate,pigCode,staffName,barnId,breedId,beginDate,endDate);
 
     }
 
@@ -278,11 +280,11 @@ public class ReportDeliveryController {
                              @RequestParam (required = false) String pigCode,
                              @RequestParam (required = false) Integer barnId,
                              @RequestParam (required = false) Integer breedId,
-//                             @RequestParam (required = false) Integer pigStatus,
+                             @RequestParam (required = false) Integer pigStatus,
                              @RequestParam (required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beginDate,
                              @RequestParam (required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
                             HttpServletRequest request, HttpServletResponse response) {
-        List<Map<String,Object>> ls=doctorDeliveryReadService.boarReport(farmId,queryDate,pigCode,staffName,barnId,breedId,beginDate,endDate);
+        List<Map<String,Object>> ls=doctorDeliveryReadService.boarReport(farmId,pigStatus,queryDate,pigCode,staffName,barnId,breedId,beginDate,endDate);
 
         //开始导出
         try  {

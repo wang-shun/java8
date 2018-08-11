@@ -2186,7 +2186,6 @@
         select event_at,live_count from doctor_pig_events where event_at &lt;= #{time} and pig_id = #{pigId} and status=1 and type = 15 order by id desc limit 1
     </select>
 
-
     <select id="getInFarmBoarId1" parameterType="map" resultType="map">
         SELECT d.id as id, d.pig_id as pig_id , max(d.event_at) as event_at, a.pig_code as pig_code,a.breed_id as breed_id,a.breed_name as breed_name,a.source as source,a.in_farm_date as in_farm_date,a.birth_date as birth_date
         FROM doctor_pig_events d
@@ -2214,8 +2213,48 @@
         and id > d.id)
     </select>
 
-    <select id="isBoarBarn" parameterType="map" resultType="map">
-        select id ,event_at from doctor_pig_events
+    <select id="getInFarmBoarId2" parameterType="map" resultType="map">
+        SELECT d.id as id, d.pig_id as pig_id , max(d.event_at) as event_at, a.pig_code as pig_code,a.breed_id as breed_id,a.breed_name as breed_name,a.source as source,a.in_farm_date as in_farm_date,a.birth_date as birth_date
+        FROM doctor_pig_events d
+        join doctor_pigs a on d.pig_id = a.id
+        WHERE d.farm_id = #{farmId}
+        and d.status = 1
+        and d.kind = 2
+        and d.type = 6
+        and d.event_at &lt;= #{queryDate}
+        <if test="pigCode != null"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
+        <if test="breedId != null"> and a.breed_id = #{breedId} </if>
+        <if test="beginDate != null"> and a.in_farm_date >= #{beginDate} </if>
+        <if test="endDate != null"> and date(a.in_farm_date) &lt;= #{endDate} </if>
+        group by d.pig_id
+    </select>
+
+    <select id="getInFarmBoarId3" parameterType="map" resultType="map">
+        SELECT d.id as id, d.pig_id as pig_id , max(d.event_at) as event_at, a.pig_code as pig_code,a.breed_id as breed_id,a.breed_name as breed_name,a.source as source,a.in_farm_date as in_farm_date,a.birth_date as birth_date
+        FROM doctor_pig_events d
+        join doctor_pigs a on d.pig_id = a.id
+        WHERE d.farm_id = #{farmId}
+        and d.status = 1
+        and d.kind = 2
+        and d.type = 2
+        and d.event_at &lt;= #{queryDate}
+        <if test="pigCode != null"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
+        <if test="breedId != null"> and a.breed_id = #{breedId} </if>
+        <if test="beginDate != null"> and a.in_farm_date >= #{beginDate} </if>
+        <if test="endDate != null"> and date(a.in_farm_date) &lt;= #{endDate} </if>
+        group by d.pig_id
+        HAVING  d.id =
+        (SELECT id
+        FROM doctor_pig_events
+        WHERE farm_id = #{farmId}
+        and pig_id = d.pig_id
+        and status = 1
+        and kind = 2
+        order by id desc limit 1)
+    </select>
+
+    <select id="isBoarBarn" parameterType="map" resultType="BigInteger">
+        select id  from doctor_pig_events
         where pig_id = #{pigId} and farm_id = #{farmId} and kind = 2 and type = 1 and status = 1 and event_at > #{queryDate} and event_at >= #{eventAt} and id > #{id}
         order by id
         limit 1
@@ -2256,8 +2295,7 @@
 
     <select id="isBoarChgFarm" parameterType="map" resultType="BigInteger">
         select id from doctor_pig_events
-        where pig_id = #{pigId} and kind = 2 and type = 2 and status = 1 and event_at > #{queryDate} and event_at >= #{eventAt} and id > #{id}
-        <if test="chgBarnEventAt != null"> and #{queryDate} > #{chgBarnEventAt} </if>
+        where pig_id = #{pigId} and farm_id = #{farmId} and kind = 2 and type = 2 and status = 1 and event_at > #{queryDate} and event_at >= #{eventAt} and id > #{id}
         order by id
         limit 1
     </select>
