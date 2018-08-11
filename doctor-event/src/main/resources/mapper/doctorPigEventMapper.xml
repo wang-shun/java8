@@ -2087,7 +2087,7 @@
         and d.kind = 1
         and d.type in (2,6)
         and d.status = 1
-        and d.event_at &lt;= #{time}
+        and d.event_at = #{time}
         <if test="pigCode != null"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
         <if test="breed != null"> and a.breed_id = #{breed} </if>
         <if test="beginInFarmTime != null"> and a.in_farm_date > #{beginInFarmTime} </if>
