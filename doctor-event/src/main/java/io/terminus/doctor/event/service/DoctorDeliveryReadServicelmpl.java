@@ -1,11 +1,21 @@
 package io.terminus.doctor.event.service;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
-import io.terminus.doctor.event.dao.DoctorDataFactorDao;
+import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.JsonMapperUtil;
+import io.terminus.doctor.event.dao.*;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportDeliverDao;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.manager.FactorManager;
+import io.terminus.doctor.event.model.DoctorChgFarmInfo;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +29,20 @@ import java.util.*;
 public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
 
     private final DoctorReportDeliverDao doctorReportDeliverDao;
+    private final DoctorPigEventDao doctorPigEventDao;
+    private final DoctorGroupEventDao doctorGroupEventDao;
+    private final DoctorChgFarmInfoDao doctorChgFarmInfoDao;
+    private final DoctorBarnDao doctorBarnDao;
+    private static final JsonMapperUtil JSON_MAPPER = JsonMapperUtil.JSON_NON_DEFAULT_MAPPER;
 
     @Autowired
-    public DoctorDeliveryReadServicelmpl(DoctorReportDeliverDao doctorReportDeliverDao) {
+    public DoctorDeliveryReadServicelmpl(DoctorReportDeliverDao doctorReportDeliverDao, DoctorPigEventDao doctorPigEventDao, DoctorGroupEventDao doctorGroupEventDao, DoctorBarnDao doctorBarnDao,
+                                         DoctorChgFarmInfoDao doctorChgFarmInfoDao, DoctorChgFarmInfoDao doctorChgFarmInfoDao1) {
         this.doctorReportDeliverDao = doctorReportDeliverDao;
+        this.doctorPigEventDao = doctorPigEventDao;
+        this.doctorGroupEventDao = doctorGroupEventDao;
+        this.doctorBarnDao = doctorBarnDao;
+        this.doctorChgFarmInfoDao = doctorChgFarmInfoDao1;
     }
 
     @Override
@@ -31,7 +51,6 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         List<Map<String,Object>> delivery = new ArrayList<>(); //分娩了
         List<Map<String,Object>> nodeliver = new ArrayList<>();//未分娩
         int deliverycount = 0;//分娩数
-        int yangxcount = 0;//阳性数
         int fqcount = 0;//返情数
         int lccount = 0;//流产数
         int yxcount = 0;//阴性数
@@ -70,6 +89,11 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             BigInteger id = (BigInteger)map.get("id");
             BigInteger pig_id = (BigInteger)map.get("pig_id");
             int parity = (int)map.get("parity");
+
+            Map<String,Object> matingCount =  doctorReportDeliverDao.getMatingCount(pig_id,(Date)map.get("event_at"));
+            if(matingCount != null){
+                map.put("current_mating_count",matingCount.get("current_mating_count"));
+            }
             List<Map<String,Object>> deliveryBarn = doctorReportDeliverDao.deliveryBarn(id,pig_id);//判断是否分娩以及查询分娩猪舍
             if(deliveryBarn != null) {
                 if (deliveryBarn.size() != 0) {
@@ -82,7 +106,6 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map.put("leave_event_at", "");
                     delivery.add(map);
                     deliverycount = deliverycount + 1;
-                    yangxcount = yangxcount + 1;
                 } else {
                     map.put("deliveryBarn", "未分娩");
                     map.put("deliveryDate", "");
@@ -100,7 +123,6 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         int b = (int) notdelivery.get("preg_check_result");
                         if (b == 1) {
                             map.put("notdelivery", "阳性");
-                            yangxcount = yangxcount + 1;
                         }
                         if (b == 2) {
                             map.put("notdelivery", "阴性");
@@ -143,7 +165,6 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         }
         int matingcount = 0;
         String deliveryrate = "0";
-        String yangxrate = "0";
         String fqrate = "0";
         String lcrate = "0";
         String yxrate = "0";
@@ -152,7 +173,6 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         if(matingList.size()!=0) {
             matingcount = matingList.size();
             deliveryrate = divide(deliverycount, matingcount);//分娩率
-            yangxrate = divide(yangxcount, matingcount);//阳性率
             fqrate = divide(fqcount, matingcount);//返情率
             lcrate = divide(lccount, matingcount);//流产率
             yxrate = divide(yxcount, matingcount);//阴性率
@@ -163,14 +183,12 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         Map<String,Object> list = new HashMap<>();
         list.put("matingcount",matingcount);
         list.put("deliverycount",deliverycount);
-        list.put("yangxcount",yangxcount);
         list.put("fqcount",fqcount);
         list.put("lccount",lccount);
         list.put("yxcount",yxcount);
         list.put("swcount",swcount);
         list.put("ttcount",ttcount);
         list.put("deliveryrate",deliveryrate);
-        list.put("yangxrate",yangxrate);
         list.put("fqrate",fqrate);
         list.put("lcrate",lcrate);
         list.put("yxrate",yxrate);
@@ -190,5 +208,510 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         BigDecimal big   =   new  BigDecimal(k);
         String  l = big.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue() +"%";
         return l;
+    }
+
+    @Override
+    public List<Map<String,Object>> sowsReport(Long farmId,Date time,String pigCode,String operatorName,Long barnId,Integer breed,Integer parity,Integer pigStatus,Date beginInFarmTime, Date endInFarmTime, Integer sowsStatus){
+        List<Map<String,Object>> inFarmPigId = null;
+//        if(pigStatus == 0){//全部
+        if(sowsStatus == 0) {
+            inFarmPigId = doctorPigEventDao.getInFarmPigId(farmId, time, pigCode, breed, beginInFarmTime, endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
+        } else{
+            inFarmPigId = doctorPigEventDao.getInFarmPigId3(farmId, time, pigCode, breed, beginInFarmTime, endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
+        }
+// }else if(pigStatus == 2){//离场
+//            inFarmPigId = doctorPigEventDao.getInFarmPigId2(farmId,time,pigCode,breed, beginInFarmTime,endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
+//        } else if(pigStatus == 10){//转场
+//            inFarmPigId = doctorPigEventDao.getInFarmPigId3(farmId,time,pigCode,breed, beginInFarmTime,endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
+//        }else {
+//            inFarmPigId = doctorPigEventDao.getInFarmPigId(farmId, time, pigCode, breed, beginInFarmTime, endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
+//        }
+        /*boolean f = true;
+        boolean g = true;
+        boolean h = true;
+        List<Map<String,Object>> j = new ArrayList<>();*/
+        for(Iterator<Map<String,Object>> it = inFarmPigId.iterator();it.hasNext();){
+            Map map = it.next();
+            int source = (int)map.get("source");
+            if (source == 1) {
+                map.put("source","本厂");
+            }else if (source == 2) {
+                map.put("source","外购");
+            }else{
+                map.put("source","");
+            }
+            BigInteger id = (BigInteger)map.get("id");
+            BigInteger pigId = (BigInteger)map.get("pig_id");
+            Date eventAt = (Date)map.get("event_at");
+            //BigInteger isBarn = doctorPigEventDao.isBarn(id,pigId,eventAt,time);//如果后面又转舍事件
+            Map<String,Object> afterEvent = doctorPigEventDao.afterEvent(pigId,time);//查当前时间后面的第一个事件，利用这个时间求当前猪舍和猪场，如果没有则按当前猪场和猪舍
+            BigInteger afterEventFarmId = null;
+            if(afterEvent != null) {
+                afterEventFarmId = (BigInteger) afterEvent.get("farm_id");
+           // }
+            //if(isBarn != null) {
+                Map<String,Object> currentBarn = doctorPigEventDao.findBarn((BigInteger)afterEvent.get("id"),id,pigId,eventAt,time,operatorName,barnId);//如果后面又转舍事件,去后面事件的猪舍
+                if(currentBarn != null) {
+                    map.put("current_barn_name", currentBarn.get("barn_name"));
+                    map.put("staff_name", currentBarn.get("staff_name"));//饲养员
+                } else{
+                    it.remove();
+                    continue;
+                    //f = false;
+                }
+            }else{
+                Map<String,Object> currentBarns = doctorPigEventDao.findBarns(pigId,operatorName,barnId);//否则取当前猪舍
+                afterEventFarmId = (BigInteger)doctorPigEventDao.findBarns(pigId,null,null).get("farm_id");
+                if(currentBarns != null) {
+                    map.put("current_barn_name", currentBarns.get("current_barn_name"));
+                    map.put("staff_name", currentBarns.get("staff_name"));//饲养员
+                } else{
+                    it.remove();
+                    continue;
+                    //g = false;
+                }
+            }
+
+                Map<String,Object> frontEvent = doctorPigEventDao.frontEvent(parity,pigId,time,pigStatus);
+                if(frontEvent != null) {
+                    map.put("parity", frontEvent.get("parity"));//母猪胎次
+                    String Status = null;
+
+                    if(afterEventFarmId == null || afterEventFarmId.equals(new BigInteger(farmId.toString()))) {
+                        int status = (int) frontEvent.get("pig_status_after");
+
+                        if (status == PigStatus.Entry.getKey()) {
+                            Status = PigStatus.Entry.getName();
+                        }
+                        if (status == PigStatus.Removal.getKey()) {
+                            Status = PigStatus.Removal.getName();
+                        }
+                        if (status == PigStatus.Mate.getKey()) {
+                            Status = PigStatus.Mate.getName();
+                        }
+                        if (status == PigStatus.Pregnancy.getKey()) {
+                            Status = PigStatus.Pregnancy.getName();
+                        }
+                        if (status == PigStatus.KongHuai.getKey()) {
+                            int pregCheckResult = doctorPigEventDao.getPregCheckResult(parity,pigId,time,pigStatus);
+
+                                //doctorPigEventDao.getPregCheckResult(parity,pigId,time,pigStatus)
+
+                                if (pregCheckResult == 2) {
+                                    Status = "阴性";
+                                } else if (pregCheckResult == 3) {
+                                    Status = "流产";
+                                } else if (pregCheckResult == 4) {
+                                    Status = "返情";
+                                } else {
+                                    Status = PigStatus.KongHuai.getName();
+                                }
+                        }
+                        if (status == PigStatus.Farrow.getKey()) {
+                            Status = PigStatus.Farrow.getName();
+                        }
+                        if (status == PigStatus.FEED.getKey()) {
+                            Status = PigStatus.FEED.getName();
+                        }
+                        if (status == PigStatus.Wean.getKey()) {
+                            Status = PigStatus.Wean.getName();
+                        }
+                        if (status == PigStatus.CHG_FARM.getKey()) {
+                            Status = PigStatus.CHG_FARM.getName();
+                        }
+                    } else {
+                        Status = "转场";
+                    }
+                    map.put("status", Status);//母猪状态
+                    if(frontEvent.get("type") != null){
+                        int a = (int)frontEvent.get("type");
+                        if(a == 15 || a == 17 || a == 18 ||a == 19 ){
+                            if(a == 15){
+                                if(frontEvent.get("live_count") != null) {
+                                    map.put("daizaishu", frontEvent.get("live_count"));//如果前一個事件是分娩事件，带仔数就是分娩事件的活仔数
+                                }else{
+                                    map.put("daizaishu",0);
+                                }
+                            }else{
+                                Map<String,Object> nearDeliver = doctorPigEventDao.nearDeliver(pigId,time);
+                                BigDecimal daizaishu = new BigDecimal((int)nearDeliver.get("live_count"));
+                                List<Map<String,Object>> b = doctorPigEventDao.getdaizaishu(pigId,time,(Date)nearDeliver.get("event_at"));//如果是拼窝或者仔猪变动则需计算
+                                for(int i = 0;i < b.size(); i++){
+                                    if((int)b.get(i).get("type") == 17){
+                                        daizaishu = daizaishu.subtract((BigDecimal)b.get(i).get("quantity"));
+                                    }
+                                    if((int)b.get(i).get("type") == 18){
+                                        daizaishu = daizaishu.subtract((BigDecimal)b.get(i).get("quantity"));
+                                    }
+                                    if((int)b.get(i).get("type") == 19){
+                                        daizaishu = daizaishu.add((BigDecimal)b.get(i).get("quantity"));
+                                    }
+                                }
+                                map.put("daizaishu",daizaishu);
+                            }
+                        }else{
+                            map.put("daizaishu",0);
+                        }
+                    }else{
+                        map.put("daizaishu",0);
+                    }
+                }else{
+                    it.remove();
+                }
+                /*if(f && g && h){
+                    j.add(map);
+                }
+                if(j.size() == 20){
+                    break;
+                }*/
+            }
+       // }
+        //}
+        return inFarmPigId;
+    }
+
+    @Override
+    public List<Map<String, Object>> boarReport(Long farmId, Date queryDate, String pigCode, String staffName, Integer barnId, Integer breedId, Date beginDate, Date endDate) {
+        List<Map<String, Object>> inFarmBoarId = null;
+        inFarmBoarId = doctorPigEventDao.getInFarmBoarId1(farmId,queryDate,barnId,pigCode,breedId,staffName,beginDate,endDate);
+        for (Iterator<Map<String,Object>> it = inFarmBoarId.iterator();it.hasNext();) {
+            Map map = it.next();
+            if (map.get("source") != null){
+                int source = (int)map.get("source");
+                if (source == 1) {
+                    map.put("source","本厂");
+                }
+                if (source == 2) {
+                    map.put("source","外购");
+                }
+            }
+            BigInteger id = (BigInteger)map.get("id");
+            BigInteger pigId = (BigInteger)map.get("pig_id");
+            Date eventAt = (Date)map.get("event_at");
+         //   BigInteger isBoarBarn = doctorPigEventDao.isBoarBarn(id,pigId,eventAt,queryDate,farmId); //该时间点后是否有转舍事件发生
+            Map<String,Object> isBoarBarn1 = doctorPigEventDao.isBoarBarn(id,pigId,eventAt,queryDate,farmId);
+            BigInteger isBoarBarn = null;
+            Date chgBarnEventAt = null;
+            if (isBoarBarn1 != null){
+                isBoarBarn = (BigInteger) isBoarBarn1.get("id");
+                chgBarnEventAt = (Date)isBoarBarn1.get("event_at");
+            }
+            if(isBoarBarn != null) {
+                Map<String,Object> currentBoarBarn = doctorPigEventDao.findBoarBarn(isBoarBarn,id,pigId,eventAt,queryDate,staffName,barnId);//如果后面又转舍事件,去后面事件的猪舍
+                if(currentBoarBarn != null) {
+                    map.put("current_barn_name", currentBoarBarn.get("barn_name"));
+                    map.put("staff_name", currentBoarBarn.get("staff_name"));//饲养员
+                } else{
+                    it.remove();
+                }
+            }else{
+                Map<String,Object> currentBoarBarn = doctorPigEventDao.findBoarBarns(pigId,staffName,barnId);//否则取当前猪舍
+                if(currentBoarBarn != null) {
+                    map.put("current_barn_name", currentBoarBarn.get("current_barn_name"));
+                    map.put("staff_name", currentBoarBarn.get("staff_name"));//饲养员
+                } else{
+                    it.remove();
+                }
+            }
+           BigInteger isBoarChgFarm = doctorPigEventDao.isBoarChgFarm(id, pigId, eventAt, queryDate,chgBarnEventAt); //该时间点后是否有转场事件发生
+            DoctorChgFarmInfo doctorChgFarmInfo;
+            DoctorPigTrack doctorPigTrack;
+            DoctorPig doctorPig;
+            if (isBoarChgFarm != null ) {
+                doctorChgFarmInfo = doctorChgFarmInfoDao.findBoarChgFarm(farmId, pigId, isBoarChgFarm);
+                if (doctorChgFarmInfo != null){
+                    doctorPigTrack = JSON_MAPPER.fromJson(doctorChgFarmInfo.getTrack(), DoctorPigTrack.class);
+                    doctorPig = JSON_MAPPER.fromJson(doctorChgFarmInfo.getPig(), DoctorPig.class);
+                    map.put("current_barn_name", doctorPigTrack.getCurrentBarnName());
+                    map.put("in_farm_date", doctorPig.getInFarmDate());
+                    Long currentBarnId = doctorPigTrack.getCurrentBarnId();
+                    String currentStaffName = doctorPigEventDao.findStaffName(currentBarnId,staffName,barnId);
+                    if (currentStaffName != null){
+                        map.put("staff_name",currentStaffName);//饲养员
+                    }else {
+                        it.remove();
+                    }
+                } else {
+                    it.remove();
+                }
+            }
+            map.put("status","已进场");
+        }
+        return inFarmBoarId;
+    }
+
+    @Override
+    public Map<String,Object> groupReport(Long farmId,Date time,String groupCode,String operatorName,Long barn,Integer groupType,Integer groupStatus,Date buildBeginGroupTime,Date buildEndGroupTime,Date closeBeginGroupTime,Date closeEndGroupTime){
+        List<Map<String,Object>> groupList = null;
+        if(groupStatus == 0) {
+            groupList = doctorGroupEventDao.groupList(farmId, time, barn, groupCode, operatorName, groupType, buildBeginGroupTime, buildEndGroupTime,closeBeginGroupTime,closeEndGroupTime);
+        } else{
+            groupList = doctorGroupEventDao.groupList1(farmId, time, barn, groupCode, operatorName, groupType, buildBeginGroupTime, buildEndGroupTime,closeBeginGroupTime,closeEndGroupTime);
+        }
+        int zongcunlan = 0;
+        for(int i=0;i<groupList.size();i++){
+            Map map = groupList.get(i);
+            int status = (int) map.get("pig_type");
+            if(status == 7){
+                map.put("pig_type","产房仔猪");
+            }
+            if(status == 2){
+                map.put("pig_type","保育猪");
+            }
+            if(status == 3){
+                map.put("pig_type","育肥猪");
+            }
+            if(status == 4){
+                map.put("pig_type","后备猪");
+            }
+            Long groupId = (Long)map.get("group_id");
+            if(map.get("build_event_at") == null){
+                Date buildEventAt =  doctorGroupEventDao.getBuildEventAt(groupId);
+                map.put("build_event_at",buildEventAt);
+            }
+            Integer getCunlan = doctorGroupEventDao.getCunlan(groupId,time);
+            if(getCunlan != null && groupStatus == 0) {
+                map.put("cunlanshu", getCunlan);
+                zongcunlan = zongcunlan + getCunlan;
+            }else{
+                map.put("cunlanshu", 0);
+            }
+            Double getInAvgweight = doctorGroupEventDao.getInAvgweight(groupId,time);
+            if(getInAvgweight != null) {
+                map.put("inAvgweight", (double)Math.round(getInAvgweight*1000)/1000);
+            }else{
+                map.put("inAvgweight", 0);
+            }
+            Double getOutAvgweight = doctorGroupEventDao.getOutAvgweight(groupId,time);
+            if(getOutAvgweight != null) {
+                map.put("outAvgweight", (double)Math.round(getOutAvgweight*1000)/1000);
+            }else{
+                map.put("outAvgweight", 0);
+            }
+            Double getAvgDayAge = doctorGroupEventDao.getAvgDayAge(groupId,time);
+            if(getAvgDayAge != null && getCunlan != null && getCunlan != 0 && groupStatus == 0) {
+                map.put("getAvgDayAge", (double)Math.round((DateUtil.getDeltaDays(getAvgDay(groupId,time), time))*1000)/1000);
+            }else{
+                map.put("getAvgDayAge", 0);
+            }
+        }
+        Map<String,Object> data = new HashMap<>();
+        data.put("data",groupList);
+        data.put("zongcunlan",zongcunlan);
+        return data;
+    }
+    public List<Map<String,Object>> barnsReport(Long farmId,String operatorName,Long isbarnId,Date beginTime,Date endTime){
+        List<Long> barnIds = new ArrayList<>();
+        if(isbarnId == 0) {
+            barnIds = doctorBarnDao.findBarnIdsByfarmId(farmId, operatorName);
+        }else{
+             barnIds.add(isbarnId);
+        }
+        if(barnIds != null) {
+            List<Map<String,Object>> list = new ArrayList<>();
+            //Map map = new HashMap();
+            for(Long barnId: barnIds) {
+
+                Map<String, Object> map = doctorBarnDao.findBarnTypeById(barnId);
+                int barnType = (int) (map.get("pig_type"));
+                if (barnType == 5 || barnType == 6 || barnType == 9) {
+                    Integer qichucunlan = doctorBarnDao.qichucunlan(farmId, barnId, beginTime);
+                    Integer qimucunlan = doctorBarnDao.qimucunlan(farmId, barnId, endTime);
+                    if (qichucunlan != null) {
+                        map.put("qichucunlan", qichucunlan);
+                    } else {
+                        map.put("qichucunlan", 0);
+                    }
+                    if (qimucunlan != null) {
+                        map.put("qimucunlan", qimucunlan);
+                    } else {
+                        map.put("qimucunlan", 0);
+                    }
+                    List<Map<Integer, Long>> jianshao = doctorBarnDao.jianshao(barnId, beginTime, endTime);
+                    Long qitajianshao = 0L;
+                    if (jianshao != null) {
+                        for (int i = 0; i < jianshao.size(); i++) {
+                            Long a = jianshao.get(i).get("change_type_id");
+                            if (a == 109) {
+                                map.put("xiaoshou", jianshao.get(i).get("count") == null ? 0 : jianshao.get(i).get("count"));
+                            }
+                            if (a == 110) {
+                                map.put("siwang", jianshao.get(i).get("count")==null ? 0 : jianshao.get(i).get("count"));
+                            }
+                            if (a == 111) {
+                                map.put("taotai", jianshao.get(i).get("count")==null ? 0 : jianshao.get(i).get("count"));
+                            }
+                            if (a == 112 || a == 113 || a == 114 || a == 115) {
+                                qitajianshao = qitajianshao + jianshao.get(i).get("count");
+                            }
+                        }
+                        map.put("qitajianshao", qitajianshao);
+                    } else {
+                        map.put("xiaoshou", 0);
+                        map.put("siwang", 0);
+                        map.put("taotai", 0);
+                        map.put("qitajianshao", 0);
+                    }
+                    Integer zhuanchu = doctorBarnDao.zhuanchu(barnId, beginTime, endTime);
+                    if (zhuanchu != null) {
+                        map.put("zhuanchu", zhuanchu);
+                    } else {
+                        map.put("zhuanchu", 0);
+                    }
+                    Long zhuanru = qimucunlan - qichucunlan + (zhuanchu == null ? 0 : zhuanchu) + (map.get("xiaoshou") == null ? 0 : (Long) map.get("xiaoshou")) + (map.get("siwang") == null ? 0 : (Long) map.get("siwang")) + (map.get("taotai") == null ? 0 : (Long) map.get("taotai")) + (map.get("qitajianshao") == null ? 0 : (Long) map.get("qitajianshao"));
+                    map.put("zhuanru", zhuanru);
+                }
+                if(barnType == 7){
+                    Integer pigqichucunlan = doctorBarnDao.qichucunlan(farmId, barnId, beginTime);
+                    Integer groupqichucunlan = doctorBarnDao.groupqichucunlan(farmId, barnId, beginTime);
+                    Integer pigqimucunlan = doctorBarnDao.qimucunlan(farmId, barnId, beginTime);
+                    Integer groupqimucunlan = doctorBarnDao.groupqimucunlan(farmId, barnId, beginTime);
+                    Integer qichucunlan = (pigqichucunlan == null? 0 : pigqichucunlan) + (groupqichucunlan == null ? 0:groupqichucunlan);
+                    Integer qimucunlan = (pigqimucunlan == null? 0 : pigqimucunlan) + (groupqimucunlan == null ? 0:groupqimucunlan);
+                    map.put("qichucunlan",qichucunlan);
+                    map.put("qimucunlan",qimucunlan);
+                    List<Map<Integer, Long>> jianshao = doctorBarnDao.jianshao(barnId, beginTime, endTime);
+                    Long pigqitajianshao = 0L;
+                    Long pigxiaoshou = 0L;
+                    Long pigsiwang = 0L;
+                    Long pigtaotai = 0L;
+                    if (jianshao != null) {
+                        for (int i = 0; i < jianshao.size(); i++) {
+                            Long a = jianshao.get(i).get("change_type_id");
+                            if (a == 109) {
+                                pigxiaoshou = jianshao.get(i).get("count");
+                            }
+                            if (a == 110) {
+                                pigsiwang = jianshao.get(i).get("count");
+                            }
+                            if (a == 111) {
+                                pigtaotai = jianshao.get(i).get("count");
+                            }
+                            if (a == 112 || a == 113 || a == 114 || a == 115) {
+                                pigqitajianshao = pigqitajianshao + jianshao.get(i).get("count");
+                            }
+                        }
+                    }
+                    List<Map<Integer, Long>> jianshao1 = doctorBarnDao.groupjianshao(barnId, beginTime, endTime);
+                    int groupqitajianshao = 0;
+                    Long groupxiaoshou = 0L;
+                    Long groupsiwang = 0L;
+                    Long grouptaotai = 0L;
+                    if (jianshao1 != null) {
+                        for (int i = 0; i < jianshao1.size(); i++) {
+                            Long a = jianshao1.get(i).get("change_type_id");
+                            if (a == 109) {
+                                Object h = jianshao1.get(i).get("count");
+                                groupxiaoshou = Long.parseLong(h.toString());
+                            }
+                            if (a == 110) {
+                                Object h = jianshao1.get(i).get("count");
+                                groupsiwang = Long.parseLong(h.toString());
+                            }
+                            if (a == 111) {
+                                Object h = jianshao1.get(i).get("count");
+                                grouptaotai = Long.parseLong(h.toString());
+                            }
+                            if (a == 112 || a == 113 || a == 114 || a == 115) {
+                                Object  ob = jianshao1.get(i).get("count");
+                                int b =Integer.parseInt(ob.toString());
+                                groupqitajianshao = groupqitajianshao+b;
+                            }
+                        }
+                    }
+                    map.put("xiaoshou",pigxiaoshou+groupxiaoshou);
+                    map.put("siwang",pigxiaoshou+groupxiaoshou);
+                    map.put("taotai",pigtaotai+grouptaotai);
+                    map.put("qitajianshao",pigqitajianshao+groupqitajianshao);
+                    Integer pigzhuanchu = doctorBarnDao.zhuanchu(barnId, beginTime, endTime);
+                    Integer groupzhuanchu = doctorBarnDao.groupzhuanchu(barnId,beginTime,endTime);
+                    int zhuanchu = (pigzhuanchu == null ? 0 : pigzhuanchu) + (groupzhuanchu == null ? 0 : groupzhuanchu);
+                    Long zhuanru = qimucunlan - qichucunlan + zhuanchu + pigxiaoshou+groupxiaoshou + pigxiaoshou+groupxiaoshou + pigtaotai+grouptaotai + pigqitajianshao+groupqitajianshao;
+                    map.put("zhuanru", zhuanru);
+                    map.put("zhuanchu", zhuanchu);
+                }
+                if (barnType == 2 || barnType == 3 || barnType == 4 ) {
+                    Integer qichucunlan = doctorBarnDao.groupqichucunlan(farmId, barnId, beginTime);
+                    Integer qimucunlan = doctorBarnDao.groupqimucunlan(farmId, barnId, endTime);
+                    if (qichucunlan != null) {
+                        map.put("qichucunlan", qichucunlan);
+                    } else {
+                        map.put("qichucunlan", 0);
+                    }
+                    if (qimucunlan != null) {
+                        map.put("qimucunlan", qimucunlan);
+                    } else {
+                        map.put("qimucunlan", 0);
+                    }
+                    Integer zhuanru = doctorBarnDao.groupzhuanru(barnId,beginTime,endTime);
+                    map.put("zhuanru", zhuanru);
+                    Integer zhuanchu = doctorBarnDao.groupzhuanchu(barnId,beginTime,endTime);
+                    if (zhuanchu != null) {
+                        map.put("zhuanchu", zhuanchu);
+                    } else {
+                        map.put("zhuanchu", 0);
+                    }
+                    List<Map<Integer, Long>> jianshao = doctorBarnDao.groupjianshao(barnId, beginTime, endTime);
+                    int qitajianshao = 0;
+                    if (jianshao != null) {
+                        for (int i = 0; i < jianshao.size(); i++) {
+                            Long a = jianshao.get(i).get("change_type_id");
+                            if (a == 109) {
+                                map.put("xiaoshou", jianshao.get(i).get("count")==null ? 0 : jianshao.get(i).get("count"));
+                            }
+                            if (a == 110) {
+                                map.put("siwang", jianshao.get(i).get("count")==null ? 0 : jianshao.get(i).get("count"));
+                            }
+                            if (a == 111) {
+                                map.put("taotai", jianshao.get(i).get("count")==null ? 0 : jianshao.get(i).get("count"));
+                            }
+                            if (a == 112 || a == 113 || a == 114 || a == 115) {
+                                Object  ob = jianshao.get(i).get("count");
+                                int b =Integer.parseInt(ob.toString());
+                               qitajianshao = qitajianshao+b;
+                            }
+                        }
+                        map.put("qitajianshao", qitajianshao);
+                    } else {
+                        map.put("xiaoshou", 0);
+                        map.put("siwang", 0);
+                        map.put("taotai", 0);
+                        map.put("qitajianshao", 0);
+                    }
+                }
+                list.add(map);
+            }
+            return list;
+        } else{
+            return null;
+        }
+    }
+    /**
+     * 获取猪群的初始日期用于计算日龄
+     *
+     * @param groupId 猪群id
+     * @return 日龄
+     */
+    public Date getAvgDay(Long groupId,Date time) {
+        List<Integer> includeTypes = Lists.newArrayList(GroupEventType.CHANGE.getValue(), GroupEventType.MOVE_IN.getValue(),
+                GroupEventType.TRANS_FARM.getValue(), GroupEventType.TRANS_GROUP.getValue());
+        List<DoctorGroupEvent> groupEventList = doctorGroupEventDao.findEventIncludeTypes1(groupId, includeTypes,time);
+        int currentQuantity = 0;
+        int avgDay = 0;
+        Date lastEvent = new Date();
+        for (DoctorGroupEvent groupEvent : groupEventList) {
+            if (Objects.equals(MoreObjects.firstNonNull(groupEvent.getQuantity(), 0), 0)) {
+                continue;
+            }
+            if (Objects.equals(groupEvent.getType(), GroupEventType.MOVE_IN.getValue())) {
+                avgDay = avgDay + DateUtil.getDeltaDays(lastEvent, groupEvent.getEventAt());
+                avgDay = EventUtil.getAvgDayAge(avgDay, currentQuantity, groupEvent.getAvgDayAge(), groupEvent.getQuantity());
+                currentQuantity += groupEvent.getQuantity();
+                lastEvent = groupEvent.getEventAt();
+            } else {
+                currentQuantity -= groupEvent.getQuantity();
+            }
+        }
+        return new DateTime(lastEvent).minusDays(avgDay).toDate();
     }
 }

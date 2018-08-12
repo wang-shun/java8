@@ -310,4 +310,84 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
     public List<DoctorFarmEarlyEventAtDto> findEarLyAt(){
         return sqlSession.selectList(sqlId("findEarLyAt"));
     }
+
+    public List<DoctorGroupEvent> findGroupEvents(Long farmId,Long relPigEventId){
+        Map<String, Object> param = new HashMap<>();
+        param.put("farmId", farmId);
+        param.put("relPigEventId", relPigEventId);
+        return sqlSession.selectList(sqlId("findGroupEvents"),param);
+    }
+
+    public List<Map<String,Object>> groupList(Long farmId,Date time,Long barn,String groupCode,String operatorName,Integer groupType,Date buildBeginGroupTime,Date buildEndGroupTime,Date closeBeginGroupTime,Date closeEndGroupTime){
+        Map<String, Object> param = new HashMap<>();
+        param.put("farmId", farmId);
+        param.put("time", time);
+        param.put("barn", barn);
+        param.put("groupCode", groupCode);
+        param.put("operatorName", operatorName);
+        param.put("groupType", groupType);
+        param.put("buildBeginGroupTime", buildBeginGroupTime);
+        param.put("buildEndGroupTime", buildEndGroupTime);
+        param.put("closeBeginGroupTime", closeBeginGroupTime);
+        param.put("closeEndGroupTime", closeEndGroupTime);
+        return sqlSession.selectList(sqlId("groupList"),param);
+    }
+    public List<Map<String,Object>> groupList1(Long farmId,Date time,Long barn,String groupCode,String operatorName,Integer groupType,Date buildBeginGroupTime,Date buildEndGroupTime,Date closeBeginGroupTime,Date closeEndGroupTime){
+        Map<String, Object> param = new HashMap<>();
+        param.put("farmId", farmId);
+        param.put("time", time);
+        param.put("barn", barn);
+        param.put("groupCode", groupCode);
+        param.put("operatorName", operatorName);
+        param.put("groupType", groupType);
+        param.put("buildBeginGroupTime", buildBeginGroupTime);
+        param.put("buildEndGroupTime", buildEndGroupTime);
+        param.put("closeBeginGroupTime", closeBeginGroupTime);
+        param.put("closeEndGroupTime", closeEndGroupTime);
+        return sqlSession.selectList(sqlId("groupList1"),param);
+    }
+    public List<Map<String,Object>> groupList2(Long farmId,Date time,Long barn,String groupCode,String operatorName,Integer groupType,Date buildBeginGroupTime,Date buildEndGroupTime){
+        Map<String, Object> param = new HashMap<>();
+        param.put("farmId", farmId);
+        param.put("time", time);
+        param.put("barn", barn);
+        param.put("groupCode", groupCode);
+        param.put("operatorName", operatorName);
+        param.put("groupType", groupType);
+        param.put("buildBeginGroupTime", buildBeginGroupTime);
+        param.put("buildEndGroupTime", buildEndGroupTime);
+        return sqlSession.selectList(sqlId("groupList2"),param);
+    }
+    public Integer getCunlan(Long groupId,Date time){
+        Map<String, Object> param = new HashMap<>();
+        param.put("groupId", groupId);
+        param.put("time", time);
+        return sqlSession.selectOne(sqlId("getCunlan"),param);
+    }
+    public Double getInAvgweight(Long groupId,Date time){
+        Map<String, Object> param = new HashMap<>();
+        param.put("groupId", groupId);
+        param.put("time", time);
+        return sqlSession.selectOne(sqlId("getInAvgweight"),param);
+    }
+    public Double getOutAvgweight(Long groupId,Date time){
+        Map<String, Object> param = new HashMap<>();
+        param.put("groupId", groupId);
+        param.put("time", time);
+        return sqlSession.selectOne(sqlId("getOutAvgweight"),param);
+    }
+    public Double getAvgDayAge(Long groupId,Date time){
+        Map<String, Object> param = new HashMap<>();
+        param.put("groupId", groupId);
+        param.put("time", time);
+        return sqlSession.selectOne(sqlId("getAvgDayAge"),param);
+    }
+    public Date getBuildEventAt(Long groupId){
+        Map<String, Object> param = new HashMap<>();
+        param.put("groupId", groupId);
+        return sqlSession.selectOne(sqlId("getBuildEventAt"),param);
+    }
+    public List<DoctorGroupEvent> findEventIncludeTypes1(Long groupId, List<Integer> types,Date time) {
+        return getSqlSession().selectList(sqlId("findEventIncludeTypes1"), ImmutableMap.of("groupId", groupId, "types", types,"time",time));
+    }
 }

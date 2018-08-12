@@ -166,4 +166,15 @@
             pig_id = #{pigId}
         </where>
     </select>
+
+    <select id="findBoarChgFarm" parameterType="map" resultMap="DoctorChgFarmInfoMap">
+        SELECT track, pig
+        FROM doctor_chg_farm_infos
+        <where>
+            farm_id = #{farmId}
+            AND pig_id = #{pigId}
+            AND event_id = #{isBoarChgFarm}
+            AND pig_type = 2
+        </where>
+    </select>
 </mapper>

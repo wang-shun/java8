@@ -178,7 +178,27 @@
             <if test="status == null">AND status = 1</if>
         </where>
     </select>
+    <select id="findByEnums1" parameterType="map" resultMap="DoctorBarnMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            <if test="farmId != null">AND farm_id = #{farmId}</if>
+            <if test="pigTypes != null  &amp;&amp; pigTypes.size() > 0">AND pig_type IN
+                <foreach collection="pigTypes" item="type" open="(" separator="," close=")">
+                    #{type}
+                </foreach>
+            </if>
 
+            <if test="barnIds != null  &amp;&amp; barnIds.size() > 0">AND id IN
+                <foreach collection="barnIds" item="bid" open="(" separator="," close=")">
+                    #{bid}
+                </foreach>
+            </if>
+
+            <if test="canOpenGroup != null">AND can_open_group = #{canOpenGroup}</if>
+            <if test="status != null and status == 5">AND status in (0,1,-1) </if>
+        </where>
+    </select>
     <!-- search api start -->
     <select id="maxId" resultType="long">
         SELECT MAX(id) FROM
@@ -294,5 +314,86 @@
         <if test="name != null">AND `name` like concat('%', #{name}, '%')</if>
         ORDER BY instr(`name`, #{name}) ASC, length(`name`) ASC, `name` ASC
         limit #{count}
+    </select>
+    <select id="findBarnTypeById" parameterType="map" resultType="map">
+        SELECT pig_type,name,staff_name
+        from doctor_barns
+        where id = #{barnId}
+    </select>
+    <select id="qichucunlan" parameterType="map" resultType="Integer">
+        select count(DISTINCT(c.pig_id)) from
+        ((select a.pig_id
+          from doctor_pig_events a
+          join (select min(id) id,pig_id from doctor_pig_events where farm_id = #{farmId} and  status = 1 and event_at > #{beginTime} group by pig_id) b
+                on a.pig_id = b.pig_id and a.barn_id = #{barnId} and a.farm_id = #{farmId} and a.id = b.id and a.status = 1 and a.type !=7)
+        UNION all
+        (select a.pig_id from doctor_pig_events a join (select current_event_id from doctor_pig_tracks where current_barn_id = #{barnId} and is_removal=0) b on a.id = b.current_event_id where a.event_at &lt;= #{beginTime} and a.status = 1)) c
+    </select>
+    <select id="qimucunlan" parameterType="map" resultType="Integer">
+        select count(DISTINCT(c.pig_id)) from
+        ((select a.pig_id
+        from doctor_pig_events a
+        join (select min(id) id,pig_id from doctor_pig_events where farm_id = #{farmId} and  status = 1 and event_at > #{endTime} group by pig_id) b
+        on a.pig_id = b.pig_id and a.barn_id = #{barnId} and a.farm_id = #{farmId} and a.id = b.id and a.status = 1 and a.type !=7)
+        UNION all
+        (select a.pig_id from doctor_pig_events a join (select current_event_id from doctor_pig_tracks where current_barn_id = #{barnId} and is_removal=0) b on a.id = b.current_event_id where a.event_at &lt;= #{endTime} and a.status = 1)) c
+    </select>
+    <select id="jianshao" parameterType="map" resultType="map">
+        SELECT change_type_id,count(*) as count
+        from doctor_pig_events
+        where barn_id = #{barnId}
+        and event_at > #{beginTime}
+        and event_at&lt;= #{endTime}
+        and type = 6
+        and status = 1
+        group by change_type_id
+    </select>
+    <select id="zhuanchu" parameterType="map" resultType="Integer">
+        SELECT count(*)
+        from doctor_pig_events
+        where barn_id = #{barnId}
+        and event_at > #{beginTime}
+        and event_at&lt;= #{endTime}
+        and status = 1
+        and type in (1,2,10,12,14)
+    </select>
+    <select id="findBarnIdsByfarmId" parameterType="map" resultType="Long">
+        select * from doctor_barns
+        where farm_id = #{farmId}
+        <if test="operatorName != null">AND staff_name like concat('%',#{operatorName},'%')</if>
+    </select>
+    <select id="groupqichucunlan" parameterType="map" resultType="Integer">
+        select
+        IFNULL((select sum(a.quantity) from doctor_group_events a join doctor_groups b on a.group_id = b.id where a.barn_id = #{barnId} and a.status = 1 and (b.close_at > #{beginTime} or b.close_at is null) and a.event_at &lt; #{beginTime} and a.type in (2)),0)
+        -
+        IFNULL((select sum(a.quantity) from doctor_group_events  a join doctor_groups b on a.group_id = b.id where a.type in (3,4,5,9) and a.status = 1 and (b.close_at > #{beginTime} or b.close_at is null)  and a.event_at &lt; #{beginTime} and a.barn_id = #{barnId}),0)
+        from dual
+    </select>
+    <select id="groupqimucunlan" parameterType="map" resultType="Integer">
+        select
+        IFNULL((select sum(a.quantity) from doctor_group_events a join doctor_groups b on a.group_id = b.id where a.barn_id = #{barnId} and a.status = 1 and (b.close_at > #{endTime} or b.close_at is null) and a.event_at &lt;= #{endTime} and a.type in (2)),0)
+        -
+        IFNULL((select sum(a.quantity) from doctor_group_events a join doctor_groups b on a.group_id = b.id where a.type in (3,4,5,9) and a.status = 1  and (b.close_at > #{endTime} or b.close_at is null) and a.event_at &lt;= #{endTime} and a.barn_id = #{barnId}),0)
+        from dual
+    </select>
+    <select id="groupzhuanru" parameterType="map" resultType="Integer">
+        select
+        IFNULL((select sum(quantity) from doctor_group_events where barn_id = #{barnId} and status = 1 and event_at &lt;= #{endTime} and event_at >= #{beginTime} and type in (2)),0)
+        from dual
+    </select>
+    <select id="groupzhuanchu" parameterType="map" resultType="Integer">
+        select
+          IFNULL((select sum(quantity) from doctor_group_events where type in (4,5,9) and status = 1  and event_at &lt;= #{endTime} and event_at >= #{beginTime} and barn_id = #{barnId}),0)
+        from dual
+    </select>
+    <select id="groupjianshao" parameterType="map" resultType="map">
+        SELECT change_type_id,sum(quantity) as count
+        from doctor_group_events
+        where barn_id = #{barnId}
+        and event_at >= #{beginTime}
+        and event_at&lt;= #{endTime}
+        and type = 3
+        and status = 1
+        group by change_type_id
     </select>
 </mapper>
