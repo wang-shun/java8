@@ -385,7 +385,8 @@ public class ReportDeliveryController {
                                           @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date closeBeginGroupTime,
                                           @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date closeEndGroupTime,
                                           HttpServletRequest request, HttpServletResponse response){
-        Map<String,Object> map =  doctorDeliveryReadService.groupReport(farmId,time,groupCode,operatorName,barn,groupType,groupStatus,buildBeginGroupTime,buildEndGroupTime,closeBeginGroupTime,closeEndGroupTime);
+        Map<String,Object> map1 =  doctorDeliveryReadService.groupReport(farmId,time,groupCode,operatorName,barn,groupType,groupStatus,buildBeginGroupTime,buildEndGroupTime,closeBeginGroupTime,closeEndGroupTime);
+        List ls = (List)map1.get("data");
         //开始导出
         try  {
             //导出名称
@@ -408,7 +409,8 @@ public class ReportDeliveryController {
                 title.createCell(8).setCellValue("饲养员");
                 title.createCell(9).setCellValue("建群日期");
                 title.createCell(10).setCellValue("关群日期");
-                for(int i = 0;i<map.size();i++) {
+                for(int i = 0;i<ls.size();i++) {
+                    Map map = (Map)ls.get(i);
                     Row row = sheet.createRow(pos++);
                     row.createCell(0).setCellValue(String.valueOf(i+1));
                     row.createCell(1).setCellValue(String.valueOf(map.get("group_code")));
