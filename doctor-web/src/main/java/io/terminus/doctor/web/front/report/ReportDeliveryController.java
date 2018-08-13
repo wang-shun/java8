@@ -193,13 +193,9 @@ public class ReportDeliveryController {
                 Sheet sheet  =  workbook.createSheet();
                 sheet.addMergedRegion(new CellRangeAddress(0,0,0,20));
                 Row count = sheet.createRow(0);
-
-
                 Row title  =  sheet.createRow(1);
                 int  pos  =  2;
-
                 title.createCell(0).setCellValue("序号");
-
 //                title.createCell(1).setCellValue("耳号");
 //                title.createCell(2).setCellValue("品种");
 //                title.createCell(3).setCellValue("胎次");
@@ -210,42 +206,32 @@ public class ReportDeliveryController {
 //                title.createCell(8).setCellValue("来源");
 //                title.createCell(9).setCellValue("进场日期");
 //                title.createCell(10).setCellValue("出生日期");
-
                 title.createCell(1).setCellValue("耳号");
                 title.createCell(2).setCellValue("猪舍");
-
                 title.createCell(3).setCellValue("品种");
                 title.createCell(4).setCellValue("胎次");
                 title.createCell(5).setCellValue("母猪状态");
-
                 title.createCell(6).setCellValue("饲养员");
                 title.createCell(7).setCellValue("带仔数");
                 title.createCell(8).setCellValue("来源");
                 title.createCell(9).setCellValue("进场日期");
                 title.createCell(10).setCellValue("出生日期");
-
                 for(int i = 0;i<ls.size();i++) {
                     Map a = ls.get(i);
                     Row row = sheet.createRow(pos++);
                     row.createCell(0).setCellValue(String.valueOf(i+1));
-
-
-
                     row.createCell(1).setCellValue(String.valueOf(a.get("pig_code")));
                     String rfid=String.valueOf(a.get("current_barn_name"));
                     if(rfid.equals("null")){
                         rfid="";
                     }
                     row.createCell(2).setCellValue(String.valueOf(rfid));
-
                     row.createCell(3).setCellValue(String.valueOf(a.get("breed_name")));
                     row.createCell(4).setCellValue(String.valueOf(a.get("parity")));
                     row.createCell(5).setCellValue(String.valueOf(a.get("status")));
-
                     row.createCell(6).setCellValue(String.valueOf(a.get("staff_name")));
                     row.createCell(7).setCellValue(String.valueOf(a.get("daizaishu")));
                     row.createCell(8).setCellValue(String.valueOf(a.get("source")));
-
                     String str = String.valueOf(a.get("in_farm_date"));
                     if("null".equals(str)){
                         row.createCell(9).setCellValue("");
@@ -253,7 +239,6 @@ public class ReportDeliveryController {
                         String[] strs = str.split(" ");
                         row.createCell(9).setCellValue(String.valueOf(strs[0]));
                     }
-
                     String bd=String.valueOf(a.get("birth_date"));
                     if("null".equals(bd)){
                         row.createCell(10).setCellValue(" ");
@@ -262,16 +247,12 @@ public class ReportDeliveryController {
                         String[] strs1=str1.split(" ");
                         row.createCell(10).setCellValue(String.valueOf(strs1[0]));
                     }
-
-
                 }
                 workbook.write(response.getOutputStream());
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
     //公猪存栏报表导出EXCEL
     @RequestMapping(method = RequestMethod.GET, value = "boars/export")
@@ -297,11 +278,8 @@ public class ReportDeliveryController {
                 Sheet sheet  =  workbook.createSheet();
                 sheet.addMergedRegion(new CellRangeAddress(0,0,0,20));
                 Row count = sheet.createRow(0);
-
-
                 Row title  =  sheet.createRow(1);
                 int  pos  =  2;
-
                 title.createCell(0).setCellValue("序号");
                 title.createCell(1).setCellValue("耳号");
                 title.createCell(2).setCellValue("猪舍");
@@ -311,27 +289,20 @@ public class ReportDeliveryController {
                 title.createCell(6).setCellValue("来源");
                 title.createCell(7).setCellValue("进场日期");
                 title.createCell(8).setCellValue("出生日期");
-
                 for(int i = 0;i<ls.size();i++) {
                     Map a = ls.get(i);
                     Row row = sheet.createRow(pos++);
                     row.createCell(0).setCellValue(String.valueOf(i+1));
-
-
-
                     row.createCell(1).setCellValue(String.valueOf(a.get("pig_code")));
                     String rfid=String.valueOf(a.get("current_barn_name"));
                     if(rfid.equals("null")){
                         rfid="";
                     }
                     row.createCell(2).setCellValue(String.valueOf(rfid));
-
                     row.createCell(3).setCellValue(String.valueOf(a.get("breed_name")));
                     row.createCell(4).setCellValue(String.valueOf(a.get("status")));
-
                     row.createCell(5).setCellValue(String.valueOf(a.get("staff_name")));
                     row.createCell(6).setCellValue(String.valueOf(a.get("source")));
-
                     String str = String.valueOf(a.get("in_farm_date"));
                     if("null".equals(str)){
                         row.createCell(7).setCellValue("");
@@ -339,7 +310,6 @@ public class ReportDeliveryController {
                         String[] strs = str.split(" ");
                         row.createCell(7).setCellValue(String.valueOf(strs[0]));
                     }
-
                     String bd=String.valueOf(a.get("birth_date"));
                     if("null".equals(bd)){
                         row.createCell(8).setCellValue(" ");
@@ -354,8 +324,6 @@ public class ReportDeliveryController {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
     }
 
     /**
@@ -402,5 +370,134 @@ public class ReportDeliveryController {
                                                @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beginTime,
                                                @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endTime) {
         return doctorDeliveryReadService.barnsReport(farmId,operatorName,barnId,beginTime,endTime);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "group/export")
+    public void groupReports(@RequestParam(required = true) Long farmId,
+                                          @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date time,
+                                          @RequestParam(required = false) String groupCode,
+                                          @RequestParam(required = false) String operatorName,
+                                          @RequestParam(required = false) Long barn,
+                                          @RequestParam(required = false) Integer groupType,
+                                          @RequestParam(required = false) Integer groupStatus,
+                                          @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date buildBeginGroupTime,
+                                          @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date buildEndGroupTime,
+                                          @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date closeBeginGroupTime,
+                                          @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date closeEndGroupTime,
+                                          HttpServletRequest request, HttpServletResponse response){
+        Map<String,Object> map =  doctorDeliveryReadService.groupReport(farmId,time,groupCode,operatorName,barn,groupType,groupStatus,buildBeginGroupTime,buildEndGroupTime,closeBeginGroupTime,closeEndGroupTime);
+        //开始导出
+        try  {
+            //导出名称
+            exporter.setHttpServletResponse(request,  response,"公群存栏报表");
+            try  (XSSFWorkbook workbook  =  new  XSSFWorkbook())  {
+                //表
+                Sheet sheet  =  workbook.createSheet();
+                sheet.addMergedRegion(new CellRangeAddress(0,0,0,20));
+                Row count = sheet.createRow(0);
+                Row title  =  sheet.createRow(1);
+                int  pos  =  2;
+                title.createCell(0).setCellValue("序号");
+                title.createCell(1).setCellValue("猪群号");
+                title.createCell(2).setCellValue("猪舍");
+                title.createCell(3).setCellValue("猪类");
+                title.createCell(4).setCellValue("当前存栏");
+                title.createCell(5).setCellValue("平均日龄");
+                title.createCell(6).setCellValue("转入均重");
+                title.createCell(7).setCellValue("转出均重");
+                title.createCell(8).setCellValue("饲养员");
+                title.createCell(9).setCellValue("建群日期");
+                title.createCell(10).setCellValue("关群日期");
+                for(int i = 0;i<map.size();i++) {
+                    Row row = sheet.createRow(pos++);
+                    row.createCell(0).setCellValue(String.valueOf(i+1));
+                    row.createCell(1).setCellValue(String.valueOf(map.get("group_code")));
+                    String rfid=String.valueOf(map.get("current_barn_name"));
+                    if(rfid.equals("null")){
+                        rfid="";
+                    }
+                    row.createCell(2).setCellValue(String.valueOf(rfid));
+                    row.createCell(3).setCellValue(String.valueOf(map.get("pig_type")));
+                    row.createCell(4).setCellValue(String.valueOf(map.get("cunlanshu")));
+                    row.createCell(5).setCellValue(String.valueOf(map.get("getAvgDayAge")));
+                    row.createCell(6).setCellValue(String.valueOf(map.get("inAvgweight")));
+                    row.createCell(7).setCellValue(String.valueOf(map.get("outAvgweight")));
+                    row.createCell(8).setCellValue(String.valueOf(map.get("staff_name")));
+                    String str = String.valueOf(map.get("build_event_at"));
+                    if("null".equals(str)){
+                        row.createCell(9).setCellValue("");
+                    }else {
+                        String[] strs = str.split(" ");
+                        row.createCell(9).setCellValue(String.valueOf(strs[0]));
+                    }
+                    String bd=String.valueOf(map.get("close_event_at"));
+                    if("null".equals(bd)){
+                        row.createCell(10).setCellValue(" ");
+                    }else {
+                        String str1 = String.valueOf(map.get("close_event_at"));
+                        String[] strs1=str1.split(" ");
+                        row.createCell(10).setCellValue(String.valueOf(strs1[0]));
+                    }
+                }
+                workbook.write(response.getOutputStream());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    @RequestMapping(method = RequestMethod.GET, value = "barns/export")
+    public void barnsReports(@RequestParam(required = true) Long farmId,
+                                                @RequestParam(required = false) String operatorName,
+                                                @RequestParam(required = false) Long barnId,
+                                                @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beginTime,
+                                                @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endTime,
+                                                 HttpServletRequest request, HttpServletResponse response ) {
+        List<Map<String,Object>> ls = doctorDeliveryReadService.barnsReport(farmId,operatorName,barnId,beginTime,endTime);
+        //开始导出
+        try  {
+            //导出名称
+            exporter.setHttpServletResponse(request,  response,"公舍存栏报表");
+            try  (XSSFWorkbook workbook  =  new  XSSFWorkbook())  {
+                //表
+                Sheet sheet  =  workbook.createSheet();
+                sheet.addMergedRegion(new CellRangeAddress(0,0,0,20));
+                Row count = sheet.createRow(0);
+                Row title  =  sheet.createRow(1);
+                int  pos  =  2;
+                title.createCell(0).setCellValue("序号");
+                title.createCell(1).setCellValue("猪舍");
+                title.createCell(2).setCellValue("饲养员");
+                title.createCell(3).setCellValue("期初存栏");
+                title.createCell(4).setCellValue("本期转入");
+                title.createCell(5).setCellValue("死亡");
+                title.createCell(6).setCellValue("淘汰");
+                title.createCell(7).setCellValue("销售");
+                title.createCell(8).setCellValue("转场");
+                title.createCell(9).setCellValue("其它减少");
+                title.createCell(10).setCellValue("期末存栏");
+                for(int i = 0;i<ls.size();i++) {
+                    Map map = ls.get(i);
+                    Row row = sheet.createRow(pos++);
+                    row.createCell(0).setCellValue(String.valueOf(i+1));
+                    String rfid=String.valueOf(map.get("name"));
+                    if(rfid.equals("null")){
+                        rfid="";
+                    }
+                    row.createCell(1).setCellValue(String.valueOf(rfid));
+                    row.createCell(2).setCellValue(String.valueOf(map.get("staff_name")));
+                    row.createCell(3).setCellValue(String.valueOf(map.get("qichucunlan")));
+                    row.createCell(4).setCellValue(String.valueOf(map.get("zhuanru")));
+                    row.createCell(5).setCellValue(String.valueOf(map.get("siwang")));
+                    row.createCell(6).setCellValue(String.valueOf(map.get("taotai")));
+                    row.createCell(7).setCellValue(String.valueOf(map.get("xiaoshou")));
+                    row.createCell(8).setCellValue(String.valueOf(map.get("zhuanchu")));
+                    row.createCell(9).setCellValue(String.valueOf(map.get("qitajianshao")));
+                    row.createCell(10).setCellValue(String.valueOf(map.get("qimucunlan")));
+                }
+                workbook.write(response.getOutputStream());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
