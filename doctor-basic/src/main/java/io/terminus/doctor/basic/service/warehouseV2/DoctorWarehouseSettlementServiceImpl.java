@@ -200,13 +200,14 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                     stockMonthly.setWarehouseId(warehouseId);
                     stockMonthly.setMaterialId(sku);
                     stockMonthly.setSettlementDate(settlementDate);
-                    if(balanceQuantity.add(thisSettlementAmountAndQuantity.getQuantity()).compareTo(BigDecimal.ZERO)==0){
-                        stockMonthly.setBalanceAmount(new BigDecimal(0));
-                        log.info("balanceQuantity.add(thisSettlementAmountAndQuantity.getQuantity()).compareTo(BigDecimal.ZERO)==0 WarehouseId{},setMaterialId{}",warehouseId,sku);
-                        throw new ServiceException("balanceQuantity.add(thisSettlementAmountAndQuantity.getQuantity()).compareTo(BigDecimal.ZERO)==0");
-                    }else {
-                        stockMonthly.setBalanceAmount(balanceAmount.add(thisSettlementAmountAndQuantity.getAmount()));
-                    }
+//                    if(balanceQuantity.add(thisSettlementAmountAndQuantity.getQuantity()).compareTo(BigDecimal.ZERO)==0){
+//                        stockMonthly.setBalanceAmount(new BigDecimal(0));
+//                        log.info("balanceQuantity.add(thisSettlementAmountAndQuantity.getQuantity()).compareTo(BigDecimal.ZERO)==0 WarehouseId{},setMaterialId{}",warehouseId,sku);
+//                        throw new ServiceException("balanceQuantity.add(thisSettlementAmountAndQuantity.getQuantity()).compareTo(BigDecimal.ZERO)==0");
+//                    }else {
+//                        stockMonthly.setBalanceAmount(balanceAmount.add(thisSettlementAmountAndQuantity.getAmount()));
+//                    }
+                    stockMonthly.setBalanceAmount(balanceAmount.add(thisSettlementAmountAndQuantity.getAmount()));
                     stockMonthly.setBalanceQuantity(balanceQuantity.add(thisSettlementAmountAndQuantity.getQuantity()));
                     if (null == stockMonthly.getId())
                         doctorWarehouseStockMonthlyDao.create(stockMonthly);
@@ -355,8 +356,13 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                 materialHandle.setUnitPrice(otherIn.getUnitPrice());
                 materialHandle.setAmount(materialHandle.getUnitPrice().multiply(materialHandle.getQuantity()));
             }else {
-                materialHandle.setAmount(historyStockAmount.multiply(materialHandle.getQuantity()).divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
-                materialHandle.setUnitPrice(historyStockAmount.divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
+                if(materialHandle.getQuantity().equals(historyStockQuantity)){
+                    materialHandle.setAmount(historyStockAmount);
+                    materialHandle.setUnitPrice(historyStockAmount.divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
+                }else {
+                    materialHandle.setAmount(historyStockAmount.multiply(materialHandle.getQuantity()).divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
+                    materialHandle.setUnitPrice(historyStockAmount.divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
+                }
             }
             if (materialHandle.getType().equals(WarehouseMaterialHandleType.OUT.getValue())) {
                 doctorWarehouseMaterialApplyDao.updateUnitPriceAndAmountByMaterialHandle(materialHandle.getId(), materialHandle.getUnitPrice(), materialHandle.getQuantity().multiply(materialHandle.getUnitPrice()));
