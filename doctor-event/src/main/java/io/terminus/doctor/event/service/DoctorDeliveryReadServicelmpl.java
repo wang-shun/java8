@@ -670,6 +670,8 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map1.put("zhuanchu", groupzhuanchu);
                     map.put("pig_type", "分娩母猪");
                     map1.put("pig_type","仔猪");
+                    map1.put("name",map.get("name"));
+                    map1.put("staff_name",map.get("staff_name"));
                     list.add(map1);
                 }
                 if (barnType == 2 || barnType == 3 || barnType == 4 || barnType == 7) {
