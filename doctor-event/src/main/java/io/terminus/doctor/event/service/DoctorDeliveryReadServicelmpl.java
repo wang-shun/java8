@@ -526,10 +526,31 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
 
                 Map<String, Object> map = doctorBarnDao.findBarnTypeById(barnId);
                 int barnType = (int) (map.get("pig_type"));
-                if (barnType == 5 || barnType == 6 || barnType == 9) {
+                if(barnType == 5){
+                    map.put("pig_type","配种母猪");
+                }
+                if(barnType == 6){
+                    map.put("pig_type","妊娠母猪");
+                }
+                if(barnType == 9){
+                    map.put("pig_type","种公猪");
+                }
+                if(barnType == 2){
+                    map.put("pig_type","保育猪");
+                }
+                if(barnType == 3){
+                    map.put("pig_type","育肥猪");
+                }
+                if(barnType == 4){
+                    map.put("pig_type","后备猪");
+                }
+                if (barnType == 5 || barnType == 6 || barnType == 9 || barnType == 7) {
                     Integer qichucunlan = doctorBarnDao.qichucunlan(farmId, barnId, beginTime);
                     Integer qimucunlan = doctorBarnDao.qimucunlan(farmId, barnId, endTime);
                     if (qichucunlan != null) {
+                        if(barnType == 7){
+                            map.put("pig_type","分娩母猪");
+                        }
                         map.put("qichucunlan", qichucunlan);
                     } else {
                         map.put("qichucunlan", 0);
@@ -573,7 +594,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     Long zhuanru = qimucunlan - qichucunlan + (zhuanchu == null ? 0 : zhuanchu) + (map.get("xiaoshou") == null ? 0 : (Long) map.get("xiaoshou")) + (map.get("siwang") == null ? 0 : (Long) map.get("siwang")) + (map.get("taotai") == null ? 0 : (Long) map.get("taotai")) + (map.get("qitajianshao") == null ? 0 : (Long) map.get("qitajianshao"));
                     map.put("zhuanru", zhuanru);
                 }
-                if(barnType == 7){
+                /*if(barnType == 7){
                     Integer pigqichucunlan = doctorBarnDao.qichucunlan(farmId, barnId, beginTime);
                     Integer groupqichucunlan = doctorBarnDao.groupqichucunlan(farmId, barnId, beginTime);
                     Integer pigqimucunlan = doctorBarnDao.qimucunlan(farmId, barnId, beginTime);
@@ -641,11 +662,14 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     Long zhuanru = qimucunlan - qichucunlan + zhuanchu + pigxiaoshou+groupxiaoshou + pigxiaoshou+groupxiaoshou + pigtaotai+grouptaotai + pigqitajianshao+groupqitajianshao;
                     map.put("zhuanru", zhuanru);
                     map.put("zhuanchu", zhuanchu);
-                }
-                if (barnType == 2 || barnType == 3 || barnType == 4 ) {
+                }*/
+                if (barnType == 2 || barnType == 3 || barnType == 4 || barnType == 7) {
                     Integer qichucunlan = doctorBarnDao.groupqichucunlan(farmId, barnId, beginTime);
                     Integer qimucunlan = doctorBarnDao.groupqimucunlan(farmId, barnId, endTime);
                     if (qichucunlan != null) {
+                        if(barnType == 7){
+                            map.put("pig_type","仔猪");
+                        }
                         map.put("qichucunlan", qichucunlan);
                     } else {
                         map.put("qichucunlan", 0);
