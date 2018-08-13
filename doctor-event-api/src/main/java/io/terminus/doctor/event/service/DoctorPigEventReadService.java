@@ -314,6 +314,8 @@ public interface DoctorPigEventReadService {
      */
     Response<List<Long>> findPigIdsByEvent(Map<String, Object> criteria);
 
+    Response<List<Long>> findPigIdsByFarmEvent(Map<String, Object> criteria);
+
     Response<Date> findFarmSowEventAt(Long pigId, Long farmId);
 
 

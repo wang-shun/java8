@@ -869,7 +869,11 @@ public class DoctorSearches {
             eventCriteria.put("farmId", farmId);
             eventCriteria.put("notList",notList);
             eventCriteria = Params.filterNullOrEmpty(eventCriteria);
-            eventList = RespHelper.or500(doctorPigEventReadService.findPigIdsByEvent(eventCriteria));
+            if("13".equals(params.get("statuses"))){
+                eventList = RespHelper.or500(doctorPigEventReadService.findPigIdsByFarmEvent(eventCriteria));
+            }else{
+                eventList = RespHelper.or500(doctorPigEventReadService.findPigIdsByEvent(eventCriteria));
+            }
         }else{
             eventList = notList;
         }

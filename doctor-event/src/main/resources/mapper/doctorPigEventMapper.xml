@@ -2011,6 +2011,12 @@
         <include refid="where_sql"/>
     </select>
 
+    <select id="findPigIdsByFarmEvent" parameterType="map" resultType="Long">
+        SELECT DISTINCT(pig_id) FROM doctor_pig_events
+        WHERE farm_id = #{farmId}
+        <include refid="where_sql"/>
+    </select>
+
     <select id="findFarmSowEventAt" parameterType="map" resultType="date">
         SELECT event_at as eventAt FROM <include refid="tb"/>
         WHERE pig_id = #{pigId} and id <![CDATA[ <= ]]> (select event_id from doctor_chg_farm_infos where pig_id = #{pigId} and farm_id = #{farmId})
