@@ -489,9 +489,23 @@ public class ReportDeliveryController {
                     row.createCell(2).setCellValue(String.valueOf(map.get("staff_name")));
                     row.createCell(3).setCellValue(String.valueOf(map.get("qichucunlan")));
                     row.createCell(4).setCellValue(String.valueOf(map.get("zhuanru")));
-                    row.createCell(5).setCellValue(String.valueOf(map.get("siwang")));
-                    row.createCell(6).setCellValue(String.valueOf(map.get("taotai")));
-                    row.createCell(7).setCellValue(String.valueOf(map.get("xiaoshou")));
+                    if(String.valueOf(map.get("siwang")) == null){
+                        row.createCell(5).setCellValue(0);
+                    }else {
+                        row.createCell(5).setCellValue(String.valueOf(map.get("siwang")));
+                    }
+                    if(String.valueOf(map.get("taotai")) == null){
+                        row.createCell(6).setCellValue(0);
+                    }else {
+                        row.createCell(6).setCellValue(String.valueOf(map.get("taotai")));
+                    }
+                    if(String.valueOf(map.get("xiaoshou")) == null){
+                        row.createCell(7).setCellValue(0);
+                    }else {
+                        row.createCell(7).setCellValue(String.valueOf(map.get("xiaoshou")));
+                    }
+                    //row.createCell(6).setCellValue(String.valueOf(map.get("taotai")));
+                    //row.createCell(7).setCellValue(String.valueOf(map.get("xiaoshou")));
                     row.createCell(8).setCellValue(String.valueOf(map.get("zhuanchu")));
                     row.createCell(9).setCellValue(String.valueOf(map.get("qitajianshao")));
                     row.createCell(10).setCellValue(String.valueOf(map.get("qimucunlan")));
