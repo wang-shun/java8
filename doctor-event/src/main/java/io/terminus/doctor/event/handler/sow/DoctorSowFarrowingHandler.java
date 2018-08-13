@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.sow;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
 import io.terminus.doctor.common.utils.CountUtil;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -63,7 +64,8 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
 
         //分娩时间
         DateTime farrowingDate = new DateTime(farrowingDto.eventAt());
-        Date farrowingDate1 = farrowingDate.toDate();
+        doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
+       /* Date farrowingDate1 = farrowingDate.toDate();*/
 
 
         //计算孕期
@@ -74,17 +76,15 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         doctorPigEvent.setRelEventId(firstMate.getId());
 
         //计算分娩日期与配种日期相差天数
-        long between1 = farrowingDate1.getTime()- firstMate.getMattingDate().getTime();
+        /*long between1 = farrowingDate1.getTime()- firstMate.getMattingDate().getTime();
         try {
-            if (between1 > (2400 * 3600000)){
+            if (between1 > (2400 * 3600 * 1000)){
                 doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
             }
         }catch (Exception e){
-            expectTrue(notNull(doctorPigTrack), "last.farrow.not.null", inputDto.getPigId());
+            log.error("last.farrow.not.null", Throwables.getStackTraceAsString(e));
             e.printStackTrace();
-        }
-
-
+        }*/
 
         //分娩窝重
         doctorPigEvent.setFarrowWeight(farrowingDto.getBirthNestAvg());
