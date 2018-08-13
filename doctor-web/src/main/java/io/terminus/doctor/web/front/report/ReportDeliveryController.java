@@ -490,17 +490,17 @@ public class ReportDeliveryController {
                     row.createCell(3).setCellValue(String.valueOf(map.get("qichucunlan")));
                     row.createCell(4).setCellValue(String.valueOf(map.get("zhuanru")));
                     if(map.get("siwang") == null){
-                        row.createCell(5).setCellValue(0);
+                        row.createCell(5).setCellValue("");
                     }else {
                         row.createCell(5).setCellValue(String.valueOf(map.get("siwang")));
                     }
                     if(map.get("taotai") == null){
-                        row.createCell(6).setCellValue(0);
+                        row.createCell(6).setCellValue("");
                     }else {
                         row.createCell(6).setCellValue(String.valueOf(map.get("taotai")));
                     }
                     if(map.get("xiaoshou") == null){
-                        row.createCell(7).setCellValue(0);
+                        row.createCell(7).setCellValue("");
                     }else {
                         row.createCell(7).setCellValue(String.valueOf(map.get("xiaoshou")));
                     }
