@@ -2203,14 +2203,14 @@
     </select>
 
     <select id="getInFarmBoarId2" parameterType="map" resultType="map">
-        SELECT d.id as id, d.pig_id as pig_id , max(d.event_at) as event_at, a.pig_code as pig_code,a.breed_id as breed_id,a.breed_name as breed_name,a.source as source,a.in_farm_date as in_farm_date,a.birth_date as birth_date
+        SELECT d.id as id, d.pig_id as pig_id ,d.type as type ,max(d.event_at) as event_at, a.pig_code as pig_code,a.breed_id as breed_id,a.breed_name as breed_name,a.source as source,a.in_farm_date as in_farm_date,a.birth_date as birth_date
         FROM doctor_pig_events d
         join doctor_pigs a on d.pig_id = a.id
         WHERE d.farm_id = #{farmId}
         and d.status = 1
         and d.kind = 2
-        and d.type = 6
-        and d.event_at &lt;= #{queryDate}
+        and d.type in(2,6)
+        and d.event_at = #{queryDate}
         <if test="pigCode != null"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
         <if test="breedId != null"> and a.breed_id = #{breedId} </if>
         <if test="beginDate != null"> and a.in_farm_date >= #{beginDate} </if>
@@ -2243,7 +2243,7 @@
     </select>
 
     <select id="isBoarBarn" parameterType="map" resultType="BigInteger">
-        select id  from doctor_pig_events
+        select id, event_at  from doctor_pig_events
         where pig_id = #{pigId} and farm_id = #{farmId} and kind = 2 and type = 1 and status = 1 and event_at > #{queryDate} and event_at >= #{eventAt} and id > #{id}
         order by id
         limit 1
@@ -2284,7 +2284,8 @@
 
     <select id="isBoarChgFarm" parameterType="map" resultType="BigInteger">
         select id from doctor_pig_events
-        where pig_id = #{pigId} and farm_id = #{farmId} and kind = 2 and type = 2 and status = 1 and event_at > #{queryDate} and event_at >= #{eventAt} and id > #{id}
+        where pig_id = #{pigId} and kind = 2 and type = 2 and status = 1 and event_at > #{queryDate} and event_at >= #{eventAt} and id > #{id}
+        <if test="chgBarnEventAt != null"> and #{queryDate} >= #{chgBarnEventAt} </if>
         order by id
         limit 1
     </select>
@@ -2296,4 +2297,5 @@
         <if test="staffName != null"> AND staff_name like CONCAT(CONCAT('%',#{staffName}),'%')</if>
         <if test="barnId != null"> and id = #{barnId} </if>
     </select>
+
 </mapper>
