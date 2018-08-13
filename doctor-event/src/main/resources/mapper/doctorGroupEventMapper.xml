@@ -713,8 +713,8 @@
         FROM
         <include refid="tb"/>
         WHERE group_id = #{groupId}
+        AND type = 1
         AND status = 1
-        order by event_at desc limit 1
     </select>
 
     <select id="findCloseGroupByGroupId" parameterType="long" resultMap="DoctorGroupEventMap" >
