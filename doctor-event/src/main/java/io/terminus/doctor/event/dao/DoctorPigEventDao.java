@@ -1131,7 +1131,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
        map.put("farmId", farmId);
        map.put("queryDate", queryDate);
        return this.sqlSession.selectOne(this.sqlId("findBoarBarn1"), map);
-            }
+   }
     public Integer checkBarn(Long barnId){
         Map<String, Object> map = new HashMap<>();
         map.put("barnId",barnId);

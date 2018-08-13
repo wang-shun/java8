@@ -2260,7 +2260,7 @@
     </select>
 
     <select id="isBoarBarn" parameterType="map" resultType="BigInteger">
-        select id  from doctor_pig_events
+        select id, event_at  from doctor_pig_events
         where pig_id = #{pigId} and farm_id = #{farmId} and kind = 2 and type = 1 and status = 1 and event_at > #{queryDate} and event_at >= #{eventAt} and id > #{id}
         order by id
         limit 1
@@ -2301,7 +2301,8 @@
 
     <select id="isBoarChgFarm" parameterType="map" resultType="BigInteger">
         select id from doctor_pig_events
-        where pig_id = #{pigId} and farm_id = #{farmId} and kind = 2 and type = 2 and status = 1 and event_at > #{queryDate} and event_at >= #{eventAt} and id > #{id}
+        where pig_id = #{pigId} and kind = 2 and type = 2 and status = 1 and event_at > #{queryDate} and event_at >= #{eventAt} and id > #{id}
+        <if test="chgBarnEventAt != null"> and #{queryDate} > #{chgBarnEventAt} </if>
         order by id
         limit 1
     </select>
@@ -2313,4 +2314,5 @@
         <if test="staffName != null"> AND staff_name like CONCAT(CONCAT('%',#{staffName}),'%')</if>
         <if test="barnId != null"> and id = #{barnId} </if>
     </select>
+
 </mapper>

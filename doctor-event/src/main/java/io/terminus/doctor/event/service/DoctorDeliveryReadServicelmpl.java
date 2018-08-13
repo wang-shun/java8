@@ -12,7 +12,10 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.reportBi.DoctorReportDeliverDao;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigStatus;
+import io.terminus.doctor.event.model.DoctorChgFarmInfo;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -37,12 +40,12 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
 
     @Autowired
     public DoctorDeliveryReadServicelmpl(DoctorReportDeliverDao doctorReportDeliverDao, DoctorPigEventDao doctorPigEventDao, DoctorGroupEventDao doctorGroupEventDao, DoctorBarnDao doctorBarnDao,
-                                         DoctorChgFarmInfoDao doctorChgFarmInfoDao, DoctorChgFarmInfoDao doctorChgFarmInfoDao1) {
+                                         DoctorChgFarmInfoDao doctorChgFarmInfoDao) {
         this.doctorReportDeliverDao = doctorReportDeliverDao;
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorBarnDao = doctorBarnDao;
-        this.doctorChgFarmInfoDao = doctorChgFarmInfoDao1;
+        this.doctorChgFarmInfoDao = doctorChgFarmInfoDao;
     }
 
     @Override
@@ -371,16 +374,9 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
     }
 
     @Override
-    public List<Map<String, Object>> boarReport(Long farmId, Integer pigStatus, Date queryDate, String pigCode, String staffName, Integer barnId, Integer breedId, Date beginDate, Date endDate) {
+    public List<Map<String, Object>> boarReport(Long farmId, Date queryDate, String pigCode, String staffName, Integer barnId, Integer breedId, Date beginDate, Date endDate) {
         List<Map<String, Object>> inFarmBoarId = null;
-      //  inFarmBoarId = doctorPigEventDao.getInFarmBoarId1(farmId,queryDate,barnId,pigCode,breedId,staffName,beginDate,endDate);
-        if(pigStatus == 11){
-            inFarmBoarId = doctorPigEventDao.getInFarmBoarId1(farmId,queryDate,barnId,pigCode,breedId,staffName,beginDate,endDate);
-        } else if(pigStatus == 12){
-            inFarmBoarId = doctorPigEventDao.getInFarmBoarId2(farmId,queryDate,barnId,pigCode,breedId,staffName,beginDate,endDate);
-        } else if (pigStatus == 13){
-            inFarmBoarId = doctorPigEventDao.getInFarmBoarId3(farmId,queryDate,barnId,pigCode,breedId,staffName,beginDate,endDate);
-        }
+        inFarmBoarId = doctorPigEventDao.getInFarmBoarId1(farmId,queryDate,barnId,pigCode,breedId,staffName,beginDate,endDate);
         for (Iterator<Map<String,Object>> it = inFarmBoarId.iterator();it.hasNext();) {
             Map map = it.next();
             if (map.get("source") != null){
@@ -413,22 +409,29 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     it.remove();
                 }
             }
-            if(pigStatus == 11){
-                map.put("status","已进场");
-            }
-            if(pigStatus == 12){
-                map.put("status","已离场");
-            }
-            if(pigStatus == 13){
-                map.put("status","已转场");
-                Map<String,Object> currentBoarBarn = doctorPigEventDao.findBoarBarn1(pigId,staffName,barnId,farmId,queryDate);//取转场前猪舍
-                if(currentBoarBarn != null) {
-                    map.put("current_barn_name", currentBoarBarn.get("barn_name"));
-                    map.put("staff_name", currentBoarBarn.get("staff_name"));//饲养员
-                } else{
+            BigInteger isBoarChgFarm = doctorPigEventDao.isBoarChgFarm(id, pigId, eventAt, queryDate,farmId); //该时间点后是否有转场事件发生
+            DoctorChgFarmInfo doctorChgFarmInfo;
+            DoctorPigTrack doctorPigTrack;
+            DoctorPig doctorPig;
+            if (isBoarChgFarm != null) {
+                doctorChgFarmInfo = doctorChgFarmInfoDao.findBoarChgFarm(farmId, pigId, isBoarChgFarm);
+                if (doctorChgFarmInfo != null){
+                    doctorPigTrack = JSON_MAPPER.fromJson(doctorChgFarmInfo.getTrack(), DoctorPigTrack.class);
+                    doctorPig = JSON_MAPPER.fromJson(doctorChgFarmInfo.getPig(), DoctorPig.class);
+                    map.put("current_barn_name", doctorPigTrack.getCurrentBarnName());
+                    map.put("in_farm_date", doctorPig.getInFarmDate());
+                    Long currentBarnId = doctorPigTrack.getCurrentBarnId();
+                    String currentStaffName = doctorPigEventDao.findStaffName(currentBarnId,staffName,barnId);
+                    if (currentStaffName != null){
+                        map.put("staff_name",currentStaffName);//饲养员
+                    }else {
+                        it.remove();
+                    }
+                } else {
                     it.remove();
                 }
             }
+            map.put("status","已进场");
         }
         return inFarmBoarId;
     }
