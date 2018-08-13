@@ -389,7 +389,7 @@ public class ReportDeliveryController {
         //开始导出
         try  {
             //导出名称
-            exporter.setHttpServletResponse(request,  response,"公群存栏报表");
+            exporter.setHttpServletResponse(request,  response,"猪群存栏报表");
             try  (XSSFWorkbook workbook  =  new  XSSFWorkbook())  {
                 //表
                 Sheet sheet  =  workbook.createSheet();
@@ -456,7 +456,7 @@ public class ReportDeliveryController {
         //开始导出
         try  {
             //导出名称
-            exporter.setHttpServletResponse(request,  response,"公舍存栏报表");
+            exporter.setHttpServletResponse(request,  response,"猪舍存栏报表");
             try  (XSSFWorkbook workbook  =  new  XSSFWorkbook())  {
                 //表
                 Sheet sheet  =  workbook.createSheet();
