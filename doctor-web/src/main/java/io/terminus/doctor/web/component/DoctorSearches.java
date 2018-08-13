@@ -869,11 +869,7 @@ public class DoctorSearches {
             eventCriteria.put("farmId", farmId);
             eventCriteria.put("notList",notList);
             eventCriteria = Params.filterNullOrEmpty(eventCriteria);
-            if("13".equals(params.get("statuses"))){
-                eventList = RespHelper.or500(doctorPigEventReadService.findPigIdsByFarmEvent(eventCriteria));
-            }else{
-                eventList = RespHelper.or500(doctorPigEventReadService.findPigIdsByEvent(eventCriteria));
-            }
+            eventList = RespHelper.or500(doctorPigEventReadService.findPigIdsByEvent(eventCriteria));
         }else{
             eventList = notList;
         }
@@ -896,6 +892,7 @@ public class DoctorSearches {
 
                 if ( "13".equals(params.get("statuses")) ) {
                     eventAt = RespHelper.or500(doctorPigEventReadService.findFarmSowEventAt(searchedPig.getId(), finalFarmId));
+
                 }else{
                     KongHuaiPregCheckResult result = KongHuaiPregCheckResult.from(searchedPig.getStatus());
                     if (result != null) {
