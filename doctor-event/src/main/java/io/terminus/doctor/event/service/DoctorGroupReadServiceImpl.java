@@ -538,7 +538,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     @Override
     public Response<DoctorGroupEvent> findNewGroupEvent(@NotNull(message = "groupId.not.null") Long groupId) {
         try {
-            return Response.ok(doctorGroupEventDao.findNewGroupByGroupId(groupId));
+            return Response.ok(doctorGroupEventDao.findNewGroupByGroupId(groupId,null));
         } catch (Exception e) {
             log.error("find new group event failed, groupId:{}, cause:{}", groupId, Throwables.getStackTraceAsString(e));
             return Response.fail("find.new.group.event.failed");

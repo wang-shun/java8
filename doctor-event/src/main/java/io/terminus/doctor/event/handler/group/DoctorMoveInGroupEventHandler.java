@@ -185,7 +185,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
     }
 
     private void checkEventAt(DoctorGroupEvent groupEvent){
-        DoctorGroupEvent newEvent = doctorGroupEventDao.findNewGroupByGroupId(groupEvent.getGroupId());
+        DoctorGroupEvent newEvent = doctorGroupEventDao.findNewGroupByGroupId(groupEvent.getGroupId(),null);
         if (notNull(newEvent) && Dates.startOfDay(groupEvent.getEventAt()).before(Dates.startOfDay(newEvent.getEventAt()))){
             throw new InvalidException("move.in.event.at.before.new.event.at", DateUtil.toDateString(groupEvent.getEventAt())
                     , DateUtil.toDateString(newEvent.getEventAt()));

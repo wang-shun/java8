@@ -230,8 +230,8 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
         getSqlSession().delete(sqlId("deleteAddWeanEvents"), farmId);
     }
 
-    public DoctorGroupEvent findNewGroupByGroupId(Long groupId) {
-        return getSqlSession().selectOne(sqlId("findNewGroupByGroupId"), groupId);
+    public DoctorGroupEvent findNewGroupByGroupId(Long groupId,Long id) {
+        return getSqlSession().selectOne(sqlId("findNewGroupByGroupId"), ImmutableMap.of("groupId",groupId,"id",id));
     }
 
     public DoctorGroupEvent findCloseGroupByGroupId(Long groupId) {
