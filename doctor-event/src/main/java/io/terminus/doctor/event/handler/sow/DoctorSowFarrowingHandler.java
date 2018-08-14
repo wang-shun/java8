@@ -79,7 +79,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
 
         //计算分娩日期与配种日期相差天数
         long between1 = farrowingDate1.getTime()- firstMate.getEventAt().getTime();
-        log.error(""+between1);
+        log.error("//////////"+(between1>(2400 * 3600 * 1000)));
         if (between1 > (2400 * 3600 * 1000)){
             doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
         }else{
