@@ -158,13 +158,13 @@ public class ReportDeliveryController {
                                                    @RequestParam (required = false) String pigCode,
                                                    @RequestParam (required = false) Integer barnId,
                                                    @RequestParam (required = false) Integer breedId,
-//                                                   @RequestParam (required = false) Integer pigStatus,
-                                                   @RequestParam(required = false) Integer boarsStatus,
+                                                   @RequestParam (required = false) Integer pigType,
+                                                   @RequestParam (required = false) Integer boarsStatus,
                                                    @RequestParam (required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beginDate,
                                                    @RequestParam (required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate){
 //        if(null != beginDate && null != endDate && beginDate.after(endDate))
 //            throw new JsonResponseException("start.date.after.end.date");
-        return doctorDeliveryReadService.boarReport(farmId,boarsStatus,queryDate,pigCode,staffName,barnId,breedId,beginDate,endDate);
+        return doctorDeliveryReadService.boarReport(farmId,pigType,boarsStatus,queryDate,pigCode,staffName,barnId,breedId,beginDate,endDate);
 
     }
 
@@ -262,12 +262,12 @@ public class ReportDeliveryController {
                              @RequestParam (required = false) String pigCode,
                              @RequestParam (required = false) Integer barnId,
                              @RequestParam (required = false) Integer breedId,
-//                             @RequestParam (required = false) Integer pigStatus,
-                             @RequestParam(required = false) Integer boarsStatus,
+                             @RequestParam (required = false) Integer pigType,
+                             @RequestParam (required = false) Integer boarsStatus,
                              @RequestParam (required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beginDate,
                              @RequestParam (required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate,
                             HttpServletRequest request, HttpServletResponse response) {
-        List<Map<String,Object>> ls=doctorDeliveryReadService.boarReport(farmId,boarsStatus,queryDate,pigCode,staffName,barnId,breedId,beginDate,endDate);
+        List<Map<String,Object>> ls=doctorDeliveryReadService.boarReport(farmId,pigType,boarsStatus,queryDate,pigCode,staffName,barnId,breedId,beginDate,endDate);
 
         //开始导出
         try  {
@@ -289,6 +289,7 @@ public class ReportDeliveryController {
                 title.createCell(6).setCellValue("来源");
                 title.createCell(7).setCellValue("进场日期");
                 title.createCell(8).setCellValue("出生日期");
+                title.createCell(9).setCellValue("公猪类型");
                 for(int i = 0;i<ls.size();i++) {
                     Map a = ls.get(i);
                     Row row = sheet.createRow(pos++);
@@ -318,6 +319,7 @@ public class ReportDeliveryController {
                         String[] strs1=str1.split(" ");
                         row.createCell(8).setCellValue(String.valueOf(strs1[0]));
                     }
+                    row.createCell(9).setCellValue(String.valueOf(a.get("boar_type")));
                 }
                 workbook.write(response.getOutputStream());
             }
