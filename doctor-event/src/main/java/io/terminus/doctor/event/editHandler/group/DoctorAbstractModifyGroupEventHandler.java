@@ -225,7 +225,7 @@ public abstract class DoctorAbstractModifyGroupEventHandler implements DoctorMod
      */
     protected void modifyHandleCheck(DoctorGroupEvent oldGroupEvent, BaseGroupInput input) {
         if (!Objects.equals(oldGroupEvent.getType(), GroupEventType.NEW.getValue())) {
-            DoctorGroupEvent newCreateEvent = doctorGroupEventDao.findNewGroupByGroupId(oldGroupEvent.getGroupId(),oldGroupEvent.getId());
+            DoctorGroupEvent newCreateEvent = doctorGroupEventDao.findNewGroupByGroupId(oldGroupEvent.getGroupId());
             DoctorGroupEvent closeEvent = doctorGroupEventDao.findCloseGroupByGroupId(oldGroupEvent.getGroupId());
             validEventAt(DateUtil.toDate(input.getEventAt()), notNull(newCreateEvent) ? newCreateEvent.getEventAt() : null
                     , notNull(closeEvent) ? closeEvent.getEventAt() : null);
