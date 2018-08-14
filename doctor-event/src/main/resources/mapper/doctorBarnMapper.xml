@@ -324,10 +324,10 @@
         select
         (select count(a.pig_id)
           from doctor_pig_events a
-          join (select min(id) id,pig_id from doctor_pig_events where farm_id = #{farmId} and  status = 1 and event_at > #{beginTime} group by pig_id) b
-                on a.pig_id = b.pig_id and a.barn_id = #{barnId} and a.farm_id = #{farmId} and a.id = b.id and a.status = 1 and a.type !=7)
+          join (select min(id) id,pig_id from doctor_pig_events where farm_id = #{farmId} and  status = 1 and event_at > date_sub(#{beginTime},interval 1 day) group by pig_id) b
+                on a.pig_id = b.pig_id and a.barn_id = #{barnId} and a.farm_id = #{farmId} and a.id = b.id and a.status = 1)
         +
-        (select count(a.pig_id) from doctor_pig_events a join (select current_event_id from doctor_pig_tracks where current_barn_id = #{barnId} and is_removal=0) b on a.id = b.current_event_id where a.event_at &lt;= #{beginTime} and a.status = 1)
+        (select count(a.pig_id) from doctor_pig_events a join (select current_event_id from doctor_pig_tracks where current_barn_id = #{barnId} and is_removal=0) b on a.id = b.current_event_id where a.event_at &lt;= date_sub(#{beginTime},interval 1 day) and a.status = 1)
         from dual
     </select>
     <select id="qimucunlan" parameterType="map" resultType="Integer">
@@ -335,7 +335,7 @@
         (select count(a.pig_id)
         from doctor_pig_events a
         join (select min(id) id,pig_id from doctor_pig_events where farm_id = #{farmId} and  status = 1 and event_at > #{endTime} group by pig_id) b
-        on a.pig_id = b.pig_id and a.barn_id = #{barnId} and a.farm_id = #{farmId} and a.id = b.id and a.status = 1 and a.type !=7)
+        on a.pig_id = b.pig_id and a.barn_id = #{barnId} and a.farm_id = #{farmId} and a.id = b.id and a.status = 1)
         +
         (select count(a.pig_id) from doctor_pig_events a join (select current_event_id from doctor_pig_tracks where current_barn_id = #{barnId} and is_removal=0) b on a.id = b.current_event_id where a.event_at &lt;= #{endTime} and a.status = 1)
         from dual
@@ -344,7 +344,7 @@
         SELECT change_type_id,count(*) as count
         from doctor_pig_events
         where barn_id = #{barnId}
-        and event_at > #{beginTime}
+        and event_at >= #{beginTime}
         and event_at&lt;= #{endTime}
         and type = 6
         and status = 1
@@ -354,7 +354,7 @@
         SELECT count(*)
         from doctor_pig_events
         where barn_id = #{barnId}
-        and event_at > #{beginTime}
+        and event_at >= #{beginTime}
         and event_at&lt;= #{endTime}
         and status = 1
         and type in (1,2,10,12,14)
@@ -363,6 +363,7 @@
         select * from doctor_barns
         where farm_id = #{farmId}
         <if test="operatorName != null">AND staff_name like concat('%',#{operatorName},'%')</if>
+        <if test="barnName != null">AND name like concat('%',#{barnName},'%')</if>
     </select>
     <select id="groupqichucunlan" parameterType="map" resultType="Integer">
         select

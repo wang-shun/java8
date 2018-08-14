@@ -375,12 +375,12 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
     }
 
     @Override
-    public List<Map<String, Object>> boarReport(Long farmId, Integer boarsStatus, Date queryDate, String pigCode, String staffName, Integer barnId, Integer breedId, Date beginDate, Date endDate) {
+    public List<Map<String, Object>> boarReport(Long farmId,Integer pigType, Integer boarsStatus, Date queryDate, String pigCode, String staffName, Integer barnId, Integer breedId, Date beginDate, Date endDate) {
         List<Map<String, Object>> inFarmBoarId = null;
         if(boarsStatus == 0){
-            inFarmBoarId = doctorPigEventDao.getInFarmBoarId1(farmId,queryDate,barnId,pigCode,breedId,staffName,beginDate,endDate);
+            inFarmBoarId = doctorPigEventDao.getInFarmBoarId1(farmId,pigType,queryDate,barnId,pigCode,breedId,staffName,beginDate,endDate);
         }else {
-            inFarmBoarId = doctorPigEventDao.getInFarmBoarId2(farmId,queryDate,barnId,pigCode,breedId,staffName,beginDate,endDate);
+            inFarmBoarId = doctorPigEventDao.getInFarmBoarId2(farmId,pigType,queryDate,barnId,pigCode,breedId,staffName,beginDate,endDate);
         }
         for (Iterator<Map<String,Object>> it = inFarmBoarId.iterator();it.hasNext();) {
             Map map = it.next();
@@ -403,6 +403,18 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 }
                 if (type == 6){
                     map.put("status","离场");
+                }
+            }
+            if (map.get("boar_type") != null){
+                int boarType = (int)map.get("boar_type");
+                if (boarType == 1){
+                    map.put("boar_type","活公猪");
+                }
+                if (boarType == 2){
+                    map.put("boar_type","冷冻精液");
+                }
+                if (boarType == 3){
+                    map.put("boar_type","新鲜精液");
                 }
             }
             BigInteger id = (BigInteger)map.get("id");
@@ -512,13 +524,8 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         data.put("zongcunlan",zongcunlan);
         return data;
     }
-    public List<Map<String,Object>> barnsReport(Long farmId,String operatorName,Long isbarnId,Date beginTime,Date endTime){
-        List<Long> barnIds = new ArrayList<>();
-        if(isbarnId == 0) {
-            barnIds = doctorBarnDao.findBarnIdsByfarmId(farmId, operatorName);
-        }else{
-             barnIds.add(isbarnId);
-        }
+    public List<Map<String,Object>> barnsReport(Long farmId,String operatorName,String barnName,Date beginTime,Date endTime){
+        List<Long> barnIds =  doctorBarnDao.findBarnIdsByfarmId(farmId, operatorName,barnName);
         if(barnIds != null) {
             List<Map<String,Object>> list = new ArrayList<>();
             //Map map = new HashMap();
