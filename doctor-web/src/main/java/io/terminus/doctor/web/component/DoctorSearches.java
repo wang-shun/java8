@@ -810,7 +810,6 @@ public class DoctorSearches {
         if (farmIdNotExist(params)) {
             return new Paging<>(0L, Collections.emptyList());
         }
-
         searchFromMessage(params);
         Map<String,Object> valueMap = new HashMap<>();
 
@@ -836,10 +835,6 @@ public class DoctorSearches {
         }
         if(!Strings.isNullOrEmpty(params.get("rfid"))){
             rfid = params.get("rfid");
-        }
-
-        if(!Strings.isNullOrEmpty(params.get("q")) || !Strings.isNullOrEmpty(params.get("rfid"))){
-
         }
 
         String leave = String.valueOf(valueMap.get("statuses"));
