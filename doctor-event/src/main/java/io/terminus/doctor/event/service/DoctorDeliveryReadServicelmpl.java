@@ -524,13 +524,8 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         data.put("zongcunlan",zongcunlan);
         return data;
     }
-    public List<Map<String,Object>> barnsReport(Long farmId,String operatorName,Long isbarnId,Date beginTime,Date endTime){
-        List<Long> barnIds = new ArrayList<>();
-        if(isbarnId == 0) {
-            barnIds = doctorBarnDao.findBarnIdsByfarmId(farmId, operatorName);
-        }else{
-             barnIds.add(isbarnId);
-        }
+    public List<Map<String,Object>> barnsReport(Long farmId,String operatorName,String barnName,Date beginTime,Date endTime){
+        List<Long> barnIds =  doctorBarnDao.findBarnIdsByfarmId(farmId, operatorName,barnName);
         if(barnIds != null) {
             List<Map<String,Object>> list = new ArrayList<>();
             //Map map = new HashMap();
