@@ -8,6 +8,7 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.util.EventUtil;
 import org.springframework.stereotype.Component;
+
 import java.util.Objects;
 
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
