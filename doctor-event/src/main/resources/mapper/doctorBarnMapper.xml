@@ -354,7 +354,7 @@
         SELECT count(*)
         from doctor_pig_events
         where barn_id = #{barnId}
-        and event_at > #{beginTime}
+        and event_at >= #{beginTime}
         and event_at&lt;= #{endTime}
         and status = 1
         and type in (1,2,10,12,14)
