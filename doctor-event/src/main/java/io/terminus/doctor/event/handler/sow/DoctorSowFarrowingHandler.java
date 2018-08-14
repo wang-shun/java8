@@ -2,6 +2,7 @@ package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.doctor.common.utils.CountUtil;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
@@ -78,13 +79,10 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
 
         //计算分娩日期与配种日期相差天数
         long between1 = farrowingDate1.getTime()- firstMate.getMattingDate().getTime();
-        try {
-            if (between1 > (2400 * 3600 * 1000)){
-                doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
-            }
-        }catch (Exception e){
-            log.error("last.farrow.not.null", Throwables.getStackTraceAsString(e));
-            e.printStackTrace();
+        if (between1 > (2400 * 3600 * 1000)){
+            doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
+        }else{
+            throw new JsonResponseException("分娩事件和初配事件必须大于100天");
         }
 
         //分娩窝重
