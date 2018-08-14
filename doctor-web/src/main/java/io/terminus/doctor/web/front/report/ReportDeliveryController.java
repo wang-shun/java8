@@ -470,15 +470,16 @@ public class ReportDeliveryController {
                 int  pos  =  2;
                 title.createCell(0).setCellValue("序号");
                 title.createCell(1).setCellValue("猪舍");
-                title.createCell(2).setCellValue("饲养员");
-                title.createCell(3).setCellValue("期初存栏");
-                title.createCell(4).setCellValue("本期转入");
-                title.createCell(5).setCellValue("死亡");
-                title.createCell(6).setCellValue("淘汰");
-                title.createCell(7).setCellValue("销售");
-                title.createCell(8).setCellValue("转场");
-                title.createCell(9).setCellValue("其它减少");
-                title.createCell(10).setCellValue("期末存栏");
+                title.createCell(2).setCellValue("猪类");
+                title.createCell(3).setCellValue("饲养员");
+                title.createCell(4).setCellValue("期初存栏");
+                title.createCell(5).setCellValue("本期转入");
+                title.createCell(6).setCellValue("死亡");
+                title.createCell(7).setCellValue("淘汰");
+                title.createCell(8).setCellValue("销售");
+                title.createCell(9).setCellValue("转场");
+                title.createCell(10).setCellValue("其它减少");
+                title.createCell(11).setCellValue("期末存栏");
                 for(int i = 0;i<ls.size();i++) {
                     Map map = ls.get(i);
                     Row row = sheet.createRow(pos++);
@@ -488,29 +489,30 @@ public class ReportDeliveryController {
                         rfid="";
                     }
                     row.createCell(1).setCellValue(String.valueOf(rfid));
-                    row.createCell(2).setCellValue(String.valueOf(map.get("staff_name")));
-                    row.createCell(3).setCellValue(String.valueOf(map.get("qichucunlan")));
-                    row.createCell(4).setCellValue(String.valueOf(map.get("zhuanru")));
+                    row.createCell(2).setCellValue(String.valueOf(map.get("pig_type")));
+                    row.createCell(3).setCellValue(String.valueOf(map.get("staff_name")));
+                    row.createCell(4).setCellValue(String.valueOf(map.get("qichucunlan")));
+                    row.createCell(5).setCellValue(String.valueOf(map.get("zhuanru")));
                     if(map.get("siwang") == null){
-                        row.createCell(5).setCellValue("");
-                    }else {
-                        row.createCell(5).setCellValue(String.valueOf(map.get("siwang")));
-                    }
-                    if(map.get("taotai") == null){
                         row.createCell(6).setCellValue("");
                     }else {
-                        row.createCell(6).setCellValue(String.valueOf(map.get("taotai")));
+                        row.createCell(6).setCellValue(String.valueOf(map.get("siwang")));
                     }
-                    if(map.get("xiaoshou") == null){
+                    if(map.get("taotai") == null){
                         row.createCell(7).setCellValue("");
                     }else {
-                        row.createCell(7).setCellValue(String.valueOf(map.get("xiaoshou")));
+                        row.createCell(7).setCellValue(String.valueOf(map.get("taotai")));
+                    }
+                    if(map.get("xiaoshou") == null){
+                        row.createCell(8).setCellValue("");
+                    }else {
+                        row.createCell(8).setCellValue(String.valueOf(map.get("xiaoshou")));
                     }
                     //row.createCell(6).setCellValue(String.valueOf(map.get("taotai")));
                     //row.createCell(7).setCellValue(String.valueOf(map.get("xiaoshou")));
-                    row.createCell(8).setCellValue(String.valueOf(map.get("zhuanchu")));
-                    row.createCell(9).setCellValue(String.valueOf(map.get("qitajianshao")));
-                    row.createCell(10).setCellValue(String.valueOf(map.get("qimucunlan")));
+                    row.createCell(9).setCellValue(String.valueOf(map.get("zhuanchu")));
+                    row.createCell(10).setCellValue(String.valueOf(map.get("qitajianshao")));
+                    row.createCell(11).setCellValue(String.valueOf(map.get("qimucunlan")));
                 }
                 workbook.write(response.getOutputStream());
             }
