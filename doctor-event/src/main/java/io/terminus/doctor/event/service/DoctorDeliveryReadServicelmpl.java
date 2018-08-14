@@ -601,9 +601,9 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 if(barnType == 7){
                     Map map1 = new HashMap();
                     Integer pigqichucunlan = doctorBarnDao.qichucunlan(farmId, barnId, beginTime);
-                    Integer groupqichucunlan = doctorBarnDao.groupqichucunlan(farmId, barnId, beginTime);
+                    Integer groupqichucunlan = doctorBarnDao.groupqichucunlan(farmId, barnId, endTime);
                     Integer pigqimucunlan = doctorBarnDao.qimucunlan(farmId, barnId, beginTime);
-                    Integer groupqimucunlan = doctorBarnDao.groupqimucunlan(farmId, barnId, beginTime);
+                    Integer groupqimucunlan = doctorBarnDao.groupqimucunlan(farmId, barnId, endTime);
                     //Integer qichucunlan = (pigqichucunlan == null? 0 : pigqichucunlan) + (groupqichucunlan == null ? 0:groupqichucunlan);
                     //Integer qimucunlan = (pigqimucunlan == null? 0 : pigqimucunlan) + (groupqimucunlan == null ? 0:groupqimucunlan);
                     map.put("qichucunlan",pigqichucunlan);
