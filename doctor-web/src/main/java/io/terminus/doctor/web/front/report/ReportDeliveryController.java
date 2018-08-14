@@ -452,11 +452,11 @@ public class ReportDeliveryController {
     @RequestMapping(method = RequestMethod.GET, value = "barns/export")
     public void barnsReports(@RequestParam(required = true) Long farmId,
                                                 @RequestParam(required = false) String operatorName,
-                                                @RequestParam(required = false) Long barnId,
+                                                @RequestParam(required = false) String barnName,
                                                 @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beginTime,
                                                 @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endTime,
                                                  HttpServletRequest request, HttpServletResponse response ) {
-        List<Map<String,Object>> ls = doctorDeliveryReadService.barnsReport(farmId,operatorName,barnId,beginTime,endTime);
+        List<Map<String,Object>> ls = doctorDeliveryReadService.barnsReport(farmId,operatorName,barnName,beginTime,endTime);
         //开始导出
         try  {
             //导出名称
