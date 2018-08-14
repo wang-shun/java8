@@ -810,6 +810,7 @@ public class DoctorSearches {
         if (farmIdNotExist(params)) {
             return new Paging<>(0L, Collections.emptyList());
         }
+
         searchFromMessage(params);
         Map<String,Object> valueMap = new HashMap<>();
 
@@ -837,15 +838,23 @@ public class DoctorSearches {
             rfid = params.get("rfid");
         }
 
+        if(!Strings.isNullOrEmpty(params.get("q")) || !Strings.isNullOrEmpty(params.get("rfid"))){
+
+        }
+
         String leave = String.valueOf(valueMap.get("statuses"));
         if(leave!=null && "[2]".equals(leave)){
             isRemoval = 1;
         }
 
-        List<Long> notList = RespHelper.or500(doctorPigReadService.findNotTransitionsSow(farmId,barnId,valueMap,pigCode,rfid,isRemoval));
+        List<Long> notList;
         if( "13".equals(params.get("statuses")) ){
-            List<Long> haveList = RespHelper.or500(doctorPigReadService.findHaveTransitionsSow(farmId,barnId,pigCode,rfid));
-            notList.addAll(haveList);
+            notList = RespHelper.or500(doctorPigReadService.findHaveTransitionsSow(farmId,barnId,pigCode,rfid));
+        }else{
+            notList = RespHelper.or500(doctorPigReadService.findNotTransitionsSow(farmId,barnId,valueMap,pigCode,rfid,isRemoval));
+        }
+        if(notList.size()<=0){
+            return new Paging<>(0L, Collections.emptyList());
         }
 
         List<Long> eventList;
