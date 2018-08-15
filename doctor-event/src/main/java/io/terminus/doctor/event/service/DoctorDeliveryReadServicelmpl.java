@@ -479,8 +479,8 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             groupList = doctorGroupEventDao.groupList1(farmId, time, barn, groupCode, operatorName, groupType, buildBeginGroupTime, buildEndGroupTime,closeBeginGroupTime,closeEndGroupTime);
         }
         int zongcunlan = 0;
-        for(int i=0;i<groupList.size();i++){
-            Map map = groupList.get(i);
+        for(Iterator<Map<String,Object>> it = groupList.iterator();it.hasNext();){
+            Map map = it.next();
             int status = (int) map.get("pig_type");
             if(status == 7){
                 map.put("pig_type","产房仔猪");
@@ -502,11 +502,13 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             Integer getCunlan = doctorGroupEventDao.getCunlan(groupId,time);
             if(getCunlan != null && groupStatus == 0) {
                 if(getCunlan == 0){
+                    it.remove();
                     continue;
                 }
                 map.put("cunlanshu", getCunlan);
                 zongcunlan = zongcunlan + getCunlan;
             }else{
+                it.remove();
                 continue;
             }
             Double getInAvgweight = doctorGroupEventDao.getInAvgweight(groupId,time);
