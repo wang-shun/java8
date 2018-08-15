@@ -257,7 +257,11 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 Map<String,Object> currentBarn = doctorPigEventDao.findBarn((BigInteger)afterEvent.get("id"),id,pigId,eventAt,time,operatorName,barnId);//如果后面又转舍事件,去后面事件的猪舍
                 if(currentBarn != null) {
                     map.put("current_barn_name", currentBarn.get("barn_name"));
-                    map.put("staff_name", currentBarn.get("staff_name"));//饲养员
+                    if(currentBarn.get("staff_name") != null) {
+                        map.put("staff_name", currentBarn.get("staff_name"));//饲养员
+                    } else{
+                        map.put("staff_name","");
+                    }
                 } else{
                     it.remove();
                     continue;
@@ -268,7 +272,11 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 afterEventFarmId = (BigInteger)doctorPigEventDao.findBarns(pigId,null,null).get("farm_id");
                 if(currentBarns != null) {
                     map.put("current_barn_name", currentBarns.get("current_barn_name"));
-                    map.put("staff_name", currentBarns.get("staff_name"));//饲养员
+                    if(currentBarns.get("staff_name") != null) {
+                        map.put("staff_name", currentBarns.get("staff_name"));//饲养员
+                    } else{
+                        map.put("staff_name","");
+                    }
                 } else{
                     it.remove();
                     continue;
