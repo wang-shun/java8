@@ -257,7 +257,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 Map<String,Object> currentBarn = doctorPigEventDao.findBarn((BigInteger)afterEvent.get("id"),id,pigId,eventAt,time,operatorName,barnId);//如果后面又转舍事件,去后面事件的猪舍
                 if(currentBarn != null) {
                     map.put("current_barn_name", currentBarn.get("barn_name"));
-                    map.put("staff_name", currentBarn.get("staff_name"));//饲养员
+                        map.put("staff_name", currentBarn.get("staff_name"));//饲养员
                 } else{
                     it.remove();
                     continue;
@@ -268,7 +268,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 afterEventFarmId = (BigInteger)doctorPigEventDao.findBarns(pigId,null,null).get("farm_id");
                 if(currentBarns != null) {
                     map.put("current_barn_name", currentBarns.get("current_barn_name"));
-                    map.put("staff_name", currentBarns.get("staff_name"));//饲养员
+                        map.put("staff_name", currentBarns.get("staff_name"));//饲养员
                 } else{
                     it.remove();
                     continue;
@@ -466,6 +466,12 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
 
     @Override
     public Map<String,Object> groupReport(Long farmId,Date time,String groupCode,String operatorName,Long barn,Integer groupType,Integer groupStatus,Date buildBeginGroupTime,Date buildEndGroupTime,Date closeBeginGroupTime,Date closeEndGroupTime){
+        if(groupCode == ""){
+            groupCode = null;
+        }
+        if (operatorName == "") {
+            operatorName = null;
+        }
         List<Map<String,Object>> groupList = null;
         if(groupStatus == 0) {
             groupList = doctorGroupEventDao.groupList(farmId, time, barn, groupCode, operatorName, groupType, buildBeginGroupTime, buildEndGroupTime,closeBeginGroupTime,closeEndGroupTime);
@@ -473,8 +479,8 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             groupList = doctorGroupEventDao.groupList1(farmId, time, barn, groupCode, operatorName, groupType, buildBeginGroupTime, buildEndGroupTime,closeBeginGroupTime,closeEndGroupTime);
         }
         int zongcunlan = 0;
-        for(int i=0;i<groupList.size();i++){
-            Map map = groupList.get(i);
+        for(Iterator<Map<String,Object>> it = groupList.iterator();it.hasNext();){
+            Map map = it.next();
             int status = (int) map.get("pig_type");
             if(status == 7){
                 map.put("pig_type","产房仔猪");
@@ -495,10 +501,15 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             }
             Integer getCunlan = doctorGroupEventDao.getCunlan(groupId,time);
             if(getCunlan != null && groupStatus == 0) {
+                if(getCunlan == 0){
+                    it.remove();
+                    continue;
+                }
                 map.put("cunlanshu", getCunlan);
                 zongcunlan = zongcunlan + getCunlan;
             }else{
-                map.put("cunlanshu", 0);
+                it.remove();
+                continue;
             }
             Double getInAvgweight = doctorGroupEventDao.getInAvgweight(groupId,time);
             if(getInAvgweight != null) {
@@ -525,6 +536,12 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         return data;
     }
     public List<Map<String,Object>> barnsReport(Long farmId,String operatorName,String barnName,Date beginTime,Date endTime){
+        if(operatorName == ""){
+            operatorName = null;
+        }
+        if (barnName == "") {
+            barnName = null;
+        }
         List<Long> barnIds =  doctorBarnDao.findBarnIdsByfarmId(farmId, operatorName,barnName);
         if(barnIds != null) {
             List<Map<String,Object>> list = new ArrayList<>();
@@ -660,11 +677,11 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         }
                     }
                     map.put("xiaoshou",pigxiaoshou);
-                    map.put("siwang",pigxiaoshou);
+                    map.put("siwang",pigsiwang);
                     map.put("taotai",pigtaotai);
                     map.put("qitajianshao",pigqitajianshao);
                     map1.put("xiaoshou",groupxiaoshou);
-                    map1.put("siwang",groupxiaoshou);
+                    map1.put("siwang",groupsiwang);
                     map1.put("taotai",grouptaotai);
                     map1.put("qitajianshao",groupqitajianshao);
                     Integer pigzhuanchu = doctorBarnDao.zhuanchu(barnId, beginTime, endTime);
