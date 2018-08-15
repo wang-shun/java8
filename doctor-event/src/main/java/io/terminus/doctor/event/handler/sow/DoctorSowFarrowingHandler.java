@@ -1,9 +1,7 @@
 package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.collect.Maps;
-import io.terminus.common.exception.JsonResponseException;
 import io.terminus.doctor.common.utils.CountUtil;
-import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.DoctorEventInfo;
@@ -23,7 +21,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -64,29 +61,26 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
 
         //分娩时间
         DateTime farrowingDate = new DateTime(farrowingDto.eventAt());
-    //    doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
-        Date farrowingDate1 = farrowingDate.toDate();
-        //计算分娩日期与配种日期相差天数
-        Integer lastParity = doctorPigEventDao.findLastParity(doctorPigTrack.getPigId());
-        DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigEvent.getPigId(), lastParity);
-
-        Integer between1 = DateUtil.getDeltaDays(farrowingDate1,firstMate.getEventAt()) + 1;
-        //  long between1 = farrowingDate1.getTime()- firstMate.getEventAt().getTime();
-        log.error("//////////"+(between1>100));
-        if (between1 > 100){
-            doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
-        }else{
-            throw new JsonResponseException("分娩事件和初配事件必须大于100天");
-        }
-
+        doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
+        //Date farrowingDate1 = farrowingDate.toDate();
 
 
         //计算孕期
-     //   Integer lastParity = doctorPigEventDao.findLastParity(doctorPigTrack.getPigId());
+        Integer lastParity = doctorPigEventDao.findLastParity(doctorPigTrack.getPigId());
         doctorPigEvent.setPregDays(doctorModifyPigFarrowEventHandler.getPregDays(doctorPigEvent.getPigId(), lastParity, farrowingDto.eventAt()));
 
-      //  DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigEvent.getPigId(), lastParity);
+        DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigEvent.getPigId(), lastParity);
         doctorPigEvent.setRelEventId(firstMate.getId());
+
+
+        //计算分娩日期与配种日期相差天数
+//        long between1 = farrowingDate1.getTime()- firstMate.getEventAt().getTime();
+//        log.error("//////////"+(between1>(2400 * 3600 * 1000)));
+//        if (between1 > (2400 * 3600 * 1000)){
+//            doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
+//        }else{
+//            throw new JsonResponseException("分娩事件和初配事件必须大于100天");
+//        }
 
         //分娩窝重
         doctorPigEvent.setFarrowWeight(farrowingDto.getBirthNestAvg());
