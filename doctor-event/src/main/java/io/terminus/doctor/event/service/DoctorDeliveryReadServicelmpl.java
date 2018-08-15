@@ -260,7 +260,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     if(currentBarn.get("staff_name") != null) {
                         map.put("staff_name", currentBarn.get("staff_name"));//饲养员
                     } else{
-                        map.put("staff_name","");
+                        map.put("staff_name","0");
                     }
                 } else{
                     it.remove();
@@ -275,7 +275,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     if(currentBarns.get("staff_name") != null) {
                         map.put("staff_name", currentBarns.get("staff_name"));//饲养员
                     } else{
-                        map.put("staff_name","");
+                        map.put("staff_name","0");
                     }
                 } else{
                     it.remove();
