@@ -379,6 +379,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             }
        // }
         //}
+        log.error("======================"+inFarmPigId.size());
         return inFarmPigId;
     }
 
