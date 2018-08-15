@@ -230,10 +230,10 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
 //        }else {
 //            inFarmPigId = doctorPigEventDao.getInFarmPigId(farmId, time, pigCode, breed, beginInFarmTime, endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
 //        }
-        //boolean f = true;
-        //boolean g = true;
-        //boolean h = true;
-        List<Map<String,Object>> j = new ArrayList<>();
+        /*boolean f = true;
+        boolean g = true;
+        boolean h = true;
+        List<Map<String,Object>> j = new ArrayList<>();*/
         for(Iterator<Map<String,Object>> it = inFarmPigId.iterator();it.hasNext();){
             Map map = it.next();
             int source = (int)map.get("source");
@@ -362,10 +362,12 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 }else{
                     it.remove();
                 }
-                j.add(map);
-                if(j.size() == 100){
-                    break;
+                /*if(f && g && h){
+                    j.add(map);
                 }
+                if(j.size() == 20){
+                    break;
+                }*/
             }
        // }
         //}
