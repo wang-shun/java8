@@ -2025,7 +2025,6 @@
         <if test="breed != null"> and a.breed_id = #{breed} </if>
         <if test="beginInFarmTime != null"> and a.in_farm_date > #{beginInFarmTime} </if>
         <if test="endInFarmTime != null"> and a.in_farm_date &lt; #{endInFarmTime} </if>
-        limit 100
     </select>
 
     <select id="getInFarmPigId1" parameterType="map" resultType="map">
