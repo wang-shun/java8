@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.handler.sow;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.doctor.common.utils.CountUtil;
@@ -65,8 +64,8 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
 
         //分娩时间
         DateTime farrowingDate = new DateTime(farrowingDto.eventAt());
-        doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
-        //Date farrowingDate1 = farrowingDate.toDate();
+    //    doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
+        Date farrowingDate1 = farrowingDate.toDate();
 
 
         //计算孕期
@@ -76,15 +75,17 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigEvent.getPigId(), lastParity);
         doctorPigEvent.setRelEventId(firstMate.getId());
 
-
         //计算分娩日期与配种日期相差天数
-//        long between1 = farrowingDate1.getTime()- firstMate.getEventAt().getTime();
-//        log.error("//////////"+(between1>(2400 * 3600 * 1000)));
-//        if (between1 > (2400 * 3600 * 1000)){
-//            doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
-//        }else{
-//            throw new JsonResponseException("分娩事件和初配事件必须大于100天");
-//        }
+        Integer between1 = DateUtil.getDeltaDays(farrowingDate1,firstMate.getEventAt()) + 1;
+      //  long between1 = farrowingDate1.getTime()- firstMate.getEventAt().getTime();
+        log.error("//////////"+(between1>100));
+        if (between1 > 100){
+            doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
+        }else{
+            throw new JsonResponseException("分娩事件和初配事件必须大于100天");
+        }
+
+
 
         //分娩窝重
         doctorPigEvent.setFarrowWeight(farrowingDto.getBirthNestAvg());
