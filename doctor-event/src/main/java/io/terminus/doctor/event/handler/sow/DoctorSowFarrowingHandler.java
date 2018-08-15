@@ -66,18 +66,12 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         DateTime farrowingDate = new DateTime(farrowingDto.eventAt());
     //    doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
         Date farrowingDate1 = farrowingDate.toDate();
-
-
-        //计算孕期
-        Integer lastParity = doctorPigEventDao.findLastParity(doctorPigTrack.getPigId());
-        doctorPigEvent.setPregDays(doctorModifyPigFarrowEventHandler.getPregDays(doctorPigEvent.getPigId(), lastParity, farrowingDto.eventAt()));
-
-        DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigEvent.getPigId(), lastParity);
-        doctorPigEvent.setRelEventId(firstMate.getId());
-
         //计算分娩日期与配种日期相差天数
+        Integer lastParity = doctorPigEventDao.findLastParity(doctorPigTrack.getPigId());
+        DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigEvent.getPigId(), lastParity);
+
         Integer between1 = DateUtil.getDeltaDays(farrowingDate1,firstMate.getEventAt()) + 1;
-      //  long between1 = farrowingDate1.getTime()- firstMate.getEventAt().getTime();
+        //  long between1 = farrowingDate1.getTime()- firstMate.getEventAt().getTime();
         log.error("//////////"+(between1>100));
         if (between1 > 100){
             doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
@@ -86,6 +80,13 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         }
 
 
+
+        //计算孕期
+     //   Integer lastParity = doctorPigEventDao.findLastParity(doctorPigTrack.getPigId());
+        doctorPigEvent.setPregDays(doctorModifyPigFarrowEventHandler.getPregDays(doctorPigEvent.getPigId(), lastParity, farrowingDto.eventAt()));
+
+      //  DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigEvent.getPigId(), lastParity);
+        doctorPigEvent.setRelEventId(firstMate.getId());
 
         //分娩窝重
         doctorPigEvent.setFarrowWeight(farrowingDto.getBirthNestAvg());
