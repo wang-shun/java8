@@ -466,6 +466,12 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
 
     @Override
     public Map<String,Object> groupReport(Long farmId,Date time,String groupCode,String operatorName,Long barn,Integer groupType,Integer groupStatus,Date buildBeginGroupTime,Date buildEndGroupTime,Date closeBeginGroupTime,Date closeEndGroupTime){
+        if(groupCode == ""){
+            groupCode = null;
+        }
+        if (operatorName == "") {
+            operatorName = null;
+        }
         List<Map<String,Object>> groupList = null;
         if(groupStatus == 0) {
             groupList = doctorGroupEventDao.groupList(farmId, time, barn, groupCode, operatorName, groupType, buildBeginGroupTime, buildEndGroupTime,closeBeginGroupTime,closeEndGroupTime);
@@ -525,6 +531,12 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         return data;
     }
     public List<Map<String,Object>> barnsReport(Long farmId,String operatorName,String barnName,Date beginTime,Date endTime){
+        if(operatorName == ""){
+            operatorName = null;
+        }
+        if (barnName == "") {
+            barnName = null;
+        }
         List<Long> barnIds =  doctorBarnDao.findBarnIdsByfarmId(farmId, operatorName,barnName);
         if(barnIds != null) {
             List<Map<String,Object>> list = new ArrayList<>();
