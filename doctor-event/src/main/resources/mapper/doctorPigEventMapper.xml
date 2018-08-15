@@ -2197,7 +2197,7 @@
         and d.kind = 2
         and d.type in (7,20)
         and d.event_at &lt;= #{queryDate}
-        <if test="pigCode != null"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
+        <if test="pigCode != null and pigCode != ''"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
         <if test="breedId != null"> and a.breed_id = #{breedId} </if>
         <if test="pigType != null"> and a.boar_type = #{pigType} </if>
         <if test="beginDate != null"> and a.in_farm_date >= #{beginDate} </if>
@@ -2227,7 +2227,7 @@
         and d.kind = 2
         and d.type in(2,6)
         and d.event_at = #{queryDate}
-        <if test="pigCode != null"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
+        <if test="pigCode != null and pigCode != ''"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
         <if test="breedId != null"> and a.breed_id = #{breedId} </if>
         <if test="pigType != null"> and a.boar_type = #{pigType} </if>
         <if test="beginDate != null"> and a.in_farm_date >= #{beginDate} </if>
@@ -2244,7 +2244,7 @@
         and d.kind = 2
         and d.type = 2
         and d.event_at &lt;= #{queryDate}
-        <if test="pigCode != null"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
+        <if test="pigCode != null and pigCode != ''"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
         <if test="breedId != null"> and a.breed_id = #{breedId} </if>
         <if test="beginDate != null"> and a.in_farm_date >= #{beginDate} </if>
         <if test="endDate != null"> and date(a.in_farm_date) &lt;= #{endDate} </if>
@@ -2271,7 +2271,7 @@
         FROM doctor_pig_events a join doctor_barns b on a.barn_id = b.id
         where a.id = #{isBoarBarn}
         and a.status = 1
-        <if test="staffName != null"> AND b.staff_name like CONCAT(CONCAT('%',#{staffName}),'%')</if>
+        <if test="staffName != null and staffName != ''"> AND b.staff_name like CONCAT(CONCAT('%',#{staffName}),'%')</if>
         <if test="barnId != null"> and b.id = #{barnId} </if>
     </select>
 
@@ -2280,7 +2280,7 @@
         from doctor_pig_tracks b
         join doctor_barns c on b.current_barn_id = c.id
         where pig_id = #{pigId}
-        <if test="staffName != null"> AND c.staff_name like CONCAT(CONCAT('%',#{staffName}),'%')</if>
+        <if test="staffName != null and staffName != ''"> AND c.staff_name like CONCAT(CONCAT('%',#{staffName}),'%')</if>
         <if test="barnId != null"> and c.id = #{barnId} </if>
     </select>
 
@@ -2289,7 +2289,7 @@
         FROM doctor_pig_events a
         join doctor_barns b on a.barn_id = b.id
         where a.farm_id = #{farmId} and a.type = 2 and a.pig_id = #{pigId} and a.event_at &lt;= #{queryDate} and a.status = 1
-        <if test="staffName != null"> AND b.staff_name like CONCAT(CONCAT('%',#{staffName}),'%')</if>
+        <if test="staffName != null and staffName != ''"> AND b.staff_name like CONCAT(CONCAT('%',#{staffName}),'%')</if>
         <if test="barnId != null"> and b.id = #{barnId} </if>
     </select>
 
@@ -2311,7 +2311,7 @@
         SELECT staff_name
         FROM doctor_barns
         where id = #{currentBarnId}
-        <if test="staffName != null"> AND staff_name like CONCAT(CONCAT('%',#{staffName}),'%')</if>
+        <if test="staffName != null and staffName != ''"> AND staff_name like CONCAT(CONCAT('%',#{staffName}),'%')</if>
         <if test="barnId != null"> and id = #{barnId} </if>
     </select>
 
