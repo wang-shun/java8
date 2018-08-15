@@ -677,11 +677,11 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         }
                     }
                     map.put("xiaoshou",pigxiaoshou);
-                    map.put("siwang",pigxiaoshou);
+                    map.put("siwang",pigsiwang);
                     map.put("taotai",pigtaotai);
                     map.put("qitajianshao",pigqitajianshao);
                     map1.put("xiaoshou",groupxiaoshou);
-                    map1.put("siwang",groupxiaoshou);
+                    map1.put("siwang",groupsiwang);
                     map1.put("taotai",grouptaotai);
                     map1.put("qitajianshao",groupqitajianshao);
                     Integer pigzhuanchu = doctorBarnDao.zhuanchu(barnId, beginTime, endTime);
