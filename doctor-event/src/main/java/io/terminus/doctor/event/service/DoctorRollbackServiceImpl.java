@@ -95,6 +95,10 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             if (groupEvent == null) {
                 throw new InvalidException("group.event.not.found", eventId);
             }
+            int a = doctorGroupEventDao.isCloseGroup(groupEvent.getGroupId());
+            if(a != 1){
+                throw new InvalidException("猪群已关闭");
+            }
             doctorRollbackManager.rollbackGroup(groupEvent, operatorId, operatorName);
 
             if (REPORT_GROUP_EVENT.contains(groupEvent.getType())) {

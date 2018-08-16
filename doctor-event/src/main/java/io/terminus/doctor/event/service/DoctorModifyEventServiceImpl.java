@@ -96,11 +96,16 @@ public class DoctorModifyEventServiceImpl implements DoctorModifyEventService {
     @Override
     public RespWithEx<Boolean> modifyGroupEvent(BaseGroupInput inputDto, Long eventId, Integer eventType) {
         try {
+            DoctorGroupEvent groupEvent = doctorGroupEventDao.findById(eventId);
+            int a = doctorGroupEventDao.isCloseGroup(groupEvent.getGroupId());
+            if(a != 1){
+                throw new InvalidException("猪群已关闭");
+            }
             groupEventManager.modifyGroupEventHandle(inputDto, eventId, eventType);
 
             //同步报表数据
             if (REPORT_GROUP_EVENT.contains(eventType)) {
-                DoctorGroupEvent groupEvent = doctorGroupEventDao.findEventById(eventId);
+                //DoctorGroupEvent groupEvent = doctorGroupEventDao.findEventById(eventId);
                 List<Long> farmIds = Lists.newArrayList(groupEvent.getFarmId());
                 if (Objects.equals(groupEvent.getType(), GroupEventType.TRANS_FARM.getValue())) {
                     DoctorTransFarmGroupInput groupInput = jsonMapper.fromJson(groupEvent.getExtra(), DoctorTransFarmGroupInput.class);

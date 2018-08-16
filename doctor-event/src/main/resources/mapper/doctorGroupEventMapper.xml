@@ -1027,4 +1027,7 @@
         </if>
         ORDER BY date_format(event_at, '%Y-%m-%d') ASC , id ASC
     </select>
+    <select id="isCloseGroup" parameterType="map" resultType="int">
+         select count(1) from doctor_groups where id = #{groupId} and status = 1
+    </select>
 </mapper>

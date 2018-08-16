@@ -507,6 +507,9 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 }
                 map.put("cunlanshu", getCunlan);
                 zongcunlan = zongcunlan + getCunlan;
+            }else if(getCunlan == null && groupStatus == 0){
+                it.remove();
+                continue;
             }else{
                 map.put("cunlanshu", 0);
             }

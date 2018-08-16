@@ -390,4 +390,7 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
     public List<DoctorGroupEvent> findEventIncludeTypes1(Long groupId, List<Integer> types,Date time) {
         return getSqlSession().selectList(sqlId("findEventIncludeTypes1"), ImmutableMap.of("groupId", groupId, "types", types,"time",time));
     }
+    public int isCloseGroup(Long groupId) {
+        return getSqlSession().selectOne(sqlId("isCloseGroup"), ImmutableMap.of("groupId", groupId));
+    }
 }
