@@ -508,8 +508,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 map.put("cunlanshu", getCunlan);
                 zongcunlan = zongcunlan + getCunlan;
             }else{
-                it.remove();
-                continue;
+                map.put("cunlanshu", 0);
             }
             Double getInAvgweight = doctorGroupEventDao.getInAvgweight(groupId,time);
             if(getInAvgweight != null) {
