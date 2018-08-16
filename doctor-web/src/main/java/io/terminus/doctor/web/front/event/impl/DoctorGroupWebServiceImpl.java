@@ -242,7 +242,6 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
             //4.新增校验事件为最后一次时间以后(孔景军)
             DoctorGroupEvent lastEventDate = doctorGroupReadService.findLastEvent(groupId);
-            log.error("==========="+lastEventDate.getEventAt().getTime()+"========="+eventAt.getTime());
             if(eventAt.getTime()<lastEventDate.getEventAt().getTime()){
                 throw new InvalidException("事件不能小于最后一次时间");
             }
