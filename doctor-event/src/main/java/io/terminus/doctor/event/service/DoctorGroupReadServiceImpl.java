@@ -592,4 +592,10 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             return Response.fail("list.open.groups.by.failed");
         }
     }
+
+    //孔景军
+    @Override
+    public DoctorGroupEvent findLastEvent(Long groupId){
+        return  doctorGroupEventDao.findLastEventByGroupId(groupId);
+    }
 }

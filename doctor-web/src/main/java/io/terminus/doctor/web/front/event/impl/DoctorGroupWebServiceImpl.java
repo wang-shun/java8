@@ -235,9 +235,16 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
             Map<String, Object> params = JSON_MAPPER.fromJson(data, JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
 
+
             //3.校验事件的时间
             Date eventAt = DateUtil.toDate((String) params.get("eventAt"));
             checkEventAt(groupId, eventAt);
+
+            //4.新增校验事件为最后一次时间以后(孔景军)
+            DoctorGroupEvent lastEventDate = doctorGroupReadService.findLastEvent(groupId);
+            if(eventAt.getTime()<lastEventDate.getEventAt().getTime()){
+                throw new InvalidException("事件不能小于最后一次时间");
+            }
 
             String groupCode = getGroupCode(groupId);
             //4.根据不同的事件类型调用不同的录入接口

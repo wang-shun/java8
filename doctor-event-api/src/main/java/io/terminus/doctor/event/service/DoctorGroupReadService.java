@@ -330,4 +330,7 @@ public interface DoctorGroupReadService {
      * @return 猪群列表
      */
     Response<List<DoctorGroup>> listOpenGroupsBy(String date);
+
+
+    DoctorGroupEvent findLastEvent(Long groupId);
 }
