@@ -227,6 +227,7 @@ public interface DoctorGroupReadService {
      */
     RespWithEx<Boolean> eventCanRollback(@NotNull(message = "input.eventId.empty") Long eventId);
 
+    Boolean isCloseGroup(Long groupId);
     /**
      * 查询猪群的所有事件
      *

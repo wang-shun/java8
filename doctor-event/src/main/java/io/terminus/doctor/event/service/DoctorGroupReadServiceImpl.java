@@ -432,6 +432,16 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
+    public Boolean isCloseGroup( Long groupId) {
+        int a = doctorGroupEventDao.isCloseGroup(groupId);
+        if (a == 1) {
+            return true;
+        }else {
+            return false;
+        }
+    }
+
+    @Override
     public Response<List<DoctorGroupEvent>> queryAllGroupEventByGroupId(@NotNull(message = "input.groupId.empty") Long groupId) {
         try {
             return Response.ok(doctorGroupEventDao.findByGroupId(groupId));
