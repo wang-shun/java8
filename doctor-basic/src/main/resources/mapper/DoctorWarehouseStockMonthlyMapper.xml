@@ -249,10 +249,10 @@
             ifnull(round((temp1.balance_quantity+temp3.inQuantity-temp4.outQuantity+ 0.00000001),3),0) as balanceQuantity,
             ifnull(round((temp1.balance_amount+temp3.inAmount-temp4.outAmount+ 0.00000001),2),0) as balanceAmount,
 
-            ifnull(round(temp3.inAmount+ 0.00000001,2),0) as inAmount,
-            ifnull(round(temp3.inQuantity+ 0.00000001,3),0) as inQuantity,
-            ifnull(round(temp4.outAmount+ 0.00000001,2),0) as outAmount,
-            ifnull(round(temp4.outQuantity+ 0.00000001,3),0) as outQuantity,
+            ifnull(round((temp3.inAmount+ 0.00000001),2),0) as inAmount,
+            ifnull(round((temp3.inQuantity+ 0.00000001),3),0) as inQuantity,
+            ifnull(round((temp4.outAmount+ 0.00000001),2),0) as outAmount,
+            ifnull(round((temp4.outQuantity+ 0.00000001),3),0) as outQuantity,
 
             db.name as unit
             from doctor_warehouse_material_handle a
@@ -301,7 +301,7 @@
             ifnull(round((sm.balance_quantity+ 0.00000001),3),0) as lastQuantity,
             ifnull(round((sm.balance_amount+ 0.00000001),2),0) as lastAmount,
             ifnull(round((sm.balance_quantity+ 0.00000001),3),0) as balanceQuantity,
-            ifnull(round((sm.balance_amount+ 0.00000001),2,0) as balanceAmount,
+            ifnull(round((sm.balance_amount+ 0.00000001),2),0) as balanceAmount,
 
             0 as inAmount,
             0 as inQuantity,
@@ -337,10 +337,10 @@
             ifnull(round((temp1.balance_quantity+temp3.inQuantity-temp4.outQuantity+ 0.00000001),3),0) as balanceQuantity,
             '--' as balanceAmount,
 
-            ifnull(round(temp3.inAmount+ 0.00000001,2),0) as inAmount,
-            ifnull(round(temp3.inQuantity+ 0.00000001,3),0) as inQuantity,
+            ifnull(round((temp3.inAmount+ 0.00000001),2),0) as inAmount,
+            ifnull(round((temp3.inQuantity+ 0.00000001),3),0) as inQuantity,
             '--' as outAmount,
-            ifnull(round(temp4.outQuantity+ 0.00000001,3),0) as outQuantity,
+            ifnull(round((temp4.outQuantity+ 0.00000001),3),0) as outQuantity,
 
             db.name as unit
             from doctor_warehouse_material_handle a
@@ -426,10 +426,10 @@
             ifnull(round((temp1.balance_quantity+temp3.inQuantity-temp4.outQuantity+ 0.00000001),3),0) as balanceQuantity,
             '--' as balanceAmount,
 
-            ifnull(round(temp3.inAmount+ 0.00000001,2),0) as inAmount,
-            ifnull(round(temp3.inQuantity+ 0.00000001,3),0) as inQuantity,
+            ifnull(round((temp3.inAmount+ 0.00000001),2),0) as inAmount,
+            ifnull(round((temp3.inQuantity+ 0.00000001),3),0) as inQuantity,
             '--' as outAmount,
-            ifnull(round(temp4.outQuantity+ 0.00000001,3),0) as outQuantity,
+            ifnull(round((temp4.outQuantity+ 0.00000001),3),0) as outQuantity,
 
             db.name as unit
             from doctor_warehouse_material_handle a
