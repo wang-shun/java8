@@ -1,7 +1,5 @@
 package io.terminus.doctor.event.handler.group;
 
-import io.terminus.common.utils.Dates;
-import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -16,12 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-
-import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc: 防疫事件处理器
@@ -46,14 +39,14 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
 
     @Override
     public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
-        DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventByGroupId(group.getId());
-        SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
-        try {
-            Date eventAt = sf.parse(input.getEventAt());
-            checkEventAt(lastEvent, eventAt);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+//        DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventByGroupId(group.getId());
+//        SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
+//        try {
+//            Date eventAt = sf.parse(input.getEventAt());
+//            checkEventAt(lastEvent, eventAt);
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
         input.setEventType(GroupEventType.ANTIEPIDEMIC.getValue());
         DoctorAntiepidemicGroupInput antiepidemic = (DoctorAntiepidemicGroupInput) input;
         checkQuantity(groupTrack.getQuantity(), antiepidemic.getQuantity());
@@ -99,9 +92,9 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
 
     }
 
-    private  void checkEventAt(DoctorGroupEvent lastEvent, Date eventAt){
-        if (notNull(eventAt) && Dates.startOfDay(eventAt).before(Dates.startOfDay(lastEvent.getEventAt()))){
-            throw new InvalidException("move.in.event.at.before.new.event.at");
-        }
-    }
+//    private  void checkEventAt(DoctorGroupEvent lastEvent, Date eventAt){
+//        if (notNull(eventAt) && Dates.startOfDay(eventAt).before(Dates.startOfDay(lastEvent.getEventAt()))){
+//            throw new InvalidException("move.in.event.at.before.new.event.at");
+//        }
+//    }
 }
