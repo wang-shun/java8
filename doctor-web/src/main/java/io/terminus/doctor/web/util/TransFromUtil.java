@@ -151,10 +151,8 @@ public class TransFromUtil {
 
             Boolean isRollback = false;
             Response<Boolean> booleanResponse = doctorGroupReadService.eventCanRollback(groupEvent.getId());
-            //判断猪群是否关闭，如果关闭，不能删除
-            Boolean isCloseGroup = doctorGroupReadService.isCloseGroup(groupEvent.getGroupId());
-            if (booleanResponse.isSuccess() && isCloseGroup && booleanResponse.getResult() == true) {
-                isRollback = true;
+            if (booleanResponse.isSuccess()) {
+                isRollback = booleanResponse.getResult();
             }
             groupEvent.setIsRollback(isRollback);
         });
