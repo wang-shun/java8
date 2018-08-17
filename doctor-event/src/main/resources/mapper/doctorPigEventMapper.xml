@@ -2045,29 +2045,20 @@
     </select>
 
     <select id="getInFarmPigId1" parameterType="map" resultType="map">
-        SELECT d.id as id, d.pig_id as pig_id , max(d.event_at) as event_at, a.pig_code as pig_code,a.breed_id as breed_id,a.breed_name as breed_name,a.source as source,a.in_farm_date as in_farm_date,a.birth_date as birth_date
-        FROM doctor_pig_events d
-        join doctor_pigs a on d.pig_id = a.id
-        WHERE d.farm_id = #{farmId}
-        and d.kind = 1
-        and d.type in (7,20)
-        and d.event_at &lt;= #{time}
-        and d.status = 1
-        <if test="pigCode != null and pigCode != ''" > AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
+        select c.id as id, c.pig_id as pig_id ,c.parity as parity,c.pig_status_after as pig_status_after,c.type as type,c.barn_name as current_barn_name,d.staff_name as staff_name,c.live_count as live_count, c.event_at as event_at, a.pig_code as pig_code,a.breed_id as breed_id,a.breed_name as breed_name,a.source as source,a.in_farm_date as in_farm_date,a.birth_date as birth_date
+        from doctor_pig_events c,doctor_pigs a,doctor_barns d
+        where c.event_at = #{time} and c.type in (2,6) and c.status = 1  and c.pig_id = a.id and c.barn_id = d.id
+        and c.type &lt;> 2 and c.type &lt;> 6
+        <if test="pigCode != null and pigCode != ''"> AND a.pig_code like CONCAT(CONCAT('%',#{pigCode}),'%')</if>
         <if test="breed != null"> and a.breed_id = #{breed} </if>
-        <if test="beginInFarmTime != null"> and a.in_farm_date > #{beginInFarmTime} </if>
-        <if test="endInFarmTime != null"> and a.in_farm_date &lt; #{endInFarmTime} </if>
-        group by d.pig_id
-        HAVING  max(d.id) not in
-        (SELECT max(d.id)
-        FROM doctor_pig_events
-        WHERE farm_id = #{farmId}
-        and pig_id = d.pig_id
-        and kind = 1
-        and type = 6
-        and status=1
-        and event_at &lt;= #{time}
-        and (id > max(d.id) or event_at >= max(d.event_at)))
+        <if test="beginInFarmTime != null"> and a.in_farm_date >= #{beginInFarmTime} </if>
+        <if test="endInFarmTime != null"> and a.in_farm_date &lt;= #{endInFarmTime} </if>
+        <if test="parity != null and parity != 11"> and c.parity = #{parity} </if>
+        <if test="parity != null and parity == 11"> and  c.parity >= 11 </if>
+        <if test="pigStatus != null and pigStatus != 5"> and  c.pig_status_after = #{pigStatus} </if>
+        <if test="pigStatus != null and pigStatus == 5"> and  c.pig_status_after in (1,5,9) </if>
+        <if test="operatorName != null and operatorName != ''"> AND d.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
+        <if test="barnId != null"> and d.id = #{barnId} </if>
     </select>
 
     <select id="getInFarmPigId2" parameterType="map" resultType="map">
