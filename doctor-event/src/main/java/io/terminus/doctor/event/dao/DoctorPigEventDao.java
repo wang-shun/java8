@@ -946,7 +946,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         map.put("pigStatus",pigStatus);
         map.put("operatorName",operatorName);
         map.put("barnId",barnId);
-        return this.sqlSession.selectList(this.sqlId("getInFarmPigId1"), map);
+        return this.sqlSession.selectList(this.sqlId("getInFarmPigId"), map);
     }
     public List<Map<String,Object>> getInFarmPigId2(Long farmId, Date time,String pigCode,Integer breed,Date beginInFarmTime, Date endInFarmTime){
         Map<String, Object> map = new HashMap<>();
