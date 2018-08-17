@@ -2019,7 +2019,7 @@
     </select>
 
     <select id="getInFarmPigId" parameterType="map" resultType="map">
-        select c.id as id, c.pig_id as pig_id , c.event_at as event_at, a.pig_code as pig_code,a.breed_id as breed_id,a.breed_name as breed_name,a.source as source,a.in_farm_date as in_farm_date,a.birth_date as birth_date
+        select c.id as id, c.pig_id as pig_id ,c.parity as parity,c.pig_status_after as pig_status_after,c.type as type,c.barn_name as current_barn_name,c.staff_name as staff_name,c.live_count as live_count, c.event_at as event_at, a.pig_code as pig_code,a.breed_id as breed_id,a.breed_name as breed_name,a.source as source,a.in_farm_date as in_farm_date,a.birth_date as birth_date
         from doctor_pig_events c,
         (select b.pig_id, max(b.id) as max_event_id
         from doctor_pig_events b,
@@ -2039,7 +2039,7 @@
     </select>
 
     <select id="getInFarmPigId1" parameterType="map" resultType="map">
-        SELECT d.id as id, d.pig_id as pig_id ,d.parity as parity,d.pig_status_after as pig_status_after,a.type as type,barn_name as current_barn_name,staff_name as staff_name,d.live_count as live_count, max(d.event_at) as event_at, a.pig_code as pig_code,a.breed_id as breed_id,a.breed_name as breed_name,a.source as source,a.in_farm_date as in_farm_date,a.birth_date as birth_date
+        SELECT d.id as id, d.pig_id as pig_id , max(d.event_at) as event_at, a.pig_code as pig_code,a.breed_id as breed_id,a.breed_name as breed_name,a.source as source,a.in_farm_date as in_farm_date,a.birth_date as birth_date
         FROM doctor_pig_events d
         join doctor_pigs a on d.pig_id = a.id
         WHERE d.farm_id = #{farmId}
