@@ -27,6 +27,7 @@ import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.utils.Checks.expectNotNull;
 import static io.terminus.doctor.common.utils.Checks.expectTrue;
 
 /**
@@ -61,17 +62,22 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
 
         //分娩时间
         DateTime farrowingDate = new DateTime(farrowingDto.eventAt());
+<<<<<<< HEAD
         doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
         //Date farrowingDate1 = farrowingDate.toDate();
+=======
+        Date farrowingDate1 = farrowingDate.toDate();
+        doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
+>>>>>>> '100'
 
 
         //计算孕期
         Integer lastParity = doctorPigEventDao.findLastParity(doctorPigTrack.getPigId());
         doctorPigEvent.setPregDays(doctorModifyPigFarrowEventHandler.getPregDays(doctorPigEvent.getPigId(), lastParity, farrowingDto.eventAt()));
-
         DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigEvent.getPigId(), lastParity);
         doctorPigEvent.setRelEventId(firstMate.getId());
 
+<<<<<<< HEAD
 
         //计算分娩日期与配种日期相差天数
 //        long between1 = farrowingDate1.getTime()- firstMate.getEventAt().getTime();
@@ -81,6 +87,12 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
 //        }else{
 //            throw new JsonResponseException("分娩事件和初配事件必须大于100天");
 //        }
+=======
+        Long between1 = (farrowingDate1.getTime()- firstMate.getMattingDate().getTime())/ (24 * 3600 * 1000);
+        if(between1 < 100){
+            log.error("配种时间与分娩时间没有100天");
+        }
+>>>>>>> '100'
 
         //分娩窝重
         doctorPigEvent.setFarrowWeight(farrowingDto.getBirthNestAvg());
@@ -93,6 +105,18 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         doctorPigEvent.setJxCount(CountUtil.getIntegerDefault0(farrowingDto.getJxCount()));
         doctorPigEvent.setDeadCount(CountUtil.getIntegerDefault0(farrowingDto.getDeadCount()));
         doctorPigEvent.setBlackCount(CountUtil.getIntegerDefault0(farrowingDto.getBlackCount()));
+
+//        //计算分娩日期与配种日期相差天数
+//        int between1 = (int) (farrowingDate1.getTime()- firstMate.getMattingDate().getTime())/ (24 * 3600 * 1000);
+//        try {
+//            if (between1 > 100){
+//                doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
+//            }
+//        }catch (Exception e){
+//            log.error("last.farrow.not.null", Throwables.getStackTraceAsString(e));
+//            e.printStackTrace();
+//        }
+//        doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
 
 //        DateTime pregJudgeDate = new DateTime(stringToDate(expectNotNull(firstMate.getExtraMap().get("judgePregDate"), "judge.preg.date.not.null").toString()));
 //        if (farrowingDate.isBefore(pregJudgeDate)) {
