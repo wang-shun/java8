@@ -821,6 +821,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     }
                     if(pigType == 27){
                         it.remove();
+                        continue;
                     }
                 }
                 if (barnType == 2 || barnType == 3 || barnType == 4) {
