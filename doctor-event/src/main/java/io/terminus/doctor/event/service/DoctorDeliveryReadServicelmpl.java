@@ -816,7 +816,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map1.put("name",map.get("name"));
                     map1.put("staff_name",map.get("staff_name"));
                     list.add(map1);
-                    if(pigType == 17){
+                    if(pigType !=null && pigType == 17){
                         list.remove(map1);
                     }
                 }
@@ -870,7 +870,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     }
                 }
                 list.add(map);
-                if(pigType == 27){
+                if(pigType !=null &&  pigType == 27){
                     list.remove(map);
                 }
             }
