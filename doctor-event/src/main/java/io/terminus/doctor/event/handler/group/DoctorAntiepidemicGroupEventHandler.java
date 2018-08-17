@@ -39,14 +39,6 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
 
     @Override
     public <I extends BaseGroupInput> DoctorGroupEvent buildGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
-//        DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventByGroupId(group.getId());
-//        SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd");
-//        try {
-//            Date eventAt = sf.parse(input.getEventAt());
-//            checkEventAt(lastEvent, eventAt);
-//        } catch (ParseException e) {
-//            e.printStackTrace();
-//        }
         input.setEventType(GroupEventType.ANTIEPIDEMIC.getValue());
         DoctorAntiepidemicGroupInput antiepidemic = (DoctorAntiepidemicGroupInput) input;
         checkQuantity(groupTrack.getQuantity(), antiepidemic.getQuantity());
@@ -92,9 +84,4 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
 
     }
 
-//    private  void checkEventAt(DoctorGroupEvent lastEvent, Date eventAt){
-//        if (notNull(eventAt) && Dates.startOfDay(eventAt).before(Dates.startOfDay(lastEvent.getEventAt()))){
-//            throw new InvalidException("move.in.event.at.before.new.event.at");
-//        }
-//    }
 }
