@@ -397,11 +397,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             Date eventAt = (Date)map.get("event_at");
             if(a ==1 || a==10  || a==12 || a==14) {
                 Map<String, Object> afterEvent = doctorPigEventDao.afterEvent(pigId, time);//查当前时间后面的第一个事件，利用这个时间求当前猪舍和猪场，如果没有则按当前猪场和猪舍
-                BigInteger afterEventFarmId = null;
                 if (afterEvent != null) {
-                    afterEventFarmId = (BigInteger) afterEvent.get("farm_id");
-                    // }
-                    //if(isBarn != null) {
                     Map<String, Object> currentBarn = doctorPigEventDao.findBarn((BigInteger) afterEvent.get("id"), id, pigId, eventAt, time, operatorName, barnId);//如果后面又转舍事件,去后面事件的猪舍
                     if (currentBarn != null) {
                         map.put("current_barn_name", currentBarn.get("barn_name"));
@@ -409,18 +405,15 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     } else {
                         it.remove();
                         continue;
-                        //f = false;
                     }
                 } else {
                     Map<String, Object> currentBarns = doctorPigEventDao.findBarns(pigId, operatorName, barnId);//否则取当前猪舍
-                    afterEventFarmId = (BigInteger) doctorPigEventDao.findBarns(pigId, null, null).get("farm_id");
                     if (currentBarns != null) {
                         map.put("current_barn_name", currentBarns.get("current_barn_name"));
                         map.put("staff_name", currentBarns.get("staff_name"));//饲养员
                     } else {
                         it.remove();
                         continue;
-                        //g = false;
                     }
                 }
             }
@@ -443,8 +436,6 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     if (status == PigStatus.KongHuai.getKey()) {
                         int pregCheckResult = doctorPigEventDao.getPregCheckResult(parity,pigId,time,pigStatus);
 
-                        //doctorPigEventDao.getPregCheckResult(parity,pigId,time,pigStatus)
-
                         if (pregCheckResult == 2) {
                             Status = "阴性";
                         } else if (pregCheckResult == 3) {
@@ -465,6 +456,9 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         Status = PigStatus.Wean.getName();
                     }
                     if (status == PigStatus.CHG_FARM.getKey()) {
+                        Status = PigStatus.CHG_FARM.getName();
+                    }
+                    if(sowsStatus != 0 && status != PigStatus.Removal.getKey()){
                         Status = PigStatus.CHG_FARM.getName();
                     }
                 map.put("status", Status);//母猪状态
@@ -496,15 +490,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 }else{
                     map.put("daizaishu",0);
                 }
-                /*if(f && g && h){
-                    j.add(map);
-                }
-                if(j.size() == 20){
-                    break;
-                }*/
         }
-        // }
-        //}
         return inFarmPigId;
     }
     @Override
