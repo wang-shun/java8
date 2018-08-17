@@ -934,7 +934,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         map.put("barnId",barnId);
         return this.sqlSession.selectList(this.sqlId("getInFarmPigId"), map);
     }
-    public List<Map<String,Object>> getInFarmPigId1(Long farmId, Date time,String pigCode,Integer breed,Date beginInFarmTime, Date endInFarmTime){
+    public List<Map<String,Object>> getInFarmPigId1(Long farmId, Date time,String pigCode,Integer breed,Date beginInFarmTime, Date endInFarmTime,Integer parity,Integer pigStatus,String operatorName,Long barnId){
         Map<String, Object> map = new HashMap<>();
         map.put("farmId",farmId);
         map.put("time",time);
@@ -942,6 +942,10 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         map.put("breed",breed);
         map.put("beginInFarmTime",beginInFarmTime);
         map.put("endInFarmTime",endInFarmTime);
+        map.put("parity",parity);
+        map.put("pigStatus",pigStatus);
+        map.put("operatorName",operatorName);
+        map.put("barnId",barnId);
         return this.sqlSession.selectList(this.sqlId("getInFarmPigId1"), map);
     }
     public List<Map<String,Object>> getInFarmPigId2(Long farmId, Date time,String pigCode,Integer breed,Date beginInFarmTime, Date endInFarmTime){
