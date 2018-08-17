@@ -816,12 +816,13 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map1.put("pig_type","仔猪");
                     map1.put("name",map.get("name"));
                     map1.put("staff_name",map.get("staff_name"));
-                    if(pigType == 17 || pigType == null){
-                        list.add(map1);
-                    }
+                    list.add(map1);
                     if(pigType == 27){
                         it.remove();
                         continue;
+                    }
+                    if(pigType == 17){
+                        list.remove(map1);
                     }
                 }
                 if (barnType == 2 || barnType == 3 || barnType == 4) {
