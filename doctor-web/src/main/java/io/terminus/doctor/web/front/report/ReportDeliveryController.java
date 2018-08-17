@@ -369,7 +369,7 @@ public class ReportDeliveryController {
     public List<Map<String,Object>> barnsReport(@RequestParam(required = true) Long farmId,
                                                @RequestParam(required = false) String operatorName,
                                                @RequestParam(required = false) String barnName,
-                                                @RequestParam(required = false) int pigType,
+                                                @RequestParam(required = false) Integer pigType,
                                                @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beginTime,
                                                @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endTime) {
         return doctorDeliveryReadService.barnsReport(farmId,operatorName,barnName,beginTime,endTime,pigType);

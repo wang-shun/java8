@@ -656,7 +656,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         data.put("zongcunlan",zongcunlan);
         return data;
     }
-    public List<Map<String,Object>> barnsReport(Long farmId,String operatorName,String barnName,Date beginTime,Date endTime,int pigType){
+    public List<Map<String,Object>> barnsReport(Long farmId,String operatorName,String barnName,Date beginTime,Date endTime,Integer pigType){
         if(operatorName == ""){
             operatorName = null;
         }
