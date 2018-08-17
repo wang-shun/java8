@@ -21,6 +21,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -62,13 +63,9 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
 
         //分娩时间
         DateTime farrowingDate = new DateTime(farrowingDto.eventAt());
-<<<<<<< HEAD
-        doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
-        //Date farrowingDate1 = farrowingDate.toDate();
-=======
         Date farrowingDate1 = farrowingDate.toDate();
         doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
->>>>>>> '100'
+
 
 
         //计算孕期
@@ -77,22 +74,10 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventHandler {
         DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigEvent.getPigId(), lastParity);
         doctorPigEvent.setRelEventId(firstMate.getId());
 
-<<<<<<< HEAD
-
-        //计算分娩日期与配种日期相差天数
-//        long between1 = farrowingDate1.getTime()- firstMate.getEventAt().getTime();
-//        log.error("//////////"+(between1>(2400 * 3600 * 1000)));
-//        if (between1 > (2400 * 3600 * 1000)){
-//            doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
-//        }else{
-//            throw new JsonResponseException("分娩事件和初配事件必须大于100天");
-//        }
-=======
         Long between1 = (farrowingDate1.getTime()- firstMate.getMattingDate().getTime())/ (24 * 3600 * 1000);
         if(between1 < 100){
             log.error("配种时间与分娩时间没有100天");
         }
->>>>>>> '100'
 
         //分娩窝重
         doctorPigEvent.setFarrowWeight(farrowingDto.getBirthNestAvg());
