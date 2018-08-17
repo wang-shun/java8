@@ -531,12 +531,11 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
                 allBalanceQuantity = allBalanceQuantity.add(new BigDecimal(map.get("balanceQuantity").toString()));
             }
 
-            if(b){
-                allLastAmount = allLastAmount.add(new BigDecimal(map.get("lastAmount").toString()));
-                allInAmount = allInAmount.add(new BigDecimal(map.get("inAmount").toString()));
-                allOutAmount = allOutAmount.add(new BigDecimal(map.get("outAmount").toString()));
-                allBalanceAmount = allBalanceAmount.add(new BigDecimal(map.get("balanceAmount").toString()));
-            }
+            allLastAmount = allLastAmount.add(new BigDecimal(map.get("lastAmount").toString()));
+            allInAmount = allInAmount.add(new BigDecimal(map.get("inAmount").toString()));
+            allOutAmount = allOutAmount.add(new BigDecimal(map.get("outAmount").toString()));
+            allBalanceAmount = allBalanceAmount.add(new BigDecimal(map.get("balanceAmount").toString()));
+
         }
         HashMap<String, Object> map = Maps.newHashMap();
         if(warehouseType==1||warehouseType==2) {
