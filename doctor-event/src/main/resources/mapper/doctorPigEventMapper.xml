@@ -2036,6 +2036,12 @@
         <if test="breed != null"> and a.breed_id = #{breed} </if>
         <if test="beginInFarmTime != null"> and a.in_farm_date > #{beginInFarmTime} </if>
         <if test="endInFarmTime != null"> and a.in_farm_date &lt; #{endInFarmTime} </if>
+        <if test="parity != null and parity != 11"> and c.parity = #{parity} </if>
+        <if test="parity != null and parity == 11"> and  c.parity >= 11 </if>
+        <if test="pigStatus != null and pigStatus != 5"> and  c.pig_status_after = #{pigStatus} </if>
+        <if test="pigStatus != null and pigStatus == 5"> and  c.pig_status_after in (1,5,9) </if>
+        <if test="operatorName != null and operatorName != ''"> AND d.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
+        <if test="barnId != null"> and d.id = #{barnId} </if>
     </select>
 
     <select id="getInFarmPigId1" parameterType="map" resultType="map">

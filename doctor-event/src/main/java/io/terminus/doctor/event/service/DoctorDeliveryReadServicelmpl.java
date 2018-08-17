@@ -377,7 +377,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
     public List<Map<String,Object>> sowsReport(Long farmId,Date time,String pigCode,String operatorName,Long barnId,Integer breed,Integer parity,Integer pigStatus,Date beginInFarmTime, Date endInFarmTime, Integer sowsStatus){
         List<Map<String,Object>> inFarmPigId = null;
         if(sowsStatus == 0) {
-            inFarmPigId = doctorPigEventDao.getInFarmPigId(farmId, time, pigCode, breed, beginInFarmTime, endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
+            inFarmPigId = doctorPigEventDao.getInFarmPigId(farmId, time, pigCode, breed, beginInFarmTime, endInFarmTime,parity,pigStatus,operatorName,barnId);//查询某个时间点之前所有进场和转场转入的猪
         } else{
             inFarmPigId = doctorPigEventDao.getInFarmPigId3(farmId, time, pigCode, breed, beginInFarmTime, endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
         }
