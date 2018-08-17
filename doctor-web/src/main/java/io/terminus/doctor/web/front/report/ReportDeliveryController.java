@@ -360,7 +360,7 @@ public class ReportDeliveryController {
      * 猪舍存栏报表
      * @param farmId
      * @param operatorName
-     * @param barnId
+     * @param pigType
      * @param beginTime
      * @param endTime
      * @return
@@ -369,9 +369,10 @@ public class ReportDeliveryController {
     public List<Map<String,Object>> barnsReport(@RequestParam(required = true) Long farmId,
                                                @RequestParam(required = false) String operatorName,
                                                @RequestParam(required = false) String barnName,
+                                                @RequestParam(required = false) int pigType,
                                                @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beginTime,
                                                @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endTime) {
-        return doctorDeliveryReadService.barnsReport(farmId,operatorName,barnName,beginTime,endTime);
+        return doctorDeliveryReadService.barnsReport(farmId,operatorName,barnName,beginTime,endTime,pigType);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "group/export")
@@ -453,10 +454,11 @@ public class ReportDeliveryController {
     public void barnsReports(@RequestParam(required = true) Long farmId,
                                                 @RequestParam(required = false) String operatorName,
                                                 @RequestParam(required = false) String barnName,
+                                                @RequestParam(required = false) int pigType,
                                                 @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beginTime,
                                                 @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endTime,
                                                  HttpServletRequest request, HttpServletResponse response ) {
-        List<Map<String,Object>> ls = doctorDeliveryReadService.barnsReport(farmId,operatorName,barnName,beginTime,endTime);
+        List<Map<String,Object>> ls = doctorDeliveryReadService.barnsReport(farmId,operatorName,barnName,beginTime,endTime,pigType);
         //开始导出
         try  {
             //导出名称

@@ -163,11 +163,12 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
         map.put("beginTime", beginTime);
         return getSqlSession().selectOne(sqlId("zhuanchu"), map);
     }
-    public List<Long> findBarnIdsByfarmId(Long farmId,String operatorName,String barnName) {
+    public List<Map<String,Object>> findBarnIdsByfarmId(Long farmId,String operatorName,String barnName,int pigType) {
         Map<String, Object> map = Maps.newHashMap();
         map.put("farmId", farmId);
         map.put("operatorName", operatorName);
         map.put("barnName", barnName);
+        map.put("pigType", pigType);
         return getSqlSession().selectList(sqlId("findBarnIdsByfarmId"), map);
     }
     public Integer groupqichucunlan(Long farmId,Long barnId,Date beginTime) {

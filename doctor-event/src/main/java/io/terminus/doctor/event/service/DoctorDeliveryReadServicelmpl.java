@@ -656,20 +656,17 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         data.put("zongcunlan",zongcunlan);
         return data;
     }
-    public List<Map<String,Object>> barnsReport(Long farmId,String operatorName,String barnName,Date beginTime,Date endTime){
+    public List<Map<String,Object>> barnsReport(Long farmId,String operatorName,String barnName,Date beginTime,Date endTime,int pigType){
         if(operatorName == ""){
             operatorName = null;
         }
         if (barnName == "") {
             barnName = null;
         }
-        List<Long> barnIds =  doctorBarnDao.findBarnIdsByfarmId(farmId, operatorName,barnName);
-        if(barnIds != null) {
+        List<Map<String,Object>> barnList =  doctorBarnDao.findBarnIdsByfarmId(farmId, operatorName,barnName,pigType);
+        if(barnList != null) {
             List<Map<String,Object>> list = new ArrayList<>();
-            //Map map = new HashMap();
-            for(Long barnId: barnIds) {
-
-                Map<String, Object> map = doctorBarnDao.findBarnTypeById(barnId);
+            for(Map map: barnList) {
                 int barnType = (int) (map.get("pig_type"));
                 if(barnType == 5){
                     map.put("pig_type","配种母猪");
