@@ -667,7 +667,8 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         if(barnList != null) {
             List<Map<String,Object>> list = new ArrayList<>();
             for(Map map: barnList) {
-                int barnType = (int) (map.get("pig_type"));
+                int barnType = (int)(map.get("pig_type"));
+                Long barnId = (Long)(map.get("id"));
                 if(barnType == 5){
                     map.put("pig_type","配种母猪");
                 }
