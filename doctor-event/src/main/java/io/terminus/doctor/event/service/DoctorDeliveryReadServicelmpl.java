@@ -377,7 +377,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
     public List<Map<String,Object>> sowsReport(Long farmId,Date time,String pigCode,String operatorName,Long barnId,Integer breed,Integer parity,Integer pigStatus,Date beginInFarmTime, Date endInFarmTime, Integer sowsStatus){
         List<Map<String,Object>> inFarmPigId = null;
         if(sowsStatus == 0) {
-            inFarmPigId = doctorPigEventDao.getInFarmPigId(farmId, time, pigCode, breed, beginInFarmTime, endInFarmTime,parity,pigStatus,operatorName,barnId);//查询某个时间点之前所有进场和转场转入的猪
+            inFarmPigId = doctorPigEventDao.getInFarmPigId(farmId, time, pigCode, breed, beginInFarmTime, endInFarmTime,parity,pigStatus,operatorName,barnId);//查询当前事件的前面一个事件的，如果该事件不是转场或者离场，则说明该猪在该猪场
         } else{
             inFarmPigId = doctorPigEventDao.getInFarmPigId1(farmId, time, pigCode, breed, beginInFarmTime, endInFarmTime,parity,pigStatus,operatorName,barnId);//查询某个时间点所有离场和转场的猪
         }
@@ -395,7 +395,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             BigInteger id = (BigInteger)map.get("id");
             BigInteger pigId = (BigInteger)map.get("pig_id");
             Date eventAt = (Date)map.get("event_at");
-            if(a ==1 || a==10  || a==12 || a==14) {
+            if(a ==1 || a==10  || a==12 || a==14) {//如果前面一个事件是转舍事件，则在后面一个事件中取猪舍或者去当前猪舍
                 Map<String, Object> afterEvent = doctorPigEventDao.afterEvent(pigId, time);//查当前时间后面的第一个事件，利用这个时间求当前猪舍和猪场，如果没有则按当前猪场和猪舍
                 if (afterEvent != null) {
                     Map<String, Object> currentBarn = doctorPigEventDao.findBarn((BigInteger) afterEvent.get("id"), id, pigId, eventAt, time, operatorName, barnId);//如果后面又转舍事件,去后面事件的猪舍
