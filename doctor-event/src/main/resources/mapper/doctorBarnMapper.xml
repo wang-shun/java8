@@ -359,11 +359,13 @@
         and status = 1
         and type in (1,2,10,12,14)
     </select>
-    <select id="findBarnIdsByfarmId" parameterType="map" resultType="Long">
-        select * from doctor_barns
+    <select id="findBarnIdsByfarmId" parameterType="map" resultType="map">
+        select id,pig_type,name,staff_name from doctor_barns
         where farm_id = #{farmId}
         <if test="operatorName != null">AND staff_name like concat('%',#{operatorName},'%')</if>
         <if test="barnName != null">AND name like concat('%',#{barnName},'%')</if>
+        <if test="pigType != null and pigType != 17 and pigType != 27">AND pig_type = #{pigType}</if>
+        <if test="pigType != null and (pigType == 17 or pigType == 27)">AND pig_type = 7</if>
     </select>
     <select id="groupqichucunlan" parameterType="map" resultType="Integer">
         select

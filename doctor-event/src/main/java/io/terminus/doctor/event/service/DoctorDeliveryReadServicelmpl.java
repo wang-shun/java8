@@ -214,7 +214,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         return l;
     }
 
-    @Override
+    /*@Override
     public List<Map<String,Object>> sowsReport(Long farmId,Date time,String pigCode,String operatorName,Long barnId,Integer breed,Integer parity,Integer pigStatus,Date beginInFarmTime, Date endInFarmTime, Integer sowsStatus){
         List<Map<String,Object>> inFarmPigId = null;
 //        if(pigStatus == 0){//全部
@@ -230,10 +230,10 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
 //        }else {
 //            inFarmPigId = doctorPigEventDao.getInFarmPigId(farmId, time, pigCode, breed, beginInFarmTime, endInFarmTime);//查询某个时间点之前所有进场和转场转入的猪
 //        }
-        /*boolean f = true;
+        *//*boolean f = true;
         boolean g = true;
         boolean h = true;
-        List<Map<String,Object>> j = new ArrayList<>();*/
+        List<Map<String,Object>> j = new ArrayList<>();*//*
         for(Iterator<Map<String,Object>> it = inFarmPigId.iterator();it.hasNext();){
             Map map = it.next();
             int source = (int)map.get("source");
@@ -362,18 +362,137 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 }else{
                     it.remove();
                 }
-                /*if(f && g && h){
+                *//*if(f && g && h){
                     j.add(map);
                 }
                 if(j.size() == 20){
                     break;
-                }*/
+                }*//*
             }
        // }
         //}
         return inFarmPigId;
-    }
+    }*/
+    @Override
+    public List<Map<String,Object>> sowsReport(Long farmId,Date time,String pigCode,String operatorName,Long barnId,Integer breed,Integer parity,Integer pigStatus,Date beginInFarmTime, Date endInFarmTime, Integer sowsStatus){
+        List<Map<String,Object>> inFarmPigId = null;
+        if(sowsStatus == 0) {
+            inFarmPigId = doctorPigEventDao.getInFarmPigId(farmId, time, pigCode, breed, beginInFarmTime, endInFarmTime,parity,pigStatus,operatorName,barnId);//查询当前事件的前面一个事件的，如果该事件不是转场或者离场，则说明该猪在该猪场
+        } else{
+            inFarmPigId = doctorPigEventDao.getInFarmPigId1(farmId, time, pigCode, breed, beginInFarmTime, endInFarmTime,parity,pigStatus,operatorName,barnId);//查询某个时间点所有离场和转场的猪
+        }
+        for(Iterator<Map<String,Object>> it = inFarmPigId.iterator();it.hasNext();){
+            Map map = it.next();
+            int source = (int)map.get("source");
+            if (source == 1) {
+                map.put("source","本厂");
+            }else if (source == 2) {
+                map.put("source","外购");
+            }else{
+                map.put("source","");
+            }
+            int a = (int)map.get("type");
+            BigInteger id = (BigInteger)map.get("id");
+            BigInteger pigId = (BigInteger)map.get("pig_id");
+            Date eventAt = (Date)map.get("event_at");
+            if(a ==1 || a==10  || a==12 || a==14) {//如果前面一个事件是转舍事件，则在后面一个事件中取猪舍或者去当前猪舍
+                Map<String, Object> afterEvent = doctorPigEventDao.afterEvent(pigId, time);//查当前时间后面的第一个事件，利用这个时间求当前猪舍和猪场，如果没有则按当前猪场和猪舍
+                if (afterEvent != null) {
+                    Map<String, Object> currentBarn = doctorPigEventDao.findBarn((BigInteger) afterEvent.get("id"), id, pigId, eventAt, time, operatorName, barnId);//如果后面又转舍事件,去后面事件的猪舍
+                    if (currentBarn != null) {
+                        map.put("current_barn_name", currentBarn.get("barn_name"));
+                        map.put("staff_name", currentBarn.get("staff_name"));//饲养员
+                    } else {
+                        it.remove();
+                        continue;
+                    }
+                } else {
+                    Map<String, Object> currentBarns = doctorPigEventDao.findBarns(pigId, operatorName, barnId);//否则取当前猪舍
+                    if (currentBarns != null) {
+                        map.put("current_barn_name", currentBarns.get("current_barn_name"));
+                        map.put("staff_name", currentBarns.get("staff_name"));//饲养员
+                    } else {
+                        it.remove();
+                        continue;
+                    }
+                }
+            }
 
+                String Status = null;
+                    int status = (int) map.get("pig_status_after");
+
+                    if (status == PigStatus.Entry.getKey()) {
+                        Status = PigStatus.Entry.getName();
+                    }
+                    if (status == PigStatus.Removal.getKey()) {
+                        Status = PigStatus.Removal.getName();
+                    }
+                    if (status == PigStatus.Mate.getKey()) {
+                        Status = PigStatus.Mate.getName();
+                    }
+                    if (status == PigStatus.Pregnancy.getKey()) {
+                        Status = PigStatus.Pregnancy.getName();
+                    }
+                    if (status == PigStatus.KongHuai.getKey()) {
+                        int pregCheckResult = doctorPigEventDao.getPregCheckResult(parity,pigId,time,pigStatus);
+
+                        if (pregCheckResult == 2) {
+                            Status = "阴性";
+                        } else if (pregCheckResult == 3) {
+                            Status = "流产";
+                        } else if (pregCheckResult == 4) {
+                            Status = "返情";
+                        } else {
+                            Status = PigStatus.KongHuai.getName();
+                        }
+                    }
+                    if (status == PigStatus.Farrow.getKey()) {
+                        Status = PigStatus.Farrow.getName();
+                    }
+                    if (status == PigStatus.FEED.getKey()) {
+                        Status = PigStatus.FEED.getName();
+                    }
+                    if (status == PigStatus.Wean.getKey()) {
+                        Status = PigStatus.Wean.getName();
+                    }
+                    if (status == PigStatus.CHG_FARM.getKey()) {
+                        Status = PigStatus.CHG_FARM.getName();
+                    }
+                    if(sowsStatus != 0 && status != PigStatus.Removal.getKey()){
+                        Status = PigStatus.CHG_FARM.getName();
+                    }
+                map.put("status", Status);//母猪状态
+
+                if(a == 15 || a == 17 || a == 18 ||a == 19 ){
+                    if(a == 15){
+                        if(map.get("live_count") != null) {
+                            map.put("daizaishu", map.get("live_count"));//如果前一個事件是分娩事件，带仔数就是分娩事件的活仔数
+                        }else{
+                            map.put("daizaishu",0);
+                        }
+                    }else{
+                        Map<String,Object> nearDeliver = doctorPigEventDao.nearDeliver(pigId,time);
+                        BigDecimal daizaishu = new BigDecimal((int)nearDeliver.get("live_count"));
+                        List<Map<String,Object>> b = doctorPigEventDao.getdaizaishu(pigId,time,(Date)nearDeliver.get("event_at"));//如果是拼窝或者仔猪变动则需计算
+                        for(int i = 0;i < b.size(); i++){
+                            if((int)b.get(i).get("type") == 17){
+                                daizaishu = daizaishu.subtract((BigDecimal)b.get(i).get("quantity"));
+                            }
+                            if((int)b.get(i).get("type") == 18){
+                                daizaishu = daizaishu.subtract((BigDecimal)b.get(i).get("quantity"));
+                            }
+                            if((int)b.get(i).get("type") == 19){
+                                daizaishu = daizaishu.add((BigDecimal)b.get(i).get("quantity"));
+                            }
+                        }
+                        map.put("daizaishu",daizaishu);
+                    }
+                }else{
+                    map.put("daizaishu",0);
+                }
+        }
+        return inFarmPigId;
+    }
     @Override
     public List<Map<String, Object>> boarReport(Long farmId,Integer pigType, Integer boarsStatus, Date queryDate, String pigCode, String staffName, Integer barnId, Integer breedId, Date beginDate, Date endDate) {
         List<Map<String, Object>> inFarmBoarId = null;
@@ -537,21 +656,19 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         data.put("zongcunlan",zongcunlan);
         return data;
     }
-    public List<Map<String,Object>> barnsReport(Long farmId,String operatorName,String barnName,Date beginTime,Date endTime){
+    public List<Map<String,Object>> barnsReport(Long farmId,String operatorName,String barnName,Date beginTime,Date endTime,Integer pigType){
         if(operatorName == ""){
             operatorName = null;
         }
         if (barnName == "") {
             barnName = null;
         }
-        List<Long> barnIds =  doctorBarnDao.findBarnIdsByfarmId(farmId, operatorName,barnName);
-        if(barnIds != null) {
+        List<Map<String,Object>> barnList =  doctorBarnDao.findBarnIdsByfarmId(farmId, operatorName,barnName,pigType);
+        if(barnList != null) {
             List<Map<String,Object>> list = new ArrayList<>();
-            //Map map = new HashMap();
-            for(Long barnId: barnIds) {
-
-                Map<String, Object> map = doctorBarnDao.findBarnTypeById(barnId);
-                int barnType = (int) (map.get("pig_type"));
+            for(Map map : barnList) {
+                int barnType = (int)(map.get("pig_type"));
+                Long barnId = (Long)(map.get("id"));
                 if(barnType == 5){
                     map.put("pig_type","配种母猪");
                 }
@@ -699,6 +816,9 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map1.put("name",map.get("name"));
                     map1.put("staff_name",map.get("staff_name"));
                     list.add(map1);
+                    if(pigType !=null && pigType == 17){
+                        list.remove(map1);
+                    }
                 }
                 if (barnType == 2 || barnType == 3 || barnType == 4) {
                     Integer qichucunlan = doctorBarnDao.groupqichucunlan(farmId, barnId, beginTime);
@@ -750,6 +870,9 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     }
                 }
                 list.add(map);
+                if(pigType !=null &&  pigType == 27){
+                    list.remove(map);
+                }
             }
             return list;
         } else{
