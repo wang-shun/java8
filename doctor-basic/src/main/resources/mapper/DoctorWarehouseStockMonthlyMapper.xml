@@ -246,8 +246,8 @@
             b.specification as specification,a.warehouse_id as warehouseId,a.warehouse_type as warehouseType,
             ifnull(round((temp1.balance_quantity+ 0.00000001),3),0) as lastQuantity,
             ifnull(round((temp1.balance_amount+ 0.00000001),2),0) as lastAmount,
-            ifnull(round((temp1.balance_quantity+temp3.inQuantity-temp4.outQuantity+ 0.00000001),3),0) as balanceQuantity,
-            ifnull(round((temp1.balance_amount+temp3.inAmount-temp4.outAmount+ 0.00000001),2),0) as balanceAmount,
+            ifnull(round((ifnull(temp1.balance_quantity,0)+ifnull(temp3.inQuantity,0)-ifnull(temp4.outQuantity,0)+ 0.00000001),3),0) as balanceQuantity,
+            ifnull(round((ifnull(temp1.balance_amount,0)+ifnull(temp3.inAmount,0)-ifnull(temp4.outAmount,0)+ 0.00000001),2),0) as balanceAmount,
 
             ifnull(round((temp3.inAmount+ 0.00000001),2),0) as inAmount,
             ifnull(round((temp3.inQuantity+ 0.00000001),3),0) as inQuantity,
@@ -334,7 +334,7 @@
             b.specification as specification,a.warehouse_id as warehouseId,a.warehouse_type as warehouseType,
             ifnull(round((temp1.balance_quantity+ 0.00000001),3),0) as lastQuantity,
             ifnull(round((temp1.balance_amount+ 0.00000001),2),0) as lastAmount,
-            ifnull(round((temp1.balance_quantity+temp3.inQuantity-temp4.outQuantity+ 0.00000001),3),0) as balanceQuantity,
+            ifnull(round((ifnull(temp1.balance_quantity,0)+ifnull(temp3.inQuantity,0)-ifnull(temp4.outQuantity,0)+ 0.00000001),3),0) as balanceQuantity,
             '--' as balanceAmount,
 
             ifnull(round((temp3.inAmount+ 0.00000001),2),0) as inAmount,
@@ -423,7 +423,7 @@
             b.specification as specification,a.warehouse_id as warehouseId,a.warehouse_type as warehouseType,
             ifnull(round((temp1.balance_quantity+ 0.00000001),3),0) as lastQuantity,
             '--' as lastAmount,
-            ifnull(round((temp1.balance_quantity+temp3.inQuantity-temp4.outQuantity+ 0.00000001),3),0) as balanceQuantity,
+            ifnull(round((ifnull(temp1.balance_quantity,0)+ifnull(temp3.inQuantity,0)-ifnull(temp4.outQuantity,0)+ 0.00000001),3),0) as balanceQuantity,
             '--' as balanceAmount,
 
             ifnull(round((temp3.inAmount+ 0.00000001),2),0) as inAmount,
