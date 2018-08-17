@@ -666,7 +666,8 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         List<Map<String,Object>> barnList =  doctorBarnDao.findBarnIdsByfarmId(farmId, operatorName,barnName,pigType);
         if(barnList != null) {
             List<Map<String,Object>> list = new ArrayList<>();
-            for(Map map: barnList) {
+            for(Iterator<Map<String,Object>> it = barnList.iterator();it.hasNext();) {
+                Map map = it.next();
                 int barnType = (int)(map.get("pig_type"));
                 Long barnId = (Long)(map.get("id"));
                 if(barnType == 5){
@@ -815,7 +816,12 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                     map1.put("pig_type","仔猪");
                     map1.put("name",map.get("name"));
                     map1.put("staff_name",map.get("staff_name"));
-                    list.add(map1);
+                    if(pigType == 17 || pigType == null){
+                        list.add(map1);
+                    }
+                    if(pigType == 27){
+                        it.remove();
+                    }
                 }
                 if (barnType == 2 || barnType == 3 || barnType == 4) {
                     Integer qichucunlan = doctorBarnDao.groupqichucunlan(farmId, barnId, beginTime);
