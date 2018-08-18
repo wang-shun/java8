@@ -699,6 +699,9 @@
         case when
         b.type in (2,8,10,12,13)
         then ifnull(b.amount,0) else '' end as ckje,
+--         ifnull(fb.`name`,'') as pig_barn_name,
+--         ifnull(fb.pig_type,'') as pig_type,
+--         ifnull(fg.group_code,'') as pig_group_name,
         ifnull(fb.`name`,'') as pig_barn_name,
         ifnull(fb.pig_type,'') as pig_type,
         ifnull(fg.group_code,'') as pig_group_name,
@@ -718,10 +721,10 @@
         <if test="warehouseId != null">
             and f.warehouse_id=#{warehouseId}
         </if>
-        inner join doctor_barns as fb
-        on fb.id=f.pig_barn_id
-        inner join doctor_groups as fg
-        on fb.id=fg.current_barn_id
+--         inner join doctor_barns as fb
+--         on fb.id=f.pig_barn_id
+--         inner join doctor_groups as fg
+--         on fb.id=fg.current_barn_id
         join doctor_farms c
         on a.farm_id=c.id
         join doctor_warehouse_sku d
