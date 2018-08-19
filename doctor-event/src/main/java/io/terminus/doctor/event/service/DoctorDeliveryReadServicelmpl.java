@@ -493,6 +493,9 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             if(istrue == true) {
                 inFarmPigId1.add(map);
             }
+            if(inFarmPigId1.size() == 50){
+                return;
+            }
         });
         Date end = new Date();
         log.error("===============?????????????????"+(start.getTime()-end.getTime()));
