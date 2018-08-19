@@ -667,8 +667,8 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         }
         List<Map<String,Object>> barnList =  doctorBarnDao.findBarnIdsByfarmId(farmId, operatorName,barnName,pigType);
         if(barnList != null) {
-            List<Map<String,Object>> list = new ArrayList<>();
-            for(Map map : barnList) {
+            List<Map<String,Object>> list =  Collections.synchronizedList(new ArrayList<>());
+            barnList.parallelStream().forEach(map -> {
                 int barnType = (int)(map.get("pig_type"));
                 Long barnId = (Long)(map.get("id"));
                 if(barnType == 5){
@@ -875,7 +875,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 if(pigType !=null &&  pigType == 27){
                     list.remove(map);
                 }
-            }
+            });
             return list;
         } else{
             return null;
