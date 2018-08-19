@@ -320,7 +320,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                         .reduce((a, b) -> a.add(b))
                         .orElse(new BigDecimal(0));
 
-                materialHandle.setUnitPrice(totalFormulaOutAmount.divide(materialHandle.getQuantity()).setScale(4,BigDecimal.ROUND_HALF_UP));
+                materialHandle.setUnitPrice(totalFormulaOutAmount.divide(materialHandle.getQuantity(), 4, BigDecimal.ROUND_HALF_UP));
                 materialHandle.setAmount(totalFormulaOutAmount.setScale(2,BigDecimal.ROUND_HALF_UP));
 
             } else if (materialHandle.getType().equals(WarehouseMaterialHandleType.TRANSFER_IN.getValue())) {
@@ -358,10 +358,10 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             }else {
                 if(materialHandle.getQuantity().equals(historyStockQuantity)){
                     materialHandle.setAmount(historyStockAmount.setScale(2,BigDecimal.ROUND_HALF_UP));
-                    materialHandle.setUnitPrice(historyStockAmount.divide(historyStockQuantity).setScale(4,BigDecimal.ROUND_HALF_UP));
+                    materialHandle.setUnitPrice(historyStockAmount.divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
                 }else {
-                    materialHandle.setAmount(historyStockAmount.multiply(materialHandle.getQuantity()).divide(historyStockQuantity).setScale(2,BigDecimal.ROUND_HALF_UP));
-                    materialHandle.setUnitPrice(historyStockAmount.divide(historyStockQuantity).setScale(4,BigDecimal.ROUND_HALF_UP));
+                    materialHandle.setAmount(historyStockAmount.multiply(materialHandle.getQuantity()).divide(historyStockQuantity, 2, BigDecimal.ROUND_HALF_UP));
+                    materialHandle.setUnitPrice(historyStockAmount.divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
                 }
             }
             if (materialHandle.getType().equals(WarehouseMaterialHandleType.OUT.getValue())) {
