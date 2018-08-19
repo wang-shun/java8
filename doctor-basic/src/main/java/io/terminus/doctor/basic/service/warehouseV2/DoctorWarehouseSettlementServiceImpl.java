@@ -285,7 +285,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             //入库类型：采购入库，退料入库，盘盈入库，调拨入库，配方生产入库
 
             if (materialHandle.getType().equals(WarehouseMaterialHandleType.IN.getValue())) {
-                return new AmountAndQuantityDto(historyStockAmount.add(materialHandle.getAmount()), historyStockQuantity.add(materialHandle.getQuantity()));
+                return new AmountAndQuantityDto(historyStockAmount.add(materialHandle.getAmount().setScale(2,BigDecimal.ROUND_HALF_UP)), historyStockQuantity.add(materialHandle.getQuantity().setScale(3,BigDecimal.ROUND_HALF_UP)));
             }
 
             //盘盈单的单价采用上一笔采购入库单的单价
@@ -294,11 +294,11 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                 DoctorWarehouseMaterialHandle previousIn = doctorWarehouseMaterialHandleDao.findPrevious(materialHandle, WarehouseMaterialHandleType.IN);
                 if (null != previousIn) {
                     log.debug("use previous material handle[purchase in] unit price :{}", previousIn.getUnitPrice());
-                    materialHandle.setUnitPrice(previousIn.getUnitPrice());
+                    materialHandle.setUnitPrice(previousIn.getUnitPrice().setScale(4,BigDecimal.ROUND_HALF_UP));
                 } else {
                     log.info("previous in not found,use user set unit price :{}", materialHandle.getUnitPrice());
                 }
-                materialHandle.setAmount(materialHandle.getUnitPrice().multiply(materialHandle.getQuantity()));
+                materialHandle.setAmount(materialHandle.getUnitPrice().multiply(materialHandle.getQuantity()).setScale(2,BigDecimal.ROUND_HALF_UP));
             } else if (materialHandle.getType().equals(WarehouseMaterialHandleType.FORMULA_IN.getValue())) {
                 //配方生产入库，根据出库的总价/入库的数量
                 //获取配方入库单据
@@ -320,8 +320,8 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                         .reduce((a, b) -> a.add(b))
                         .orElse(new BigDecimal(0));
 
-                materialHandle.setUnitPrice(totalFormulaOutAmount.divide(materialHandle.getQuantity(), 4, BigDecimal.ROUND_HALF_UP));
-                materialHandle.setAmount(totalFormulaOutAmount);
+                materialHandle.setUnitPrice(totalFormulaOutAmount.divide(materialHandle.getQuantity()).setScale(4,BigDecimal.ROUND_HALF_UP));
+                materialHandle.setAmount(totalFormulaOutAmount.setScale(2,BigDecimal.ROUND_HALF_UP));
 
             } else if (materialHandle.getType().equals(WarehouseMaterialHandleType.TRANSFER_IN.getValue())) {
 
@@ -330,8 +330,8 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                     throw new InvalidException("settlement.transfer.out.material.handle.not.found", materialHandle.getRelMaterialHandleId());
                 }
 
-                materialHandle.setUnitPrice(otherIn.getUnitPrice());
-                materialHandle.setAmount(materialHandle.getUnitPrice().multiply(materialHandle.getQuantity()));
+                materialHandle.setUnitPrice(otherIn.getUnitPrice().setScale(4,BigDecimal.ROUND_HALF_UP));
+                materialHandle.setAmount(materialHandle.getUnitPrice().multiply(materialHandle.getQuantity()).setScale(2,BigDecimal.ROUND_HALF_UP));
             }
 
             historyStockQuantity = historyStockQuantity.add(materialHandle.getQuantity());
@@ -353,15 +353,15 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                         throw new InvalidException("settlement.out.material.handle.not.found", materialHandle.getRelMaterialHandleId());
                 }
 
-                materialHandle.setUnitPrice(otherIn.getUnitPrice());
-                materialHandle.setAmount(materialHandle.getUnitPrice().multiply(materialHandle.getQuantity()));
+                materialHandle.setUnitPrice(otherIn.getUnitPrice().setScale(4,BigDecimal.ROUND_HALF_UP));
+                materialHandle.setAmount(materialHandle.getUnitPrice().multiply(materialHandle.getQuantity()).setScale(2,BigDecimal.ROUND_HALF_UP));
             }else {
                 if(materialHandle.getQuantity().equals(historyStockQuantity)){
-                    materialHandle.setAmount(historyStockAmount);
-                    materialHandle.setUnitPrice(historyStockAmount.divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
+                    materialHandle.setAmount(historyStockAmount.setScale(2,BigDecimal.ROUND_HALF_UP));
+                    materialHandle.setUnitPrice(historyStockAmount.divide(historyStockQuantity).setScale(4,BigDecimal.ROUND_HALF_UP));
                 }else {
-                    materialHandle.setAmount(historyStockAmount.multiply(materialHandle.getQuantity()).divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
-                    materialHandle.setUnitPrice(historyStockAmount.divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
+                    materialHandle.setAmount(historyStockAmount.multiply(materialHandle.getQuantity()).divide(historyStockQuantity).setScale(2,BigDecimal.ROUND_HALF_UP));
+                    materialHandle.setUnitPrice(historyStockAmount.divide(historyStockQuantity).setScale(4,BigDecimal.ROUND_HALF_UP));
                 }
             }
             if (materialHandle.getType().equals(WarehouseMaterialHandleType.OUT.getValue())) {
