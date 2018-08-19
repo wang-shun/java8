@@ -381,8 +381,9 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         } else{
             inFarmPigId = doctorPigEventDao.getInFarmPigId1(farmId, time, pigCode, breed, beginInFarmTime, endInFarmTime,parity,pigStatus,operatorName,barnId);//查询某个时间点所有离场和转场的猪
         }
-        for(Iterator<Map<String,Object>> it = inFarmPigId.iterator();it.hasNext();){
-            Map map = it.next();
+        List<Map<String,Object>> inFarmPigId1 = new ArrayList<>();
+        inFarmPigId.parallelStream().forEach(map -> {
+            boolean istrue = true;
             int source = (int)map.get("source");
             if (source == 1) {
                 map.put("source","本厂");
@@ -403,8 +404,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         map.put("current_barn_name", currentBarn.get("barn_name"));
                         map.put("staff_name", currentBarn.get("staff_name"));//饲养员
                     } else {
-                        it.remove();
-                        continue;
+                        istrue = false;
                     }
                 } else {
                     Map<String, Object> currentBarns = doctorPigEventDao.findBarns(pigId, operatorName, barnId);//否则取当前猪舍
@@ -412,8 +412,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         map.put("current_barn_name", currentBarns.get("current_barn_name"));
                         map.put("staff_name", currentBarns.get("staff_name"));//饲养员
                     } else {
-                        it.remove();
-                        continue;
+                        istrue = false;
                     }
                 }
             }
@@ -490,8 +489,9 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 }else{
                     map.put("daizaishu",0);
                 }
-        }
-        return inFarmPigId;
+            inFarmPigId1.add(map);
+        });
+        return inFarmPigId1;
     }
     @Override
     public List<Map<String, Object>> boarReport(Long farmId,Integer pigType, Integer boarsStatus, Date queryDate, String pigCode, String staffName, Integer barnId, Integer breedId, Date beginDate, Date endDate) {
