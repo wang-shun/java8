@@ -381,8 +381,9 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         } else{
             inFarmPigId = doctorPigEventDao.getInFarmPigId1(farmId, time, pigCode, breed, beginInFarmTime, endInFarmTime,parity,pigStatus,operatorName,barnId);//查询某个时间点所有离场和转场的猪
         }
-        for(Iterator<Map<String,Object>> it = inFarmPigId.iterator();it.hasNext();){
-            Map map = it.next();
+        List<Map<String,Object>> inFarmPigId1 = Collections.synchronizedList(new ArrayList<>());
+        inFarmPigId.parallelStream().forEach(map ->{
+            boolean istrue = true;
             int source = (int)map.get("source");
             if (source == 1) {
                 map.put("source","本厂");
@@ -403,8 +404,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         map.put("current_barn_name", currentBarn.get("barn_name"));
                         map.put("staff_name", currentBarn.get("staff_name"));//饲养员
                     } else {
-                        it.remove();
-                        continue;
+                        istrue = false;
                     }
                 } else {
                     Map<String, Object> currentBarns = doctorPigEventDao.findBarns(pigId, operatorName, barnId);//否则取当前猪舍
@@ -412,8 +412,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         map.put("current_barn_name", currentBarns.get("current_barn_name"));
                         map.put("staff_name", currentBarns.get("staff_name"));//饲养员
                     } else {
-                        it.remove();
-                        continue;
+                        istrue = false;
                     }
                 }
             }
@@ -490,8 +489,11 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 }else{
                     map.put("daizaishu",0);
                 }
-        }
-        return inFarmPigId;
+            if(istrue == true) {
+                inFarmPigId1.add(map);
+            }
+        });
+        return inFarmPigId1;
     }
     @Override
     public List<Map<String, Object>> boarReport(Long farmId,Integer pigType, Integer boarsStatus, Date queryDate, String pigCode, String staffName, Integer barnId, Integer breedId, Date beginDate, Date endDate) {
@@ -665,8 +667,8 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         }
         List<Map<String,Object>> barnList =  doctorBarnDao.findBarnIdsByfarmId(farmId, operatorName,barnName,pigType);
         if(barnList != null) {
-            List<Map<String,Object>> list = new ArrayList<>();
-            for(Map map : barnList) {
+            List<Map<String,Object>> list =  Collections.synchronizedList(new ArrayList<>());
+            barnList.parallelStream().forEach(map -> {
                 int barnType = (int)(map.get("pig_type"));
                 Long barnId = (Long)(map.get("id"));
                 if(barnType == 5){
@@ -873,7 +875,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 if(pigType !=null &&  pigType == 27){
                     list.remove(map);
                 }
-            }
+            });
             return list;
         } else{
             return null;
