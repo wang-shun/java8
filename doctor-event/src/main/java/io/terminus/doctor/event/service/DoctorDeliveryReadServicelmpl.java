@@ -489,7 +489,9 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                 }else{
                     map.put("daizaishu",0);
                 }
-            inFarmPigId1.add(map);
+            if(istrue == true) {
+                inFarmPigId1.add(map);
+            }
         });
         return inFarmPigId1;
     }
