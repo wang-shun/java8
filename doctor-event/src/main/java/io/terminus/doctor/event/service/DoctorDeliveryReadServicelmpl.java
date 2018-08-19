@@ -382,7 +382,6 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             inFarmPigId = doctorPigEventDao.getInFarmPigId1(farmId, time, pigCode, breed, beginInFarmTime, endInFarmTime,parity,pigStatus,operatorName,barnId);//查询某个时间点所有离场和转场的猪
         }
         List<Map<String,Object>> inFarmPigId1 = Collections.synchronizedList(new ArrayList<>());
-        Date start = new Date();
         inFarmPigId.parallelStream().forEach(map ->{
             boolean istrue = true;
             int source = (int)map.get("source");
@@ -493,12 +492,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             if(istrue == true) {
                 inFarmPigId1.add(map);
             }
-            if(inFarmPigId1.size() == 50){
-                return;
-            }
         });
-        Date end = new Date();
-        log.error("===============?????????????????"+(start.getTime()-end.getTime()));
         return inFarmPigId1;
     }
     @Override
