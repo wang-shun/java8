@@ -381,7 +381,7 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
         } else{
             inFarmPigId = doctorPigEventDao.getInFarmPigId1(farmId, time, pigCode, breed, beginInFarmTime, endInFarmTime,parity,pigStatus,operatorName,barnId);//查询某个时间点所有离场和转场的猪
         }
-        List<Map<String,Object>> inFarmPigId1 = new ArrayList<>();
+        List<Map<String,Object>> inFarmPigId1 = Collections.synchronizedList(new ArrayList<>());
         inFarmPigId.parallelStream().forEach(map -> {
             boolean istrue = true;
             int source = (int)map.get("source");
