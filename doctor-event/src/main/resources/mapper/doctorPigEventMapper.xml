@@ -1853,6 +1853,17 @@
         limit 1
     </select>
 
+    <select id="findMateEventToPigId" parameterType="long" resultType="date">
+        SELECT event_at as eventAt
+        FROM
+        <include refid="tb"/>
+        WHERE pig_id = #{pigId}
+        and type = 9
+        and pig_status_after = 3
+        order by id DESC
+        limit 1
+    </select>
+
     <select id="countEvent" parameterType="map" resultType="int">
         SELECT count(*)
         FROM

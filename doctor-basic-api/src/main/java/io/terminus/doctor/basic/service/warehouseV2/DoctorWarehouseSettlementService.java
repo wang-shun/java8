@@ -1,10 +1,6 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import io.terminus.common.model.Response;
-import org.joda.time.DateTime;
-
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -13,6 +9,8 @@ import java.util.List;
  * Created by sunbo@terminus.io on 2018/4/9.
  */
 public interface DoctorWarehouseSettlementService {
+
+    public Boolean findByOrgId(Long orgId);
 
 
     /**

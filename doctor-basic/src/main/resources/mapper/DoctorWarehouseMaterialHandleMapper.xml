@@ -244,11 +244,12 @@
     </update>
 
     <delete id="delete" parameterType="long">
-        DELETE FROM <include refid="tb"/>
+        DELETE FROM
+        <include refid="tb"/>
         WHERE id = #{id}
     </delete>
 
-    <select id="findByRelMaterialHandleId" parameterType="map"  resultType="DoctorWarehouseMaterialHandle">
+    <select id="findByRelMaterialHandleId" parameterType="map" resultType="DoctorWarehouseMaterialHandle">
         select * from  doctor_warehouse_material_handle
         where  rel_material_handle_id = #{relMaterialHandleId} and type = #{type} and delete_flag=1
     </select>
@@ -257,53 +258,65 @@
         select count(*) from  doctor_warehouse_material_handle
         where  rel_material_handle_id = #{relMaterialHandleId} and type = #{type} and delete_flag=1
     </select>
-    
+
     <select id="count" parameterType="map" resultType="long">
         SELECT COUNT(1)
-        FROM <include refid="tb"/>
+        FROM
+        <include refid="tb"/>
         <include refid="criteria"/>
     </select>
 
     <select id="paging" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
         LIMIT #{offset}, #{limit}
     </select>
 
     <select id="list" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         <include refid="criteria"/>
         ORDER BY `id` DESC
     </select>
 
     <select id="advCount" parameterType="map" resultType="long">
         SELECT COUNT(1)
-        FROM <include refid="tb"/>
+        FROM
+        <include refid="tb"/>
         <include refid="adv_criteria"/>
     </select>
 
     <select id="advPaging" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         <include refid="adv_criteria"/>
         ORDER BY `id` DESC
         LIMIT #{offset}, #{limit}
     </select>
 
     <select id="advList" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         <include refid="adv_criteria"/>
         ORDER BY `id` DESC
     </select>
 
 
     <select id="findAfterByDate" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         WHERE warehouse_id=#{warehouseId}
         AND material_id=#{skuId}
         <choose>
@@ -331,7 +344,8 @@
         when '12' then -quantity
         when '13' then -quantity end
         ),0) as quantity
-        FROM <include refid="tb"/>
+        FROM
+        <include refid="tb"/>
         WHERE warehouse_id=#{warehouseId}
         AND material_id=#{skuId}
         <choose>
@@ -348,8 +362,10 @@
     </select>
 
     <select id="findByOrgAndSettlementDate" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         WHERE org_id=#{orgId}
         AND settlement_date=#{settlementDate}
         AND delete_flag=1
@@ -382,7 +398,8 @@
         when '12' then -amount
         when '13' then -amount end
         ),0) as amount
-        FROM <include refid="tb"/>
+        FROM
+        <include refid="tb"/>
         WHERE warehouse_id=#{warehouseId}
         AND settlement_date = #{settlementDate}
         AND delete_flag=1
@@ -414,7 +431,8 @@
         when '12' then -amount
         when '13' then -amount end
         ),0) as amount
-        FROM <include refid="tb"/>
+        FROM
+        <include refid="tb"/>
         WHERE warehouse_id=#{warehouseId}
         AND material_id=#{skuId}
         AND settlement_date = #{settlementDate}
@@ -439,19 +457,20 @@
         inner join doctor_warehouse_sku as s
         on mh.material_id=s.id
         WHERE mh.warehouse_id=#{warehouseId}
-        <if test="warehouseType != null and ''!=warehouseType" >
+        <if test="warehouseType != null and ''!=warehouseType">
             and mh.warehouse_type=#{warehouseType}
         </if>
-        <if test="materialId != null and ''!=materialId" >
+        <if test="materialId != null and ''!=materialId">
             and s.id=#{materialId}
         </if>
-        <if test="materialType != null and ''!=materialType" >
+        <if test="materialType != null and ''!=materialType">
             and s.type=#{materialType}
         </if>
-        <if test="materialName != null and ''!=materialName" >
+        <if test="materialName != null and ''!=materialName">
             and s.`name` like CONCAT('%', #{materialName}, '%')
         </if>
-        AND <![CDATA[ date_format(settlement_date,'%Y-%m')<=date_format(DATE_SUB(#{settlementDate}, INTERVAL 1 MONTH),'%Y-%m')]]>
+        AND
+        <![CDATA[ date_format(settlement_date,'%Y-%m')<=date_format(DATE_SUB(#{settlementDate}, INTERVAL 1 MONTH),'%Y-%m')]]>
         AND delete_flag=1
     </select>
 
@@ -467,7 +486,8 @@
 
     <select id="findFirstRefundHandleDate" parameterType="list" resultType="Date">
         SELECT min(handle_date)
-        FROM <include refid="tb"/>
+        FROM
+        <include refid="tb"/>
         WHERE
         <foreach collection="outMaterialHandleIds" item="i" open="(" separator="or" close=")">
             rel_material_handle_id=#{i}
@@ -476,8 +496,10 @@
     </select>
 
     <select id="findPrevious" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         WHERE warehouse_id=#{warehouseId}
         AND material_id=#{materialId}
         AND type=#{type}
@@ -532,15 +554,17 @@
     </select>
 
     <select id="findLibraryById" parameterType="map" resultType="BigDecimal">
-        select quantity from <include refid="tb"/>
-        where type=2 and delete_flag = 1 and id=#{id}  and material_name=#{materialName}
+        select quantity from
+        <include refid="tb"/>
+        where type=2 and delete_flag = 1 and id=#{id} and material_name=#{materialName}
     </select>
 
     <select id="findRetreatingById" parameterType="map" resultType="BigDecimal">
-        select ifnull(sum(quantity),0) from <include refid="tb"/>
+        select ifnull(sum(quantity),0) from
+        <include refid="tb"/>
         where type=13 and delete_flag = 1 and rel_material_handle_id=#{relMaterialHandleId}
         <if test="materialName != null">
-          and material_name=#{materialName}
+            and material_name=#{materialName}
         </if>
         and stock_handle_id!=#{stockHandleId}
         order by settlement_date ,id desc;
@@ -560,56 +584,44 @@
         select a.farm_id as farmId,ifnull(f.name,'') as farmName,a.type as type,
         a.handle_year as handleYear,a.handle_Month as handleMonth,a.org_id as orgId,
         a.settlement_date as settlementDate,
-
-        ifnull(ROUND(temp1.inAmount,2),0) as inAmount,
-        ifnull(ROUND(temp2.outAmount,2),0) as outAmount,
-        ifnull(ROUND(temp3.balanceAmount,2),0)as balanceAmount
-
+        ifnull(ROUND((temp1.inAmount+ 0.00000001),2),0) as inAmount,
+        ifnull(ROUND((temp2.outAmount+ 0.00000001),2),0) as outAmount,
+        ifnull(ROUND((temp3.balanceAmount+ 0.00000001),2),0)as balanceAmount
         from doctor_warehouse_material_handle a
         left join doctor_farms f on a.farm_id = f.id
 
-        left join (select  sum(c.amount) as inAmount,c.farm_id
-                        from doctor_warehouse_material_handle c ,doctor_warehouse_stock_handle c1
-                        where c.stock_handle_id = c1.id
-                        and c.org_id = #{orgId}
-                        and c.delete_flag = 1
-                        and date_format(c.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
-                        and c1.handle_type = 1
-                        GROUP BY c.farm_id
-                    ) temp1 on a.farm_id = temp1.farm_id
+        left join (SELECT ifnull(
+            sum(case type	when '1' then amount	when '7' then amount	when '9' then amount
+            when '11' then amount end	),0) as inAmount,farm_id FROM doctor_warehouse_material_handle
+            WHERE org_id = #{orgId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
+            group by farm_id
+        ) temp1 on a.farm_id = temp1.farm_id
 
-        left join (select sum(d.amount) as outAmount,d.farm_id
-        from doctor_warehouse_material_handle d,doctor_warehouse_stock_handle d1
-        where d.stock_handle_id = d1.id
-        and d.org_id = #{orgId}
-        and d.delete_flag = 1
-        and date_format(d.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
-        and d1.handle_type = 2
-                    GROUP BY d.farm_id
-                    ) temp2 on a.farm_id = temp2.farm_id
+        left join (SELECT ifnull(
+            sum(case type	when '2' then amount	when '8' then amount	when '10' then amount
+            when '12' then amount	when '13' then amount end	),0) as outAmount,farm_id FROM doctor_warehouse_material_handle
+            WHERE org_id = #{orgId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')	AND delete_flag=1
+            group by farm_id ORDER BY farm_id
+        ) temp2 on a.farm_id = temp2.farm_id
 
         left join (select sum(b.balance_amount) as balanceAmount,b.farm_id
             from doctor_warehouse_stock_monthly b
             where b.org_id = #{orgId}
             and date_format(b.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
             GROUP BY b.farm_id
-            ) temp3 on a.farm_id = temp3.farm_id
-
+        ) temp3 on a.farm_id = temp3.farm_id
 
         where a.delete_flag = 1
-
         and date_format(a.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
-
         and a.org_id = #{orgId}
-
         group by a.farm_id
-        order by a.farm_id
+        order by a.farm_id;
     </select>
 
     <!-- 得到所有的物料 -->
     <select id="getMeterails" parameterType="Map" resultType="java.util.LinkedHashMap">
         select distinct material_name from doctor_warehouse_material_handle
-        where delete_flag=1 
+        where delete_flag=1
         <if test="farmId != null">
             and farm_id=#{farmId}
         </if>
@@ -623,46 +635,47 @@
     </select>
 
     <select id="lastWlbdReport" parameterType="Map" resultType="java.util.LinkedHashMap">
-    select
-    '' as id,
-    '上月结存' as material_name,
-    '' as material_type,
-    '' as ware_house_name,
-    '' as handle_date,
-    '' as settlement_date,
-    '' as handler_type,
-    '' as rksl,
-    '' as rkdj,
-    '' as rkje,
-    '' as cksl,
-    '' as ckdj,
-    '' as ckje,
-    sum(a.balance_quantity) as jcsl,
-    sum(a.balance_amount) / sum(a.balance_quantity) as jcdj,
-    sum(a.balance_amount) as jcje,
-    '' as pig_barn_name,
-    '' as pig_type,
-    '' as pig_group_name,
-    '' as apply_staff_name,
-    '' as farm_name,
-    '' as unit,
-    '' as provider_name,
-    '' as specification
-    from  doctor_warehouse_stock_monthly  a
-    join  doctor_warehouse_sku b on a.material_id=b.id
-    where 1=1
-    <if test="settlementDate != null">
-        and date_format(a.settlement_date,'%Y-%m') = date_format(DATE_SUB(CONCAT(#{settlementDate},'-01'), INTERVAL 1 MONTH),'%Y-%m')
-    </if>
-    <if test="farmId != null">
-        and a.farm_id=#{farmId}
-    </if>
-    <if test="warehouseId != null">
-        and a.warehouse_id=#{warehouseId}
-    </if>
-    <if test="materialName != null">
-        and b.`name` like CONCAT('%',#{materialName},'%')
-    </if>
+        select
+        '' as id,
+        '上月结存' as material_name,
+        '' as material_type,
+        '' as ware_house_name,
+        '' as handle_date,
+        '' as settlement_date,
+        '' as handler_type,
+        '' as rksl,
+        '' as rkdj,
+        '' as rkje,
+        '' as cksl,
+        '' as ckdj,
+        '' as ckje,
+        sum(a.balance_quantity) as jcsl,
+        sum(a.balance_amount) / sum(a.balance_quantity) as jcdj,
+        sum(a.balance_amount) as jcje,
+        '' as pig_barn_name,
+        '' as pig_type,
+        '' as pig_group_name,
+        '' as apply_staff_name,
+        '' as farm_name,
+        '' as unit,
+        '' as provider_name,
+        '' as specification
+        from doctor_warehouse_stock_monthly a
+        join doctor_warehouse_sku b on a.material_id=b.id
+        where 1=1
+        <if test="settlementDate != null">
+            and date_format(a.settlement_date,'%Y-%m') = date_format(DATE_SUB(CONCAT(#{settlementDate},'-01'), INTERVAL
+            1 MONTH),'%Y-%m')
+        </if>
+        <if test="farmId != null">
+            and a.farm_id=#{farmId}
+        </if>
+        <if test="warehouseId != null">
+            and a.warehouse_id=#{warehouseId}
+        </if>
+        <if test="materialName != null">
+            and b.`name` like CONCAT('%',#{materialName},'%')
+        </if>
     </select>
 
     <select id="wlbdReport" parameterType="Map" resultType="java.util.LinkedHashMap">
@@ -675,16 +688,16 @@
         date_format(b.settlement_date,'%Y-%m') as settlement_date,
         ifnull(b.type,'') as handler_type,
         case when
-        b.type in (1,7,9,11,13)
+        b.type in (1,7,9,11)
         then ifnull(b.quantity,0) else '' end as rksl,
         case when
-        b.type in (1,7,9,11,13)
+        b.type in (1,7,9,11)
         then ifnull(b.amount,0) else '' end as rkje,
         case when
-        b.type in (2,8,10,12)
+        b.type in (2,8,10,12,13)
         then ifnull(b.quantity,0) else '' end as cksl,
         case when
-        b.type in (2,8,10,12)
+        b.type in (2,8,10,12,13)
         then ifnull(b.amount,0) else '' end as ckje,
         ifnull(f.pig_barn_name,'') as pig_barn_name,
         ifnull(f.pig_type,'') as pig_type,
@@ -732,7 +745,7 @@
         order by b.handle_date,b.id,f.pig_group_name
     </select>
 
-    <sql id ="balanceAmount">
+    <sql id="balanceAmount">
         ifnull((select sum(b.balance_amount)
         from doctor_warehouse_stock_monthly b
         where b.farm_id = a.farm_id
@@ -845,7 +858,7 @@
     </select>
 
     <!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，备注-->
-    <select id="getDataByMaterialName"  parameterType="Long" resultType="map">
+    <select id="getDataByMaterialName" parameterType="Long" resultType="map">
         select mh.id as material_handle_id, mh.material_id as material_id, mh.material_name as material_name,s.code as material_code,
         v.short_name as vendor_name,s.specification as specification,db.name as unit,mh.unit_price as unit_price,
         mh.remark as remark,mh.farm_id as farm_id
@@ -864,6 +877,20 @@
     <select id="findCountByRelMaterialHandleId" parameterType="map" resultType="INTEGER">
         select count(*) from  doctor_warehouse_material_handle
         where delete_flag=1 and rel_material_handle_id = #{id} and farm_id=#{farmId}
+    </select>
+
+    <select id="findSettlementDate" parameterType="Long" resultType="Date">
+        select min(settlement_date) from doctor_warehouse_material_handle where org_id=#{orgId}
+    </select>
+
+    <select id="findMinTimeByFarmId" parameterType="list" resultType="Date">
+        select min(handle_date) as time
+        from doctor_warehouse_material_handle
+        where 1=1
+        and farm_id in
+        <foreach collection="list" open="(" separator="," close=")" item="i">
+            #{i}
+        </foreach>
     </select>
 
 </mapper>

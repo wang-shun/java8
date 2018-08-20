@@ -7,7 +7,6 @@ import io.terminus.common.model.Paging;
 import io.terminus.doctor.basic.enums.WarehouseSkuStatus;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseVendor;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuReadService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuWriteService;
@@ -26,7 +25,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * 物料
@@ -90,6 +92,43 @@ public class SkuController {
 
 
         Paging<DoctorWarehouseSku> skuPaging = RespHelper.or500(doctorWarehouseSkuReadService.paging(pageNo, pageSize, params));
+
+        return new Paging<WarehouseSkuDto>(skuPaging.getTotal(),
+                skuPaging.getData().stream().map(sku -> {
+                    WarehouseSkuDto skuDto = new WarehouseSkuDto();
+                    skuDto.copyFrom(sku);
+                    skuDto.setUnitId(Long.parseLong(sku.getUnit()));
+                    DoctorBasic unit = RespHelper.or500(doctorBasicReadService.findBasicById(skuDto.getUnitId()));
+                    if (null != unit)
+                        skuDto.setUnit(unit.getName());
+                    skuDto.setVendorName(RespHelper.or500(doctorWarehouseVendorReadService.findNameById(sku.getVendorId())));
+                    return skuDto;
+                }).collect(Collectors.toList()));
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "pagingWarehouseSku")
+    public Paging<WarehouseSkuDto> pagingWarehouseSku(@RequestParam(required = false) Long orgId,
+                                         @RequestParam(required = false) Integer type,
+                                         @RequestParam(required = false) String name,
+                                         @RequestParam(required = false) String vendorName,
+                                         @RequestParam(required = false) Integer pageNo,
+                                         @RequestParam(required = false) Integer pageSize) {
+
+        if (null == orgId )
+            throw new JsonResponseException("warehouse.sku.org.id.null");
+
+        Map<String, Object> params = new HashMap<>();
+        if (null != orgId)
+            params.put("orgId", orgId);
+        if (null != type)
+            params.put("type", type);
+        if (null != name)
+            params.put("name", name);
+        if (null != vendorName)
+            params.put("vendorName", vendorName);
+
+        Paging<DoctorWarehouseSku> skuPaging = RespHelper.or500(doctorWarehouseSkuReadService.pagingWarehouseSku(pageNo, pageSize, params));
 
         return new Paging<WarehouseSkuDto>(skuPaging.getTotal(),
                 skuPaging.getData().stream().map(sku -> {
@@ -181,6 +220,13 @@ public class SkuController {
             skuDto.setOrgId(farm.getOrgId());
         }
 
+        List<DoctorWarehouseSku> doctorWarehouseSkus = RespHelper.or500(doctorWarehouseSkuReadService.findWarehouseSkuByOrgAndName(skuDto.getOrgId(), skuDto.getName()));
+        for (DoctorWarehouseSku ws:doctorWarehouseSkus) {
+            if (notNull(ws) && !Objects.equals(ws.getId(),skuDto.getId())) {
+                throw new JsonResponseException("物料名称已存在");
+            }
+        }
+
         if (skuDto.getStatus().equals(WarehouseSkuStatus.FORBIDDEN.getValue())) {
             //改成停用需要检查一下该物料是否有在仓库中
             Map<String, Object> params = new HashMap<>();
@@ -213,6 +259,11 @@ public class SkuController {
             if (null == farm)
                 throw new JsonResponseException("farm.not.found");
             skuDto.setOrgId(farm.getOrgId());
+        }
+
+        List<DoctorWarehouseSku> doctorWarehouseSkus = RespHelper.or500(doctorWarehouseSkuReadService.findWarehouseSkuByOrgAndName(skuDto.getOrgId(), skuDto.getName()));
+        if (doctorWarehouseSkus.size()>0) {
+            throw new JsonResponseException("物料名称已存在");
         }
 
         DoctorWarehouseSku sku = new DoctorWarehouseSku();

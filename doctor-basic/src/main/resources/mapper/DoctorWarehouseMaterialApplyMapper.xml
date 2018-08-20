@@ -66,6 +66,7 @@
 
     <resultMap id="DoctorWarehouseMaterialApplyPigGroupDetailMap" type="DoctorWarehouseMaterialApplyPigGroupDetail">
         <id property="id" column="id"/>
+        <result property="materialHandleId" column="material_handle_id"/>
         <result property="skuName" column="sku_name"/>
         <result property="skuType" column="sku_type"/>
         <result property="warehouseName" column="warehouse_name"/>
@@ -79,6 +80,7 @@
         <result property="pigType" column="pig_type"/>
         <result property="pigGroupName" column="pig_group_name"/>
         <result property="staffName" column="staff_name"/>
+        <result property="farmId" column="farm_id"/>
         <result property="farmName" column="farm_name"/>
         <result property="unit" column="unit"/>
         <result property="vendorName" column="vendor_name"/>
@@ -341,7 +343,8 @@
     <select id="findByMaterialHandleAndFarmId" parameterType="map" resultMap="DoctorWarehouseMaterialApplyMap">
         SELECT * FROM <include refid="tb"/>
         WHERE material_handle_id= #{materialHandleId} and farm_id=#{farmId}
-        ORDER BY id DESC LIMIT 1
+        ORDER BY id DESC
+--         LIMIT 1
     </select>
 
     <delete id="deleteGroupApply" parameterType="long">
@@ -437,9 +440,9 @@
         c.code,
         c.name as sku_name,
         db.name as unit,
-        CAST(sum( a.quantity ) AS CHAR) AS quantity,
-        CAST(ifnull(sum( a.unit_price * a.quantity ) / sum( a.quantity ),0) AS CHAR) AS unit_price,
-        CAST(sum(a.amount) AS CHAR) AS amount,
+        CAST(sum( f.quantity + tl.quantity) AS CHAR) AS quantity,
+        CAST(ifnull(sum(f.amount+tl.amount) / sum( f.quantity + tl.quantity ),0) AS CHAR) AS unit_price,
+        CAST(sum(f.amount+tl.amount) AS CHAR) AS amount,
         c.type as sku_type,
         b.short_name as vendor_name,
         c.specification,
@@ -457,6 +460,9 @@
         JOIN doctor_barns e ON e.id = a.pig_barn_id
         JOIN doctor_basics as db on db.id=c.unit
         JOIN doctor_warehouse_material_handle as f on f.id=a.material_handle_id
+        inner join (
+          select quantity,unit_price,amount,rel_material_handle_id from doctor_warehouse_material_handle where type=13 and delete_flag=1
+        ) tl on tl.rel_material_handle_id=f.id
         WHERE
         a.apply_type = 1
         <if test="farmId != null"> AND a.farm_id = #{farmId}</if>
@@ -487,11 +493,9 @@
         s.`code` as material_code,
         s.`name` as material_name,
         db.name as unit,
-        format(ifnull(sum(ma.quantity)+'',0),3) as sum_quantity,
-
---         format(ifnull(sum(ma.unit_price)+'',0),4) as sum_unit_price,
-        format(ifnull((sum(ma.amount)/sum(ma.quantity))+'',0),4) as sum_unit_price,
-        format(ifnull(sum(ma.amount)+'',0),2) as sum_amount,
+        format(ifnull(sum(mh.quantity+tl.quantity)+'',0),3) as sum_quantity,
+        format(ifnull((sum(mh.amount+tl.amount)/sum(mh.quantity+tl.quantity))+'',0),4) as sum_unit_price,
+        format(ifnull(sum(mh.amount+tl.amount)+'',0),2) as sum_amount,
         s.type as material_type,
         v.short_name as vendor_name,
         s.specification as specification,
@@ -510,6 +514,9 @@
         on db.id=ma.unit
         inner join doctor_warehouse_vendor as v
         on v.id=s.vendor_id
+        inner join (
+          select quantity,unit_price,amount,rel_material_handle_id from doctor_warehouse_material_handle where type=13 and delete_flag=1
+        ) tl on tl.rel_material_handle_id=mh.id
         where mh.type=2 and ma.apply_type=0 and mh.delete_flag=1
         <if test="farmId != null">
             and ma.farm_id = #{farmId}
@@ -549,7 +556,7 @@
             '' as unit,
             '' as sum_quantity,
             '' as sum_unit_price,
-            format(ifnull(sum(ma.amount)+'',0),2) as sum_amount,
+            format(ifnull(sum(mh.amount)+'',0),2) as sum_amount,
             '' as material_type,
             '' as vendor_name,
             '' as specification,
@@ -568,6 +575,9 @@
             on db.id=ma.unit
             inner join doctor_warehouse_vendor as v
             on v.id=s.vendor_id
+            inner join (
+              select quantity,unit_price,amount,rel_material_handle_id from doctor_warehouse_material_handle where type=13 and delete_flag=1
+            ) tl on tl.rel_material_handle_id=mh.id
             where mh.type=2 and ma.apply_type=0 and mh.delete_flag=1
             <if test="farmId != null">
                 and ma.farm_id = #{farmId}
@@ -602,9 +612,9 @@
             '' as material_code,
             '' as material_name,
             '' as unit,
-            format(ifnull(sum(ma.quantity)+'',0),3) as sum_quantity,
+            format(ifnull(sum(mh.quantity)+'',0),3) as sum_quantity,
             '' as sum_unit_price,
-            format(ifnull(sum(ma.amount)+'',0),2) as sum_amount,
+            format(ifnull(sum(mh.amount)+'',0),2) as sum_amount,
             '' as material_type,
             '' as vendor_name,
             '' as specification,
@@ -623,6 +633,9 @@
             on db.id=ma.unit
             inner join doctor_warehouse_vendor as v
             on v.id=s.vendor_id
+            inner join (
+              select quantity,unit_price,amount,rel_material_handle_id from doctor_warehouse_material_handle where type=13 and delete_flag=1
+            ) tl on tl.rel_material_handle_id=mh.id
             where mh.type=2 and ma.apply_type=0 and mh.delete_flag=1
             <if test="farmId != null">
                 and ma.farm_id = #{farmId}
@@ -650,7 +663,7 @@
     </select>
 
     <select id="piggeryDetails" parameterType="DoctorWarehouseMaterialApply" resultType="map">
-        select s.`code` as material_code,
+        select mh.id as id,s.`code` as material_code,
         s.`name` as material_name,
         s.type as material_type,
         ma.warehouse_name as warehouse_name,
@@ -658,9 +671,9 @@
         year(mh.settlement_date) as settlement_year,
         month(mh.settlement_date) as settlement_month,
         mh.type as material_handle_type,
-        format(ifnull(ma.quantity,0),3) as quantity,
-        format(ma.unit_price,4) as unit_price,
-        format(ifnull(ma.amount,0),2) as amount,
+        format(ifnull(mh.quantity,0),3) as quantity,
+        format(mh.unit_price,4) as unit_price,
+        format(ifnull(mh.amount,0),2) as amount,
         ma.pig_barn_name as pig_barn_name,
         ma.pig_type as pig_type,
         ifnull((
@@ -668,6 +681,7 @@
           and w.apply_type!=0 and w.org_id = ma.org_id limit 1
         ),'无') as pig_group_name,
         b.staff_name as staff_name,
+        f.id as farm_id,
         f.`name` as farm_name,
         db.name as unit ,
         v.short_name as vendor_name,
@@ -700,26 +714,84 @@
         </if>
     </select>
 
+    <select id="piggeryRetreatingDetails" parameterType="DoctorWarehouseMaterialApply" resultType="map">
+      select mh.id as id,s.`code` as material_code,
+        s.`name` as material_name,
+        s.type as material_type,
+        ma.warehouse_name as warehouse_name,
+        mh.handle_date as handle_date,
+        year(mh.settlement_date) as settlement_year,
+        month(mh.settlement_date) as settlement_month,
+        mh.type as material_handle_type,
+        format(ifnull(mh.quantity,0),3) as quantity,
+        format(mh.unit_price,4) as unit_price,
+        format(ifnull(mh.amount,0),2) as amount,
+        ma.pig_barn_name as pig_barn_name,
+        ma.pig_type as pig_type,
+        ifnull((
+          select w.pig_group_name from doctor_warehouse_material_apply w where w.material_handle_id = ma.material_handle_id
+          and w.apply_type!=0 and w.org_id = ma.org_id limit 1
+        ),'无') as pig_group_name,
+        ma.staff_name as staff_name,
+        f.id as farm_id,
+        f.`name` as farm_name,
+        db.name as unit ,
+        v.short_name as vendor_name,
+        s.specification as specification
+        from doctor_warehouse_material_handle as mh
+        inner join doctor_warehouse_sku as s
+        on s.id=mh.material_id
+        inner join doctor_farms as f
+        on f.id=mh.farm_id
+        inner join doctor_basics as db
+        on db.id=mh.unit
+        inner join doctor_warehouse_vendor as v
+        on v.id=s.vendor_id
+        inner join (
+            select DISTINCT maa.material_handle_id,maa.org_id,maa.warehouse_name,maa.pig_barn_name,maa.pig_type,b.staff_name from doctor_warehouse_material_apply as maa
+            inner join doctor_barns as b on b.id=maa.pig_barn_id
+            where maa.apply_type=0
+            <if test="pigBarnId != null">
+              and maa.pig_barn_id = #{pigBarnId}
+            </if>
+            and maa.material_handle_id=#{materialHandleId}
+        ) ma on mh.rel_material_handle_id=ma.material_handle_id
+        where mh.delete_flag=1
+        and mh.type=13
+        <if test="materialName != null">
+            and s.`name` like concat('%',#{materialName},'%')
+        </if>
+        <if test="applyYear != null">
+            and year(mh.settlement_date) = #{applyYear}
+        </if>
+        <if test="applyMonth != null">
+            and month(mh.settlement_date) = #{applyMonth}
+        </if>
+        and mh.rel_material_handle_id=#{materialHandleId}
+    </select>
+
     <!--猪群end-->
 
     <select id="selectPigGroupApplyDetail" parameterType="map" resultMap="DoctorWarehouseMaterialApplyPigGroupDetailMap">
-        SELECT
+        SELECT b.id as material_handle_id,
         c.name as sku_name,
-        a.type as sku_type,
+        c.type as sku_type,
         a.warehouse_name,
-        date_format( a.apply_date,'%Y-%m-%d') as apply_date,
+        date_format( b.handle_date,'%Y-%m-%d') as apply_date,
         date_format(b.settlement_date,'%Y-%m') as settlement_date,
         b.type,
-        CAST(a.quantity AS CHAR) as quantity,
-        CAST(a.unit_price AS CHAR) as  unit_price,
+        CAST(b.quantity AS CHAR) as quantity,
+        CAST(b.unit_price AS CHAR) as  unit_price,
         CAST(b.amount AS CHAR) as amount,
         a.pig_barn_name,
         a.pig_type,
         a.pig_group_name,
         e.staff_name,
-        d.farm_name,
+        f.id as farm_id,
+        f.`name` as farm_name,
         db.name as unit,
-        b.vendor_name,
+--         b.vendor_name,
+        v.short_name as vendor_name,
         c.specification
         FROM
         doctor_warehouse_material_apply a
@@ -728,10 +800,52 @@
         JOIN doctor_groups d ON d.id = a.pig_group_id
         JOIN doctor_barns e ON e.id = a.pig_barn_id
         JOIN doctor_basics as db on db.id=c.unit
+        JOIN doctor_farms as f on f.id=b.farm_id
+        JOIN doctor_warehouse_vendor as v on v.id=c.vendor_id
         WHERE
         a.apply_type = 1 and b.delete_flag=1
         <if test="pigGroupId != null"> AND a.pig_group_id = #{pigGroupId}</if>
         <if test="skuId != null"> AND a.material_id = #{skuId}</if>
+    </select>
+
+    <select id="selectPigGroupApplyRetreatingDetail" parameterType="map" resultMap="DoctorWarehouseMaterialApplyPigGroupDetailMap">
+      SELECT	b.id as material_handle_id,
+        c.name as sku_name,
+        c.type as sku_type,
+        a.warehouse_name,
+        date_format( b.handle_date,'%Y-%m-%d') as apply_date,
+        date_format(b.settlement_date,'%Y-%m') as settlement_date,
+        b.type,
+        CAST(b.quantity AS CHAR) as quantity,
+        CAST(b.unit_price AS CHAR) as  unit_price,
+        CAST(b.amount AS CHAR) as amount,
+        a.pig_barn_name,
+        a.pig_type,
+        a.pig_group_name,
+        a.staff_name,
+        f.id as farm_id,
+        f.`name` as farm_name,
+        db.name as unit,
+--         b.vendor_name,
+        v.short_name as vendor_name,
+        c.specification
+        FROM doctor_warehouse_material_handle b
+        JOIN doctor_warehouse_sku c ON b.material_id = c.id
+        JOIN doctor_basics as db on db.id=c.unit
+        JOIN doctor_farms as f on f.id=b.farm_id
+        JOIN doctor_warehouse_vendor as v on v.id=c.vendor_id
+        inner join (
+            select DISTINCT ma.material_handle_id,ma.warehouse_name,ma.pig_barn_name,ma.pig_type,ma.pig_group_name,bb.staff_name from doctor_warehouse_material_apply as ma
+            inner join doctor_barns as bb on bb.id=ma.pig_barn_id
+            where ma.apply_type=1
+            <if test="pigGroupId != null">
+            and ma.pig_group_id = #{pigGroupId}
+            </if>
+            and ma.material_handle_id=#{materialHandleId}
+        ) a on b.rel_material_handle_id=a.material_handle_id
+        WHERE b.delete_flag=1
+         AND b.rel_material_handle_id=#{materialHandleId}
+        <if test="skuId != null"> AND b.material_id = #{skuId}</if>
     </select>
 
 </mapper>

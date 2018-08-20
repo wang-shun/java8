@@ -1000,7 +1000,7 @@ public class ReportController {
                         if(drksl.compareTo(BigDecimal.ZERO) == 1) { //表示大于0
                             singleJcsl = tempsinglejcsl.add(drksl); //加法
                         }
-                        else if(dcksl.compareTo(BigDecimal.ZERO) == 1) {
+                        else if(dcksl.compareTo(BigDecimal.ZERO) !=0&&!dcksl.equals("")) {//表示不等于0
                             singleJcsl = tempsinglejcsl.subtract(dcksl); //减法
                         }
                         else {
@@ -1010,7 +1010,7 @@ public class ReportController {
                         if(drkje.compareTo(BigDecimal.ZERO) == 1) {
                             singleJcje = tempsinglejcje.add(drkje);
                         }
-                        else if(dckje.compareTo(BigDecimal.ZERO) == 1) {
+                        else if(dckje.compareTo(BigDecimal.ZERO) != 0&&!dcksl.equals("")) {
                             singleJcje = tempsinglejcje.subtract(dckje);
                         }
                         else {
@@ -1079,7 +1079,7 @@ public class ReportController {
                     if(byjsflag) {
                         thisMap.put("jcdj", thisMonthTotalJcsl.compareTo(BigDecimal.ZERO) == 0 || thisMonthTotalJcje.compareTo(BigDecimal.ZERO) == 0 ? "" :
                                 thisMonthTotalJcje.divide(thisMonthTotalJcsl, 4, BigDecimal.ROUND_HALF_UP));
-                        thisMap.put("jcje", thisMonthTotalJcje.compareTo(BigDecimal.ZERO) == 0 ? "" :
+                        thisMap.put("jcje", thisMonthTotalJcsl.compareTo(BigDecimal.ZERO) == 0 ||thisMonthTotalJcje.compareTo(BigDecimal.ZERO) == 0 ? "" :
                                 thisMonthTotalJcje.setScale(2, BigDecimal.ROUND_HALF_UP));
                     }
                     else{

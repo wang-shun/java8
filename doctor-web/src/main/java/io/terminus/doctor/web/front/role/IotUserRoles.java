@@ -88,6 +88,7 @@ public class IotUserRoles {
     @RequestMapping(value = "/createOrUpdate/iotUserRole", method = RequestMethod.POST)
     public Boolean createOrUpdateIotUserRole(@RequestBody @ApiParam("物联网运营用户") IotUserDto iotUserDto) {
         if (isNull(iotUserDto.getUserId())) {
+
             log.info("start to create iot user");
             Response<Boolean> checkUser = doctorUserReadService.checkExist(iotUserDto.getMobile(), iotUserDto.getUserName());
             if (!checkUser.isSuccess()) {

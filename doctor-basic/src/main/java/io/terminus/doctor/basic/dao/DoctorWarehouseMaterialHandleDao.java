@@ -321,19 +321,6 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     //查公司结算列表
     public List<Map> listByFarmIdTime(Map<String, Object> criteria) {
         List<Map> resultList = this.sqlSession.selectList("listByFarmIdTime", criteria);
-
-       /* resultList.stream().forEach(map -> {
-
-            map.put("type", WarehouseMaterialHandleType.IN.getValue());
-
-            map.put("inAmount", this.sqlSession.selectOne("selectSumAmount", map));
-
-            map.put("type", WarehouseMaterialHandleType.OUT.getValue());
-
-            map.put("outAmount", this.sqlSession.selectOne("selectSumAmount", map));
-
-        });*/
-
         return resultList;
     }
 
@@ -426,4 +413,23 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         Integer count = this.sqlSession.selectOne(this.sqlId("findCountByRelMaterialHandleId"), params);
         return count;
     }
+
+    /**
+     * 得到该公司第一笔单据的会计年月，用来结算的时候做判断
+     * @param orgId
+     * @return
+     */
+    public Date findSettlementDate(Long orgId) {
+        return this.sqlSession.selectOne(this.sqlId("findSettlementDate"), orgId);
+    }
+
+    /**
+     * 根据framId查最早生成单据的时间
+     * @param farms
+     * @return
+     */
+    public Date findMinTimeByFarmId(List<Long> farms) {
+        return this.sqlSession.selectOne(this.sqlId("findMinTimeByFarmId"),farms);
+    }
+
 }

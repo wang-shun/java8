@@ -122,4 +122,13 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
             return Response.fail("find.by.name.failed");
         }
     }
+    /**
+     * 通过公司id查集团(孔景军)
+     * @param orgId
+     * @return
+     */
+    @Override
+    public Response<DoctorOrg>  findGroupcompanyByOrgId(Long orgId){
+        return Response.ok(doctorOrgDao.findGroupcompanyByOrgId(orgId));
+    }
 }

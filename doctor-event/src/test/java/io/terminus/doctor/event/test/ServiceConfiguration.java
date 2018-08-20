@@ -413,6 +413,10 @@ public class ServiceConfiguration {
             public Response<DoctorOrg> findByName(String name) {
                 return null;
             }
+            @Override
+            public Response<DoctorOrg> findGroupcompanyByOrgId(Long orgId) {
+                return null;
+            }
         };
     }
 

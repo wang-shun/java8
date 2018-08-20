@@ -17,6 +17,9 @@ public class DoctorWarehouseMaterialApplyPigGroupDetail implements Serializable 
 
     private static final long serialVersionUID = -1544032127028041983L;
 
+    //单据明细id
+    private Long materialHandleId;
+
     //物料名称
     private String skuName;
 
@@ -55,6 +58,9 @@ public class DoctorWarehouseMaterialApplyPigGroupDetail implements Serializable 
 
     //饲养员
     private String staffName;
+
+    //猪场Id
+    private Long farmId;
 
     //猪场名称
     private String farmName;

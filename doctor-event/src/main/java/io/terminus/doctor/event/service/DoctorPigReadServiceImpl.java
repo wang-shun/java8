@@ -604,4 +604,40 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             return Response.fail("paging.chg.farm.pig.failed");
         }
     }
+
+
+    // -------------------- 新增代码-----------------------
+    @Override
+    public Response<List<Long>> findNotTransitionsSow(Long farmId, Long barnId, Map<String,Object> valueMap, String pigCode, String rfid,Integer isRemoval) {
+        try {
+            return Response.ok(doctorPigJoinDao.findNotTransitionsSow(farmId,barnId,valueMap,pigCode,rfid,isRemoval));
+        }catch (Exception e){
+            e.printStackTrace();
+            return Response.fail("find.farms.by.userId.failed 1");
+        }
+    }
+
+    @Override
+    public Response<List<Long>> findHaveTransitionsSow(Long farmId,Long barnId,String pigCode,String rfid) {
+        try {
+            return Response.ok(doctorPigJoinDao.findHaveTransitionsSow(farmId,barnId,pigCode,rfid));
+        }catch (Exception e){
+            e.printStackTrace();
+            return Response.fail("find.farms.by.userId.failed 2");
+        }
+    }
+
+    @Override
+    public Response<Paging<SearchedPig>> pagesSowPigById(Map<String, Object> params, Integer pageNo, Integer pageSize) {
+        try {
+            PageInfo pageInfo = new PageInfo(pageNo, pageSize);
+            Paging<SearchedPig> paging = doctorPigJoinDao.pagesSowPig(params, pageInfo.getOffset(), pageInfo.getLimit());
+
+            return Response.ok(new Paging<>(paging.getTotal(), mapSearchPig(paging.getData())));
+        } catch (Exception e) {
+            log.error("paging pig failed, params:{}, pageNo:{}, pageSize:{}, cause:{}", params, pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            return Response.fail("paging.pig.fail");
+        }
+    }
+
 }

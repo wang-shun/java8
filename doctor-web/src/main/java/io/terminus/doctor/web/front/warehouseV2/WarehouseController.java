@@ -32,6 +32,7 @@ import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -248,17 +249,20 @@ public class WarehouseController {
     public List<WarehouseVo> sameTypeWarehouse(@PathVariable Integer type,
                                                @RequestParam(required = false) Long orgId,
                                                @RequestParam(required = false) Long farmId) {
+        System.out.println("AAA"+farmId+"BB"+type);
         if (null == orgId && null == farmId)
             throw new JsonResponseException("missing parameter,orgId or farmId must pick one");
 
         List<DoctorWareHouse> wareHouses;
         if (null != orgId) {
             wareHouses = RespHelper.or500(doctorWarehouseReaderService.findByOrgId(RespHelper.or500(doctorFarmReadService.findFarmsByOrgId(orgId)).stream().map(DoctorFarm::getId).collect(Collectors.toList()), type));
+            System.out.println("CCC"+wareHouses);
         } else {
             DoctorWareHouse criteria = new DoctorWareHouse();
             criteria.setType(type);
             criteria.setFarmId(farmId);
             wareHouses = RespHelper.or500(doctorWarehouseReaderService.list(criteria));
+            System.out.println("DDD"+wareHouses);
         }
 
         List<WarehouseVo> vos = new ArrayList<>(wareHouses.size());
@@ -271,6 +275,7 @@ public class WarehouseController {
             vo.setManagerId(wareHouse.getManagerId());
             vos.add(vo);
         });
+        System.out.println("EEE"+vos);
         return vos;
     }
 
@@ -333,8 +338,9 @@ public class WarehouseController {
 
 //        if (null == farmId)
 //            throw new JsonResponseException("missing parameter,farmId must pick one");
-        //会计年月
-        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(new Date());
+        //会计年月DateUtils.addMonths(settlementDate, -1)
+//        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(new Date());
+        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(DateUtils.addMonths(new Date(), -1));
 
         DoctorWareHouse doctorWareHouse = RespHelper.or500(doctorWarehouseReaderService.findById(warehouseId));
         //根据猪场得到orgId
