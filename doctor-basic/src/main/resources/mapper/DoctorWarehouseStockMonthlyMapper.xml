@@ -274,7 +274,7 @@
             left join (
                 SELECT ifnull(sum(case type	when '1' then amount	when '7' then amount	when '9' then amount
                 when '11' then amount end	),0) as inAmount,
-                ifnull(sum(case type	when '1' then quantity	when '7' then quantity	when '9' then quantity
+                ifnull(sum(case type	when '1' then quantity 	when '7' then quantity 	when '9' then quantity
                 when '11' then quantity end	),0) as inQuantity,material_id,warehouse_id FROM doctor_warehouse_material_handle
                 WHERE warehouse_id = #{warehouseId} and date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
                 group by material_id
@@ -283,7 +283,7 @@
             left join (
                 SELECT ifnull(sum(case type	when '2' then amount	when '8' then amount	when '10' then amount
                 when '12' then amount	when '13' then amount end	),0) as outAmount,
-                ifnull(sum(case type	when '2' then quantity	when '8' then quantity	when '10' then quantity
+                ifnull(sum(case type	when '2' then quantity	 when '8' then quantity	when '10' then quantity
                 when '12' then quantity	when '13' then quantity end	),0) as outQuantity,material_id,warehouse_id FROM doctor_warehouse_material_handle
                 WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
                 group by material_id
@@ -362,7 +362,7 @@
             left join (
                 SELECT ifnull(sum(case type	when '1' then amount	when '7' then amount	when '9' then amount
                 when '11' then amount end	),0) as inAmount,
-                ifnull(sum(case type	when '1' then quantity	when '7' then quantity	when '9' then quantity
+                ifnull(sum(case type	when '1' then quantity 	when '7' then quantity	 when '9' then quantity
                 when '11' then quantity end	),0) as inQuantity,material_id,warehouse_id FROM doctor_warehouse_material_handle
                 WHERE warehouse_id = #{warehouseId} and date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
                 group by material_id
@@ -371,7 +371,7 @@
             left join (
                 SELECT ifnull(sum(case type	when '2' then amount	when '8' then amount	when '10' then amount
                 when '12' then amount	when '13' then amount end	),0) as outAmount,
-                ifnull(sum(case type	when '2' then quantity	when '8' then quantity	when '10' then quantity
+                ifnull(sum(case type	when '2' then quantity	 when '8' then quantity	when '10' then quantity
                 when '12' then quantity	when '13' then quantity end	),0) as outQuantity,material_id,warehouse_id
                 FROM doctor_warehouse_material_handle
                 WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
@@ -441,8 +441,8 @@
             on v.id=b.vendor_id
 
             left join (
-                SELECT ifnull(sum( case mh.type	when '1' then quantity	when '2' then -quantity	when '7' then quantity	when '8' then -quantity
-                when '9' then quantity	when '10' then -quantity	when '11' then quantity	when '12' then -quantity	when '13' then -quantity end	),0)
+                SELECT ifnull(sum( case mh.type	when '1' then quantity  when '2' then -quantity	when '7' then quantity 	when '8' then -quantity
+                when '9' then quantity 	when '10' then -quantity	when '11' then quantity	when '12' then -quantity	when '13' then -quantity end	),0)
                 as quantity,material_id,warehouse_id	FROM doctor_warehouse_material_handle as mh
                 inner join doctor_warehouse_sku as s	on mh.material_id=s.id
                 WHERE delete_flag=1 AND mh.warehouse_id=#{warehouseId}
@@ -453,7 +453,7 @@
             left join (
                 SELECT ifnull(sum(case type	when '1' then amount	when '7' then amount	when '9' then amount
                 when '11' then amount end	),0) as inAmount,
-                ifnull(sum(case type	when '1' then quantity	when '7' then quantity	when '9' then quantity
+                ifnull(sum(case type	when '1' then quantity 	when '7' then quantity 	when '9' then quantity
                 when '11' then quantity end	),0) as inQuantity,material_id,warehouse_id FROM doctor_warehouse_material_handle
                 WHERE warehouse_id = #{warehouseId} and date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
                 group by material_id
@@ -462,7 +462,7 @@
             left join (
                 SELECT ifnull(sum(case type	when '2' then amount	when '8' then amount	when '10' then amount
                 when '12' then amount	when '13' then amount end	),0) as outAmount,
-                ifnull(sum(case type	when '2' then quantity	when '8' then quantity	when '10' then quantity
+                ifnull(sum(case type	when '2' then quantity	 when '8' then quantity	when '10' then quantity
                 when '12' then quantity	when '13' then quantity end	),0) as outQuantity,material_id,warehouse_id
                 FROM doctor_warehouse_material_handle
                 WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
@@ -498,8 +498,8 @@
             on v.id=b.vendor_id
 
             left join(
-                SELECT ifnull(sum( case mh.type	when '1' then quantity	when '2' then -quantity	when '7' then quantity	when '8' then -quantity
-                when '9' then quantity	when '10' then -quantity	when '11' then quantity	when '12' then -quantity	when '13' then -quantity end	),0)
+                SELECT ifnull(sum( case mh.type	when '1' then quantity when '2' then -quantity	when '7' then quantity  when '8' then -quantity
+                when '9' then quantity	 when '10' then -quantity	when '11' then quantity	when '12' then -quantity	when '13' then -quantity end	),0)
                 as quantity,material_id,warehouse_id	FROM doctor_warehouse_material_handle as mh
                 inner join doctor_warehouse_sku as s	on mh.material_id=s.id
                 WHERE delete_flag=1 AND mh.warehouse_id=#{warehouseId}
