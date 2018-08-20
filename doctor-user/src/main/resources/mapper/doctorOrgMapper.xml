@@ -245,4 +245,10 @@
         WHERE
         `mobile` = #{mobile}
     </select>
+    <select id="findGroupcompanyByOrgId" parameterType="long" resultMap="DoctorOrgMap">
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb"/>
+        WHERE
+        id = #{orgId}
+    </select>
 </mapper>
