@@ -170,7 +170,7 @@
         )temp1 on a.id = temp1.warehouse_id
 
         left join (
-            ifnull(sum(case type	when '1' then quantity 	when '7' then quantity 	when '9' then quantity
+            select ifnull(sum(case type	when '1' then quantity 	when '7' then quantity 	when '9' then quantity
             when '11' then quantity end	),0) as thismonth_sum_rk_quantity,
             warehouse_id FROM doctor_warehouse_material_handle
             WHERE farm_id = #{farmId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
@@ -178,7 +178,7 @@
         )temp2 on a.id = temp2.warehouse_id
 
         left join (
-            ifnull(sum(case type	when '2' then quantity 	when '8' then quantity	 when '10' then quantity
+            select ifnull(sum(case type	when '2' then quantity 	when '8' then quantity	 when '10' then quantity
             when '12' then quantity	when '13' then quantity end	),0) as thismonth_sum_ck_quantity,
             warehouse_id FROM doctor_warehouse_material_handle
             WHERE farm_id = #{farmId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
