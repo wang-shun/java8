@@ -29,16 +29,16 @@ public class DoctorPigJoinDao extends MyBatisDao<SearchedPig> {
         if (params == null) {    //如果查询条件为空
             params = Maps.newHashMap();
         }
-        log.info("pigPagingWithJoin"+params.toString());
+        log.info("pigPagingWithJoin1"+params.toString());
         Long total = sqlSession.selectOne(sqlId(COUNT), params);
-        log.error("pigPagingWithJoin"+total.toString());
+        log.error("pigPagingWithJoin2"+total.toString());
         if (total <= 0){
             return new Paging<>(0L, Collections.emptyList());
         }
         params.put(Constants.VAR_OFFSET, offset);
         params.put(Constants.VAR_LIMIT, limit);
         List<SearchedPig> datas = sqlSession.selectList(sqlId(PAGING), params);
-        log.error("pigPagingWithJoin"+datas.toString());
+        log.error("pigPagingWithJoin3"+datas.toString());
         return new Paging<>(total, datas);
     }
 
