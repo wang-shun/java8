@@ -556,6 +556,9 @@ public class DoctorBarns {
         }
         doctorFarmAuthCenter.checkFarmAuth(farmId);
         params.put("farmId", farmId);
+        if(params.get("status")==null ||params.get("status").equals("")){
+            params.put("status",1);
+        }
         return RespHelper.or500(doctorBarnReadService.countForTypes(params));
     }
 
