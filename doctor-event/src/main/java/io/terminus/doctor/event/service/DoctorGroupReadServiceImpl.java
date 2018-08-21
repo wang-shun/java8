@@ -596,6 +596,6 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     //孔景军
     @Override
     public DoctorGroupEvent findLastEvent(Long groupId){
-        return  doctorGroupEventDao.findLastEventByGroupId(groupId);
+        return  doctorGroupEventDao.lastEventByGroupId(groupId);
     }
 }

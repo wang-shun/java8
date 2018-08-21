@@ -395,4 +395,10 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
     public int isCloseGroup(Long groupId) {
         return getSqlSession().selectOne(sqlId("isCloseGroup"), ImmutableMap.of("groupId", groupId));
     }
+    /**
+     * 查询最新猪群事件
+     */
+    public DoctorGroupEvent lastEventByGroupId(Long groupId) {
+        return getSqlSession().selectOne(sqlId("lastEventByGroupId"), groupId);
+    }
 }
