@@ -240,8 +240,8 @@
         <include refid="tb"/>
         WHERE
         <if test="farmId != null">farm_id = #{farmId}</if>
-        <if test="status != null">AND status = #{status}</if>
-        <if test="status == null or status == ''">AND status = 1</if>
+        <if test="status != null and status == 0">AND status = #{status}</if>
+        <if test="status == null and status != 0">AND status = 1</if>
         GROUP BY pig_type
         ) AS temp
     </select>
