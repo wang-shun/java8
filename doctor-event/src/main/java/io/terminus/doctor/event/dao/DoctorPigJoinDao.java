@@ -30,8 +30,7 @@ public class DoctorPigJoinDao extends MyBatisDao<SearchedPig> {
         if (params == null) {    //如果查询条件为空
             params = Maps.newHashMap();
         }
-        log.info("pigPagingWithJoin1"+params.toString()+"======="+((List)params.get("statuses")).get(0));
-        if(((String)params.get("pigType")).equals("2") && (int)((List)params.get("statuses")).get(0)==12){
+        if(((String)params.get("pigType")).equals("2") && params.get("statuses")!=null && (int)((List)params.get("statuses")).get(0)==12){
             params.put("isRemoval",1);
             params.remove("statuses");
         }
