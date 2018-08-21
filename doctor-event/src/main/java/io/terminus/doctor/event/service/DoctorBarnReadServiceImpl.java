@@ -195,10 +195,12 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
     @Override
     public Response<DoctorBarnCountForPigTypeDto> countForTypes(Map<String, Object> criteria) {
         try {
+            log.error("==================criteria"+criteria);
             DoctorBarnCountForPigTypeDto dto = doctorBarnDao.countForTypes(criteria);
             Long allCount = dto.getReserveCount() + dto.getBoarCount() + dto.getPregSowCount()
                     + dto.getDeliverSowCount() + dto.getMateSowCount() + dto.getFattenPigCount() + dto.getNurseryPigletCount();
             dto.setAllCount(allCount);
+            log.error("==============dto"+dto);
             return Response.ok(dto);
         } catch (Exception e) {
             log.error("count.for.types.failed, cause by :{}", Throwables.getStackTraceAsString(e));
