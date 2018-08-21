@@ -555,7 +555,6 @@ public class DoctorBarns {
             return new DoctorBarnCountForPigTypeDto();
         }
         doctorFarmAuthCenter.checkFarmAuth(farmId);
-        log.error("========="+params);
         params.put("farmId", farmId);
         if(params.get("status")==null ||params.get("status").equals("")){
             params.put("status",1);
