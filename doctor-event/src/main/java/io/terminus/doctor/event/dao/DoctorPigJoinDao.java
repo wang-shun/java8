@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +31,11 @@ public class DoctorPigJoinDao extends MyBatisDao<SearchedPig> {
             params = Maps.newHashMap();
         }
         log.info("pigPagingWithJoin1"+params.toString());
-        Long total = sqlSession.selectOne(sqlId(COUNT), params);
+        Map param1 = new HashMap();
+        param1.put("pigType",2);
+        param1.put("status",12);
+        param1.put("farmId",404);
+        Long total = sqlSession.selectOne(sqlId(COUNT), param1);
         log.error("pigPagingWithJoin2"+total.toString());
         if (total <= 0){
             return new Paging<>(0L, Collections.emptyList());
