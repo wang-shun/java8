@@ -744,14 +744,16 @@ public class DoctorPigCreateEvents {
                 return doctorValidService.valid(dto, doctorPig.getPigCode());
             case FARROWING:
                 DoctorFarrowingDto farrowingDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorFarrowingDto.class);
-                /*DoctorPigEvent doctorPigEvent = RespHelper.orServEx(doctorPigEventReadService.findLastFirstMateEvent(pigId));
-                Long farrowingDate = farrowingDto.getFarrowingDate().getTime();
-                Long lastMateDate = doctorPigEvent.getEventAt().getTime();
-                Long time = (farrowingDate - lastMateDate)/(3600 * 24 * 1000);
-                log.error("==========="+farrowingDate+"========="+lastMateDate);
-                if (time < 100){
-                    throw new InvalidException("分娩时间必须大于配种时间100天");
-                }*/
+                if(pigId != null) {
+                    DoctorPigEvent doctorPigEvent = RespHelper.orServEx(doctorPigEventReadService.findLastFirstMateEvent(pigId));
+                    Long farrowingDate = farrowingDto.getFarrowingDate().getTime();
+                    Long lastMateDate = doctorPigEvent.getEventAt().getTime();
+                    Long time = (farrowingDate - lastMateDate) / (3600 * 24 * 1000);
+                    log.error("===========" + farrowingDate + "=========" + lastMateDate);
+                    if (time < 100) {
+                        throw new InvalidException("分娩时间必须大于配种时间100天");
+                    }
+                }
                 DoctorFarm doctorFarm3 = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
                 if (Objects.equals(doctorFarm3.getIsWeak(), io.terminus.doctor.common.enums.IsOrNot.NO.getKey())) {
                     farrowingDto.setFarrowingLiveCount(farrowingDto.getHealthCount());
