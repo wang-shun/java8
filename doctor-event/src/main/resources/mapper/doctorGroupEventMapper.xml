@@ -964,7 +964,7 @@
         from doctor_groups b
         join doctor_barns c on b.current_barn_id = c.id
         where b.farm_id = #{farmId} and b.status = -1
-        and b.close_at = #{time}
+        and date(b.close_at) = #{time}
         <if test="barn != null">and c.id = #{barn}</if>
         <if test="groupCode != null"> AND b.group_code like CONCAT(CONCAT('%',#{groupCode}),'%')</if>
         <if test="operatorName != null"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
