@@ -415,6 +415,11 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         Date eventAt = DateUtil.toDate((String) params.get("eventAt"));
         checkEventAt(groupId, eventAt);
 
+        //批量操作猪群事件，校验新建事件时间小于最后一次事件时间(孔景军)
+        DoctorGroupEvent lastEventDate = doctorGroupReadService.findLastEvent(groupId);
+        if(eventAt.getTime()<lastEventDate.getEventAt().getTime()){
+            throw new InvalidException("事件不能小于最后一次时间");
+        }
         //4.根据不同的事件类型调用不同的录入接口
         return buildGroupEventInfo(eventType, groupDetail, params);
     }
