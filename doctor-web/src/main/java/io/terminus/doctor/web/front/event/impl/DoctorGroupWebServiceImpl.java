@@ -420,7 +420,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                 params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
                 return new DoctorGroupInputInfo(groupDetail, map(putBasicFields(params), DoctorMoveInGroupInput.class));
             case CHANGE:
-                checkParam1(params, groupDetail.getGroup().getGroupCode());
+                checkParam(params, groupDetail.getGroup().getGroupCode());
                 params.put("changeTypeName", getBasicName(getLong(params, "changeTypeId")));
                 params.put("changeReasonName", getChangeReasonName(getLong(params, "changeReasonId")));
                 if (params.get("customerName") == null || params.get("customerName") == "") {
@@ -630,18 +630,6 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         expectNotNull(params.get("sowQty"), "sow.qty.is.null", groupCode);
         expectNotNull(params.get("boarQty"), "boar.qty.is.null", groupCode);
         expectNotNull(params.get("weight"), "weight.is.null", groupCode);
-        Boolean isSaleType = Objects.equals(getLong(params, "changeTypeId"), CHANGE_TYPE_SALE);
-        Boolean canGetCustomer = getLong(params, "customerId") != null || params.get("customerName") != null;
-        if (isSaleType && (!canGetCustomer || getLong(params, "price") == null)) {
-            throw new InvalidException("price.or.customer.info.is.null.when.sale", groupCode);
-        }
-    }
-    private void checkParam1(Map<String, Object> params, String groupCode) {
-
-        expectNotNull(params.get("changeTypeId"), "change.type.id.is.null", groupCode);
-        expectNotNull(params.get("sowQty"), "sow.qty.is.null", groupCode);
-        expectNotNull(params.get("boarQty"), "boar.qty.is.null", groupCode);
-    //    expectNotNull(params.get("weight"), "weight.is.null", groupCode);
         Boolean isSaleType = Objects.equals(getLong(params, "changeTypeId"), CHANGE_TYPE_SALE);
         Boolean canGetCustomer = getLong(params, "customerId") != null || params.get("customerName") != null;
         if (isSaleType && (!canGetCustomer || getLong(params, "price") == null)) {
