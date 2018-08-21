@@ -196,9 +196,6 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
     public Response<DoctorBarnCountForPigTypeDto> countForTypes(Map<String, Object> criteria) {
         try {
             log.error("==================criteria"+criteria);
-            if(criteria.get("status")==null){
-                criteria.put("status",1);
-            }
             DoctorBarnCountForPigTypeDto dto = doctorBarnDao.countForTypes(criteria);
             Long allCount = dto.getReserveCount() + dto.getBoarCount() + dto.getPregSowCount()
                     + dto.getDeliverSowCount() + dto.getMateSowCount() + dto.getFattenPigCount() + dto.getNurseryPigletCount();
