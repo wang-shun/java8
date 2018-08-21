@@ -30,10 +30,10 @@ public class DoctorPigJoinDao extends MyBatisDao<SearchedPig> {
         if (params == null) {    //如果查询条件为空
             params = Maps.newHashMap();
         }
-        if(params.get("pigType") != null &&((String)params.get("pigType")).equals("2") && params.get("statuses")!=null && (int)((List)params.get("statuses")).get(0)==12){
+        /*if(params.get("pigType") != null &&((String)params.get("pigType")).equals("2") && params.get("statuses")!=null && (int)((List)params.get("statuses")).get(0)==12){
             params.put("isRemoval",1);
             params.remove("statuses");
-        }
+        }*/
         Long total = sqlSession.selectOne(sqlId(COUNT), params);
         log.error("pigPagingWithJoin2"+total.toString());
         if (total <= 0){
