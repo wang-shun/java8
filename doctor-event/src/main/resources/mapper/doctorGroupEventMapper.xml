@@ -1036,4 +1036,12 @@
     <select id="isCloseGroup" parameterType="map" resultType="int">
          select count(1) from doctor_groups where id = #{groupId} and status = 1
     </select>
+    <select id="lastEventByGroupId" parameterType="long" resultMap="DoctorGroupEventMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE status = 1
+        AND group_id = #{groupId}
+        and type != 11
+        ORDER BY date_format(event_at, '%Y-%m-%d') DESC, id DESC limit 1
+    </select>
 </mapper>
