@@ -749,7 +749,6 @@ public class DoctorPigCreateEvents {
                     Long farrowingDate = farrowingDto.getFarrowingDate().getTime();
                     Long lastMateDate = doctorPigEvent.getEventAt().getTime();
                     Long time = (farrowingDate - lastMateDate) / (3600 * 24 * 1000);
-                    log.error("===========" + farrowingDate + "=========" + lastMateDate);
                     if (time < 100) {
                         throw new InvalidException("分娩时间必须大于配种时间100天");
                     }
