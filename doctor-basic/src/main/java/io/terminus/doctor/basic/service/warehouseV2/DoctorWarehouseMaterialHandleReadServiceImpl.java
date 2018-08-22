@@ -61,6 +61,27 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     private DoctorWarehouseMaterialApplyDao doctorWarehouseMaterialApplyDao;
 
     @Override
+    public Boolean getErrorAmount(Long warehouseId, Long materialId, Date settlementDate) {
+        // 结算误差（陈娟 2018-8-21）
+        Map<String, Object> lastMap = doctorWarehouseMaterialHandleDao.getLastAmount(warehouseId, materialId, settlementDate);
+        Map<String, Object> thisMap = doctorWarehouseMaterialHandleDao.getThisAmount(warehouseId, materialId, settlementDate);
+        BigDecimal lastQuantity =(BigDecimal) lastMap.get("lastQuantity");
+        BigDecimal lastAmount =(BigDecimal) lastMap.get("lastAmount");
+        BigDecimal thisQuantity =(BigDecimal) thisMap.get("thisQuantity");
+        BigDecimal thisAmount =(BigDecimal) thisMap.get("thisAmount");
+        if((lastQuantity.add(thisQuantity).compareTo(BigDecimal.ZERO)==0)&&(lastAmount.add(thisAmount).compareTo(BigDecimal.ZERO)!=0)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    @Override
+    public Response<DoctorWarehouseMaterialHandle> getLastDocument(Long warehouseId, Long materialId, Date settlementDate) {
+        return Response.ok(doctorWarehouseMaterialHandleDao.getLastDocument(warehouseId,materialId,settlementDate));
+    }
+
+    @Override
     public Response<BigDecimal> getPDPrice(Long warehouseId, Long materialId, String handleDate){
         DoctorWarehouseMaterialHandle mh=new DoctorWarehouseMaterialHandle();
         mh.setWarehouseId(warehouseId);
