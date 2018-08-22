@@ -26,6 +26,39 @@ import java.util.*;
 @Repository
 public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouseMaterialHandle> {
 
+    // 结算误差（陈娟 2018-8-21）
+    // 得到上月结存金额
+    public Map<String, Object> getLastAmount(Long warehouseId, Long materialId, Date settlementDate) {
+
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("materialId", materialId);
+        criteria.put("settlementDate", settlementDate);
+
+        return this.sqlSession.selectOne(this.sqlId("getLastAmount"), criteria);
+    }
+
+    //得到本月结存金额
+    public Map<String, Object> getThisAmount(Long warehouseId, Long materialId, Date settlementDate) {
+
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("materialId", materialId);
+        criteria.put("settlementDate", settlementDate);
+
+        return this.sqlSession.selectOne(this.sqlId("getThisAmount"), criteria);
+    }
+
+    //得到最后一笔单据
+    public DoctorWarehouseMaterialHandle getLastDocument(Long warehouseId, Long materialId, Date settlementDate) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("materialId", materialId);
+        criteria.put("settlementDate", settlementDate);
+        return this.sqlSession.selectOne(this.sqlId("getLastDocument"), criteria);
+    }
+
+
     //更改物料有关的信息
     public Boolean updateWarehouseMaterialHandle(DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle) {
         return  this.sqlSession.update(this.sqlId("updateWarehouseMaterialHandle"), doctorWarehouseMaterialHandle)>=1;
