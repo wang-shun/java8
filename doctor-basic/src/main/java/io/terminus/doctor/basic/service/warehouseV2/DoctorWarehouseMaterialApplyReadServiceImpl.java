@@ -188,7 +188,6 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
             boolean  b = doctorWarehouseOrgSettlementDao.isSettled(orgId, sdf.parse(date));
             if(!b){
-                BigDecimal allQuantity = new BigDecimal(0);
                 for(int i = 0;i<maps.size(); i++){
                     maps.get(i).put("sum_unit_price","--");
                     maps.get(i).put("sum_amount","--");

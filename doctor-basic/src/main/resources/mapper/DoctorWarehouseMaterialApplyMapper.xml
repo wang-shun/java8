@@ -444,9 +444,9 @@
         s.`code` as material_code,
         s.`name` as material_name,
         db.name as unit,
-        sum(ifnull(round((ma.quantity+ 0.00000001),3),0)+ifnull(round((ma.refund_quantity+ 0.00000001),3),0)) as sum_quantity,
-        round(sum(ifnull(round((ma.amount+ 0.00000001),2),0)+ifnull(round((ma.refund_amount+ 0.00000001),2),0))/sum(ifnull(round((ma.quantity+ 0.00000001),3),0)+ifnull(round((ma.refund_quantity+ 0.00000001),3),0)),4) as sum_unit_price,
-        sum(ifnull(round((ma.amount+ 0.00000001),2),0)+ifnull(round((ma.refund_amount+ 0.00000001),2),0)) as sum_amount,
+        sum(ifnull(round((ma.quantity+ 0.00000001),3),0)+ifnull(round((ma.refund_quantity+ 0.00000001),3),0))+'' as sum_quantity,
+        round(sum(ifnull(round((ma.amount+ 0.00000001),2),0)+ifnull(round((ma.refund_amount+ 0.00000001),2),0))/sum(ifnull(round((ma.quantity+ 0.00000001),3),0)+ifnull(round((ma.refund_quantity+ 0.00000001),3),0)),4)+'' as sum_unit_price,
+        sum(ifnull(round((ma.amount+ 0.00000001),2),0)+ifnull(round((ma.refund_amount+ 0.00000001),2),0))+'' as sum_amount,
         s.type as material_type,
         v.short_name as vendor_name,
         s.specification as specification,
@@ -481,7 +481,7 @@
         <if test="pigType != null">
             and ma.pig_type = #{pigType}
         </if>
-        <if test="type != null">
+        <if test="type != 0">
             and ma.type = #{type}
         </if>
         <if test="materialName != null">
@@ -491,7 +491,7 @@
 
         union all
 
-        <if test="type == null or type == '' or (type=3 or type=4 or type=5) ">
+        <if test=" type==0 or type==3 or type==4 or type==5 ">
             select '' as pig_barn_id,
             '合计' as pig_barn_name,
             '' as pig_type,
@@ -503,7 +503,7 @@
             '' as unit,
             '' as sum_quantity,
             '' as sum_unit_price,
-            sum(ifnull(round((ma.amount+ 0.00000001),2),0)+ifnull(round((ma.refund_amount+ 0.00000001),2),0)) as sum_amount,
+            sum(ifnull(round((ma.amount+ 0.00000001),2),0)+ifnull(round((ma.refund_amount+ 0.00000001),2),0))+'' as sum_amount,
             '' as material_type,
             '' as vendor_name,
             '' as specification,
@@ -538,7 +538,7 @@
             <if test="pigType != null">
                 and ma.pig_type = #{pigType}
             </if>
-            <if test="type != null">
+            <if test="type != 0">
                 and ma.type = #{type}
             </if>
             <if test="materialName != null">
@@ -546,7 +546,7 @@
             </if>
         </if>
 
-        <if test="type != null and type != '' and (type=1 or type=2) ">
+        <if test=" type==1 or type==2 ">
             select '' as pig_barn_id,
             '合计' as pig_barn_name,
             '' as pig_type,
@@ -556,9 +556,9 @@
             '' as material_code,
             '' as material_name,
             '' as unit,
-            sum(ifnull(round((ma.quantity+ 0.00000001),3),0)+ifnull(round((ma.refund_quantity+ 0.00000001),3),0)) as sum_quantity,
+            sum(ifnull(round((ma.quantity+ 0.00000001),3),0)+ifnull(round((ma.refund_quantity+ 0.00000001),3),0))+'' as sum_quantity,
             '' as sum_unit_price,
-            sum(ifnull(round((ma.amount+ 0.00000001),2),0)+ifnull(round((ma.refund_amount+ 0.00000001),2),0)) as sum_amount,
+            sum(ifnull(round((ma.amount+ 0.00000001),2),0)+ifnull(round((ma.refund_amount+ 0.00000001),2),0))+'' as sum_amount,
             '' as material_type,
             '' as vendor_name,
             '' as specification,
@@ -593,7 +593,7 @@
             <if test="pigType != null">
                 and ma.pig_type = #{pigType}
             </if>
-            <if test="type != null">
+            <if test="type!=0">
                 and ma.type = #{type}
             </if>
             <if test="materialName != null">
