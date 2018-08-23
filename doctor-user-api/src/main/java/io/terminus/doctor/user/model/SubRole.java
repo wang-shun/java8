@@ -29,7 +29,7 @@ import java.util.Objects;
  */
 @Data
 @EqualsAndHashCode(of = {"id"})
-@ToString(of = {"id", "name", "desc", "userId", "status"})
+@ToString(of = {"id", "name", "desc", "userId", "status","roleType"})
 public class SubRole implements Serializable, CustomRole {
 
     private static final long serialVersionUID = 1L;
