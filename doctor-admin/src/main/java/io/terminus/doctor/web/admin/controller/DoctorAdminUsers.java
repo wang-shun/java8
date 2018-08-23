@@ -337,7 +337,7 @@ public class DoctorAdminUsers {
      * @param role 运营角色
      * @return 角色主键 ID
      */
-    @RequestMapping(value = "/addRole", method = RequestMethod.POST)
+    @RequestMapping(value = "/addRole", method = RequestMethod.GET)
     public Long createRole(@RequestBody SubRole role) {
         role.setAppKey("PC");
         role.setStatus(1);
