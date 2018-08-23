@@ -949,15 +949,15 @@
         from doctor_groups b
         join doctor_barns c on b.current_barn_id = c.id
         where b.farm_id = #{farmId} and
-        ((b.status = 1 and b.open_at &lt;= #{time}) or (b.status = -1 and b.open_at &lt;= #{time} and b.close_at >= #{time}))
+        ((b.status = 1 and date(b.open_at) &lt;= #{time}) or (b.status = -1 and date(b.open_at) &lt;= #{time} and date(b.close_at) >= #{time}))
         <if test="barn != null">and c.id = #{barn}</if>
         <if test="groupCode != null"> AND b.group_code like CONCAT(CONCAT('%',#{groupCode}),'%')</if>
         <if test="operatorName != null"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
         <if test="groupType != null">and c.pig_type = #{groupType}</if>
-        <if test="buildBeginGroupTime != null">and b.open_at >= #{buildBeginGroupTime}</if>
-        <if test="buildEndGroupTime != null">and b.open_at &lt;= #{buildEndGroupTime}</if>
-        <if test="closeBeginGroupTime != null">and b.close_at >= #{closeBeginGroupTime}</if>
-        <if test="closeEndGroupTime != null">and b.close_at &lt;= #{closeEndGroupTime}</if>
+        <if test="buildBeginGroupTime != null">and date(b.open_at) >= #{buildBeginGroupTime}</if>
+        <if test="buildEndGroupTime != null">and date(b.open_at) &lt;= #{buildEndGroupTime}</if>
+        <if test="closeBeginGroupTime != null">and date(b.close_at) >= #{closeBeginGroupTime}</if>
+        <if test="closeEndGroupTime != null">and date(b.close_at) &lt;= #{closeEndGroupTime}</if>
     </select>
     <select id="groupList1" parameterType="map" resultType="map">
         select b.id as group_id,b.group_code, b.pig_type, b.current_barn_id, b.current_barn_name, c.staff_id, c.staff_name ,b.close_at as close_event_at,b.open_at as build_event_at
@@ -969,10 +969,10 @@
         <if test="groupCode != null"> AND b.group_code like CONCAT(CONCAT('%',#{groupCode}),'%')</if>
         <if test="operatorName != null"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
         <if test="groupType != null">and c.pig_type = #{groupType}</if>
-        <if test="buildBeginGroupTime != null">and b.open_at >= #{buildBeginGroupTime}</if>
-        <if test="buildEndGroupTime != null">and b.open_at &lt;= #{buildEndGroupTime}</if>
-        <if test="closeBeginGroupTime != null">and b.close_at >= #{closeBeginGroupTime}</if>
-        <if test="closeEndGroupTime != null">and b.close_at &lt;= #{closeEndGroupTime}</if>
+        <if test="buildBeginGroupTime != null">and date(b.open_at) >= #{buildBeginGroupTime}</if>
+        <if test="buildEndGroupTime != null">and date(b.open_at) &lt;= #{buildEndGroupTime}</if>
+        <if test="closeBeginGroupTime != null">and date(b.close_at) >= #{closeBeginGroupTime}</if>
+        <if test="closeEndGroupTime != null">and date(b.close_at) &lt;= #{closeEndGroupTime}</if>
     </select>
     <select id="groupList2" parameterType="map" resultType="map">
         select a.group_id,a.group_code, b.pig_type, b.current_barn_id, b.current_barn_name, c.staff_id, c.staff_name ,a.event_at
