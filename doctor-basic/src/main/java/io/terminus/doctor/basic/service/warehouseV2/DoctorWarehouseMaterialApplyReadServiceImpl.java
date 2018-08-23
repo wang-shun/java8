@@ -157,24 +157,23 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
         BigDecimal allQuantity = new BigDecimal(0);
         BigDecimal allAmount = new BigDecimal(0);
+        // 陈娟2018-8-23
         for (int i = 0; i < pigGroupList.size(); i++) {
-            pigGroupList.get(i).setQuantity(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getQuantity())).setScale(3, BigDecimal.ROUND_HALF_UP).toString());
-            pigGroupList.get(i).setUnitPrice(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getUnitPrice())).setScale(4, BigDecimal.ROUND_HALF_UP).toString());
-            pigGroupList.get(i).setAmount(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getAmount())).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
             boolean b = doctorWarehouseOrgSettlementDao.isSettled(orgId, pigGroupList.get(i).getSettlementDate());
-            if(!b){
-                pigGroupList.get(i).setUnitPrice("0");
-                pigGroupList.get(i).setAmount("0");
-            }
-            if (pigGroupList.get(i).getQuantity() != null) {
-                allQuantity = new BigDecimal(Double.parseDouble(pigGroupList.get(i).getQuantity())).add(allQuantity);
-            }
-            if (pigGroupList.get(i).getAmount() != null) {
-                allAmount = new BigDecimal(Double.parseDouble( pigGroupList.get(i).getAmount())).add(allAmount);
-            }
             if(!b){
                 pigGroupList.get(i).setUnitPrice("--");
                 pigGroupList.get(i).setAmount("--");
+                allAmount=allAmount.add(BigDecimal.ZERO);
+            }else{
+                pigGroupList.get(i).setUnitPrice(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getUnitPrice())).setScale(4, BigDecimal.ROUND_HALF_UP).toString());
+                pigGroupList.get(i).setAmount(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getAmount())).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+                if (pigGroupList.get(i).getAmount() != null) {
+                    allAmount = new BigDecimal(Double.parseDouble( pigGroupList.get(i).getAmount())).add(allAmount);
+                }
+            }
+            pigGroupList.get(i).setQuantity(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getQuantity())).setScale(3, BigDecimal.ROUND_HALF_UP).toString());
+            if (pigGroupList.get(i).getQuantity() != null) {
+                allQuantity = new BigDecimal(Double.parseDouble(pigGroupList.get(i).getQuantity())).add(allQuantity);
             }
         }
         Map<String, Object> map = new HashMap<>();
@@ -277,15 +276,19 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
         List<DoctorWarehouseMaterialApplyPigGroup> pigGroupList = doctorWarehouseMaterialApplyDao.selectPigGroupApply1(farmId, pigType, pigName, pigGroupName, skuType, skuName, openAtStart,openAtEnd,closeAtStart,closeAtEnd);
         for (int i = 0; i < pigGroupList.size(); i++) {
-            pigGroupList.get(i).setQuantity(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getQuantity())).setScale(3, BigDecimal.ROUND_HALF_UP).toString());
-            pigGroupList.get(i).setUnitPrice(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getUnitPrice())).setScale(4, BigDecimal.ROUND_HALF_UP).toString());
-            pigGroupList.get(i).setAmount(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getAmount())).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+            // 陈娟2018-8-23
             boolean b = doctorWarehouseOrgSettlementDao.isSettled(orgId, pigGroupList.get(i).getSettlementDate());
             if (!b) {
                 pigGroupList.get(i).setUnitPrice("--");
                 pigGroupList.get(i).setAmount("--");
+            }else{
+                pigGroupList.get(i).setUnitPrice(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getUnitPrice())).setScale(4, BigDecimal.ROUND_HALF_UP).toString());
+                pigGroupList.get(i).setAmount(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getAmount())).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
             }
+            pigGroupList.get(i).setQuantity(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getQuantity())).setScale(3, BigDecimal.ROUND_HALF_UP).toString());
         }
+
+
         return pigGroupList;
     }
 }

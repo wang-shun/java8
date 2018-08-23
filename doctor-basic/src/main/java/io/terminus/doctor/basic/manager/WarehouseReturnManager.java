@@ -137,7 +137,7 @@ public class WarehouseReturnManager extends AbstractStockManager<WarehouseStockR
             //退料数量记录为负数
             if (apply.getRefundQuantity() == null)
                 apply.setRefundQuantity(new BigDecimal(0));
-            apply.setRefundQuantity(apply.getRefundQuantity().add(materialHandle.getQuantity()));
+            apply.setRefundQuantity(apply.getRefundQuantity().subtract(materialHandle.getQuantity()));
             doctorWarehouseMaterialApplyDao.update(apply);
         });
 
