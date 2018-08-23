@@ -692,10 +692,16 @@
         then ifnull(b.quantity,0) else '' end as rksl,
         case when
         b.type in (1,7,9,11)
+        then ifnull(b.unit_price,0) else '' end as rkdj,
+        case when
+        b.type in (1,7,9,11)
         then ifnull(b.amount,0) else '' end as rkje,
         case when
         b.type in (2,8,10,12,13)
         then ifnull(b.quantity,0) else '' end as cksl,
+        case when
+        b.type in (2,8,10,12,13)
+        then ifnull(b.unit_price,0) else '' end as ckdj,
         case when
         b.type in (2,8,10,12,13)
         then ifnull(b.amount,0) else '' end as ckje,

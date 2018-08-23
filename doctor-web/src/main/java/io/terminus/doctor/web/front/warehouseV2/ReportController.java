@@ -950,8 +950,10 @@ public class ReportController {
 
                         // 计算每一条明细的结存数据
                         Object rksl = thismap.get("rksl");
+                        Object rkdj = thismap.get("rkdj");
                         Object rkje = thismap.get("rkje");
                         Object cksl = thismap.get("cksl");
+                        Object ckdj = thismap.get("ckdj");
                         Object ckje = thismap.get("ckje");
 
                         BigDecimal drksl = isNull(rksl) ? new BigDecimal(0d) :  new BigDecimal(rksl.toString());
@@ -970,28 +972,15 @@ public class ReportController {
 
                         thisMonthTotalRksl.add(drksl); //入库数量累加
                         thisMonthTotalRkje.add(drkje); //入库金额累加
-
-                        if(drksl.compareTo(BigDecimal.ZERO) == 0 || drkje.compareTo(BigDecimal.ZERO) == 0){
-                            tempmap.put("rkdj","");
-                        } else {
-                            tempmap.put("rkdj", drkje.divide(drksl, 4, BigDecimal.ROUND_HALF_UP));
-                        }
-
                         thisMonthTotalCksl.add(dcksl); //出库数量累加
                         thisMonthTotalCkje.add(dckje); //出库金额累加
 
-                        if(dcksl.compareTo(BigDecimal.ZERO) == 0 || dckje.compareTo(BigDecimal.ZERO) == 0){
-                            if(byjsflag) {
-                                tempmap.put("ckdj", "");
-                            }else{
-                                tempmap.put("ckdj", "--");
-                            }
-                        } else {
-                            if(byjsflag) {
-                                tempmap.put("ckdj", dckje.divide(dcksl, 4, BigDecimal.ROUND_HALF_UP));
-                            }else {
-                                tempmap.put("ckdj", "--");
-                            }
+                        if(byjsflag) {
+                            tempmap.put("rkdj", isNull(rkdj) ? "" : new BigDecimal(rkdj.toString()).setScale(4, BigDecimal.ROUND_HALF_UP));
+                            tempmap.put("ckdj", isNull(ckdj) ? "" : new BigDecimal(ckdj.toString()).setScale(4, BigDecimal.ROUND_HALF_UP));
+                        }else{
+                            tempmap.put("rkdj", "--");
+                            tempmap.put("ckdj", "--");
                         }
 
                         BigDecimal singleJcsl = new BigDecimal(0d);
