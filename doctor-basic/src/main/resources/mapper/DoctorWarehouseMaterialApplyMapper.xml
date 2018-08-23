@@ -492,7 +492,7 @@
 
         union all
 
-        <if test="type == null or type == ''or (type=3 or type=4 or type=5) ">
+        <if test="type == null or type == '' or (type=3 or type=4 or type=5) ">
             select '' as pig_barn_id,
             '合计' as pig_barn_name,
             '' as pig_type,
@@ -547,7 +547,7 @@
             </if>
         </if>
 
-        <if test="type != null and type != ''and (type=1 or type=2) ">
+        <if test="type != null and type != '' and (type=1 or type=2) ">
             select '' as pig_barn_id,
             '合计' as pig_barn_name,
             '' as pig_type,
