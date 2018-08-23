@@ -445,8 +445,7 @@
         s.`name` as material_name,
         db.name as unit,
         sum(ifnull(round((ma.quantity+ 0.00000001),3),0)+ifnull(round((ma.refund_quantity+ 0.00000001),3),0)) as sum_quantity,
-        round(sum(ifnull(round((ma.amount+ 0.00000001),2),0)+ifnull(round((ma.refund_amount+ 0.00000001),2),0))/
-        sum(ifnull(round((ma.quantity+ 0.00000001),3),0)+ifnull(round((ma.refund_quantity+ 0.00000001),3),0)),4) as sum_unit_price,
+        round(sum(ifnull(round((ma.amount+ 0.00000001),2),0)+ifnull(round((ma.refund_amount+ 0.00000001),2),0))/sum(ifnull(round((ma.quantity+ 0.00000001),3),0)+ifnull(round((ma.refund_quantity+ 0.00000001),3),0)),4) as sum_unit_price,
         sum(ifnull(round((ma.amount+ 0.00000001),2),0)+ifnull(round((ma.refund_amount+ 0.00000001),2),0)) as sum_amount,
         s.type as material_type,
         v.short_name as vendor_name,
@@ -726,8 +725,7 @@
         c.name as sku_name,
         db.name as unit,
         sum(ifnull(round((a.quantity+ 0.00000001),3),0)+ifnull(round((a.refund_quantity+ 0.00000001),3),0)) as quantity,
-        round(sum(ifnull(round((a.amount+ 0.00000001),2),0)+ifnull(round((a.refund_amount+ 0.00000001),2),0))/
-        sum(ifnull(round((a.quantity+ 0.00000001),3),0)+ifnull(round((a.refund_quantity+ 0.00000001),3),0)),4) as sum_unit_price,
+        round(sum(ifnull(round((a.amount+ 0.00000001),2),0)+ifnull(round((a.refund_amount+ 0.00000001),2),0))/sum(ifnull(round((a.quantity+ 0.00000001),3),0)+ifnull(round((a.refund_quantity+ 0.00000001),3),0)),4) as unit_price,
         sum(ifnull(round((a.amount+ 0.00000001),2),0)+ifnull(round((a.refund_amount+ 0.00000001),2),0)) as amount,
         c.type as sku_type,
         b.short_name as vendor_name,

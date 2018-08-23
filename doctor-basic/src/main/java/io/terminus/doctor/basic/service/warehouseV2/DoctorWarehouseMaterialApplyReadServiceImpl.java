@@ -165,15 +165,12 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
                 pigGroupList.get(i).setAmount("--");
                 allAmount=allAmount.add(BigDecimal.ZERO);
             }else{
-                pigGroupList.get(i).setUnitPrice(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getUnitPrice())).setScale(4, BigDecimal.ROUND_HALF_UP).toString());
-                pigGroupList.get(i).setAmount(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getAmount())).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
                 if (pigGroupList.get(i).getAmount() != null) {
-                    allAmount = new BigDecimal(Double.parseDouble( pigGroupList.get(i).getAmount())).add(allAmount);
+                    allAmount = new BigDecimal( pigGroupList.get(i).getAmount()).add(allAmount);
                 }
             }
-            pigGroupList.get(i).setQuantity(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getQuantity())).setScale(3, BigDecimal.ROUND_HALF_UP).toString());
             if (pigGroupList.get(i).getQuantity() != null) {
-                allQuantity = new BigDecimal(Double.parseDouble(pigGroupList.get(i).getQuantity())).add(allQuantity);
+                allQuantity = new BigDecimal(pigGroupList.get(i).getQuantity()).add(allQuantity);
             }
         }
         Map<String, Object> map = new HashMap<>();
@@ -251,9 +248,6 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         }
 
         for (int i = 0; i < maps.size(); i++) {
-            maps.get(i).setQuantity(new BigDecimal(Double.parseDouble(maps.get(i).getQuantity())).setScale(3, BigDecimal.ROUND_HALF_UP).toString());
-            maps.get(i).setUnitPrice(new BigDecimal(Double.parseDouble(maps.get(i).getUnitPrice())).setScale(4, BigDecimal.ROUND_HALF_UP).toString());
-            maps.get(i).setAmount(new BigDecimal(Double.parseDouble(maps.get(i).getAmount())).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
             try {
             //会计年月支持选择未结算过的会计年月，如果选择未结算的会计区间，则报表不显示金额和单价
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
@@ -281,13 +275,8 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
             if (!b) {
                 pigGroupList.get(i).setUnitPrice("--");
                 pigGroupList.get(i).setAmount("--");
-            }else{
-                pigGroupList.get(i).setUnitPrice(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getUnitPrice())).setScale(4, BigDecimal.ROUND_HALF_UP).toString());
-                pigGroupList.get(i).setAmount(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getAmount())).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
             }
-            pigGroupList.get(i).setQuantity(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getQuantity())).setScale(3, BigDecimal.ROUND_HALF_UP).toString());
         }
-
 
         return pigGroupList;
     }
