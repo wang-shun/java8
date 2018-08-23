@@ -75,6 +75,11 @@ public class SubRole implements Serializable, CustomRole {
     private Integer status;
 
     /**
+     * 角色类型
+     */
+    private Integer roleType;
+
+    /**
      * 角色对应资源列表, 不存数据库
      */
     @Setter(AccessLevel.NONE)
