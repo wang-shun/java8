@@ -481,7 +481,7 @@
         <if test="pigType != null">
             and ma.pig_type = #{pigType}
         </if>
-        <if test="type != 0">
+        <if test="type != 0 and type!=null">
             and ma.type = #{type}
         </if>
         <if test="materialName != null">
@@ -491,7 +491,7 @@
 
         union all
 
-        <if test=" type==0 or type==3 or type==4 or type==5 ">
+        <if test=" type==null or type=='' or type==0 or type==3 or type==4 or type==5 ">
             select '' as pig_barn_id,
             '合计' as pig_barn_name,
             '' as pig_type,
@@ -538,7 +538,7 @@
             <if test="pigType != null">
                 and ma.pig_type = #{pigType}
             </if>
-            <if test="type != 0">
+            <if test="type != 0 and type!=null">
                 and ma.type = #{type}
             </if>
             <if test="materialName != null">
@@ -546,7 +546,7 @@
             </if>
         </if>
 
-        <if test=" type==1 or type==2 ">
+        <if test=" type!=null and type!='' and (type==1 or type==2) ">
             select '' as pig_barn_id,
             '合计' as pig_barn_name,
             '' as pig_type,
@@ -593,7 +593,7 @@
             <if test="pigType != null">
                 and ma.pig_type = #{pigType}
             </if>
-            <if test="type!=0">
+            <if test="type!=0 and type!=null">
                 and ma.type = #{type}
             </if>
             <if test="materialName != null">
