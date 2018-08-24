@@ -252,7 +252,7 @@
         id = #{orgId}
     </select>
 
-    <update id="updateOrgPidTpye" parameterType="long">
+    <update id="updateOrgPidTpye" parameterType="map">
         UPDATE
         <include refid="tb"/>
         SET parent_id = 0 , `type` = 2
