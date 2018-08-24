@@ -69,15 +69,11 @@ public interface DoctorOrgReadService {
     Response<DoctorOrg> findByName(String name);
 
     /**
-     * 通过公司id查集团(孔景军)
-     * @param orgId
+     * 用户审核通过后把公司的parent_id置为0、type置为2
+     * @param id
      * @return
      */
-    Response<DoctorOrg>  findGroupcompanyByOrgId(Long orgId);
-
-    /**
-     * 用户审核通过后把公司的parent_id置为0、type置为2
-     */
     Response<Boolean> updateOrgPidTpye(Long id);
+
 
 }
