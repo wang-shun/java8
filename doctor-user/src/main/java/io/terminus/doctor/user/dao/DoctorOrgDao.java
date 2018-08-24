@@ -211,12 +211,14 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
     public DoctorOrg findName(Long id) {
         return sqlSession.selectOne(sqlId("findName"), id);
     }
+
     /**
-     * 通过公司id查集团(孔景军)
-     * @param orgId
+     * 用户审核通过后把公司的parent_id置为0、type置为2
+     * @param id
      * @return
      */
-    public DoctorOrg  findGroupcompanyByOrgId(Long orgId){
-        return sqlSession.selectOne(sqlId("findGroupcompanyByOrgId"), orgId);
+    public boolean updateOrgPidTpye(Long id){
+        return sqlSession.update(sqlId("updateOrgPidTpye"),ImmutableMap.of("id",id))==1;
     }
+
 }

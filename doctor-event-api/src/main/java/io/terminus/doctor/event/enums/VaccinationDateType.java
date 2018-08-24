@@ -25,7 +25,13 @@ public enum VaccinationDateType {
     PREG_CHECK(6, "妊娠检查"),
     BREEDING(7, "配种"),
     DELIVER(8, "分娩"),
-    WEAN(9, "断奶");
+    WEAN(9, "断奶"),
+
+    //(jsj后面加的)
+    BACK_TO_LOVE(10,"返情"),
+    MISCARRY(11,"流产"),
+    FEMININE(12,"阴性"),
+    ENTER(13,"进场");
 
     @Getter
     private Integer value;

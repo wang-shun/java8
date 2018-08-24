@@ -131,4 +131,17 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
     public Response<DoctorOrg>  findGroupcompanyByOrgId(Long orgId){
         return Response.ok(doctorOrgDao.findGroupcompanyByOrgId(orgId));
     }
+
+    @Override
+    public Response<Boolean> updateOrgPidTpye(Long id) {
+        Response<Boolean> response=new Response<>();
+        try{
+            response.setResult(doctorOrgDao.updateOrgPidTpye(id));
+        }catch (Exception e){
+            log.error("update org failed, cause : {}", Throwables.getStackTraceAsString(e));
+            response.setError("update.org.failed");
+        }
+        return response;
+    }
+
 }

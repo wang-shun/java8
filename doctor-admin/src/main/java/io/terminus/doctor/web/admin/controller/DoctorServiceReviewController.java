@@ -111,6 +111,10 @@ public class DoctorServiceReviewController {
         if (dto.getOrg() == null || dto.getOrg().getId() == null) {
             throw new JsonResponseException("orgId.not.null");
         }
+
+        //jiangjs用户审核通过后把公司的parent_id置为0、type置为2
+        doctorOrgReadService.updateOrgPidTpye(dto.getOrg().getId());
+
         
         List<DoctorFarm> newFarms = RespHelper.or500(
                 doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getLoginName(), dto.getOrg(), dto.getFarms())

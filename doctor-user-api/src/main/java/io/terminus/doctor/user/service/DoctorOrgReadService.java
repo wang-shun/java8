@@ -74,4 +74,10 @@ public interface DoctorOrgReadService {
      * @return
      */
     Response<DoctorOrg>  findGroupcompanyByOrgId(Long orgId);
+
+    /**
+     * 用户审核通过后把公司的parent_id置为0、type置为2
+     */
+    Response<Boolean> updateOrgPidTpye(Long id);
+
 }
