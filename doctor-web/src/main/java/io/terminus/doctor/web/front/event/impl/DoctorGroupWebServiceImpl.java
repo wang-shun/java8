@@ -420,7 +420,10 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                 params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
                 return new DoctorGroupInputInfo(groupDetail, map(putBasicFields(params), DoctorMoveInGroupInput.class));
             case CHANGE:
-         //       checkParam(params, groupDetail.getGroup().getGroupCode());
+                if(params.get("weight") == null){
+                    params.put("weight",0);
+                }
+                checkParam(params, groupDetail.getGroup().getGroupCode());
                 params.put("changeTypeName", getBasicName(getLong(params, "changeTypeId")));
                 params.put("changeReasonName", getChangeReasonName(getLong(params, "changeReasonId")));
                 if (params.get("customerName") == null || params.get("customerName") == "") {
