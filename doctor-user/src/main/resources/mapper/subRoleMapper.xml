@@ -110,7 +110,7 @@
         <if test="status != null">AND status = #{status}</if>
         <if test="userId != null">AND user_id = #{userId}</if>
         <if test="farmId != null">AND farm_id = #{farmId}</if>
-        <if test="roleType != null">AND farm_id = #{roleType}</if>
+        <if test="roleType != null">AND role_type = #{roleType}</if>
     </sql>
 
 

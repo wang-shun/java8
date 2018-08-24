@@ -345,6 +345,21 @@ public class DoctorAdminUsers {
     }
 
     /**
+     * 查找角色
+     *
+     * @param
+     * @return 角色主键 ID
+     */
+    @RequestMapping(value = "/findrole", method = RequestMethod.GET)
+    public Paging<SubRole> findrole( @RequestParam(required = false)Integer status,
+                                     @RequestParam(required = false)String roleName,
+                                     @RequestParam(required = false)Integer roleType,
+                                     @RequestParam(required = false)Integer pageNo,
+                                     @RequestParam(required = false)Integer size) {
+        return or500(subRoleReadService.findrole(status,roleName,roleType,pageNo,size));
+    }
+
+    /**
      * 更新子账号角色
      *
      * @param role 角色授权内容

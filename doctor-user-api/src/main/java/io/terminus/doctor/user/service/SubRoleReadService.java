@@ -74,5 +74,8 @@ public interface SubRoleReadService extends CustomRoleReadService<SubRole> {
      * @param size   查询个数
      * @return 自定义角色分页
      */
+
     Response<Paging<SubRole>> pagingRole(String appKey, Long farmId, Integer status, String roleName, Integer pageNo, Integer size);
+
+    Response<Paging<SubRole>> findrole(Integer status, String roleName, Integer roleType, Integer pageNo, Integer size);
 }
