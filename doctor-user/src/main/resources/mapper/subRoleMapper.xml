@@ -19,6 +19,7 @@
         <result column="extra_json" property="extraJson"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
+        <result column="role_type" property="roleType"/>
     </resultMap>
 
     <sql id="tb">
