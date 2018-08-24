@@ -112,9 +112,6 @@ public class DoctorServiceReviewController {
             throw new JsonResponseException("orgId.not.null");
         }
 
-        //jiangjs用户审核通过后把公司的parent_id置为0、type置为2
-        doctorOrgReadService.updateOrgPidTpye(dto.getOrg().getId());
-
         
         List<DoctorFarm> newFarms = RespHelper.or500(
                 doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getLoginName(), dto.getOrg(), dto.getFarms())
@@ -127,6 +124,9 @@ public class DoctorServiceReviewController {
         }else{
             log.error("failed to post OpenDoctorServiceEvent due to findFarmsByUserId failing");
         }
+
+        //（蒋圣津）用户审核通过后把公司的parent_id置为0、type置为2
+        doctorOrgReadService.updateOrgPidTpye(dto.getOrg().getId());
 
         log.info("init barn start, userId:{}, farms:{}", dto.getUserId(), newFarms);
         //初始化猪舍和仓库大类

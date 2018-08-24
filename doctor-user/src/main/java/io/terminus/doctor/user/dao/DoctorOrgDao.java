@@ -213,7 +213,7 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
     }
 
     /**
-     * 用户审核通过后把公司的parent_id置为0、type置为2
+     * （jiangsj）用户审核通过后把公司的parent_id置为0、type置为2
      * @param id
      * @return
      */

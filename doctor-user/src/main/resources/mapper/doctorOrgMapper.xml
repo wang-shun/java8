@@ -255,7 +255,7 @@
     <update id="updateOrgPidTpye" parameterType="long">
         UPDATE
         <include refid="tb"/>
-        SET parent_id = 0, `type` = 2
+        SET parent_id = 0 , `type` = 2
         WHERE
         id =#{id}
     </update>
