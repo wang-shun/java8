@@ -362,8 +362,8 @@
     <select id="findBarnIdsByfarmId" parameterType="map" resultType="map">
         select id,pig_type,name,staff_name from doctor_barns
         where farm_id = #{farmId}
-        <if test="operatorName != null">AND staff_name like concat('%',#{operatorName},'%')</if>
-        <if test="barnName != null">AND name like concat('%',#{barnName},'%')</if>
+        <if test="operatorName != null and operatorName != ''">AND staff_name like concat('%',#{operatorName},'%')</if>
+        <if test="barnName != null and barnName != ''">AND name like concat('%',#{barnName},'%')</if>
         <if test="pigType != null and pigType != 17 and pigType != 27">AND pig_type = #{pigType}</if>
         <if test="pigType != null and (pigType == 17 or pigType == 27)">AND pig_type = 7</if>
     </select>

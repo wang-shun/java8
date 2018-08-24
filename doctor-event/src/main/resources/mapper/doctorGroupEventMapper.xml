@@ -951,8 +951,8 @@
         where b.farm_id = #{farmId} and
         ((b.status = 1 and date(b.open_at) &lt;= #{time}) or (b.status = -1 and date(b.open_at) &lt;= #{time} and date(b.close_at) >= #{time}))
         <if test="barn != null">and c.id = #{barn}</if>
-        <if test="groupCode != null"> AND b.group_code like CONCAT(CONCAT('%',#{groupCode}),'%')</if>
-        <if test="operatorName != null"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
+        <if test="groupCode != null and groupCode != ''"> AND b.group_code like CONCAT(CONCAT('%',#{groupCode}),'%')</if>
+        <if test="operatorName != null and operatorName != ''"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
         <if test="groupType != null">and c.pig_type = #{groupType}</if>
         <if test="buildBeginGroupTime != null">and date(b.open_at) >= #{buildBeginGroupTime}</if>
         <if test="buildEndGroupTime != null">and date(b.open_at) &lt;= #{buildEndGroupTime}</if>
@@ -966,8 +966,8 @@
         where b.farm_id = #{farmId} and b.status = -1
         and date(b.close_at) = #{time}
         <if test="barn != null">and c.id = #{barn}</if>
-        <if test="groupCode != null"> AND b.group_code like CONCAT(CONCAT('%',#{groupCode}),'%')</if>
-        <if test="operatorName != null"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
+        <if test="groupCode != null and groupCode != ''"> AND b.group_code like CONCAT(CONCAT('%',#{groupCode}),'%')</if>
+        <if test="operatorName != null and operatorName != ''"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
         <if test="groupType != null">and c.pig_type = #{groupType}</if>
         <if test="buildBeginGroupTime != null">and date(b.open_at) >= #{buildBeginGroupTime}</if>
         <if test="buildEndGroupTime != null">and date(b.open_at) &lt;= #{buildEndGroupTime}</if>
