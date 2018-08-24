@@ -620,7 +620,7 @@
 
     <!-- 得到所有的物料 -->
     <select id="getMeterails" parameterType="Map" resultType="java.util.LinkedHashMap">
-        select distinct material_name from doctor_warehouse_material_handle
+        select distinct material_id from doctor_warehouse_material_handle
         where delete_flag=1
         <if test="farmId != null">
             and farm_id=#{farmId}
@@ -673,9 +673,7 @@
         <if test="warehouseId != null">
             and a.warehouse_id=#{warehouseId}
         </if>
-        <if test="materialName != null">
-            and b.`name` like CONCAT('%',#{materialName},'%')
-        </if>
+        and a.material_id = #{materialId}
     </select>
 
     <select id="wlbdReport" parameterType="Map" resultType="java.util.LinkedHashMap">

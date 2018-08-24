@@ -365,7 +365,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         params.put("settlementDate", settlementDate);
         params.put("type", type);
         params.put("warehouseId", warehouseId);
-        params.put("materialName", materialName);
+        params.put("materialId", materialName);
         return this.sqlSession.selectOne("lastWlbdReport", params);
     }
 

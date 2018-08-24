@@ -764,7 +764,7 @@ public class ReportController {
             if(resultMap.size() > 0)
             {
                 for(Map<String,Object> map:resultMap){
-                    materials.add(String.valueOf(map.get("material_name")));
+                    materials.add(String.valueOf(map.get("material_id")));
                 }
             }
             else {
