@@ -365,7 +365,7 @@ public class DoctorAdminUsers {
      * @param role 角色授权内容
      * @return 是否更新成功
      */
-    @RequestMapping(value = "", method = RequestMethod.PUT)
+    @RequestMapping(value = "updateRole", method = RequestMethod.PUT)
     public Boolean updateRole(@RequestBody SubRole role) {
         if(role.getId() == null){
             throw new JsonResponseException(500, "sub.role.id.miss");
@@ -377,7 +377,7 @@ public class DoctorAdminUsers {
         }
 
         role.setId(role.getId());
-        role.setAppKey(null); // prevent update
+        role.setAppKey("PC"); // prevent update
         or500(subRoleWriteService.updateRole(role));
 
         //如果角色名称发生了改变, 则更新冗余字段

@@ -78,6 +78,7 @@
             <if test="status!=null">status = #{status},</if>
             <if test="allowJson!=null">allow_json = #{allowJson},</if>
             <if test="extraJson!=null">extra_json = #{extraJson},</if>
+            <if test="roleType!=null">role_type = #{roleType},</if>
             updated_at = now()
         </set>
         where id = #{id}
