@@ -755,23 +755,19 @@ public class ReportController {
         List<Map<String, Object>> resultNewMap = Lists.newArrayList();
 
         List<String> materials = Lists.newArrayList();
-        if(StringUtils.isBlank(materialName))
-        {
-            List<Map<String,Object>> resultMap = doctorWarehouseReportReadService.getMeterails(
-                    farmId,settlementDate, type,warehouseId,materialName
-            );
 
-            if(resultMap.size() > 0)
-            {
-                for(Map<String,Object> map:resultMap){
-                    materials.add(String.valueOf(map.get("material_id")));
-                }
+        List<Map<String,Object>> resultMtMap = doctorWarehouseReportReadService.getMeterails(
+                orgId,farmId,settlementDate, type,warehouseId,materialName
+        );
+
+        if(resultMtMap != null && resultMtMap.size() > 0)
+        {
+            for(Map<String,Object> map:resultMtMap){
+                materials.add(String.valueOf(map.get("material_id")));
             }
-            else {
-                return resultNewMap;
-            }
-        } else {
-            materials.add(materialName);
+        }
+        else {
+            return resultNewMap;
         }
 
         if(materials.size() > 0) {
@@ -868,12 +864,12 @@ public class ReportController {
                 }
                 resultNewMap.add(lastMap);
 
-                List<Map<String, Object>> resultMap = doctorWarehouseReportReadService.wlbdReport(
+                List<Map<String,Object>> resultMap = doctorWarehouseReportReadService.wlbdReport(
                         farmId, settlementDate, type, warehouseId, str
                 );
 
                 // 计算这条物料的结存数据与汇总数据
-                if (resultMap.size() > 0) {
+                if (resultMap != null && resultMap.size() > 0) {
 
                     //本月汇总变量定义
                     List<Map<String, Object>> resultEndMap = Lists.newArrayList();

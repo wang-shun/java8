@@ -370,15 +370,19 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     }
 
     public List<Map<String, Object>> getMeterails(
+            Long orgId,
             Long farmId, String settlementDate,
             Integer type, Long warehouseId, String materialName
     ) {
         Map<String, Object> params = new HashMap<>();
+        params.put("orgId",orgId);
         params.put("farmId", farmId);
         params.put("settlementDate", settlementDate);
         params.put("type", type);
         params.put("warehouseId", warehouseId);
-        params.put("materialName", materialName);
+        params.put("materialName", materialName == null ||
+          "".equals(materialName.trim()) ||
+         "null".equals(materialName.trim().toLowerCase()) ? null : materialName.trim());
         return this.sqlSession.selectList("getMeterails", params);
     }
 
@@ -390,7 +394,7 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         params.put("settlementDate", settlementDate);
         params.put("type", type);
         params.put("warehouseId", warehouseId);
-        params.put("materialName", materialName);
+        params.put("materialId", materialName);
         return this.sqlSession.selectList("wlbdReport", params);
     }
 

@@ -621,7 +621,10 @@
     <!-- 得到所有的物料 -->
     <select id="getMeterails" parameterType="Map" resultType="java.util.LinkedHashMap">
         select distinct material_id from doctor_warehouse_material_handle
-        where delete_flag=1
+        where delete_flag = 1
+        <if test="orgId != null">
+            and org_id=#{orgId}
+        </if>
         <if test="farmId != null">
             and farm_id=#{farmId}
         </if>
@@ -630,6 +633,9 @@
         </if>
         <if test="warehouseId != null">
             and warehouse_id=#{warehouseId}
+        </if>
+        <if test="materialName != null">
+            and material_name like CONCAT('%',#{materialName},'%')
         </if>
         order by id
     </select>
@@ -740,14 +746,11 @@
         <if test="warehouseId != null">
             and b.warehouse_id=#{warehouseId}
         </if>
-        <if test="materialName != null and ''!=materialName ">
-            and d.`name` like CONCAT('%',#{materialName},'%')
-        </if>
+        and d.id = #{materialId}
         <if test="type != null and ''!=type">
             and d.type=#{type}
         </if>
         order by b.handle_date,b.id,f.pig_group_name
-        <!--order by b.handle_date,b.id,f.pig_group_name-->
     </select>
 
     <sql id="balanceAmount">

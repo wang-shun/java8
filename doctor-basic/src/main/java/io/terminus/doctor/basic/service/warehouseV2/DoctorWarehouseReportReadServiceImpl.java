@@ -497,12 +497,14 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
      */
     @Override
     public List<Map<String,Object>> getMeterails(
+            Long orgId,
             Long farmId,
             String settlementDate,
             Integer type,
             Long warehouseId,
             String materialName){
         List<Map<String,Object>> lists = doctorWarehouseMaterialHandleDao.getMeterails(
+                orgId,
                 farmId, settlementDate, type, warehouseId, materialName);
         return lists;
     }
