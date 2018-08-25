@@ -157,24 +157,20 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
         BigDecimal allQuantity = new BigDecimal(0);
         BigDecimal allAmount = new BigDecimal(0);
+        // 陈娟2018-8-23
         for (int i = 0; i < pigGroupList.size(); i++) {
-            pigGroupList.get(i).setQuantity(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getQuantity())).setScale(3, BigDecimal.ROUND_HALF_UP).toString());
-            pigGroupList.get(i).setUnitPrice(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getUnitPrice())).setScale(4, BigDecimal.ROUND_HALF_UP).toString());
-            pigGroupList.get(i).setAmount(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getAmount())).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
             boolean b = doctorWarehouseOrgSettlementDao.isSettled(orgId, pigGroupList.get(i).getSettlementDate());
-            if(!b){
-                pigGroupList.get(i).setUnitPrice("0");
-                pigGroupList.get(i).setAmount("0");
-            }
-            if (pigGroupList.get(i).getQuantity() != null) {
-                allQuantity = new BigDecimal(Double.parseDouble(pigGroupList.get(i).getQuantity())).add(allQuantity);
-            }
-            if (pigGroupList.get(i).getAmount() != null) {
-                allAmount = new BigDecimal(Double.parseDouble( pigGroupList.get(i).getAmount())).add(allAmount);
-            }
             if(!b){
                 pigGroupList.get(i).setUnitPrice("--");
                 pigGroupList.get(i).setAmount("--");
+                allAmount=allAmount.add(BigDecimal.ZERO);
+            }else{
+                if (pigGroupList.get(i).getAmount() != null) {
+                    allAmount = new BigDecimal( pigGroupList.get(i).getAmount()).add(allAmount);
+                }
+            }
+            if (pigGroupList.get(i).getQuantity() != null) {
+                allQuantity = new BigDecimal(pigGroupList.get(i).getQuantity()).add(allQuantity);
             }
         }
         Map<String, Object> map = new HashMap<>();
@@ -192,7 +188,6 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
             boolean  b = doctorWarehouseOrgSettlementDao.isSettled(orgId, sdf.parse(date));
             if(!b){
-                BigDecimal allQuantity = new BigDecimal(0);
                 for(int i = 0;i<maps.size(); i++){
                     maps.get(i).put("sum_unit_price","--");
                     maps.get(i).put("sum_amount","--");
@@ -252,9 +247,6 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         }
 
         for (int i = 0; i < maps.size(); i++) {
-            maps.get(i).setQuantity(new BigDecimal(Double.parseDouble(maps.get(i).getQuantity())).setScale(3, BigDecimal.ROUND_HALF_UP).toString());
-            maps.get(i).setUnitPrice(new BigDecimal(Double.parseDouble(maps.get(i).getUnitPrice())).setScale(4, BigDecimal.ROUND_HALF_UP).toString());
-            maps.get(i).setAmount(new BigDecimal(Double.parseDouble(maps.get(i).getAmount())).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
             try {
             //会计年月支持选择未结算过的会计年月，如果选择未结算的会计区间，则报表不显示金额和单价
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
@@ -277,15 +269,14 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
         List<DoctorWarehouseMaterialApplyPigGroup> pigGroupList = doctorWarehouseMaterialApplyDao.selectPigGroupApply1(farmId, pigType, pigName, pigGroupName, skuType, skuName, openAtStart,openAtEnd,closeAtStart,closeAtEnd);
         for (int i = 0; i < pigGroupList.size(); i++) {
-            pigGroupList.get(i).setQuantity(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getQuantity())).setScale(3, BigDecimal.ROUND_HALF_UP).toString());
-            pigGroupList.get(i).setUnitPrice(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getUnitPrice())).setScale(4, BigDecimal.ROUND_HALF_UP).toString());
-            pigGroupList.get(i).setAmount(new BigDecimal(Double.parseDouble(pigGroupList.get(i).getAmount())).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+            // 陈娟2018-8-23
             boolean b = doctorWarehouseOrgSettlementDao.isSettled(orgId, pigGroupList.get(i).getSettlementDate());
             if (!b) {
                 pigGroupList.get(i).setUnitPrice("--");
                 pigGroupList.get(i).setAmount("--");
             }
         }
+
         return pigGroupList;
     }
 }
