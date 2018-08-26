@@ -184,6 +184,7 @@ public class WarehouseOutStockService extends AbstractWarehouseStockService<Ware
             apply.setApplyStaffId(detail.getApplyStaffId());
             apply.setApplyStaffName(detail.getApplyStaffName());
             apply.setPigType(detail.getPigType());
+            apply.setRefundQuantity(detail.getQuantity().subtract(materialHandle.getQuantity()));
 
             if (apply.getApplyType().equals(WarehouseMaterialApplyType.SOW.getValue())
                     || apply.getApplyType().equals(WarehouseMaterialApplyType.GROUP.getValue())) {

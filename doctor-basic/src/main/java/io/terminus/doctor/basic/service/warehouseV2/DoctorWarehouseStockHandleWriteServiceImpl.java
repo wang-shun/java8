@@ -5,26 +5,17 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.*;
-import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.manager.*;
-import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStock;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
-import io.terminus.doctor.common.exception.InvalidException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Desc:
@@ -63,6 +54,8 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
     private DoctorBasicDao doctorBasicDao;
     @Autowired
     private DoctorWarehouseStockManager doctorWarehouseStockManager;
+    @Autowired
+    private DoctorWarehouseMaterialApplyDao doctorWarehouseMaterialApplyDao;
 
     @Override
     public Response<Long> create(DoctorWarehouseStockHandle doctorWarehouseStockHandle) {
@@ -117,6 +110,9 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
             //退料入库
             if(type == 13){
                 warehouseReturnManager.delete(handle);
+                DoctorWarehouseMaterialApply apply = doctorWarehouseMaterialApplyDao.findMaterialHandle(handle.getRelMaterialHandleId());
+                apply.setQuantity(handle.getQuantity());
+                doctorWarehouseMaterialApplyDao.update(apply);
                 doctorWarehouseStockManager.out(handle.getMaterialId(),handle.getQuantity(),wareHouse);
             }
             //盘盈入库
