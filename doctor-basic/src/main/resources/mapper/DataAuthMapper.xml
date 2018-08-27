@@ -16,13 +16,13 @@
         <if test="userId != null">
             and a.id like CONCAT(CONCAT('%',#{userId}),'%')
         </if>
-        <if test="userName != null and userName != ''">
-            and a.`name` like CONCAT(CONCAT('%',#{userName}),'%')
+        <if test="userName != null">
+            and a.`name` like contact('%',#{userName},'%')
         </if>
-        <if test="mobile != null and mobile != ''">
-            and a.mobile like CONCAT(CONCAT('%',#{mobile}),'%')
+        <if test="mobile != null">
+            and a.mobile like contact('%',#{mobile},'%')
         </if>
-        <if test="userType != null and userType != ''">
+        <if test="userType != null">
             and b.user_type = #{userType}
         </if>
     </select>
@@ -37,14 +37,13 @@
         <if test="userId != null">
           and a.id like CONCAT(CONCAT('%',#{userId}),'%')
         </if>
-        <if test="userName != null and userName != ''">
+        <if test="userName != null">
           and a.`name` like  CONCAT(CONCAT('%',#{userName}),'%')
-
         </if>
-        <if test="mobile != null and mobile != ''">
+        <if test="mobile != null">
           and a.mobile like CONCAT(CONCAT('%',#{mobile}),'%')
         </if>
-        <if test="userType != null and userType != ''">
+        <if test="userType != null">
           and b.user_type = #{userType}
         </if>
         order by a.id
@@ -105,7 +104,6 @@
         role_name=#{roleName}
         where user_id = #{userId}
     </update>
-
 
     <!-- 数据范围授权接口 -->
     <select id="selectTreeAll" resultType="Map">
