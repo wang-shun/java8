@@ -278,7 +278,6 @@ public class DataAuthServiceImpl implements DataAuthService{
                 params.put("userId",userId);
                 userParams.add(params);
             }
-
             // 删除历史数据
             dataAuthDao.deletePerssion(userIdParams);
             // 修改用户角色数据
