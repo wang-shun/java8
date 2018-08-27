@@ -414,7 +414,7 @@ public class ServiceConfiguration {
                 return null;
             }
             @Override
-            public Response<DoctorOrg> findGroupcompanyByOrgId(Long orgId) {
+            public Response<Boolean> updateOrgPidTpye(Long id){
                 return null;
             }
         };

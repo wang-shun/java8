@@ -75,5 +75,4 @@ public interface DoctorOrgReadService {
      */
     Response<Boolean> updateOrgPidTpye(Long id);
 
-
 }
