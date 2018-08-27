@@ -22,7 +22,7 @@
         <if test="mobile != null">
             and a.mobile like contact('%',#{mobile},'%')
         </if>
-        <if test="mobile != null">
+        <if test="userType != null">
             and b.user_type = #{userType}
         </if>
     </select>
@@ -43,7 +43,7 @@
         <if test="mobile != null">
           and a.mobile like contact('%',#{mobile},'%')
         </if>
-        <if test="mobile != null">
+        <if test="userType != null">
           and b.user_type = #{userType}
         </if>
         order by a.id
