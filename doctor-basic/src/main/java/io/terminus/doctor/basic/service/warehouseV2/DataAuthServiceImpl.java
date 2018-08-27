@@ -149,7 +149,7 @@ public class DataAuthServiceImpl implements DataAuthService{
                 if(groupId != null && !groupId.equals(tempGroupId))
                 {
                     orgMap = Maps.newLinkedHashMap();
-                    orgMap.put("key",groupId);
+                    orgMap.put("key","group_" + groupId);
                     orgMap.put("name",groupName);
 
                     //处理公司数据,过滤得到新的集合数组
@@ -200,17 +200,19 @@ public class DataAuthServiceImpl implements DataAuthService{
         try
         {
             List<Map<String,Object>> orgLists = Lists.newArrayList();
+            String tempOrgId = "";
             for (Map<String,Object> subMap : mapList) {
                 String groupId = String.valueOf(subMap.get("groupId"));
                 if(groupId != null && groupId.equals(pgroupId)) {
                     String orgId = String.valueOf(subMap.get("orgId"));
                     String orgName = String.valueOf(subMap.get("orgName"));
-                    if(StringUtils.isNotBlank(orgId)) {
+                    if(StringUtils.isNotBlank(orgId) && !tempOrgId.equals(orgId)) {
                         Map<String, Object> orgMap = Maps.newLinkedHashMap();
-                        orgMap.put("key", orgId);
+                        orgMap.put("key", "org_" + orgId);
                         orgMap.put("name", orgName);
                         orgLists.add(orgMap);
                     }
+                    tempOrgId = orgId;
                 }
             }
             return orgLists;
@@ -239,7 +241,7 @@ public class DataAuthServiceImpl implements DataAuthService{
                     String farmName = String.valueOf(subMap.get("farmName"));
                     if(StringUtils.isNotBlank(farmId)) {
                         Map<String, Object> orgMap = Maps.newLinkedHashMap();
-                        orgMap.put("key", farmId);
+                        orgMap.put("key","farm_" + farmId);
                         orgMap.put("name", farmName);
                         farmLists.add(orgMap);
                     }
