@@ -161,7 +161,7 @@ public class DataAuthServiceImpl implements DataAuthService{
                         for (Map<String,Object> subOrgMap : orgLists)
                         {
                             Map<String,Object> reSubOrgMap = subOrgMap;
-                            String orgId = String.valueOf(subOrgMap.get("key"));
+                            String orgId = String.valueOf(subOrgMap.get("key")).replace("org_","");
                             //处理猪场数据,过滤得到新的集合数组
                             List<Map<String,Object>> farmLists = getFarmLists(mapList,groupId,orgId);
                             reSubOrgMap.put("children",farmLists);
