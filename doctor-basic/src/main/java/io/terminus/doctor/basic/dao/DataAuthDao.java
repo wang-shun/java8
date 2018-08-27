@@ -127,8 +127,8 @@ public class DataAuthDao extends MyBatisDao<DataAuth> {
     /**
      * 删除用户可访问数据权限
      */
-    public int deletePerssion(String userId){
-        return getSqlSession().delete(sqlId("deletePerssion"),userId);
+    public int deletePerssion(List<Map<String,String>> params){
+        return getSqlSession().delete(sqlId("deletePerssion"),params);
     }
 
     /**
@@ -136,7 +136,7 @@ public class DataAuthDao extends MyBatisDao<DataAuth> {
      * @param params
      * @return
      */
-    public int updateSubUserType(Map<String,String> params){
+    public int updateSubUserType(List<Map<String,String>> params){
         return getSqlSession().update(sqlId("updateSubUserType"),params);
     }
 
@@ -145,7 +145,7 @@ public class DataAuthDao extends MyBatisDao<DataAuth> {
      * @param params
      * @return
      */
-    public int insertPerssion(Map<String,String> params){
+    public int insertPerssion(List<Map<String,String>> params){
         return getSqlSession().insert(sqlId("insertPerssion"),params);
     }
 

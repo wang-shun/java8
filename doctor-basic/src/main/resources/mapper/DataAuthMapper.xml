@@ -128,17 +128,23 @@
     </select>
 
     <!-- 批量操作数据范围授权接口 -->
-    <delete id="deletePerssion" parameterType="String">
-        delete from doctor_user_data_permissions where user_id=#{userId}
+    <delete id="deletePerssion" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" separator=";">
+            delete from doctor_user_data_permissions where user_id=#{item.userId}
+        </foreach>
     </delete>
 
-    <update id="updateSubUserType" parameterType="Map">
-        update doctor_sub_roles set user_type = #{userType} where user_id = #{userId}
+    <update id="updateSubUserType" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" separator=";">
+          update doctor_sub_roles set user_type = #{item.userType} where user_id = #{item.userId}
+        </foreach>
     </update>
 
-    <insert id="insertPerssion" parameterType="Map">
-        insert into doctor_user_data_permissions(user_id,group_ids,org_ids,farm_ids)
-        values(#{userId},#{groupIds},#{orgIds},#{farmIds})
+    <insert id="insertPerssion" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" separator=";">
+            insert into doctor_user_data_permissions(user_id,group_ids,org_ids,farm_ids)
+            values(#{item.userId},#{item.groupIds},#{item.orgIds},#{item.farmIds})
+        </foreach>
     </insert>
 
 </mapper>

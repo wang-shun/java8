@@ -266,24 +266,36 @@ public class DataAuthServiceImpl implements DataAuthService{
             }
 
             List<String> userIds = dataSubRoles.getUserIds();
+            List<Map<String,String>> userIdParams = Lists.newArrayList();
+            List<Map<String,String>> userParams = Lists.newArrayList();
             for (String userId : userIds) {
-                dataAuthDao.deletePerssion(userId);
+                Map<String,String> userIdParam = Maps.newHashMap();
+                userIdParam.put("userId",userId);
+                userIdParams.add(userIdParam);
+
                 Map<String,String> params = Maps.newHashMap();
                 params.put("userType",dataSubRoles.getUserType());
                 params.put("userId",userId);
-                dataAuthDao.updateSubUserType(params);
+                userParams.add(params);
             }
 
-            // 批量新增
+            // 删除历史数据
+            dataAuthDao.deletePerssion(userIdParams);
+            // 修改用户角色数据
+            dataAuthDao.updateSubUserType(userParams);
+
+            // 批量新增数据权限
             List<DataSubRole> dataSubRoleList = dataSubRoles.getDatas();
+            List<Map<String,String>> dataSubRoleParams = Lists.newArrayList();
             for (DataSubRole dataSubRole : dataSubRoleList) {
-                Map<String,String> params = Maps.newHashMap();
-                params.put("userId",dataSubRole.getUserId());
-                params.put("groupIds",dataSubRole.getGroupIds());
-                params.put("orgIds",dataSubRole.getOrgIds());
-                params.put("farmIds",dataSubRole.getFarmIds());
-                dataAuthDao.insertPerssion(params);
+                Map<String,String> dataSubRoleParam = Maps.newHashMap();
+                dataSubRoleParam.put("userId",dataSubRole.getUserId());
+                dataSubRoleParam.put("groupIds",dataSubRole.getGroupIds());
+                dataSubRoleParam.put("orgIds",dataSubRole.getOrgIds());
+                dataSubRoleParam.put("farmIds",dataSubRole.getFarmIds());
+                dataSubRoleParams.add(dataSubRoleParam);
             }
+            dataAuthDao.insertPerssion(dataSubRoleParams);
 
             return Response.ok("执行成功");
         }catch (Exception e){
