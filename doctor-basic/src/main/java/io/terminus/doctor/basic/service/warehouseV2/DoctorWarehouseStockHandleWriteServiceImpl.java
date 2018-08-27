@@ -111,7 +111,7 @@ public class DoctorWarehouseStockHandleWriteServiceImpl implements DoctorWarehou
             if(type == 13){
                 warehouseReturnManager.delete(handle);
                 DoctorWarehouseMaterialApply apply = doctorWarehouseMaterialApplyDao.findMaterialHandle(handle.getRelMaterialHandleId());
-                apply.setRefundQuantity(apply.getRefundAmount().add(handle.getQuantity()));
+                apply.setRefundQuantity(apply.getRefundQuantity().add(handle.getQuantity()));
                 doctorWarehouseMaterialApplyDao.update(apply);
                 doctorWarehouseStockManager.out(handle.getMaterialId(),handle.getQuantity(),wareHouse);
             }
