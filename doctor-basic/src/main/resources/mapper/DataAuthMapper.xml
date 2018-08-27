@@ -17,10 +17,10 @@
             and a.id=#{userId}
         </if>
         <if test="userName != null">
-            and a.`name` like contact('%',#{userName},'%')
+            and a.`name` like CONCAT(CONCAT('%',#{userName}),'%')
         </if>
         <if test="mobile != null">
-            and a.mobile like contact('%',#{mobile},'%')
+            and a.mobile like CONCAT(CONCAT('%',#{mobile}),'%')
         </if>
         <if test="userType != null">
             and b.user_type = #{userType}
@@ -38,10 +38,11 @@
           and a.id=#{userId}
         </if>
         <if test="userName != null">
-          and a.`name` like contact('%',#{userName},'%')
+          and a.`name` like  CONCAT(CONCAT('%',#{userName}),'%')
+
         </if>
         <if test="mobile != null">
-          and a.mobile like contact('%',#{mobile},'%')
+          and a.mobile like CONCAT(CONCAT('%',#{mobile}),'%')
         </if>
         <if test="userType != null">
           and b.user_type = #{userType}
