@@ -6,7 +6,6 @@ import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockRefundDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.manager.WarehouseReturnManager;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.common.exception.InvalidException;
@@ -107,18 +106,18 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
                 }
                 materialHandle.setQuantity(detail.getQuantity());
 
-                DoctorWarehouseMaterialApply apply1 = doctorWarehouseMaterialApplyDao.findMaterialHandle(materialHandle.getRelMaterialHandleId());
-                apply1.setRefundQuantity(apply1.getRefundQuantity().add(materialHandle.getQuantity().subtract(outMaterialHandle.getQuantity())));
-                doctorWarehouseMaterialApplyDao.update(apply1);
+//                DoctorWarehouseMaterialApply apply1 = doctorWarehouseMaterialApplyDao.findMaterialHandle(materialHandle.getRelMaterialHandleId());
+//                apply1.setRefundQuantity(apply1.getRefundQuantity().add(materialHandle.getQuantity().subtract(outMaterialHandle.getQuantity())));
+//                doctorWarehouseMaterialApplyDao.update(apply1);
 
                 //更新领用记录中的退料数量
-//                doctorWarehouseMaterialApplyDao.findAllByMaterialHandle(materialHandle.getId()).forEach(apply -> {
-//                    if (apply.getRefundQuantity() == null)
-//                        apply.setRefundQuantity(new BigDecimal(0));
-//
-//                    apply.setRefundQuantity(apply.getRefundQuantity().add(changedQuantity));
-//                    doctorWarehouseMaterialApplyDao.update(apply);
-//                });
+                doctorWarehouseMaterialApplyDao.findAllByMaterialHandle(materialHandle.getId()).forEach(apply -> {
+                    if (apply.getRefundQuantity() == null)
+                        apply.setRefundQuantity(new BigDecimal(0));
+
+                    apply.setRefundQuantity(apply.getRefundQuantity().add(changedQuantity));
+                    doctorWarehouseMaterialApplyDao.update(apply);
+                });
             }
 
             Date recalculateDate = materialHandle.getHandleDate();
