@@ -68,7 +68,7 @@
 
 
     <!-- 新增用户 -->
-    <insert id="insertUser" parameterType="Map">
+    <insert id="insertUser" parameterType="Map" >
         insert into parana_users(`name`,mobile,password,`type`,status)
         values(#{userName},#{mobile},#{password},6,1)
     </insert>
