@@ -7,6 +7,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DataAuthDao;
 import io.terminus.doctor.basic.dto.warehouseV2.DataAuth;
 import io.terminus.doctor.basic.dto.warehouseV2.DataSubRole;
+import io.terminus.doctor.common.utils.EncryptUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,17 @@ public class DataAuthServiceImpl implements DataAuthService{
         }
     }
 
+    @Override
+    public Response userSingleRoleInfo(Integer userId) {
+        try{
+            return Response.ok(dataAuthDao.userSingleRoleInfo(userId));
+        }catch (Exception e){
+            log.error("userSingleRoleInfo[error] ==> {}",e);
+            return Response.fail(e.getMessage());
+        }
+    }
+
+
     /**
      * 添加或修改用户角色数据
      * @return
@@ -75,6 +87,10 @@ public class DataAuthServiceImpl implements DataAuthService{
                     return Response.fail("该用户对应的用户名或手机号已存在");
                 }
 
+                String password = params.get("password");
+                if(StringUtils.isBlank(password)) return Response.fail("password必传");
+
+                params.put("password", EncryptUtil.encrypt(password));
                 dataAuthDao.insertUser(params);
                 Integer userId = dataAuthDao.selectUserByName(userName);
                 params.put("userId",userId.toString());
@@ -88,6 +104,11 @@ public class DataAuthServiceImpl implements DataAuthService{
 
                 if(dataAuthDao.selectUserById(userId) == null) {
                     return Response.fail("该用户不存在,不能修改");
+                }
+
+                String password = params.get("password");
+                if(StringUtils.isNotBlank(password)){
+                    params.put("password", EncryptUtil.encrypt(password));
                 }
 
                 dataAuthDao.updateUser(params);

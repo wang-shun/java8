@@ -15,6 +15,8 @@ public interface DataAuthService {
 
     Response getUserRoleInfo(Map<String,String> params);
 
+    Response userSingleRoleInfo(Integer userId);
+
     Response editUserRoleInfo(Map<String,String> params);
 
     Response getDataSubRoles(Integer userId);

@@ -28,7 +28,7 @@
     </select>
 
     <select id="getUserRoleInfo" parameterType="Map" resultType="Map">
-        select a.id,a.`name`,b.real_name,a.mobile,b.user_type,c.`name` as roleName
+        select a.id,a.`name`,b.real_name as realName,a.mobile,b.user_type as userType,c.`name` as roleName
         from parana_users a
         join doctor_user_subs b on a.id=b.user_id
         join doctor_sub_roles c on b.role_id=c.id
@@ -49,6 +49,23 @@
         order by a.id
         limit ${pageNo},${pageSize}
     </select>
+
+    <select id="userSingleRoleInfo" parameterType="Integer" resultType="Map">
+        select
+        b.role_id as roleId,
+        a.`name`,
+        b.real_name as realName,
+        a.mobile,
+        b.user_type as userType,
+        a.password
+        from parana_users a
+        join doctor_user_subs b on a.id=b.user_id
+        join doctor_sub_roles c on b.role_id=c.id
+        where (b.user_type=1 or b.user_type=2)
+        and (c.role_type=0 or c.role_type=1 or c.role_type=2)
+        and a.id = #{userId}
+    </select>
+
 
     <!-- 新增用户 -->
     <insert id="insertUser" parameterType="Map">
@@ -75,7 +92,10 @@
 
     <!-- 修改用户 -->
     <update id="updateUser" parameterType="Map">
-        update parana_users set mobile = #{mobile},password = #{password}
+        update parana_users set mobile = #{mobile}
+        <if test="password != null">
+        ,password = #{password}
+        </if>
         where id = #{userId}
     </update>
 

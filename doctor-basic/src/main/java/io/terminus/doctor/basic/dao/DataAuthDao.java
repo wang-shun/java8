@@ -37,6 +37,14 @@ public class DataAuthDao extends MyBatisDao<DataAuth> {
     }
 
     /**
+     * 查询单个用户角色数据
+     * @return
+     */
+    public Map<String,Object> userSingleRoleInfo(Integer userId) {
+        return getSqlSession().selectOne(sqlId("userSingleRoleInfo"), userId);
+    }
+
+    /**
      * 通过用户名称查询用户id
      * @return
      */
