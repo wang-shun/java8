@@ -205,10 +205,12 @@ public class DataAuthServiceImpl implements DataAuthService{
                 if(groupId != null && groupId.equals(pgroupId)) {
                     String orgId = String.valueOf(subMap.get("orgId"));
                     String orgName = String.valueOf(subMap.get("orgName"));
-                    Map<String,Object> orgMap = Maps.newLinkedHashMap();
-                    orgMap.put("key",orgId);
-                    orgMap.put("name",orgName);
-                    orgLists.add(orgMap);
+                    if(StringUtils.isNotBlank(orgId)) {
+                        Map<String, Object> orgMap = Maps.newLinkedHashMap();
+                        orgMap.put("key", orgId);
+                        orgMap.put("name", orgName);
+                        orgLists.add(orgMap);
+                    }
                 }
             }
             return orgLists;
@@ -235,10 +237,12 @@ public class DataAuthServiceImpl implements DataAuthService{
                 if(groupId != null && orgId != null && groupId.equals(pgroupId) && orgId.equals(porgId)) {
                     String farmId = String.valueOf(subMap.get("farmId"));
                     String farmName = String.valueOf(subMap.get("farmName"));
-                    Map<String,Object> orgMap = Maps.newLinkedHashMap();
-                    orgMap.put("key",farmId);
-                    orgMap.put("name",farmName);
-                    farmLists.add(orgMap);
+                    if(StringUtils.isNotBlank(farmId)) {
+                        Map<String, Object> orgMap = Maps.newLinkedHashMap();
+                        orgMap.put("key", farmId);
+                        orgMap.put("name", farmName);
+                        farmLists.add(orgMap);
+                    }
                 }
             }
             return farmLists;
