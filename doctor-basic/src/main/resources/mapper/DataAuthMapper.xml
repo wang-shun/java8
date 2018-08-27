@@ -92,7 +92,7 @@
 
     <!-- 修改用户 -->
     <update id="updateUser" parameterType="Map">
-        update parana_users set mobile = #{mobile}
+        update parana_users set mobile = #{mobile},updated_at=now()
         <if test="password != null">
         ,password = #{password}
         </if>
@@ -101,7 +101,7 @@
 
     <!-- 修改用户 -->
     <update id="updateUserRole" parameterType="Map">
-        update doctor_user_subs set real_name = #{realName},role_id = #{roleId},user_type=#{userType}
+        update doctor_user_subs set real_name = #{realName},role_id = #{roleId},user_type=#{userType},updated_at=now()
         where user_id = #{userId}
     </update>
 
@@ -136,14 +136,14 @@
 
     <update id="updateSubUserType" parameterType="java.util.List">
         <foreach collection="list" item="item" index="index" separator=";">
-          update doctor_sub_roles set user_type = #{item.userType} where user_id = #{item.userId}
+          update doctor_sub_roles set user_type = #{item.userType},updated_at=now() where user_id = #{item.userId}
         </foreach>
     </update>
 
     <insert id="insertPerssion" parameterType="java.util.List">
         <foreach collection="list" item="item" index="index" separator=";">
-            insert into doctor_user_data_permissions(user_id,group_ids,org_ids,farm_ids)
-            values(#{item.userId},#{item.groupIds},#{item.orgIds},#{item.farmIds})
+            insert into doctor_user_data_permissions(user_id,group_ids,org_ids,farm_ids,created_at,updated_at)
+            values(#{item.userId},#{item.groupIds},#{item.orgIds},#{item.farmIds},now(),now())
         </foreach>
     </insert>
 
