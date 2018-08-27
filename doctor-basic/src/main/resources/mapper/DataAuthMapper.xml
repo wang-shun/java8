@@ -134,11 +134,14 @@
         </foreach>
     </delete>
 
-    <update id="updateSubUserType" parameterType="Integer">
-        update doctor_sub_roles set user_type = #{item.userType},updated_at=now()
+    <update id="updateSubUserType" parameterType="java.util.List">
+        update doctor_user_subs set
+          <foreach item="item" collection="list" separator="," >
+              user_type = #{item.userType},updated_at=now()
+          </foreach>
         where user_id in
-        <foreach item="user_IdItem" collection="array" open="(" separator="," close=")">
-            #{user_IdItem}
+        <foreach item="item" collection="list" open="(" separator="," close=")">
+            #{item.userId}
         </foreach>
     </update>
 
