@@ -178,39 +178,39 @@ public class DataAuthServiceImpl implements DataAuthService{
 
             if(userId != null) {
                 Map<String, Object> map = dataAuthDao.selectUserPermission(userId);
-                String group_ids = String.valueOf(map.get("group_ids"));
-                String org_ids = String.valueOf(map.get("org_ids"));
-                String farm_ids = String.valueOf(map.get("farm_ids"));
-
                 Map<String,Object> vmap = Maps.newLinkedHashMap();
-                if(StringUtils.isNotBlank(group_ids)){
-                    String [] groupIds = group_ids.split(",");
-                    List<String> groupLists = Lists.newArrayList();
-                    for(String groupId : groupIds)
-                    {
-                        groupLists.add("group_" + groupId);
-                    }
-                    vmap.put("groupLists",groupLists);
-                }
 
-                if(StringUtils.isNotBlank(org_ids)){
-                    String [] orgIds = org_ids.split(",");
-                    List<String> orgLists = Lists.newArrayList();
-                    for(String orgId : orgIds)
-                    {
-                        orgLists.add("org_"+ orgId);
-                    }
-                    vmap.put("orgLists",orgLists);
-                }
+                if(map != null) {
+                    String group_ids = String.valueOf(map.get("group_ids"));
+                    String org_ids = String.valueOf(map.get("org_ids"));
+                    String farm_ids = String.valueOf(map.get("farm_ids"));
 
-                if(StringUtils.isNotBlank(farm_ids)){
-                    String [] farmIds = farm_ids.split(",");
-                    List<String> farmLists = Lists.newArrayList();
-                    for(String farmId : farmIds)
-                    {
-                        farmLists.add("farm_"+ farmId);
+                    if (StringUtils.isNotBlank(group_ids)) {
+                        String[] groupIds = group_ids.split(",");
+                        List<String> groupLists = Lists.newArrayList();
+                        for (String groupId : groupIds) {
+                            groupLists.add("group_" + groupId);
+                        }
+                        vmap.put("groupLists", groupLists);
                     }
-                    vmap.put("farmLists",farmLists);
+
+                    if (StringUtils.isNotBlank(org_ids)) {
+                        String[] orgIds = org_ids.split(",");
+                        List<String> orgLists = Lists.newArrayList();
+                        for (String orgId : orgIds) {
+                            orgLists.add("org_" + orgId);
+                        }
+                        vmap.put("orgLists", orgLists);
+                    }
+
+                    if (StringUtils.isNotBlank(farm_ids)) {
+                        String[] farmIds = farm_ids.split(",");
+                        List<String> farmLists = Lists.newArrayList();
+                        for (String farmId : farmIds) {
+                            farmLists.add("farm_" + farmId);
+                        }
+                        vmap.put("farmLists", farmLists);
+                    }
                 }
 
                 String userType = dataAuthDao.selectUserType(userId);
