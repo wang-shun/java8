@@ -227,6 +227,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             if (notNull(endDate)) {
                 endAt = new DateTime(endAt).plusDays(1).minusMillis(1).toDate();
             }
+            log.error("================"+pageInfo.getOffset()+"==========="+pageInfo.getLimit());
             Paging<DoctorGroupEvent> paging = doctorGroupEventDao.paging(pageInfo.getOffset(), pageInfo.getLimit(),
                     MapBuilder.<String, Object>of().put("farmId", farmId).put("groupId", groupId).put("type", type).put("tag", GroupEventType.WEAN.getValue()).put("beginDate", startDate).put("endDate", endAt).map());
             paging.setData(setExtraData(paging.getData()));
