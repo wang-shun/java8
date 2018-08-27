@@ -80,7 +80,7 @@ public class DoctorReportDeliverDao extends MyBatisDao<DoctorReportDeliver> {
         return getSqlSession().selectOne(sqlId("getMatingCount"), map);
     }
 
-    public Long getFarmId(BigInteger farmId){
-        return getSqlSession().selectOne(sqlId("getFarmId"),farmId);
+    public Long getFarmId(BigInteger pigId){
+        return getSqlSession().selectOne(sqlId("getFarmId"),pigId);
     }
 }
