@@ -29,6 +29,7 @@ public class DataAuthController {
     @RequestMapping(value = "/userRoleInfo", method = RequestMethod.POST)
     @ResponseBody
     public Response getUserRoleInfo(@RequestBody(required = false) Map<String,String> params){
+        log.error("====="+params);
         return dataAuthService.getUserRoleInfo(params);
     }
 
