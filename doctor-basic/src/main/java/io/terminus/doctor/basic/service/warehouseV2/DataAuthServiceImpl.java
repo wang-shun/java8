@@ -140,7 +140,7 @@ public class DataAuthServiceImpl implements DataAuthService{
 
             // 循环处理所有集团、公司、猪场数据
             String tempGroupId = "";
-            Map<String,Object> reMap = Maps.newHashMap();
+            Map<String,Object> reMap = Maps.newLinkedHashMap();
             List<Map<String,Object>> orgList = Lists.newArrayList();
             Map<String,Object> orgMap;
             for (Map<String,Object> subMap : mapList) {
@@ -148,7 +148,7 @@ public class DataAuthServiceImpl implements DataAuthService{
                 String groupName = String.valueOf(subMap.get("groupName"));
                 if(groupId != null && !groupId.equals(tempGroupId))
                 {
-                    orgMap = Maps.newHashMap();
+                    orgMap = Maps.newLinkedHashMap();
                     orgMap.put("key",groupId);
                     orgMap.put("name",groupName);
 
