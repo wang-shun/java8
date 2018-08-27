@@ -127,22 +127,29 @@
     </select>
 
     <!-- 批量操作数据范围授权接口 -->
-    <delete id="deletePerssion" parameterType="java.util.List">
-        <foreach collection="list" item="item" index="index" separator=";">
-            delete from doctor_user_data_permissions where user_id=#{item.userId}
+    <delete id="deletePerssion" parameterType="Integer">
+        delete from doctor_user_data_permissions where user_id in
+        <foreach item="user_IdItem" collection="array" open="(" separator="," close=")">
+            #{user_IdItem}
         </foreach>
     </delete>
 
-    <update id="updateSubUserType" parameterType="java.util.List">
-        <foreach collection="list" item="item" index="index" separator=";">
-          update doctor_sub_roles set user_type = #{item.userType},updated_at=now() where user_id = #{item.userId}
+    <update id="updateSubUserType" parameterType="Integer">
+        update doctor_sub_roles set user_type = #{item.userType},updated_at=now()
+        where user_id in
+        <foreach item="user_IdItem" collection="array" open="(" separator="," close=")">
+            #{user_IdItem}
         </foreach>
     </update>
 
     <insert id="insertPerssion" parameterType="java.util.List">
-        <foreach collection="list" item="item" index="index" separator=";">
-            insert into doctor_user_data_permissions(user_id,group_ids,org_ids,farm_ids,created_at,updated_at)
-            values(#{item.userId},#{item.groupIds},#{item.orgIds},#{item.farmIds},now(),now())
+        insert into doctor_user_data_permissions(user_id,group_ids,org_ids,farm_ids,created_at,updated_at)
+        values
+        <foreach collection="list" item="item" index="index"
+                 separator=",">
+            (
+              #{item.userId},#{item.groupIds},#{item.orgIds},#{item.farmIds},now(),now()
+            )
         </foreach>
     </insert>
 

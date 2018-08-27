@@ -2,6 +2,7 @@ package io.terminus.doctor.basic.dto.warehouseV2;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -11,7 +12,7 @@ import java.util.List;
  * @Date 2018/8/24 17:22
  */
 @Data
-public class DataAuth {
+public class DataAuth implements Serializable{
 
     private List<String> userIds;
     private String userType;

@@ -150,7 +150,7 @@ public class DataAuthServiceImpl implements DataAuthService{
                 {
                     orgMap = Maps.newLinkedHashMap();
                     orgMap.put("key","group_" + groupId);
-                    orgMap.put("name",groupName);
+                    orgMap.put("title",groupName);
 
                     //处理公司数据,过滤得到新的集合数组
                     List<Map<String,Object>> orgLists = getOrgLists(mapList,groupId);
@@ -244,7 +244,7 @@ public class DataAuthServiceImpl implements DataAuthService{
                     if(StringUtils.isNotBlank(orgId) && !tempOrgId.equals(orgId)  && !"null".equals(orgId.toLowerCase().trim())) {
                         Map<String, Object> orgMap = Maps.newLinkedHashMap();
                         orgMap.put("key", "org_" + orgId);
-                        orgMap.put("name", orgName);
+                        orgMap.put("title", orgName);
                         orgLists.add(orgMap);
                     }
                     tempOrgId = orgId;
@@ -277,7 +277,7 @@ public class DataAuthServiceImpl implements DataAuthService{
                     if(StringUtils.isNotBlank(farmId) && !"null".equals(farmId.toLowerCase().trim())) {
                         Map<String, Object> orgMap = Maps.newLinkedHashMap();
                         orgMap.put("key","farm_" + farmId);
-                        orgMap.put("name", farmName);
+                        orgMap.put("title", farmName);
                         farmLists.add(orgMap);
                     }
                 }
@@ -309,12 +309,10 @@ public class DataAuthServiceImpl implements DataAuthService{
             }
 
             List<String> userIds = dataSubRoles.getUserIds();
-            List<Map<String,String>> userIdParams = Lists.newArrayList();
+            List<Integer> userIdParams = Lists.newArrayList();
             List<Map<String,String>> userParams = Lists.newArrayList();
             for (String userId : userIds) {
-                Map<String,String> userIdParam = Maps.newHashMap();
-                userIdParam.put("userId",userId);
-                userIdParams.add(userIdParam);
+                userIdParams.add(Integer.parseInt(userId));
 
                 Map<String,String> params = Maps.newHashMap();
                 params.put("userType",dataSubRoles.getUserType());
@@ -322,7 +320,7 @@ public class DataAuthServiceImpl implements DataAuthService{
                 userParams.add(params);
             }
             // 删除历史数据
-            dataAuthDao.deletePerssion(userIdParams);
+            dataAuthDao.deletePerssion(userIdParams.toArray(new Integer[0]));
             // 修改用户角色数据
             dataAuthDao.updateSubUserType(userParams);
 

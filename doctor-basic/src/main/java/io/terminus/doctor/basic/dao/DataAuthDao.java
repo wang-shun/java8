@@ -126,9 +126,11 @@ public class DataAuthDao extends MyBatisDao<DataAuth> {
 
     /**
      * 删除用户可访问数据权限
+     * @param user_id
+     * @return
      */
-    public int deletePerssion(List<Map<String,String>> params){
-        return getSqlSession().delete(sqlId("deletePerssion"),params);
+    public int deletePerssion(Integer [] user_id){
+        return getSqlSession().delete(sqlId("deletePerssion"),user_id);
     }
 
     /**
