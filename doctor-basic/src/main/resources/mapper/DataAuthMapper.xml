@@ -16,13 +16,13 @@
         <if test="userId != null">
             and a.id=#{userId}
         </if>
-        <if test="userName != null">
+        <if test="userName != null and userName != ''">
             and a.`name` like CONCAT(CONCAT('%',#{userName}),'%')
         </if>
-        <if test="mobile != null">
+        <if test="mobile != null and mobile != ''">
             and a.mobile like CONCAT(CONCAT('%',#{mobile}),'%')
         </if>
-        <if test="userType != null">
+        <if test="userType != null and userType != ''">
             and b.user_type = #{userType}
         </if>
     </select>
@@ -37,14 +37,14 @@
         <if test="userId != null">
           and a.id=#{userId}
         </if>
-        <if test="userName != null">
+        <if test="userName != null and userName != ''">
           and a.`name` like  CONCAT(CONCAT('%',#{userName}),'%')
 
         </if>
-        <if test="mobile != null">
+        <if test="mobile != null and mobile != ''">
           and a.mobile like CONCAT(CONCAT('%',#{mobile}),'%')
         </if>
-        <if test="userType != null">
+        <if test="userType != null and userType != ''">
           and b.user_type = #{userType}
         </if>
         order by a.id
