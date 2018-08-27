@@ -14,7 +14,7 @@
         where (b.user_type=1 or b.user_type=2)
         and (c.role_type=0 or c.role_type=1 or c.role_type=2)
         <if test="userId != null">
-            and a.id=#{userId}
+            and a.id like CONCAT(CONCAT('%',#{userId}),'%')
         </if>
         <if test="userName != null and userName != ''">
             and a.`name` like CONCAT(CONCAT('%',#{userName}),'%')
@@ -35,7 +35,7 @@
         where (b.user_type=1 or b.user_type=2)
         and (c.role_type=0 or c.role_type=1 or c.role_type=2)
         <if test="userId != null">
-          and a.id=#{userId}
+          and a.id like CONCAT(CONCAT('%',#{userId}),'%')
         </if>
         <if test="userName != null and userName != ''">
           and a.`name` like  CONCAT(CONCAT('%',#{userName}),'%')
