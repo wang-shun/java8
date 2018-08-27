@@ -26,20 +26,10 @@ public class DataAuthController {
      * 查询用户角色数据
      * @return
      */
-    @RequestMapping(value = "/userRoleInfo", method = RequestMethod.PUT)
+    @RequestMapping(value = "/userRoleInfo", method = RequestMethod.POST)
     @ResponseBody
     public Response getUserRoleInfo(@RequestBody(required = false) Map<String,String> params){
         return dataAuthService.getUserRoleInfo(params);
-    }
-
-    /**
-     * 查询单个用户角色数据
-     * @return
-     */
-    @RequestMapping(value = "/userSingleRoleInfo/{userId}", method = RequestMethod.GET)
-    @ResponseBody
-    public Response userSingleRoleInfo(@PathVariable("userId") Integer userId){
-        return dataAuthService.userSingleRoleInfo(userId);
     }
 
     /**
