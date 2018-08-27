@@ -174,13 +174,15 @@ public class DataAuthServiceImpl implements DataAuthService{
                 tempGroupId = groupId;
             }
             reMap.put("children",orgList);
-
-            Map<String,Object> map = dataAuthDao.selectUserPermission(userId);
-            String userType = dataAuthDao.selectUserType(userId);
-
             resultMap.put("datas",reMap);
-            resultMap.put("userPerssion",map);
-            resultMap.put("userType",userType);
+
+            if(userId != null) {
+                Map<String, Object> map = dataAuthDao.selectUserPermission(userId);
+                String userType = dataAuthDao.selectUserType(userId);
+                resultMap.put("userPerssion", map);
+                resultMap.put("userType", userType);
+            }
+
             return Response.ok(resultMap);
         }catch (Exception e){
             log.error("getDataSubRoles[error] ==> {}",e);

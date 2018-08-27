@@ -13,16 +13,16 @@
         join doctor_sub_roles c on b.role_id=c.id
         where (b.user_type=1 or b.user_type=2)
         and (c.role_type=0 or c.role_type=1 or c.role_type=2)
-        <if test="userId != null">
+        <if test="userId != null and userId != '' ">
             and a.id like CONCAT(CONCAT('%',#{userId}),'%')
         </if>
-        <if test="userName != null">
-            and a.`name` like contact('%',#{userName},'%')
+        <if test="userName != null and userName != ''">
+            and a.`name` like CONCAT(CONCAT('%',#{userName}),'%')
         </if>
-        <if test="mobile != null">
-            and a.mobile like contact('%',#{mobile},'%')
+        <if test="mobile != null and mobile != ''">
+            and a.mobile like CONCAT(CONCAT('%',#{mobile}),'%')
         </if>
-        <if test="userType != null">
+        <if test="userType != null and userType != ''">
             and b.user_type = #{userType}
         </if>
     </select>
@@ -34,17 +34,17 @@
         join doctor_sub_roles c on b.role_id=c.id
         where (b.user_type=1 or b.user_type=2)
         and (c.role_type=0 or c.role_type=1 or c.role_type=2)
-        <if test="userId != null">
-          and a.id like CONCAT(CONCAT('%',#{userId}),'%')
+        <if test="userId != null and userId != '' ">
+            and a.id like CONCAT(CONCAT('%',#{userId}),'%')
         </if>
-        <if test="userName != null">
-          and a.`name` like  CONCAT(CONCAT('%',#{userName}),'%')
+        <if test="userName != null and userName != ''">
+            and a.`name` like CONCAT(CONCAT('%',#{userName}),'%')
         </if>
-        <if test="mobile != null">
-          and a.mobile like CONCAT(CONCAT('%',#{mobile}),'%')
+        <if test="mobile != null and mobile != ''">
+            and a.mobile like CONCAT(CONCAT('%',#{mobile}),'%')
         </if>
-        <if test="userType != null">
-          and b.user_type = #{userType}
+        <if test="userType != null and userType != ''">
+            and b.user_type = #{userType}
         </if>
         order by a.id
         limit ${pageNo},${pageSize}
@@ -92,7 +92,7 @@
     <!-- 修改用户 -->
     <update id="updateUser" parameterType="Map">
         update parana_users set mobile = #{mobile},updated_at=now()
-        <if test="password != null">
+        <if test="password != null and password != ''">
         ,password = #{password}
         </if>
         where id = #{userId}
