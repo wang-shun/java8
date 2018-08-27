@@ -6,7 +6,6 @@ import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockRefundDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.manager.WarehouseReturnManager;
 import io.terminus.doctor.basic.model.DoctorWareHouse;
-import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.common.exception.InvalidException;
@@ -113,6 +112,7 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
                         apply.setRefundQuantity(new BigDecimal(0));
 
                     apply.setRefundQuantity(apply.getRefundQuantity().add(changedQuantity));
+                    doctorWarehouseMaterialApplyDao.update(apply);
                 });
             }
 
