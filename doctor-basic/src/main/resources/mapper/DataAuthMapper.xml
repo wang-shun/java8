@@ -100,7 +100,8 @@
 
     <!-- 修改用户 -->
     <update id="updateUserRole" parameterType="Map">
-        update doctor_user_subs set real_name = #{realName},role_id = #{roleId},user_type=#{userType},updated_at=now()
+        update doctor_user_subs set real_name = #{realName},role_id = #{roleId},user_type=#{userType},updated_at=now(),
+        role_name=#{roleName}
         where user_id = #{userId}
     </update>
 
