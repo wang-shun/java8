@@ -46,9 +46,9 @@ public class DataAuthController {
      * 查询用户数据范围授权
      * @return
      */
-    @RequestMapping(value = "/getDataSubRoles/{userId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/getDataSubRoles", method = RequestMethod.GET)
     @ResponseBody
-    public Response getDataSubRoles(@PathVariable("userId") Integer userId){
+    public Response getDataSubRoles(Integer userId){
         return dataAuthService.getDataSubRoles(userId);
     }
 
