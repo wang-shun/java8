@@ -71,6 +71,9 @@ public class DoctorServiceReviewServiceImpl implements DoctorServiceReviewServic
     @Override
     public Response<List<DoctorFarm>> openDoctorService(BaseUser user, Long userId, String loginName, DoctorOrg org, List<DoctorFarm> farms){
         Response<List<DoctorFarm>> response = new Response<>();
+        //（jiangsj）用户审核通过后把公司的parent_id置为0、type置为2
+        doctorServiceReviewDao.updateOrgPidTpye(org.getId());
+
         try{
             DoctorServiceReview review = doctorServiceReviewDao.findByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR);
             Preconditions.checkState(Objects.equals(DoctorServiceReview.Status.REVIEW.getValue(), review.getStatus()), "user.service.not.applied");

@@ -69,7 +69,7 @@ public interface DoctorOrgReadService {
     Response<DoctorOrg> findByName(String name);
 
     /**
-     * 用户审核通过后把公司的parent_id置为0、type置为2
+     * 用户审核通过后把公司的parent_id置为0、type置为2(此方法已作废)
      * @param id
      * @return
      */

@@ -95,6 +95,9 @@ public class DoctorServiceReviewController {
     @RequestMapping(value = "/pigdoctor/open", method = RequestMethod.POST)
     @ResponseBody
     public Boolean openDoctorService(@RequestBody UserApplyServiceDetailDto dto){
+        //（蒋圣津）用户审核通过后把公司的parent_id置为0、type置为2(此方法已作废)
+//        doctorOrgReadService.updateOrgPidTpye(dto.getOrg().getId());
+
         BaseUser baseUser = this.checkUserTypeOperator();
         if (dto.getUserId() == null) {
             throw new JsonResponseException(500, "user.id.invalid");
@@ -112,7 +115,7 @@ public class DoctorServiceReviewController {
             throw new JsonResponseException("orgId.not.null");
         }
 
-        
+
         List<DoctorFarm> newFarms = RespHelper.or500(
                 doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getLoginName(), dto.getOrg(), dto.getFarms())
         );
@@ -125,8 +128,7 @@ public class DoctorServiceReviewController {
             log.error("failed to post OpenDoctorServiceEvent due to findFarmsByUserId failing");
         }
 
-        //（蒋圣津）用户审核通过后把公司的parent_id置为0、type置为2
-        doctorOrgReadService.updateOrgPidTpye(dto.getOrg().getId());
+
 
         log.info("init barn start, userId:{}, farms:{}", dto.getUserId(), newFarms);
         //初始化猪舍和仓库大类
