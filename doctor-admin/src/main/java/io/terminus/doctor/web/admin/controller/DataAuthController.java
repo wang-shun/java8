@@ -26,7 +26,7 @@ public class DataAuthController {
      * 查询用户角色数据
      * @return
      */
-    @RequestMapping(value = "/userRoleInfo", method = RequestMethod.POST)
+    @RequestMapping(value = "/userRoleInfo", method = RequestMethod.PUT)
     @ResponseBody
     public Response getUserRoleInfo(@RequestBody(required = false) Map<String,String> params){
         return dataAuthService.getUserRoleInfo(params);
