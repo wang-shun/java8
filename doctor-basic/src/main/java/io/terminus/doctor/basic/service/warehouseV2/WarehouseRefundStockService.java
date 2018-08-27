@@ -111,7 +111,8 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
                     if (apply.getRefundQuantity() == null)
                         apply.setRefundQuantity(new BigDecimal(0));
 
-                    apply.setRefundQuantity(apply.getRefundQuantity().add(changedQuantity));
+               //     apply.setRefundQuantity(apply.getRefundQuantity().add(changedQuantity));
+                    apply.setRefundQuantity(apply.getRefundQuantity().add(materialHandle.getQuantity().subtract(outMaterialHandle.getQuantity())));
                     doctorWarehouseMaterialApplyDao.update(apply);
                 });
             }
