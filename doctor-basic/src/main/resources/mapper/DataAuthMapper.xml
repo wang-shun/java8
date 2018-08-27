@@ -28,7 +28,7 @@
     </select>
 
     <select id="getUserRoleInfo" parameterType="Map" resultType="Map">
-        select a.id,a.`name`,b.real_name as realName,a.mobile,b.user_type as userType,c.`name` as roleName
+        select a.id,a.`name` as userName,b.real_name as realName,a.mobile,b.user_type as userType,c.`name` as roleName
         from parana_users a
         join doctor_user_subs b on a.id=b.user_id
         join doctor_sub_roles c on b.role_id=c.id
@@ -53,7 +53,7 @@
     <select id="userSingleRoleInfo" parameterType="Integer" resultType="Map">
         select
         b.role_id as roleId,
-        a.`name`,
+        a.`name` as userName,
         b.real_name as realName,
         a.mobile,
         b.user_type as userType,
