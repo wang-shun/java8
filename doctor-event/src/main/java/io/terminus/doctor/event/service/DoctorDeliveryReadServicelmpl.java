@@ -93,7 +93,8 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             BigInteger id = (BigInteger)map.get("id");
             BigInteger pig_id = (BigInteger)map.get("pig_id");
             Map<String,Object> farmId1 = doctorReportDeliverDao.getFarmId(pig_id);
-            if(farmId1.get("farm_id") != farmId){
+            Long farmId2 = Long.valueOf(String.valueOf(farmId1.get("farm_id"))).longValue();
+            if(!farmId2.equals(farmId)){
                 map.put("pig_status","已转场");
             }
             int parity = (int)map.get("parity");

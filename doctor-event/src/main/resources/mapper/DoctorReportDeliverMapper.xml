@@ -406,7 +406,7 @@
     order by id DESC limit 1
 </select>
     <select id = "getFarmId" parameterType="map" resultType="map">
-        SELECT a.farm_id
+        SELECT a.farm_id as farm_id
         FROM doctor_pigs a
         WHERE a.id = #{pigId}
     </select>
