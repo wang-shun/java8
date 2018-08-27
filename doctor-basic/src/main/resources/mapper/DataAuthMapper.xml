@@ -66,7 +66,6 @@
         and a.id = #{userId}
     </select>
 
-
     <!-- 新增用户 -->
     <insert id="insertUser" parameterType="Map" >
         insert into parana_users(`name`,mobile,password,`type`,status,created_at,updated_at)
@@ -86,8 +85,8 @@
     </select>
 
     <insert id="insertUserRole" parameterType="Map">
-        insert into doctor_user_subs(user_id,user_name,real_name,role_id,user_type,status,created_at,updated_at)
-        values(#{userId},#{userName},#{realName},#{roleId},#{userType},1,now(),now())
+        insert into doctor_user_subs(user_id,user_name,real_name,role_id,user_type,status,created_at,updated_at,role_name)
+        values(#{userId},#{userName},#{realName},#{roleId},#{userType},1,now(),now(),#{roleName})
     </insert>
 
     <!-- 修改用户 -->
