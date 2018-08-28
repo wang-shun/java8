@@ -298,7 +298,7 @@ public class DataAuthServiceImpl implements DataAuthService{
             if(StringUtils.isBlank(dataSubRoles.getUserType())){
                 return Response.fail("请选择用户类型");
             }
-            if(null == dataSubRoles.getDatas() || dataSubRoles.getDatas().size() == 0){
+            if(null == dataSubRoles.getDatas()){
                 return Response.fail("请选择用户可访问的数据权限");
             }
 
@@ -319,11 +319,11 @@ public class DataAuthServiceImpl implements DataAuthService{
             dataAuthDao.updateSubUserType(userParams);
 
             // 批量新增数据权限
-            List<DataSubRole> dataSubRoleList = dataSubRoles.getDatas();
+            DataSubRole dataSubRole = dataSubRoles.getDatas();
             List<Map<String,String>> dataSubRoleParams = Lists.newArrayList();
-            for (DataSubRole dataSubRole : dataSubRoleList) {
+            for (String userId : userIds) {
                 Map<String,String> dataSubRoleParam = Maps.newHashMap();
-                dataSubRoleParam.put("userId",dataSubRole.getUserId());
+                dataSubRoleParam.put("userId",userId);
                 dataSubRoleParam.put("groupIds",dataSubRole.getGroupIds());
                 dataSubRoleParam.put("orgIds",dataSubRole.getOrgIds());
                 dataSubRoleParam.put("farmIds",dataSubRole.getFarmIds());

@@ -16,6 +16,6 @@ public class DataAuth implements Serializable{
 
     private List<String> userIds;
     private String userType;
-    private List<DataSubRole> datas;
+    private DataSubRole datas;
 
 }
