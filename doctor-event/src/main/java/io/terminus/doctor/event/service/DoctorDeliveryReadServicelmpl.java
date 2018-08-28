@@ -159,9 +159,11 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         long b = (long) leave.get("change_type_id");
                         if (b == 110) {
                             map.put("deadorescape", "死亡");
+                            map.put("pig_status","已离场");
                             swcount = swcount + 1;
                         }else if (b == 111) {
                             map.put("deadorescape", "淘汰");
+                            map.put("pig_status","已离场");
                             ttcount = ttcount + 1;
                         }else{
                             map.put("deadorescape", "");
