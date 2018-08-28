@@ -111,7 +111,7 @@ public class WarehouseRefundStockService extends AbstractWarehouseStockService<W
 //                doctorWarehouseMaterialApplyDao.update(apply1);
 
                 //更新领用记录中的退料数量
-                doctorWarehouseMaterialApplyDao.findAllByMaterialHandle(materialHandle.getId()).forEach(apply -> {
+                doctorWarehouseMaterialApplyDao.findAllByMaterialHandle(materialHandle.getRelMaterialHandleId()).forEach(apply -> {
                     if (apply.getRefundQuantity() == null)
                         apply.setRefundQuantity(new BigDecimal(0));
 
