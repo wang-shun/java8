@@ -47,7 +47,7 @@
         <if test="userType != null and userType != ''">
             and b.user_type = #{userType}
         </if>
-        order by a.id
+        order by a.id desc
         limit ${pageNo},${pageSize}
     </select>
 
