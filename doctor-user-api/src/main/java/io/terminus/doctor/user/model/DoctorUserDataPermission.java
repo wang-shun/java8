@@ -47,7 +47,11 @@ public class DoctorUserDataPermission implements Serializable {
      */
     @Getter
     private String orgIds;
-    
+    /**
+     * 集团Id，用逗号隔开（孔景军）
+     */
+    @Getter
+    private String groupIds;
     /**
      * 仓库类型, 逗号分隔
      */
@@ -95,6 +99,23 @@ public class DoctorUserDataPermission implements Serializable {
      */
     @Getter @Setter
     private Date updatedAt;
+
+    /**
+     * 将 groupIds 转为集合, 方便使用,不存数据库（孔景军）
+     */
+
+    @Getter
+    private List<Long> groupIdsList;
+
+    public void setGroupIds(String groupIds){
+        this.groupIds = groupIds;
+        if (StringUtils.isNotBlank(groupIds)) {
+            this.groupIdsList = Splitters.COMMA.splitToList(groupIds).stream().map(Long::valueOf).collect(Collectors.toList());
+        } else {
+            this.groupIdsList = Lists.newArrayList();
+        }
+
+    }
 
     /**
      * 将 farmIds 转为集合, 方便使用,不存数据库

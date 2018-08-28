@@ -435,6 +435,32 @@ public class Users {
         return result.getResult();
     }
 
+
+    /**
+     * 根据登录用户筛选集团
+     * @return
+     */
+    @RequestMapping(value = "/groupList", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<DoctorOrg> groupList() {
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        if (baseUser == null) {
+            throw new JsonResponseException("user.not.login");
+        }
+        Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
+        if (!dataPermissionResponse.isSuccess()) {
+            throw new JsonResponseException("user.not.permission");
+        }
+        List<Long> groupIds = dataPermissionResponse.getResult().getGroupIdsList();
+        log.error("==============groupIds = "+groupIds);
+        Response<List<DoctorOrg>> result = doctorOrgReadService.findOrgByIds(groupIds);
+        log.error("==============result = "+result);
+        if (!result.isSuccess()) {
+            throw new JsonResponseException(result.getError());
+        }
+        return result.getResult();
+    }
+
     @Data
     private static class UserWithServiceStatus extends User implements Serializable {
         private static final long serialVersionUID = -4515482071656393479L;
