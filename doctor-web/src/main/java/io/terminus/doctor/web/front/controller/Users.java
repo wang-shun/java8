@@ -132,6 +132,7 @@ public class Users {
             PermissionData perm = permissionHelper.getPermissions(acl, user, true);
             perm.setAllRequests(null); // empty it
             doctorUser.setAuth(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(perm));
+            log.error("==========doctorUser="+doctorUser);
             return doctorUser;
         } catch (Exception e) {
             Throwables.propagateIfInstanceOf(e, JsonResponseException.class);
