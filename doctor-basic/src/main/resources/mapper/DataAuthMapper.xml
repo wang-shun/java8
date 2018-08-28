@@ -91,8 +91,8 @@
     </insert>
 
     <insert id="insertUserStaff" parameterType="Map">
-        insert into doctor_staffs(user_id,group_id,org_id,status,created_at,updated_at)
-        values(#{userId},#{groupId},#{orgId},1,now(),now())
+        insert into doctor_staffs(user_id,group_id,org_id,status,created_at,updated_at,user_name)
+        values(#{userId},#{groupId},#{orgId},1,now(),now(),#{userName})
     </insert>
 
     <!-- 修改用户 -->
