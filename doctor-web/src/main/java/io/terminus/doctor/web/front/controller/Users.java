@@ -430,6 +430,7 @@ public class Users {
         }
         List<Long> orgIds = dataPermissionResponse.getResult().getOrgIdsList();
         Response<List<DoctorOrg>> result = doctorOrgReadService.findOrgByIds(orgIds);
+        log.error("==============ORGresult = "+result.getResult());
         if (!result.isSuccess()) {
             throw new JsonResponseException(result.getError());
         }
@@ -444,7 +445,6 @@ public class Users {
     @RequestMapping(value = "/groupList", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public List<DoctorOrg> groupList() {
-        log.error("==========================================================");
         BaseUser baseUser = UserUtil.getCurrentUser();
         if (baseUser == null) {
             throw new JsonResponseException("user.not.login");
