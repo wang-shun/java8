@@ -92,10 +92,14 @@
 
     <!-- 修改用户 -->
     <update id="updateUser" parameterType="Map">
-        update parana_users set mobile = #{mobile},updated_at=now()
-        <if test="password != null and password != ''">
-        ,password = #{password}
+        update parana_users set
+        <if test="mobile != null and mobile != ''">
+            mobile = #{mobile},
         </if>
+        <if test="password != null and password != ''">
+            password = #{password},
+        </if>
+        updated_at=now()
         where id = #{userId}
     </update>
 

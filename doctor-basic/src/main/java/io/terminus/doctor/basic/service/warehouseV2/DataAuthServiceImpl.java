@@ -106,13 +106,23 @@ public class DataAuthServiceImpl implements DataAuthService{
                     return Response.fail("该用户不存在,不能修改");
                 }
 
+                Integer sid = dataAuthDao.selectUserByMobile(mobile);
+                if(sid != null)
+                {
+                    if(sid == Integer.parseInt(userId)){
+                        params.put("mobile",null);
+                    } else {
+                        return Response.fail("该用户对应的手机号已存在");
+                    }
+                }
+
                 String password = params.get("password");
                 if(StringUtils.isNotBlank(password)){
                     params.put("password", EncryptUtil.encrypt(password));
                 }
 
-                dataAuthDao.updateUser(params);
                 dataAuthDao.updateUserRole(params);
+                dataAuthDao.updateUser(params);
 
             }
             return Response.ok();
