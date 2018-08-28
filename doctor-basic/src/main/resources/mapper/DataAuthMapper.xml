@@ -6,6 +6,14 @@
 
 <mapper namespace="DataAuth">
 
+    <select id="selGroups" resultType="map">
+        select distinct id,`name` as orgName from doctor_orgs where type =1
+    </select>
+
+    <select id="selOrgs" parameterType="Integer" resultType="map">
+        select distinct id,`name` as orgName from doctor_orgs where type =2 and parent_id = #{groupId}
+    </select>
+
     <select id="getUserRoleInfoCount" parameterType="Map" resultType="Integer">
         select count(1) as ct
         from parana_users a

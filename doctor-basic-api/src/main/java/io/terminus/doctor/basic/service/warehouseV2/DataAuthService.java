@@ -13,6 +13,10 @@ import java.util.Map;
  */
 public interface DataAuthService {
 
+    Response selGroups();
+
+    Response selOrgs(Integer groupId);
+
     Response getUserRoleInfo(Map<String,String> params);
 
     Response userSingleRoleInfo(Integer userId);

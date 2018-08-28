@@ -23,6 +23,26 @@ public class DataAuthController {
     private DataAuthService dataAuthService;
 
     /**
+     * 查询集团数据
+     * @return
+     */
+    @RequestMapping(value = "/selGroups", method = RequestMethod.GET)
+    @ResponseBody
+    public Response selGroups(){
+        return dataAuthService.selGroups();
+    }
+
+    /**
+     * 查询公司数据
+     * @return
+     */
+    @RequestMapping(value = "/selOrgs/{groupId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Response selOrgs(@PathVariable("groupId") Integer groupId){
+        return dataAuthService.selOrgs(groupId);
+    }
+
+    /**
      * 查询用户角色数据
      * @return
      */

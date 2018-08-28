@@ -16,6 +16,14 @@ import java.util.Map;
 @Repository
 public class DataAuthDao extends MyBatisDao<DataAuth> {
 
+    public List<Map<String,Object>> selGroups() {
+        return getSqlSession().selectList(sqlId("selGroups"));
+    }
+
+    public List<Map<String,Object>> selOrgs(Integer groupId) {
+        return getSqlSession().selectList(sqlId("selOrgs"),groupId);
+    }
+
     /**
      * 查询用户角色数据总数
      * @return

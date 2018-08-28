@@ -31,6 +31,27 @@ public class DataAuthServiceImpl implements DataAuthService{
     @Autowired
     private DataAuthDao dataAuthDao;
 
+
+    @Override
+    public Response selGroups() {
+        try{
+            return Response.ok(dataAuthDao.selGroups());
+        }catch (Exception e){
+            log.error("selGroups[error] ==> {}",e);
+            return Response.fail(e.getMessage());
+        }
+    }
+
+    @Override
+    public Response selOrgs(Integer groupId) {
+        try{
+            return Response.ok(dataAuthDao.selOrgs(groupId));
+        }catch (Exception e){
+            log.error("selOrgs[error] ==> {}",e);
+            return Response.fail(e.getMessage());
+        }
+    }
+
     /**
      * 查询用户角色数据
      * @return
@@ -76,12 +97,14 @@ public class DataAuthServiceImpl implements DataAuthService{
             String mobile = params.get("mobile");
             String groupId = params.get("groupId");
             String orgId = params.get("orgId");
+            String realName = params.get("realName");
 
             if(StringUtils.isBlank(editType)) return Response.fail("editType必传");
             if(StringUtils.isBlank(userName)) return Response.fail("userName必传");
             if(StringUtils.isBlank(mobile)) return Response.fail("mobile必传");
             if(StringUtils.isBlank(groupId)) return Response.fail("groupId必传");
             if(StringUtils.isBlank(orgId)) return Response.fail("orgId必传");
+            if(StringUtils.isBlank(realName)) return Response.fail("realName必传");
 
             if(editType.toUpperCase().equals("A")) //新增
             {
