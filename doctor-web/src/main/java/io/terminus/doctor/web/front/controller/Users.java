@@ -444,6 +444,7 @@ public class Users {
     @RequestMapping(value = "/groupList", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public List<DoctorOrg> groupList() {
+        log.error("==========================================================");
         BaseUser baseUser = UserUtil.getCurrentUser();
         if (baseUser == null) {
             throw new JsonResponseException("user.not.login");
