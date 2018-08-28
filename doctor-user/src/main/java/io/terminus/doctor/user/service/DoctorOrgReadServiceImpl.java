@@ -58,6 +58,18 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
     }
 
     @Override
+    public Response<List<DoctorOrg>>  findOrgByGroup(List<Long> orgIds,Long groupId){
+        Response<List<DoctorOrg>> response = new Response<>();
+        try {
+            response.setResult(doctorOrgDao.findOrgByGroup(orgIds,groupId));
+        } catch (Exception e) {
+            log.error("find org by id failed, orgIds:{}, cause:{}", orgIds, Throwables.getStackTraceAsString(e));
+            response.setError("find.org.by.id.failed");
+        }
+        return response;
+    }
+
+    @Override
     public Response<List<DoctorOrg>> findOrgsByUserId(Long userId) {
         try {
             DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(userId);

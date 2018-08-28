@@ -430,7 +430,6 @@ public class Users {
         }
         List<Long> orgIds = dataPermissionResponse.getResult().getOrgIdsList();
         Response<List<DoctorOrg>> result = doctorOrgReadService.findOrgByIds(orgIds);
-        log.error("==============ORGresult = "+result.getResult());
         if (!result.isSuccess()) {
             throw new JsonResponseException(result.getError());
         }
@@ -454,15 +453,34 @@ public class Users {
             throw new JsonResponseException("user.not.permission");
         }
         List<Long> groupIds = dataPermissionResponse.getResult().getGroupIdsList();
-        log.error("==============groupIds = "+groupIds);
         Response<List<DoctorOrg>> result = doctorOrgReadService.findOrgByIds(groupIds);
-        log.error("==============result = "+result);
         if (!result.isSuccess()) {
             throw new JsonResponseException(result.getError());
         }
         return result.getResult();
     }
 
+    /**
+     * 根据集团筛选公司
+     * @return
+     */
+    @RequestMapping(value = "/getOrgListByGroup", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<DoctorOrg> orgListByGroup(@RequestParam Long groupId) {
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        if (baseUser == null) {
+            throw new JsonResponseException("user.not.login");
+        }
+        Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
+        if (!dataPermissionResponse.isSuccess()) {
+            throw new JsonResponseException("user.not.permission");
+        }
+        List<Long> orgIds = dataPermissionResponse.getResult().getOrgIdsList();
+        Response<List<DoctorOrg>> result = doctorOrgReadService.findOrgByGroup(orgIds,groupId);
+        if (!result.isSuccess()) {
+            throw new JsonResponseException(result.getError());
+        }
+        return result.getResult();
+    }
     @Data
     private static class UserWithServiceStatus extends User implements Serializable {
         private static final long serialVersionUID = -4515482071656393479L;

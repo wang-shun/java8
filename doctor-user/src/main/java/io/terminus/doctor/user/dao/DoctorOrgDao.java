@@ -6,7 +6,9 @@ import io.terminus.doctor.user.model.DoctorOrg;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 公司表Dao类
@@ -219,4 +221,14 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
     public DoctorOrg  findGroupcompanyByOrgId(Long orgId){
         return sqlSession.selectOne(sqlId("findGroupcompanyByOrgId"), orgId);
     }
+    /*
+    孔景军
+     */
+    public List<DoctorOrg>  findOrgByGroup(List<Long> orgIds,Long groupId){
+        Map map = new HashMap();
+        map.put("orgIds",orgIds);
+        map.put("groupId",groupId);
+        return sqlSession.selectOne(sqlId("findOrgByGroup"), map);
+    }
+
 }

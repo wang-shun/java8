@@ -74,4 +74,12 @@ public interface DoctorOrgReadService {
      * @return
      */
     Response<DoctorOrg>  findGroupcompanyByOrgId(Long orgId);
+
+    /**
+     * 通过集团查公司(孔景军)
+     * @param orgIds
+     * @param orgId
+     * @return
+     */
+    Response<List<DoctorOrg>>  findOrgByGroup(List<Long> orgIds,Long groupId);
 }
