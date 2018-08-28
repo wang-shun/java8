@@ -819,8 +819,8 @@
         <if test="client != null">AND a.customer_id = #{client}</if>
         <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
-        group by a.group_id, a.event_at, a.customer_id
-        order by a.event_at ASC ;
+        group by a.event_at, a.group_id, a.customer_id
+        order by a.event_at DESC ;
     </select>
 
     <select id="findNurseSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
@@ -851,8 +851,8 @@
         <if test="client != null">AND a.customer_id = #{client}</if>
         <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
-        group by a.group_id, a.event_at, a.customer_id
-        order by a.event_at ASC ;
+        group by a.event_at, a.group_id, a.customer_id
+        order by a.event_at DESC ;
     </select>
 
     <select id="findReverseSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
@@ -883,8 +883,8 @@
         <if test="client != null">AND a.customer_id = #{client}</if>
         <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
-        group by a.group_id, a.event_at, a.customer_id
-        order by a.event_at ASC ;
+        group by a.event_at, a.group_id,  a.customer_id
+        order by a.event_at DESC ;
     </select>
 
     <select id="findFattenSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
@@ -915,8 +915,8 @@
         <if test="client != null">AND a.customer_id = #{client}</if>
         <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
-        group by a.group_id, a.event_at, a.customer_id
-        order by a.event_at ASC;
+        group by a.event_at, a.group_id,  a.customer_id
+        order by a.event_at DESC ;
     </select>
 
     <sql id="saleCriteria">
