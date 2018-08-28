@@ -33,6 +33,16 @@ public class DataAuthController {
     }
 
     /**
+     * 查询单个用户角色数据
+     * @return
+     */
+    @RequestMapping(value = "/userSingleRoleInfo/{userId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Response userSingleRoleInfo(@PathVariable("userId") Integer userId){
+        return dataAuthService.userSingleRoleInfo(userId);
+    }
+
+    /**
      * 添加或修改用户角色数据
      * @return
      */
