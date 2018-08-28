@@ -31,7 +31,6 @@ public class DataAuthServiceImpl implements DataAuthService{
     @Autowired
     private DataAuthDao dataAuthDao;
 
-
     @Override
     public Response selGroups() {
         try{
