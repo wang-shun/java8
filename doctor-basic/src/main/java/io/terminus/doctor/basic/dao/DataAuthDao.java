@@ -84,6 +84,10 @@ public class DataAuthDao extends MyBatisDao<DataAuth> {
         return getSqlSession().insert(sqlId("insertUserRole"), params);
     }
 
+    public int insertUserStaff(Map<String, String> params) {
+        return getSqlSession().insert(sqlId("insertUserStaff"), params);
+    }
+
     /**
      * 修改用户
      * @return
@@ -98,6 +102,10 @@ public class DataAuthDao extends MyBatisDao<DataAuth> {
      */
     public int updateUserRole(Map<String, String> params) {
         return getSqlSession().insert(sqlId("updateUserRole"), params);
+    }
+
+    public int updateUserStaff(Map<String, String> params) {
+        return getSqlSession().insert(sqlId("updateUserStaff"), params);
     }
 
     /**

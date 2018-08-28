@@ -74,10 +74,14 @@ public class DataAuthServiceImpl implements DataAuthService{
             String editType = params.get("editType");
             String userName = params.get("userName");
             String mobile = params.get("mobile");
+            String groupId = params.get("groupId");
+            String orgId = params.get("orgId");
 
             if(StringUtils.isBlank(editType)) return Response.fail("editType必传");
             if(StringUtils.isBlank(userName)) return Response.fail("userName必传");
             if(StringUtils.isBlank(mobile)) return Response.fail("mobile必传");
+            if(StringUtils.isBlank(groupId)) return Response.fail("groupId必传");
+            if(StringUtils.isBlank(orgId)) return Response.fail("orgId必传");
 
             if(editType.toUpperCase().equals("A")) //新增
             {
@@ -94,7 +98,7 @@ public class DataAuthServiceImpl implements DataAuthService{
                 Integer userId = dataAuthDao.selectUserByName(userName);
                 params.put("userId",userId.toString());
                 dataAuthDao.insertUserRole(params);
-
+                dataAuthDao.insertUserStaff(params);
             }
             else  //编辑
             {
@@ -122,7 +126,7 @@ public class DataAuthServiceImpl implements DataAuthService{
 
                 dataAuthDao.updateUserRole(params);
                 dataAuthDao.updateUser(params);
-
+                dataAuthDao.updateUserStaff(params);
             }
             return Response.ok();
         }catch (Exception e){
