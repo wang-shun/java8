@@ -465,7 +465,7 @@ public class Users {
      * @return
      */
     @RequestMapping(value = "/getOrgListByGroup", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Map orgListByGroup(@RequestParam Long groupId) {
+    public List<DoctorOrg> orgListByGroup(@RequestParam Long groupId) {
         BaseUser baseUser = UserUtil.getCurrentUser();
         if (baseUser == null) {
             throw new JsonResponseException("user.not.login");
@@ -479,10 +479,7 @@ public class Users {
         if (!result.isSuccess()) {
             throw new JsonResponseException(result.getError());
         }
-        Map map = new HashMap();
-        map.put("groupId",groupId);
-        map.put("orgList",result.getResult());
-        return map;
+        return result.getResult();
     }
     @Data
     private static class UserWithServiceStatus extends User implements Serializable {
