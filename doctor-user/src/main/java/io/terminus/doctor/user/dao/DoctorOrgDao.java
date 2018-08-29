@@ -22,6 +22,7 @@ import java.util.Map;
 @Repository
 public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
 
+    //集团，公司的数据展示（陈娟 2018-8-29）
     public Paging<DoctorOrg> pagingCompany(Integer offset, Integer limit, Map<String, Object> criteria) {
         if (criteria == null) {
             criteria = Maps.newHashMap();

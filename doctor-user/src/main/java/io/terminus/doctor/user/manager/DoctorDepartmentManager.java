@@ -76,6 +76,7 @@ public class DoctorDepartmentManager {
         return departmentDto;
     }
 
+    //集团，公司的数据展示（陈娟 2018-8-29）
     public DoctorDepartmentDto findCliqueTree2(Long departmentId,Integer type) {
         return findCliqueTreeImp2(departmentId,type, 1);
     }
@@ -87,6 +88,11 @@ public class DoctorDepartmentManager {
         departmentDto.setName(doctorOrg.getName());
         departmentDto.setLevel(level);
         departmentDto.setType(type);
+        if(departmentDto.getType()==1){
+            departmentDto.setTypeName("集团");
+        }else if(departmentDto.getType()==2){
+            departmentDto.setTypeName("公司");
+        }
         level ++;
         List<DoctorOrg> children = doctorOrgDao.findOrgByParentId(departmentId);
         if (Arguments.isNullOrEmpty(children)) {
@@ -120,7 +126,7 @@ public class DoctorDepartmentManager {
 
     public List<DoctorDepartmentDto> availableBindDepartment(Long departmentId) {
         List<DoctorOrg> orgList = doctorOrgDao.findExcludeIds(upAndIncludeSelfNodeId(departmentId));
-        return orgList.stream().map(doctorOrg -> new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), null,null, null))
+        return orgList.stream().map(doctorOrg -> new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), null,null,null, null))
                 .collect(Collectors.toList());
     }
 
@@ -140,6 +146,7 @@ public class DoctorDepartmentManager {
 
     public Paging<DoctorDepartmentDto> pagingCliqueTree(Map<String, Object> criteria, Integer pageSize, Integer pageNo) {
         PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
+        //集团，公司的数据展示（陈娟 2018-8-29）
         Paging<DoctorOrg> pagingOrg = doctorOrgDao.pagingCompany(pageInfo.getOffset(), pageInfo.getLimit(), criteria);
         List<DoctorDepartmentDto> departmentDtoList = pagingOrg.getData().stream()
                 .map(doctorOrg -> findCliqueTree2(doctorOrg.getId(),doctorOrg.getType())).collect(Collectors.toList());
@@ -157,7 +164,7 @@ public class DoctorDepartmentManager {
     private DoctorDepartmentDto findClique(Long departmentId) {
         DoctorOrg doctorOrg = doctorOrgDao.findById(departmentId);
         if (Objects.equals(doctorOrg.getType(), DoctorOrg.Type.CLIQUE.getValue())) {
-            return new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), 1,null, null);
+            return new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), 1,null,null, null);
         }
         return findClique(doctorOrg.getParentId());
     }

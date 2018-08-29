@@ -188,6 +188,7 @@
         limit #{offset}, #{limit}
     </select>
 
+    <!--集团，公司的数据展示（陈娟 2018-8-29）-->
     <select id="countCompany" parameterType="map" resultType="long">
         SELECT count(*)
         FROM <include refid="tb"/>

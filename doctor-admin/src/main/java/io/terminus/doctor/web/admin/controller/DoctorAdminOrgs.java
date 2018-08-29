@@ -104,7 +104,7 @@ public class DoctorAdminOrgs {
                                           @RequestParam(required = false) Integer pageSize,
                                           @RequestParam Map<String, Object> params) {
         params = Params.filterNullOrEmpty(params);
-        params.put("type", DoctorOrg.Type.CLIQUE.getValue());
+//        params.put("type", DoctorOrg.Type.CLIQUE.getValue());
         return RespHelper.or500(doctorDepartmentReadService.pagingCliqueTree(params, pageSize, pageNo));
     }
 
