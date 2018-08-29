@@ -49,6 +49,7 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
     public Response<List<DoctorOrg>> findOrgByIds(List<Long> orgIds) {
         Response<List<DoctorOrg>> response = new Response<>();
         try {
+            log.error("================="+doctorOrgDao.findByIds(orgIds));
             response.setResult(doctorOrgDao.findByIds(orgIds));
         } catch (Exception e) {
             log.error("find org by id failed, orgIds:{}, cause:{}", orgIds, Throwables.getStackTraceAsString(e));
