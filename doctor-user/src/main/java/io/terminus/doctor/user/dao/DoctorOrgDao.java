@@ -1,12 +1,16 @@
 package io.terminus.doctor.user.dao;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.user.model.DoctorOrg;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 公司表Dao类
@@ -16,6 +20,22 @@ import java.util.List;
  */
 @Repository
 public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
+
+    public Paging<DoctorOrg> pagingCompany(Integer offset, Integer limit, Map<String, Object> criteria) {
+        if (criteria == null) {
+            criteria = Maps.newHashMap();
+        }
+
+        Long total = (Long)this.sqlSession.selectOne(this.sqlId("countCompany"), criteria);
+        if (total.longValue() <= 0L) {
+            return new Paging(0L, Collections.emptyList());
+        } else {
+            ((Map)criteria).put("offset", offset);
+            ((Map)criteria).put("limit", limit);
+            List<DoctorOrg> datas = this.sqlSession.selectList(this.sqlId("pagingCompany"), criteria);
+            return new Paging(total, datas);
+        }
+    }
 
     public DoctorOrg findByName(String orgName) {
         return sqlSession.selectOne(sqlId("findByName"), orgName);

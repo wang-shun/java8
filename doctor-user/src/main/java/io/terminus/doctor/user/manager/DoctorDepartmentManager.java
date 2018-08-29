@@ -76,6 +76,30 @@ public class DoctorDepartmentManager {
         return departmentDto;
     }
 
+    public DoctorDepartmentDto findCliqueTree2(Long departmentId,Integer type) {
+        return findCliqueTreeImp2(departmentId,type, 1);
+    }
+
+    private DoctorDepartmentDto findCliqueTreeImp2(Long departmentId,Integer type, Integer level) {
+        DoctorOrg doctorOrg = doctorOrgDao.findById(departmentId);
+        DoctorDepartmentDto departmentDto = new DoctorDepartmentDto();
+        departmentDto.setId(doctorOrg.getId());
+        departmentDto.setName(doctorOrg.getName());
+        departmentDto.setLevel(level);
+        departmentDto.setType(type);
+        level ++;
+        List<DoctorOrg> children = doctorOrgDao.findOrgByParentId(departmentId);
+        if (Arguments.isNullOrEmpty(children)) {
+            return departmentDto;
+        }
+        List<DoctorDepartmentDto> childrenDepartmentList = Lists.newArrayList();
+        for (DoctorOrg childOrg : children) {
+            childrenDepartmentList.add(findCliqueTreeImp2(childOrg.getId(),childOrg.getType(), level));
+        }
+        departmentDto.setChildren(childrenDepartmentList);
+        return departmentDto;
+    }
+
     public Boolean bindDepartment(Long parentId, List<Long> orgIds) {
         if (Arguments.isNullOrEmpty(orgIds)) {
             return Boolean.FALSE;
@@ -96,7 +120,7 @@ public class DoctorDepartmentManager {
 
     public List<DoctorDepartmentDto> availableBindDepartment(Long departmentId) {
         List<DoctorOrg> orgList = doctorOrgDao.findExcludeIds(upAndIncludeSelfNodeId(departmentId));
-        return orgList.stream().map(doctorOrg -> new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), null, null))
+        return orgList.stream().map(doctorOrg -> new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), null,null, null))
                 .collect(Collectors.toList());
     }
 
@@ -116,9 +140,9 @@ public class DoctorDepartmentManager {
 
     public Paging<DoctorDepartmentDto> pagingCliqueTree(Map<String, Object> criteria, Integer pageSize, Integer pageNo) {
         PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
-        Paging<DoctorOrg> pagingOrg = doctorOrgDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria);
+        Paging<DoctorOrg> pagingOrg = doctorOrgDao.pagingCompany(pageInfo.getOffset(), pageInfo.getLimit(), criteria);
         List<DoctorDepartmentDto> departmentDtoList = pagingOrg.getData().stream()
-                .map(doctorOrg -> findCliqueTree(doctorOrg.getId())).collect(Collectors.toList());
+                .map(doctorOrg -> findCliqueTree2(doctorOrg.getId(),doctorOrg.getType())).collect(Collectors.toList());
         return new Paging<>(pagingOrg.getTotal(), departmentDtoList);
     }
 
@@ -133,7 +157,7 @@ public class DoctorDepartmentManager {
     private DoctorDepartmentDto findClique(Long departmentId) {
         DoctorOrg doctorOrg = doctorOrgDao.findById(departmentId);
         if (Objects.equals(doctorOrg.getType(), DoctorOrg.Type.CLIQUE.getValue())) {
-            return new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), 1, null);
+            return new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), 1,null, null);
         }
         return findClique(doctorOrg.getParentId());
     }

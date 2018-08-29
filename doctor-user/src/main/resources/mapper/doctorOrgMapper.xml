@@ -188,6 +188,27 @@
         limit #{offset}, #{limit}
     </select>
 
+    <select id="countCompany" parameterType="map" resultType="long">
+        SELECT count(*)
+        FROM <include refid="tb"/>
+        WHERE (type=1 or (type=2 and parent_id=0))
+        <if test="fuzzyName != null">AND `name` LIKE concat('%', #{fuzzyName}, '%')</if>
+        <if test="type != null">AND `type` = #{type}</if>
+    </select>
+
+    <select id="pagingCompany" parameterType="map" resultMap="DoctorOrgMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE (type=1 or (type=2 and parent_id=0))
+        <if test="fuzzyName != null">AND `name` LIKE concat('%', #{fuzzyName}, '%')</if>
+        <if test="type != null">AND `type` = #{type}</if>
+        <if test="fuzzyName != null">
+            ORDER BY instr(`name`, #{fuzzyName}) ASC, LENGTH (`name`) ASC
+        </if>
+        limit #{offset}, #{limit}
+    </select>
+
+
     <select id="findByFuzzyName" parameterType="map" resultMap="DoctorOrgMap">
         SELECT id, `name`
         FROM <include refid="tb" />
