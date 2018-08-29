@@ -295,21 +295,21 @@
     </select>
 
     <select id="getCunlan" parameterType="long" resultType="map" >
-        select ifnull(end,0) as end, 1 as 'type' from doctor_report_resevers where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')
+        select ifnull(end,0) as end, '后备猪' as 'type' from doctor_report_resevers where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')
         union
-        select ifnull(end,0) as end, 2 as 'type' from doctor_report_boars where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')
+        select ifnull(end,0) as end, '种公猪' as 'type' from doctor_report_boars where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')
         union
-        select ifnull(end,0) as end, 3 as 'type' from doctor_report_sows where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')
+        select ifnull(end,0) as end, '基础母猪' as 'type' from doctor_report_sows where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')
         union
-        select ifnull(end,0) as end, 4 as 'type' from doctor_report_matings where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')
+        select ifnull(end,0) as end, '配怀母猪' as 'type' from doctor_report_matings where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')
         union
-        select ifnull(end,0) as end, 5 as 'type' from doctor_report_delivers where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')
+        select ifnull(end,0) as end, '产房母猪' as 'type' from doctor_report_delivers where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')
         union
-        select ifnull(piglet_end,0) as end, 6 as 'type' from doctor_report_delivers where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')
+        select ifnull(piglet_end,0) as end, '产房仔猪' as 'type' from doctor_report_delivers where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')
         union
-        select ifnull(end,0) as end, 7 as 'type' from doctor_report_nurseries where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')
+        select ifnull(end,0) as end, '保育猪' as 'type' from doctor_report_nurseries where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')
         union
-        select ifnull(end,0) as end, 8 as 'type' from doctor_report_fattens where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')
+        select ifnull(end,0) as end, '育肥猪' as 'type' from doctor_report_fattens where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')
     </select>
 
 </mapper>
