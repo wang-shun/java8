@@ -13,9 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
 
@@ -147,5 +145,18 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
     @Override
     public Integer  findUserTypeById(Long userId){
         return doctorOrgDao.findUserTypeById(userId);
+    }
+    @Override
+    public List<Map<String,Object>> getOrgcunlan(Long groupId){
+        List<Map<String,Object>> result = new ArrayList<>();
+        List<Map<String,Object>> orgList = doctorOrgDao.getOrgByGroupId(groupId);
+        orgList.parallelStream().forEach(map -> {
+            List<Map<Object,String>> orgCunlan = doctorOrgDao.getCunlan((long)map.get("id"));
+            Map<String,Object> maps = new HashMap<>();
+            maps.put("orgName",map.get("name"));
+            maps.put("orgCunlan",orgCunlan);
+            result.add(maps);
+        });
+        return result;
     }
 }

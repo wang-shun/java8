@@ -253,4 +253,12 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
     public Integer findUserTypeById(Long userId){
         return sqlSession.selectOne(sqlId("findUserTypeById"), userId);
     }
+
+    public List<Map<String,Object>> getOrgByGroupId(Long groupId){
+        return sqlSession.selectList(sqlId("getOrgByGroupId"), groupId);
+    }
+    public List<Map<Object,String>> getCunlan(Long orgId){
+        return sqlSession.selectList(sqlId("getCunlan"), orgId);
+    }
+
 }

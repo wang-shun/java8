@@ -435,7 +435,7 @@ public class Users {
 
 
     /**
-     * 根据登录用户筛选集团
+     * 根据登录用户筛选集团(孔景军)
      * @return
      */
     @RequestMapping(value = "/groupList", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -468,7 +468,7 @@ public class Users {
     }
 
     /**
-     * 根据集团筛选公司
+     * 根据集团筛选公司（孔景军）
      * @return
      */
     @RequestMapping(value = "/getOrgListByGroup", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -487,6 +487,15 @@ public class Users {
             throw new JsonResponseException(result.getError());
         }
         return result.getResult();
+    }
+    /**
+     * 查集团下的公司的存栏（孔景军）
+     * @return
+     */
+    @RequestMapping(value = "/getOrgcunlan", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Map<String,Object>> getOrgcunlan(@RequestParam Long groupId) {
+        List<Map<String,Object>> orgList = doctorOrgReadService.getOrgcunlan(groupId);
+        return orgList;
     }
     @Data
     private static class UserWithServiceStatus extends User implements Serializable {
