@@ -43,4 +43,17 @@ public class DoctorRollbacks {
     public Boolean rollbackPigEvent(@RequestParam("eventId") Long eventId) {
         return RespWithExHelper.orInvalid(doctorRollbackService.rollbackPigEvent(eventId, UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
     }
+
+    //app回滚母猪事件
+    @RequestMapping(value = "/sow", method = RequestMethod.GET)
+    public Boolean rollbackSowEvent(@RequestParam("eventId") Long eventId) {
+        return RespWithExHelper.orInvalid(doctorRollbackService.rollbackPigEvent(eventId, UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
+    }
+
+    //app回滚母猪公猪事件
+    @RequestMapping(value = "/boar", method = RequestMethod.GET)
+    public Boolean rollbackBoarEvent(@RequestParam("eventId") Long eventId) {
+        return RespWithExHelper.orInvalid(doctorRollbackService.rollbackPigEvent(eventId, UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
+    }
+
 }
