@@ -82,4 +82,12 @@ public interface DoctorOrgReadService {
      * @return
      */
     Response<List<DoctorOrg>>  findOrgByGroup(List<Long> orgIds,Long groupId);
+
+    /**
+     * 通过用户id查用户类型
+     * @param userId
+     * @return
+     */
+    Integer  findUserTypeById(Long userId);
+
 }

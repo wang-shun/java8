@@ -66,10 +66,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Author:  <a href="mailto:i@terminus.io">jlchen</a>
@@ -443,7 +440,7 @@ public class Users {
      */
     @RequestMapping(value = "/groupList", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public List<DoctorOrg> groupList() {
+    public Map groupList() {
         BaseUser baseUser = UserUtil.getCurrentUser();
         if (baseUser == null) {
             throw new JsonResponseException("user.not.login");
@@ -452,16 +449,22 @@ public class Users {
         if (!dataPermissionResponse.isSuccess()) {
             throw new JsonResponseException("user.not.permission");
         }
+        Integer userType = doctorOrgReadService.findUserTypeById(baseUser.getId());
         List<Long> groupIds = dataPermissionResponse.getResult().getGroupIdsList();
+        List<DoctorOrg> data = new ArrayList<>();
         if(groupIds == null || groupIds.size() == 0){
-            return null;
+            data = null;
         } else {
             Response<List<DoctorOrg>> result = doctorOrgReadService.findOrgByIds(groupIds);
             if (!result.isSuccess()) {
                 throw new JsonResponseException(result.getError());
             }
-            return result.getResult();
+            data =  result.getResult();
         }
+        Map map = new HashMap();
+        map.put("data",data);
+        map.put("userType",userType);
+        return map;
     }
 
     /**

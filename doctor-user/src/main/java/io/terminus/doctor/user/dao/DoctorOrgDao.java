@@ -250,5 +250,7 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
         map.put("groupId",groupId);
         return sqlSession.selectList(sqlId("findOrgByGroup"), map);
     }
-
+    public Integer findUserTypeById(Long userId){
+        return sqlSession.selectOne(sqlId("findUserTypeById"), userId);
+    }
 }

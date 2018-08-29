@@ -143,4 +143,9 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
     public Response<DoctorOrg>  findGroupcompanyByOrgId(Long orgId){
         return Response.ok(doctorOrgDao.findGroupcompanyByOrgId(orgId));
     }
+
+    @Override
+    public Integer  findUserTypeById(Long userId){
+        return doctorOrgDao.findUserTypeById(userId);
+    }
 }

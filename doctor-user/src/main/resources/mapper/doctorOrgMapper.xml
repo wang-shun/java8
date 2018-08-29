@@ -285,4 +285,8 @@
         </foreach>
         and parent_id = #{groupId}
     </select>
+
+    <select id="findUserTypeById" parameterType="long" resultType="Integer" >
+        select user_type from doctor_user_subs where userId = #{userId}
+    </select>
 </mapper>
