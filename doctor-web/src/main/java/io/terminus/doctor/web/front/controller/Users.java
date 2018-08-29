@@ -453,8 +453,7 @@ public class Users {
             throw new JsonResponseException("user.not.permission");
         }
         List<Long> groupIds = dataPermissionResponse.getResult().getGroupIdsList();
-        log.error("========="+groupIds);
-        if(groupIds.size() == 0){
+        if(groupIds == null || groupIds.size() == 0){
             return null;
         } else {
             Response<List<DoctorOrg>> result = doctorOrgReadService.findOrgByIds(groupIds);
