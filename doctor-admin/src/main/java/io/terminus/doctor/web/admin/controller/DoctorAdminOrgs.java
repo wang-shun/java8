@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.admin.controller;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Params;
@@ -9,20 +10,13 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.dto.DoctorDepartmentDto;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
-import io.terminus.doctor.user.service.DoctorDepartmentReadService;
-import io.terminus.doctor.user.service.DoctorDepartmentWriteService;
-import io.terminus.doctor.user.service.DoctorOrgReadService;
-import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
-import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.user.service.*;
 import io.terminus.doctor.web.admin.dto.DoctorAvailableBindDto;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -45,6 +39,8 @@ public class DoctorAdminOrgs {
     @RpcConsumer
     private DoctorOrgReadService doctorOrgReadService;
     @RpcConsumer
+    private DoctorOrgWriteService doctorOrgWriteService;
+    @RpcConsumer
     private DoctorDepartmentReadService doctorDepartmentReadService;
     @RpcConsumer
     private DoctorDepartmentWriteService doctorDepartmentWriteService;
@@ -52,6 +48,17 @@ public class DoctorAdminOrgs {
     private DoctorUserReadService doctorUserReadService;
     @RpcConsumer
     private DoctorServiceStatusReadService doctorServiceStatusReadService;
+
+    //添加公司
+    @RequestMapping(value = "/addOrg", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Long addOrg(@RequestBody DoctorOrg org) {
+        org.setParentId(0L);
+        Response<Long> response = doctorOrgWriteService.createOrg(org);
+        if (!response.isSuccess()) {
+            throw new JsonResponseException(500, response.getError());
+        }
+        return response.getResult();
+    }
 
     /**
      * 查询全部公司
