@@ -14,6 +14,7 @@ import io.terminus.doctor.common.utils.ResponseUtil;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.web.core.export.Exporter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -99,14 +100,14 @@ public class StockHandleControllerv2 {
     @RequestMapping(value = "/monthWarehouseDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public Response<List<Map>> warehouseReport(@RequestParam(required = true,value = "warehouseId") Long warehouseId,
                                                 @RequestParam(required = false,value = "orgId") Long orgId,
-                                                @RequestParam(required = false,value = "settlementDate") String settlementDate,
-                                                @RequestParam(required = false,value = "materialName") String materialName
+                                                @RequestParam(required = false,value = "settlementDate") String settlementDate
+                                                /*@RequestParam(required = false,value = "materialName") String materialName*/
                                                 ){
         Map<String, Object> params = new HashMap<>();
         params.put("warehouseId",warehouseId);
         params.put("orgId",orgId);
         params.put("settlementDate",settlementDate);
-        params.put("materialName",materialName);
+        /*params.put("materialName",materialName);*/
         return doctorWarehouseMaterialHandleReadService.monthWarehouseDetail(params);
 
     }
@@ -337,7 +338,7 @@ public class StockHandleControllerv2 {
                     params.put("warehouseId",warehouseId);
                     params.put("orgId",orgId);
                     params.put("settlementDate",settlementDate);
-                    params.put("materialName",materialName);
+                    //params.put("materialName",materialName);
                     Response<List<Map>> listResponse2 = doctorWarehouseMaterialHandleReadService.monthWarehouseDetail(params);
                     List<Map> result2 = listResponse2.getResult();
                     //开始导出

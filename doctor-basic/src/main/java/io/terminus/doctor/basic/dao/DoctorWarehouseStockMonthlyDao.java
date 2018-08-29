@@ -181,7 +181,7 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
 
     public List<Map> monthWarehouseDetail(Map<String, Object> criteria) {
 
-        return this.sqlSession.selectList("monthWarehouseDetail", criteria);
+        return this.sqlSession.selectList(this.sqlId("monthWarehouseDetail"), criteria);
 
     }
 }
