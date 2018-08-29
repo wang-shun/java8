@@ -88,11 +88,6 @@ public class DoctorDepartmentManager {
         departmentDto.setName(doctorOrg.getName());
         departmentDto.setLevel(level);
         departmentDto.setType(type);
-        if(departmentDto.getType()==1){
-            departmentDto.setTypeName("集团");
-        }else if(departmentDto.getType()==2){
-            departmentDto.setTypeName("公司");
-        }
         level ++;
         List<DoctorOrg> children = doctorOrgDao.findOrgByParentId(departmentId);
         if (Arguments.isNullOrEmpty(children)) {
@@ -126,7 +121,7 @@ public class DoctorDepartmentManager {
 
     public List<DoctorDepartmentDto> availableBindDepartment(Long departmentId) {
         List<DoctorOrg> orgList = doctorOrgDao.findExcludeIds(upAndIncludeSelfNodeId(departmentId));
-        return orgList.stream().map(doctorOrg -> new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), null,null,null, null))
+        return orgList.stream().map(doctorOrg -> new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), null,null,null))
                 .collect(Collectors.toList());
     }
 
@@ -164,7 +159,7 @@ public class DoctorDepartmentManager {
     private DoctorDepartmentDto findClique(Long departmentId) {
         DoctorOrg doctorOrg = doctorOrgDao.findById(departmentId);
         if (Objects.equals(doctorOrg.getType(), DoctorOrg.Type.CLIQUE.getValue())) {
-            return new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), 1,null,null, null);
+            return new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), 1,null, null);
         }
         return findClique(doctorOrg.getParentId());
     }

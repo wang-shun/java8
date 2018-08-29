@@ -94,9 +94,9 @@ public class DoctorDepartmentReadServiceImpl implements DoctorDepartmentReadServ
             Map<Long, List<DoctorFarm>> map = allFarm.stream().collect(Collectors.groupingBy(DoctorFarm::getOrgId));
             List<DoctorDepartmentDto> dtos = map.entrySet().stream().map(entry -> {
                 List<DoctorDepartmentDto> list = entry.getValue().stream().map(doctorFarm ->
-                        new DoctorDepartmentDto(doctorFarm.getId(), doctorFarm.getName(), null,null,null, null))
+                        new DoctorDepartmentDto(doctorFarm.getId(), doctorFarm.getName(), null,null,null))
                         .collect(Collectors.toList());
-                return new DoctorDepartmentDto(entry.getKey(), entry.getValue().get(0).getOrgName(), null,null, null,list);
+                return new DoctorDepartmentDto(entry.getKey(), entry.getValue().get(0).getOrgName(), null, null,list);
             }).collect(Collectors.toList());
 
             return Response.ok(dtos);

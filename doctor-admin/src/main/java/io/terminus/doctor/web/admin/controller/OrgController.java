@@ -31,7 +31,7 @@ public class OrgController {
      * @return
      */
     @RequestMapping(value = "/name", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Boolean updateDoctorOrg(@RequestParam long id,@RequestParam String name) {
+    public Boolean updateDoctorOrg(@RequestParam long id,@RequestParam String name,@RequestParam Integer type) {
 
         Response<DoctorOrg> doctorOrg = doctorOrgWriteService.findName(id);
 //        System.out.println("前"+id+doctorOrg.getResult().getName());
@@ -48,7 +48,7 @@ public class OrgController {
         doctorOrgsLogsWriteService.createLog(doctorOrgsLogs);
 //        System.out.println("后"+id+name);
 
-        doctorOrgWriteService.updateOrgName(id,name);
+        doctorOrgWriteService.updateOrgName(id,name,type);
         doctorOrgWriteService.updateBarnName(id, name);
         doctorOrgWriteService.updateFarmName(id,name);
         doctorOrgWriteService.updateGroupName(id,name);

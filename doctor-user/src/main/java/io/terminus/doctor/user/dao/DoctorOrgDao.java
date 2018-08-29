@@ -128,8 +128,8 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
      * @param name
      * @return
      */
-    public boolean updateName(Long id,String name){
-        return sqlSession.update(sqlId("updateName"),ImmutableMap.of("id",id,"name",name))==1;
+    public boolean updateName(Long id,String name,Integer type){
+        return sqlSession.update(sqlId("updateName"),ImmutableMap.of("id",id,"name",name,"type",type))==1;
     }
 
     /**

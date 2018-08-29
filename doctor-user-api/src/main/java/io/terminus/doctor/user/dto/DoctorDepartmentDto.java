@@ -35,8 +35,6 @@ public class DoctorDepartmentDto implements Serializable{
 
     private Integer type;
 
-    private String typeName;
-
     /**
      * 子节点列表
      */

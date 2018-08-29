@@ -89,7 +89,7 @@
 
     <update id="updateName" parameterType="map">
         UPDATE doctor_orgs
-        set name = #{name}
+        set name = #{name}, type=#{type}
         WHERE id = #{id}
     </update>
 
