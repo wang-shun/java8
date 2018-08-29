@@ -455,13 +455,14 @@ public class Users {
         List<Long> groupIds = dataPermissionResponse.getResult().getGroupIdsList();
         log.error("========="+groupIds);
         if(groupIds.size() == 0){
-
+            return null;
+        } else {
+            Response<List<DoctorOrg>> result = doctorOrgReadService.findOrgByIds(groupIds);
+            if (!result.isSuccess()) {
+                throw new JsonResponseException(result.getError());
+            }
+            return result.getResult();
         }
-        Response<List<DoctorOrg>> result = doctorOrgReadService.findOrgByIds(groupIds);
-        if (!result.isSuccess()) {
-            throw new JsonResponseException(result.getError());
-        }
-        return result.getResult();
     }
 
     /**
