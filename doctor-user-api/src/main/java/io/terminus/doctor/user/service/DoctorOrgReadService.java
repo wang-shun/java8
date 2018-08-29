@@ -90,4 +90,6 @@ public interface DoctorOrgReadService {
      */
     Integer  findUserTypeById(Long userId);
     List<Map<String,Object>> getOrgcunlan(Long groupId);
+    List<Map<Object,String>> getGroupcunlan(Long groupId);
+
 }

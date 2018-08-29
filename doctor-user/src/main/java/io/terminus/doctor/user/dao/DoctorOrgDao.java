@@ -257,8 +257,13 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
     public List<Map<String,Object>> getOrgByGroupId(Long groupId){
         return sqlSession.selectList(sqlId("getOrgByGroupId"), groupId);
     }
+    public List<Long> getOrgByGroupId1(Long groupId){
+        return sqlSession.selectList(sqlId("getOrgByGroupId1"), groupId);
+    }
     public List<Map<Object,String>> getCunlan(Long orgId){
         return sqlSession.selectList(sqlId("getCunlan"), orgId);
     }
-
+    public List<Map<Object,String>> getGroupCunlan(List<Long> orgId){
+        return sqlSession.selectList(sqlId("getGroupCunlan"), orgId);
+    }
 }

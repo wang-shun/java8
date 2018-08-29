@@ -497,6 +497,16 @@ public class Users {
         List<Map<String,Object>> orgList = doctorOrgReadService.getOrgcunlan(groupId);
         return orgList;
     }
+
+    /**
+     * 查集团的存栏（孔景军）
+     * @return
+     */
+    @RequestMapping(value = "/getGroupcunlan", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Map<Object,String>> getGroupcunlan(@RequestParam Long groupId) {
+        List<Map<Object,String>> orgList = doctorOrgReadService.getGroupcunlan(groupId);
+        return orgList;
+    }
     @Data
     private static class UserWithServiceStatus extends User implements Serializable {
         private static final long serialVersionUID = -4515482071656393479L;
