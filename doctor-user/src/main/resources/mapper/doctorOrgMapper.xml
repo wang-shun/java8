@@ -287,6 +287,6 @@
     </select>
 
     <select id="findUserTypeById" parameterType="long" resultType="Integer" >
-        select user_type from doctor_user_subs where userId = #{userId}
+        select user_type from doctor_user_subs where user_id = #{userId}
     </select>
 </mapper>
