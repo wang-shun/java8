@@ -95,14 +95,14 @@ public class DataAuthServiceImpl implements DataAuthService{
             String userName = params.get("userName");
             String mobile = params.get("mobile");
             String groupId = params.get("groupId");
-            String orgId = params.get("orgId");
+            //String orgId = params.get("orgId");
             String realName = params.get("realName");
 
             if(StringUtils.isBlank(editType)) return Response.fail("editType必传");
             if(StringUtils.isBlank(userName)) return Response.fail("userName必传");
             if(StringUtils.isBlank(mobile)) return Response.fail("mobile必传");
             if(StringUtils.isBlank(groupId)) return Response.fail("groupId必传");
-            if(StringUtils.isBlank(orgId)) return Response.fail("orgId必传");
+            //if(StringUtils.isBlank(orgId)) return Response.fail("orgId必传");
             if(StringUtils.isBlank(realName)) return Response.fail("realName必传");
 
             if(editType.toUpperCase().equals("A")) //新增
