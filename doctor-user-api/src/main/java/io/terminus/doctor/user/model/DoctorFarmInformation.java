@@ -97,6 +97,11 @@ public class DoctorFarmInformation implements Serializable {
     private int fatteningAmount;
 
     /**
+     * 后备猪存栏数量
+     */
+    private int backupAmount;
+
+    /**
      * 仔猪存栏数量
      */
     private int pigletsAmount;

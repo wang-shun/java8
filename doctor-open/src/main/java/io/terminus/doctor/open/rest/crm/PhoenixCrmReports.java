@@ -45,9 +45,11 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import sun.misc.BASE64Encoder;
 
 import java.io.BufferedReader;
 import java.net.HttpURLConnection;
+import java.security.MessageDigest;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -93,17 +95,29 @@ public class PhoenixCrmReports {
     /**
      * 查询全部下属猪场的存栏数据
      *
+     * @param appKey 身份验证
      * @return jsonArray
      */
     @OpenMethod(key = "get.pig.farms.living", paramNames = "appKey")
     public String getPigFarmsLiving(@NotEmpty(message = "appKey.not.empty") String appKey){
         try {
-//            char[] m = sign.toCharArray();
-//            for (int i = 0;i<m.length;i++){
-//                m[i] = (char) (m[i] ^ 't');
+            String key = "pigDoctorCRM";
+//            MD5 32位加密
+//            MessageDigest md5 = MessageDigest.getInstance("MD5");
+//            byte[] md5Bytes = md5.digest(key.getBytes());
+//            StringBuffer hexValue = new StringBuffer();
+//            for (int i = 0; i < md5Bytes.length; i++) {
+//                int val = ((int) md5Bytes[i]) & 0xff;
+//                if (val < 16)
+//                    hexValue.append("0");
+//                hexValue.append(Integer.toHexString(val));
 //            }
-//            String md5 = new String(m);
-            if(!"pigDoctorCRM".equals(appKey)){
+//            String m = hexValue.toString();
+//            if(!m.equals(appKey)){
+//                return "";
+//            }
+
+            if(!key.equals(appKey)){
                 return "";
             }
             Response<List<DoctorFarmInformation>> farmInforMation = doctorFarmReadService.findSubordinatePig();
