@@ -73,6 +73,7 @@ import io.terminus.doctor.user.dto.DoctorDepartmentDto;
 import io.terminus.doctor.user.dto.DoctorDepartmentLinerDto;
 import io.terminus.doctor.user.dto.FarmCriteria;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorFarmInformation;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorDepartmentReadService;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -295,7 +296,7 @@ public class ServiceConfiguration {
             }
 
             @Override
-            public Response<List<DoctorDepartmentDto>> availableBindDepartment(Long orgId) {
+            public Response<List<DoctorDepartmentDto>> availableBindDepartment(Long orgId,String name) {
                 return null;
             }
 
@@ -367,6 +368,11 @@ public class ServiceConfiguration {
             public Response<DoctorFarm> findByNumber(String number) {
                 return null;
             }
+
+            @Override
+            public Response<List<DoctorFarmInformation>> findSubordinatePig() {
+                return null;
+            }
         };
     }
 
@@ -415,6 +421,26 @@ public class ServiceConfiguration {
             }
             @Override
             public Response<DoctorOrg> findGroupcompanyByOrgId(Long orgId) {
+                return null;
+            }
+
+            @Override
+            public Response<List<DoctorOrg>> findOrgByGroup(List<Long> orgIds, Long groupId) {
+                return null;
+            }
+
+            @Override
+            public Integer findUserTypeById(Long userId) {
+                return null;
+            }
+
+            @Override
+            public List<Map<String, Object>> getOrgcunlan(Long groupId) {
+                return null;
+            }
+
+            @Override
+            public Map<Object, String> getGroupcunlan(Long groupId) {
                 return null;
             }
         };
