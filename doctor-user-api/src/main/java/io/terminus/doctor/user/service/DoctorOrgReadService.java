@@ -75,4 +75,26 @@ public interface DoctorOrgReadService {
      */
     Response<Boolean> updateOrgPidTpye(Long id);
 
+    /**
+     * 通过集团查公司(孔景军)
+     * @param orgIds
+     * @param orgId
+     * @return
+     */
+    Response<List<DoctorOrg>>  findOrgByGroup(List<Long> orgIds,Long groupId);
+
+    /**
+     * 通过用户id查用户类型
+     * @param userId
+     * @return
+     */
+    Integer  findUserTypeById(Long userId);
+    List<Map<String,Object>> getOrgcunlan(Long groupId);
+    Map<Object,String> getGroupcunlan(Long groupId);
+
+    /**
+     * 员工查询（yusq）1
+     */
+    Response staffQuery(Map<String, String> params);
+
 }

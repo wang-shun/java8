@@ -275,7 +275,7 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
         return sqlSession.selectOne(sqlId("getGroupNameById"), orgId);
     }
     /**
-     * 员工查询
+     * 员工查询1
      */
     public Paging<Map<String,Object>> staffQuery(Map<String, String> params){
         Long total = this.sqlSession.selectOne(sqlId("staffCount"), params);
