@@ -487,6 +487,7 @@ public class UserInitService {
             sub.setParentUserId(Long.valueOf(Params.get(subUser.getExtra(), "pid")));
             sub.setContact(Params.get(subUser.getExtra(), "contact"));
             sub.setStatus(UserStatus.NORMAL.value());
+            sub.setUserType(3);
             subDao.create(sub);
 
             userWriteService.update(subUser);

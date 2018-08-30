@@ -119,7 +119,7 @@ public class Sub implements Serializable {
     private Integer frozen;
 
     /**
-     * 用户类型：1：集团；2：公司
+     * 用户类型：1：集团；2：公司；3：猪场
      */
     private Integer userType;
 

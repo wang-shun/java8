@@ -152,6 +152,7 @@ public class DoctorUserManager {
             sub.setParentUserId(Long.valueOf(Params.get(user.getExtra(), "pid")));
             sub.setContact(Params.get(user.getExtra(), "contact"));
             sub.setStatus(UserStatus.NORMAL.value());
+            sub.setUserType(3);
             subDao.create(sub);
 
             UserProfile userProfile = new UserProfile();
@@ -267,6 +268,7 @@ public class DoctorUserManager {
         sub.setParentUserId(Long.valueOf(Params.get(user.getExtra(), "pid")));
         sub.setContact(Params.get(user.getExtra(), "contact"));
         sub.setStatus(UserStatus.NORMAL.value());
+        sub.setUserType(3);
         subDao.create(sub);
     }
 
