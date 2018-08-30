@@ -460,6 +460,12 @@ public class Users {
                 throw new JsonResponseException(result.getError());
             }
             data =  result.getResult();
+            if(groupIds.contains(0)){
+                DoctorOrg group = new DoctorOrg();
+                group.setId(0L);
+                group.setName("无集团");
+                data.add(group);
+            }
         }
         Map map = new HashMap();
         map.put("data",data);
