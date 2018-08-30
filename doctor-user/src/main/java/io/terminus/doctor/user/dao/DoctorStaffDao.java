@@ -18,7 +18,7 @@ import java.util.List;
 public class DoctorStaffDao extends MyBatisDao<DoctorStaff> {
 
     public DoctorStaff findByFarmIdAndUserId(Long farmId, Long userId){
-        return sqlSession.selectOne(sqlId("findByOrgAndFarmId"), ImmutableMap.of("farmId", farmId, "userId", userId));
+        return sqlSession.selectOne(sqlId("findByFarmIdAndUserId"), ImmutableMap.of("farmId", farmId, "userId", userId));
     }
 
     public List<DoctorStaff> findByFarmIdAndStatus(Long farmId, Integer status){

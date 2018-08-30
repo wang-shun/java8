@@ -26,9 +26,29 @@ public class DoctorStaff implements Serializable {
     private Long farmId;
 
     /**
+     * 公司id
+     */
+    private Long orgId;
+
+    /**
+     * 集团id
+     */
+    private Long groupId;
+
+    /**
      * 用户id
      */
     private Long userId;
+
+    /**
+     * 用户名称
+     */
+    private String UserName;
+
+    /**
+     * 联系方式
+     */
+    private String mobile;
 
     /**
      * 状态 1:在职，-1:不在职

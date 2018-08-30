@@ -118,6 +118,11 @@ public class Sub implements Serializable {
      */
     private Integer frozen;
 
+    /**
+     * 用户类型：1：集团；2：公司
+     */
+    private Integer userType;
+
     @SneakyThrows
     public void setExtra(Map<String, String> extra) {
         this.extra = extra;
