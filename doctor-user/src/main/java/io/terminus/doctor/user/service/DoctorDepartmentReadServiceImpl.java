@@ -56,9 +56,9 @@ public class DoctorDepartmentReadServiceImpl implements DoctorDepartmentReadServ
     }
 
     @Override
-    public Response<List<DoctorDepartmentDto>> availableBindDepartment(@NotNull(message = "orgId.not.null") Long orgId) {
+    public Response<List<DoctorDepartmentDto>> availableBindDepartment(@NotNull(message = "orgId.not.null") Long orgId,String name) {
         try {
-            return Response.ok(doctorDepartmentManager.availableBindDepartment(orgId));
+            return Response.ok(doctorDepartmentManager.availableBindDepartment(orgId,name));
         } catch (Exception e) {
             log.error("available bind department failed, orgId:{}, cause:{}",
                     orgId, Throwables.getStackTraceAsString(e));

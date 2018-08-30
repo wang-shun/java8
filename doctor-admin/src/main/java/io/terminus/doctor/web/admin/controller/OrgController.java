@@ -34,33 +34,28 @@ public class OrgController {
     public Boolean updateDoctorOrg(@RequestParam long id,@RequestParam String name,@RequestParam Integer type) {
 
         Response<DoctorOrg> doctorOrg = doctorOrgWriteService.findName(id);
-//        System.out.println("前"+id+doctorOrg.getResult().getName());
-
         DoctorOrgsLogs doctorOrgsLogs=new DoctorOrgsLogs();
         doctorOrgsLogs.setOrgId(id);
         doctorOrgsLogs.setOrgFrotName(doctorOrg.getResult().getName());
         doctorOrgsLogs.setOrgLaterName(name);
         doctorOrgsLogs.setCreatorId(1L);
-//        doctorOrgsLogs.setCreatorName("jsj");
         doctorOrgsLogs.setUpdatorId(1L);
-//        doctorOrgsLogs.setUpdatorName("jsj");
-
         doctorOrgsLogsWriteService.createLog(doctorOrgsLogs);
-//        System.out.println("后"+id+name);
 
         doctorOrgWriteService.updateOrgName(id,name,type);
-        doctorOrgWriteService.updateBarnName(id, name);
-        doctorOrgWriteService.updateFarmName(id,name);
-        doctorOrgWriteService.updateGroupName(id,name);
-        doctorOrgWriteService.updateGroupEventName(id,name);
-        doctorOrgWriteService.updatePigEventsName(id,name);
-        doctorOrgWriteService.updatePigScoreApplyName(id,name);
-        doctorOrgWriteService.updatePigName(id,name);
-        doctorOrgWriteService.updateGroupDaileName(id,name);
-        doctorOrgWriteService.updatePigDailieName(id,name);
-//        if (!response.isSuccess()) {
-//            throw new JsonResponseException(500, response.getError());
-//        }
+        //如果是公司，则修改以下的公司名称（陈娟 2018-8-30）
+        if(type==2){
+            doctorOrgWriteService.updateBarnName(id, name);
+            doctorOrgWriteService.updateFarmName(id,name);
+            doctorOrgWriteService.updateGroupName(id,name);
+            doctorOrgWriteService.updateGroupEventName(id,name);
+            doctorOrgWriteService.updatePigEventsName(id,name);
+            doctorOrgWriteService.updatePigScoreApplyName(id,name);
+            doctorOrgWriteService.updatePigName(id,name);
+            doctorOrgWriteService.updateGroupDaileName(id,name);
+            doctorOrgWriteService.updatePigDailieName(id,name);
+        }
+
         return true;
     }
 

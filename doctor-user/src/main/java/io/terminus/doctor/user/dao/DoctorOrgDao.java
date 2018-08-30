@@ -89,6 +89,11 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
         return sqlSession.update(sqlId("unbindDepartment"), ImmutableMap.of("orgIds", orgIds)) == 1;
     }
 
+    //关联子公司得到公司（陈娟 2018-08-29）
+    public List<DoctorOrg> getCompanyByName(String name) {
+        return getSqlSession().selectList(sqlId("getCompanyByName"), ImmutableMap.of("name", name));
+    }
+
     /**
      * 查询排除这些id的公司
      *

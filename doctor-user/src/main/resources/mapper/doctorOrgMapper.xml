@@ -222,7 +222,7 @@
     <update id="bindDepartment" parameterType="map" >
         UPDATE
         <include refid="tb"/>
-        SET parent_id = #{parentId}, `type` = 2
+        SET parent_id = #{parentId}
         WHERE
         id IN
         <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
@@ -240,6 +240,13 @@
             #{orgId}
         </foreach>
     </update>
+
+    <!-- 关联子公司得到公司（陈娟 2018-08-29）-->
+    <select id="getCompanyByName" parameterType="map" resultMap="DoctorOrgMap" >
+        select * from doctor_orgs where type=2
+        <if test="name != null">AND `name` LIKE concat('%', #{name}, '%')</if>
+    </select>
+
 
     <select id="findExcludeIds" parameterType="map" resultMap="DoctorOrgMap" >
         SELECT <include refid="cols_all" />

@@ -153,9 +153,9 @@ public class DoctorAdminOrgs {
      * @return 公司列表
      */
     @RequestMapping(value = "/available/bind", method = RequestMethod.GET)
-    public DoctorAvailableBindDto availableBindDepartment(@RequestParam Long orgId) {
+    public DoctorAvailableBindDto availableBindDepartment(@RequestParam Long orgId,@RequestParam(required = false) String name) {
         DoctorAvailableBindDto dto = new DoctorAvailableBindDto();
-        dto.setDepartmentDtoList(RespHelper.or500(doctorDepartmentReadService.availableBindDepartment(orgId)));
+        dto.setDepartmentDtoList(RespHelper.or500(doctorDepartmentReadService.availableBindDepartment(orgId,name)));
         dto.setDoctorDepartmentDto(RespHelper.or500(doctorDepartmentReadService.findCliqueTree(orgId)));
         return dto;
     }

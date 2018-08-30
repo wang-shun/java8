@@ -119,9 +119,11 @@ public class DoctorDepartmentManager {
         return doctorOrgDao.unbindDepartment(Lists.newArrayList(departmentId));
     }
 
-    public List<DoctorDepartmentDto> availableBindDepartment(Long departmentId) {
-        List<DoctorOrg> orgList = doctorOrgDao.findExcludeIds(upAndIncludeSelfNodeId(departmentId));
-        return orgList.stream().map(doctorOrg -> new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), null,null,null))
+    //关联子公司得到公司（陈娟 2018-08-29）
+    public List<DoctorDepartmentDto> availableBindDepartment(Long departmentId,String name) {
+//        List<DoctorOrg> orgList = doctorOrgDao.findExcludeIds(upAndIncludeSelfNodeId(departmentId));
+        List<DoctorOrg> company = doctorOrgDao.getCompanyByName(name);
+        return company.stream().map(doctorOrg -> new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), null,doctorOrg.getType(),null))
                 .collect(Collectors.toList());
     }
 
