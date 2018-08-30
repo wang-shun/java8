@@ -18,6 +18,7 @@
         select count(1) as ct
         from parana_users a
         join doctor_user_subs b on a.id=b.user_id
+        join doctor_staffs d on b.user_id=d.user_id
         join doctor_sub_roles c on b.role_id=c.id
         where (b.user_type=1 or b.user_type=2)
         and (c.role_type=0 or c.role_type=1 or c.role_type=2)
@@ -37,9 +38,11 @@
 
     <select id="getUserRoleInfo" parameterType="Map" resultType="Map">
         select a.id,a.`name` as userName,b.real_name as realName,a.mobile,
-        b.user_type as userType,c.id as roleId,c.`name` as roleName
+        b.user_type as userType,c.id as roleId,c.`name` as roleName,d.group_id as groupId,
+        d.org_id as orgId,d.farm_id as farmId
         from parana_users a
         join doctor_user_subs b on a.id=b.user_id
+        join doctor_staffs d on b.user_id=d.user_id
         join doctor_sub_roles c on b.role_id=c.id
         where (b.user_type=1 or b.user_type=2)
         and (c.role_type=0 or c.role_type=1 or c.role_type=2)
