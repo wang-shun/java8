@@ -532,6 +532,7 @@ public class DoctorImportDataService {
             permission.setFarmIds(farm.getId().toString());
 //            permission.setOrgIdsList(Lists.newArrayList(org.getId()));
             permission.setOrgIds(farm.getOrgId().toString());
+
             log.info("Lists.newArrayList(org.getId()):"+Lists.newArrayList(org.getId()));
             log.info("farm.getOrgId().toString():"+farm.getOrgId().toString());
             log.info("permission:"+permission);
