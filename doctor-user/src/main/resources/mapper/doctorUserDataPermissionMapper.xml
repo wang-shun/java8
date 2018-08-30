@@ -35,7 +35,7 @@
     </sql>
 
     <sql id="vals">
-        #{userId}, #{farmIds}, #{barnIds},#{orgIds},#{groupIds} #{wareHouseTypes}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
+        #{userId}, #{farmIds}, #{barnIds},#{orgIds},#{groupIds}, #{wareHouseTypes}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorUserDataPermission" keyProperty="id" useGeneratedKeys="true">
