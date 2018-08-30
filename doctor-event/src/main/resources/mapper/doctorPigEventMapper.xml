@@ -1046,8 +1046,6 @@
         FROM
         <include refid="tb"/>
         WHERE operator_id IS NOT NULL
-        AND operator_name IS NOT NULL
-        and operator_id > 0
         <if test="types != null &amp;&amp; types.size() > 0">
             AND `type` IN
             <foreach collection="types" item="i" open="(" close=")" separator=",">
