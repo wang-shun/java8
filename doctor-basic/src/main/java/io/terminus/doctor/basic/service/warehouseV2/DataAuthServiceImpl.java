@@ -36,7 +36,7 @@ public class DataAuthServiceImpl implements DataAuthService{
         try{
             List<Map<String,Object>> groupIdList = dataAuthDao.selGroups();
             Map<String,Object> pp = Maps.newLinkedHashMap();
-            pp.put("id","0");
+            pp.put("id",0);
             pp.put("groupName","无集团");
             groupIdList.add(pp);
             return Response.ok(groupIdList);
