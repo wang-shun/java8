@@ -163,7 +163,12 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
     public Map<Object,String> getGroupcunlan(Long groupId){
         String groupName = doctorOrgDao.getGroupNameById(groupId);
         List<Long> orgList = doctorOrgDao.getOrgByGroupId1(groupId);
-        List<Map<Object,String>> a = doctorOrgDao.getGroupCunlan(orgList);
+        List<Map<Object,String>> a = new ArrayList<>();
+        if(orgList.size() == 0){
+            a= null;
+        }else {
+            a = doctorOrgDao.getGroupCunlan(orgList);
+        }
         Map map = new HashMap();
         map.put("groupName",groupName);
         map.put("data",a);
