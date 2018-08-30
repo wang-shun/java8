@@ -7,7 +7,7 @@
 <mapper namespace="DataAuth">
 
     <select id="selGroups" resultType="map">
-        select distinct id,`name` as orgName from doctor_orgs where type =1
+        select distinct id,`name` as groupName from doctor_orgs where type =1
     </select>
 
     <select id="selOrgs" parameterType="Integer" resultType="map">

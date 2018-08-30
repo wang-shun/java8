@@ -34,7 +34,12 @@ public class DataAuthServiceImpl implements DataAuthService{
     @Override
     public Response selGroups() {
         try{
-            return Response.ok(dataAuthDao.selGroups());
+            List<Map<String,Object>> groupIdList = dataAuthDao.selGroups();
+            Map<String,Object> pp = Maps.newLinkedHashMap();
+            pp.put("id","0");
+            pp.put("groupName","无集团");
+            groupIdList.add(pp);
+            return Response.ok(groupIdList);
         }catch (Exception e){
             log.error("selGroups[error] ==> {}",e);
             return Response.fail(e.getMessage());
