@@ -128,6 +128,9 @@
         <if test="mobile != null and mobile != ''">
             ,mobile = #{mobile}
         </if>
+        <if test="status != null and status != ''">
+            ,status = #{status}
+        </if>
         where user_id = #{userId}
     </update>
 
