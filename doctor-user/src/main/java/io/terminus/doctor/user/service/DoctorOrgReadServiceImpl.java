@@ -174,4 +174,13 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
         map.put("data",a);
         return map;
     }
+    /**
+     * 员工查询
+     */
+    @Override
+    public Response staffQuery(Map<String, String> params) {
+        Paging<Map<String,Object>> paging = doctorOrgDao.staffQuery(params);
+        return Response.ok(paging);
+    }
+
 }

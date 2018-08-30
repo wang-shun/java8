@@ -159,4 +159,12 @@ public class DoctorAdminOrgs {
         dto.setDoctorDepartmentDto(RespHelper.or500(doctorDepartmentReadService.findCliqueTree(orgId)));
         return dto;
     }
+
+    /**
+     * 员工查询(yusq)
+     */
+    @RequestMapping(value = "/staffQuery", method = RequestMethod.POST)
+    public Response staffQuery(@RequestBody(required = false) Map<String, String> params){
+        return  doctorOrgReadService.staffQuery(params);
+    }
 }

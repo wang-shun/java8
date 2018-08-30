@@ -443,6 +443,9 @@ public class ServiceConfiguration {
             public Map<Object, String> getGroupcunlan(Long groupId) {
                 return null;
             }
+
+            @Override
+            public Response staffQuery(Map<String, String> params) { return null; }
         };
     }
 

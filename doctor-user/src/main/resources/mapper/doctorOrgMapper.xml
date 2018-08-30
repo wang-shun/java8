@@ -375,4 +375,39 @@
     <select id="getGroupNameById" parameterType="long" resultType="String" >
         select name from doctor_orgs where id = #{orgId}
     </select>
+    <select id="staffCount" parameterType="map" resultType="long">
+        select  count(1) as count
+        from doctor_staffs a
+        left join doctor_orgs b1 on a.group_id = b1.parent_id
+        left join doctor_orgs b2 on	a.org_id = b2.id
+        left join doctor_farms c on a.farm_id = c.id
+        where 1 = 1
+        <if test="groupId != null"> and a.group_id = #{groupId}</if>
+        <if test="orgId != null"> and a.org_id = #{orgId}</if>
+        <if test="farmId != null"> and a.farm_id = #{farmId}</if>
+        <if test="userName != null"> and a.user_name like  CONCAT(CONCAT('%',#{userName},'%')) </if>
+        <if test="mobile != null"> and a.mobile like  CONCAT(CONCAT('%',#{mobile},'%')) </if>
+        <if test="status != null"> and a.status = #{status}</if>
+    </select>
+
+    <select id="staffQuery" parameterType="map" resultType="map">
+        select  a.user_name as userName,
+                 a.mobile as mobile,
+                 b1.`name` as groupName,
+                 b2.`name` as orgName,
+                 c.name as farmName,
+                 a.status as `status`
+        from doctor_staffs a
+        left join doctor_orgs b1 on a.group_id = b1.parent_id
+        left join doctor_orgs b2 on	a.org_id = b2.id
+        left join doctor_farms c on a.farm_id = c.id
+        where 1 = 1
+        <if test="groupId != null"> and a.group_id = #{groupId}</if>
+        <if test="orgId != null"> and a.org_id = #{orgId}</if>
+        <if test="farmId != null"> and a.farm_id = #{farmId}</if>
+        <if test="userName != null"> and a.user_name like  CONCAT(CONCAT('%',#{userName},'%')) </if>
+        <if test="mobile != null"> and a.mobile like  CONCAT(CONCAT('%',#{mobile},'%')) </if>
+        <if test="status != null"> and a.status = #{status}</if>
+        limit ${pageNo},${pageSize}
+    </select>
 </mapper>

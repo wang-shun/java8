@@ -92,4 +92,8 @@ public interface DoctorOrgReadService {
     List<Map<String,Object>> getOrgcunlan(Long groupId);
     Map<Object,String> getGroupcunlan(Long groupId);
 
+    /**
+     * 员工查询（yusq）
+     */
+    Response staffQuery(Map<String, String> params);
 }

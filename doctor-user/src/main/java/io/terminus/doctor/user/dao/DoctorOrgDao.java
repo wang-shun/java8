@@ -271,7 +271,25 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
     public List<Map<Object,String>> getGroupCunlan(List<Long> orgId){
         return sqlSession.selectList(sqlId("getGroupCunlan"), orgId);
     }
-    public String getGroupNameById(Long orgId){
+    public String getGroupNameById(Long orgId) {
         return sqlSession.selectOne(sqlId("getGroupNameById"), orgId);
+    }
+    /**
+     * 员工查询
+     */
+    public Paging<Map<String,Object>> staffQuery(Map<String, String> params){
+        Long total = this.sqlSession.selectOne(sqlId("staffCount"), params);
+        if (total == 0){
+            return new Paging(0L, Collections.emptyList());
+        } else {
+            int pageNo = Integer.parseInt(params.get("pageNo")) * Integer.parseInt(params.get("pageSize"))
+                    - Integer.parseInt(params.get("pageSize"));
+            params.put("pageNo", pageNo + "");
+            List<Map<String,Object>> datas = this.sqlSession.selectList(this.sqlId("staffQuery"), params);
+//            for (Iterator<Map<String,Object>> it = datas.iterator(); it.hasNext();){
+//
+//            }
+            return new Paging(total, datas);
+        }
     }
 }
