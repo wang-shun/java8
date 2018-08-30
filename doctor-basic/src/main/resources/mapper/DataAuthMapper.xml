@@ -132,15 +132,16 @@
     </update>
 
     <!-- 数据范围授权接口 -->
-    <select id="selectTreeAll" resultType="Map">
-        select groupId,groupName,orgId,orgName,c.id as farmId,c.`name` as farmName
-        from (select a.id as groupId,a.`name` as groupName,a.type,b.id as orgId,b.`name` as orgName,b.type as orgType
-        from doctor_orgs a left join  doctor_orgs b on a.id=b.parent_id
-        where (a.type = 1 or b.type=2)
-        order by a.id,b.id) as group_org_result
-        left join doctor_farms c
-        on group_org_result.orgId = c.org_id
-        order by group_org_result.groupId,group_org_result.orgId,c.id
+    <select id="selectAllGroups" resultType="Map">
+        select id as groupId,`name` as groupName from doctor_orgs where type=1 order by id
+    </select>
+
+    <select id="selectOrgs" parameterType="Map" resultType="Map">
+        select id as orgId,`name` as orgName from doctor_orgs where type=2 and parent_id=#{groupId} order by id
+    </select>
+
+    <select id="selectFarms" resultType="Map">
+        select id as farmId,`name` as farmName from doctor_farms where org_id=#{orgId} order by id
     </select>
 
     <select id="selectUserPermission" parameterType="Integer" resultType="Map">

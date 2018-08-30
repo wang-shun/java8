@@ -117,11 +117,27 @@ public class DataAuthDao extends MyBatisDao<DataAuth> {
     }
 
     /**
-     * 查询所有树状集团、公司、猪场数据
+     * 查询所有集团数据
      * @return
      */
-    public List<Map<String,Object>> selectTreeAll(){
-        return getSqlSession().selectList(sqlId("selectTreeAll"));
+    public List<Map<String,Object>> selectAllGroups(){
+        return getSqlSession().selectList(sqlId("selectAllGroups"));
+    }
+
+    /**
+     * 查询集团下公司数据
+     * @return
+     */
+    public List<Map<String,Object>> selectOrgs(Map<String,String> params){
+        return getSqlSession().selectList(sqlId("selectOrgs"),params);
+    }
+
+    /**
+     * 查询公司下猪场数据
+     * @return
+     */
+    public List<Map<String,Object>> selectFarms(Map<String,String> params){
+        return getSqlSession().selectList(sqlId("selectFarms"),params);
     }
 
     /**

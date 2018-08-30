@@ -168,47 +168,108 @@ public class DataAuthServiceImpl implements DataAuthService{
         try{
             Map<String,Object> resultMap = Maps.newLinkedHashMap();
 
-            List<Map<String,Object>> mapList = dataAuthDao.selectTreeAll();
-            if(null == mapList || mapList.size() == 0){
-                return Response.fail("没有集团、公司及猪场数据");
-            }
-
-            // 循环处理所有集团、公司、猪场数据
-            String tempGroupId = "";
+            //存放集团、公司、猪场的树状数据集合
             Map<String,Object> reMap = Maps.newLinkedHashMap();
-            List<Map<String,Object>> orgList = Lists.newArrayList();
-            Map<String,Object> orgMap;
-            for (Map<String,Object> subMap : mapList) {
-                String groupId = String.valueOf(subMap.get("groupId"));
-                String groupName = String.valueOf(subMap.get("groupName"));
-                if(groupId != null && !groupId.equals(tempGroupId))
-                {
-                    orgMap = Maps.newLinkedHashMap();
-                    orgMap.put("key","group_" + groupId);
-                    orgMap.put("title",groupName);
 
-                    //处理公司数据,过滤得到新的集合数组
-                    List<Map<String,Object>> orgLists = getOrgLists(mapList,groupId);
-                    List<Map<String,Object>> reorgLists = null;
-                    if(orgLists != null && orgLists.size() > 0)
-                    {
-                        reorgLists = Lists.newArrayList();
-                        for (Map<String,Object> subOrgMap : orgLists)
-                        {
-                            Map<String,Object> reSubOrgMap = subOrgMap;
-                            String orgId = String.valueOf(subOrgMap.get("key")).replace("org_","");
-                            //处理猪场数据,过滤得到新的集合数组
-                            List<Map<String,Object>> farmLists = getFarmLists(mapList,groupId,orgId);
-                            reSubOrgMap.put("children",farmLists);
-                            reorgLists.add(reSubOrgMap);
+            List<Map<String, Object>> groupZ = Lists.newArrayList();
+
+            // 处理无集团
+            Map<String, Object> sg = Maps.newLinkedHashMap();
+            sg.put("key", "group_0");
+            sg.put("title", "无集团");
+
+            Map<String, Object> newOrg;
+            List<Map<String, Object>> newOrgList;
+
+            Map<String, Object> newFarm;
+            List<Map<String, Object>> newFarmList;
+
+            Map<String,String> pm = Maps.newLinkedHashMap();
+            pm.put("groupId","0");
+            List<Map<String, Object>> orgList =  dataAuthDao.selectOrgs(pm);
+            if(orgList != null && orgList.size() > 0)
+            {
+                newOrgList = Lists.newArrayList();
+                for (Map<String, Object> org : orgList) {
+                    String orgId = String.valueOf(org.get("orgId"));
+                    String orgName = String.valueOf(org.get("orgName"));
+
+                    newOrg = Maps.newLinkedHashMap();
+                    newOrg.put("key", "org_" + orgId);
+                    newOrg.put("title", orgName);
+
+                    pm = Maps.newLinkedHashMap();
+                    pm.put("orgId",orgId);
+
+                    List<Map<String, Object>> farmList = dataAuthDao.selectFarms(pm);
+                    newFarmList = Lists.newArrayList();
+                    if(farmList != null && farmList.size() > 0){
+                        for (Map<String, Object> farm : farmList) {
+                            String farmId = String.valueOf(farm.get("farmId"));
+                            String farmName = String.valueOf(farm.get("farmName"));
+                            newFarm = Maps.newLinkedHashMap();
+                            newFarm.put("key", "farm_" + farmId);
+                            newFarm.put("title", farmName);
+                            newFarmList.add(newFarm);
                         }
                     }
-                    orgMap.put("children",reorgLists);
-                    orgList.add(orgMap);
+                    newOrg.put("children",newFarmList);
+                    newOrgList.add(newOrg);
                 }
-                tempGroupId = groupId;
+                sg.put("children",newOrgList);
+                groupZ.add(sg);
             }
-            reMap.put("children",orgList);
+
+            // 处理有集团
+            List<Map<String,Object>> groupList = dataAuthDao.selectAllGroups();
+            if(groupList != null && groupList.size() > 0) {
+                for (Map<String, Object> groupV : groupList) {
+                    String groupId = String.valueOf(groupV.get("groupId"));
+                    String groupName = String.valueOf(groupV.get("groupName"));
+
+                    sg = Maps.newLinkedHashMap();
+                    sg.put("key", "group_" + groupId);
+                    sg.put("title", groupName);
+
+                    pm = Maps.newLinkedHashMap();
+                    pm.put("groupId",groupId);
+                    orgList =  dataAuthDao.selectOrgs(pm);
+
+                    newOrgList = Lists.newArrayList();
+                    if(orgList != null && orgList.size() > 0)
+                    {
+                        for (Map<String, Object> org : orgList) {
+                            String orgId = String.valueOf(org.get("orgId"));
+                            String orgName = String.valueOf(org.get("orgName"));
+
+                            newOrg = Maps.newLinkedHashMap();
+                            newOrg.put("key", "org_" + orgId);
+                            newOrg.put("title", orgName);
+
+                            pm = Maps.newLinkedHashMap();
+                            pm.put("orgId",orgId);
+
+                            List<Map<String, Object>> farmList = dataAuthDao.selectFarms(pm);
+                            newFarmList = Lists.newArrayList();
+                            if(farmList != null && farmList.size() > 0){
+                                for (Map<String, Object> farm : farmList) {
+                                    String farmId = String.valueOf(farm.get("farmId"));
+                                    String farmName = String.valueOf(farm.get("farmName"));
+                                    newFarm = Maps.newLinkedHashMap();
+                                    newFarm.put("key", "farm_" + farmId);
+                                    newFarm.put("title", farmName);
+                                    newFarmList.add(newFarm);
+                                }
+                            }
+                            newOrg.put("children",newFarmList);
+                            newOrgList.add(newOrg);
+                        }
+                    }
+                    sg.put("children",newOrgList);
+                    groupZ.add(sg);
+                }
+            }
+            reMap.put("children", groupZ);
             resultMap.put("datas",reMap);
 
             if(userId != null) {
@@ -251,70 +312,6 @@ public class DataAuthServiceImpl implements DataAuthService{
         }catch (Exception e){
             log.error("getDataSubRoles[error] ==> {}",e);
             return Response.fail(e.getMessage());
-        }
-    }
-
-    /**
-     * 获取指定集团下的公司集合数据
-     * @param mapList
-     * @param pgroupId
-     * @return
-     */
-    private List<Map<String,Object>> getOrgLists(List<Map<String,Object>> mapList,String pgroupId){
-        try
-        {
-            List<Map<String,Object>> orgLists = Lists.newArrayList();
-            String tempOrgId = "";
-            for (Map<String,Object> subMap : mapList) {
-                String groupId = String.valueOf(subMap.get("groupId"));
-                if(groupId != null && groupId.equals(pgroupId)) {
-                    String orgId = String.valueOf(subMap.get("orgId"));
-                    String orgName = String.valueOf(subMap.get("orgName"));
-                    if(StringUtils.isNotBlank(orgId) && !tempOrgId.equals(orgId)  && !"null".equals(orgId.toLowerCase().trim())) {
-                        Map<String, Object> orgMap = Maps.newLinkedHashMap();
-                        orgMap.put("key", "org_" + orgId);
-                        orgMap.put("title", orgName);
-                        orgLists.add(orgMap);
-                    }
-                    tempOrgId = orgId;
-                }
-            }
-            return orgLists;
-        }catch (Exception e){
-            log.error(e.getMessage());
-            return null;
-        }
-    }
-
-    /**
-     * 获取指定集团公司下的猪场集合数据
-     * @param mapList
-     * @param pgroupId
-     * @param porgId
-     * @return
-     */
-    private List<Map<String,Object>> getFarmLists(List<Map<String,Object>> mapList,String pgroupId,String porgId){
-        try
-        {
-            List<Map<String,Object>> farmLists = Lists.newArrayList();
-            for (Map<String,Object> subMap : mapList) {
-                String groupId = String.valueOf(subMap.get("groupId"));
-                String orgId = String.valueOf(subMap.get("orgId"));
-                if(groupId != null && orgId != null && groupId.equals(pgroupId) && orgId.equals(porgId)) {
-                    String farmId = String.valueOf(subMap.get("farmId"));
-                    String farmName = String.valueOf(subMap.get("farmName"));
-                    if(StringUtils.isNotBlank(farmId) && !"null".equals(farmId.toLowerCase().trim())) {
-                        Map<String, Object> orgMap = Maps.newLinkedHashMap();
-                        orgMap.put("key","farm_" + farmId);
-                        orgMap.put("title", farmName);
-                        farmLists.add(orgMap);
-                    }
-                }
-            }
-            return farmLists;
-        }catch (Exception e){
-            log.error(e.getMessage());
-            return null;
         }
     }
 
