@@ -73,6 +73,7 @@ import io.terminus.doctor.user.dto.DoctorDepartmentDto;
 import io.terminus.doctor.user.dto.DoctorDepartmentLinerDto;
 import io.terminus.doctor.user.dto.FarmCriteria;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorFarmInformation;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorDepartmentReadService;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -365,6 +366,11 @@ public class ServiceConfiguration {
 
             @Override
             public Response<DoctorFarm> findByNumber(String number) {
+                return null;
+            }
+
+            @Override
+            public Response<List<DoctorFarmInformation>> findSubordinatePig() {
                 return null;
             }
         };
