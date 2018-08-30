@@ -365,5 +365,7 @@
             </foreach>
         and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')
     </select>
-
+    <select id="getGroupNameById" parameterType="long" resultType="String" >
+        select name from doctor_orgs where id = #{orgId}
+    </select>
 </mapper>

@@ -503,8 +503,8 @@ public class Users {
      * @return
      */
     @RequestMapping(value = "/getGroupcunlan", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Map<Object,String>> getGroupcunlan(@RequestParam Long groupId) {
-        List<Map<Object,String>> orgList = doctorOrgReadService.getGroupcunlan(groupId);
+    public Map<Object,String> getGroupcunlan(@RequestParam Long groupId) {
+        Map<Object,String> orgList = doctorOrgReadService.getGroupcunlan(groupId);
         return orgList;
     }
     @Data
