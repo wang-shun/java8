@@ -233,7 +233,7 @@
     <update id="unbindDepartment" parameterType="map">
         UPDATE
         <include refid="tb"/>
-        SET parent_id = 0, `type` = 1
+        SET parent_id = 0
         WHERE
         id IN
         <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
