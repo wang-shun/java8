@@ -132,6 +132,12 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
             return Response.fail("find.by.name.failed");
         }
     }
+
+    @Override
+    public Response<Boolean> updateOrgPidTpye(Long id) {
+        return null;
+    }
+
     /**
      * 通过公司id查集团(孔景军)
      * @param orgId

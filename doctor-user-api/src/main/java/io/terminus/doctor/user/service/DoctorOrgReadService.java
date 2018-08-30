@@ -44,6 +44,8 @@ public interface DoctorOrgReadService {
      */
     Response<List<DoctorOrg>> findOrgByParentId(Long parentId);
 
+    Response<DoctorOrg>  findGroupcompanyByOrgId(Long orgId);
+
     /**
      * 根据公司名字模糊搜索公司
      * @param fuzzyName
