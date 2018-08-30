@@ -12,6 +12,7 @@ import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.dto.FarmCriteria;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorFarmInformation;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.parana.common.utils.RespHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -162,4 +163,16 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
             return Response.fail("find.by.number.failed");
         }
     }
+
+    //  ---------------------  新增代码  2018年8月28日17:50:56 ----------------------
+    @Override
+    public Response<List<DoctorFarmInformation>> findSubordinatePig() {
+        try {
+            return Response.ok(doctorFarmDao.findSubordinatePig());
+        }catch (Exception e) {
+            log.error(Throwables.getStackTraceAsString(e));
+            return Response.fail("error");
+        }
+    }
+
 }

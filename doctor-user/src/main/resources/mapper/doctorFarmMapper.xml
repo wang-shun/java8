@@ -242,4 +242,71 @@
             <include refid="singleFrozen"/>
         </where>
     </select>
+
+
+    <!-- 新增查询下属猪场数据存栏 2018年8月28日17:45:30 -->
+    <select id="findSubordinatePig" resultType="Map">
+        select f.org_id AS orgId,f.org_name AS org_name,NULL AS record_dt,f.id AS farmId,f.name AS farmName,CONCAT(f.province_name,f.city_name,f.district_name,f.detail_address) AS address,
+	        NULL AS legalPerson,NULL AS personPhone,NULL AS head,o.mobile AS contactPhone,f.created_at AS factoryDate,NULL AS construction,NULL AS capacity,
+            (SELECT
+                    COUNT(
+                        CASE p.pig_type
+                        WHEN 1 THEN
+                            p.id
+                        END)
+                FROM
+                    doctor_pigs p where p.is_removal = 0 and p.farm_id = f.id
+                GROUP BY
+                    p.farm_id
+            ) AS sowAmount,
+            (SELECT
+                    COUNT(
+                        CASE p.pig_type
+                        WHEN 2 THEN
+                            p.id
+                        END)
+                FROM
+                    doctor_pigs p where p.is_removal = 0 and p.farm_id = f.id
+                GROUP BY
+                    p.farm_id
+            ) AS boarAmount,
+            (
+                SELECT
+                    SUM(
+                        CASE g.pig_type
+                        WHEN 2 THEN
+                            t.quantity
+                        END
+                    ) AS byPig
+                FROM
+                    doctor_group_tracks t INNER JOIN doctor_groups g on t.group_id = g.id  where g.`status` = 1 and g.farm_id = f.id
+                GROUP BY g.farm_id
+            ) AS conservationAmount,
+            (
+                SELECT
+                    SUM(
+                        CASE g.pig_type
+                        WHEN 3 THEN
+                            t.quantity
+                        END
+                    ) AS byPig
+                FROM
+                    doctor_group_tracks t INNER JOIN doctor_groups g on t.group_id = g.id  where g.`status` = 1 and g.farm_id = f.id
+                GROUP BY g.farm_id
+            ) AS fatteningAmount,
+            (
+                SELECT
+                    SUM(
+                        CASE g.pig_type
+                        WHEN 7 THEN
+                            t.quantity
+                        END
+                    ) AS byPig
+                FROM
+                    doctor_group_tracks t INNER JOIN doctor_groups g on t.group_id = g.id  where g.`status` = 1 and g.farm_id = f.id
+                GROUP BY g.farm_id
+            ) AS pigletsAmount
+        from doctor_farms f INNER JOIN doctor_orgs o on f.org_id = o.id GROUP BY f.id
+    </select>
+
 </mapper>

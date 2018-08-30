@@ -9,6 +9,7 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
@@ -44,6 +45,8 @@ import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorMessageUserReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.user.model.DoctorFarmInformation;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.web.core.export.Exporter;
 import io.terminus.doctor.web.front.event.dto.DoctorSowManagerDto;
@@ -97,6 +100,8 @@ public class DoctorSearches {
 
     private final DoctorPigReadService doctorPigReadService;
 
+    private final DoctorFarmReadService doctorFarmReadService;
+
     @RpcConsumer
     private DoctorPigEventReadService doctorPigEventReadService;
 
@@ -113,12 +118,14 @@ public class DoctorSearches {
                           DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
                           DoctorGroupReadService doctorGroupReadService,
                           DoctorMessageUserReadService doctorMessageUserReadService,
-                          DoctorPigReadService doctorPigReadService) {
+                          DoctorPigReadService doctorPigReadService,
+                          DoctorFarmReadService doctorFarmReadService) {
         this.doctorBarnReadService = doctorBarnReadService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorMessageUserReadService = doctorMessageUserReadService;
         this.doctorPigReadService = doctorPigReadService;
+        this.doctorFarmReadService = doctorFarmReadService;
     }
 
     /**
@@ -926,6 +933,12 @@ public class DoctorSearches {
 
         log.error("pagePigs:size"+paging.getData().size());
         return paging;
+    }
+
+    @RequestMapping(value = "/findSubordinatePig",produces="application/json;charset=UTF-8", method = RequestMethod.GET)
+    public String findSubordinatePig(){
+        Response<List<DoctorFarmInformation>> farmInformation = doctorFarmReadService.findSubordinatePig();
+        return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(farmInformation);
     }
 
 }

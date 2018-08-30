@@ -33,6 +33,7 @@ import io.terminus.doctor.open.dto.DoctorMatingDailyReportOpen;
 import io.terminus.doctor.open.dto.DoctorMonthlyReportOpen;
 import io.terminus.doctor.open.dto.DoctorSaleDailyReportOpen;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorFarmInformation;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.PrimaryUserReadService;
 import io.terminus.pampas.openplatform.annotations.OpenBean;
@@ -88,6 +89,33 @@ public class PhoenixCrmReports {
         this.primaryUserReadService = primaryUserReadService;
     }
 
+
+    /**
+     * 查询全部下属猪场的存栏数据
+     *
+     * @return jsonArray
+     */
+    @OpenMethod(key = "get.pig.farms.living", paramNames = "appKey")
+    public String getPigFarmsLiving(@NotEmpty(message = "appKey.not.empty") String appKey){
+        try {
+//            char[] m = sign.toCharArray();
+//            for (int i = 0;i<m.length;i++){
+//                m[i] = (char) (m[i] ^ 't');
+//            }
+//            String md5 = new String(m);
+            if(!"pigDoctorCRM".equals(appKey)){
+                return "";
+            }
+            Response<List<DoctorFarmInformation>> farmInforMation = doctorFarmReadService.findSubordinatePig();
+            if(!farmInforMation.isSuccess() || farmInforMation.getResult() == null){
+                return "";
+            }
+            return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(farmInforMation);
+        }catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
 
 
     /**
