@@ -426,6 +426,7 @@ public class DoctorImportDataService {
                 DoctorUserDataPermission permission = new DoctorUserDataPermission();
                 permission.setUserId(subUserId);
                 permission.setFarmIds(farm.getId().toString());
+                log.info("=====430=====");
                 permission.setOrgIds(farm.getOrgId().toString());
                 doctorUserDataPermissionDao.create(permission);
             }
@@ -530,6 +531,7 @@ public class DoctorImportDataService {
             permission = new DoctorUserDataPermission();
             permission.setUserId(userId);
             permission.setFarmIds(farm.getId().toString());
+            log.info("=====535=====");
             permission.setOrgIdsList(Lists.newArrayList(org.getId()));
             doctorUserDataPermissionDao.create(permission);
         } else if (permission.getFarmIdsList() == null || !permission.getFarmIdsList().contains(farm.getId())) {
@@ -639,10 +641,12 @@ public class DoctorImportDataService {
         if (permission == null) {
             permission = new DoctorUserDataPermission();
             permission.setUserId(user.getId());
+            log.info("=====643=====");
             permission.setOrgIds(orgIds);
             permission.setFarmIds(farmIds);
             doctorUserDataPermissionDao.create(permission);
         } else {
+            log.info("=====647=====");
             permission.setOrgIds(orgIds);
             permission.setFarmIds(farmIds);
             doctorUserDataPermissionDao.update(permission);
@@ -664,6 +668,7 @@ public class DoctorImportDataService {
             log.error("createOrUpdateMultiPermission error, data permission not found, user:{}", user);
             throw new JsonResponseException("集团账号手机号(" + mobile + ")没有关联猪场，请检查");
         }
+        log.info("=====670=====");
         permission.setOrgIds(permission.getOrgIds() + "," + orgId);
         permission.setFarmIds(permission.getFarmIds() + "," + farmId);
         doctorUserDataPermissionDao.update(permission);
