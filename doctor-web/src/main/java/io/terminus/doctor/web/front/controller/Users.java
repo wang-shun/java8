@@ -451,7 +451,6 @@ public class Users {
         }
         Integer userType = doctorOrgReadService.findUserTypeById(baseUser.getId());
         List<Long> groupIds = dataPermissionResponse.getResult().getGroupIdsList();
-        log.error("=================="+groupIds);
         List<DoctorOrg> data = new ArrayList<>();
         if(groupIds == null || groupIds.size() == 0){
             data = null;
@@ -466,7 +465,6 @@ public class Users {
                 group.setId(0L);
                 group.setName("无集团");
                 data.add(group);
-                log.error("=======================data="+data);
             }
         }
         Map map = new HashMap();
