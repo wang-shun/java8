@@ -531,10 +531,12 @@ public class DoctorImportDataService {
             permission = new DoctorUserDataPermission();
             permission.setUserId(userId);
             permission.setFarmIds(farm.getId().toString());
-            log.info("=====535=====");
 //            permission.setOrgIdsList(Lists.newArrayList(org.getId()));
-            permission.setOrgIds(org.getId().toString());
-            doctorUserDataPermissionDao.create(permission);
+            permission.setOrgIds(farm.getOrgId().toString());
+            Boolean aBoolean = doctorUserDataPermissionDao.create(permission);
+            if(!aBoolean){
+                log.info("=====535=====");
+            }
         } else if (permission.getFarmIdsList() == null || !permission.getFarmIdsList().contains(farm.getId())) {
             permission.setFarmIds(permission.getFarmIds() + "," + farm.getId());
             doctorUserDataPermissionDao.update(permission);
