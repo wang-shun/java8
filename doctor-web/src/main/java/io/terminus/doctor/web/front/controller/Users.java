@@ -461,7 +461,7 @@ public class Users {
                 throw new JsonResponseException(result.getError());
             }
             data =  result.getResult();
-            if(groupIds.contains(0)){
+            if(groupIds.contains(0L)){
                 DoctorOrg group = new DoctorOrg();
                 group.setId(0L);
                 group.setName("无集团");
