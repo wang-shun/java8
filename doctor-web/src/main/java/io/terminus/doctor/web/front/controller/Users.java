@@ -502,6 +502,9 @@ public class Users {
      */
     @RequestMapping(value = "/getOrgcunlan", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Map<String,Object>> getOrgcunlan(@RequestParam Long groupId) {
+        if(groupId == 0L){
+            return null;
+        }
         List<Map<String,Object>> orgList = doctorOrgReadService.getOrgcunlan(groupId);
         return orgList;
     }
@@ -512,6 +515,9 @@ public class Users {
      */
     @RequestMapping(value = "/getGroupcunlan", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<Object,String> getGroupcunlan(@RequestParam Long groupId) {
+        if(groupId == 0L){
+            return null;
+        }
         Map<Object,String> orgList = doctorOrgReadService.getGroupcunlan(groupId);
         return orgList;
     }
