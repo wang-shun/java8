@@ -35,7 +35,7 @@
     </sql>
 
     <sql id="vals">
-        #{userId}, #{farmIds}, #{barnIds},#{orgIds}, #{wareHouseTypes}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
+        #{userId}, #{farmIds}, #{barnIds},#{orgIds},#{groupIds} #{wareHouseTypes}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorUserDataPermission" keyProperty="id" useGeneratedKeys="true">
@@ -75,6 +75,7 @@
             <if test="farmIds != null">farm_ids = #{farmIds},</if>
             <if test="barnIds != null">barn_ids = #{barnIds},</if>
             <if test="orgIds != null">org_ids = #{orgIds},</if>
+            <if test="groupIds != null">group_ids = #{groupIds},</if>
             <if test="wareHouseTypes != null">ware_house_types = #{wareHouseTypes},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="creatorId != null">creator_id = #{creatorId},</if>
