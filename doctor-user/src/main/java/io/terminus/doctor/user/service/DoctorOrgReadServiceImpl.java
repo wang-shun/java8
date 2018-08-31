@@ -176,7 +176,7 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
             a = doctorOrgDao.getGroupCunlan(orgList);
         }
         Map map = new HashMap();
-        if(groupId == 0L) {
+        if(groupId != 0L) {
             map.put("groupName", groupName);
         }else{
             map.put("groupName", "无集团");
