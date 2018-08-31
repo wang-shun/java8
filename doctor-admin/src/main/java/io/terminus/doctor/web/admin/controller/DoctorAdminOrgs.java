@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
 
 /**
@@ -112,6 +113,9 @@ public class DoctorAdminOrgs {
                                           @RequestParam Map<String, Object> params) {
         params = Params.filterNullOrEmpty(params);
 //        params.put("type", DoctorOrg.Type.CLIQUE.getValue());
+        if(isNull(params)||params.size()==0||params.equals("")){
+            params.put("type", DoctorOrg.Type.CLIQUE.getValue());
+        }
         return RespHelper.or500(doctorDepartmentReadService.pagingCliqueTree(params, pageSize, pageNo));
     }
 
