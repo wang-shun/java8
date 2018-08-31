@@ -17,6 +17,8 @@ public interface DataAuthService {
 
     Response selOrgs(Integer groupId);
 
+    Response selFarms(Integer orgId);
+
     Response getUserRoleInfo(Map<String,String> params);
 
     Response userSingleRoleInfo(Integer userId);

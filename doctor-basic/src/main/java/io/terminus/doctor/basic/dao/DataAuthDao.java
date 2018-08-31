@@ -24,6 +24,9 @@ public class DataAuthDao extends MyBatisDao<DataAuth> {
         return getSqlSession().selectList(sqlId("selOrgs"),groupId);
     }
 
+    public List<Map<String,Object>> selFarms(Integer orgId) {
+        return getSqlSession().selectList(sqlId("selFarms"),orgId);
+    }
     /**
      * 查询用户角色数据总数
      * @return

@@ -60,6 +60,16 @@ public class DataAuthServiceImpl implements DataAuthService{
         }
     }
 
+    @Override
+    public Response selFarms(Integer orgId) {
+        try{
+            return Response.ok(dataAuthDao.selFarms(orgId));
+        }catch (Exception e){
+            log.error("selOrgs[error] ==> {}",e);
+            return Response.fail(e.getMessage());
+        }
+    }
+
     /**
      * 查询用户角色数据
      * @return

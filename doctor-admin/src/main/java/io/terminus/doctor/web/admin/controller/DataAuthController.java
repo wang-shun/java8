@@ -43,6 +43,16 @@ public class DataAuthController {
     }
 
     /**
+     * 查询公司数据
+     * @return
+     */
+    @RequestMapping(value = "/selFarms/{orgId}", method = RequestMethod.GET)
+    @ResponseBody
+    public Response selFarms(@PathVariable("orgId") Integer orgId){
+        return dataAuthService.selFarms(orgId);
+    }
+
+    /**
      * 查询用户角色数据
      * @return
      */
