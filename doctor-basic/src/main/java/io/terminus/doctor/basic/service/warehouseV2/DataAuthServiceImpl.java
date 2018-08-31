@@ -285,7 +285,7 @@ public class DataAuthServiceImpl implements DataAuthService{
                         }
                     }
                     sg.put("children",newOrgList);
-                    groupZ.add(sg);
+                    groupZ.add(0,sg);
                 }
             }
             reMap.put("children", groupZ);
