@@ -418,7 +418,7 @@
                  c.name as farmName,
                  a.status as `status`
         from doctor_staffs a
-        left join doctor_orgs b1 on a.group_id = b1.parent_id
+        left join doctor_orgs b1 on a.group_id = b1.id
         left join doctor_orgs b2 on	a.org_id = b2.id
         left join doctor_farms c on a.farm_id = c.id
         where 1 = 1

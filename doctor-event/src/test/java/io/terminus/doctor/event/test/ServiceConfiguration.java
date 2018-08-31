@@ -435,7 +435,7 @@ public class ServiceConfiguration {
             }
 
             @Override
-            public List<Map<String, Object>> getOrgcunlan(Long groupId) {
+            public List<Map<String, Object>> getOrgcunlan(Long groupId,List<Long> orgIds) {
                 return null;
             }
 
