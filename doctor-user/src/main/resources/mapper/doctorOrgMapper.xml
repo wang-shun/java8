@@ -318,7 +318,7 @@
         </foreach>
     </select>
 
-    <select id="getOrgByGroupId1" parameterType="long" resultType="long" >
+    <select id="getOrgByGroupId1" parameterType="map" resultType="long" >
         select id from doctor_orgs where parent_id = #{groupId} and id IN
         <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
             #{orgId}
