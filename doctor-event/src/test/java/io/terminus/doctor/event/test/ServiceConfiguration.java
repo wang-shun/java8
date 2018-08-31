@@ -445,7 +445,7 @@ public class ServiceConfiguration {
             }
 
             @Override
-            public Response staffQuery(Map<String, String> params) { return null; }
+            public Response staffQuery(Map<String, Object> params) { return null; }
             @Override
             public Response<Boolean> updateOrgPidTpye(Long id) {
                 return null;

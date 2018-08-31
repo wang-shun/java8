@@ -184,7 +184,7 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
      * 员工查询1
      */
     @Override
-    public Response staffQuery(Map<String, String> params) {
+    public Response staffQuery(Map<String, Object> params) {
         Paging<Map<String,Object>> paging = doctorOrgDao.staffQuery(params);
         return Response.ok(paging);
     }

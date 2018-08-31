@@ -97,6 +97,6 @@ public interface DoctorOrgReadService {
     /**
      * 员工查询（yusq）1
      */
-    Response staffQuery(Map<String, String> params);
+    Response staffQuery(Map<String, Object> params);
 
 }

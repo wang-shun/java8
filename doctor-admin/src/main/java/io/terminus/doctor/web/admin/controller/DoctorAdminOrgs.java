@@ -168,7 +168,7 @@ public class DoctorAdminOrgs {
      * 员工查询(yusq)
      */
     @RequestMapping(value = "/staffQuery", method = RequestMethod.POST)
-    public Response staffQuery(@RequestBody(required = false) Map<String, String> params){
+    public Response staffQuery(@RequestBody(required = false) Map<String, Object> params){
         return  doctorOrgReadService.staffQuery(params);
     }
 }

@@ -289,14 +289,15 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
     /**
      * 员工查询1
      */
-    public Paging<Map<String,Object>> staffQuery(Map<String, String> params){
+    public Paging<Map<String,Object>> staffQuery(Map<String, Object> params){
         Long total = this.sqlSession.selectOne(sqlId("staffCount"), params);
         if (total == 0){
             return new Paging(0L, Collections.emptyList());
         } else {
-            int pageNo = Integer.parseInt(params.get("pageNo")) * Integer.parseInt(params.get("pageSize"))
-                    - Integer.parseInt(params.get("pageSize"));
-            params.put("pageNo", pageNo + "");
+            int pageNo = (Integer.parseInt(String.valueOf(params.get("pageNo"))))  * (Integer.parseInt(String.valueOf(params.get("pageSize"))))
+                    - (Integer.parseInt(String.valueOf(params.get("pageSize"))));
+            params.put("pageNo", pageNo);
+            params.put("pageSize", (Integer.parseInt(String.valueOf(params.get("pageSize")))));
             List<Map<String,Object>> datas = this.sqlSession.selectList(this.sqlId("staffQuery"), params);
 //            for (Iterator<Map<String,Object>> it = datas.iterator(); it.hasNext();){
 //
