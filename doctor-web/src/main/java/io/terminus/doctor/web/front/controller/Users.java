@@ -519,10 +519,16 @@ public class Users {
      */
     @RequestMapping(value = "/getGroupcunlan", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<Object,String> getGroupcunlan(@RequestParam Long groupId) {
-        if(groupId == 0L){
-            return null;
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        if (baseUser == null) {
+            throw new JsonResponseException("user.not.login");
         }
-        Map<Object,String> orgList = doctorOrgReadService.getGroupcunlan(groupId);
+        Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
+        if (!dataPermissionResponse.isSuccess()) {
+            throw new JsonResponseException("user.not.permission");
+        }
+        List<Long> orgIds = dataPermissionResponse.getResult().getOrgIdsList();
+        Map<Object,String> orgList = doctorOrgReadService.getGroupcunlan(groupId,orgIds);
         return orgList;
     }
     @Data

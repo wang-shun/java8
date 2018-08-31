@@ -92,7 +92,7 @@ public interface DoctorOrgReadService {
      */
     Integer  findUserTypeById(Long userId);
     List<Map<String,Object>> getOrgcunlan(Long groupId,List<Long> orgIds);
-    Map<Object,String> getGroupcunlan(Long groupId);
+    Map<Object,String> getGroupcunlan(Long groupId,List<Long> orgIds);
 
     /**
      * 员工查询（yusq）1

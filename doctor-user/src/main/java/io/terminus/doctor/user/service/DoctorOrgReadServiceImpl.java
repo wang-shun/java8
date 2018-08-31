@@ -166,9 +166,9 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
         return result;
     }
     @Override
-    public Map<Object,String> getGroupcunlan(Long groupId){
+    public Map<Object,String> getGroupcunlan(Long groupId,List<Long> orgIds){
         String groupName = doctorOrgDao.getGroupNameById(groupId);
-        List<Long> orgList = doctorOrgDao.getOrgByGroupId1(groupId);
+        List<Long> orgList = doctorOrgDao.getOrgByGroupId1(groupId,orgIds);
         List<Map<Object,String>> a = new ArrayList<>();
         if(orgList.size() == 0){
             a= null;
@@ -176,7 +176,11 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
             a = doctorOrgDao.getGroupCunlan(orgList);
         }
         Map map = new HashMap();
-        map.put("groupName",groupName);
+        if(groupId == 0L) {
+            map.put("groupName", groupName);
+        }else{
+            map.put("groupName", "无集团");
+        }
         map.put("data",a);
         return map;
     }
