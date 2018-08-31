@@ -464,7 +464,7 @@ public class Users {
                 DoctorOrg group = new DoctorOrg();
                 group.setId(0L);
                 group.setName("无集团");
-                data.add(group);
+                data.add(0,group);
             }
         }
         Map map = new HashMap();
