@@ -107,7 +107,7 @@
 
     <insert id="insertUserStaff" parameterType="Map">
         insert into doctor_staffs(user_id,group_id,org_id,status,created_at,updated_at,user_name,mobile)
-        values(#{userId},#{groupId},#{orgId},1,now(),now(),#{userName},#{mobile})
+        values(#{userId},#{groupId},#{orgId},1,now(),now(),#{realName},#{mobile})
     </insert>
 
     <!-- 修改用户 -->
