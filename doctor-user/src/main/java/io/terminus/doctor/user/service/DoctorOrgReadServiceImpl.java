@@ -153,9 +153,9 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
         return doctorOrgDao.findUserTypeById(userId);
     }
     @Override
-    public List<Map<String,Object>> getOrgcunlan(Long groupId){
+    public List<Map<String,Object>> getOrgcunlan(Long groupId,List<Long> orgIds){
         List<Map<String,Object>> result = new ArrayList<>();
-        List<Map<String,Object>> orgList = doctorOrgDao.getOrgByGroupId(groupId);
+        List<Map<String,Object>> orgList = doctorOrgDao.getOrgByGroupId(groupId,orgIds);
         orgList.parallelStream().forEach(map -> {
             List<Map<Object,String>> orgCunlan = doctorOrgDao.getCunlan((long)map.get("id"));
             Map<String,Object> maps = new HashMap<>();

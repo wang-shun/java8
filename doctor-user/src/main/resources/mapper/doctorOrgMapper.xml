@@ -311,8 +311,11 @@
         select user_type from doctor_user_subs where user_id = #{userId}
     </select>
 
-    <select id="getOrgByGroupId" parameterType="long" resultType="map" >
-       select id,name from doctor_orgs where parent_id = #{groupId}
+    <select id="getOrgByGroupId" parameterType="map" resultType="map" >
+       select id,name from doctor_orgs where parent_id = #{groupId} and id IN
+        <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
+            #{orgId}
+        </foreach>
     </select>
 
     <select id="getOrgByGroupId1" parameterType="long" resultType="long" >

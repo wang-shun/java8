@@ -500,10 +500,16 @@ public class Users {
      */
     @RequestMapping(value = "/getOrgcunlan", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Map<String,Object>> getOrgcunlan(@RequestParam Long groupId) {
-        if(groupId == 0L){
-            return null;
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        if (baseUser == null) {
+            throw new JsonResponseException("user.not.login");
         }
-        List<Map<String,Object>> orgList = doctorOrgReadService.getOrgcunlan(groupId);
+        Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
+        if (!dataPermissionResponse.isSuccess()) {
+            throw new JsonResponseException("user.not.permission");
+        }
+        List<Long> orgIds = dataPermissionResponse.getResult().getOrgIdsList();
+        List<Map<String,Object>> orgList = doctorOrgReadService.getOrgcunlan(groupId,orgIds);
         return orgList;
     }
 
