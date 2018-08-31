@@ -22,7 +22,16 @@ import java.util.Map;
 @Repository
 public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
 
-    //集团，公司的数据展示（陈娟 2018-8-29）
+    // 查询公司时得到有集团的公司 （陈娟 2018-08-31）
+    public List<DoctorOrg> getParentId(Map<String, Object> criteria) {
+        return this.sqlSession.selectList(this.sqlId("getParentId"), criteria);
+    }
+
+    public List<DoctorOrg> findOrgByParentIdAndName(Long parentId,String fuzzyName) {
+        return sqlSession.selectList("findOrgByParentIdAndName", ImmutableMap.of("parentId", parentId, "fuzzyName", fuzzyName));
+    }
+
+    // 集团，公司的数据展示（陈娟 2018-8-29）
     public Paging<DoctorOrg> pagingCompany(Integer offset, Integer limit, Map<String, Object> criteria) {
         if (criteria == null) {
             criteria = Maps.newHashMap();

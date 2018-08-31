@@ -209,6 +209,20 @@
         limit #{offset}, #{limit}
     </select>
 
+    <!--查询公司时得到有集团的公司 （陈娟 2018-08-31）-->
+    <select id="getParentId" parameterType="map" resultMap="DoctorOrgMap">
+        select DISTINCT parent_id from doctor_orgs
+        where parent_id!=0 and type=2
+        <if test="fuzzyName != null">AND `name` LIKE concat('%', #{fuzzyName}, '%')</if>
+        ORDER BY parent_id
+    </select>
+
+    <select id="findOrgByParentIdAndName" parameterType="map" resultMap="DoctorOrgMap" >
+        select * from doctor_orgs
+        where parent_id!=0 and type=2 and parent_id = #{parentId}
+        <if test="fuzzyName != null">AND `name` LIKE concat('%', #{fuzzyName}, '%')</if>
+        ORDER BY id
+    </select>
 
     <select id="findByFuzzyName" parameterType="map" resultMap="DoctorOrgMap">
         SELECT id, `name`
