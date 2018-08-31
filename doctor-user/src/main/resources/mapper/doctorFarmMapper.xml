@@ -247,74 +247,24 @@
     <!-- 新增查询下属猪场数据存栏 2018年8月28日17:45:30 -->
     <select id="findSubordinatePig" resultType="Map">
         select f.org_id AS orgId,f.org_name AS orgName,NULL AS record_dt,f.id AS farmId,f.name AS farmName,CONCAT(f.province_name,f.city_name,f.district_name,f.detail_address) AS address,
-            NULL AS legalPerson,NULL AS personPhone,NULL AS head,o.mobile AS contactPhone,f.created_at AS factoryDate,NULL AS construction,NULL AS capacity,
-            IFNULL((SELECT
-                    COUNT(
-                        CASE p.pig_type
-                        WHEN 1 THEN
-                            p.id
-                        END)
-                FROM
-                    doctor_pigs p where p.is_removal = 0 and p.farm_id = f.id
-                GROUP BY
-                    p.farm_id
-            ),0) AS sowAmount,
-            IFNULL((SELECT
-                    COUNT(
-                        CASE p.pig_type
-                        WHEN 2 THEN
-                            p.id
-                        END)
-                FROM
-                    doctor_pigs p where p.is_removal = 0 and p.farm_id = f.id
-                GROUP BY
-                    p.farm_id
-            ),0) AS boarAmount,
-            IFNULL((
-                SELECT
-                    SUM(
-                        CASE g.pig_type
-                        WHEN 2 THEN
-                            t.quantity
-                        END
-                    ) AS byPig
-                FROM
-                    doctor_group_tracks t INNER JOIN doctor_groups g on t.group_id = g.id  where g.`status` = 1 and g.farm_id = f.id
-            ),0) AS conservationAmount,
-            IFNULL((
-                SELECT
-                    SUM(
-                        CASE g.pig_type
-                        WHEN 3 THEN
-                            t.quantity
-                        END
-                    ) AS byPig
-                FROM
-                    doctor_group_tracks t INNER JOIN doctor_groups g on t.group_id = g.id  where g.`status` = 1 and g.farm_id = f.id
-            ),0) AS fatteningAmount,
-            IFNULL((
-                SELECT
-                    SUM(
-                        CASE g.pig_type
-                        WHEN 4 THEN
-                            t.quantity
-                        END
-                    ) AS byPig
-                FROM
-                    doctor_group_tracks t INNER JOIN doctor_groups g on t.group_id = g.id  where g.`status` = 1 and g.farm_id = f.id
-            ),0) AS backupAmount,
-            IFNULL((
-                SELECT
-                    SUM(
-                        CASE g.pig_type
-                        WHEN 7 THEN
-                            t.quantity
-                        END
-                    ) AS byPig
-                FROM
-                    doctor_group_tracks t INNER JOIN doctor_groups g on t.group_id = g.id  where g.`status` = 1 and g.farm_id = f.id
-            ),0) AS pigletsAmount
-        from doctor_farms f INNER JOIN doctor_orgs o on f.org_id = o.id GROUP BY f.id
+				NULL AS legalPerson,NULL AS personPhone,NULL AS head,o.mobile AS contactPhone,f.created_at AS factoryDate,NULL AS construction,NULL AS capacity,
+				IFNULL((select `end` from doctor_report_sows
+						where orz_id = f.id and orz_type = 3 and sum_at = DATE_FORMAT(NOW(),'%Y-%m-%d')),0) AS basisSowAmount,
+				IFNULL((select `end` from doctor_report_matings
+						where orz_id = f.id and orz_type = 3 and sum_at = DATE_FORMAT(NOW(),'%Y-%m-%d')),0) AS pregnantSowAmount,
+				IFNULL((select `end` from doctor_report_delivers
+						where orz_id = f.id and orz_type = 3 and sum_at = DATE_FORMAT(NOW(),'%Y-%m-%d')),0) AS roomSowAmount,
+				IFNULL((select `end` from doctor_report_boars
+						where orz_id = f.id and orz_type = 3 and sum_at = DATE_FORMAT(NOW(),'%Y-%m-%d')),0) AS boarAmount,
+				IFNULL((select `end` from doctor_report_nurseries
+						where orz_id = f.id and orz_type = 3 and sum_at = DATE_FORMAT(NOW(),'%Y-%m-%d')),0) AS conservationAmount,
+				IFNULL((select `end` from doctor_report_fattens
+						where orz_id = f.id and orz_type = 3 and sum_at = DATE_FORMAT(NOW(),'%Y-%m-%d')),0) AS fatteningAmount,
+				IFNULL((select `end` from doctor_report_resevers
+						where orz_id = f.id and orz_type = 3 and sum_at = DATE_FORMAT(NOW(),'%Y-%m-%d')),0) AS backupAmount,
+				IFNULL((select piglet_end from doctor_report_delivers
+						where orz_id = f.id and orz_type = 3 and sum_at = DATE_FORMAT(NOW(),'%Y-%m-%d')),0) AS pigletsAmount
+		from doctor_farms f INNER JOIN doctor_orgs o on f.org_id = o.id GROUP BY f.id
     </select>
 
 </mapper>

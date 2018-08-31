@@ -69,7 +69,7 @@ public class DoctorFarmInformation implements Serializable {
     /**
      * 建筑面积
      */
-    private double construction;
+    private float construction;
 
     /**
      * 产能
@@ -77,9 +77,19 @@ public class DoctorFarmInformation implements Serializable {
     private BigDecimal capacity;
 
     /**
-     * 母猪存栏数量
+     * 基础母猪存栏数量
      */
-    private int sowAmount;
+    private int basisSowAmount;
+
+    /**
+     * 配怀母猪存栏数量
+     */
+    private int pregnantSowAmount;
+
+    /**
+     * 产房母猪存栏数量
+     */
+    private int roomSowAmount;
 
     /**
      * 公猪存栏数量
