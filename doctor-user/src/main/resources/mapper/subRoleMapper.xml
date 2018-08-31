@@ -135,4 +135,28 @@
             <include refid="criteria"/>
         </where>
     </select>
+
+
+    <select id="pagingMainRole" parameterType="map" resultMap="SubRoleMap">
+        select id,
+        <include refid="cols_exclude_id"/>
+        from
+        <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+            and role_type in (0,1,2)
+        </where>
+        order by `id` desc
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="countMainRole" parameterType="map" resultType="long">
+        select count(1) from
+        <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+            and role_type in (0,1,2)
+        </where>
+    </select>
+
 </mapper>

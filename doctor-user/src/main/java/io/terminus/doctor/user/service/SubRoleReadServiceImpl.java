@@ -113,11 +113,10 @@ public class SubRoleReadServiceImpl implements SubRoleReadService {
         try {
             PageInfo page = new PageInfo(pageNo, size);
             SubRole criteria = new SubRole();
-            criteria.setAppKey("PC");
             criteria.setRoleType(roleType);
             criteria.setStatus(status);
             criteria.setName(roleName);
-            return Response.ok(subRoleDao.paging(page.getOffset(), page.getLimit(), criteria));
+            return Response.ok(subRoleDao.pagingMainRole(page.getOffset(), page.getLimit(), criteria));
         } catch (Exception e) {
             log.error("paging seller roles failed, farmId={}, status={}, pageNo={}, size={}, cause:{}",
                     roleType, status, pageNo, size, Throwables.getStackTraceAsString(e));

@@ -339,7 +339,7 @@ public class DoctorAdminUsers {
      */
     @RequestMapping(value = "/addRole", method = RequestMethod.PUT)
     public Long createRole(@RequestBody SubRole role) {
-        role.setAppKey("PC");
+        role.setAppKey("MOBILE");
         role.setStatus(1);
         return or500(subRoleWriteService.createRole(role));
     }
