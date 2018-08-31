@@ -296,23 +296,23 @@ public class DataAuthServiceImpl implements DataAuthService{
                 List<String> keys = Lists.newArrayList();
 
                 if(map != null) {
-                    String group_ids = String.valueOf(map.get("group_ids"));
-                    String org_ids = String.valueOf(map.get("org_ids"));
+//                    String group_ids = String.valueOf(map.get("group_ids"));
+//                    String org_ids = String.valueOf(map.get("org_ids"));
                     String farm_ids = String.valueOf(map.get("farm_ids"));
 
-                    if (StringUtils.isNotBlank(group_ids)) {
-                        String[] groupIds = group_ids.split(",");
-                        for (String groupId : groupIds) {
-                            keys.add("group_" + groupId);
-                        }
-                    }
-
-                    if (StringUtils.isNotBlank(org_ids)) {
-                        String[] orgIds = org_ids.split(",");
-                        for (String orgId : orgIds) {
-                            keys.add("org_" + orgId);
-                        }
-                    }
+//                    if (StringUtils.isNotBlank(group_ids)) {
+//                        String[] groupIds = group_ids.split(",");
+//                        for (String groupId : groupIds) {
+//                            keys.add("group_" + groupId);
+//                        }
+//                    }
+//
+//                    if (StringUtils.isNotBlank(org_ids)) {
+//                        String[] orgIds = org_ids.split(",");
+//                        for (String orgId : orgIds) {
+//                            keys.add("org_" + orgId);
+//                        }
+//                    }
 
                     if (StringUtils.isNotBlank(farm_ids)) {
                         String[] farmIds = farm_ids.split(",");
