@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.dao.DataAuthDao;
 import io.terminus.doctor.basic.dto.warehouseV2.DataAuth;
 import io.terminus.doctor.basic.dto.warehouseV2.DataSubRole;
@@ -14,8 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @ClassName DataAuthServiceImpl
@@ -357,12 +361,42 @@ public class DataAuthServiceImpl implements DataAuthService{
 
             // 批量新增数据权限
             DataSubRole dataSubRole = dataSubRoles.getDatas();
+            String farmIds = dataSubRole.getFarmIds();
+
+
+            List<Long> farmIdList = new ArrayList<Long>();
+            if (StringUtils.isNotBlank(farmIds)) {
+                farmIdList = Splitters.COMMA.splitToList(farmIds).stream().map(Long::valueOf).collect(Collectors.toList());
+            } else {
+                farmIdList = Lists.newArrayList();
+            }
+            List<Long> orgIdList = dataAuthDao.getOrgIdList(farmIdList);
+            List<Long> orgIds;
+            if (StringUtils.isNotBlank(dataSubRole.getOrgIds())) {
+                orgIds = Splitters.COMMA.splitToList(dataSubRole.getOrgIds()).stream().map(Long::valueOf).collect(Collectors.toList());
+            } else {
+                orgIds = Lists.newArrayList();
+            }
+            orgIdList.addAll(orgIds);
+            List<Long> OrgIdsList = removeDuplicate(orgIdList);
+            String orgIdsString =  StringUtils.join(OrgIdsList.toArray(), ",");
+
+            List<Long> groupIdList = dataAuthDao.getGroupIdList(OrgIdsList);
+            List<Long> groupIds;
+            if (StringUtils.isNotBlank(dataSubRole.getGroupIds())) {
+                groupIds = Splitters.COMMA.splitToList(dataSubRole.getGroupIds()).stream().map(Long::valueOf).collect(Collectors.toList());
+            } else {
+                groupIds = Lists.newArrayList();
+            }
+            groupIdList.addAll(groupIds);
+            String groupIdsString =  StringUtils.join(removeDuplicate(groupIdList).toArray(), ",");
+
             List<Map<String,String>> dataSubRoleParams = Lists.newArrayList();
             for (String userId : userIds) {
                 Map<String,String> dataSubRoleParam = Maps.newHashMap();
                 dataSubRoleParam.put("userId",userId);
-                dataSubRoleParam.put("groupIds",dataSubRole.getGroupIds());
-                dataSubRoleParam.put("orgIds",dataSubRole.getOrgIds());
+                dataSubRoleParam.put("groupIds",groupIdsString);
+                dataSubRoleParam.put("orgIds",orgIdsString);
                 dataSubRoleParam.put("farmIds",dataSubRole.getFarmIds());
                 dataSubRoleParams.add(dataSubRoleParam);
             }
@@ -375,6 +409,17 @@ public class DataAuthServiceImpl implements DataAuthService{
             log.error("saveDataSubRoles[error] ==> {}",e);
             return Response.fail(e.getMessage());
         }
+    }
+    private List<Long> removeDuplicate(List<Long> list){
+        List<Long> result = new ArrayList<Long>(list.size());
+        for (Long str : list) {
+            if (!result.contains(str)) {
+                result.add(str);
+            }
+        }
+        list.clear();
+        list.addAll(result);
+        return list;
     }
 
 }

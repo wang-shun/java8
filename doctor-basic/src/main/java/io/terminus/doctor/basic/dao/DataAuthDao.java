@@ -183,4 +183,11 @@ public class DataAuthDao extends MyBatisDao<DataAuth> {
         return getSqlSession().insert(sqlId("insertPerssion"),params);
     }
 
+    public List<Long> getOrgIdList(List<Long> farmIdList){
+        return getSqlSession().selectList(sqlId("getOrgIdList"),farmIdList);
+    }
+
+    public List<Long> getGroupIdList(List<Long> OrgIdsList){
+        return getSqlSession().selectList(sqlId("getGroupIdList"),OrgIdsList);
+    }
 }
