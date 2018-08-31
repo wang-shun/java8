@@ -388,8 +388,8 @@ public class DataAuthServiceImpl implements DataAuthService{
 //                orgIds = Lists.newArrayList();
 //            }
 //            orgIdList.addAll(orgIds);
-//            List<Long> OrgIdsList = removeDuplicate(orgIdList);
-            String orgIdsString =  StringUtils.join(orgIdList.toArray(), ",");
+             List<Long> OrgIdsList = removeDuplicate(orgIdList);
+            String orgIdsString =  StringUtils.join(OrgIdsList.toArray(), ",");
 
             List<Long> groupIdList = dataAuthDao.getGroupIdList(orgIdList);
 //            List<Long> groupIds;
@@ -399,7 +399,7 @@ public class DataAuthServiceImpl implements DataAuthService{
 //                groupIds = Lists.newArrayList();
 //            }
 //            groupIdList.addAll(groupIds);
-            String groupIdsString =  StringUtils.join(groupIdList.toArray(), ",");
+            String groupIdsString =  StringUtils.join(removeDuplicate(groupIdList).toArray(), ",");
 
             List<Map<String,String>> dataSubRoleParams = Lists.newArrayList();
             for (String userId : userIds) {
