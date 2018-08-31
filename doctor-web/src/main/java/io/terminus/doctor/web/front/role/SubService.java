@@ -333,6 +333,8 @@ public class SubService {
             doctorStaff.setFarmId(farmId);
             doctorStaff.setOrgId(orgId);
             doctorStaff.setGroupId(groupId);
+            doctorStaff.setUserName(sub.getRealName());
+            doctorStaff.setMobile(sub.getContact());
             doctorStaff.setStatus(Objects.equals(sub.getStatus(), io.terminus.doctor.user.model.Sub.Status.ACTIVE.value())
                     ? DoctorStaff.Status.PRESENT.value() : DoctorStaff.Status.ABSENT.value());
             RespHelper.orServEx(doctorStaffWriteService.createDoctorStaff(doctorStaff));
