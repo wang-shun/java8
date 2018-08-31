@@ -322,9 +322,14 @@ public class SubService {
             return;
         }
         sub.getFarmIds().forEach(farmId -> {
+            //通过猪场查公司和集团(孔景军)
+            Long orgId = doctorStaffReadService.getOrgId(farmId);
+            Long groupId = doctorStaffReadService.getGroupId(orgId);
             DoctorStaff doctorStaff = new DoctorStaff();
             doctorStaff.setUserId(userId);
             doctorStaff.setFarmId(farmId);
+            doctorStaff.setOrgId(orgId);
+            doctorStaff.setGroupId(groupId);
             doctorStaff.setStatus(Objects.equals(sub.getStatus(), io.terminus.doctor.user.model.Sub.Status.ACTIVE.value())
                     ? DoctorStaff.Status.PRESENT.value() : DoctorStaff.Status.ABSENT.value());
             RespHelper.orServEx(doctorStaffWriteService.createDoctorStaff(doctorStaff));

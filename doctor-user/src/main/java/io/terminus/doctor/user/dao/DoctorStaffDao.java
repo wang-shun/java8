@@ -24,4 +24,10 @@ public class DoctorStaffDao extends MyBatisDao<DoctorStaff> {
     public List<DoctorStaff> findByFarmIdAndStatus(Long farmId, Integer status){
         return sqlSession.selectList(sqlId("findByFarmIdAndStatus"), MapBuilder.newHashMap().put("farmId", farmId, "status", status).map());
     }
+    public Long findOrgIdByFarmId(Long farmId){
+        return sqlSession.selectOne(sqlId("findOrgIdByFarmId"),farmId);
+    }
+    public Long findGroupIdByFarmId(Long orgId){
+        return sqlSession.selectOne(sqlId("findGroupIdByFarmId"),orgId);
+    }
 }

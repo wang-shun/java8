@@ -23,4 +23,6 @@ public interface DoctorStaffReadService {
      */
     Response<List<DoctorStaff>> findStaffByFarmIdAndStatus(@NotNull(message = "farmId.not.null") Long farmId,
                                                            @Nullable Integer status);
+    Long getOrgId(Long farmId);
+    Long getGroupId(Long orgId);
 }

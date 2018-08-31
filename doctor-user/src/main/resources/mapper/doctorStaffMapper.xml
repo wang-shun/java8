@@ -85,4 +85,15 @@
         WHERE id = #{id}
     </delete>
 
+    <select id="findOrgIdByFarmId" parameterType="long" resultMap="long" >
+        SELECT org_id
+        FROM doctor_farms
+        WHERE id = #{farmId}
+    </select>
+    <select id="findGroupIdByFarmId" parameterType="long" resultMap="long" >
+        SELECT parent_id
+        FROM doctor_orgs
+        WHERE id = #{orgId}
+    </select>
+
 </mapper>
