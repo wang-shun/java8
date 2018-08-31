@@ -381,25 +381,25 @@ public class DataAuthServiceImpl implements DataAuthService{
                 farmIdList = Lists.newArrayList();
             }
             List<Long> orgIdList = dataAuthDao.getOrgIdList(farmIdList);
-            List<Long> orgIds;
-            if (StringUtils.isNotBlank(dataSubRole.getOrgIds())) {
-                orgIds = Splitters.COMMA.splitToList(dataSubRole.getOrgIds()).stream().map(Long::valueOf).collect(Collectors.toList());
-            } else {
-                orgIds = Lists.newArrayList();
-            }
-            orgIdList.addAll(orgIds);
-            List<Long> OrgIdsList = removeDuplicate(orgIdList);
-            String orgIdsString =  StringUtils.join(OrgIdsList.toArray(), ",");
+//            List<Long> orgIds;
+//            if (StringUtils.isNotBlank(dataSubRole.getOrgIds())) {
+//                orgIds = Splitters.COMMA.splitToList(dataSubRole.getOrgIds()).stream().map(Long::valueOf).collect(Collectors.toList());
+//            } else {
+//                orgIds = Lists.newArrayList();
+//            }
+//            orgIdList.addAll(orgIds);
+//            List<Long> OrgIdsList = removeDuplicate(orgIdList);
+            String orgIdsString =  StringUtils.join(orgIdList.toArray(), ",");
 
-            List<Long> groupIdList = dataAuthDao.getGroupIdList(OrgIdsList);
-            List<Long> groupIds;
-            if (StringUtils.isNotBlank(dataSubRole.getGroupIds())) {
-                groupIds = Splitters.COMMA.splitToList(dataSubRole.getGroupIds()).stream().map(Long::valueOf).collect(Collectors.toList());
-            } else {
-                groupIds = Lists.newArrayList();
-            }
-            groupIdList.addAll(groupIds);
-            String groupIdsString =  StringUtils.join(removeDuplicate(groupIdList).toArray(), ",");
+            List<Long> groupIdList = dataAuthDao.getGroupIdList(orgIdList);
+//            List<Long> groupIds;
+//            if (StringUtils.isNotBlank(dataSubRole.getGroupIds())) {
+//                groupIds = Splitters.COMMA.splitToList(dataSubRole.getGroupIds()).stream().map(Long::valueOf).collect(Collectors.toList());
+//            } else {
+//                groupIds = Lists.newArrayList();
+//            }
+//            groupIdList.addAll(groupIds);
+            String groupIdsString =  StringUtils.join(groupIdList.toArray(), ",");
 
             List<Map<String,String>> dataSubRoleParams = Lists.newArrayList();
             for (String userId : userIds) {
