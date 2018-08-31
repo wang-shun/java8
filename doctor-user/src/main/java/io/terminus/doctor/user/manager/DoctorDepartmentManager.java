@@ -152,6 +152,9 @@ public class DoctorDepartmentManager {
         departmentDto.setType(doctorOrg.getType());
         departmentDto.setLevel(level);
         level ++;
+        if(fuzzyName==null||isNull(fuzzyName)){
+            fuzzyName=new String("");
+        }
         List<DoctorOrg> children = doctorOrgDao.findOrgByParentIdAndName(departmentId,fuzzyName);
         if (Arguments.isNullOrEmpty(children)) {
             return departmentDto;
