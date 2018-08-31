@@ -325,6 +325,9 @@ public class SubService {
             //通过猪场查公司和集团(孔景军)
             Long orgId = doctorStaffReadService.getOrgId(farmId);
             Long groupId = doctorStaffReadService.getGroupId(orgId);
+            if(groupId == 0L){
+                groupId = null;
+            }
             DoctorStaff doctorStaff = new DoctorStaff();
             doctorStaff.setUserId(userId);
             doctorStaff.setFarmId(farmId);
