@@ -248,9 +248,9 @@ public class SubService {
      */
     public Response<Long> createSub(BaseUser user, Sub sub){
         try {
-            Long primaryId = this.getPrimaryUserId(user);
+            //Long primaryId = this.getPrimaryUserId(user);
             //孔景军
-            //Long primaryId = user.getId();
+            Long primaryId = user.getId();
             //先查下主账号的猪场, 以避免子账号的猪场不属于主账号
             DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(primaryId));
             List<Long> primaryFarms = permission.getFarmIdsList();
@@ -273,7 +273,7 @@ public class SubService {
                 }
             } else {
                 subUser = new User();
-            }
+           }
 
             //子账号@主账号
             String userName = subAccount(sub, user);
