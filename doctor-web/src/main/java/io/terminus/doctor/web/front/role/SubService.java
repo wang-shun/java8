@@ -251,15 +251,17 @@ public class SubService {
             //Long primaryId = this.getPrimaryUserId(user);
             //孔景军
             Long primaryId = user.getId();
+            log.error("==================1");
             //先查下主账号的猪场, 以避免子账号的猪场不属于主账号
             DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(primaryId));
+            log.error("==================2");
             List<Long> primaryFarms = permission.getFarmIdsList();
             for(Long farmId : sub.getFarmIds()){
                 if(!primaryFarms.contains(farmId)){
                     throw new ServiceException("authorize.fail");
                 }
             }
-
+            log.error("==================3");
             RespHelper.or500(doctorUserReadService.checkExist(sub.getContact(), sub.getUsername()));
 
             User subUser;
@@ -274,7 +276,7 @@ public class SubService {
             } else {*/
                 subUser = new User();
            //}
-
+            log.error("==================4");
             //子账号@主账号
             String userName = subAccount(sub, user);
 //            checkSubUserAccount(userName);
@@ -296,21 +298,28 @@ public class SubService {
                     .map());
             Long subUserId;
             if (isNull(subUser.getId())) {
+                log.error("==================5");
                  subUserId = RespHelper.orServEx(userWriteService.create(subUser));
             } else {
+                log.error("==================7");
                 RespHelper.orServEx(userWriteService.update(subUser));
                 subUserId = subUser.getId();
             }
             //设置子账号关联猪场
+            log.error("==================8");
             io.terminus.doctor.user.model.Sub sub1 = RespHelper.orServEx(primaryUserReadService.findSubByUserId(subUserId));
             io.terminus.doctor.user.model.Sub updateSub = new io.terminus.doctor.user.model.Sub();
             updateSub.setId(sub1.getId());
             updateSub.setFarmId(sub.getFarmIds().get(0));
+            log.error("==================9");
             primaryUserWriteService.updateSub(updateSub);
+            log.error("==================10");
 
             //create farm staff if necessary
             createStaff(subUserId, sub);
+            log.error("==================11");
             this.createPermission(user, subUserId, sub.getFarmIds(), sub.getBarnIds(), permission.getOrgIdsList());
+            log.error("==================12");
             return Response.ok(subUserId);
         } catch (ServiceException | JsonResponseException e) {
             return Response.fail(e.getMessage());
