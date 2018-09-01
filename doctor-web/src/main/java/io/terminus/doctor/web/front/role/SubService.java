@@ -308,7 +308,7 @@ public class SubService {
 
             //create farm staff if necessary
             createStaff(subUserId, sub);
-            this.createPermission(user, subUserId, sub.getFarmIds(), sub.getBarnIds(), permission.getOrgIdsList());
+            this.createPermission(user, subUserId, sub.getFarmIds(), sub.getBarnIds(), permission.getOrgIdsList(),permission.getGroupIdsList());
             return Response.ok(subUserId);
         } catch (ServiceException | JsonResponseException e) {
             return Response.fail(e.getMessage());
@@ -344,7 +344,7 @@ public class SubService {
         });
     }
 
-    private void createPermission(BaseUser currentUser, Long userId, List<Long> farmIds, List<Long> barnIds, List<Long> orgIds){
+    private void createPermission(BaseUser currentUser, Long userId, List<Long> farmIds, List<Long> barnIds, List<Long> orgIds,List<Long> groupIds){
         //创建 数据权限
         DoctorUserDataPermission permission = new DoctorUserDataPermission();
         permission.setUserId(userId);
@@ -357,6 +357,7 @@ public class SubService {
         permission.setUpdatorId(currentUser.getId());
         permission.setUpdatorName(currentUser.getName());
         permission.setOrgIdsList(orgIds);
+        permission.setGroupIdsList(groupIds);
         RespHelper.orServEx(doctorUserDataPermissionWriteService.createDataPermission(permission));
     }
 

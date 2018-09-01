@@ -170,4 +170,13 @@ public class DoctorUserDataPermission implements Serializable {
             this.orgIds = null;
         }
     }
+
+    public void setGroupIdsList(List<Long> groupIdsList){
+        this.groupIdsList = groupIdsList == null ? new ArrayList<>() : groupIdsList;
+        if(groupIdsList != null && !groupIdsList.isEmpty()){
+            this.groupIds = Joiner.on(",").join(groupIdsList);
+        }else{
+            this.groupIds = null;
+        }
+    }
 }
