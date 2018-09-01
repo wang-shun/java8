@@ -377,7 +377,7 @@ public class DoctorAdminUsers {
         }
 
         role.setId(role.getId());
-        role.setAppKey("PC"); // prevent update
+        role.setAppKey("MOBILE"); // prevent update
         or500(subRoleWriteService.updateRole(role));
 
         //如果角色名称发生了改变, 则更新冗余字段

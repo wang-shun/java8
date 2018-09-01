@@ -117,12 +117,11 @@ public class DataAuthServiceImpl implements DataAuthService{
             //String orgId = params.get("orgId");
             String realName = params.get("realName");
 
-            if(StringUtils.isBlank(editType)) return Response.fail("editType必传");
-            if(StringUtils.isBlank(userName)) return Response.fail("userName必传");
-            if(StringUtils.isBlank(mobile)) return Response.fail("mobile必传");
-            if(StringUtils.isBlank(groupId)) return Response.fail("groupId必传");
+            if(StringUtils.isBlank(userName)) return Response.fail("请填写用户名");
+            if(StringUtils.isBlank(mobile)) return Response.fail("请填写手机号");
+            if(StringUtils.isBlank(groupId)) return Response.fail("请选择集团");
             //if(StringUtils.isBlank(orgId)) return Response.fail("orgId必传");
-            if(StringUtils.isBlank(realName)) return Response.fail("realName必传");
+            if(StringUtils.isBlank(realName)) return Response.fail("请填写真是姓名");
 
             if(editType.toUpperCase().equals("A")) //新增
             {
