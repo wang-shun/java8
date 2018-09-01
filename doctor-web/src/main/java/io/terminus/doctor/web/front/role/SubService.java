@@ -145,7 +145,9 @@ public class SubService {
                 Response.fail("sub.id.miss");
             }
 
-            Long primaryId = this.getPrimaryUserId(user);
+            //Long primaryId = this.getPrimaryUserId(user);
+            //孔景军
+            Long primaryId = user.getId();
 
             User subUser = RespHelper.orServEx(doctorUserReadService.findById(sub.getId()));
 
@@ -246,7 +248,9 @@ public class SubService {
      */
     public Response<Long> createSub(BaseUser user, Sub sub){
         try {
-            Long primaryId = this.getPrimaryUserId(user);
+            //Long primaryId = this.getPrimaryUserId(user);
+            //孔景军
+            Long primaryId = user.getId();
             //先查下主账号的猪场, 以避免子账号的猪场不属于主账号
             DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(primaryId));
             List<Long> primaryFarms = permission.getFarmIdsList();
