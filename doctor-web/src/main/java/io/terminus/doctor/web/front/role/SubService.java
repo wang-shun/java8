@@ -479,12 +479,12 @@ public class SubService {
     private String subAccount(Sub sub, BaseUser user){
         User primaryUser;
         // 子账号特别处理
-        if((Objects.equals(user.getType(), UserType.FARM_SUB.value()))){
+        /*if((Objects.equals(user.getType(), UserType.FARM_SUB.value()))){
             Long primaryUserId = this.getPrimaryUserId(user);
             primaryUser = RespHelper.orServEx(doctorUserReadService.findById(primaryUserId));
-        }else{
+        }else{*/
             primaryUser = RespHelper.orServEx(doctorUserReadService.findById(user.getId()));
-        }
+        //}
         DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(sub.getFarmIds().get(0)));
 
         return AT.join(sub.getUsername(), farm.getFarmCode() == null ? primaryUser.getMobile() : farm.getFarmCode());
