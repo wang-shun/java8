@@ -248,9 +248,9 @@ public class SubService {
      */
     public Response<Long> createSub(BaseUser user, Sub sub){
         try {
-            //Long primaryId = this.getPrimaryUserId(user);
+            Long primaryId = this.getPrimaryUserId(user);
             //孔景军
-            Long primaryId = user.getId();
+            //Long primaryId = user.getId();
             //先查下主账号的猪场, 以避免子账号的猪场不属于主账号
             DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(primaryId));
             List<Long> primaryFarms = permission.getFarmIdsList();
@@ -264,15 +264,15 @@ public class SubService {
 
             User subUser;
             String password = sub.getPassword();
-            /*Response<User> userResponse = doctorUserReadService.findBy(sub.getContact(), LoginType.MOBILE);
+            Response<User> userResponse = doctorUserReadService.findBy(sub.getContact(), LoginType.MOBILE);
             if (userResponse.isSuccess() && notNull(userResponse.getResult())) {
                 subUser = userResponse.getResult();
                 if (org.springframework.util.StringUtils.hasText(sub.getPassword())) {  //对密码加盐加密
                     password = EncryptUtil.encrypt(sub.getPassword());
                 }
-            } else {*/
+            } else {
                 subUser = new User();
-            //}(kongjj)
+            }
 
             //子账号@主账号
             String userName = subAccount(sub, user);
