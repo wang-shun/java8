@@ -279,6 +279,7 @@ public class SubService {
             log.error("==================4");
             //子账号@主账号
             String userName = subAccount(sub, user);
+            log.error("==================a");
 //            checkSubUserAccount(userName);
             subUser.setName(userName);
             subUser.setMobile(sub.getContact());
@@ -286,16 +287,20 @@ public class SubService {
             subUser.setType(UserType.FARM_SUB.value());
             subUser.setStatus(UserStatus.NORMAL.value());
             // TODO: 自定义角色冗余进 user 表
+            log.error("==================b");
             List<String> roles = Lists.newArrayList("SUB");
+            log.error("==================c");
             if (sub.getRoleId() != null) {
                 roles.add("SUB(SUB(" + sub.getRoleId() + "))");
             }
             subUser.setRoles(roles);
+            log.error("==================d");
             subUser.setExtra(MapBuilder.<String, String>of()
                     .put("pid", primaryId.toString())
                     .put("contact", sub.getContact())
                     .put("realName", sub.getRealName())
                     .map());
+            log.error("==================e");
             Long subUserId;
             if (isNull(subUser.getId())) {
                 log.error("==================5");
