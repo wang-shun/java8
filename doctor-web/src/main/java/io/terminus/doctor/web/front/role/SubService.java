@@ -267,6 +267,7 @@ public class SubService {
             Response<User> userResponse = doctorUserReadService.findBy(sub.getContact(), LoginType.MOBILE);
             if (userResponse.isSuccess() && notNull(userResponse.getResult())) {
                 subUser = userResponse.getResult();
+                log.error("================subUser="+subUser);
                 if (org.springframework.util.StringUtils.hasText(sub.getPassword())) {  //对密码加盐加密
                     password = EncryptUtil.encrypt(sub.getPassword());
                 }
