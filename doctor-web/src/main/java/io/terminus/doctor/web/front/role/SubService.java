@@ -265,14 +265,14 @@ public class SubService {
             User subUser;
             String password = sub.getPassword();
             Response<User> userResponse = doctorUserReadService.findBy(sub.getContact(), LoginType.MOBILE);
-            if (userResponse.isSuccess() && notNull(userResponse.getResult())) {
+            /*if (userResponse.isSuccess() && notNull(userResponse.getResult())) {
                 subUser = userResponse.getResult();
                 if (org.springframework.util.StringUtils.hasText(sub.getPassword())) {  //对密码加盐加密
                     password = EncryptUtil.encrypt(sub.getPassword());
                 }
-            } else {
+            } else {*/
                 subUser = new User();
-            }
+            //}(kongjj)
 
             //子账号@主账号
             String userName = subAccount(sub, user);
