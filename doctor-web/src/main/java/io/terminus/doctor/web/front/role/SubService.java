@@ -251,10 +251,10 @@ public class SubService {
             //Long primaryId = this.getPrimaryUserId(user);
             //孔景军
             Long primaryId = user.getId();
-            log.error("==================1");
+            log.error("==================1"+user);
             //先查下主账号的猪场, 以避免子账号的猪场不属于主账号
             DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(primaryId));
-            log.error("==================2");
+            log.error("==================2"+sub);
             List<Long> primaryFarms = permission.getFarmIdsList();
             for(Long farmId : sub.getFarmIds()){
                 if(!primaryFarms.contains(farmId)){
@@ -483,6 +483,7 @@ public class SubService {
             Long primaryUserId = this.getPrimaryUserId(user);
             primaryUser = RespHelper.orServEx(doctorUserReadService.findById(primaryUserId));
         }else{*/
+        log.error("==============user"+user);
             primaryUser = RespHelper.orServEx(doctorUserReadService.findById(user.getId()));
         //}
         DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(sub.getFarmIds().get(0)));
