@@ -32,6 +32,7 @@ public class PrimaryUserWriteServiceImpl implements PrimaryUserWriteService {
     @Override
     public Response<Long> createPrimaryUser(PrimaryUser primaryUser) {
         try {
+            log.info("=====================================PrimaryUserWriteServiceImpl.primaryUserDao.create");
             primaryUserDao.create(primaryUser);
             return Response.ok(primaryUser.getId());
         } catch (Exception e) {

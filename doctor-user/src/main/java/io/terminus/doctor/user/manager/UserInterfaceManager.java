@@ -128,6 +128,7 @@ public class UserInterfaceManager {
         //暂时暂定手机号
         primaryUser.setUserName(user.getMobile());
         primaryUser.setStatus(UserStatus.NORMAL.value());
+        log.info("=====================================UserInterfaceManager.primaryUserDao.create");
         primaryUserDao.create(primaryUser);
 
         //用户个人信息

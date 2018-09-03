@@ -269,6 +269,7 @@ public class UserInitService {
         }
         primaryUser.setRealName(realName);
         primaryUser.setStatus(UserStatus.NORMAL.value());
+        log.info("=====================================UserInitService.primaryUserDao.create");
         primaryUserDao.create(primaryUser);
     }
 
