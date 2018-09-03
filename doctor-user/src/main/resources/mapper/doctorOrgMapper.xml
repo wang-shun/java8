@@ -402,9 +402,9 @@
         left join doctor_orgs b2 on	a.org_id = b2.id
         left join doctor_farms c on a.farm_id = c.id
         where 1 = 1
-        <if test="groupId != null and groupId != -1"> and a.group_id = #{groupId}</if>
-        <if test="orgId != null and orgId != -1"> and a.org_id = #{orgId}</if>
-        <if test="farmId != null and farmId != -1"> and a.farm_id = #{farmId}</if>
+        <if test="groupId != null and groupId != ''"> and a.group_id = #{groupId}</if>
+        <if test="orgId != null and orgId != ''"> and a.org_id = #{orgId}</if>
+        <if test="farmId != null and farmId != ''"> and a.farm_id = #{farmId}</if>
         <if test="userName != null and userName != ''"> and a.user_name like  CONCAT(CONCAT('%',#{userName},'%')) </if>
         <if test="mobile != null and mobile != ''"> and a.mobile like  CONCAT(CONCAT('%',#{mobile},'%')) </if>
         <if test="status != null and status != ''"> and a.status = #{status}</if>
