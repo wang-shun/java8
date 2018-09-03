@@ -76,7 +76,6 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
     @Override
     public Response<User> findBy(String loginId, LoginType loginType) {
         try {
-            log.error("=============loginId="+loginId);
             User user;
             switch (loginType) {
                 case NAME:

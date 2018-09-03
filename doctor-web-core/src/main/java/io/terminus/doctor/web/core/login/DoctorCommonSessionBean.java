@@ -294,7 +294,6 @@ public class DoctorCommonSessionBean {
         token.setDeviceId(deviceId);
         token.setCookieName(sessionProperties.getCookieName());
         token.setRoles(MoreObjects.firstNonNull(user.getRoles(), Lists.<String>newArrayList()));
-        log.error("========================================"+token);
         return token;
     }
 
