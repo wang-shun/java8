@@ -15,11 +15,6 @@ import java.util.List;
 @Repository
 public class PrimaryUserDao extends MyBatisDao<PrimaryUser> {
 
-    public Boolean create(PrimaryUser primaryUser) {
-        log.info("=====================================PrimaryUserDao.PrimaryUser.create");
-        return this.sqlSession.insert(this.sqlId("create"), primaryUser) == 1;
-    }
-
     public PrimaryUser findByUserId(Long userId) {
         return getSqlSession().selectOne(sqlId("findByUserId"), userId);
     }

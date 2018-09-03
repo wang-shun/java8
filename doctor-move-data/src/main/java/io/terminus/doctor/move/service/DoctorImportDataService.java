@@ -80,7 +80,6 @@ import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
 import io.terminus.doctor.user.dao.DoctorServiceStatusDao;
 import io.terminus.doctor.user.dao.DoctorStaffDao;
 import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
-import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.dao.SubRoleDao;
 import io.terminus.doctor.user.dao.UserDaoExt;
@@ -185,8 +184,6 @@ public class DoctorImportDataService {
     private SubRoleDao subRoleDao;
     @Autowired
     private SubDao subDao;
-    @Autowired
-    private PrimaryUserDao primaryUserDao;
     @Autowired
     private DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
     @Autowired
@@ -504,13 +501,6 @@ public class DoctorImportDataService {
         userProfile.setRealName(realName);
         userProfileDao.update(userProfile);
 
-        //主账户关联猪场id
-//        PrimaryUser primaryUser = primaryUserDao.findByUserId(userId);
-//        PrimaryUser updatePrimary = new PrimaryUser();
-//        updatePrimary.setId(primaryUser.getId());
-//        updatePrimary.setRelFarmId(farm.getId());
-//        primaryUserDao.update(updatePrimary);
-
         // 给公司账号关联猪场 （陈娟 2018-08-30）
         Sub sub = subDao.findByUserId(userId);
         Sub updateSub=new Sub();
@@ -586,18 +576,6 @@ public class DoctorImportDataService {
             user.setExtra(userExtraMap);
             userWriteService.update(user);
 
-            //如果primaryUser不存在新建
-//            PrimaryUser primaryUser = primaryUserDao.findByUserId(userId);
-//            if (isNull(primaryUser)) {
-//                //猪场管理员
-//                primaryUser = new PrimaryUser();
-//                primaryUser.setUserId(userId);
-//                //暂时暂定手机号
-//                primaryUser.setUserName(user.getMobile());
-//                primaryUser.setRealName(realName);
-//                primaryUser.setStatus(UserStatus.NORMAL.value());
-//                primaryUserDao.create(primaryUser);
-//            }
         }else{
             user = new User();
             user.setMobile(mobile);
@@ -613,17 +591,17 @@ public class DoctorImportDataService {
         }
 
         // 猪场的主账号变成公司账号添加到doctor_user_subs表中（陈娟 2018-08-30）
-        Sub sub = subDao.findByUserId(user.getId());
-        if(isNull(sub)){
-            sub=new Sub();
-            sub.setUserId(user.getId());
-            sub.setUserName(user.getName());
-            sub.setContact(user.getMobile());
-            sub.setRealName(realName);
-            sub.setStatus(UserStatus.NORMAL.value());
-            sub.setUserType(2);
-            subDao.create(sub);
-        }
+//        Sub sub = subDao.findByUserId(user.getId());
+//        if(isNull(sub)){
+//            sub=new Sub();
+//            sub.setUserId(user.getId());
+//            sub.setUserName(user.getName());
+//            sub.setContact(user.getMobile());
+//            sub.setRealName(realName);
+//            sub.setStatus(UserStatus.NORMAL.value());
+//            sub.setUserType(2);
+//            subDao.create(sub);
+//        }
         return user;
     }
 
