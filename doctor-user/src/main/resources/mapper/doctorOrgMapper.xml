@@ -398,7 +398,7 @@
     <select id="staffCount" parameterType="map" resultType="long">
         select  count(1) as count
         from doctor_staffs a
-        left join doctor_orgs b1 on a.group_id = b1.parent_id
+        left join doctor_orgs b1 on a.group_id = b1.id
         left join doctor_orgs b2 on	a.org_id = b2.id
         left join doctor_farms c on a.farm_id = c.id
         where 1 = 1
@@ -428,6 +428,6 @@
         <if test="userName != null and userName != ''"> and a.user_name like  CONCAT(CONCAT('%',#{userName},'%')) </if>
         <if test="mobile != null and mobile != ''"> and a.mobile like  CONCAT(CONCAT('%',#{mobile},'%')) </if>
         <if test="status != null and status != ''"> and a.status = #{status}</if>
-        limit ${pageNo},${pageSize}
+        limit #{pageNo},#{pageSize}
     </select>
 </mapper>

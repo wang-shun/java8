@@ -440,7 +440,7 @@ public class ServiceConfiguration {
             }
 
             @Override
-            public Map<Object, String> getGroupcunlan(Long groupId) {
+            public Map<Object, String> getGroupcunlan(Long groupId, List<Long> orgIds) {
                 return null;
             }
 
