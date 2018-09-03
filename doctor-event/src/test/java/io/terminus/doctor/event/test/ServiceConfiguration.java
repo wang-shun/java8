@@ -446,6 +446,12 @@ public class ServiceConfiguration {
 
             @Override
             public Response staffQuery(Map<String, Object> params) { return null; }
+
+            @Override
+            public Response<Long> findGroupByOrgId(Long groupId) {
+                return null;
+            }
+
             @Override
             public Response<Boolean> updateOrgPidTpye(Long id) {
                 return null;

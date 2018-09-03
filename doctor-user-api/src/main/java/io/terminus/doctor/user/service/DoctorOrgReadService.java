@@ -99,4 +99,12 @@ public interface DoctorOrgReadService {
      */
     Response staffQuery(Map<String, Object> params);
 
+
+    /**
+     * 通过公司查集团(孔景军)
+     * @param groupId
+     * @return
+     */
+    Response<Long>  findGroupByOrgId(Long groupId);
+
 }

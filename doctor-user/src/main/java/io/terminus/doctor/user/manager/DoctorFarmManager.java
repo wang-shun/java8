@@ -167,22 +167,29 @@ public class DoctorFarmManager {
         }
 
         //解冻猪场主/子用户
-        if (Objects.equals(doctorUserUnfreezeDto.getUserType(), UserType.FARM_ADMIN_PRIMARY.value())) {
-            PrimaryUser primaryUser = doctorUserUnfreezeDto.getPrimaryUser();
-            if (isNull(primaryUser.getId())) {
-                primaryUserDao.create(primaryUser);
-            } else {
-                primaryUser.setFrozen(IsOrNot.NO.getKey());
-                primaryUserDao.update(primaryUser);
-            }
+//        if (Objects.equals(doctorUserUnfreezeDto.getUserType(), UserType.FARM_ADMIN_PRIMARY.value())) {
+//            PrimaryUser primaryUser = doctorUserUnfreezeDto.getPrimaryUser();
+//            if (isNull(primaryUser.getId())) {
+//                primaryUserDao.create(primaryUser);
+//            } else {
+//                primaryUser.setFrozen(IsOrNot.NO.getKey());
+//                primaryUserDao.update(primaryUser);
+//            }
+//        } else {
+//            Sub sub = doctorUserUnfreezeDto.getSub();
+//            if (isNull(sub.getId())) {
+//                subDao.create(sub);
+//            } else {
+//                sub.setFrozen(IsOrNot.NO.getKey());
+//                subDao.update(sub);
+//            }
+//        }
+        Sub sub = doctorUserUnfreezeDto.getSub();
+        if (isNull(sub.getId())) {
+            subDao.create(sub);
         } else {
-            Sub sub = doctorUserUnfreezeDto.getSub();
-            if (isNull(sub.getId())) {
-                subDao.create(sub);
-            } else {
-                sub.setFrozen(IsOrNot.NO.getKey());
-                subDao.update(sub);
-            }
+            sub.setFrozen(IsOrNot.NO.getKey());
+            subDao.update(sub);
         }
 
         //更新用户个人

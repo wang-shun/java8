@@ -430,4 +430,8 @@
         <if test="status != null and status != ''"> and a.status = #{status}</if>
         limit #{pageNo},#{pageSize}
     </select>
+
+    <select id="findGroupByOrgId" parameterType="long" resultType="long" >
+        select parent_id from doctor_orgs where id = #{groupId}
+    </select>
 </mapper>
