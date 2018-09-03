@@ -501,12 +501,12 @@ public class DoctorImportDataService {
         userProfile.setRealName(realName);
         userProfileDao.update(userProfile);
 
-//        // 给公司账号关联猪场 （陈娟 2018-08-30）
-//        Sub sub = subDao.findByUserId(userId);
-//        Sub updateSub=new Sub();
-//        updateSub.setId(sub.getId());
-//        updateSub.setFarmId(farm.getId());
-//        subDao.update(updateSub);
+        // 给公司账号关联猪场 （陈娟 2018-08-30）
+        Sub sub = subDao.findByUserId(userId);
+        Sub updateSub=new Sub();
+        updateSub.setId(sub.getId());
+        updateSub.setFarmId(farm.getId());
+        subDao.update(updateSub);
 
         // 在员工表里面添加数据
         DoctorStaff doctorStaff = doctorStaffDao.findByFarmIdAndUserId(user.getId(), farm.getId());
@@ -591,17 +591,17 @@ public class DoctorImportDataService {
         }
 
         // 猪场的主账号变成公司账号添加到doctor_user_subs表中（陈娟 2018-08-30）
-//        Sub sub = subDao.findByUserId(user.getId());
-//        if(isNull(sub)){
-//            sub=new Sub();
-//            sub.setUserId(user.getId());
-//            sub.setUserName(user.getName());
-//            sub.setContact(user.getMobile());
-//            sub.setRealName(realName);
-//            sub.setStatus(UserStatus.NORMAL.value());
-//            sub.setUserType(2);
-//            subDao.create(sub);
-//        }
+        Sub sub = subDao.findByUserId(user.getId());
+        if(isNull(sub)){
+            sub=new Sub();
+            sub.setUserId(user.getId());
+            sub.setUserName(user.getName());
+            sub.setContact(user.getMobile());
+            sub.setRealName(realName);
+            sub.setStatus(UserStatus.NORMAL.value());
+            sub.setUserType(2);
+            subDao.create(sub);
+        }
         return user;
     }
 
