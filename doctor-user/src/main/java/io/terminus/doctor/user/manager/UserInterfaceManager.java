@@ -8,6 +8,7 @@ import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
+import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.dao.UserDaoExt;
 import io.terminus.doctor.user.interfaces.event.EventType;
 import io.terminus.doctor.user.interfaces.event.UserEvent;
@@ -15,6 +16,7 @@ import io.terminus.doctor.user.interfaces.model.UserDto;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.PrimaryUser;
+import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
 import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
 import io.terminus.parana.user.impl.dao.UserDao;
@@ -52,6 +54,9 @@ public class UserInterfaceManager {
     private PrimaryUserDao primaryUserDao;
     @Autowired
     private UserProfileDao userProfileDao;
+    @Autowired
+    private SubDao subDao;
+
 
     @Autowired
     public UserInterfaceManager(ZKClientFactory zkClientFactory,
@@ -123,12 +128,20 @@ public class UserInterfaceManager {
         Long userId = user.getId();
 
         //猪场管理员
-        PrimaryUser primaryUser = new PrimaryUser();
-        primaryUser.setUserId(userId);
-        //暂时暂定手机号
-        primaryUser.setUserName(user.getMobile());
-        primaryUser.setStatus(UserStatus.NORMAL.value());
-        primaryUserDao.create(primaryUser);
+//        PrimaryUser primaryUser = new PrimaryUser();
+//        primaryUser.setUserId(userId);
+//        //暂时暂定手机号
+//        primaryUser.setUserName(user.getMobile());
+//        primaryUser.setStatus(UserStatus.NORMAL.value());
+//        primaryUserDao.create(primaryUser);
+
+        Sub sub=new Sub();
+        sub.setUserId(userId);
+        sub.setUserName(user.getName());
+        sub.setContact(user.getMobile());
+        sub.setUserType(2);
+        sub.setStatus(UserStatus.NORMAL.value());
+        subDao.create(sub);
 
         //用户个人信息
         UserProfile userProfile = new UserProfile();

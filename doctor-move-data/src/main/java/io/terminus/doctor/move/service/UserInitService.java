@@ -113,163 +113,171 @@ public class UserInitService {
     @Autowired
     private SubRoleWriteService subRoleWriteService;
 
-//    @Transactional
-//    public List<DoctorFarmWithMobile> init(String loginName, String mobile, Long dataSourceId, Sheet sheet){
-//        List<DoctorMoveFarmInfo> moveFarmInfoList = analyzeExcelForFarmInfo(sheet);
-//        log.info("===moveFarmInfoList:{}", moveFarmInfoList);
-//
-//        List<String> includeFarmList = moveFarmInfoList.stream().map(DoctorMoveFarmInfo::getOldFarmName).collect(Collectors.toList());
-//        Map<String, String> farmNameMap = moveFarmInfoList.stream().collect(Collectors.toMap(k -> k.getOldFarmName(), v -> v.getNewFarmName()));
-//
-//        List<View_FarmMember> allList = getFarmMember(dataSourceId);
-//        View_FarmMember admin = allList.stream().filter(farmMember -> farmMember.getLevels() == 0 && "admin".equals(farmMember.getLoginName())).collect(Collectors.toList()).get(0);
-//        log.info("===admin:{}", admin);
-//        List<View_FarmMember> list = allList.stream()
-//                .filter(view_farmMember -> includeFarmList.contains(view_farmMember.getFarmName()))
-//                .collect(Collectors.toList());
-//        log.info("===list{}", list);
-//        checkFarmNameRepeat(list);
-//
-//        List<DoctorFarm> farms = new ArrayList<>();
-//        List<View_FarmInfo> allViewFarmInfoList = RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, View_FarmInfo.class, DoctorMoveTableEnum.view_FarmInfo));
-//        log.info("===allViewFarmInfoList:{}", allViewFarmInfoList);
-//        allViewFarmInfoList.stream().filter(view_farmInfo -> includeFarmList.contains(view_farmInfo.getFarmName())).forEach(farmInfo -> {
-//            if (farmInfo.getLevels() == 1) {
-//                DoctorFarm doctorFarm = makeFarm(farmInfo);
-//                doctorFarm.setName(farmNameMap.get(doctorFarm.getName()));
-//                farms.add(doctorFarm);
-//            }
-//        });
-//        log.info("===farms:{}", farms);
-//        //猪场名称与猪场映射
-//        Map<String, DoctorFarm> nameFarmMap = farms.stream().collect(Collectors.toMap(k -> k.getName(), v ->v));
-//        log.info("===nameFarmMap:{}", nameFarmMap);
-//
-//        List<DoctorFarmWithMobile> farmList = Lists.newArrayList();
-//        //创建org
-//        DoctorOrg org = doctorOrgDao.findByName(moveFarmInfoList.get(0).getOrgName());
-//        if (isNull(org)) {
-//            org = this.createOrg(moveFarmInfoList.get(0).getOrgName(), admin.getMobilPhone(), null, admin.getOID());
-//        }
-//
-//        Address province = addressDao.findByName(moveFarmInfoList.get(0).getProvince());
-//        Address city = addressDao.findByName(moveFarmInfoList.get(0).getCity());;
-//        Address region = addressDao.findByName(moveFarmInfoList.get(0).getRegion());
-//        String detailAddress = moveFarmInfoList.get(0).getProvince();
-//        for (DoctorMoveFarmInfo farmInfo : moveFarmInfoList) {
-//            log.info("===farmInfo:{}", farmInfo);
-//            // 主账号注册,内含事务
-//            User primaryUser;
-//            Response<User> result = doctorUserReadService.findBy(farmInfo.getMobile(), LoginType.MOBILE);
-//            if(result.isSuccess() && result.getResult() != null){
-//                primaryUser = result.getResult();
-//                primaryUser.setName(farmInfo.getLoginName());
-//                primaryUser.setPassword(EncryptUtil.encrypt("123456"));
-//                primaryUser.setStatus(UserStatus.NORMAL.value());
-//                primaryUser.setType(UserType.FARM_ADMIN_PRIMARY.value());
-//                primaryUser.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));
-//                Map<String, String> userExtraMap = Maps.newHashMap();
-//                userExtraMap.put("realName", farmInfo.getRealName());
-//                primaryUser.setExtra(userExtraMap);
-//
-//                PrimaryUser primary = primaryUserDao.findByUserId(primaryUser.getId());
-//                if (notNull(primary)) {
-//                    primaryUserDao.delete(primary.getId());
-//                }
-//                Sub sub = subDao.findByUserId(primaryUser.getId());
-//                if (notNull(sub)) {
-//                    subDao.delete(sub.getId());
-//                }
-//                createPrimaryUser(primaryUser);
-//
-//                userWriteService.update(primaryUser);
-//
-//            } else {
-//                primaryUser = this.registerByMobile(farmInfo.getMobile(), "123456", farmInfo.getLoginName(), farmInfo.getRealName());
-//            }
-//            DoctorServiceStatus serviceStatus = RespHelper.orServEx(doctorServiceStatusReadService.findByUserId(primaryUser.getId()));
-//            if(serviceStatus == null){
-//                //初始化服务状态
-//                this.initDefaultServiceStatus(primaryUser.getId());
-//            }else{
-//                serviceStatus.setPigdoctorStatus(DoctorServiceStatus.Status.OPENED.value());
-//                serviceStatus.setPigdoctorReviewStatus(DoctorServiceReview.Status.OK.getValue());
-//                doctorServiceStatusWriteService.updateServiceStatus(serviceStatus);
-//            }
-//
-//            DoctorServiceReview review = RespHelper.orServEx(doctorServiceReviewReadService.findServiceReviewByUserIdAndType(primaryUser.getId(), DoctorServiceReview.Type.PIG_DOCTOR));
-//            if(review == null){
-//                //初始化服务的申请审批状态
-//                this.initServiceReview(primaryUser.getId(), primaryUser.getMobile(), primaryUser.getName());
-//            }else{
-//                review.setStatus(DoctorServiceReview.Status.OK.getValue());
-//                doctorServiceReviewWriteService.updateReview(review);
-//            }
-//
-//            Long userId = primaryUser.getId();
-//            DoctorFarm farm = nameFarmMap.get(farmInfo.getNewFarmName());
-//            log.info("===farm:{}", farm);
-//            //创建猪场
-//            farm.setFarmCode(farmInfo.getLoginName());
-//            farm.setOrgId(org.getId());
-//            farm.setOrgName(org.getName());
-//            farm.setProvinceId(province.getId());
-//            farm.setProvinceName(province.getName());
-//            farm.setCityId(city.getId());
-//            farm.setCityName(city.getName());
-//            farm.setDistrictId(region.getId());
-//            farm.setDistrictName(region.getName());
-//            farm.setDetailAddress(detailAddress);
-//            doctorFarmDao.create(farm);
-//            farmList.add(new DoctorFarmWithMobile(farm, primaryUser.getMobile()));
-//
-//            //创建staff
-//            //this.createStaff(primaryUser, farm, farm.getOutId());
-//
-//            RespHelper.or500(doctorMessageRuleWriteService.initTemplate(farm.getId()));
-//
-//            //主账户关联猪场id
-//            PrimaryUser primary = primaryUserDao.findByUserId(userId);
-//            PrimaryUser updatePrimary = new PrimaryUser();
-//            updatePrimary.setId(primary.getId());
-//            updatePrimary.setRelFarmId(farm.getId());
-//            primaryUserDao.update(updatePrimary);
-//
-//            //创建数据权限
-//            DoctorUserDataPermission permission = new DoctorUserDataPermission();
-//            permission.setUserId(userId);
-//            permission.setFarmIds(farm.getId().toString());
-//            permission.setOrgIds(org.getId().toString());
-//            doctorUserDataPermissionDao.create(permission);
-//
-//            //创建子账号角色,后面创建子账号需要用到
-//            Map<String, Long> roleId = this.createSubRole(farm.getId(), primaryUser.getId(), dataSourceId);
-//            //现在轮到子账号了
-//            for (View_FarmMember member : list) {
-//                if(member.getLevels() == 1
-//                        && Objects.equals(member.getFarmName(), farmInfo.getOldFarmName())
-//                        && (!Objects.equals(member.getMobilPhone(), primaryUser.getMobile()))) {
-//                    this.createSubUser(member, roleId, primaryUser.getId(), primaryUser.getMobile(), farm.getId(), farm.getOutId());
-//                }
-//            }
-//        }
-//        log.info("===farmList:{}", farmList);
-//        return farmList;
-//    }
+    @Transactional
+    public List<DoctorFarmWithMobile> init(String loginName, String mobile, Long dataSourceId, Sheet sheet){
+        List<DoctorMoveFarmInfo> moveFarmInfoList = analyzeExcelForFarmInfo(sheet);
+        log.info("===moveFarmInfoList:{}", moveFarmInfoList);
+
+        List<String> includeFarmList = moveFarmInfoList.stream().map(DoctorMoveFarmInfo::getOldFarmName).collect(Collectors.toList());
+        Map<String, String> farmNameMap = moveFarmInfoList.stream().collect(Collectors.toMap(k -> k.getOldFarmName(), v -> v.getNewFarmName()));
+
+        List<View_FarmMember> allList = getFarmMember(dataSourceId);
+        View_FarmMember admin = allList.stream().filter(farmMember -> farmMember.getLevels() == 0 && "admin".equals(farmMember.getLoginName())).collect(Collectors.toList()).get(0);
+        log.info("===admin:{}", admin);
+        List<View_FarmMember> list = allList.stream()
+                .filter(view_farmMember -> includeFarmList.contains(view_farmMember.getFarmName()))
+                .collect(Collectors.toList());
+        log.info("===list{}", list);
+        checkFarmNameRepeat(list);
+
+        List<DoctorFarm> farms = new ArrayList<>();
+        List<View_FarmInfo> allViewFarmInfoList = RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, View_FarmInfo.class, DoctorMoveTableEnum.view_FarmInfo));
+        log.info("===allViewFarmInfoList:{}", allViewFarmInfoList);
+        allViewFarmInfoList.stream().filter(view_farmInfo -> includeFarmList.contains(view_farmInfo.getFarmName())).forEach(farmInfo -> {
+            if (farmInfo.getLevels() == 1) {
+                DoctorFarm doctorFarm = makeFarm(farmInfo);
+                doctorFarm.setName(farmNameMap.get(doctorFarm.getName()));
+                farms.add(doctorFarm);
+            }
+        });
+        log.info("===farms:{}", farms);
+        //猪场名称与猪场映射
+        Map<String, DoctorFarm> nameFarmMap = farms.stream().collect(Collectors.toMap(k -> k.getName(), v ->v));
+        log.info("===nameFarmMap:{}", nameFarmMap);
+
+        List<DoctorFarmWithMobile> farmList = Lists.newArrayList();
+        //创建org
+        DoctorOrg org = doctorOrgDao.findByName(moveFarmInfoList.get(0).getOrgName());
+        if (isNull(org)) {
+            org = this.createOrg(moveFarmInfoList.get(0).getOrgName(), admin.getMobilPhone(), null, admin.getOID());
+        }
+
+        Address province = addressDao.findByName(moveFarmInfoList.get(0).getProvince());
+        Address city = addressDao.findByName(moveFarmInfoList.get(0).getCity());;
+        Address region = addressDao.findByName(moveFarmInfoList.get(0).getRegion());
+        String detailAddress = moveFarmInfoList.get(0).getProvince();
+        for (DoctorMoveFarmInfo farmInfo : moveFarmInfoList) {
+            log.info("===farmInfo:{}", farmInfo);
+            // 主账号注册,内含事务
+            User primaryUser;
+            Response<User> result = doctorUserReadService.findBy(farmInfo.getMobile(), LoginType.MOBILE);
+            if(result.isSuccess() && result.getResult() != null){
+                primaryUser = result.getResult();
+                primaryUser.setName(farmInfo.getLoginName());
+                primaryUser.setPassword(EncryptUtil.encrypt("123456"));
+                primaryUser.setStatus(UserStatus.NORMAL.value());
+                primaryUser.setType(UserType.FARM_ADMIN_PRIMARY.value());
+                primaryUser.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));
+                Map<String, String> userExtraMap = Maps.newHashMap();
+                userExtraMap.put("realName", farmInfo.getRealName());
+                primaryUser.setExtra(userExtraMap);
+
+                PrimaryUser primary = primaryUserDao.findByUserId(primaryUser.getId());
+                if (notNull(primary)) {
+                    primaryUserDao.delete(primary.getId());
+                }
+                Sub sub = subDao.findByUserId(primaryUser.getId());
+                if (notNull(sub)) {
+                    subDao.delete(sub.getId());
+                }
+                createPrimaryUser(primaryUser);
+
+                userWriteService.update(primaryUser);
+
+            } else {
+                primaryUser = this.registerByMobile(farmInfo.getMobile(), "123456", farmInfo.getLoginName(), farmInfo.getRealName());
+            }
+            DoctorServiceStatus serviceStatus = RespHelper.orServEx(doctorServiceStatusReadService.findByUserId(primaryUser.getId()));
+            if(serviceStatus == null){
+                //初始化服务状态
+                this.initDefaultServiceStatus(primaryUser.getId());
+            }else{
+                serviceStatus.setPigdoctorStatus(DoctorServiceStatus.Status.OPENED.value());
+                serviceStatus.setPigdoctorReviewStatus(DoctorServiceReview.Status.OK.getValue());
+                doctorServiceStatusWriteService.updateServiceStatus(serviceStatus);
+            }
+
+            DoctorServiceReview review = RespHelper.orServEx(doctorServiceReviewReadService.findServiceReviewByUserIdAndType(primaryUser.getId(), DoctorServiceReview.Type.PIG_DOCTOR));
+            if(review == null){
+                //初始化服务的申请审批状态
+                this.initServiceReview(primaryUser.getId(), primaryUser.getMobile(), primaryUser.getName());
+            }else{
+                review.setStatus(DoctorServiceReview.Status.OK.getValue());
+                doctorServiceReviewWriteService.updateReview(review);
+            }
+
+            Long userId = primaryUser.getId();
+            DoctorFarm farm = nameFarmMap.get(farmInfo.getNewFarmName());
+            log.info("===farm:{}", farm);
+            //创建猪场
+            farm.setFarmCode(farmInfo.getLoginName());
+            farm.setOrgId(org.getId());
+            farm.setOrgName(org.getName());
+            farm.setProvinceId(province.getId());
+            farm.setProvinceName(province.getName());
+            farm.setCityId(city.getId());
+            farm.setCityName(city.getName());
+            farm.setDistrictId(region.getId());
+            farm.setDistrictName(region.getName());
+            farm.setDetailAddress(detailAddress);
+            doctorFarmDao.create(farm);
+            farmList.add(new DoctorFarmWithMobile(farm, primaryUser.getMobile()));
+
+            //创建staff
+            //this.createStaff(primaryUser, farm, farm.getOutId());
+
+            RespHelper.or500(doctorMessageRuleWriteService.initTemplate(farm.getId()));
+
+            //主账户关联猪场id
+            PrimaryUser primary = primaryUserDao.findByUserId(userId);
+            PrimaryUser updatePrimary = new PrimaryUser();
+            updatePrimary.setId(primary.getId());
+            updatePrimary.setRelFarmId(farm.getId());
+            primaryUserDao.update(updatePrimary);
+
+            //创建数据权限
+            DoctorUserDataPermission permission = new DoctorUserDataPermission();
+            permission.setUserId(userId);
+            permission.setFarmIds(farm.getId().toString());
+            permission.setOrgIds(org.getId().toString());
+            doctorUserDataPermissionDao.create(permission);
+
+            //创建子账号角色,后面创建子账号需要用到
+            Map<String, Long> roleId = this.createSubRole(farm.getId(), primaryUser.getId(), dataSourceId);
+            //现在轮到子账号了
+            for (View_FarmMember member : list) {
+                if(member.getLevels() == 1
+                        && Objects.equals(member.getFarmName(), farmInfo.getOldFarmName())
+                        && (!Objects.equals(member.getMobilPhone(), primaryUser.getMobile()))) {
+                    this.createSubUser(member, roleId, primaryUser.getId(), primaryUser.getMobile(), farm.getId(), farm.getOutId());
+                }
+            }
+        }
+        log.info("===farmList:{}", farmList);
+        return farmList;
+    }
 
     private void createPrimaryUser (User user) {
         //猪场管理员
-        PrimaryUser primaryUser = new PrimaryUser();
-        primaryUser.setUserId(user.getId());
-        //暂时暂定手机号
-        primaryUser.setUserName(user.getMobile());
-        String realName = user.getName();
-        if (notNull(user.getExtra()) && user.getExtra().containsKey("realName")) {
-            realName = Params.get(user.getExtra(), "realName");
-        }
-        primaryUser.setRealName(realName);
-        primaryUser.setStatus(UserStatus.NORMAL.value());
-        primaryUserDao.create(primaryUser);
+//        PrimaryUser primaryUser = new PrimaryUser();
+//        primaryUser.setUserId(user.getId());
+//        //暂时暂定手机号
+//        primaryUser.setUserName(user.getMobile());
+//        String realName = user.getName();
+//        if (notNull(user.getExtra()) && user.getExtra().containsKey("realName")) {
+//            realName = Params.get(user.getExtra(), "realName");
+//        }
+//        primaryUser.setRealName(realName);
+//        primaryUser.setStatus(UserStatus.NORMAL.value());
+//        primaryUserDao.create(primaryUser);
+        Sub sub=new Sub();
+        sub.setUserId(user.getId());
+        sub.setUserName(user.getName());
+        sub.setRealName(Params.get(user.getExtra(), "realName"));
+        sub.setContact(Params.get(user.getExtra(), "contact"));
+        sub.setUserType(2);
+        sub.setStatus(UserStatus.NORMAL.value());
+        subDao.create(sub);
     }
 
     public List<View_FarmMember> getFarmMember(Long datasourceId) {
