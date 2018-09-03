@@ -468,10 +468,11 @@ public class Users {
             }
         }
         List<Long> OrgIdsList = dataPermissionResponse.getResult().getOrgIdsList();
-        doctorOrgReadService.findGroupByOrgId(OrgIdsList.get(0));
+        Long groupId = doctorOrgReadService.findGroupByOrgId(OrgIdsList.get(0)).getResult();
         Map map = new HashMap();
         map.put("data",data);
         map.put("userType",userType);
+        map.put("groupId",groupId);
         return map;
     }
 
