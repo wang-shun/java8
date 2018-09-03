@@ -308,4 +308,13 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
             return new Paging(total, datas);
         }
     }
+    /**
+     * 通过公司查集团(孔景军)
+     * @param groupId
+     * @return
+     */
+
+    public Long findGroupByOrgId(Long groupId){
+        return sqlSession.selectOne(sqlId("findGroupByOrgId"), groupId);
+    }
 }
