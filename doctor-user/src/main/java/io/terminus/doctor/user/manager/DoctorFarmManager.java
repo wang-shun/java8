@@ -170,6 +170,7 @@ public class DoctorFarmManager {
         if (Objects.equals(doctorUserUnfreezeDto.getUserType(), UserType.FARM_ADMIN_PRIMARY.value())) {
             PrimaryUser primaryUser = doctorUserUnfreezeDto.getPrimaryUser();
             if (isNull(primaryUser.getId())) {
+                log.info("=======================DoctorFarmManager.primaryUserDao.create");
                 primaryUserDao.create(primaryUser);
             } else {
                 primaryUser.setFrozen(IsOrNot.NO.getKey());

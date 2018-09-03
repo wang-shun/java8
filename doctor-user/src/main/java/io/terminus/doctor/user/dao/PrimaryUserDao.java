@@ -16,7 +16,7 @@ import java.util.List;
 public class PrimaryUserDao extends MyBatisDao<PrimaryUser> {
 
     public Boolean create(PrimaryUser primaryUser) {
-        log.info("PrimaryUser.create");
+        log.info("=====================================PrimaryUserDao.PrimaryUser.create");
         return this.sqlSession.insert(this.sqlId("create"), primaryUser) == 1;
     }
 

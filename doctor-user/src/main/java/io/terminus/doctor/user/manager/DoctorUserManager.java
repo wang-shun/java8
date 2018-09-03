@@ -126,6 +126,7 @@ public class DoctorUserManager {
             }
             primaryUser.setRealName(realName);
             primaryUser.setStatus(UserStatus.NORMAL.value());
+            log.info("=====================================DoctorUserManager.primaryUserDao.create111");
             primaryUserDao.create(primaryUser);
 
             //用户个人信息
@@ -284,6 +285,7 @@ public class DoctorUserManager {
         }
         primaryUser.setRealName(realName);
         primaryUser.setStatus(UserStatus.NORMAL.value());
+        log.info("=====================================DoctorUserManager.primaryUserDao.create2222");
         primaryUserDao.create(primaryUser);
     }
 
