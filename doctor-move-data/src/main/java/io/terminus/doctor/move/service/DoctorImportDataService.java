@@ -501,12 +501,12 @@ public class DoctorImportDataService {
         userProfile.setRealName(realName);
         userProfileDao.update(userProfile);
 
-        // 给公司账号关联猪场 （陈娟 2018-08-30）
-        Sub sub = subDao.findByUserId(userId);
-        Sub updateSub=new Sub();
-        updateSub.setId(sub.getId());
-        updateSub.setFarmId(farm.getId());
-        subDao.update(updateSub);
+//        // 给公司账号关联猪场 （陈娟 2018-08-30）
+//        Sub sub = subDao.findByUserId(userId);
+//        Sub updateSub=new Sub();
+//        updateSub.setId(sub.getId());
+//        updateSub.setFarmId(farm.getId());
+//        subDao.update(updateSub);
 
         // 在员工表里面添加数据
         DoctorStaff doctorStaff = doctorStaffDao.findByFarmIdAndUserId(user.getId(), farm.getId());
