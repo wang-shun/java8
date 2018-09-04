@@ -128,20 +128,20 @@ public class UserInterfaceManager {
         Long userId = user.getId();
 
         //猪场管理员
-//        PrimaryUser primaryUser = new PrimaryUser();
-//        primaryUser.setUserId(userId);
-//        //暂时暂定手机号
-//        primaryUser.setUserName(user.getMobile());
-//        primaryUser.setStatus(UserStatus.NORMAL.value());
-//        primaryUserDao.create(primaryUser);
+        PrimaryUser primaryUser = new PrimaryUser();
+        primaryUser.setUserId(userId);
+        //暂时暂定手机号
+        primaryUser.setUserName(user.getMobile());
+        primaryUser.setStatus(UserStatus.NORMAL.value());
+        primaryUserDao.create(primaryUser);
 
-        Sub sub=new Sub();
-        sub.setUserId(userId);
-        sub.setUserName(user.getName());
-        sub.setContact(user.getMobile());
-        sub.setUserType(2);
-        sub.setStatus(UserStatus.NORMAL.value());
-        subDao.create(sub);
+//        Sub sub=new Sub();
+//        sub.setUserId(userId);
+//        sub.setUserName(user.getName());
+//        sub.setContact(user.getMobile());
+//        sub.setUserType(2);
+//        sub.setStatus(UserStatus.NORMAL.value());
+//        subDao.create(sub);
 
         //用户个人信息
         UserProfile userProfile = new UserProfile();

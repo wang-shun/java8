@@ -115,27 +115,27 @@ public class DoctorUserManager {
                 // 卖家
             }
         } else if (Objects.equals(user.getType(), UserType.FARM_ADMIN_PRIMARY.value())) {
-//            //猪场管理员
-//            PrimaryUser primaryUser = new PrimaryUser();
-//            primaryUser.setUserId(userId);
-//            //暂时暂定手机号
-//            primaryUser.setUserName(user.getMobile());
-//            String realName = user.getName();
-//            if (notNull(user.getExtra()) && user.getExtra().containsKey("realName")) {
-//                realName = Params.get(user.getExtra(), "realName");
-//            }
-//            primaryUser.setRealName(realName);
-//            primaryUser.setStatus(UserStatus.NORMAL.value());
-//            primaryUserDao.create(primaryUser);
+            //猪场管理员
+            PrimaryUser primaryUser = new PrimaryUser();
+            primaryUser.setUserId(userId);
+            //暂时暂定手机号
+            primaryUser.setUserName(user.getMobile());
+            String realName = user.getName();
+            if (notNull(user.getExtra()) && user.getExtra().containsKey("realName")) {
+                realName = Params.get(user.getExtra(), "realName");
+            }
+            primaryUser.setRealName(realName);
+            primaryUser.setStatus(UserStatus.NORMAL.value());
+            primaryUserDao.create(primaryUser);
 
-            Sub sub=new Sub();
-            sub.setUserId(userId);
-            sub.setUserName(user.getName());
-            sub.setRealName(Params.get(user.getExtra(), "realName"));
-            sub.setContact(Params.get(user.getExtra(), "contact"));
-            sub.setUserType(2);
-            sub.setStatus(UserStatus.NORMAL.value());
-            subDao.create(sub);
+//            Sub sub=new Sub();
+//            sub.setUserId(userId);
+//            sub.setUserName(user.getName());
+//            sub.setRealName(Params.get(user.getExtra(), "realName"));
+//            sub.setContact(Params.get(user.getExtra(), "contact"));
+//            sub.setUserType(2);
+//            sub.setStatus(UserStatus.NORMAL.value());
+//            subDao.create(sub);
 
             //用户个人信息
             UserProfile userProfile = new UserProfile();
@@ -283,25 +283,25 @@ public class DoctorUserManager {
 
     private void createPrimaryUser(User user) {
         //猪场管理员
-//        PrimaryUser primaryUser = new PrimaryUser();
-//        primaryUser.setUserId(user.getId());
-//        //暂时暂定手机号
-//        primaryUser.setUserName(user.getMobile());
-//        String realName = user.getName();
-//        if (notNull(user.getExtra()) && user.getExtra().containsKey("realName")) {
-//            realName = Params.get(user.getExtra(), "realName");
-//        }
-//        primaryUser.setRealName(realName);
-//        primaryUser.setStatus(UserStatus.NORMAL.value());
-//        primaryUserDao.create(primaryUser);
-        Sub sub=new Sub();
-        sub.setUserId(user.getId());
-        sub.setUserName(user.getName());
-        sub.setRealName(Params.get(user.getExtra(), "realName"));
-        sub.setContact(Params.get(user.getExtra(), "contact"));
-        sub.setUserType(2);
-        sub.setStatus(UserStatus.NORMAL.value());
-        subDao.create(sub);
+        PrimaryUser primaryUser = new PrimaryUser();
+        primaryUser.setUserId(user.getId());
+        //暂时暂定手机号
+        primaryUser.setUserName(user.getMobile());
+        String realName = user.getName();
+        if (notNull(user.getExtra()) && user.getExtra().containsKey("realName")) {
+            realName = Params.get(user.getExtra(), "realName");
+        }
+        primaryUser.setRealName(realName);
+        primaryUser.setStatus(UserStatus.NORMAL.value());
+        primaryUserDao.create(primaryUser);
+//        Sub sub=new Sub();
+//        sub.setUserId(user.getId());
+//        sub.setUserName(user.getName());
+//        sub.setRealName(Params.get(user.getExtra(), "realName"));
+//        sub.setContact(Params.get(user.getExtra(), "contact"));
+//        sub.setUserType(2);
+//        sub.setStatus(UserStatus.NORMAL.value());
+//        subDao.create(sub);
     }
 
     @Transactional
