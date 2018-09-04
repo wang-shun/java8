@@ -473,6 +473,7 @@ public class Users {
         map.put("data",data);
         map.put("userType",userType);
         map.put("groupId",groupId);
+        log.error("================data"+data);
         return map;
     }
 
