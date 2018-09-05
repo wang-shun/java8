@@ -1161,4 +1161,9 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         return this.sqlSession.selectOne(this.sqlId("findStaffName"), map);
     }
 
+    // 事件中心-比如配种事件、转舍事件，当前状态不应该显示空怀，是返情就显示返情 （陈娟 2018-09-05）
+    public DoctorPigEvent getKongHuaiStatus(Long pigId) {
+        return getSqlSession().selectOne(sqlId("getKongHuaiStatus"), pigId);
+    }
+
 }

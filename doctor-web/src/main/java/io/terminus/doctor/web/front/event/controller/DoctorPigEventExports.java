@@ -6,13 +6,11 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.common.utils.BeanMapper;
-import io.terminus.common.utils.JsonMapper;
-import io.terminus.common.utils.NumberUtils;
-import io.terminus.common.utils.Splitters;
+import io.terminus.common.utils.*;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -383,6 +381,21 @@ public class DoctorPigEventExports {
         }).collect(toList());
         return new Paging<>(pigEventPaging.getTotal(), list);
     }
+
+    /**
+     * 获取已配种天数
+     * @param pregCheckEvent 妊娠检查事件
+     * @return 已配种天数
+     */
+    private Integer getMatingDay(DoctorPigEvent pregCheckEvent) {
+        DoctorPigEvent firstMatingEvent = RespHelper.orServEx(doctorPigEventReadService
+                .findFirstMatingBeforePregCheck(pregCheckEvent.getPigId(), pregCheckEvent.getParity(), pregCheckEvent.getId()));
+        if (Arguments.isNull(firstMatingEvent)) {
+            return 0;
+        }
+        return DateUtil.getDeltaDays(firstMatingEvent.getEventAt(), pregCheckEvent.getEventAt());
+    }
+
     /**
      *检查
      */
@@ -396,6 +409,7 @@ public class DoctorPigEventExports {
                 dto.setPigCode(doctorPigEventDetail.getPigCode());
                 dto.setParity(doctorPigEventDetail.getParity());
                 dto.setBarnName(doctorPigEventDetail.getBarnName());
+                dto.setMatingDay(getMatingDay(doctorPigEventDetail));
                 dto.setOperatorName(doctorPigEventDetail.getOperatorName());
                 dto.setBarnName(doctorPigEventDetail.getBarnName());
                 if (doctorPigEventDetail.getPregCheckResult() != null) {

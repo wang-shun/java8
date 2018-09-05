@@ -2311,4 +2311,10 @@
         <if test="barnId != null"> and id = #{barnId} </if>
     </select>
 
+    <!-- 事件中心-比如配种事件、转舍事件，当前状态不应该显示空怀，是返情就显示返情 （陈娟 2018-09-05）-->
+    <select id="getKongHuaiStatus" parameterType="Long" resultMap="DoctorPigEventMap">
+      select * from doctor_pig_events
+      where pig_id = #{pigId} and type = 11 AND status = 1 ORDER BY event_at desc,id desc limit 1
+    </select>
+
 </mapper>
