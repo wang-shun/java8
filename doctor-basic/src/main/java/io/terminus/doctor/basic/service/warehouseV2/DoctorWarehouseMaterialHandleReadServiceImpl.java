@@ -234,8 +234,6 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
     @Override
     public ResponseUtil<List<List<Map>>> companyReport(Map<String, Object> criteria) {
-
-
         List<List<Map>> resultList = Lists.newArrayList();
         //查公司名下所有猪场
         List<Map<String,Object>> farms = this.doctorWarehouseMaterialHandleDao.selectFarmsByOrgId((Long)criteria.get("orgId"));
@@ -244,11 +242,9 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         farms.forEach(stringObjectMap -> {
             ids.add((Long)stringObjectMap.get("id"));
         });
-
         Date maxTime = this.doctorWarehouseMaterialHandleDao.findMinTimeByFarmId(ids);
         if(maxTime==null)
             return ResponseUtil.isOk(resultList,farms);
-
         try {
             criteria = this.getMonth(criteria);
             int count =(int)criteria.get("count");
@@ -262,41 +258,6 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
                 }
                 criteria.put("settlementDate", DateUtil.toDate(startYear + "-" + startMonth + "-01"));
 
-                /*Date date=null;
-                if(criteria.get("settlementDate")==null) {
-                    date = new Date();
-                    criteria.put("settlementDate", date);
-                }else {
-                    String settlementDate = (String)criteria.get("settlementDate");
-                    SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM");
-                    date  = sdf.parse(settlementDate);
-                    criteria.put("settlementDate",date);
-                }
-                //取上个月
-                Date lastDate = null;
-                if (date != null) {
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(date);
-                    calendar.add(Calendar.MONTH, -1);
-                    lastDate = calendar.getTime();
-                }
-
-                //判断本月是否结算，如果本月已结算，上月肯定已结算（0：未结算，1：已结算）
-                boolean b = doctorWarehouseSettlementService.isSettled((Long)criteria.get("orgId"), date);
-                if(b){
-                    criteria.put("flag",1);
-                    criteria.put("lastFlag",1);
-                }else{
-                    //判断上月是否结算
-                    boolean b2 = doctorWarehouseSettlementService.isSettled((Long)criteria.get("orgId"), lastDate);
-                    if(b2){
-                        criteria.put("flag",0);
-                        criteria.put("lastFlag",1);
-                    }else{
-                        criteria.put("flag",0);
-                        criteria.put("lastFlag",0);
-                    }
-                }*/
                 List<Map> lists = doctorWarehouseMaterialHandleDao.listByFarmIdTime(criteria);
                 Date time = (Date) criteria.get("settlementDate");
 //                if (time.getTime() < System.currentTimeMillis()&&time.getTime()>maxTime.getTime()) {
@@ -382,7 +343,6 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
     @Override
     public ResponseUtil<List<List<Map>>> warehouseReport(Map<String, Object> criteria) {
-
         //查猪场名下仓库
         List<Map<String,Object>> farms = doctorWareHouseDao.findMapByFarmId((Long) criteria.get("farmId"));
 
