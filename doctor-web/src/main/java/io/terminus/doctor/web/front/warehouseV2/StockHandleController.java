@@ -789,6 +789,8 @@ public class StockHandleController {
 
                         BigDecimal totalQuantity = new BigDecimal(0);
                         BigDecimal inventoryQuantity = new BigDecimal(0);
+                        double totalUnitPrice = 0L;
+
                         for (StockHandleExportVo vo : exportVos) {
 
                             Row row = sheet.createRow(pos++);
@@ -815,6 +817,7 @@ public class StockHandleController {
 
                             totalQuantity = vo.getQuantity();
                             inventoryQuantity = vo.getBeforeInventoryQuantity();
+                            totalUnitPrice += vo.getUnitPrice();
                         }
 
                         Row countRow = sheet.createRow(pos);
@@ -831,6 +834,12 @@ public class StockHandleController {
                         countCell.setCellValue("盘点：盘亏");
 
                         countRow.createCell(6).setCellValue(inventoryQuantity.subtract(totalQuantity).doubleValue());
+
+                        if(totalUnitPrice==0.0){
+                            countRow.createCell(7).setCellValue("--");
+                        }else{
+                            countRow.createCell(7).setCellValue(totalUnitPrice);
+                        }
                         pos++;
 
                     }
