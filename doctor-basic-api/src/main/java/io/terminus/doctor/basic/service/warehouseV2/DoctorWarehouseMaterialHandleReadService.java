@@ -22,11 +22,6 @@ import java.util.List;
  */
 public interface DoctorWarehouseMaterialHandleReadService {
 
-    // 结算误差（陈娟 2018-8-21）
-    Boolean getErrorAmount(Long warehouseId,Long materialId,Date settlementDate);
-
-    Response<DoctorWarehouseMaterialHandle> getLastDocument(Long warehouseId, Long materialId,Date settlementDate);
-
     //盘盈的时候得到最近一次的采购单价
     Response<BigDecimal> getPDPrice(Long warehouseId,Long materialId,String handleDate);
 

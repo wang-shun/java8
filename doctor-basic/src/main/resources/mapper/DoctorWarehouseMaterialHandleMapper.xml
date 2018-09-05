@@ -620,11 +620,8 @@
 
     <!-- 得到所有的物料 -->
     <select id="getMeterails" parameterType="Map" resultType="java.util.LinkedHashMap">
-        select distinct material_id from doctor_warehouse_material_handle
-        where delete_flag = 1
-        <if test="orgId != null">
-            and org_id=#{orgId}
-        </if>
+        select distinct material_name from doctor_warehouse_material_handle
+        where delete_flag=1
         <if test="farmId != null">
             and farm_id=#{farmId}
         </if>
@@ -633,9 +630,6 @@
         </if>
         <if test="warehouseId != null">
             and warehouse_id=#{warehouseId}
-        </if>
-        <if test="materialName != null">
-            and material_name like CONCAT('%',#{materialName},'%')
         </if>
         order by id
     </select>
@@ -679,7 +673,9 @@
         <if test="warehouseId != null">
             and a.warehouse_id=#{warehouseId}
         </if>
-        and a.material_id = #{materialId}
+        <if test="materialName != null">
+            and b.`name` like CONCAT('%',#{materialName},'%')
+        </if>
     </select>
 
     <select id="wlbdReport" parameterType="Map" resultType="java.util.LinkedHashMap">
@@ -696,16 +692,10 @@
         then ifnull(b.quantity,0) else '' end as rksl,
         case when
         b.type in (1,7,9,11)
-        then ifnull(b.unit_price,0) else '' end as rkdj,
-        case when
-        b.type in (1,7,9,11)
         then ifnull(b.amount,0) else '' end as rkje,
         case when
         b.type in (2,8,10,12,13)
         then ifnull(b.quantity,0) else '' end as cksl,
-        case when
-        b.type in (2,8,10,12,13)
-        then ifnull(b.unit_price,0) else '' end as ckdj,
         case when
         b.type in (2,8,10,12,13)
         then ifnull(b.amount,0) else '' end as ckje,
@@ -746,7 +736,9 @@
         <if test="warehouseId != null">
             and b.warehouse_id=#{warehouseId}
         </if>
-        and d.id = #{materialId}
+        <if test="materialName != null and ''!=materialName ">
+            and d.`name` like CONCAT('%',#{materialName},'%')
+        </if>
         <if test="type != null and ''!=type">
             and d.type=#{type}
         </if>
