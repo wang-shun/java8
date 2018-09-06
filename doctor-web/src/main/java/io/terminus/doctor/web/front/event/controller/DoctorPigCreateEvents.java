@@ -631,7 +631,7 @@ public class DoctorPigCreateEvents {
             expectTrue(notEmpty((String) map.get("pigId")), "pig.id.not.null");
         }
         Long realPigId = pigId !=null?pigId:Long.parseLong((String) map.get("pigId"));
-
+        log.error("========================realPigId="+realPigId);
         DoctorPig doctorPig = RespHelper.or500(doctorPigReadService.findPigById(realPigId));
         expectTrue(notNull(doctorPig), "pig.not.null", realPigId);
 
