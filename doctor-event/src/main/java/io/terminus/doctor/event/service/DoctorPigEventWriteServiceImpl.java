@@ -113,7 +113,10 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     public Response<Boolean> createPigEvent(DoctorPigEvent doctorPigEvent) {
         try {
             //通知物联网接口(孔景军)
-            if(doctorPigEvent.getType() == TO_MATING.getKey()){
+            /*
+            当母猪状态变更为进场、哺乳，配种、断奶、妊娠检查阴性、妊娠检查返情、妊娠检查流产时，需调用物联网提供的接口，以此通知网联网。
+             */
+            if(doctorPigEvent.getType() == MATING.getKey()){
                 Map<String,String> param = Maps.newHashMap();
                 param.put("pigId",doctorPigEvent.getPigId().toString());
                 param.put("newStatus","3");
@@ -164,6 +167,15 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
                 params.put("pigId",doctorPigEvent.getPigId().toString());
                 params.put("newStatus","53");
                 new PostRequest().postRequest("https://iot-test.xrnm.com/api/iot/pig/sow-status-change",params);
+            }
+            /*
+            当母猪发生转舍、离场、销售、离场事件时，需调用物联网提供的接口，以此通知物联网。
+             */
+            if(doctorPigEvent.getType() == CHG_LOCATION.getKey() || doctorPigEvent.getType() == TO_PREG.getKey() || doctorPigEvent.getType() == TO_MATING.getKey()
+                    || doctorPigEvent.getType() == TO_FARROWING.getKey()  || doctorPigEvent.getType() == REMOVAL.getKey()  || (doctorPigEvent.getType() == PIGLETS_CHG.getKey() && doctorPigEvent.getChangeTypeId()==109) ){
+                Map<String,String> params = Maps.newHashMap();
+                params.put("pigId",doctorPigEvent.getPigId().toString());
+                new PostRequest().postRequest("https://iot-test.xrnm.com/api/iot/pig/sow-leaving",params);
             }
             return Response.ok(doctorPigEventDao.create(doctorPigEvent));
         } catch (Exception e) {
