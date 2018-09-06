@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -53,24 +52,6 @@ public class SettlementController {
         return doctorWarehouseSettlementService.getSettlementDate(new Date());
     }
 
-
-    //金额误差 （陈娟 2018-8-21）
-    @RequestMapping(method = RequestMethod.GET, value = "/getErrorAmount")
-    public Boolean getErrorAmount(@RequestParam Long warehouseId,
-                                          @RequestParam Long materialId,
-                                          @DateTimeFormat(pattern = "yyyy-MM-dd")
-                                          @RequestParam Date settlementDate){
-        return doctorWarehouseMaterialHandleReadService.getErrorAmount(warehouseId, materialId, settlementDate);
-    }
-
-    //得到最后一笔单据
-    @RequestMapping(method = RequestMethod.GET, value = "/getLastDocument")
-    public DoctorWarehouseMaterialHandle getLastDocument(@RequestParam Long warehouseId,
-                                                         @RequestParam Long materialId,
-                                                         @DateTimeFormat(pattern = "yyyy-MM")
-                                                         @RequestParam Date settlementDate){
-        return RespHelper.or500(doctorWarehouseMaterialHandleReadService.getLastDocument(warehouseId, materialId,settlementDate));
-    }
 
     //得到该公司第一笔单据的会计年月，用来结算的时候做判断
     @RequestMapping(method = RequestMethod.GET, value = "/findSettlementDate")
