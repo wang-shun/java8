@@ -842,7 +842,12 @@ public class StockHandleController {
                         }else{
                             countRow.createCell(7).setCellValue(totalUnitPrice);
                         }
-                        countRow.createCell(8).setCellValue(totalAmount);
+
+                        if(totalAmount==0.0){
+                            countRow.createCell(8).setCellValue("--");
+                        }else{
+                            countRow.createCell(8).setCellValue(totalAmount);
+                        }
                         pos++;
 
                     }
@@ -860,6 +865,9 @@ public class StockHandleController {
                     title.createCell(9).setCellValue("单价");
                     title.createCell(10).setCellValue("金额（元）");
                     title.createCell(11).setCellValue("备注");
+
+                    BigDecimal totalQuantity = new BigDecimal(0);
+                    double totalAmount = 0L;
 
                     for (StockHandleExportVo vo : exportVos) {
                         Row row = sheet.createRow(pos++);
@@ -886,7 +894,31 @@ public class StockHandleController {
                         }
 
                         row.createCell(11).setCellValue(vo.getRemark());
+
+                        totalQuantity = totalQuantity.add(vo.getQuantity());
+                        totalAmount += vo.getAmount();
                     }
+                    Row countRow = sheet.createRow(pos);
+                    //表格范围
+                    CellRangeAddress countRange = new CellRangeAddress(pos, pos, 0, 5);
+                    //合并区域
+                    sheet.addMergedRegion(countRange);
+
+                    Cell countCell = countRow.createCell(0);
+                    CellStyle style = workbook.createCellStyle();
+                    //对齐
+                    style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                    countCell.setCellStyle(style);
+                    countCell.setCellValue("调拨出库");
+
+                    countRow.createCell(8).setCellValue(totalQuantity.doubleValue());
+
+                    if(totalAmount==0.0){
+                        countRow.createCell(10).setCellValue("--");
+                    }else{
+                        countRow.createCell(10).setCellValue(totalAmount);
+                    }
+
                 }
                 //调拨入库
                 else if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.TRANSFER_IN.getValue())) {
@@ -899,6 +931,9 @@ public class StockHandleController {
                     title.createCell(6).setCellValue("单价");
                     title.createCell(7).setCellValue("金额（元）");
                     title.createCell(8).setCellValue("备注");
+
+                    BigDecimal totalQuantity = new BigDecimal(0);
+                    double totalAmount = 0L;
 
                     for (StockHandleExportVo vo : exportVos) {
                         Row row = sheet.createRow(pos++);
@@ -921,7 +956,27 @@ public class StockHandleController {
                            row.createCell(7).setCellValue(vo.getAmount());
                        }
                         row.createCell(8).setCellValue(vo.getRemark());
+
+                        totalQuantity = totalQuantity.add(vo.getQuantity());
+                        totalAmount += vo.getAmount();
                     }
+
+                    Row countRow = sheet.createRow(pos);
+                    //表格范围
+                    CellRangeAddress countRange = new CellRangeAddress(pos, pos, 0, 5);
+                    //合并区域
+                    sheet.addMergedRegion(countRange);
+
+                    Cell countCell = countRow.createCell(0);
+                    CellStyle style = workbook.createCellStyle();
+                    //对齐
+                    style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                    countCell.setCellStyle(style);
+                    countCell.setCellValue("调拨入库");
+
+                    countRow.createCell(5).setCellValue(totalQuantity.doubleValue());
+
+                    countRow.createCell(7).setCellValue(totalAmount);
                 }
                 //配方生成出库
                 else if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.FORMULA_OUT.getValue())) {
