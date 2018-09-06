@@ -256,7 +256,7 @@
             ifnull(round((temp4.outQuantity+ 0.00000001),3),0) as outQuantity,
             ifnull(round((temp4.outAmount+ 0.00000001),2),0) as outAmount,
             round((ifnull(temp1.lastQuantity,0)+ifnull(temp3.inQuantity,0)-ifnull(temp4.outQuantity,0)+ 0.00000001),3) as balanceQuantity,
-            round((ifnull(temp1.lastAmount,0)+ifnull(temp3.inAmount,0)-ifnull(temp4.outAmount,0)+ 0.00000001),2),0) as balanceAmount
+            round((ifnull(temp1.lastAmount,0)+ifnull(temp3.inAmount,0)-ifnull(temp4.outAmount,0)+ 0.00000001),2) as balanceAmount
 
             from doctor_warehouse_material_handle a
             join doctor_warehouse_sku b on a.material_id=b.id
@@ -265,7 +265,7 @@
             left join (select m.material_id,sum(m.balance_amount) as lastAmount,sum(m.balance_quantity) as lastQuantity
             from doctor_warehouse_stock_monthly m
             where date_format(m.settlement_date,'%Y-%m')=date_format(DATE_SUB(#{settlementDate}, INTERVAL 1 MONTH),'%Y-%m')
-            and m.warehouse_id = #{warehouseId , jdbcType=VARCHAR}
+            and m.warehouse_id = #{warehouseId}
             GROUP BY m.material_id
             ) temp1 on a.material_id = temp1.material_id
 
@@ -274,7 +274,7 @@
                 when '11' then amount end	),0) as inAmount,
                 ifnull(sum(case type	when '1' then quantity 	when '7' then quantity	 when '9' then quantity
                 when '11' then quantity end	),0) as inQuantity FROM doctor_warehouse_material_handle
-                WHERE warehouse_id = #{warehouseId , jdbcType=VARCHAR} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate ,jdbcType=VARCHAR},'%Y-%m') AND delete_flag=1
+                WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
                 group by material_id
                 )temp3 on a.material_id = temp3.material_id
 
@@ -283,7 +283,7 @@
                 when '12' then amount	when '13' then amount end	),0) as outAmount,
                 ifnull(sum(case type	when '2' then quantity	 when '8' then quantity	when '10' then quantity
                 when '12' then quantity	when '13' then quantity end	),0) as outQuantity,warehouse_id FROM doctor_warehouse_material_handle
-                WHERE warehouse_id = #{warehouseId , jdbcType=VARCHAR} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate ,jdbcType=VARCHAR},'%Y-%m') AND delete_flag=1
+                WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
                 group by material_id
             )temp4 on a.material_id = temp4.material_id
 
@@ -320,7 +320,7 @@
             left join (select m.material_id,sum(m.balance_amount) as lastAmount,sum(m.balance_quantity) as lastQuantity
             from doctor_warehouse_stock_monthly m
             where date_format(m.settlement_date,'%Y-%m')=date_format(DATE_SUB(#{settlementDate}, INTERVAL 1 MONTH),'%Y-%m')
-            and m.warehouse_id=#{warehouseId , jdbcType=VARCHAR}
+            and m.warehouse_id=#{warehouseId}
             GROUP BY m.material_id
             ) temp1 on a.material_id = temp1.material_id
 
@@ -329,7 +329,7 @@
             when '11' then amount end	),0) as inAmount,
             ifnull(sum(case type	when '1' then quantity 	when '7' then quantity	 when '9' then quantity
             when '11' then quantity end	),0) as inQuantity FROM doctor_warehouse_material_handle
-            WHERE warehouse_id = #{warehouseId , jdbcType=VARCHAR} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate ,jdbcType=VARCHAR},'%Y-%m') AND delete_flag=1
+            WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
             group by material_id
             )temp3 on a.material_id = temp3.material_id
 
@@ -338,7 +338,7 @@
             when '12' then amount	when '13' then amount end	),0) as outAmount,
             ifnull(sum(case type	when '2' then quantity	 when '8' then quantity	when '10' then quantity
             when '12' then quantity	when '13' then quantity end	),0) as outQuantity,warehouse_id FROM doctor_warehouse_material_handle
-            WHERE warehouse_id = #{warehouseId , jdbcType=VARCHAR} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate ,jdbcType=VARCHAR},'%Y-%m') AND delete_flag=1
+            WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
             group by material_id
             )temp4 on a.material_id = temp4.material_id
 
@@ -375,7 +375,7 @@
             left join (select m.material_id,sum(m.balance_amount) as lastAmount,sum(m.balance_quantity) as lastQuantity
             from doctor_warehouse_stock_monthly m
             where date_format(m.settlement_date,'%Y-%m')=date_format(DATE_SUB(#{settlementDate}, INTERVAL 1 MONTH),'%Y-%m')
-            and m.warehouse_id=#{warehouseId , jdbcType=VARCHAR}
+            and m.warehouse_id=#{warehouseId}
             GROUP BY m.material_id
             ) temp1 on a.material_id = temp1.material_id
 
@@ -384,7 +384,7 @@
             when '11' then amount end	),0) as inAmount,
             ifnull(sum(case type	when '1' then quantity 	when '7' then quantity	 when '9' then quantity
             when '11' then quantity end	),0) as inQuantity FROM doctor_warehouse_material_handle
-            WHERE warehouse_id = #{warehouseId , jdbcType=VARCHAR} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
+            WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
             group by material_id
             )temp3 on a.material_id = temp3.material_id
 
@@ -393,7 +393,7 @@
             when '12' then amount	when '13' then amount end	),0) as outAmount,
             ifnull(sum(case type	when '2' then quantity	 when '8' then quantity	when '10' then quantity
             when '12' then quantity	when '13' then quantity end	),0) as outQuantity,warehouse_id FROM doctor_warehouse_material_handle
-            WHERE warehouse_id = #{warehouseId , jdbcType=VARCHAR} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate ,jdbcType=VARCHAR},'%Y-%m') AND delete_flag=1
+            WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
             group by material_id
             )temp4 on a.material_id = temp4.material_id
 
