@@ -383,12 +383,15 @@ public class StockHandleController {
         }
 
         BigDecimal totalQuantity = new BigDecimal(0);
+        double totalAmount = 0L;
         BigDecimal totalUnitPrice = new BigDecimal(0);
         for (StockHandleVo.Detail detail : vo.getDetails()) {
             totalQuantity = totalQuantity.add(detail.getQuantity());
+            totalAmount += detail.getAmount().doubleValue();
             totalUnitPrice = totalUnitPrice.add(null == detail.getUnitPrice() ? new BigDecimal(0) : detail.getUnitPrice());
         }
         vo.setTotalQuantity(totalQuantity.doubleValue());
+        vo.setTotalAmount(totalAmount);
         vo.setTotalAmount(totalQuantity.multiply(totalUnitPrice).doubleValue());
 
         return vo;
@@ -909,7 +912,7 @@ public class StockHandleController {
                     //对齐
                     style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
                     countCell.setCellStyle(style);
-                    countCell.setCellValue("调拨出库");
+                    countCell.setCellValue("合计：");
 
                     countRow.createCell(8).setCellValue(totalQuantity.doubleValue());
 
@@ -918,7 +921,7 @@ public class StockHandleController {
                     }else{
                         countRow.createCell(10).setCellValue(totalAmount);
                     }
-
+                    pos++;
                 }
                 //调拨入库
                 else if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.TRANSFER_IN.getValue())) {
@@ -972,11 +975,12 @@ public class StockHandleController {
                     //对齐
                     style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
                     countCell.setCellStyle(style);
-                    countCell.setCellValue("调拨入库");
+                    countCell.setCellValue("合计");
 
                     countRow.createCell(5).setCellValue(totalQuantity.doubleValue());
-
                     countRow.createCell(7).setCellValue(totalAmount);
+
+                    pos++;
                 }
                 //配方生成出库
                 else if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.FORMULA_OUT.getValue())) {
@@ -1012,6 +1016,7 @@ public class StockHandleController {
                         }
                         row.createCell(8).setCellValue(vo.getRemark());
                     }
+
                 }
                 //配方生产入库
                 else if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.FORMULA_IN.getValue())) {
