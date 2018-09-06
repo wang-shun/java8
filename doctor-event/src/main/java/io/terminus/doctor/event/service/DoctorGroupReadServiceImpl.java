@@ -383,6 +383,16 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
+    public Response<List<DoctorGroupEvent>> getGroupEventsByCriteria(Map<String, Object> criteria) {
+        try {
+            return Response.ok(doctorGroupEventDao.list(criteria));
+        } catch (Exception e) {
+            log.error("query.group.events.by.criteria.failed, cause {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("query.group.events.by.criteria.failed");
+        }
+    }
+
+    @Override
     public Response<Boolean> isLastEvent(Long groupId, Long eventId) {
         try {
             DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventByGroupId(groupId);

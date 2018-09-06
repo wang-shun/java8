@@ -518,8 +518,21 @@ public class DoctorPigEvents {
                     detail.setIsRollback(isRollback);
                     return detail;
                 }).collect(toList());
-        DoctorGroupEventDetail detail = this.aggregatedPigs(pagingResponse.getResult().getData());
-        groupEventDetailList.add(detail);
+        // 合计：不用每页显示合计，根据筛选条件出来的所有数据最后一条显示合计 （陈娟 2018-09-06）
+        Long total = pagingResponse.getResult().getTotal();
+        if(pageNo==null){
+            if(total<=20){
+                List<DoctorGroupEvent> doctorGroupEvents = RespHelper.or500(doctorGroupReadService.getGroupEventsByCriteria(params));
+                DoctorGroupEventDetail detail = this.aggregatedPigs(doctorGroupEvents);
+                groupEventDetailList.add(detail);
+            }
+        }else{
+            if(total<=pageNo*pageSize){
+                List<DoctorGroupEvent> doctorGroupEvents = RespHelper.or500(doctorGroupReadService.getGroupEventsByCriteria(params));
+                DoctorGroupEventDetail detail = this.aggregatedPigs(doctorGroupEvents);
+                groupEventDetailList.add(detail);
+            }
+        }
         return new Paging<>(pagingResponse.getResult().getTotal(), groupEventDetailList);
     }
 
