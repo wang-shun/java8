@@ -316,5 +316,6 @@ public interface DoctorPigEventReadService {
 
     Response<Date> findFarmSowEventAt(Long pigId, Long farmId);
 
+    Response<DoctorPigEvent> getKongHuaiStatus(Long pigId);
 
 }

@@ -150,7 +150,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                     log.warn("no balance found for warehouse:{},material:{},init amount to 0,quantity to 0", materialHandle.getWarehouseId(), materialHandle.getMaterialId());
                     lastSettlementBalance = new AmountAndQuantityDto();
                 } else {
-                    log.debug("start calc unit price for material {},history amount {},history quantity {}", materialHandle.getId(), lastSettlementBalance.getAmount(), lastSettlementBalance.getQuantity());
+                    log.error("start calc unit price for material {},history amount {},history quantity {}", materialHandle.getId(), lastSettlementBalance.getAmount(), lastSettlementBalance.getQuantity());
                 }
 
                 AmountAndQuantityDto newHistoryBalance = CalcUnitPrice(materialHandle,
@@ -216,7 +216,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 
             warehouseMaterialHandleMap.forEach((warehouseId, warehouseMaterialHandles) -> {
                 warehouseMaterialHandles.stream().collect(Collectors.groupingBy(DoctorWarehouseMaterialHandle::getMaterialId)).forEach((sku, skuMaterialHandles) -> {
-                    log.debug("start record warehouse {},sku {}", warehouseId, sku);
+                    log.error("start record warehouse {},sku {}", warehouseId, sku);
 
                     //上一个会计年月的余额和余量
                     DoctorWarehouseStockMonthly balance = doctorWarehouseStockMonthlyDao.findBalanceBySettlementDate(warehouseId, sku, DateUtils.addMonths(settlementDate, -1));
@@ -305,7 +305,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
     private AmountAndQuantityDto CalcUnitPrice(DoctorWarehouseMaterialHandle materialHandle,
                                                AmountAndQuantityDto historyBalance,
                                                Map<Long, DoctorWarehouseMaterialHandle> settlementMaterialHandles) {
-        log.debug("settlement for material handle {},material {},warehouse {},quantity {}",
+        log.error("settlement for material handle {},material {},warehouse {},quantity {}",
                 materialHandle.getId(),
                 materialHandle.getMaterialId(),
                 materialHandle.getWarehouseId(),
@@ -326,7 +326,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                 //获取上一笔采购入库单
                 DoctorWarehouseMaterialHandle previousIn = doctorWarehouseMaterialHandleDao.findPrevious(materialHandle, WarehouseMaterialHandleType.IN);
                 if (null != previousIn) {
-                    log.debug("use previous material handle[purchase in] unit price :{}", previousIn.getUnitPrice());
+                    log.error("use previous material handle[purchase in] unit price :{}", previousIn.getUnitPrice());
                     materialHandle.setUnitPrice(previousIn.getUnitPrice().setScale(4,BigDecimal.ROUND_HALF_UP));
                 } else {
                     log.info("previous in not found,use user set unit price :{}", materialHandle.getUnitPrice());
@@ -371,7 +371,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             historyStockAmount = historyStockAmount.add(new BigDecimal(materialHandle.getUnitPrice().toString()).multiply(materialHandle.getQuantity()));
         } else {
             //出库类型：领料出库，盘亏出库，调拨出库，配方生产出库
-            log.debug("material handle:{},history amount:{},history quantity:{}", materialHandle.getId(), historyStockAmount, historyStockQuantity);
+            log.error("material handle:{},history amount:{},history quantity:{}", materialHandle.getId(), historyStockAmount, historyStockQuantity);
             if (historyStockAmount.compareTo(new BigDecimal("0")) <= 0 || historyStockQuantity.compareTo(new BigDecimal("0")) <= 0) {
                 log.error("history amount or quantity is small then zero,can not settlement for material handle:{}", materialHandle.getId());
                 throw new InvalidException("settlement.history.quantity.amount.zero");

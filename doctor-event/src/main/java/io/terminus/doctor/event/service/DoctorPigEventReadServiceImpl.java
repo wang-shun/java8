@@ -632,5 +632,9 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         }
     }
 
+    @Override
+    public Response<DoctorPigEvent> getKongHuaiStatus(Long pigId) {
+        return Response.ok(doctorPigEventDao.getKongHuaiStatus(pigId));
+    }
 
 }
