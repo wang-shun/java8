@@ -150,7 +150,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                     log.warn("no balance found for warehouse:{},material:{},init amount to 0,quantity to 0", materialHandle.getWarehouseId(), materialHandle.getMaterialId());
                     lastSettlementBalance = new AmountAndQuantityDto();
                 } else {
-                    log.error("start calc unit price for material {},history amount {},history quantity {}", materialHandle.getId(), lastSettlementBalance.getAmount(), lastSettlementBalance.getQuantity());
+                    log.debug("start calc unit price for material {},history amount {},history quantity {}", materialHandle.getId(), lastSettlementBalance.getAmount(), lastSettlementBalance.getQuantity());
                 }
 
                 AmountAndQuantityDto newHistoryBalance = CalcUnitPrice(materialHandle,
@@ -305,7 +305,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
     private AmountAndQuantityDto CalcUnitPrice(DoctorWarehouseMaterialHandle materialHandle,
                                                AmountAndQuantityDto historyBalance,
                                                Map<Long, DoctorWarehouseMaterialHandle> settlementMaterialHandles) {
-        log.error("settlement for material handle {},material {},warehouse {},quantity {}",
+        log.debug("settlement for material handle {},material {},warehouse {},quantity {}",
                 materialHandle.getId(),
                 materialHandle.getMaterialId(),
                 materialHandle.getWarehouseId(),
@@ -326,7 +326,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                 //获取上一笔采购入库单
                 DoctorWarehouseMaterialHandle previousIn = doctorWarehouseMaterialHandleDao.findPrevious(materialHandle, WarehouseMaterialHandleType.IN);
                 if (null != previousIn) {
-                    log.error("use previous material handle[purchase in] unit price :{}", previousIn.getUnitPrice());
+                    log.debug("use previous material handle[purchase in] unit price :{}", previousIn.getUnitPrice());
                     materialHandle.setUnitPrice(previousIn.getUnitPrice().setScale(4,BigDecimal.ROUND_HALF_UP));
                 } else {
                     log.info("previous in not found,use user set unit price :{}", materialHandle.getUnitPrice());
@@ -371,7 +371,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             historyStockAmount = historyStockAmount.add(new BigDecimal(materialHandle.getUnitPrice().toString()).multiply(materialHandle.getQuantity()));
         } else {
             //出库类型：领料出库，盘亏出库，调拨出库，配方生产出库
-            log.error("material handle:{},history amount:{},history quantity:{}", materialHandle.getId(), historyStockAmount, historyStockQuantity);
+            log.debug("material handle:{},history amount:{},history quantity:{}", materialHandle.getId(), historyStockAmount, historyStockQuantity);
             if (historyStockAmount.compareTo(new BigDecimal("0")) <= 0 || historyStockQuantity.compareTo(new BigDecimal("0")) <= 0) {
                 log.error("history amount or quantity is small then zero,can not settlement for material handle:{}", materialHandle.getId());
                 throw new InvalidException("settlement.history.quantity.amount.zero");
@@ -393,7 +393,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                     materialHandle.setUnitPrice(historyStockAmount.divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
             }
             if (materialHandle.getType().equals(WarehouseMaterialHandleType.OUT.getValue())) {
-                doctorWarehouseMaterialApplyDao.updateUnitPriceAndAmountByMaterialHandle(materialHandle.getId(), materialHandle.getUnitPrice(), materialHandle.getQuantity().multiply(materialHandle.getUnitPrice()));
+                doctorWarehouseMaterialApplyDao.updateUnitPriceAndAmountByMaterialHandle(materialHandle.getId(), materialHandle.getUnitPrice().setScale(4,BigDecimal.ROUND_HALF_UP), materialHandle.getQuantity().multiply(materialHandle.getUnitPrice()).setScale(2,BigDecimal.ROUND_HALF_UP));
             }
 
             historyStockQuantity = historyStockQuantity.subtract(materialHandle.getQuantity());
