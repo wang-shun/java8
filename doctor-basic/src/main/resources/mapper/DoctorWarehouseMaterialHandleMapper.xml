@@ -699,9 +699,9 @@
         case when
         b.type in (2,8,10,12,13)
         then ifnull(b.amount,0) else '' end as ckje,
-        ifnull(f.pig_barn_name,'') as pig_barn_name,
-        ifnull(f.pig_type,'') as pig_type,
-        ifnull(f.pig_group_name,'') as pig_group_name,
+        ifnull(fb.`name`,'') as pig_barn_name,
+        ifnull(fb.pig_type,'') as pig_type,
+        ifnull(fg.group_code,'') as pig_group_name,
         ifnull(f.apply_staff_name,'') as apply_staff_name,
         ifnull(c.`name`,'') as farm_name,
         ifnull(db.name,'') as unit,
@@ -718,6 +718,10 @@
         <if test="warehouseId != null">
             and f.warehouse_id=#{warehouseId}
         </if>
+        inner join doctor_barns as fb
+        on fb.id=f.pig_barn_id
+        inner join doctor_groups as fg
+        on fb.id=fg.current_barn_id
         join doctor_farms c
         on a.farm_id=c.id
         join doctor_warehouse_sku d
@@ -891,28 +895,6 @@
         <foreach collection="list" open="(" separator="," close=")" item="i">
             #{i}
         </foreach>
-    </select>
-
-    <!--结算误差（陈娟 2018-8-21）-->
-    <select id="getLastAmount" parameterType="map" resultType="map">
-        select balance_amount as lastAmount,balance_quantity as lastQuantity from doctor_warehouse_stock_monthly
-        where warehouse_id=#{warehouseId} and material_id=#{materialId}
-        and date_format(settlement_date,'%Y-%m')=date_format(date_sub(#{settlementDate}, interval 1 month),'%Y-%m')
-    </select>
-
-    <select id="getThisAmount" parameterType="map" resultType="map">
-        SELECT	ifnull(sum(	case type	when '1' then quantity	when '2' then -quantity	when '7' then quantity	when '8' then -quantity
-        when '9' then quantity	when '10' then -quantity	when '11' then quantity	when '12' then -quantity	when '13' then -quantity end),0) as thisQuantity,
-        ifnull(sum(	case type	when '1' then amount	when '2' then -amount	when '7' then amount	when '8' then -amount
-        when '9' then amount	when '10' then -amount	when '11' then amount	when '12' then -amount	when '13' then -amount end ),0) as thisAmount
-        FROM doctor_warehouse_material_handle WHERE delete_flag=1
-        AND warehouse_id=#{warehouseId} AND material_id=#{materialId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
-    </select>
-
-    <select id="getLastDocument" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
-        select * from doctor_warehouse_material_handle
-        where warehouse_id=#{warehouseId} and material_id=#{materialId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
-        and delete_flag=1 and (type=2 or type=8 or type=10 or type=12) ORDER BY handle_date desc,id desc limit 1
     </select>
 
 </mapper>

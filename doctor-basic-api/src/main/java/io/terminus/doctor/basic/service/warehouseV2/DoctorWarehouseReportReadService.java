@@ -173,6 +173,7 @@ public interface DoctorWarehouseReportReadService {
      * @return
      */
     List<Map<String,Object>> getMeterails(
+            Long orgId,
             Long farmId,
             String settlementDate,
             Integer type,

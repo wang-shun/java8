@@ -1420,8 +1420,8 @@
         <if test="client != null">AND  a.customer_id = #{client}</if>
         <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
-        group by a.barn_id, a.event_at, a.customer_id
-        order by a.event_at ASC;
+        group by a.event_at
+        order by a.event_at ASC ;
     </select>
 
     <select id="getFarrowEventByParity" parameterType="map" resultMap="DoctorPigEventMap">
