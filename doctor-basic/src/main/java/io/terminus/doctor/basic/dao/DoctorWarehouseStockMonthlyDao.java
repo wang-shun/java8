@@ -152,8 +152,8 @@ public class DoctorWarehouseStockMonthlyDao extends MyBatisDao<DoctorWarehouseSt
 
     public void reverseSettlement(Long orgId, Date settlementDate) {
         Map<String, Object> params = new HashMap<>();
-        params.put("warehouseId", orgId);
-        params.put("handleDate", settlementDate);
+        params.put("orgId", orgId);
+        params.put("settlementDate", settlementDate);
 
         this.sqlSession.delete(this.sqlId("reverseSettlement"), params);
     }
