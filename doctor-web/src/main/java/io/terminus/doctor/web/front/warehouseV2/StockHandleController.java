@@ -383,17 +383,17 @@ public class StockHandleController {
         }
 
         BigDecimal totalQuantity = new BigDecimal(0);
-        double totalAmount = 0L;
         BigDecimal totalUnitPrice = new BigDecimal(0);
+        double totalAmount = 0L;
         for (StockHandleVo.Detail detail : vo.getDetails()) {
             totalQuantity = totalQuantity.add(detail.getQuantity());
-            totalAmount += detail.getAmount().doubleValue();
             totalUnitPrice = totalUnitPrice.add(null == detail.getUnitPrice() ? new BigDecimal(0) : detail.getUnitPrice());
+            totalAmount += detail.getQuantity().multiply(detail.getUnitPrice()).doubleValue();
         }
+
         vo.setTotalQuantity(totalQuantity.doubleValue());
         vo.setTotalAmount(totalAmount);
-        vo.setTotalAmount(totalQuantity.multiply(totalUnitPrice).doubleValue());
-
+        //vo.setTotalAmount(totalQuantity.multiply(totalUnitPrice).doubleValue());
         return vo;
     }
 
@@ -966,7 +966,7 @@ public class StockHandleController {
 
                     Row countRow = sheet.createRow(pos);
                     //表格范围
-                    CellRangeAddress countRange = new CellRangeAddress(pos, pos, 0, 5);
+                    CellRangeAddress countRange = new CellRangeAddress(pos, pos, 0, 4);
                     //合并区域
                     sheet.addMergedRegion(countRange);
 
