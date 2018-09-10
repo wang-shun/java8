@@ -752,7 +752,7 @@ public class ReportController {
         }
 
         // 最终结果集数据集合
-        List<Map<String, Object>> resultNewMap = Lists.newArrayList();
+        List<Map<String,  Object>> resultNewMap = Lists.newArrayList();
 
         List<String> materials = Lists.newArrayList();
 
