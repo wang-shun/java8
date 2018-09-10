@@ -436,8 +436,6 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return getMaterialNameByID;
     }
 
-
-
     //<!--得到盘点：盘盈盘亏的最大时间节点-->
     public List<Map> getPYTime(Long id) {
         List<Map> getPYTime = this.sqlSession.selectList(this.sqlId("getPYTime"), id);
