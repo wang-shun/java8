@@ -463,7 +463,7 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
         criteria.put("deleteFlag", WarehouseMaterialHandleDeleteFlag.NOT_DELETE.getValue());
         criteria.put("vendorName", vendorName);
         if (null == types)
-            criteria.put("bigType", Stream.of(ALL_KIND_OF_HANDLE).map(WarehouseMaterialHandleType::getValue).collect(Collectors.toList()));
+            criteria.put("bigType",   Stream.of(ALL_KIND_OF_HANDLE).map(WarehouseMaterialHandleType::getValue).collect(Collectors.toList()));
         else
             criteria.put("bigType", Stream.of(types).map(WarehouseMaterialHandleType::getValue).collect(Collectors.toList()));
 
@@ -472,17 +472,17 @@ public class DoctorWarehouseReportReadServiceImpl implements DoctorWarehouseRepo
 
     @Override
     public Map<String, Object> lastWlbdReport(
-            Long farmId, String settlementDate, Integer type, Long warehouseId, String materialName) {
+            Long farmId, String settlementDate, Integer type, Long warehouseId, Long materialId) {
         Map<String,Object> lists = doctorWarehouseMaterialHandleDao.lastWlbdReport(
-                farmId, settlementDate, type, warehouseId, materialName);
+                farmId, settlementDate, type, warehouseId, materialId);
         return lists;
     }
 
     @Override
     public List<Map<String, Object>> wlbdReport(
-            Long farmId, String settlementDate, Integer type, Long warehouseId, String materialName) {
+            Long farmId, String settlementDate, Integer type, Long warehouseId, Long materialId) {
         List<Map<String,Object>> lists = doctorWarehouseMaterialHandleDao.wlbdReport(
-                farmId, settlementDate, type, warehouseId, materialName);
+                farmId, settlementDate, type, warehouseId, materialId);
         return lists;
     }
 
