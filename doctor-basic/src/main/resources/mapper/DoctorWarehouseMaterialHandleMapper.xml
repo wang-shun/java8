@@ -620,8 +620,11 @@
 
     <!-- 得到所有的物料 -->
     <select id="getMeterails" parameterType="Map" resultType="java.util.LinkedHashMap">
-        select distinct material_name from doctor_warehouse_material_handle
-        where delete_flag=1
+        select distinct material_id from doctor_warehouse_material_handle
+        where delete_flag = 1
+        <if test="orgId != null">
+            and org_id=#{orgId}
+        </if>
         <if test="farmId != null">
             and farm_id=#{farmId}
         </if>
@@ -631,7 +634,13 @@
         <if test="warehouseId != null">
             and warehouse_id=#{warehouseId}
         </if>
-        order by id
+        <if test="type != null and ''!=type">
+            and type=#{type}
+        </if>
+        <if test="materialName != null">
+            and material_name like CONCAT('%',#{materialName},'%')
+        </if>
+        order by material_id
     </select>
 
     <select id="lastWlbdReport" parameterType="Map" resultType="java.util.LinkedHashMap">
@@ -673,9 +682,7 @@
         <if test="warehouseId != null">
             and a.warehouse_id=#{warehouseId}
         </if>
-        <if test="materialName != null">
-            and b.`name` like CONCAT('%',#{materialName},'%')
-        </if>
+        and   a.material_id = #{materialId}
     </select>
 
     <select id="wlbdReport" parameterType="Map" resultType="java.util.LinkedHashMap">
@@ -692,10 +699,16 @@
         then ifnull(b.quantity,0) else '' end as rksl,
         case when
         b.type in (1,7,9,11)
+        then ifnull(b.unit_price,0) else '' end as rkdj,
+        case when
+        b.type in (1,7,9,11)
         then ifnull(b.amount,0) else '' end as rkje,
         case when
         b.type in (2,8,10,12,13)
         then ifnull(b.quantity,0) else '' end as cksl,
+        case when
+        b.type in (2,8,10,12,13)
+        then ifnull(b.unit_price,0) else '' end as ckdj,
         case when
         b.type in (2,8,10,12,13)
         then ifnull(b.amount,0) else '' end as ckje,
@@ -736,9 +749,7 @@
         <if test="warehouseId != null">
             and b.warehouse_id=#{warehouseId}
         </if>
-        <if test="materialName != null and ''!=materialName ">
-            and d.`name` like CONCAT('%',#{materialName},'%')
-        </if>
+        and d.id = #{materialId}
         <if test="type != null and ''!=type">
             and d.type=#{type}
         </if>
@@ -891,6 +902,28 @@
         <foreach collection="list" open="(" separator="," close=")" item="i">
             #{i}
         </foreach>
+    </select>
+
+    <!--结算误差（陈娟 2018-8-21）-->
+    <select id="getLastAmount" parameterType="map" resultType="map">
+        select balance_amount as lastAmount,balance_quantity as lastQuantity from doctor_warehouse_stock_monthly
+        where warehouse_id=#{warehouseId} and material_id=#{materialId}
+        and date_format(settlement_date,'%Y-%m')=date_format(date_sub(#{settlementDate}, interval 1 month),'%Y-%m')
+    </select>
+
+    <select id="getThisAmount" parameterType="map" resultType="map">
+        SELECT	ifnull(sum(	case type	when '1' then quantity	when '2' then -quantity	when '7' then quantity	when '8' then -quantity
+        when '9' then quantity	when '10' then -quantity	when '11' then quantity	when '12' then -quantity	when '13' then -quantity end),0) as thisQuantity,
+        ifnull(sum(	case type	when '1' then amount	when '2' then -amount	when '7' then amount	when '8' then -amount
+        when '9' then amount	when '10' then -amount	when '11' then amount	when '12' then -amount	when '13' then -amount end ),0) as thisAmount
+        FROM doctor_warehouse_material_handle WHERE delete_flag=1
+        AND warehouse_id=#{warehouseId} AND material_id=#{materialId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+    </select>
+
+    <select id="getLastDocument" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
+        select * from doctor_warehouse_material_handle
+        where warehouse_id=#{warehouseId} and material_id=#{materialId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+        and delete_flag=1 and (type=2 or type=8 or type=10 or type=12) ORDER BY handle_date desc,id desc limit 1
     </select>
 
 </mapper>

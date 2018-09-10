@@ -26,6 +26,39 @@ import java.util.*;
 @Repository
 public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouseMaterialHandle> {
 
+    // 结算误差（陈娟 2018-8-21）
+    // 得到上月结存金额
+    public Map<String, Object> getLastAmount(Long warehouseId, Long materialId, Date settlementDate) {
+
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("materialId", materialId);
+        criteria.put("settlementDate", settlementDate);
+
+        return this.sqlSession.selectOne(this.sqlId("getLastAmount"), criteria);
+    }
+
+    //得到本月结存金额
+    public Map<String, Object> getThisAmount(Long warehouseId, Long materialId, Date settlementDate) {
+
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("materialId", materialId);
+        criteria.put("settlementDate", settlementDate);
+
+        return this.sqlSession.selectOne(this.sqlId("getThisAmount"), criteria);
+    }
+
+    //得到最后一笔单据
+    public DoctorWarehouseMaterialHandle getLastDocument(Long warehouseId, Long materialId, Date settlementDate) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("materialId", materialId);
+        criteria.put("settlementDate", settlementDate);
+        return this.sqlSession.selectOne(this.sqlId("getLastDocument"), criteria);
+    }
+
+
     //更改物料有关的信息
     public Boolean updateWarehouseMaterialHandle(DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle) {
         return  this.sqlSession.update(this.sqlId("updateWarehouseMaterialHandle"), doctorWarehouseMaterialHandle)>=1;
@@ -320,44 +353,48 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
 
     //查公司结算列表
     public List<Map> listByFarmIdTime(Map<String, Object> criteria) {
-        List<Map> resultList = this.sqlSession.selectList("listByFarmIdTime", criteria);
+        List<Map> resultList = this.sqlSession.selectList( "listByFarmIdTime", criteria);
         return resultList;
     }
 
     public Map<String, Object> lastWlbdReport(
-            Long farmId, String settlementDate, Integer type, Long warehouseId, String materialName
+            Long farmId, String settlementDate, Integer type, Long warehouseId, Long materialId
     ) {
         Map<String, Object> params = new HashMap<>();
         params.put("farmId", farmId);
         params.put("settlementDate", settlementDate);
         params.put("type", type);
         params.put("warehouseId", warehouseId);
-        params.put("materialName", materialName);
+        params.put("materialId", materialId);
         return this.sqlSession.selectOne("lastWlbdReport", params);
     }
 
-    public List<Map<String, Object>> getMeterails(
+    public List<Map<String, Object>>  getMeterails(
+            Long orgId,
             Long farmId, String settlementDate,
             Integer type, Long warehouseId, String materialName
     ) {
         Map<String, Object> params = new HashMap<>();
+        params.put("orgId",orgId);
         params.put("farmId", farmId);
         params.put("settlementDate", settlementDate);
         params.put("type", type);
         params.put("warehouseId", warehouseId);
-        params.put("materialName", materialName);
+        params.put("materialName", materialName == null ||
+          "".equals(materialName.trim()) ||
+         "null".equals(materialName.trim().toLowerCase()) ? null : materialName.trim());
         return this.sqlSession.selectList("getMeterails", params);
     }
 
     public List<Map<String, Object>> wlbdReport(
-            Long farmId, String settlementDate, Integer type, Long warehouseId, String materialName
+            Long farmId, String settlementDate, Integer type, Long warehouseId, Long materialId
     ) {
         Map<String, Object> params = new HashMap<>();
         params.put("farmId", farmId);
         params.put("settlementDate", settlementDate);
         params.put("type", type);
         params.put("warehouseId", warehouseId);
-        params.put("materialName", materialName);
+        params.put("materialId", materialId);
         return this.sqlSession.selectList("wlbdReport", params);
     }
 
