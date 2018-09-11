@@ -631,7 +631,6 @@ public class DoctorPigCreateEvents {
             expectTrue(notEmpty((String) map.get("pigId")), "pig.id.not.null");
         }
         Long realPigId = pigId !=null?pigId:Long.parseLong((String) map.get("pigId"));
-
         DoctorPig doctorPig = RespHelper.or500(doctorPigReadService.findPigById(realPigId));
         expectTrue(notNull(doctorPig), "pig.not.null", realPigId);
 
@@ -744,8 +743,8 @@ public class DoctorPigCreateEvents {
                 return doctorValidService.valid(dto, doctorPig.getPigCode());
             case FARROWING:
                 DoctorFarrowingDto farrowingDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorFarrowingDto.class);
-                if(pigId != null) {
-                    DoctorPigEvent doctorPigEvent = RespHelper.orServEx(doctorPigEventReadService.findLastFirstMateEvent(pigId));
+                if(realPigId != null) {
+                    DoctorPigEvent doctorPigEvent = RespHelper.orServEx(doctorPigEventReadService.findLastFirstMateEvent(realPigId));
                     Long farrowingDate = farrowingDto.getFarrowingDate().getTime();
                     Long lastMateDate = doctorPigEvent.getEventAt().getTime();
                     Long time = (farrowingDate - lastMateDate) / (3600 * 24 * 1000);

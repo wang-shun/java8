@@ -202,6 +202,8 @@ public interface DoctorGroupReadService {
      */
     Response<Paging<DoctorGroupEvent>> queryGroupEventsByCriteria(Map<String, Object> criteria, Integer pageNo, Integer pageSize);
 
+    Response<List<DoctorGroupEvent>> getGroupEventsByCriteria(Map<String, Object> criteria);
+
     /**
      * 判断是否是最新事件
      *

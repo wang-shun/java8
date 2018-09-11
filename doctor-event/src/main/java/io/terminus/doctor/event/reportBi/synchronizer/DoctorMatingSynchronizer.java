@@ -12,6 +12,7 @@ import io.terminus.doctor.event.reportBi.helper.FieldHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.Objects;
 
 import static io.terminus.doctor.event.reportBi.helper.DateHelper.dateCN;
@@ -42,7 +43,7 @@ public class DoctorMatingSynchronizer {
             reportBI.setOrzType(dimensionCriteria.getOrzType());
             reportBI.setDateType(dimensionCriteria.getDateType());
         }
-        insertOrUpdate(build(pigDaily, reportBI, dimensionCriteria.getIsRealTime()));
+        insertOrUpdate(build(pigDaily, reportBI, dimensionCriteria));
     }
 
     private void insertOrUpdate(DoctorReportMating reportBi){
@@ -53,7 +54,8 @@ public class DoctorMatingSynchronizer {
         doctorReportMatingDao.update(reportBi);
     }
 
-    public DoctorReportMating build(DoctorPigDailyExtend pigDaily, DoctorReportMating reportBi, Integer isRealTime) {
+    public DoctorReportMating build(DoctorPigDailyExtend pigDaily, DoctorReportMating reportBi, DoctorDimensionCriteria dimensionCriteria) {
+        Integer isRealTime = dimensionCriteria.getIsRealTime();
         if (Objects.equals(reportBi.getOrzType(), OrzDimension.FARM.getValue())) {
             reportBi.setOrzId(pigDaily.getFarmId());
             reportBi.setOrzName(pigDaily.getFarmName());
@@ -66,7 +68,7 @@ public class DoctorMatingSynchronizer {
         reportBi.setSumAtName(dateCN(pigDaily.getSumAt(), dateDimension));
         buildRealTime(pigDaily, reportBi);
         if (!Objects.equals(isRealTime, IsOrNot.YES.getKey())) {
-            buildDelay(pigDaily, reportBi);
+            buildDelay(pigDaily, reportBi,dimensionCriteria);
         }
         return reportBi;
     }
@@ -103,14 +105,20 @@ public class DoctorMatingSynchronizer {
         return otherIn;
     }
 
-    private void buildDelay(DoctorPigDailyExtend pigDaily, DoctorReportMating reportBi) {
+    private void buildDelay(DoctorPigDailyExtend pigDaily, DoctorReportMating reportBi,DoctorDimensionCriteria dimensionCriteria) {
         if (DateDimension.YEARLY.contains(reportBi.getDateType())) {
-            reportBi.setMatingRate(matingRate(pigDaily));
+            reportBi.setMatingRate(matingRate(pigDaily,dimensionCriteria));
         }
     }
 
-    private Double matingRate(DoctorPigDailyExtend dailyExtend) {
-        return FieldHelper.get((dailyExtend.getWeanMate()-dailyExtend.getWeanDeadWeedOut()), (dailyExtend.getWeanNest() - dailyExtend.getWeanDeadWeedOut()));
+    private Double matingRate(DoctorPigDailyExtend dailyExtend,DoctorDimensionCriteria dimensionCriteria) {
+        Date startAt = dimensionCriteria.getStartAt();
+        Date endAt = dimensionCriteria.getEndAt();
+        Integer weanMateCount = doctorReportMatingDao.getWeanMateCount(dailyExtend.getFarmId(),startAt,endAt,1);
+        Integer wwanCount = doctorReportMatingDao.getWeanMateCount(dailyExtend.getFarmId(),startAt,endAt,0);
+        //断奶母猪7日配种数-断奶母猪7日死淘数/断奶窝数-断奶母猪7日死淘数
+        //return FieldHelper.get((dailyExtend.getWeanMate()-dailyExtend.getWeanDeadWeedOut()), (dailyExtend.getWeanNest() - dailyExtend.getWeanDeadWeedOut()));
+        return FieldHelper.get(weanMateCount, wwanCount);
     }
 
     public void deleteAll() {

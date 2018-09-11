@@ -79,4 +79,10 @@ public class DoctorReportDeliverDao extends MyBatisDao<DoctorReportDeliver> {
         map.put("pigId",pigId);
         return getSqlSession().selectOne(sqlId("getMatingCount"), map);
     }
+
+    public Map<String,Object> getFarmId(BigInteger pigId){
+        Map<String,Object> map = new HashMap<>();
+        map.put("pigId",pigId);
+        return getSqlSession().selectOne(sqlId("getFarmId"),map);
+    }
 }

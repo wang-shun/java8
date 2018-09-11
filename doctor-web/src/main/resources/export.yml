@@ -697,6 +697,8 @@ export.tables:
           format: isoDateFormatter
         - name: checkResultName
           display: 检查结果
+        - name: matingDay
+          display: 已配种天数
         - name: operatorName
           display: 检查人员
         - name: checkMark

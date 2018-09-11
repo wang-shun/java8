@@ -624,11 +624,11 @@
     </select>
 
     <select id="findOperators" parameterType="map" resultType="io.terminus.doctor.event.dto.event.DoctorEventOperator">
-        SELECT distinct creator_name AS operatorName,  creator_id AS operatorId
+        SELECT distinct operator_name AS operatorName,  operator_id AS operatorId
         FROM
         <include refid="tb"/>
         WHERE status = 1
-        AND creator_id IS NOT NULL
+        AND operator_id IS NOT NULL
         <if test="types != null &amp;&amp; types.size() > 0">
             AND `type` IN
             <foreach collection="types" item="i" open="(" close=")" separator=",">
@@ -819,7 +819,7 @@
         <if test="client != null">AND a.customer_id = #{client}</if>
         <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
-        group by a.group_id, a.event_at, a.customer_id
+        group by a.event_at
         order by a.event_at ASC ;
     </select>
 
@@ -851,7 +851,7 @@
         <if test="client != null">AND a.customer_id = #{client}</if>
         <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
-        group by a.group_id, a.event_at, a.customer_id
+        group by a.event_at
         order by a.event_at ASC ;
     </select>
 
@@ -883,7 +883,7 @@
         <if test="client != null">AND a.customer_id = #{client}</if>
         <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
-        group by a.group_id, a.event_at, a.customer_id
+        group by a.event_at
         order by a.event_at ASC ;
     </select>
 
@@ -915,8 +915,8 @@
         <if test="client != null">AND a.customer_id = #{client}</if>
         <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
-        group by a.group_id, a.event_at, a.customer_id
-        order by a.event_at ASC;
+        group by a.event_at
+        order by a.event_at ASC ;
     </select>
 
     <sql id="saleCriteria">

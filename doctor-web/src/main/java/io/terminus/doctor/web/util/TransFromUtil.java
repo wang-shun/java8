@@ -6,15 +6,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.enums.BoarEntryType;
-import io.terminus.doctor.event.enums.FarrowingType;
-import io.terminus.doctor.event.enums.IsOrNot;
-import io.terminus.doctor.event.enums.MatingType;
-import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.enums.PigSource;
-import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.enums.PregCheckResult;
-import io.terminus.doctor.event.enums.VaccinResult;
+import io.terminus.doctor.event.enums.*;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -65,7 +57,14 @@ public class TransFromUtil {
             if (Objects.equals(display.getType(), PigEvent.MATING.getKey())
                     || PigEvent.CHANGE_LOCATION.contains(display.getType())) {
                 DoctorPigTrack doctorPigTrack = RespHelper.orServEx(doctorPigReadService.findPigTrackByPigId(display.getPigId()));
-                display.setPigStatus(PigStatus.from(doctorPigTrack.getStatus()).getName());
+                // 事件中心-比如配种事件、转舍事件，当前状态不应该显示空怀，是返情就显示返情 （陈娟 2018-09-05）
+                // 2：阴性   3：流产  4：返情
+                if(doctorPigTrack.getStatus()==5){
+                    DoctorPigEvent doctorPigEvent = RespHelper.orServEx(doctorPigEventReadService.getKongHuaiStatus(doctorPigTrack.getPigId()));
+                    display.setPigStatus(KongHuaiStarus.from(doctorPigEvent.getPregCheckResult()).getName());
+                }else{
+                    display.setPigStatus(PigStatus.from(doctorPigTrack.getStatus()).getName());
+                }
             }
 
             if (Objects.equals(display.getType(), PigEvent.PREG_CHECK.getKey())) {

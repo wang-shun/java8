@@ -367,6 +367,7 @@ public class ServiceConfiguration {
             public Response<DoctorFarm> findByNumber(String number) {
                 return null;
             }
+
         };
     }
 
@@ -414,9 +415,10 @@ public class ServiceConfiguration {
                 return null;
             }
             @Override
-            public Response<DoctorOrg> findGroupcompanyByOrgId(Long orgId) {
+            public Response<DoctorOrg>  findGroupcompanyByOrgId(Long orgId) {
                 return null;
-            }
+            };
+
         };
     }
 

@@ -92,6 +92,11 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
             }
             BigInteger id = (BigInteger)map.get("id");
             BigInteger pig_id = (BigInteger)map.get("pig_id");
+            Map<String,Object> farmId1 = doctorReportDeliverDao.getFarmId(pig_id);
+            Long farmId2 = Long.valueOf(String.valueOf(farmId1.get("farm_id"))).longValue();
+            if(!farmId2.equals(farmId)){
+                map.put("pig_status","已转场");
+            }
             int parity = (int)map.get("parity");
 
             Map<String,Object> matingCount =  doctorReportDeliverDao.getMatingCount(pig_id,(Date)map.get("event_at"));
@@ -130,14 +135,17 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         }
                         if (b == 2) {
                             map.put("notdelivery", "阴性");
+                            map.put("pig_status","阴性");
                             yxcount = yxcount + 1;
                         }
                         if (b == 3) {
                             map.put("notdelivery", "流产");
+                            map.put("pig_status","流产");
                             lccount = lccount + 1;
                         }
                         if (b == 4) {
                             map.put("notdelivery", "返情");
+                            map.put("pig_status","返情");
                             fqcount = fqcount + 1;
                         }
                         map.put("check_event_at",notdelivery.get("event_at"));
@@ -151,9 +159,11 @@ public class DoctorDeliveryReadServicelmpl implements DoctorDeliveryReadService{
                         long b = (long) leave.get("change_type_id");
                         if (b == 110) {
                             map.put("deadorescape", "死亡");
+                            map.put("pig_status","已离场");
                             swcount = swcount + 1;
                         }else if (b == 111) {
                             map.put("deadorescape", "淘汰");
+                            map.put("pig_status","已离场");
                             ttcount = ttcount + 1;
                         }else{
                             map.put("deadorescape", "");
