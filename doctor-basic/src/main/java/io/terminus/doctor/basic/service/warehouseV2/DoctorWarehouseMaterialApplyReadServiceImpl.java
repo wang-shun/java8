@@ -188,7 +188,6 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
             boolean  b = doctorWarehouseOrgSettlementDao.isSettled(orgId, sdf.parse(date));
             if(!b){
-                BigDecimal allQuantity = new BigDecimal(0);
                 for(int i = 0;i<maps.size(); i++){
                     maps.get(i).put("sum_unit_price","--");
                     maps.get(i).put("sum_amount","--");
@@ -248,9 +247,6 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         }
 
         for (int i = 0; i < maps.size(); i++) {
-            maps.get(i).setQuantity(new BigDecimal(Double.parseDouble(maps.get(i).getQuantity())).setScale(3, BigDecimal.ROUND_HALF_UP).toString());
-            maps.get(i).setUnitPrice(new BigDecimal(Double.parseDouble(maps.get(i).getUnitPrice())).setScale(4, BigDecimal.ROUND_HALF_UP).toString());
-            maps.get(i).setAmount(new BigDecimal(Double.parseDouble(maps.get(i).getAmount())).setScale(2, BigDecimal.ROUND_HALF_UP).toString());
             try {
             //会计年月支持选择未结算过的会计年月，如果选择未结算的会计区间，则报表不显示金额和单价
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");

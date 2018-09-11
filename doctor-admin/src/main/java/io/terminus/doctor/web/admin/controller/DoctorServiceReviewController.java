@@ -111,7 +111,7 @@ public class DoctorServiceReviewController {
         if (dto.getOrg() == null || dto.getOrg().getId() == null) {
             throw new JsonResponseException("orgId.not.null");
         }
-        
+
         List<DoctorFarm> newFarms = RespHelper.or500(
                 doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getLoginName(), dto.getOrg(), dto.getFarms())
         );

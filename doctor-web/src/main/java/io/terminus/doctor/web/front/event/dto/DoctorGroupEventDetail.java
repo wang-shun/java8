@@ -17,4 +17,27 @@ public class DoctorGroupEventDetail extends DoctorGroupEvent implements Serializ
     private static final long serialVersionUID = 3941077199183497746L;
 
     private Boolean isRollback;
+
+    // 猪群合计 （陈娟 2018-09-05）
+    // 总猪只数
+    private Integer sumQuantity;
+
+    // 总重，
+    private Double sumWeight;
+
+    // 总价值，
+    private Long sumAmount;
+
+    // 公猪数，
+    private Integer sumBoarQty;
+
+    // 母猪数，
+    private Integer sumSowQty;
+
+    // 公猪数，
+    private Integer boarQty;
+
+    // 母猪数，
+    private Integer sowQty;
+
 }
