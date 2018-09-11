@@ -293,6 +293,7 @@
             and a.warehouse_id = #{warehouseId}
             and DATE_FORMAT(a.settlement_date,'%Y-%M') = DATE_FORMAT(#{settlementDate},'%Y-%M')
             group by a.material_id
+            order by a.material_id
 
             UNION ALL
 
@@ -326,6 +327,7 @@
             where warehouse_id = #{warehouseId} and DATE_FORMAT(settlement_date,'%Y-%M') = DATE_FORMAT(#{settlementDate},'%Y-%M')
             )
             GROUP BY sm.material_id
+            order by sm.material_id
         </if>
 
         <!--2.本月未结算，上月已结算-->
@@ -382,6 +384,7 @@
             and a.warehouse_id = #{warehouseId}
             and DATE_FORMAT(a.settlement_date,'%Y-%M') = DATE_FORMAT(#{settlementDate},'%Y-%M')
             group by a.material_id
+            order by a.material_id
 
             UNION ALL
 
@@ -415,6 +418,7 @@
             where warehouse_id = #{warehouseId} and DATE_FORMAT(settlement_date,'%Y-%M') = DATE_FORMAT(#{settlementDate},'%Y-%M')
             )
             GROUP BY sm.material_id
+            order by sm.material_id
         </if>
 
         <!--3.本月未结算，上月未结算-->
@@ -473,6 +477,7 @@
             and a.warehouse_id = #{warehouseId}
             and DATE_FORMAT(a.settlement_date,'%Y-%M') = DATE_FORMAT(#{settlementDate},'%Y-%M')
             group by a.material_id
+            order by a.material_id
 
             UNION ALL
 
@@ -507,10 +512,15 @@
             GROUP BY material_id
             )temp on a.material_id=temp.material_id and a.warehouse_id=temp.warehouse_id
 
-            WHERE a.delete_flag=1 AND a.warehouse_id=#{warehouseId}
-            AND <![CDATA[ date_format(settlement_date,'%Y-%m')<=date_format(DATE_SUB(#{settlementDate}, INTERVAL 1 MONTH),'%Y-%m')]]>
-            and temp.balance_quantity!=0
+            where a.warehouse_id = #{warehouseId} and temp.balance_quantity!=0
+            and date_format(a.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+            and temp.material_id not in(
+            select DISTINCT material_id from doctor_warehouse_material_handle
+            where warehouse_id = #{warehouseId} and DATE_FORMAT(settlement_date,'%Y-%M') = DATE_FORMAT(#{settlementDate},'%Y-%M') order by material_id
+            )
             GROUP BY a.material_id
+            order by a.material_id
+
         </if>
     </select>
 
