@@ -505,6 +505,11 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     }
 
     @Override
+    public  Response<List<Map>> getPYTime(Long id) {
+        return Response.ok(doctorWarehouseMaterialHandleDao.getPYTime(id));
+    }
+
+    @Override
     public Response<List<Map>> getDataByMaterialName(Long id) {
 //        List<Map> dataByMaterialName = doctorWarehouseMaterialHandleDao.getDataByMaterialName(id);
         return Response.ok(doctorWarehouseMaterialHandleDao.getDataByMaterialName(id));

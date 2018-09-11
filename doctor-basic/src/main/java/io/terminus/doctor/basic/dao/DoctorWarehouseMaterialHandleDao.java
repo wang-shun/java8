@@ -436,6 +436,15 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return getMaterialNameByID;
     }
 
+
+
+    //<!--得到盘点：盘盈盘亏的最大时间节点-->
+    public List<Map> getPYTime(Long id) {
+        List<Map> getPYTime = this.sqlSession.selectList(this.sqlId("getPYTime"), id);
+        return getPYTime;
+
+    }
+
     //<!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注-->
     public List<Map> getDataByMaterialName(Long id) {
         List<Map> getDataByMaterialName = this.sqlSession.selectList(this.sqlId("getDataByMaterialName"), id);
