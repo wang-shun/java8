@@ -752,30 +752,28 @@ public class ReportController {
         }
 
         // 最终结果集数据集合
-        List<Map<String,  Object>> resultNewMap = Lists.newArrayList();
-
-        List<String> materials = Lists.newArrayList();
+        List<Map<String, Object>>  resultNewMap = Lists.newArrayList();
+        List<Long> materialIds = Lists.newArrayList();
 
         List<Map<String,Object>> resultMtMap = doctorWarehouseReportReadService.getMeterails(
                 orgId,farmId,settlementDate, type,warehouseId,materialName
         );
 
-        if(resultMtMap != null && resultMtMap.size() > 0)
-        {
+        if(resultMtMap != null && resultMtMap.size() > 0){
             for(Map<String,Object> map:resultMtMap){
-                materials.add(String.valueOf(map.get("material_id")));
+                materialIds.add((Long) map.get("material_id"));
             }
         }
         else {
             return resultNewMap;
         }
 
-        if(materials.size() > 0) {
+        if(materialIds.size() > 0) {
 
-            for(String str : materials) {
+            for(Long ids : materialIds) {
 
                 // 查出上月结存数据
-                Map<String, Object> lastMap = doctorWarehouseReportReadService.lastWlbdReport(farmId, settlementDate, type, warehouseId, str);
+                Map<String, Object> lastMap = doctorWarehouseReportReadService.lastWlbdReport(farmId, settlementDate, type, warehouseId, ids);
                 if (lastMap == null) {
                     // 构造上月结存新map数据
                     lastMap = Maps.newHashMap();
@@ -838,7 +836,7 @@ public class ReportController {
                     Object ljcdj = lastMap.get("jcdj");
                     Object ljcje = lastMap.get("jcje");
                     if(isNull(ljcsl)){
-                        BigDecimal quantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findWJSQuantity(BigInteger.valueOf(warehouseId),null,null,type,str,dd));
+                        BigDecimal quantity = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findWJSQuantity(BigInteger.valueOf(warehouseId),null,ids,type,null,dd));
                         lastMap.put("jcsl",quantity);
                     } else {
                         lastMap.put("jcsl",
@@ -865,7 +863,7 @@ public class ReportController {
                 resultNewMap.add(lastMap);
 
                 List<Map<String,Object>> resultMap = doctorWarehouseReportReadService.wlbdReport(
-                        farmId, settlementDate, type, warehouseId, str
+                        farmId, settlementDate, type, warehouseId, ids
                 );
 
                 // 计算这条物料的结存数据与汇总数据

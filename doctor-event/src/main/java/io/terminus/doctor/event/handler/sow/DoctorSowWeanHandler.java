@@ -83,17 +83,14 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventHandler {
         doctorPigEvent.setWeanCount(weanDto.getPartWeanPigletsCount());
         doctorPigEvent.setWeanAvgWeight(weanDto.getPartWeanAvgWeight());
 
-//        Integer quaQty = doctorPigEvent.getWeanCount();
-//        if (weanDto.getQualifiedCount() != null) {
-//            quaQty = weanDto.getQualifiedCount();
-//        }
-        doctorPigEvent.setHealthCount(weanDto.getQualifiedCount());
- //       doctorPigEvent.setHealthCount(quaQty);    //额 这个字段存一下合格数吧
-     //   doctorPigEvent.setWeakCount(doctorPigEvent.getWeanCount() - quaQty);
-        doctorPigEvent.setWeakCount(weanDto.getNotQualifiedCount());
+        Integer quaQty = doctorPigEvent.getWeanCount();
+        if (weanDto.getQualifiedCount() != null) {
+            quaQty = weanDto.getQualifiedCount();
+        }
+        doctorPigEvent.setHealthCount(quaQty);    //额 这个字段存一下合格数吧
+        doctorPigEvent.setWeakCount(doctorPigEvent.getWeanCount() - quaQty);
         Map<String, Object> extraMap = doctorPigEvent.getExtraMap();
-    //    extraMap.put("qualifiedCount", quaQty);
-        extraMap.put("qualifiedCount", weanDto.getQualifiedCount());
+        extraMap.put("qualifiedCount", quaQty);
         doctorPigEvent.setExtraMap(extraMap);
 
         expectTrue(notNull(pigTrack), "pig.track.not.null", inputDto.getPigId());
