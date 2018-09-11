@@ -631,7 +631,13 @@
         <if test="warehouseId != null">
             and warehouse_id=#{warehouseId}
         </if>
-        order by id
+        <if test="type != null and ''!=type">
+            and type=#{type}
+        </if>
+        <if test="materialName != null">
+            and material_name like CONCAT('%',#{materialName},'%')
+        </if>
+        order by material_id
     </select>
 
     <select id="lastWlbdReport" parameterType="Map" resultType="java.util.LinkedHashMap">
@@ -673,9 +679,7 @@
         <if test="warehouseId != null">
             and a.warehouse_id=#{warehouseId}
         </if>
-        <if test="materialName != null">
-            and b.`name` like CONCAT('%',#{materialName},'%')
-        </if>
+        and   a.material_id = #{materialId}
     </select>
 
     <select id="wlbdReport" parameterType="Map" resultType="java.util.LinkedHashMap">

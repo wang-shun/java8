@@ -353,23 +353,23 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
 
     //查公司结算列表
     public List<Map> listByFarmIdTime(Map<String, Object> criteria) {
-        List<Map> resultList = this.sqlSession.selectList("listByFarmIdTime", criteria);
+        List<Map> resultList = this.sqlSession.selectList( "listByFarmIdTime", criteria);
         return resultList;
     }
 
     public Map<String, Object> lastWlbdReport(
-            Long farmId, String settlementDate, Integer type, Long warehouseId, String materialName
+            Long farmId, String settlementDate, Integer type, Long warehouseId, Long materialId
     ) {
         Map<String, Object> params = new HashMap<>();
         params.put("farmId", farmId);
         params.put("settlementDate", settlementDate);
         params.put("type", type);
         params.put("warehouseId", warehouseId);
-        params.put("materialId", materialName);
+        params.put("materialId", materialId);
         return this.sqlSession.selectOne("lastWlbdReport", params);
     }
 
-    public List<Map<String, Object>> getMeterails(
+    public List<Map<String, Object>>  getMeterails(
             Long orgId,
             Long farmId, String settlementDate,
             Integer type, Long warehouseId, String materialName
@@ -387,14 +387,14 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     }
 
     public List<Map<String, Object>> wlbdReport(
-            Long farmId, String settlementDate, Integer type, Long warehouseId, String materialName
+            Long farmId, String settlementDate, Integer type, Long warehouseId, Long materialId
     ) {
         Map<String, Object> params = new HashMap<>();
         params.put("farmId", farmId);
         params.put("settlementDate", settlementDate);
         params.put("type", type);
         params.put("warehouseId", warehouseId);
-        params.put("materialId", materialName);
+        params.put("materialId", materialId);
         return this.sqlSession.selectList("wlbdReport", params);
     }
 

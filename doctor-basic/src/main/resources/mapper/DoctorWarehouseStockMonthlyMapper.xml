@@ -270,21 +270,21 @@
             ) temp1 on a.material_id = temp1.material_id
 
             left join (
-            SELECT material_id,ifnull(sum(case type	when '1' then amount when '7' then amount	when '9' then amount
-            when '11' then amount end	),0) as inAmount,
-            ifnull(sum(case type	when '1' then quantity 	when '7' then quantity	 when '9' then quantity
-            when '11' then quantity end	),0) as inQuantity FROM doctor_warehouse_material_handle
-            WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
-            group by material_id
-            )temp3 on a.material_id = temp3.material_id
+                SELECT material_id,ifnull(sum(case type	when '1' then amount when '7' then amount	when '9' then amount
+                when '11' then amount end	),0) as inAmount,
+                ifnull(sum(case type	when '1' then quantity 	when '7' then quantity	 when '9' then quantity
+                when '11' then quantity end	),0) as inQuantity FROM doctor_warehouse_material_handle
+                WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
+                group by material_id
+                )temp3 on a.material_id = temp3.material_id
 
             left join (
-            SELECT material_id, ifnull(sum(case type when '2' then amount	when '8' then amount	when '10' then amount
-            when '12' then amount	when '13' then amount end	),0) as outAmount,
-            ifnull(sum(case type	when '2' then quantity	 when '8' then quantity	when '10' then quantity
-            when '12' then quantity	when '13' then quantity end	),0) as outQuantity,warehouse_id FROM doctor_warehouse_material_handle
-            WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
-            group by material_id
+                SELECT material_id, ifnull(sum(case type when '2' then amount	when '8' then amount	when '10' then amount
+                when '12' then amount	when '13' then amount end	),0) as outAmount,
+                ifnull(sum(case type	when '2' then quantity	 when '8' then quantity	when '10' then quantity
+                when '12' then quantity	when '13' then quantity end	),0) as outQuantity,warehouse_id FROM doctor_warehouse_material_handle
+                WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
+                group by material_id
             )temp4 on a.material_id = temp4.material_id
 
             left join doctor_basics db on db.id = b.unit
