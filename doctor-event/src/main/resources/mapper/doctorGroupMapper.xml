@@ -378,4 +378,11 @@
             AND (close_at is null or close_at &gt;= #{date})
         </where>
     </select>
+
+    <select id="findByCurrentBarnId1" parameterType="map" resultMap="DoctorGroupMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE current_barn_id = #{currentBarnId} AND status = 1
+        <if test="groupCode != null">AND `group_code` like concat('%', #{groupCode}, '%')</if>
+    </select>
 </mapper>

@@ -16,7 +16,7 @@ import java.util.Map;
 public class PostRequest {
     public static Response<Boolean> postRequest(String path,Map<String,String> params){
         try {
-            URL url = new URL(path);
+            URL url = new URL("https://iot-test.xrnm.com"+path);
             //打开和url之间的连接
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             PrintWriter out = null;
@@ -67,6 +67,6 @@ public class PostRequest {
         Map<String,String> map = Maps.newHashMap();
         map.put("pigId","1");
         map.put("newStatus","1");
-        postRequest("https://iot-test.xrnm.com/api/iot/pig/sow-status-change",map);
+        postRequest("/api/iot/pig/sow-status-change",map);
     }
 }

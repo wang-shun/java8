@@ -205,7 +205,7 @@ public interface DoctorPigReadService {
      * @param barnId
      * @return
      */
-    Response<List<DoctorPig>> findUnRemovalPigsBy(Long barnId);
+    Response<List<DoctorPig>> findUnRemovalPigsBy(Long barnId,String pigCode);
 
     /**
      * 查询转场记录

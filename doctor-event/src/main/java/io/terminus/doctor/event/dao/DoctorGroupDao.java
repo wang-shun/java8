@@ -189,4 +189,11 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
     public List<DoctorGroup> listOpenGroupsBy(String date){
         return getSqlSession().selectList(sqlId("listOpenGroupsBy"), date);
     }
+
+    public List<DoctorGroup> findByCurrentBarnId1(Long currentBarnId,String groupCode) {
+        Map map = Maps.newHashMap();
+        map.put("currentBarnId",currentBarnId);
+        map.put("groupCode",groupCode);
+        return getSqlSession().selectList(sqlId("findByCurrentBarnId1"), map);
+    }
 }

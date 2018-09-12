@@ -120,53 +120,53 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
                 Map<String,String> param = Maps.newHashMap();
                 param.put("pigId",doctorPigEvent.getPigId().toString());
                 param.put("newStatus","3");
-                new PostRequest().postRequest("https://iot-test.xrnm.com/api/iot/pig/sow-status-change",param);
+                new PostRequest().postRequest("/api/iot/pig/sow-status-change",param);
 
                 Map<String,String> param1 = Maps.newHashMap();
                 param1.put("pigId",doctorPigEvent.getPigId().toString());
                 param1.put("newStatus","4");
-                new PostRequest().postRequest("https://iot-test.xrnm.com/api/iot/pig/sow-status-change",param1);
+                new PostRequest().postRequest("/api/iot/pig/sow-status-change",param1);
 
                 Map<String,String> param2 = Maps.newHashMap();
                 param2.put("pigId",doctorPigEvent.getPigId().toString());
                 param2.put("newStatus","7");
-                new PostRequest().postRequest("https://iot-test.xrnm.com/api/iot/pig/sow-status-change",param2);
+                new PostRequest().postRequest("/api/iot/pig/sow-status-change",param2);
             }
             if(doctorPigEvent.getType() == ENTRY.getKey()){
                 Map<String,String> params = Maps.newHashMap();
                 params.put("pigId",doctorPigEvent.getPigId().toString());
                 params.put("newStatus","1");
-                new PostRequest().postRequest("https://iot-test.xrnm.com/api/iot/pig/sow-status-change",params);
+                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
             }
             if(doctorPigEvent.getType() == FARROWING.getKey()){
                 Map<String,String> params = Maps.newHashMap();
                 params.put("pigId",doctorPigEvent.getPigId().toString());
                 params.put("newStatus","8");
-                new PostRequest().postRequest("https://iot-test.xrnm.com/api/iot/pig/sow-status-change",params);
+                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
             }
             if(doctorPigEvent.getType() == WEAN.getKey()){
                 Map<String,String> params = Maps.newHashMap();
                 params.put("pigId",doctorPigEvent.getPigId().toString());
                 params.put("newStatus","9");
-                new PostRequest().postRequest("https://iot-test.xrnm.com/api/iot/pig/sow-status-change",params);
+                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
             }
             if(doctorPigEvent.getType() == PREG_CHECK.getKey() && doctorPigEvent.getPregCheckResult() == 2){
                 Map<String,String> params = Maps.newHashMap();
                 params.put("pigId",doctorPigEvent.getPigId().toString());
                 params.put("newStatus","51");
-                new PostRequest().postRequest("https://iot-test.xrnm.com/api/iot/pig/sow-status-change",params);
+                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
             }
             if(doctorPigEvent.getType() == PREG_CHECK.getKey() && doctorPigEvent.getPregCheckResult() == 3){
                 Map<String,String> params = Maps.newHashMap();
                 params.put("pigId",doctorPigEvent.getPigId().toString());
                 params.put("newStatus","52");
-                new PostRequest().postRequest("https://iot-test.xrnm.com/api/iot/pig/sow-status-change",params);
+                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
             }
             if(doctorPigEvent.getType() == PREG_CHECK.getKey() && doctorPigEvent.getPregCheckResult() == 4){
                 Map<String,String> params = Maps.newHashMap();
                 params.put("pigId",doctorPigEvent.getPigId().toString());
                 params.put("newStatus","53");
-                new PostRequest().postRequest("https://iot-test.xrnm.com/api/iot/pig/sow-status-change",params);
+                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
             }
             /*
             当母猪发生转舍、离场、销售、离场事件时，需调用物联网提供的接口，以此通知物联网。
@@ -175,7 +175,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
                     || doctorPigEvent.getType() == TO_FARROWING.getKey()  || doctorPigEvent.getType() == REMOVAL.getKey()  || (doctorPigEvent.getType() == PIGLETS_CHG.getKey() && doctorPigEvent.getChangeTypeId()==109) ){
                 Map<String,String> params = Maps.newHashMap();
                 params.put("pigId",doctorPigEvent.getPigId().toString());
-                new PostRequest().postRequest("https://iot-test.xrnm.com/api/iot/pig/sow-leaving",params);
+                new PostRequest().postRequest("/api/iot/pig/sow-leaving",params);
             }
             return Response.ok(doctorPigEventDao.create(doctorPigEvent));
         } catch (Exception e) {

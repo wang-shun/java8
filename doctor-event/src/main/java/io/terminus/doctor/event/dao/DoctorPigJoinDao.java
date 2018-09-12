@@ -78,8 +78,11 @@ public class DoctorPigJoinDao extends MyBatisDao<SearchedPig> {
     }
 
 
-    public List<DoctorPig> findUnRemovalPigsBy(Long barnId){
-        return getSqlSession().selectList(sqlId("findUnRemovalPigsBy"), barnId);
+    public List<DoctorPig> findUnRemovalPigsBy(Long barnId,String pigCode){
+        Map map = Maps.newHashMap();
+        map.put("barnId",barnId);
+        map.put("pigCode",pigCode);
+        return getSqlSession().selectList(sqlId("findUnRemovalPigsBy"), map);
     }
 
 
