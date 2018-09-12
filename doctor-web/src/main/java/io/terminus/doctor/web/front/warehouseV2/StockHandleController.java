@@ -356,6 +356,12 @@ public class StockHandleController {
                                 detail.setStorageWarehouseNames(sh.getWarehouseName());
                             }
 
+                            //盘点入库计算合计fyq2018-9-12
+                            if (stockHandle.getHandleSubType().equals( WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue())) {
+                               detail.setBeforeStockQuantity(detail.getBeforeStockQuantity());
+                            }
+
+
                             return detail;
                         })
                         .collect(Collectors.toList()));
@@ -384,13 +390,25 @@ public class StockHandleController {
 
         BigDecimal totalQuantity = new BigDecimal(0);
         BigDecimal totalUnitPrice = new BigDecimal(0);
+        double totalAmount = 0L;
         for (StockHandleVo.Detail detail : vo.getDetails()) {
-            totalQuantity = totalQuantity.add(detail.getQuantity());
+            if(detail.getBeforeStockQuantity() != null) {
+                totalQuantity = totalQuantity.add(detail.getBeforeStockQuantity().add(detail.getQuantity()));
+            }else {
+                totalQuantity = totalQuantity.add(detail.getQuantity());
+            }
             totalUnitPrice = totalUnitPrice.add(null == detail.getUnitPrice() ? new BigDecimal(0) : detail.getUnitPrice());
-        }
-        vo.setTotalQuantity(totalQuantity.doubleValue());
-        vo.setTotalAmount(totalQuantity.multiply(totalUnitPrice).doubleValue());
 
+            if(detail.getBeforeStockQuantity() != null) {
+                totalAmount += detail.getBeforeStockQuantity().add(detail.getQuantity()).multiply(detail.getUnitPrice()).doubleValue();
+            }else {
+                totalAmount += detail.getQuantity().multiply(detail.getUnitPrice()).doubleValue();
+            }
+        }
+
+        vo.setTotalQuantity(totalQuantity.doubleValue());
+        vo.setTotalAmount(totalAmount);
+        //vo.setTotalAmount(totalQuantity.multiply(totalUnitPrice).doubleValue());
         return vo;
     }
 
