@@ -973,7 +973,7 @@ public class ReportController {
                             if(handlerType.equals("7")||handlerType.equals("9")||handlerType.equals("11")){
                                 tempmap.put("rkdj","--");
                             }else if(handlerType.equals("1")){
-                                tempmap.put("rkdj",isNull(rkje) ? "" :  new BigDecimal(rkje.toString()).setScale(2, BigDecimal.ROUND_HALF_UP));
+                                tempmap.put("rkdj", isNull(rkdj) ? "" : new BigDecimal(rkdj.toString()).setScale(4, BigDecimal.ROUND_HALF_UP));
                             }else{
                                 tempmap.put("rkdj", "");
                             }
