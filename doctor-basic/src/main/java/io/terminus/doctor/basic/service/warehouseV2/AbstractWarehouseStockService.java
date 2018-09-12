@@ -111,16 +111,13 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
 
         Map<F, DoctorWarehouseMaterialHandle> changed = new HashMap<>();
         details.forEach(detail -> {
-            log.error("================detail"+detail);
             if (detail.getMaterialHandleId() == null)
                 create(stockDto, detail, stockHandle, wareHouse);
             else if (oldMaterialHandles.containsKey(detail.getMaterialHandleId())) {
                 DoctorWarehouseMaterialHandle materialHandle = oldMaterialHandles.get(detail.getMaterialHandleId()).get(0);
 
                 if (!materialHandle.getMaterialId().equals(detail.getMaterialId())) {
-                    log.error("=====================1"+detail.getMaterialId());
                     create(stockDto, detail, stockHandle, wareHouse);
-                    log.error("=====================2");
                     doctorWarehouseStockManager.in(detail.getMaterialId(), detail.getQuantity(), wareHouse);
                     delete(materialHandle);
                     doctorWarehouseStockManager.out(materialHandle.getMaterialId(), materialHandle.getQuantity(), wareHouse);
