@@ -249,11 +249,11 @@
         inner join doctor_ware_houses as b
         on a.warehouse_id=b.id
 
-        where  a.farm_id = 1
-        and date_format(a.settlement_date,'%Y-%m')=date_format('2018-01-01','%Y-%m')
+        where  a.farm_id = #{farmId}
+        and date_format(a.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
         and a.warehouse_id not in(
             select DISTINCT warehouse_id from doctor_warehouse_material_handle
-            where farm_id = 1 and DATE_FORMAT(settlement_date,'%Y-%M') = DATE_FORMAT('2018-01-01','%Y-%M')
+            where farm_id = #{farmId} and DATE_FORMAT(settlement_date,'%Y-%M') = DATE_FORMAT(#{settlementDate},'%Y-%M')
         )
         GROUP BY a.warehouse_id
     </select>
