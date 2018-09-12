@@ -103,9 +103,9 @@ public class PhoenixCrmReports {
 //                m[i] = (char) (m[i] ^ 't');
 //            }
 //            String md5 = new String(m);
-            if(!"pigDoctorCRM".equals(appKey)){
-                return "";
-            }
+//            if(!"pigDoctorCRM".equals(appKey)){
+//                return "";
+//            }
             Response<List<DoctorFarmInformation>> farmInforMation = doctorFarmReadService.findSubordinatePig();
             if(!farmInforMation.isSuccess() || farmInforMation.getResult() == null){
                 return "";
