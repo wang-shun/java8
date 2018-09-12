@@ -788,13 +788,8 @@ public class ReportController {
                     lastMap.put("rkdj","");
                     lastMap.put("rkje","");
                     lastMap.put("cksl","");
-                    if(byjsflag) {
-                        lastMap.put("ckdj", "");
-                        lastMap.put("ckje", "");
-                    }else{ //结算前
-                        lastMap.put("ckdj", "--");
-                        lastMap.put("ckje", "--");
-                    }
+                    lastMap.put("ckdj", "");
+                    lastMap.put("ckje", "");
                     lastMap.put("jcsl","");
                     if(byjsflag) {
                         lastMap.put("jcdj", "");
@@ -812,26 +807,6 @@ public class ReportController {
                     lastMap.put("provider_name","");
                     lastMap.put("specification","");
                 } else {
-                    Object lckdj = lastMap.get("ckdj");
-                    Object lckje = lastMap.get("ckje");
-                    if(byjsflag) {
-                        if (isNull(lckdj)) {
-                            lastMap.put("ckdj", "");
-                        } else {
-                            lastMap.put("ckdj",
-                                    new BigDecimal(Double.parseDouble(lckdj.toString())).setScale(4, BigDecimal.ROUND_HALF_UP));
-                        }
-                        if (isNull(lckje)) {
-                            lastMap.put("ckje", "");
-                        } else {
-                            lastMap.put("ckje",
-                                    new BigDecimal(Double.parseDouble(lckje.toString())).setScale(2, BigDecimal.ROUND_HALF_UP));
-                        }
-                    } else { //结算前
-                        lastMap.put("ckdj", "--");
-                        lastMap.put("ckje", "--");
-                    }
-
                     Object ljcsl = lastMap.get("jcsl");
                     Object ljcdj = lastMap.get("jcdj");
                     Object ljcje = lastMap.get("jcje");
@@ -949,6 +924,7 @@ public class ReportController {
                         Object cksl = thismap.get("cksl");
                         Object ckdj = thismap.get("ckdj");
                         Object ckje = thismap.get("ckje");
+                        String handlerType = (String) thismap.get("handler_type");
 
                         BigDecimal drksl = isNull(rksl) ? new BigDecimal(0d) :  new BigDecimal(rksl.toString());
                         BigDecimal drkje = isNull(rkje) ? new BigDecimal(0d) :  new BigDecimal(rkje.toString());
@@ -956,12 +932,26 @@ public class ReportController {
                         BigDecimal dckje = isNull(ckje) ? new BigDecimal(0d) :  new BigDecimal(ckje.toString());
                         tempmap.put("rksl",isNull(rksl) ? "" :  new BigDecimal(rksl.toString()).setScale(3, BigDecimal.ROUND_HALF_UP));
                         tempmap.put("cksl",isNull(cksl) ? "" :  new BigDecimal(cksl.toString()).setScale(3, BigDecimal.ROUND_HALF_UP));
-                        tempmap.put("rkje",isNull(rkje) ? "" :  new BigDecimal(rkje.toString()).setScale(2, BigDecimal.ROUND_HALF_UP));
 
                         if(byjsflag) {
+                            tempmap.put("rkje",isNull(rkje) ? "" :  new BigDecimal(rkje.toString()).setScale(2, BigDecimal.ROUND_HALF_UP));
                             tempmap.put("ckje", isNull(ckje) ? "" : new BigDecimal(ckje.toString()).setScale(2, BigDecimal.ROUND_HALF_UP));
                         } else {
-                            tempmap.put("ckje","--");
+                            // 物料变动结算与未结算的单价，金额的展示 （陈娟 2018-09-12）
+                            // 出库单据（2,8,10,12,13）未结算，显示"--"，否则不显示
+                            if(handlerType.equals("2")||handlerType.equals("8")||handlerType.equals("10")||handlerType.equals("12")||handlerType.equals("13")){
+                                tempmap.put("ckje","--");
+                            }else{
+                                tempmap.put("ckje", "");
+                            }
+                            // 入库单据（7,9,11）未结算，显示"--"，否则不显示，采购入库除外
+                            if(handlerType.equals("7")||handlerType.equals("9")||handlerType.equals("11")){
+                                tempmap.put("rkje","--");
+                            }else if(handlerType.equals("1")){
+                                tempmap.put("rkje",isNull(rkje) ? "" :  new BigDecimal(rkje.toString()).setScale(2, BigDecimal.ROUND_HALF_UP));
+                            }else{
+                                tempmap.put("rkje", "");
+                            }
                         }
 
                         thisMonthTotalRksl.add(drksl); //入库数量累加
@@ -973,8 +963,20 @@ public class ReportController {
                             tempmap.put("rkdj", isNull(rkdj) ? "" : new BigDecimal(rkdj.toString()).setScale(4, BigDecimal.ROUND_HALF_UP));
                             tempmap.put("ckdj", isNull(ckdj) ? "" : new BigDecimal(ckdj.toString()).setScale(4, BigDecimal.ROUND_HALF_UP));
                         }else{
-                            tempmap.put("rkdj", "--");
-                            tempmap.put("ckdj", "--");
+                            // 出库单据（2,8,10,12,13）未结算，显示"--"，否则不显示
+                            if(handlerType.equals("2")||handlerType.equals("8")||handlerType.equals("10")||handlerType.equals("12")||handlerType.equals("13")){
+                                tempmap.put("ckdj", "--");
+                            }else{
+                                tempmap.put("ckdj", "");
+                            }
+                            // 入库单据（7,9,11）未结算，显示"--"，否则不显示，采购入库除外
+                            if(handlerType.equals("7")||handlerType.equals("9")||handlerType.equals("11")){
+                                tempmap.put("rkdj","--");
+                            }else if(handlerType.equals("1")){
+                                tempmap.put("rkdj",isNull(rkje) ? "" :  new BigDecimal(rkje.toString()).setScale(2, BigDecimal.ROUND_HALF_UP));
+                            }else{
+                                tempmap.put("rkdj", "");
+                            }
                         }
 
                         BigDecimal singleJcsl = new BigDecimal(0d);
@@ -1002,22 +1004,20 @@ public class ReportController {
 
                         tempmap.put("jcsl",singleJcsl.compareTo(BigDecimal.ZERO) == 0 ? "" :
                                 singleJcsl.setScale(3, BigDecimal.ROUND_HALF_UP)); //单笔记录的结存数量
-                        //物料变动报表结存的数量为0的之后，单价和金额也展示0
-                        if(singleJcsl.compareTo(BigDecimal.ZERO) == 0||singleJcje.compareTo(BigDecimal.ZERO) == 0){
-                            tempmap.put("jcje","");
-                            tempmap.put("jcdj", "");
-                        }else {
-                            if (byjsflag) {
+
+                        if(byjsflag){
+                            //物料变动报表结存的数量为0的之后，单价和金额也展示0
+                            if(singleJcsl.compareTo(BigDecimal.ZERO) == 0||singleJcje.compareTo(BigDecimal.ZERO) == 0){
+                                tempmap.put("jcje","");
+                                tempmap.put("jcdj", "");
+                            }else{
                                 tempmap.put("jcje", singleJcje.compareTo(BigDecimal.ZERO) == 0 ? "" :
                                         singleJcje.setScale(2, BigDecimal.ROUND_HALF_UP)); //单笔记录的结存金额
-                            } else {
-                                tempmap.put("jcje", "--");
+                                tempmap.put("jcdj", singleJcje.compareTo(BigDecimal.ZERO) == 0 || singleJcsl.compareTo(BigDecimal.ZERO) == 0 ? "" : singleJcje.divide(singleJcsl, 4, BigDecimal.ROUND_HALF_UP));
                             }
-                            if (byjsflag) {
-                                tempmap.put("jcdj", singleJcje.divide(singleJcsl, 4, BigDecimal.ROUND_HALF_UP));
-                            } else {
-                                tempmap.put("jcdj", "--");
-                            }
+                        }else{
+                            tempmap.put("jcje", "--");
+                            tempmap.put("jcdj", "--");
                         }
                         resultNewMap.add(tempmap);
                         tempsinglejcsl = singleJcsl;
@@ -1045,17 +1045,11 @@ public class ReportController {
                     thisMap.put("cksl",
                             thisMonthTotalCksl.compareTo(BigDecimal.ZERO) == 0
                                     ? "" : thisMonthTotalCksl.setScale(3, BigDecimal.ROUND_HALF_UP));
-                    if(byjsflag) {
-                        thisMap.put("ckdj", thisMonthTotalCksl.compareTo(BigDecimal.ZERO) == 0
-                                || thisMonthTotalCkje.compareTo(BigDecimal.ZERO) == 0 ? "" :
-                                thisMonthTotalCkje.divide(thisMonthTotalCksl, 4, BigDecimal.ROUND_HALF_UP));
-                        thisMap.put("ckje", thisMonthTotalCkje.compareTo(BigDecimal.ZERO) == 0 ? "" :
+                    thisMap.put("ckdj", thisMonthTotalCksl.compareTo(BigDecimal.ZERO) == 0
+                            || thisMonthTotalCkje.compareTo(BigDecimal.ZERO) == 0 ? "" :
+                            thisMonthTotalCkje.divide(thisMonthTotalCksl, 4, BigDecimal.ROUND_HALF_UP));
+                    thisMap.put("ckje", thisMonthTotalCkje.compareTo(BigDecimal.ZERO) == 0 ? "" :
                                 thisMonthTotalCkje.setScale(2, BigDecimal.ROUND_HALF_UP));
-                    }
-                    else {
-                        thisMap.put("ckdj","--");
-                        thisMap.put("ckje","--");
-                    }
 
                     thisMap.put("jcsl", thisMonthTotalJcsl.compareTo(BigDecimal.ZERO) == 0 ? "" :
                             thisMonthTotalJcsl.setScale(3, BigDecimal.ROUND_HALF_UP));
