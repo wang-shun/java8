@@ -42,6 +42,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+
 /**
  * 库存操作单据
  * 出库
@@ -363,6 +364,11 @@ public class StockHandleController {
                                 detail.setStorageWarehouseNames(sh.getWarehouseName());
                             }
 
+                            //盘点入库计算合计fyq2018-9-12
+                            if (stockHandle.getHandleSubType().equals( WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue())) {
+                              detail.getBeforeStockQuantity();
+                            }
+
                             return detail;
                         })
                         .collect(Collectors.toList()));
@@ -393,7 +399,11 @@ public class StockHandleController {
         BigDecimal totalUnitPrice = new BigDecimal(0);
         double totalAmount = 0L;
         for (StockHandleVo.Detail detail : vo.getDetails()) {
-            totalQuantity = totalQuantity.add(detail.getQuantity());
+            if(detail.getBeforeStockQuantity() != null) {
+                totalQuantity = totalQuantity.add(detail.getBeforeStockQuantity().add(detail.getQuantity()));
+            }else {
+                totalQuantity = totalQuantity.add(detail.getQuantity());
+            }
             totalUnitPrice = totalUnitPrice.add(null == detail.getUnitPrice() ? new BigDecimal(0) : detail.getUnitPrice());
             totalAmount += detail.getQuantity().multiply(detail.getUnitPrice()).doubleValue();
         }
@@ -734,7 +744,7 @@ public class StockHandleController {
                     title.createCell(3).setCellValue("规格");
                     title.createCell(4).setCellValue("单位");
                     title.createCell(5).setCellValue("账面数量");
-                    title.createCell(6).setCellValue("入库数量");
+                    title.createCell(6).setCellValue("盘点数量");
                     title.createCell(7).setCellValue("单价");
                     title.createCell(8).setCellValue("金额（元）");
                     title.createCell(9).setCellValue("备注");
@@ -749,7 +759,7 @@ public class StockHandleController {
                         row.createCell(3).setCellValue(vo.getMaterialSpecification());
                         row.createCell(4).setCellValue(vo.getUnit());
                         row.createCell(5).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
-                        row.createCell(6).setCellValue(vo.getQuantity().doubleValue());
+                        row.createCell(6).setCellValue(vo.getBeforeInventoryQuantity().add(vo.getQuantity()).doubleValue());
                         if(vo.getUnitPrice()==0.0&&vo.getAmount()==0.0){
                             CellStyle style = workbook.createCellStyle();
                             //对齐
@@ -764,7 +774,7 @@ public class StockHandleController {
                         }
                         row.createCell(9).setCellValue(vo.getRemark());
 
-                        totalQuantity = vo.getBeforeInventoryQuantity().add(vo.getQuantity());
+                        totalQuantity = vo.getQuantity();
                     }
 
                     Row countRow = sheet.createRow(pos);
@@ -778,7 +788,7 @@ public class StockHandleController {
                     //对齐
                     style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
                     countCell.setCellStyle(style);
-                    countCell.setCellValue("盘点：盘盈");
+                    countCell.setCellValue("盘盈");
 
                     countRow.createCell(6).setCellValue(totalQuantity.doubleValue());
                     pos++;
@@ -1184,4 +1194,3 @@ public class StockHandleController {
     }
 
 }
-
