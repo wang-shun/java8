@@ -98,16 +98,16 @@ public class PhoenixCrmReports {
     //@OpenMethod(key = "get.pig.farms.living", paramNames = "appKey")
    // public String getPigFarmsLiving(@NotEmpty(message = "appKey.not.empty") String appKey){
     @OpenMethod(key = "get.pig.farms.living", paramNames = "appKey")
-    public String getPigFarmsLiving(){
+    public String getPigFarmsLiving(@NotEmpty(message = "appKey.not.empty") String appKey){
         try {
 //            char[] m = sign.toCharArray();
 //            for (int i = 0;i<m.length;i++){
 //                m[i] = (char) (m[i] ^ 't');
 //            }
 //            String md5 = new String(m);
-//            if(!"pigDoctorCRM".equals(appKey)){
-//                return "";
-//            }
+            if(!"pigDoctorCRM".equals(appKey)){
+                return "";
+            }
             Response<List<DoctorFarmInformation>> farmInforMation = doctorFarmReadService.findSubordinatePig();
             if(!farmInforMation.isSuccess() || farmInforMation.getResult() == null){
                 return "";
