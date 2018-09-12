@@ -219,7 +219,7 @@
         ) temp1 on a.warehouse_id = temp1.warehouse_id
 
         left join (SELECT ifnull(sum(case type	when '2' then amount	when '8' then amount	when '10' then amount
-	        when '12' then amount	when '13' then amount end	),0) as outAmount,
+	        when '12' then amount	when '13' then -amount end	),0) as outAmount,
             warehouse_id FROM doctor_warehouse_material_handle
             WHERE farm_id = #{farmId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
             group by warehouse_id
@@ -237,6 +237,7 @@
         and date_format(a.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
         GROUP BY a.warehouse_id
 
+        <!--仓库报表（陈娟 2018-9-12）-->
         union all
 
 		select a.farm_id as farmId,a.warehouse_id as warehouseId,b.ware_house_name as warehouseName,
@@ -301,9 +302,9 @@
 
             left join (
             SELECT ifnull(sum(case type	when '2' then amount	when '8' then amount	when '10' then amount
-            when '12' then amount	when '13' then amount end	),0) as outAmount,
+            when '12' then amount	when '13' then -amount end	),0) as outAmount,
             ifnull(sum(case type	when '2' then quantity	 when '8' then quantity	when '10' then quantity
-            when '12' then quantity	when '13' then quantity end	),0) as outQuantity,material_id,warehouse_id FROM doctor_warehouse_material_handle
+            when '12' then quantity	when '13' then -quantity end	),0) as outQuantity,material_id,warehouse_id FROM doctor_warehouse_material_handle
             WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
             group by material_id
             )temp4 on a.material_id = temp4.material_id and a.warehouse_id=temp4.warehouse_id
@@ -389,9 +390,9 @@
 
             left join (
             SELECT ifnull(sum(case type	when '2' then amount	when '8' then amount	when '10' then amount
-            when '12' then amount	when '13' then amount end	),0) as outAmount,
+            when '12' then amount	when '13' then -amount end	),0) as outAmount,
             ifnull(sum(case type	when '2' then quantity	 when '8' then quantity	when '10' then quantity
-            when '12' then quantity	when '13' then quantity end	),0) as outQuantity,material_id,warehouse_id
+            when '12' then quantity	when '13' then -quantity end	),0) as outQuantity,material_id,warehouse_id
             FROM doctor_warehouse_material_handle
             WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
             group by material_id
@@ -480,9 +481,9 @@
 
             left join (
             SELECT ifnull(sum(case type	when '2' then amount	when '8' then amount	when '10' then amount
-            when '12' then amount	when '13' then amount end	),0) as outAmount,
+            when '12' then amount	when '13' then -amount end	),0) as outAmount,
             ifnull(sum(case type	when '2' then quantity	 when '8' then quantity	when '10' then quantity
-            when '12' then quantity	when '13' then quantity end	),0) as outQuantity,material_id,warehouse_id
+            when '12' then quantity	when '13' then -quantity end	),0) as outQuantity,material_id,warehouse_id
             FROM doctor_warehouse_material_handle
             WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
             group by material_id

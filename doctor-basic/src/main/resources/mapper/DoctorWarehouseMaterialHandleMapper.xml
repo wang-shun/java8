@@ -599,7 +599,7 @@
 
         left join (SELECT ifnull(
             sum(case type	when '2' then amount	when '8' then amount	when '10' then amount
-            when '12' then amount	when '13' then amount end	),0) as outAmount,farm_id FROM doctor_warehouse_material_handle
+            when '12' then amount  when '13' then -amount end	),0) as outAmount,farm_id FROM doctor_warehouse_material_handle
             WHERE org_id = #{orgId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')	AND delete_flag=1
             group by farm_id ORDER BY farm_id
         ) temp2 on a.farm_id = temp2.farm_id
@@ -922,7 +922,7 @@
 
     <select id="getThisAmount" parameterType="map" resultType="map">
         SELECT	ifnull(sum(	case type	when '1' then quantity	when '2' then -quantity	when '7' then quantity	when '8' then -quantity
-        when '9' then quantity	when '10' then -quantity	when '11' then quantity	when '12' then -quantity	when '13' then -quantity end),0) as thisQuantity,
+        when '9' then quantity	 when '10' then -quantity 	when '11' then quantity	when '12' then -quantity when '13' then -quantity end),0) as thisQuantity,
         ifnull(sum(	case type	when '1' then amount	when '2' then -amount	when '7' then amount	when '8' then -amount
         when '9' then amount	when '10' then -amount	when '11' then amount	when '12' then -amount	when '13' then -amount end ),0) as thisAmount
         FROM doctor_warehouse_material_handle WHERE delete_flag=1
