@@ -366,7 +366,7 @@ public class StockHandleController {
 
                             //盘点入库计算合计fyq2018-9-12
                             if (stockHandle.getHandleSubType().equals( WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue())) {
-                              detail.getBeforeStockQuantity();
+                               detail.setBeforeStockQuantity(detail.getBeforeStockQuantity());
                             }
 
                             return detail;
