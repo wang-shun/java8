@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 package io.terminus.doctor.web.front.warehouseV2;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
@@ -42,53 +41,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-
-
-=======
-package io.terminus.doctor.web.front.warehouseV2;
-
-import io.terminus.boot.rpc.common.annotation.RpcConsumer;
-import io.terminus.common.exception.JsonResponseException;
-import io.terminus.common.model.Paging;
-import io.terminus.common.model.Response;
-import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
-import io.terminus.doctor.basic.model.DoctorWareHouse;
-import io.terminus.doctor.basic.model.warehouseV2.*;
-import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
-import io.terminus.doctor.basic.service.warehouseV2.*;
-import io.terminus.doctor.common.enums.WareHouseType;
-import io.terminus.doctor.common.utils.DateUtil;
-import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.model.DoctorGroup;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.user.model.DoctorFarm;
-import io.terminus.doctor.user.service.DoctorFarmReadService;
-import io.terminus.doctor.web.core.export.Exporter;
-import io.terminus.doctor.web.front.warehouseV2.vo.StockHandleExportVo;
-import io.terminus.doctor.web.front.warehouseV2.vo.StockHandleVo;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.propertyeditors.CustomDateEditor;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-
 
 /**
  * 库存操作单据
@@ -1232,4 +1184,4 @@ public class StockHandleController {
     }
 
 }
->>>>>>> :''
+
