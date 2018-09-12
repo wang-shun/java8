@@ -114,62 +114,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
         try {
             //通知物联网接口(孔景军)
             /*
-            当母猪状态变更为进场、哺乳，配种、断奶、妊娠检查阴性、妊娠检查返情、妊娠检查流产时，需调用物联网提供的接口，以此通知网联网。
-             */
-            if(doctorPigEvent.getType() == MATING.getKey()){
-                Map<String,String> param = Maps.newHashMap();
-                param.put("pigId",doctorPigEvent.getPigId().toString());
-                param.put("newStatus","3");
-                new PostRequest().postRequest("/api/iot/pig/sow-status-change",param);
-
-                Map<String,String> param1 = Maps.newHashMap();
-                param1.put("pigId",doctorPigEvent.getPigId().toString());
-                param1.put("newStatus","4");
-                new PostRequest().postRequest("/api/iot/pig/sow-status-change",param1);
-
-                Map<String,String> param2 = Maps.newHashMap();
-                param2.put("pigId",doctorPigEvent.getPigId().toString());
-                param2.put("newStatus","7");
-                new PostRequest().postRequest("/api/iot/pig/sow-status-change",param2);
-            }
-            if(doctorPigEvent.getType() == ENTRY.getKey()){
-                Map<String,String> params = Maps.newHashMap();
-                params.put("pigId",doctorPigEvent.getPigId().toString());
-                params.put("newStatus","1");
-                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
-            }
-            if(doctorPigEvent.getType() == FARROWING.getKey()){
-                Map<String,String> params = Maps.newHashMap();
-                params.put("pigId",doctorPigEvent.getPigId().toString());
-                params.put("newStatus","8");
-                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
-            }
-            if(doctorPigEvent.getType() == WEAN.getKey()){
-                Map<String,String> params = Maps.newHashMap();
-                params.put("pigId",doctorPigEvent.getPigId().toString());
-                params.put("newStatus","9");
-                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
-            }
-            if(doctorPigEvent.getType() == PREG_CHECK.getKey() && doctorPigEvent.getPregCheckResult() == 2){
-                Map<String,String> params = Maps.newHashMap();
-                params.put("pigId",doctorPigEvent.getPigId().toString());
-                params.put("newStatus","51");
-                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
-            }
-            if(doctorPigEvent.getType() == PREG_CHECK.getKey() && doctorPigEvent.getPregCheckResult() == 3){
-                Map<String,String> params = Maps.newHashMap();
-                params.put("pigId",doctorPigEvent.getPigId().toString());
-                params.put("newStatus","52");
-                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
-            }
-            if(doctorPigEvent.getType() == PREG_CHECK.getKey() && doctorPigEvent.getPregCheckResult() == 4){
-                Map<String,String> params = Maps.newHashMap();
-                params.put("pigId",doctorPigEvent.getPigId().toString());
-                params.put("newStatus","53");
-                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
-            }
-            /*
-            当母猪发生转舍、离场、销售、离场事件时，需调用物联网提供的接口，以此通知物联网。
+            当母猪发生转舍、离场、销售、离场事件时，需调用物联网提供的接口，以此通知物联网。(孔景军)
              */
             if(doctorPigEvent.getType() == CHG_LOCATION.getKey() || doctorPigEvent.getType() == TO_PREG.getKey() || doctorPigEvent.getType() == TO_MATING.getKey()
                     || doctorPigEvent.getType() == TO_FARROWING.getKey()  || doctorPigEvent.getType() == REMOVAL.getKey()  || (doctorPigEvent.getType() == PIGLETS_CHG.getKey() && doctorPigEvent.getChangeTypeId()==109) ){

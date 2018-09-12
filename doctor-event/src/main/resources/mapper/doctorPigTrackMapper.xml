@@ -421,4 +421,11 @@
         FROM doctor_pig_tracks
         WHERE pig_id = #{pigId}
     </select>
+
+
+    <select id="getLastEvent" parameterType="long" resultType="Integer">
+        select preg_check_result from doctor_pig_events
+        where pig_id = #{pigId} and type = 11 order by id desc limit 1
+    </select>
+
 </mapper>
