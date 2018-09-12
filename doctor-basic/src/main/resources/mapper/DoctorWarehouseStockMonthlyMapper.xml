@@ -236,7 +236,26 @@
         and a.farm_id = #{farmId}
         and date_format(a.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
         GROUP BY a.warehouse_id
-        order by a.warehouse_id
+
+        union all
+
+		select a.farm_id as farmId,a.warehouse_id as warehouseId,b.ware_house_name as warehouseName,
+          YEAR(a.settlement_date) as handleYear,MONTH(a.settlement_date) as handleMonth,a.org_id as orgId,a.settlement_date as settlementDate,
+          0 as inAmount,
+          0 as outAmount,
+          sum(a.balance_amount) as balanceAmount
+
+        from doctor_warehouse_stock_monthly as a
+        inner join doctor_ware_houses as b
+        on a.warehouse_id=b.id
+
+        where  a.farm_id = 1
+        and date_format(a.settlement_date,'%Y-%m')=date_format('2018-01-01','%Y-%m')
+        and a.warehouse_id not in(
+            select DISTINCT warehouse_id from doctor_warehouse_material_handle
+            where farm_id = 1 and DATE_FORMAT(settlement_date,'%Y-%M') = DATE_FORMAT('2018-01-01','%Y-%M')
+        )
+        GROUP BY a.warehouse_id
     </select>
 
     <select id="monthWarehouseDetail" parameterType="map" resultType="map">
@@ -508,7 +527,6 @@
             )temp on a.material_id=temp.material_id and a.warehouse_id=temp.warehouse_id
 
             where a.warehouse_id = #{warehouseId} and temp.balance_quantity!=0
-            and date_format(a.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
             and temp.material_id not in(
             select DISTINCT material_id from doctor_warehouse_material_handle
             where warehouse_id = #{warehouseId} and DATE_FORMAT(settlement_date,'%Y-%M') = DATE_FORMAT(#{settlementDate},'%Y-%M') order by material_id
