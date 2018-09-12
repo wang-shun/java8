@@ -1,3 +1,50 @@
+<<<<<<< HEAD
+package io.terminus.doctor.web.front.warehouseV2;
+
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
+import io.terminus.doctor.basic.model.DoctorWareHouse;
+import io.terminus.doctor.basic.model.warehouseV2.*;
+import io.terminus.doctor.basic.service.DoctorWareHouseReadService;
+import io.terminus.doctor.basic.service.warehouseV2.*;
+import io.terminus.doctor.common.enums.WareHouseType;
+import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.web.core.export.Exporter;
+import io.terminus.doctor.web.front.warehouseV2.vo.StockHandleExportVo;
+import io.terminus.doctor.web.front.warehouseV2.vo.StockHandleVo;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+
+
+=======
 package io.terminus.doctor.web.front.warehouseV2;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
@@ -735,7 +782,7 @@ public class StockHandleController {
                     title.createCell(3).setCellValue("规格");
                     title.createCell(4).setCellValue("单位");
                     title.createCell(5).setCellValue("账面数量");
-                    title.createCell(6).setCellValue("盘点数量");
+                    title.createCell(6).setCellValue("入库数量");
                     title.createCell(7).setCellValue("单价");
                     title.createCell(8).setCellValue("金额（元）");
                     title.createCell(9).setCellValue("备注");
@@ -750,7 +797,7 @@ public class StockHandleController {
                         row.createCell(3).setCellValue(vo.getMaterialSpecification());
                         row.createCell(4).setCellValue(vo.getUnit());
                         row.createCell(5).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
-                        row.createCell(6).setCellValue(vo.getBeforeInventoryQuantity().add(vo.getQuantity()).doubleValue());
+                        row.createCell(6).setCellValue(vo.getQuantity().doubleValue());
                         if(vo.getUnitPrice()==0.0&&vo.getAmount()==0.0){
                             CellStyle style = workbook.createCellStyle();
                             //对齐
@@ -765,7 +812,7 @@ public class StockHandleController {
                         }
                         row.createCell(9).setCellValue(vo.getRemark());
 
-                        totalQuantity = vo.getQuantity();
+                        totalQuantity = vo.getBeforeInventoryQuantity().add(vo.getQuantity());
                     }
 
                     Row countRow = sheet.createRow(pos);
@@ -779,7 +826,7 @@ public class StockHandleController {
                     //对齐
                     style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
                     countCell.setCellStyle(style);
-                    countCell.setCellValue("盘盈");
+                    countCell.setCellValue("盘点：盘盈");
 
                     countRow.createCell(6).setCellValue(totalQuantity.doubleValue());
                     pos++;
@@ -1185,3 +1232,4 @@ public class StockHandleController {
     }
 
 }
+>>>>>>> :''
