@@ -871,8 +871,8 @@
 
     <!--得到盘点：盘盈盘亏的最大时间节点-->
     <select id="getPYTime" parameterType="Long" resultType="map">
-        select DISTINCT material_id,MAX(DATE_FORMAT(handle_date,'%Y-%m-%d')) from doctor_warehouse_material_handle
-        where stock_handle_id = #{id} and delete_flag=1 and (type = 7 or type =  8 )
+        select DISTINCT material_id,MAX(handle_date) as maxDate from doctor_warehouse_material_handle
+        where material_id = #{id} and delete_flag=1 and (type = 7 or type =  8 )
     </select>
 
 
