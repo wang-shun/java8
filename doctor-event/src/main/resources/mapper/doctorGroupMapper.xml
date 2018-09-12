@@ -379,7 +379,7 @@
         </where>
     </select>
 
-    <select id="findByCurrentBarnId1" parameterType="map" resultMap="DoctorGroupMap">
+    <select id="findGroupByCurrentBarnIdFuzzy" parameterType="map" resultMap="DoctorGroupMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         WHERE current_barn_id = #{currentBarnId} AND status = 1

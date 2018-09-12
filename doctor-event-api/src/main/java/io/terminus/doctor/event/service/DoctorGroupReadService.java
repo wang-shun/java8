@@ -337,5 +337,5 @@ public interface DoctorGroupReadService {
     DoctorGroupEvent findLastEvent(Long groupId);
 
     /*物联网接口使用（孔景军）*/
-    Response<List<DoctorGroup>> findGroupByCurrentBarnId1(@NotNull(message = "barnId.not.null") Long barnId,String groupCode);
+    Response<List<DoctorGroup>> findGroupByCurrentBarnIdFuzzy(@NotNull(message = "barnId.not.null") Long barnId,String groupCode);
 }
