@@ -96,8 +96,8 @@ public class PhoenixCrmReports {
      * @return jsonArray
      */
     //@OpenMethod(key = "get.pig.farms.living", paramNames = "appKey")
-   // public String getPigFarmsLiving(@NotEmpty(message = "appKey.not.empty") String appKey)
-    @OpenMethod(key = "get.pig.farms.living")
+   // public String getPigFarmsLiving(@NotEmpty(message = "appKey.not.empty") String appKey){
+    @OpenMethod(key = "get.pig.farms.living", paramNames = "appKey")
     public String getPigFarmsLiving(){
         try {
 //            char[] m = sign.toCharArray();
