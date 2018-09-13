@@ -174,9 +174,12 @@ public class DoctorDepartmentManager {
             linerDto.setCliqueId(doctorOrg.getId());
             linerDto.setCliqueName(doctorOrg.getName());
         } else {
-            DoctorOrg clique = doctorOrgDao.findById(doctorOrg.getParentId());
-            linerDto.setCliqueId(clique.getId());
-            linerDto.setCliqueName(clique.getName());
+            //kong
+            if(doctorOrg.getParentId()!=0) {
+                DoctorOrg clique = doctorOrgDao.findById(doctorOrg.getParentId());
+                linerDto.setCliqueId(clique.getId());
+                linerDto.setCliqueName(clique.getName());
+            }
         }
         return linerDto;
     }
