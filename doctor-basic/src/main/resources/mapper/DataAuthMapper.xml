@@ -101,8 +101,8 @@
     </select>
 
     <insert id="insertUserRole" parameterType="Map">
-        insert into doctor_user_subs(user_id,user_name,real_name,role_id,user_type,status,created_at,updated_at,role_name,contact)
-        values(#{userId},#{userName},#{realName},#{roleId},#{userType},1,now(),now(),#{roleName},#{mobile})
+        insert into doctor_user_subs(user_id,user_name,real_name,role_id,user_type,status,created_at,updated_at,role_name,contact,parent_user_id)
+        values(#{userId},#{userName},#{realName},#{roleId},#{userType},1,now(),now(),#{roleName},#{mobile},#{userId)
     </insert>
 
     <insert id="insertUserStaff" parameterType="Map">
