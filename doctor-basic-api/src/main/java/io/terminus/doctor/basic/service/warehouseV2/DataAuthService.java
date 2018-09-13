@@ -29,4 +29,5 @@ public interface DataAuthService {
 
     Response saveDataSubRoles(DataAuth dataSubRoles);
 
+    Response changeUserPassword(Map<String,String> params);
 }

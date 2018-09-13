@@ -101,6 +101,14 @@ public class DataAuthController {
     public Response saveDataSubRoles(@RequestBody(required = false) DataAuth dataSubRoles){
         return dataAuthService.saveDataSubRoles(dataSubRoles);
     }
-
+    /**
+     * 修改密码
+     * @return
+     */
+    @RequestMapping(value = "/changeUserPassword", method = RequestMethod.POST)
+    @ResponseBody
+    public Response changeUserPassword(@RequestBody(required = false) Map<String,String> params){
+        return dataAuthService.changeUserPassword(params);
+    }
 
 }
