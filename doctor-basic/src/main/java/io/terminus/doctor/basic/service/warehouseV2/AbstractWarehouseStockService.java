@@ -68,6 +68,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
                 //编辑之前，可以做一些校验等
                 beforeUpdate(stockDto, stockHandle);
                 //编辑
+                log.error("=============stockDto="+stockDto+"=============stockHandle="+stockHandle);
                 stockHandle = update(stockDto, wareHouse, stockHandle);
             }
 
