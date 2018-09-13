@@ -381,6 +381,7 @@ public class StockHandleController {
             vo.setStorageWarehouseName(sh.getWarehouseName());
         }
 
+
         DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(vo.getFarmId()));
         if (farm != null) {
             vo.setFarmName(farm.getName());
