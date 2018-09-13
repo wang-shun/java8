@@ -1114,7 +1114,7 @@ public class StockHandleController {
                     }
 
                     Row countRow = sheet.createRow(pos);
-                    CellRangeAddress cra = new CellRangeAddress(pos, pos, 0, 4);
+                    CellRangeAddress cra = new CellRangeAddress(pos, pos, 0, 5);
                     sheet.addMergedRegion(cra);
 
                     Cell countCell = countRow.createCell(0);
@@ -1124,12 +1124,12 @@ public class StockHandleController {
                     countRow.createCell(8).setCellStyle(style);
                     countCell.setCellValue("合计");
 
-                    countRow.createCell(6).setCellValue(totalQuantity.doubleValue());
+                    countRow.createCell(8).setCellValue(totalQuantity.doubleValue());
 
                     if(totalAmount==0.0){
-                        countRow.createCell(8).setCellValue("--");
+                        countRow.createCell(10).setCellValue("--");
                     }else{
-                        countRow.createCell(8).setCellValue(totalAmount);
+                        countRow.createCell(10).setCellValue(totalAmount);
                     }
 
                     pos++;
