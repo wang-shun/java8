@@ -937,7 +937,7 @@
 
     <!--得到调拨入库单 （陈娟 2018-09-14）-->
     <select id="findByRelMaterialHandleIdAndWarehouseId" parameterType="map" resultType="DoctorWarehouseMaterialHandle">
-        select * from doctor_warehouse_material_handle where rel_material_handle_id=#{relMaterialHandleId} and delete_flag=1 and warehouse_id=#{warehouseId}
+        select * from doctor_warehouse_material_handle where rel_material_handle_id=#{relMaterialHandleId} and delete_flag=1 and warehouse_id=#{warehouseId} and material_id=#{materialId}
     </select>
 
 </mapper>

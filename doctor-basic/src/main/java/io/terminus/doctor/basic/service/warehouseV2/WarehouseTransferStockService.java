@@ -154,7 +154,7 @@ public class WarehouseTransferStockService
 
                     // 修改调出明细 （陈娟 2018-09-14）
                     if(update){
-                        DoctorWarehouseMaterialHandle newHandle = doctorWarehouseMaterialHandleDao.findByRelMaterialHandleIdAndWarehouseId(materialHandle.getId(), detail.getTransferInWarehouseId());
+                        DoctorWarehouseMaterialHandle newHandle = doctorWarehouseMaterialHandleDao.findByRelMaterialHandleIdAndWarehouseId(materialHandle.getId(), detail.getTransferInWarehouseId(),materialHandle.getMaterialId());
                         materialHandle.setRelMaterialHandleId(newHandle.getId());
                     }
 

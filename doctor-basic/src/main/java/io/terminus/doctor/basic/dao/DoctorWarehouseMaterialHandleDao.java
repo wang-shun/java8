@@ -477,10 +477,11 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
     }
 
     // 得到调拨入库单 （陈娟 2018-09-14）
-    public DoctorWarehouseMaterialHandle findByRelMaterialHandleIdAndWarehouseId(Long relMaterialHandleId, Long warehouseId) {
+    public DoctorWarehouseMaterialHandle findByRelMaterialHandleIdAndWarehouseId(Long relMaterialHandleId, Long warehouseId,Long materialId) {
         Map<String, Object> criteria = Maps.newHashMap();
         criteria.put("relMaterialHandleId", relMaterialHandleId);
         criteria.put("warehouseId", warehouseId);
+        criteria.put("materialId", materialId);
         return this.sqlSession.selectOne(this.sqlId("findByRelMaterialHandleIdAndWarehouseId"), criteria);
     }
 
