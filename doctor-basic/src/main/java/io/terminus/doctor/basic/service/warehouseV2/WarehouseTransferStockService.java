@@ -136,11 +136,11 @@ public class WarehouseTransferStockService
 
                 if (changedTransferInWarehouse) {
                     //原调入仓库扣减库存
-                    doctorWarehouseStockManager.out(materialHandle.getMaterialId(), materialHandle.getQuantity(), transferInWarehouse);
+//                    doctorWarehouseStockManager.out(materialHandle.getMaterialId(), materialHandle.getQuantity(), transferInWarehouse);
                     //删除调入单据
-                    doctorWarehouseStockHandleDao.delete(transferIn.getStockHandleId());
+//                    doctorWarehouseStockHandleDao.delete(transferIn.getStockHandleId());
                     //删除原调入明细
-                    warehouseTransferManager.delete(transferIn);
+//                    warehouseTransferManager.delete(transferIn);
 
                     //新的调入仓库
                     transferInWarehouse = newTransferInWarehouseMap.get(detail.getTransferInWarehouseId());
@@ -150,7 +150,16 @@ public class WarehouseTransferStockService
                     //创建新的调入明细
                     DoctorWarehouseMaterialHandle newTransferInMaterialHandle = warehouseTransferManager.create(detail, stockDto, newTransferInStockHandle.get(detail.getTransferInWarehouseId()), transferInWarehouse);
                     newTransferInMaterialHandle.setRelMaterialHandleId(materialHandle.getId());
-                    doctorWarehouseMaterialHandleDao.update(newTransferInMaterialHandle);
+                    Boolean update = doctorWarehouseMaterialHandleDao.update(newTransferInMaterialHandle);
+
+                    // 修改调出明细
+                    if(update){
+                        DoctorWarehouseMaterialHandle newTransferOutMaterialHandle = new DoctorWarehouseMaterialHandle();
+                        DoctorWarehouseMaterialHandle byId = doctorWarehouseMaterialHandleDao.findById(materialHandle.getId());
+                        newTransferOutMaterialHandle.setId(byId.getId());
+                        newTransferOutMaterialHandle.setRelMaterialHandleId(newTransferInMaterialHandle.getId());
+                        doctorWarehouseMaterialHandleDao.update(newTransferOutMaterialHandle);
+                    }
 
                     //新调入仓库增加库存
                     doctorWarehouseStockManager.in(detail.getMaterialId(), detail.getQuantity(), transferInWarehouse);
