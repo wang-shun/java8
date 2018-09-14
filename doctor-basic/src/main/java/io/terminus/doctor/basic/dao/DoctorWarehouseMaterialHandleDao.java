@@ -476,4 +476,12 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectOne(this.sqlId("findMinTimeByFarmId"),farms);
     }
 
+    // 得到调拨入库单 （陈娟 2018-09-14）
+    public DoctorWarehouseMaterialHandle findByRelMaterialHandleIdAndWarehouseId(Long relMaterialHandleId, Long warehouseId) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("relMaterialHandleId", relMaterialHandleId);
+        criteria.put("warehouseId", warehouseId);
+        return this.sqlSession.selectOne(this.sqlId("findByRelMaterialHandleIdAndWarehouseId"), criteria);
+    }
+
 }
