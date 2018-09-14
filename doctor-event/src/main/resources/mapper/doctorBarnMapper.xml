@@ -242,6 +242,7 @@
         <if test="farmId != null">farm_id = #{farmId}</if>
         <if test="status != null">AND status = #{status}</if>
         <if test="status == null">AND status = 1</if>
+        and FIND_IN_SET(id,(select barn_ids from doctor_user_data_permissions where user_id = #{userId}))
         GROUP BY pig_type
         ) AS temp
     </select>
