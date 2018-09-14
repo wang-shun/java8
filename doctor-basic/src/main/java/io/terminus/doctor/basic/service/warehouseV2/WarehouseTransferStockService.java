@@ -1,6 +1,7 @@
 package io.terminus.doctor.basic.service.warehouseV2;
 
 import io.terminus.common.exception.ServiceException;
+import io.terminus.doctor.basic.dao.DoctorWarehouseStockHandleDao;
 import io.terminus.doctor.basic.dto.warehouseV2.WarehouseStockTransferDto;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.manager.WarehouseTransferManager;
@@ -136,6 +137,8 @@ public class WarehouseTransferStockService
                 if (changedTransferInWarehouse) {
                     //原调入仓库扣减库存
                     doctorWarehouseStockManager.out(materialHandle.getMaterialId(), materialHandle.getQuantity(), transferInWarehouse);
+                    //删除调入单据
+                    doctorWarehouseStockHandleDao.delete(transferIn.getStockHandleId());
                     //删除原调入明细
                     warehouseTransferManager.delete(transferIn);
 
@@ -151,6 +154,32 @@ public class WarehouseTransferStockService
 
                     //新调入仓库增加库存
                     doctorWarehouseStockManager.in(detail.getMaterialId(), detail.getQuantity(), transferInWarehouse);
+
+//                    // 调拨入库仓库更换：（陈娟 2018-09-14）
+//                    //原调入仓库扣减库存
+//                    doctorWarehouseStockManager.out(materialHandle.getMaterialId(), materialHandle.getQuantity(), transferInWarehouse);
+//
+//                    DoctorWareHouse warehouseIn = doctorWareHouseDao.findById(detail.getTransferInWarehouseId());
+//                     // 1.单据表：入库仓库名称更改
+//                    DoctorWarehouseStockHandle byId = doctorWarehouseStockHandleDao.findById(transferIn.getStockHandleId());
+//                    DoctorWarehouseStockHandle warehouseStockHandleIn = new DoctorWarehouseStockHandle();
+//                    warehouseStockHandleIn.setId(byId.getId());
+//                    warehouseStockHandleIn.setWarehouseId(warehouseIn.getId());
+//                    warehouseStockHandleIn.setWarehouseName(warehouseIn.getWareHouseName());
+//                    warehouseStockHandleIn.setWarehouseType(warehouseIn.getType());
+//                    doctorWarehouseStockHandleDao.update(warehouseStockHandleIn);
+//
+//                    // 2.单据明细表：入库仓库名称更改
+//                    DoctorWarehouseMaterialHandle warehouseMaterialHandleIn=new DoctorWarehouseMaterialHandle();
+//                    warehouseMaterialHandleIn.setId(transferIn.getId());
+//                    warehouseMaterialHandleIn.setWarehouseId(warehouseIn.getId());
+//                    warehouseMaterialHandleIn.setWarehouseName(warehouseIn.getWareHouseName());
+//                    warehouseMaterialHandleIn.setWarehouseType(warehouseIn.getType());
+//                    warehouseMaterialHandleIn.setQuantity(detail.getQuantity());
+//                    doctorWarehouseMaterialHandleDao.update(warehouseMaterialHandleIn);
+//
+//                    // 3.库存表：新调入的库存增加
+//                    doctorWarehouseStockManager.in(detail.getMaterialId(), detail.getQuantity(), transferInWarehouse);
                 }
 
                 //更改了数量，
