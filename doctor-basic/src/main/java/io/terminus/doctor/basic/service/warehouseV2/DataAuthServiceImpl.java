@@ -436,6 +436,7 @@ public class DataAuthServiceImpl implements DataAuthService{
     @Override
     public Response changeUserPassword(Map<String,String> params){
         String password = params.get("password");
+        log.error("=========+"+password);
         if(StringUtils.isNotBlank(password)){
             params.put("password", EncryptUtil.encrypt(password));
         }
