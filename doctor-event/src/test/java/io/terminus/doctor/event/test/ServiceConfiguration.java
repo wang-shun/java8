@@ -91,6 +91,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 
@@ -293,10 +294,8 @@ public class ServiceConfiguration {
             public Response<DoctorDepartmentDto> findCliqueTree(Long orgId) {
                 return null;
             }
-
             @Override
-            public Response<List<DoctorDepartmentDto>> availableBindDepartment(Long orgId) {
-                return null;
+            public Response<List<DoctorDepartmentDto>> availableBindDepartment(@NotNull(message = "orgId.not.null") Long orgId, String name) {return null;
             }
 
             @Override
@@ -371,55 +370,6 @@ public class ServiceConfiguration {
         };
     }
 
-    @Bean
-    public DoctorOrgReadService doctorOrgReadService() {
-        return new DoctorOrgReadService() {
 
-            @Override
-            public Response<DoctorOrg> findOrgById(Long orgId) {
-                return null;
-            }
-
-            @Override
-            public Response<List<DoctorOrg>> findOrgByIds(List<Long> orgIds) {
-                return null;
-            }
-
-            @Override
-            public Response<List<DoctorOrg>> findOrgsByUserId(Long userId) {
-                return null;
-            }
-
-            @Override
-            public Response<List<DoctorOrg>> findAllOrgs() {
-                return null;
-            }
-
-            @Override
-            public Response<List<DoctorOrg>> findOrgByParentId(Long parentId) {
-                return null;
-            }
-
-            @Override
-            public Response<List<DoctorOrg>> suggestOrg(String fuzzyName, Integer type) {
-                return null;
-            }
-
-            @Override
-            public Response<Paging<DoctorOrg>> paging(Map<String, Object> criteria, Integer pageSize, Integer pageNo) {
-                return null;
-            }
-
-            @Override
-            public Response<DoctorOrg> findByName(String name) {
-                return null;
-            }
-            @Override
-            public Response<DoctorOrg>  findGroupcompanyByOrgId(Long orgId) {
-                return null;
-            };
-
-        };
-    }
 
 }
