@@ -253,7 +253,7 @@ public class FarmController {
      * @return 员工列表
      */
     private List<FarmStaff> transformStaffs(Long farmId) {
-        List<Sub> subList = RespHelper.or500(primaryUserReadService.findSubsByFarmIdAndStatus(farmId, Sub.Status.ACTIVE.value()));
+        List<Sub> subList = RespHelper.or500(primaryUserReadService.findSubsByFarmIdAndStatus(farmId, Sub.Status.ACTIVE.value(),null));
         List<FarmStaff> staffList = Lists.newArrayList();
         if (!Arguments.isNullOrEmpty(subList)) {
             staffList.addAll(subList.stream().map(sub -> {
