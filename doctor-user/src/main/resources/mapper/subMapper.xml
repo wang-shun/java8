@@ -226,7 +226,9 @@
         <where>
             farm_id = #{farmId}
             AND status = #{status}
+            <if test="userId != null">
             AND  user_id != #{userId}
+            </if>
             <include refid="frozen"/>
         </where>
     </select>
