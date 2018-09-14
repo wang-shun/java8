@@ -136,11 +136,11 @@ public class WarehouseTransferStockService
 
                 if (changedTransferInWarehouse) {
                     //原调入仓库扣减库存
-//                    doctorWarehouseStockManager.out(materialHandle.getMaterialId(), materialHandle.getQuantity(), transferInWarehouse);
+                    doctorWarehouseStockManager.out(materialHandle.getMaterialId(), materialHandle.getQuantity(), transferInWarehouse);
                     //删除调入单据
-//                    doctorWarehouseStockHandleDao.delete(transferIn.getStockHandleId());
+                    doctorWarehouseStockHandleDao.delete(transferIn.getStockHandleId());
                     //删除原调入明细
-//                    warehouseTransferManager.delete(transferIn);
+                    warehouseTransferManager.delete(transferIn);
 
                     //新的调入仓库
                     transferInWarehouse = newTransferInWarehouseMap.get(detail.getTransferInWarehouseId());
@@ -152,7 +152,7 @@ public class WarehouseTransferStockService
                     newTransferInMaterialHandle.setRelMaterialHandleId(materialHandle.getId());
                     Boolean update = doctorWarehouseMaterialHandleDao.update(newTransferInMaterialHandle);
 
-                    // 修改调出明细
+                    // 修改调出明细 （陈娟 2018-09-14）
                     if(update){
                         DoctorWarehouseMaterialHandle newTransferOutMaterialHandle = new DoctorWarehouseMaterialHandle();
                         DoctorWarehouseMaterialHandle byId = doctorWarehouseMaterialHandleDao.findById(materialHandle.getId());
