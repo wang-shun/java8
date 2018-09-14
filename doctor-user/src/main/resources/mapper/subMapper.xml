@@ -229,6 +229,19 @@
         <where>
             farm_id = #{farmId}
             AND status = #{status}
+            AND  user_id != #{userId}
+            <include refid="frozen"/>
+        </where>
+    </select>
+
+    <!-- 软件登陆人员是谁，仓库单据操作人就默认是谁，并支持修改 （陈娟 2018-09-13） -->
+    <select id="findSubsByFarmIdAndStatusAndUserId" parameterType="map" resultMap="SubMap" >
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            farm_id = #{farmId}
+            AND status = #{status}
+            AND  user_id = #{userId}
             <include refid="frozen"/>
         </where>
     </select>

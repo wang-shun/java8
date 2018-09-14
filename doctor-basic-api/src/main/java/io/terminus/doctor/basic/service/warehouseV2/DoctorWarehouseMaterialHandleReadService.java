@@ -181,6 +181,10 @@ public interface DoctorWarehouseMaterialHandleReadService {
     //<!--得到领料出库的物料名称-->
     Response<List<Map>> getMaterialNameByID(Long id);
 
+
+    //<!--得到盘点：盘盈盘亏的最大时间节点-->
+    Response<List<Map>> getPYTime(Long id);
+
     //<!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注-->
     Response<List<Map>> getDataByMaterialName(Long id);
 

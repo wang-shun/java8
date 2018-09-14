@@ -868,6 +868,15 @@
         where stock_handle_id = #{id} and delete_flag=1
     </select>
 
+
+    <!--得到盘点：盘盈盘亏的最大时间节点-->
+    <select id="getPYTime" parameterType="Long" resultType="map">
+        select DISTINCT material_id,MAX(handle_date) as maxDate from doctor_warehouse_material_handle
+        where warehouse_id = #{id} and delete_flag=1 and (type = 7 or type =  8 )
+    </select>
+
+
+
     <!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，备注-->
     <select id="getDataByMaterialName" parameterType="Long" resultType="map">
         select mh.id as material_handle_id, mh.material_id as material_id, mh.material_name as material_name,s.code as material_code,
@@ -924,6 +933,11 @@
         select * from doctor_warehouse_material_handle
         where warehouse_id=#{warehouseId} and material_id=#{materialId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
         and delete_flag=1 and (type=2 or type=8 or type=10 or type=12) ORDER BY handle_date desc,id desc limit 1
+    </select>
+
+    <!--得到调拨入库单 （陈娟 2018-09-14）-->
+    <select id="findByRelMaterialHandleIdAndWarehouseId" parameterType="map" resultType="DoctorWarehouseMaterialHandle">
+        select * from doctor_warehouse_material_handle where rel_material_handle_id=#{relMaterialHandleId} and delete_flag=1 and warehouse_id=#{warehouseId} and material_id=#{materialId}
     </select>
 
 </mapper>

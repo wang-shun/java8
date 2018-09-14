@@ -162,9 +162,21 @@ public class PrimaryUserReadServiceImpl implements PrimaryUserReadService {
     }
 
     @Override
-    public Response<List<Sub>> findSubsByFarmIdAndStatus(@NotNull(message = "farm.id.not.null") Long farmId, Integer status) {
+    public Response<List<Sub>> findSubsByFarmIdAndStatus(@NotNull(message = "farm.id.not.null") Long farmId, Integer status, Long userId) {
         try {
-            return Response.ok(subDao.findSubsByFarmIdAndStatus(farmId, status));
+            return Response.ok(subDao.findSubsByFarmIdAndStatus(farmId, status, userId));
+        } catch (Exception e) {
+            log.error("find subs by farmId and status failed, farmId:{}, status:{}, cause:{}",
+                    farmId, status, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.subs.by.farmId.and.status");
+        }
+    }
+
+    // 软件登陆人员是谁，仓库单据操作人就默认是谁，并支持修改 （陈娟 2018-09-13）
+    @Override
+    public Response<Sub> findSubsByFarmIdAndStatusAndUserId(@NotNull(message = "farm.id.not.null")Long farmId, Integer status, Long userId) {
+        try {
+            return Response.ok(subDao.findSubsByFarmIdAndStatusAndUserId(farmId, status, userId));
         } catch (Exception e) {
             log.error("find subs by farmId and status failed, farmId:{}, status:{}, cause:{}",
                     farmId, status, Throwables.getStackTraceAsString(e));

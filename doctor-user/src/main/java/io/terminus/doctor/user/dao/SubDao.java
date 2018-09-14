@@ -72,8 +72,13 @@ public class SubDao extends MyBatisDao<Sub> {
     }
 
 
-    public List<Sub> findSubsByFarmIdAndStatus(Long farmId, Integer status) {
-        return getSqlSession().selectList(sqlId("findSubsByFarmIdAndStatus"), ImmutableMap.of("farmId", farmId, "status", status));
+    public List<Sub> findSubsByFarmIdAndStatus(Long farmId, Integer status, Long userId) {
+        return getSqlSession().selectList(sqlId("findSubsByFarmIdAndStatus"), ImmutableMap.of("farmId", farmId, "status", status,"userId",userId));
+    }
+
+    // 软件登陆人员是谁，仓库单据操作人就默认是谁，并支持修改 （陈娟 2018-09-13）
+    public Sub findSubsByFarmIdAndStatusAndUserId(Long farmId, Integer status, Long userId) {
+        return getSqlSession().selectOne(sqlId("findSubsByFarmIdAndStatusAndUserId"), ImmutableMap.of("farmId", farmId, "status", status,"userId",userId));
     }
 
     /**

@@ -101,7 +101,10 @@ public interface PrimaryUserReadService {
      * @param status 员工状态
      * @return 员工列表
      */
-    Response<List<Sub>> findSubsByFarmIdAndStatus(@NotNull(message = "farm.id.not.null") Long farmId, Integer status);
+    Response<List<Sub>> findSubsByFarmIdAndStatus(@NotNull(message = "farm.id.not.null") Long farmId, Integer status, Long userId);
+
+    // 软件登陆人员是谁，仓库单据操作人就默认是谁，并支持修改 （陈娟 2018-09-13）
+    Response<Sub> findSubsByFarmIdAndStatusAndUserId(@NotNull(message = "farm.id.not.null") Long farmId, Integer status, Long userId);
 
     /**
      * 获取关联猪场主账号列表

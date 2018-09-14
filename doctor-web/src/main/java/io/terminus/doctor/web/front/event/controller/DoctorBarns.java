@@ -34,6 +34,7 @@ import io.terminus.doctor.web.component.DoctorSearches;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.dto.DoctorBarnDetail;
 import io.terminus.doctor.web.front.event.dto.DoctorBarnSelect;
+import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -555,6 +556,8 @@ public class DoctorBarns {
             return new DoctorBarnCountForPigTypeDto();
         }
         doctorFarmAuthCenter.checkFarmAuth(farmId);
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        params.put("userId",baseUser.getId());
         params.put("farmId", farmId);
         if(params.get("status")==null ||params.get("status").equals("")){
             params.put("status",1);

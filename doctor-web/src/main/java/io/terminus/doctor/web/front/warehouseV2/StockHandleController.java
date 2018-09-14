@@ -118,6 +118,14 @@ public class StockHandleController {
         return maps;
     }
 
+    //得到盘点：盘盈盘亏的最大时间节点//冯雨晴2018-09-10
+    @RequestMapping(method = RequestMethod.GET, value = "/getPYTime")
+    public List<Map> getPYTime(@RequestParam Long id){
+        List<Map> maps = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getPYTime(id));
+        return maps;
+    }
+
+
     //根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注
     @RequestMapping(method = RequestMethod.GET, value = "/getDataByMaterialName")
     public List<Map> getDataByMaterialName(@RequestParam Long id) {
@@ -356,11 +364,6 @@ public class StockHandleController {
                                 detail.setStorageWarehouseNames(sh.getWarehouseName());
                             }
 
-                            //盘点入库计算合计fyq2018-9-12
-                            if (stockHandle.getHandleSubType().equals( WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue())) {
-                               detail.setBeforeStockQuantity(detail.getBeforeStockQuantity());
-                            }
-
 
                             return detail;
                         })
@@ -372,6 +375,7 @@ public class StockHandleController {
             vo.setStorageWarehouseId(sh.getWarehouseId());
             vo.setStorageWarehouseName(sh.getWarehouseName());
         }
+
 
         DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(vo.getFarmId()));
         if (farm != null) {
@@ -392,18 +396,9 @@ public class StockHandleController {
         BigDecimal totalUnitPrice = new BigDecimal(0);
         double totalAmount = 0L;
         for (StockHandleVo.Detail detail : vo.getDetails()) {
-            if(detail.getBeforeStockQuantity() != null) {
-                totalQuantity = totalQuantity.add(detail.getBeforeStockQuantity().add(detail.getQuantity()));
-            }else {
-                totalQuantity = totalQuantity.add(detail.getQuantity());
-            }
+            totalQuantity = totalQuantity.add(detail.getQuantity());
             totalUnitPrice = totalUnitPrice.add(null == detail.getUnitPrice() ? new BigDecimal(0) : detail.getUnitPrice());
-
-            if(detail.getBeforeStockQuantity() != null) {
-                totalAmount += detail.getBeforeStockQuantity().add(detail.getQuantity()).multiply(detail.getUnitPrice()).doubleValue();
-            }else {
-                totalAmount += detail.getQuantity().multiply(detail.getUnitPrice()).doubleValue();
-            }
+            totalAmount += detail.getQuantity().multiply(detail.getUnitPrice()).doubleValue();
         }
 
         vo.setTotalQuantity(totalQuantity.doubleValue());
@@ -742,7 +737,7 @@ public class StockHandleController {
                     title.createCell(3).setCellValue("规格");
                     title.createCell(4).setCellValue("单位");
                     title.createCell(5).setCellValue("账面数量");
-                    title.createCell(6).setCellValue("盘点数量");
+                    title.createCell(6).setCellValue("入库数量");
                     title.createCell(7).setCellValue("单价");
                     title.createCell(8).setCellValue("金额（元）");
                     title.createCell(9).setCellValue("备注");
@@ -757,7 +752,7 @@ public class StockHandleController {
                         row.createCell(3).setCellValue(vo.getMaterialSpecification());
                         row.createCell(4).setCellValue(vo.getUnit());
                         row.createCell(5).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
-                        row.createCell(6).setCellValue(vo.getBeforeInventoryQuantity().add(vo.getQuantity()).doubleValue());
+                        row.createCell(6).setCellValue(vo.getQuantity().doubleValue());
                         if(vo.getUnitPrice()==0.0&&vo.getAmount()==0.0){
                             CellStyle style = workbook.createCellStyle();
                             //对齐
@@ -806,7 +801,7 @@ public class StockHandleController {
                         title.createCell(9).setCellValue("备注");
 
                         BigDecimal totalQuantity = new BigDecimal(0);
-                        BigDecimal inventoryQuantity = new BigDecimal(0);
+                       // BigDecimal inventoryQuantity = new BigDecimal(0);
                         double totalUnitPrice = 0L;
                         double totalAmount = 0L;
 
@@ -834,8 +829,8 @@ public class StockHandleController {
                             }
                             row.createCell(9).setCellValue(vo.getRemark());
 
-                            totalQuantity = vo.getQuantity();
-                            inventoryQuantity = vo.getBeforeInventoryQuantity();
+                            totalQuantity = totalQuantity.add(vo.getQuantity());
+                            //inventoryQuantity = vo.getBeforeInventoryQuantity();
                             totalUnitPrice += vo.getUnitPrice();
                             totalAmount += vo.getAmount();
                         }
@@ -851,9 +846,9 @@ public class StockHandleController {
                         //对齐
                         style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
                         countCell.setCellStyle(style);
-                        countCell.setCellValue("盘点：盘亏");
+                        countCell.setCellValue("合计");
 
-                        countRow.createCell(6).setCellValue(inventoryQuantity.subtract(totalQuantity).doubleValue());
+                        countRow.createCell(6).setCellValue(totalQuantity.doubleValue());
 
                         if(totalUnitPrice==0.0){
                             countRow.createCell(7).setCellValue("--");
@@ -1119,7 +1114,7 @@ public class StockHandleController {
                     }
 
                     Row countRow = sheet.createRow(pos);
-                    CellRangeAddress cra = new CellRangeAddress(pos, pos, 0, 4);
+                    CellRangeAddress cra = new CellRangeAddress(pos, pos, 0, 5);
                     sheet.addMergedRegion(cra);
 
                     Cell countCell = countRow.createCell(0);
@@ -1129,12 +1124,12 @@ public class StockHandleController {
                     countRow.createCell(8).setCellStyle(style);
                     countCell.setCellValue("合计");
 
-                    countRow.createCell(6).setCellValue(totalQuantity.doubleValue());
+                    countRow.createCell(8).setCellValue(totalQuantity.doubleValue());
 
                     if(totalAmount==0.0){
-                        countRow.createCell(8).setCellValue("--");
+                        countRow.createCell(10).setCellValue("--");
                     }else{
-                        countRow.createCell(8).setCellValue(totalAmount);
+                        countRow.createCell(10).setCellValue(totalAmount);
                     }
 
                     pos++;

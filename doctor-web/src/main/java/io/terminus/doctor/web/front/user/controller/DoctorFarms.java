@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.Splitters;
@@ -37,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 
@@ -158,9 +160,40 @@ public class DoctorFarms {
      * @param farmId 猪场id
      * @return 员工列表
      */
+    // 软件登陆人员是谁，仓库单据操作人就默认是谁，并支持修改 （陈娟 2018-09-13）
     private List<FarmStaff> transformStaffs(Long farmId) {
-        List<Sub> subList = RespHelper.or500(primaryUserReadService.findSubsByFarmIdAndStatus(farmId, Sub.Status.ACTIVE.value()));
         List<FarmStaff> staffList = Lists.newArrayList();
+        BaseUser currentUser = UserUtil.getCurrentUser();
+        // 得到当前登陆人的信息，置顶
+        Sub subUser = RespHelper.or500(primaryUserReadService.findSubsByFarmIdAndStatusAndUserId(farmId, Sub.Status.ACTIVE.value(), currentUser.getId()));
+        if(subUser!=null&&notNull(subUser)){
+            FarmStaff farmStaff = new FarmStaff();
+            farmStaff.setUserId(subUser.getUserId());
+            farmStaff.setRealName(subUser.getRealName());
+            farmStaff.setStatus(subUser.getStatus());
+            farmStaff.setFarmId(subUser.getFarmId());
+            staffList.add(farmStaff);
+        }else{
+            PrimaryUser primaryUser = RespHelper.or500(primaryUserReadService.findPrimaryByFarmIdAndStatus(farmId, UserStatus.NORMAL.value()));
+            if (primaryUser != null) {
+                FarmStaff farmStaff = new FarmStaff();
+                farmStaff.setFarmId(primaryUser.getRelFarmId());
+                farmStaff.setUserId(primaryUser.getUserId());
+                farmStaff.setStatus(primaryUser.getStatus());
+                Response<UserProfile> userProfileResponse = doctorUserProfileReadService.findProfileByUserId(primaryUser.getUserId());
+                if (userProfileResponse.isSuccess()
+                        && notNull(userProfileResponse.getResult())
+                        && !Strings.isNullOrEmpty(userProfileResponse.getResult().getRealName())) {
+                    farmStaff.setRealName(userProfileResponse.getResult().getRealName());
+                } else {
+                    User user = RespHelper.or500(doctorUserReadService.findById(primaryUser.getUserId()));
+                    farmStaff.setRealName(user.getName());
+                }
+                staffList.add(farmStaff);
+            }
+        }
+
+        List<Sub> subList = RespHelper.or500(primaryUserReadService.findSubsByFarmIdAndStatus(farmId, Sub.Status.ACTIVE.value(),currentUser.getId()));
         if (!Arguments.isNullOrEmpty(subList)) {
             staffList.addAll(subList.stream().map(sub -> {
                 FarmStaff farmStaff = new FarmStaff();
@@ -170,23 +203,6 @@ public class DoctorFarms {
                 farmStaff.setFarmId(sub.getFarmId());
                 return farmStaff;
             }).collect(Collectors.toList()));
-        }
-        PrimaryUser primaryUser = RespHelper.or500(primaryUserReadService.findPrimaryByFarmIdAndStatus(farmId, UserStatus.NORMAL.value()));
-        if (primaryUser != null) {
-            FarmStaff farmStaff = new FarmStaff();
-            farmStaff.setFarmId(primaryUser.getRelFarmId());
-            farmStaff.setUserId(primaryUser.getUserId());
-            farmStaff.setStatus(primaryUser.getStatus());
-            Response<UserProfile> userProfileResponse = doctorUserProfileReadService.findProfileByUserId(primaryUser.getUserId());
-            if (userProfileResponse.isSuccess()
-                    && notNull(userProfileResponse.getResult())
-                    && !Strings.isNullOrEmpty(userProfileResponse.getResult().getRealName())) {
-                farmStaff.setRealName(userProfileResponse.getResult().getRealName());
-            } else {
-                User user = RespHelper.or500(doctorUserReadService.findById(primaryUser.getUserId()));
-                farmStaff.setRealName(user.getName());
-            }
-            staffList.add(farmStaff);
         }
         return staffList;
     }

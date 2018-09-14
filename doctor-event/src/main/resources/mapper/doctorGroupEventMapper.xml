@@ -799,14 +799,14 @@
         a.pig_type as pigType,
         "保育猪" as pigTypeName,
         a.barn_name as barnName,
-        sum(a.avg_day_age*a.quantity)/sum(a.quantity) as ages,
-        sum(a.quantity) as pigNumber,
-        sum(a.weight) as pigWeight,
-        sum(a.amount)/sum(a.weight) as pigPrice,
-        sum(a.amount) as pigAmount,
+        a.avg_day_age * a.quantity / a.quantity as ages,
+        a.quantity as pigNumber,
+        a.weight as pigWeight,
+        a.amount / a.weight as pigPrice,
+        a.amount as pigAmount,
         b.breed_id as breedId,
         b.breed_name as breedName
-        from doctor_group_events a left join doctor_groups b on a.group_id = b.id
+        from doctor_group_events a left join doctor_groups b on  a.group_id = b.id
         left join doctor_customers c on a.customer_id = c.id
         where a.type = 3
         and a.pig_type = 2
@@ -819,7 +819,6 @@
         <if test="client != null">AND a.customer_id = #{client}</if>
         <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
-        group by a.event_at
         order by a.event_at ASC ;
     </select>
 
@@ -831,11 +830,11 @@
         a.pig_type as pigType,
         "仔猪" as pigTypeName,
         a.barn_name as barnName,
-        sum(a.avg_day_age*a.quantity)/sum(a.quantity) as ages,
-        sum(a.quantity) as pigNumber,
-        sum(a.weight) as pigWeight,
-        sum(a.amount)/sum(a.weight) as pigPrice,
-        sum(a.amount) as pigAmount,
+        a.avg_day_age * a.quantity / a.quantity as ages,
+        a.quantity as pigNumber,
+        a.weight as pigWeight,
+        a.amount/a.weight as pigPrice,
+        a.amount as pigAmount,
         b.breed_id as breedId,
         b.breed_name as breedName
         from doctor_group_events a left join doctor_groups b on a.group_id = b.id
@@ -851,7 +850,6 @@
         <if test="client != null">AND a.customer_id = #{client}</if>
         <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
-        group by a.event_at
         order by a.event_at ASC ;
     </select>
 
@@ -863,11 +861,11 @@
         a.pig_type as pigType,
         "后备猪" as pigTypeName,
         a.barn_name as barnName,
-        sum(a.avg_day_age*a.quantity)/sum(a.quantity) as ages,
-        sum(a.quantity) as pigNumber,
-        sum(a.weight) as pigWeight,
-        sum(a.amount)/sum(a.weight) as pigPrice,
-        sum(a.amount) as pigAmount,
+        a.avg_day_age * a.quantity / a.quantity  as ages,
+        a.quantity as pigNumber,
+        a.weight as pigWeight,
+        a.amount / a.weight as pigPrice,
+        a.amount as pigAmount,
         b.breed_id as breedId,
         b.breed_name as breedName
         from doctor_group_events a left join doctor_groups b on a.group_id = b.id
@@ -883,7 +881,6 @@
         <if test="client != null">AND a.customer_id = #{client}</if>
         <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
-        group by a.event_at
         order by a.event_at ASC ;
     </select>
 
@@ -895,11 +892,11 @@
         a.pig_type as pigType,
         "育肥猪" as pigTypeName,
         a.barn_name as barnName,
-        sum(a.avg_day_age*a.quantity)/sum(a.quantity) as ages,
-        sum(a.quantity) as pigNumber,
-        sum(a.weight) as pigWeight,
-        sum(a.amount)/sum(a.weight) as pigPrice,
-        sum(a.amount) as pigAmount,
+        a.avg_day_age * a.quantity / a.quantity as ages,
+        a.quantity as pigNumber,
+        a.weight as pigWeight,
+        a.amount / a.weight as pigPrice,
+        a.amount as pigAmount,
         b.breed_id as breedId,
         b.breed_name as breedName
         from doctor_group_events a left join doctor_groups b on a.group_id = b.id
@@ -915,7 +912,6 @@
         <if test="client != null">AND a.customer_id = #{client}</if>
         <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
-        group by a.event_at
         order by a.event_at ASC ;
     </select>
 
