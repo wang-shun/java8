@@ -1401,10 +1401,10 @@
         '种猪' AS pigTypeName,
         a.barn_name AS barnName,
         count(1) AS pigNumber,
-        DATEDIFF(a.event_at,b.birth_date)as ages,
-        ifnull(sum(a.weight), 0) AS pigWeight,
-        ifnull(sum(a.amount)/sum(a.weight),0) AS pigPrice,
-        ifnull(sum(a.amount), 0) AS pigAmount,
+        DATEDIFF(a.event_at,b.birth_date) as ages,
+        ifnull(a.weight, 0) AS pigWeight,
+        ifnull(a.amount / a.weight,0) AS pigPrice,
+        ifnull(a.amount, 0) AS pigAmount,
         b.breed_id as breedId,
         b.breed_name as breedName
         from doctor_pig_events a left join doctor_pigs b on a.pig_id = b.id
@@ -1420,7 +1420,6 @@
         <if test="client != null">AND  a.customer_id = #{client}</if>
         <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
-        group by a.event_at
         order by a.event_at ASC ;
     </select>
 
