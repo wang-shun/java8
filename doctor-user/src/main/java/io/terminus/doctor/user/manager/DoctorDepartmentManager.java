@@ -13,6 +13,7 @@ import io.terminus.doctor.user.model.DoctorOrg;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -62,6 +63,7 @@ public class DoctorDepartmentManager {
         DoctorDepartmentDto departmentDto = new DoctorDepartmentDto();
         departmentDto.setId(doctorOrg.getId());
         departmentDto.setName(doctorOrg.getName());
+        departmentDto.setType(doctorOrg.getType());
         departmentDto.setLevel(level);
         level ++;
         List<DoctorOrg> children = doctorOrgDao.findOrgByParentId(departmentId);
@@ -94,9 +96,11 @@ public class DoctorDepartmentManager {
         return doctorOrgDao.unbindDepartment(Lists.newArrayList(departmentId));
     }
 
-    public List<DoctorDepartmentDto> availableBindDepartment(Long departmentId) {
-        List<DoctorOrg> orgList = doctorOrgDao.findExcludeIds(upAndIncludeSelfNodeId(departmentId));
-        return orgList.stream().map(doctorOrg -> new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), null, null))
+    //关联子公司得到公司（陈娟 2018-08-29）
+    public List<DoctorDepartmentDto> availableBindDepartment(Long departmentId,String name) {
+//        List<DoctorOrg> orgList = doctorOrgDao.findExcludeIds(upAndIncludeSelfNodeId(departmentId));
+        List<DoctorOrg> company = doctorOrgDao.getCompanyByName(name);
+        return company.stream().map(doctorOrg -> new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), null,doctorOrg.getType(),null))
                 .collect(Collectors.toList());
     }
 
@@ -116,10 +120,51 @@ public class DoctorDepartmentManager {
 
     public Paging<DoctorDepartmentDto> pagingCliqueTree(Map<String, Object> criteria, Integer pageSize, Integer pageNo) {
         PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
-        Paging<DoctorOrg> pagingOrg = doctorOrgDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria);
+        //集团，公司的数据展示（陈娟 2018-8-29）
+        Paging<DoctorOrg> pagingOrg = doctorOrgDao.pagingCompany(pageInfo.getOffset(), pageInfo.getLimit(), criteria);
         List<DoctorDepartmentDto> departmentDtoList = pagingOrg.getData().stream()
                 .map(doctorOrg -> findCliqueTree(doctorOrg.getId())).collect(Collectors.toList());
+        //可以模糊查询集团下面的公司，此时查出公司和他上面的集团
+        Integer type=Integer.valueOf(criteria.get("type").toString());
+        String fuzzyName = (String)criteria.get("fuzzyName");
+        if(type==2){
+            //先根据条件得到集团
+            List<DoctorOrg> parentId = doctorOrgDao.getParentId(criteria);
+            //根据集团得到符合条件的子公司
+            List<DoctorDepartmentDto> parentList = parentId.stream()
+                    .map(parent -> findCliqueTree2(parent.getParentId(),fuzzyName)).collect(Collectors.toList());
+            departmentDtoList.addAll(parentList);
+
+        }
+
         return new Paging<>(pagingOrg.getTotal(), departmentDtoList);
+    }
+
+    public DoctorDepartmentDto findCliqueTree2(Long departmentId,String fuzzyName) {
+        return findCliqueTreeImp2(departmentId, fuzzyName,1);
+    }
+
+    private DoctorDepartmentDto findCliqueTreeImp2(Long departmentId,String fuzzyName, Integer level) {
+        DoctorOrg doctorOrg = doctorOrgDao.findById(departmentId);
+        DoctorDepartmentDto departmentDto = new DoctorDepartmentDto();
+        departmentDto.setId(doctorOrg.getId());
+        departmentDto.setName(doctorOrg.getName());
+        departmentDto.setType(doctorOrg.getType());
+        departmentDto.setLevel(level);
+        level ++;
+        if(fuzzyName==null||isNull(fuzzyName)){
+            fuzzyName=new String("");
+        }
+        List<DoctorOrg> children = doctorOrgDao.findOrgByParentIdAndName(departmentId,fuzzyName);
+        if (Arguments.isNullOrEmpty(children)) {
+            return departmentDto;
+        }
+        List<DoctorDepartmentDto> childrenDepartmentList = Lists.newArrayList();
+        for (DoctorOrg childOrg : children) {
+            childrenDepartmentList.add(findCliqueTreeImp2(childOrg.getId(),fuzzyName, level));
+        }
+        departmentDto.setChildren(childrenDepartmentList);
+        return departmentDto;
     }
 
     public DoctorDepartmentDto findClique(Long departmentId, Boolean isFarm) {
@@ -133,7 +178,7 @@ public class DoctorDepartmentManager {
     private DoctorDepartmentDto findClique(Long departmentId) {
         DoctorOrg doctorOrg = doctorOrgDao.findById(departmentId);
         if (Objects.equals(doctorOrg.getType(), DoctorOrg.Type.CLIQUE.getValue())) {
-            return new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), 1, null);
+            return new DoctorDepartmentDto(doctorOrg.getId(), doctorOrg.getName(), 1,null, null);
         }
         return findClique(doctorOrg.getParentId());
     }

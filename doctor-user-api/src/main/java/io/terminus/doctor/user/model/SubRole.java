@@ -29,7 +29,7 @@ import java.util.Objects;
  */
 @Data
 @EqualsAndHashCode(of = {"id"})
-@ToString(of = {"id", "name", "desc", "userId", "status"})
+@ToString(of = {"id", "name", "desc", "userId", "status","roleType"})
 public class SubRole implements Serializable, CustomRole {
 
     private static final long serialVersionUID = 1L;
@@ -73,6 +73,11 @@ public class SubRole implements Serializable, CustomRole {
      * 0. 未生效(冻结), 1. 生效, -1. 删除
      */
     private Integer status;
+
+    /**
+     * 角色类型
+     */
+    private Integer roleType;
 
     /**
      * 角色对应资源列表, 不存数据库

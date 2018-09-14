@@ -270,6 +270,14 @@ public class UserInitService {
         primaryUser.setRealName(realName);
         primaryUser.setStatus(UserStatus.NORMAL.value());
         primaryUserDao.create(primaryUser);
+//        Sub sub=new Sub();
+//        sub.setUserId(user.getId());
+//        sub.setUserName(user.getName());
+//        sub.setRealName(Params.get(user.getExtra(), "realName"));
+//        sub.setContact(Params.get(user.getExtra(), "contact"));
+//        sub.setUserType(2);
+//        sub.setStatus(UserStatus.NORMAL.value());
+//        subDao.create(sub);
     }
 
     public List<View_FarmMember> getFarmMember(Long datasourceId) {
@@ -487,6 +495,7 @@ public class UserInitService {
             sub.setParentUserId(Long.valueOf(Params.get(subUser.getExtra(), "pid")));
             sub.setContact(Params.get(subUser.getExtra(), "contact"));
             sub.setStatus(UserStatus.NORMAL.value());
+            sub.setUserType(3);
             subDao.create(sub);
 
             userWriteService.update(subUser);

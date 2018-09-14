@@ -69,9 +69,40 @@ public interface DoctorOrgReadService {
     Response<DoctorOrg> findByName(String name);
 
     /**
-     * 通过公司id查集团(孔景军)
+     * 用户审核通过后把公司的parent_id置为0、type置为2(此方法已作废)
+     * @param id
+     * @return
+     */
+    Response<Boolean> updateOrgPidTpye(Long id);
+
+    /**
+     * 通过集团查公司(孔景军)
+     * @param orgIds
      * @param orgId
      * @return
      */
-    Response<DoctorOrg>  findGroupcompanyByOrgId(Long orgId);
+    Response<List<DoctorOrg>>  findOrgByGroup(List<Long> orgIds,Long groupId);
+
+    /**
+     * 通过用户id查用户类型
+     * @param userId
+     * @return
+     */
+    Integer  findUserTypeById(Long userId);
+    List<Map<String,Object>> getOrgcunlan(Long groupId,List<Long> orgIds);
+    Map<Object,String> getGroupcunlan(Long groupId,List<Long> orgIds);
+
+    /**
+     * 员工查询（yusq）1
+     */
+    Response staffQuery(Map<String, Object> params);
+
+
+    /**
+     * 通过公司查集团(孔景军)
+     * @param groupId
+     * @return
+     */
+    Response<Long>  findGroupByOrgId(Long groupId);
+
 }

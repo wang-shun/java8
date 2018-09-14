@@ -13,9 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
 
@@ -50,6 +48,18 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
         Response<List<DoctorOrg>> response = new Response<>();
         try {
             response.setResult(doctorOrgDao.findByIds(orgIds));
+        } catch (Exception e) {
+            log.error("find org by id failed, orgIds:{}, cause:{}", orgIds, Throwables.getStackTraceAsString(e));
+            response.setError("find.org.by.id.failed");
+        }
+        return response;
+    }
+
+    @Override
+    public Response<List<DoctorOrg>>  findOrgByGroup(List<Long> orgIds,Long groupId){
+        Response<List<DoctorOrg>> response = new Response<>();
+        try {
+            response.setResult(doctorOrgDao.findOrgByGroup(orgIds,groupId));
         } catch (Exception e) {
             log.error("find org by id failed, orgIds:{}, cause:{}", orgIds, Throwables.getStackTraceAsString(e));
             response.setError("find.org.by.id.failed");
@@ -122,6 +132,12 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
             return Response.fail("find.by.name.failed");
         }
     }
+
+    @Override
+    public Response<Boolean> updateOrgPidTpye(Long id) {
+        return null;
+    }
+
     /**
      * 通过公司id查集团(孔景军)
      * @param orgId
@@ -131,4 +147,60 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
     public Response<DoctorOrg>  findGroupcompanyByOrgId(Long orgId){
         return Response.ok(doctorOrgDao.findGroupcompanyByOrgId(orgId));
     }
+
+    @Override
+    public Integer  findUserTypeById(Long userId){
+        return doctorOrgDao.findUserTypeById(userId);
+    }
+    @Override
+    public List<Map<String,Object>> getOrgcunlan(Long groupId,List<Long> orgIds){
+        List<Map<String,Object>> result = new ArrayList<>();
+        List<Map<String,Object>> orgList = doctorOrgDao.getOrgByGroupId(groupId,orgIds);
+        orgList.parallelStream().forEach(map -> {
+            List<Map<Object,String>> orgCunlan = doctorOrgDao.getCunlan((long)map.get("id"));
+            Map<String,Object> maps = new HashMap<>();
+            maps.put("orgName",map.get("name"));
+            maps.put("orgCunlan",orgCunlan);
+            result.add(maps);
+        });
+        return result;
+    }
+    @Override
+    public Map<Object,String> getGroupcunlan(Long groupId,List<Long> orgIds){
+        String groupName = doctorOrgDao.getGroupNameById(groupId);
+        List<Long> orgList = doctorOrgDao.getOrgByGroupId1(groupId,orgIds);
+        List<Map<Object,String>> a = new ArrayList<>();
+        if(orgList.size() == 0){
+            a= null;
+        }else {
+            a = doctorOrgDao.getGroupCunlan(orgList);
+        }
+        Map map = new HashMap();
+        if(groupId != 0L) {
+            map.put("groupName", groupName);
+        }else{
+            map.put("groupName", "无集团");
+        }
+        map.put("data",a);
+        return map;
+    }
+    /**
+     * 员工查询1
+     */
+    @Override
+    public Response staffQuery(Map<String, Object> params) {
+        Paging<Map<String,Object>> paging = doctorOrgDao.staffQuery(params);
+        return Response.ok(paging);
+    }
+
+    /**
+     * 通过公司查集团(孔景军)
+     * @param groupId
+     * @return
+     */
+    @Override
+    public Response<Long>  findGroupByOrgId(Long groupId){
+        return Response.ok(doctorOrgDao.findGroupByOrgId(groupId));
+    }
+
 }

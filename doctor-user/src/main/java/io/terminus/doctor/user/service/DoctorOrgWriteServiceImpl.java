@@ -60,10 +60,10 @@ public class DoctorOrgWriteServiceImpl implements DoctorOrgWriteService{
 
 
     @Override
-    public Response<Boolean> updateOrgName(Long id, String name) {
+    public Response<Boolean> updateOrgName(Long id, String name,Integer type) {
         Response<Boolean> response=new Response<>();
         try{
-            response.setResult(doctorOrgDao.updateName(id,name));
+            response.setResult(doctorOrgDao.updateName(id,name,type));
         }catch (Exception e){
             log.error("update org failed, cause : {}", Throwables.getStackTraceAsString(e));
             response.setError("update.org.failed");

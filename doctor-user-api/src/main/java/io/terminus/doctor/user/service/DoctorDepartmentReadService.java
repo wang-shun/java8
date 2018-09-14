@@ -35,7 +35,7 @@ public interface DoctorDepartmentReadService {
      * @param orgId 父公司id
      * @return 公司列表
      */
-    Response<List<DoctorDepartmentDto>> availableBindDepartment(@NotNull(message = "orgId.not.null") Long orgId);
+    Response<List<DoctorDepartmentDto>> availableBindDepartment(@NotNull(message = "orgId.not.null") Long orgId,String name);
 
     /**
      * 分页获取集团树

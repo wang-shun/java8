@@ -19,15 +19,15 @@ public interface DataAuthService {
 
     Response selFarms(Integer orgId);
 
-    Response getUserRoleInfo(Map<String, String> params);
+    Response getUserRoleInfo(Map<String,String> params);
 
     Response userSingleRoleInfo(Integer userId);
 
-    Response editUserRoleInfo(Map<String, String> params);
+    Response editUserRoleInfo(Map<String,String> params);
 
     Response getDataSubRoles(Integer userId);
 
     Response saveDataSubRoles(DataAuth dataSubRoles);
 
-    Response changeUserPassword(Map<String, String> params);
+    Response changeUserPassword(Map<String,String> params);
 }

@@ -66,10 +66,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Author:  <a href="mailto:i@terminus.io">jlchen</a>
@@ -435,6 +432,107 @@ public class Users {
         return result.getResult();
     }
 
+
+    /**
+     * 根据登录用户筛选集团(孔景军)
+     * @return
+     */
+    @RequestMapping(value = "/groupList", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Map groupList() {
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        if (baseUser == null) {
+            throw new JsonResponseException("user.not.login");
+        }
+        Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
+        if (!dataPermissionResponse.isSuccess()) {
+            throw new JsonResponseException("user.not.permission");
+        }
+        Integer userType = doctorOrgReadService.findUserTypeById(baseUser.getId());
+        List<Long> groupIds = dataPermissionResponse.getResult().getGroupIdsList();
+        List<DoctorOrg> data = new ArrayList<>();
+        if(groupIds == null || groupIds.size() == 0){
+            data = null;
+        } else {
+            Response<List<DoctorOrg>> result = doctorOrgReadService.findOrgByIds(groupIds);
+            if (!result.isSuccess()) {
+                throw new JsonResponseException(result.getError());
+            }
+            data =  result.getResult();
+            if(groupIds.contains(0L)){
+                DoctorOrg group = new DoctorOrg();
+                group.setId(0L);
+                group.setName("无集团");
+                data.add(group);
+            }
+        }
+        List<Long> OrgIdsList = dataPermissionResponse.getResult().getOrgIdsList();
+        Long groupId = doctorOrgReadService.findGroupByOrgId(OrgIdsList.get(0)).getResult();
+        Map map = new HashMap();
+        map.put("data",data);
+        map.put("userType",userType);
+        map.put("groupId",groupId);
+        return map;
+    }
+
+    /**
+     * 根据集团筛选公司（孔景军）
+     * @return
+     */
+    @RequestMapping(value = "/getOrgListByGroup", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<DoctorOrg> orgListByGroup(@RequestParam Long groupId) {
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        if (baseUser == null) {
+            throw new JsonResponseException("user.not.login");
+        }
+        Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
+        if (!dataPermissionResponse.isSuccess()) {
+            throw new JsonResponseException("user.not.permission");
+        }
+        List<Long> orgIds = dataPermissionResponse.getResult().getOrgIdsList();
+        Response<List<DoctorOrg>> result = doctorOrgReadService.findOrgByGroup(orgIds,groupId);
+        if (!result.isSuccess()) {
+            throw new JsonResponseException(result.getError());
+        }
+        return result.getResult();
+    }
+    /**
+     * 查集团下的公司的存栏（孔景军）
+     * @return
+     */
+    @RequestMapping(value = "/getOrgcunlan", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Map<String,Object>> getOrgcunlan(@RequestParam Long groupId) {
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        if (baseUser == null) {
+            throw new JsonResponseException("user.not.login");
+        }
+        Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
+        if (!dataPermissionResponse.isSuccess()) {
+            throw new JsonResponseException("user.not.permission");
+        }
+        List<Long> orgIds = dataPermissionResponse.getResult().getOrgIdsList();
+        List<Map<String,Object>> orgList = doctorOrgReadService.getOrgcunlan(groupId,orgIds);
+        return orgList;
+    }
+
+    /**
+     * 查集团的存栏（孔景军）
+     * @return
+     */
+    @RequestMapping(value = "/getGroupcunlan", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Map<Object,String> getGroupcunlan(@RequestParam Long groupId) {
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        if (baseUser == null) {
+            throw new JsonResponseException("user.not.login");
+        }
+        Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
+        if (!dataPermissionResponse.isSuccess()) {
+            throw new JsonResponseException("user.not.permission");
+        }
+        List<Long> orgIds = dataPermissionResponse.getResult().getOrgIdsList();
+        Map<Object,String> orgList = doctorOrgReadService.getGroupcunlan(groupId,orgIds);
+        return orgList;
+    }
     @Data
     private static class UserWithServiceStatus extends User implements Serializable {
         private static final long serialVersionUID = -4515482071656393479L;

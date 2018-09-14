@@ -8,7 +8,11 @@
     <resultMap id="DoctorStaffMap" type="DoctorStaff">
         <id column="id" property="id"/>
         <result column="farm_id" property="farmId"/>
+        <result column="org_id" property="orgId"/>
+        <result column="group_id" property="groupId"/>
         <result column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="mobile" property="mobile"/>
         <result column="status" property="status"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
@@ -23,11 +27,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, user_id, status, created_at, updated_at
+        farm_id, org_id, group_id, user_id, user_name, mobile, status, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{userId}, #{status}, now(), now()
+        #{farmId},#{orgId},#{groupId}, #{userId},#{userName},#{mobile}, #{status}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorStaff" keyProperty="id" useGeneratedKeys="true">
@@ -65,7 +69,11 @@
         <include refid="tb"/>
         <set>
             <if test="farmId != null">farm_id = #{farmId},</if>
+            <if test="farmId != null">org_id = #{orgId},</if>
+            <if test="farmId != null">group_id = #{groupId},</if>
             <if test="userId != null">user_id = #{userId},</if>
+            <if test="farmId != null">user_name = #{userName},</if>
+            <if test="farmId != null">mobile = #{mobile},</if>
             <if test="status != null">status = #{status},</if>
             updated_at=now()
         </set>
@@ -76,5 +84,16 @@
         DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
+
+    <select id="findOrgIdByFarmId" parameterType="long" resultType="long" >
+        SELECT org_id
+        FROM doctor_farms
+        WHERE id = #{farmId}
+    </select>
+    <select id="findGroupIdByFarmId" parameterType="long" resultType="long" >
+        SELECT parent_id
+        FROM doctor_orgs
+        WHERE id = #{orgId}
+    </select>
 
 </mapper>
