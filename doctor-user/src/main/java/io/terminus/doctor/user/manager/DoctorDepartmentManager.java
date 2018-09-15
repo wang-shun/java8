@@ -195,9 +195,12 @@ public class DoctorDepartmentManager {
             linerDto.setCliqueId(doctorOrg.getId());
             linerDto.setCliqueName(doctorOrg.getName());
         } else {
-            DoctorOrg clique = doctorOrgDao.findById(doctorOrg.getParentId());
-            linerDto.setCliqueId(clique.getId());
-            linerDto.setCliqueName(clique.getName());
+            //此处判断还需测试，正式系统没有判断不报错，但是测试系统报错（孔景军）
+            if(doctorOrg.getParentId() != 0L) {
+                DoctorOrg clique = doctorOrgDao.findById(doctorOrg.getParentId());
+                linerDto.setCliqueId(clique.getId());
+                linerDto.setCliqueName(clique.getName());
+            }
         }
         return linerDto;
     }
