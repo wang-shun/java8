@@ -193,4 +193,13 @@ public class DataAuthDao extends MyBatisDao<DataAuth> {
     public List<Long> getGroupIdList(List<Long> OrgIdsList){
         return getSqlSession().selectList(sqlId("getGroupIdList"),OrgIdsList);
     }
+
+    // user profile 的新增与编辑 （陈娟 2018-09-16）
+    public int insertUserProfile(Map<String, String> params) {
+        return getSqlSession().insert(sqlId("insertUserProfile"), params);
+    }
+
+    public int updateUserProfile(Map<String, String> params) {
+        return getSqlSession().insert(sqlId("updateUserProfile"), params);
+    }
 }
