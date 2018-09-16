@@ -233,8 +233,8 @@
 
     <update id="updateUserProfile" parameterType="Map">
         update parana_user_profiles set
-        <if test="realname != null and realname != ''">
-            realname = #{realname},
+        <if test="realName != null and realName != ''">
+            realname = #{realName},
         </if>
         updated_at=NOW()
         where user_id = #{userId}
