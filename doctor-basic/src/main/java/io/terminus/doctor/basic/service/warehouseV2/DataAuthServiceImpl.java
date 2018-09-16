@@ -139,6 +139,8 @@ public class DataAuthServiceImpl implements DataAuthService{
                 params.put("userId",userId.toString());
                 dataAuthDao.insertUserRole(params);
                 dataAuthDao.insertUserStaff(params);
+                // user profile 的新增 （陈娟 2018-09-16）
+                dataAuthDao.insertUserProfile(params);
             }
             else  //编辑
             {
@@ -167,6 +169,8 @@ public class DataAuthServiceImpl implements DataAuthService{
                 dataAuthDao.updateUserRole(params);
                 dataAuthDao.updateUser(params);
                 dataAuthDao.updateUserStaff(params);
+                // user profile 的编辑 （陈娟 2018-09-16）
+                dataAuthDao.updateUserProfile(params);
             }
             return Response.ok();
         }catch (Exception e){

@@ -225,4 +225,18 @@
             #{id}
         </foreach>
     </select>
+
+    <!--user profile 的新增与编辑（陈娟 2018-09-16）-->
+    <insert id="insertUserProfile" parameterType="Map">
+        insert into parana_user_profiles (user_id,realname,created_at,updated_at) VALUES(#{userId},#{realName},NOW(),NOW())
+    </insert>
+
+    <update id="updateUserProfile" parameterType="Map">
+        update parana_user_profiles set
+        <if test="realname != null and realname != ''">
+            realname = #{realname},
+        </if>
+        updated_at=NOW()
+        where user_id = #{userId}
+    </update>
 </mapper>
