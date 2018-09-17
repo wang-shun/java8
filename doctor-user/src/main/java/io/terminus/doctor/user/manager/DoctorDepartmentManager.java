@@ -133,8 +133,17 @@ public class DoctorDepartmentManager {
             //根据集团得到符合条件的子公司
             List<DoctorDepartmentDto> parentList = parentId.stream()
                     .map(parent -> findCliqueTree2(parent.getParentId(),fuzzyName)).collect(Collectors.toList());
-            departmentDtoList.addAll(parentList);
-
+            // 根据公司得到集团，把集团数据放到集合的最后面 （陈娟 2018-09-17）
+            Long total = pagingOrg.getTotal();
+            if(pageNo==null){
+                if(total<=(20-parentList.size())){
+                    departmentDtoList.addAll(parentList);
+                }
+            }else{
+                if(total<=(pageNo*20-parentList.size())){
+                    departmentDtoList.addAll(parentList);
+                }
+            }
         }
 
         return new Paging<>(pagingOrg.getTotal(), departmentDtoList);
