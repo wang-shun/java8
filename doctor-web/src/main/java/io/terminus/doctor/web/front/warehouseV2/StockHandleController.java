@@ -118,13 +118,6 @@ public class StockHandleController {
         return maps;
     }
 
-    //得到盘点：盘盈盘亏的最大时间节点//冯雨晴2018-09-10
-    @RequestMapping(method = RequestMethod.GET, value = "/getPYTime")
-    public List<Map> getPYTime(@RequestParam Long id){
-        List<Map> maps = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getPYTime(id));
-        return maps;
-    }
-
 
     //根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注
     @RequestMapping(method = RequestMethod.GET, value = "/getDataByMaterialName")

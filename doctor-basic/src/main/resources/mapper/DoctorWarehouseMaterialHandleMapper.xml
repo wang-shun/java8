@@ -869,13 +869,6 @@
     </select>
 
 
-    <!--得到盘点：盘盈盘亏的最大时间节点-->
-    <select id="getPYTime" parameterType="Long" resultType="map">
-        select DISTINCT material_id,MAX(handle_date) as maxDate from doctor_warehouse_material_handle
-        where warehouse_id = #{id} and delete_flag=1 and (type = 7 or type =  8 )
-    </select>
-
-
 
     <!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，备注-->
     <select id="getDataByMaterialName" parameterType="Long" resultType="map">
