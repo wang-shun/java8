@@ -326,19 +326,19 @@
     </select>
 
     <select id="getCunlan" parameterType="long" resultType="map" >
-        select ifnull((select ifnull(end,0) from doctor_report_resevers where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0) as end, '后备猪' as 'type'
+        select ifnull((select ifnull(end,0) from doctor_report_resevers where orz_id = #{orgId} and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0) as end, '后备猪' as 'type'
         union
-        select ifnull((select ifnull(end,0) from doctor_report_boars where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0) as end, '种公猪' as 'type'
+        select ifnull((select ifnull(end,0) from doctor_report_boars where orz_id = #{orgId} and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0) as end, '种公猪' as 'type'
         union
-        select ifnull((select ifnull(end,0) from doctor_report_sows where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0)  as end, '基础母猪' as 'type'
+        select ifnull((select ifnull(end,0) from doctor_report_sows where orz_id = #{orgId} and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0)  as end, '基础母猪' as 'type'
         union
-        select ifnull((select ifnull(end,0) from doctor_report_matings where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0)  as end, '配怀母猪' as 'type'
+        select ifnull((select ifnull(end,0) from doctor_report_matings where orz_id = #{orgId} and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0)  as end, '配怀母猪' as 'type'
         union
-        select ifnull((select ifnull(end,0) from doctor_report_delivers where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0)  as end, '产房母猪' as 'type'
+        select ifnull((select ifnull(end,0) from doctor_report_delivers where orz_id = #{orgId} and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0)  as end, '产房母猪' as 'type'
         union
-        select ifnull((select ifnull(piglet_end,0) from doctor_report_delivers where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0)  as end, '产房仔猪' as 'type'
+        select ifnull((select ifnull(piglet_end,0) from doctor_report_delivers where orz_id = #{orgId} and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0)  as end, '产房仔猪' as 'type'
         union
-        select ifnull((select ifnull(end,0) from doctor_report_nurseries where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0)  as end, '保育猪' as 'type'
+        select ifnull((select ifnull(end,0) from doctor_report_nurseries where orz_id = #{orgId} and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0)  as end, '保育猪' as 'type'
         union
         select ifnull((select ifnull(end,0) from doctor_report_fattens where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0)  as end, '育肥猪' as 'type'
     </select>
@@ -348,31 +348,31 @@
             <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
                            #{item}
             </foreach>
-        and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')),0) as end, '后备猪' as 'type'
+        and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')),0) as end, '后备猪' as 'type'
         union
         select ifnull((select sum(end) from doctor_report_boars where orz_id in
             <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
                 #{item}
             </foreach>
-        and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')),0) as end, '种公猪' as 'type'
+        and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')),0) as end, '种公猪' as 'type'
         union
         select ifnull((select sum(end) from doctor_report_sows where orz_id IN
             <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
                 #{item}
             </foreach>
-        and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')),0) as end, '基础母猪' as 'type'
+        and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')),0) as end, '基础母猪' as 'type'
         union
         select ifnull((select sum(end) from doctor_report_matings where orz_id in
             <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
                 #{item}
             </foreach>
-        and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')),0) as end, '配怀母猪' as 'type'
+        and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')),0) as end, '配怀母猪' as 'type'
         union
         select ifnull((select sum(end) from doctor_report_delivers where orz_id in
             <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
                 #{item}
             </foreach>
-        and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')),0) as end, '产房母猪' as 'type'
+        and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')),0) as end, '产房母猪' as 'type'
         union
         select ifnull((select sum(piglet_end) from doctor_report_delivers where orz_id in
             <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
@@ -384,13 +384,13 @@
             <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
                 #{item}
             </foreach>
-        and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')),0) as end, '保育猪' as 'type'
+        and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')),0) as end, '保育猪' as 'type'
         union
         select ifnull((select sum(end) from doctor_report_fattens where orz_id in
             <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
                 #{item}
             </foreach>
-        and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')),0) as end, '育肥猪' as 'type'
+        and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')),0) as end, '育肥猪' as 'type'
     </select>
     <select id="getGroupNameById" parameterType="long" resultType="String" >
         select name from doctor_orgs where id = #{orgId}
