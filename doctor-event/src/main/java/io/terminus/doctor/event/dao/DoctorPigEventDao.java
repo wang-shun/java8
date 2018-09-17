@@ -484,31 +484,31 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public Paging<Map<String, Object>> sumNpd(Map<String, Object> maps, Integer offset, Integer limit) {
         maps.put("offset", offset);
         maps.put("limit", limit);
-        String aa = maps.get("startDate").toString();
-        String bb = maps.get("endDate").toString();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
-        Calendar cal = Calendar.getInstance();
- //       Date startDate = null;
-        try {
-            Date startDate = sdf.parse(aa);
-            cal.setTime(startDate);
-            int startYear = cal.get(Calendar.YEAR);
-            int startMonth = cal.get(Calendar.MONTH) + 1;
-            maps.put("startYear", startYear);
-            maps.put("startMonth", startMonth);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-//        Date endDate = null;
-        try {
-           Date endDate = sdf.parse(bb);
-            cal.setTime(endDate);
-            int endYear = cal.get(Calendar.YEAR);
-            int endMonth = cal.get(Calendar.MONTH) + 1;
-            maps.put("endYear", endYear);
-            maps.put("endMonth", endMonth);
-        } catch (ParseException e) {
-            e.printStackTrace();
+        if(maps.get("startDate") != null && maps.get("endDate") != null){
+            String aa = maps.get("startDate").toString();
+            String bb = maps.get("endDate").toString();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+            Calendar cal = Calendar.getInstance();
+            try {
+                Date startDate = sdf.parse(aa);
+                cal.setTime(startDate);
+                int startYear = cal.get(Calendar.YEAR);
+                int startMonth = cal.get(Calendar.MONTH) + 1;
+                maps.put("startYear", startYear);
+                maps.put("startMonth", startMonth);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            try {
+                Date endDate = sdf.parse(bb);
+                cal.setTime(endDate);
+                int endYear = cal.get(Calendar.YEAR);
+                int endMonth = cal.get(Calendar.MONTH) + 1;
+                maps.put("endYear", endYear);
+                maps.put("endMonth", endMonth);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
         maps = ImmutableMap.copyOf(Params.filterNullOrEmpty(maps));
         long total = getSqlSession().selectOne(sqlId("totalNpd"),maps);
