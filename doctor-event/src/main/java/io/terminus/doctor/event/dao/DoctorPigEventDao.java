@@ -484,7 +484,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         maps.put("limit", limit);
 
         maps = ImmutableMap.copyOf(Params.filterNullOrEmpty(maps));
-        long total = this.sqlSession.selectOne(sqlId("totalNpd"),maps);
+        long total = getSqlSession().selectOne(sqlId("totalNpd"),maps);
         if (total <= 0) {
             return new Paging(0L, Collections.<DoctorNpdExportDto>emptyList());
         }

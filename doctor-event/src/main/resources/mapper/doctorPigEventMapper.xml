@@ -2492,7 +2492,7 @@
 		]]>
     </select>
 
-    <select id="totalNpd" parameterType="map" resultType="map">
+    <select id="totalNpd" parameterType="map" resultType="long">
 
         select count(1) as count
         from (
@@ -2509,8 +2509,8 @@
         SUM(a.npd_date) as npddate
         FROM doctor_sow_npd_dayly a join doctor_pigs b on a.pig_id = b.id join doctor_barns c on a.barn_id = c.id
         WHERE
-        <if test="farmId != null">AND farm_id = #{farmId}</if>
-        <if test="barnId != null">AND barn_id = #{barnId}</if>
+        <if test="farmId != null"> a.farm_id = #{farmId}</if>
+        <if test="barnId != null">AND a.barn_id = #{barnId}</if>
         <if test="pigCode != null">AND b.pig_code LIKE concat('%',#{pigCode},'%')</if>
         <if test="startDate != null">AND a.fiscal_month >= #{startDate}</if>
         <if test="endDate != null">AND a.fiscal_month &lt;= #{endDate} </if>
@@ -2533,8 +2533,8 @@
         SUM(a.npd_date) as npddate
         FROM doctor_sow_npd_dayly a join doctor_pigs b on a.pig_id = b.id join doctor_barns c on a.barn_id = c.id
         WHERE
-        <if test="farmId != null">AND farm_id = #{farmId}</if>
-        <if test="barnId != null">AND barn_id = #{barnId}</if>
+        <if test="farmId != null"> a.farm_id = #{farmId}</if>
+        <if test="barnId != null">AND a.barn_id = #{barnId}</if>
         <if test="pigCode != null">AND b.pig_code LIKE concat('%',#{pigCode},'%')</if>
         <if test="startDate != null">AND a.fiscal_month >= #{startDate}</if>
         <if test="endDate != null">AND a.fiscal_month &lt;= #{endDate} </if>
