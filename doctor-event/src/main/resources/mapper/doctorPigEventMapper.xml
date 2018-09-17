@@ -2512,8 +2512,10 @@
         <if test="farmId != null"> a.farm_id = #{farmId}</if>
         <if test="barnId != null">AND a.barn_id = #{barnId}</if>
         <if test="pigCode != null">AND b.pig_code LIKE concat('%',#{pigCode},'%')</if>
-        <if test="startDate != null">AND a.fiscal_month >= #{startDate}</if>
-        <if test="endDate != null">AND a.fiscal_month &lt;= #{endDate} </if>
+        <if test="startYear != null">AND a.fiscal_year >= #{startYear}</if>
+        <if test="endYear != null">AND a.fiscal_year &lt;= #{endYear} </if>
+        <if test="startMonth != null">AND a.fiscal_period >= #{startMonth}</if>
+        <if test="endMonth != null">AND a.fiscal_period &lt;= #{endMonth} </if>
         GROUP BY a.pig_id, a.barn_id
         limit #{offset}, #{limit}
         ) dd
@@ -2536,8 +2538,10 @@
         <if test="farmId != null"> a.farm_id = #{farmId}</if>
         <if test="barnId != null">AND a.barn_id = #{barnId}</if>
         <if test="pigCode != null">AND b.pig_code LIKE concat('%',#{pigCode},'%')</if>
-        <if test="startDate != null">AND a.fiscal_month >= #{startDate}</if>
-        <if test="endDate != null">AND a.fiscal_month &lt;= #{endDate} </if>
+        <if test="startYear != null">AND a.fiscal_year >= #{startYear}</if>
+        <if test="endYear != null">AND a.fiscal_year &lt;= #{endYear} </if>
+        <if test="startMonth != null">AND a.fiscal_period >= #{startMonth}</if>
+        <if test="endMonth != null">AND a.fiscal_period &lt;= #{endMonth} </if>
         GROUP BY a.pig_id, a.barn_id
         limit #{offset}, #{limit}
     </select>
