@@ -2316,4 +2316,229 @@
       where pig_id = #{pigId} and type = 11 AND status = 1 ORDER BY event_at desc,id desc limit 1
     </select>
 
+    <select id="selectPIG" parameterType="map" resultType="map">
+        SELECT distinct a.id as id FROM doctor_pigs a
+        WHERE a.pig_type=1 AND a.farm_id=#{farmId}
+        and exists(select 1 from doctor_pig_events b where b.pig_id = a.id
+        and (b.type=6 or b.type=7 or b.type=9 or b.type=11 or b.type=15 or b.type=16 or b.type=2 or b.type=20)
+        and b.event_at between #{startDate} and #{endDate})
+    </select>
+
+    <select id="selectNPD" parameterType="map" resultType="map">
+        <![CDATA[
+			SELECT
+		      		a.id as eventId,
+					a.org_id as orgId,
+					a.org_name as orgName,
+					a.farm_id as farmId,
+					a.farm_name as farmName,
+					a.barn_id as barnId,
+					a.pig_id as pigId,
+					a.type as type,
+					a.`name` as `name`,
+					a.preg_check_result as pregCheckResult,
+					a.event_at as eventAt,
+					a.parity as parity,
+					a.change_type_id as changeTypeId, 1 as xh,
+					a.live_count as liveCount,
+					a.current_mating_count as currentMatingCount,
+				  (CASE when a.`type` = 7 then 1
+								when a.`type` = 9 then 2
+								when a.`type` = 11 and a.preg_check_result = 1 then 3
+				                when a.`type` = 11 and a.preg_check_result = 2 then 4
+								when a.`type` = 11 and a.preg_check_result = 3 then 5
+								when a.`type` = 11 and a.preg_check_result = 4 then 6
+								when a.`type` = 15 then 7
+								when a.`type` = 6 then 8
+								when a.`type` = 16 then 9
+								when a.`type` = 2 then 10
+								when a.`type` = 20 then 11
+				        else 0 end ) as eventType
+				FROM  doctor_pig_events a
+				WHERE  a.kind = 1
+				AND (a.type=6 or a.type=7 or a.type=9 or a.type=11
+						 or a.type=15 or a.type=16 or a.type=2 or a.type=20)
+				AND a.`status`=1
+				AND not exists(SELECT 1 FROM doctor_pig_events b
+				WHERE  b.pig_id=a.pig_id AND b.type=20 AND b.event_at>=a.event_at)
+				AND a.event_at BETWEEN #{startDate} and #{endDate}
+				AND a.farm_id=#{farmId}
+				AND a.pig_id=#{pigId}
+		union all
+		select
+		    t.id as eventId,
+			t.org_id as orgId,
+			t.org_name as orgName,
+			t.farm_id as farmId,
+			t.farm_name as farmName,
+			t.barn_id as barnId,
+			t.pig_id as pigId,
+			t.type as type,
+			t.`name` as `name`,
+			t.preg_check_result as pregCheckResult,
+			t.event_at as eventAt,
+			t.parity as parity,
+			t.change_type_id as changeTypeId, 0 as xh,
+			t.live_count as liveCount,
+			t.current_mating_count as currentMatingCount,
+		    t.eventType as eventType
+		from
+		(
+		  select
+		            a.id,
+					a.org_id,
+					a.org_name,
+					a.farm_id,
+					a.farm_name,
+					a.barn_id,
+					a.pig_id,
+					a.type,
+					a.`name`,
+					a.preg_check_result ,
+					a.event_at,
+					a.parity,
+					a.change_type_id,
+					a.live_count,
+					a.current_mating_count,
+				  (CASE when a.`type` = 7 then 1
+								when a.`type` = 9 then 2
+								when a.`type` = 11 and a.preg_check_result = 1 then 3
+				                when a.`type` = 11 and a.preg_check_result = 2 then 4
+								when a.`type` = 11 and a.preg_check_result = 3 then 5
+								when a.`type` = 11 and a.preg_check_result = 4 then 6
+								when a.`type` = 15 then 7
+								when a.`type` = 6 then 8
+								when a.`type` = 16 then 9
+								when a.`type` = 2 then 10
+								when a.`type` = 20 then 11
+				        else 0 end ) as eventType
+				FROM  doctor_pig_events a
+				WHERE  a.kind = 1
+				AND (a.type=6 or a.type=7 or a.type=9 or a.type=11
+						 or a.type=15 or a.type=16 or a.type=2 or a.type=20)
+				AND a.`status`=1
+				AND not exists(SELECT 1 FROM doctor_pig_events b
+				WHERE  b.pig_id=a.pig_id AND b.type=20 AND b.event_at>=a.event_at)
+				AND a.event_at < #{startDate}
+				AND a.farm_id=#{farmId}
+				AND a.pig_id=#{pigId}
+		  ORDER BY a.event_at desc, a.id desc limit 1
+		) t
+		order by xh, eventAt, eventId ]]>
+    </select>
+
+    <select id="selectLastEndNPD" parameterType="map" resultType="map">
+        <![CDATA[
+				select
+					current_event_date as currentEventDate
+				from
+					doctor_sow_npd_dayly
+				where org_id=#{orgId}
+				AND farm_id=#{farmId}
+				AND pig_id=#{pigId}
+				AND current_event_date < #{edate}
+				order by current_event_date desc limit 0,1
+		]]>
+    </select>
+
+    <select id="selectEvent" parameterType="map" resultType="map">
+        select
+        <include refid="cols_all"/>
+        from doctor_pig_events a
+        where a.event_at &lt; #{eTime}
+        and (a.type = 9
+        or (a.type = 11 and a.preg_check_result = 2)
+        or (a.type = 11 and a.preg_check_result = 3)
+        or (a.type = 11 and a.preg_check_result = 4)
+        or a.type = 16
+        or a.type = 7)
+        and a.pig_id = #{pigId}
+        ORDER BY a.id desc
+        limit 1
+    </select>
+
+    <select id="selectType" parameterType="map" resultType="map">
+        select <include refid="cols_all"/>
+        from doctor_pig_events a
+        where (a.type = 2 or a.type = 20)
+        and a.pig_id = #{pigId}
+        and a.event_at between #{eventAt} and #{eTime}
+        ORDER BY a.id
+    </select>
+
+    <select id="selectDate" parameterType="map" resultType="String">
+        select event_at as time
+        from doctor_pig_events a
+        where a.type = 20
+        and a.pig_id = #{pigId}
+        and a.event_at &lt;= #{time}
+        and a.farm_id = #{farmId}
+        ORDER BY a.id desc
+        limit 1
+    </select>
+
+    <select id="selectStartNPD" resultType="java.util.Map">
+        <![CDATA[
+			select
+				current_event_date as currentEventDate
+			from
+				doctor_sow_npd_dayly
+			where org_id=#{orgId}
+			AND farm_id=#{farmId}
+			AND pig_id=#{pigId}
+			AND current_event_type=2
+			AND current_event_date < #{startDate}
+			order by current_event_date desc limit 0,1
+		]]>
+    </select>
+
+    <select id="totalNpd" parameterType="map" resultType="map">
+
+        select count(1) as count
+        from (
+        SELECT pig_id,
+        jc_npd as jpnpd,
+        dnpz_npd as dpnpd,
+        fq_npd as pfnpd,
+        lc_npd as plnpd,
+        sw_npd as psnpd,
+        tt_npd as ptnpd
+        FROM doctor_sow_npd_dayly
+        WHERE
+        1 = 1
+        <if test="orgId != null">AND org_id = #{orgId}</if>
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="barnId != null">AND barn_id = #{barnId}</if>
+        GROUP BY pig_id
+        ) dd , doctor_pig_tracks a , doctor_pigs b
+        WHERE
+        dd.pig_id = a.pig_id
+        and
+        dd.pig_id = b.id
+        <if test="pigCode != null">AND b.pig_code LIKE concat('%',#{pigCode},'%')</if>
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="sumNpd" parameterType="map" resultType="map">
+        SELECT a.pig_id,
+        b.pig_code as pigCode,
+        a.barn_id,
+        c.name as barnName,
+        SUM(a.jc_npd) as jcnpd,
+        SUM(a.dnpz_npd) as dnpznpd,
+        SUM(a.lc_npd) as lcnpd,
+        SUM(a.fq_npd) as fqnpd,
+        SUM(a.sw_npd) as swnpd,
+        SUM(a.tt_npd) as ttnpd,
+        SUM(a.npd_date) as npddate
+        FROM doctor_sow_npd_dayly a join doctor_pigs b on a.pig_id = b.id join doctor_barns c on a.barn_id = c.id
+        WHERE
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="barnId != null">AND barn_id = #{barnId}</if>
+        <if test="pigCode != null">AND b.pig_code LIKE concat('%',#{pigCode},'%')</if>
+        <if test="startDate != null">AND a.fiscal_month >= #{startDate}</if>
+        <if test="endDate != null">AND a.fiscal_month &lt;= #{endDate} </if>
+        GROUP BY a.pig_id, a.barn_id
+        limit #{offset}, #{limit}
+    </select>
 </mapper>
