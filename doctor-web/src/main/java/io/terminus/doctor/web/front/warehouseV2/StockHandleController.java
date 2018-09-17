@@ -846,7 +846,7 @@ public class StockHandleController {
                         //对齐
                         style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
                         countCell.setCellStyle(style);
-                        countCell.setCellValue("合计");
+                        countCell.setCellValue("盘亏");
 
                         countRow.createCell(6).setCellValue(totalQuantity.doubleValue());
 
