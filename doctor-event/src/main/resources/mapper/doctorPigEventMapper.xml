@@ -2496,27 +2496,27 @@
 
         select count(1) as count
         from (
-        SELECT pig_id,
-        jc_npd as jpnpd,
-        dnpz_npd as dpnpd,
-        fq_npd as pfnpd,
-        lc_npd as plnpd,
-        sw_npd as psnpd,
-        tt_npd as ptnpd
-        FROM doctor_sow_npd_dayly
+        SELECT a.pig_id,
+        b.pig_code as pigCode,
+        a.barn_id,
+        c.name as barnName,
+        SUM(a.jc_npd) as jcnpd,
+        SUM(a.dnpz_npd) as dnpznpd,
+        SUM(a.lc_npd) as lcnpd,
+        SUM(a.fq_npd) as fqnpd,
+        SUM(a.sw_npd) as swnpd,
+        SUM(a.tt_npd) as ttnpd,
+        SUM(a.npd_date) as npddate
+        FROM doctor_sow_npd_dayly a join doctor_pigs b on a.pig_id = b.id join doctor_barns c on a.barn_id = c.id
         WHERE
-        1 = 1
-        <if test="orgId != null">AND org_id = #{orgId}</if>
         <if test="farmId != null">AND farm_id = #{farmId}</if>
         <if test="barnId != null">AND barn_id = #{barnId}</if>
-        GROUP BY pig_id
-        ) dd , doctor_pig_tracks a , doctor_pigs b
-        WHERE
-        dd.pig_id = a.pig_id
-        and
-        dd.pig_id = b.id
         <if test="pigCode != null">AND b.pig_code LIKE concat('%',#{pigCode},'%')</if>
+        <if test="startDate != null">AND a.fiscal_month >= #{startDate}</if>
+        <if test="endDate != null">AND a.fiscal_month &lt;= #{endDate} </if>
+        GROUP BY a.pig_id, a.barn_id
         limit #{offset}, #{limit}
+        ) dd
     </select>
 
     <select id="sumNpd" parameterType="map" resultType="map">
