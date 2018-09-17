@@ -383,6 +383,11 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
+    public Response<List<DoctorGroupEvent>> getGroupEventsByCriteria(Map<String, Object> criteria) {
+        return null;
+    }
+
+    @Override
     public Response<Boolean> isLastEvent(Long groupId, Long eventId) {
         try {
             DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventByGroupId(groupId);

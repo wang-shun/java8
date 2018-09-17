@@ -463,6 +463,18 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     }
 
     @Override
+    public Response findNpd(Map<String, Object> map, Integer offset, Integer limit) {
+
+        try {
+            PageInfo pageInfo = new PageInfo(offset, limit);
+            return Response.ok(doctorPigEventDao.sumNpd(map, pageInfo.getOffset(), pageInfo.getLimit()));
+        } catch (Exception e) {
+            log.error("find.npd.event, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find npd event fail");
+        }
+    }
+
+    @Override
     public Response<Paging<DoctorPigSalesExportDto>> pagingFindSales(Map<String, Object> map, Integer offset, Integer limit) {
         try {
             PageInfo pageInfo = new PageInfo(offset, limit);

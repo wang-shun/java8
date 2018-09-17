@@ -630,6 +630,21 @@ public class DoctorPigEvents {
         return RespHelper.or500(doctorPigEventReadService.pagingFindNpd(criteria, pageNo, pageSize));
     }
 
+    /**
+     * ysq
+     * @param pigNpd
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    @RequestMapping(value = "/getNpd", method = RequestMethod.GET)
+    @ResponseBody
+    public Response getNpd(@RequestParam Map<String, String> pigNpd, Integer pageNo, Integer pageSize) {
+
+        Map<String, Object> criteria = OBJECT_MAPPER.convertValue(pigNpd, Map.class);
+        return doctorPigEventReadService.findNpd(criteria, pageNo, pageSize);
+    }
+
     public Paging<DoctorNpdExportDto> pagingNpdPigEvent(Map<String, String> pigEventCriteria) {
 
         Map<String, Object> criteria = OBJECT_MAPPER.convertValue(pigEventCriteria, Map.class);

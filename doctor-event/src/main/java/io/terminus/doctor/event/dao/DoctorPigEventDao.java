@@ -479,6 +479,18 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         return new Paging<>(total, doctorNpdExportDtos);
     }
 
+    public Paging<Map<String, Object>> sumNpd(Map<String, Object> maps, Integer offset, Integer limit) {
+        maps.put("offset", offset);
+        maps.put("limit", limit);
+
+        maps = ImmutableMap.copyOf(Params.filterNullOrEmpty(maps));
+        long total = this.sqlSession.selectOne(sqlId("totalNpd"),maps);
+        if (total <= 0) {
+            return new Paging(0L, Collections.<DoctorNpdExportDto>emptyList());
+        }
+        List<Map<String, Object>> dates = getSqlSession().selectList(sqlId("sumNpd"), maps);
+        return new Paging(total, dates);
+    }
 
     public Long countSaleEvent(Map<String, Object> maps) {
         return getSqlSession().selectOne(sqlId("countSales"), maps);
@@ -770,6 +782,61 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         params.put("endDate", end);
         params.put("farmId", farmId);
         return sqlSession.selectList(sqlId("findForNPD"), params);
+    }
+    /**
+     * 指定公司指定猪场的猪id
+     */
+    public List<Map<String, Object>> selectPIG(Map<String, Object> params) {
+        return sqlSession.selectList(sqlId("selectPIG"), params);
+    }
+    /**
+     * 查询npd
+     * ysq
+     */
+    public List<Map<String, Object>> selectNPD(Map<String, Object> params) {
+        return sqlSession.selectList(sqlId("selectNPD"), params);
+    }
+    /**
+     *查询前一个事件（对于有转场事件发生）
+     * ysq
+     */
+    public List<Map<String, Object>> selectEvent(Map<String, Object> params) {
+        return sqlSession.selectList(sqlId("selectEvent"), params);
+    }
+    /**
+     * 查询转场事件
+     * ysq
+     */
+    public List<Map<String, Object>> selectType(Map<String, Object> params) {
+        return sqlSession.selectList(sqlId("selectType"), params);
+    }
+    /**
+     * 查找最后一个事件
+     * ysq
+     * @param params
+     * @return
+     */
+    public List<Map<String, Object>> selectLastEndNPD(Map<String, Object> params) {
+        return sqlSession.selectList(sqlId("selectLastEndNPD"), params);
+    }
+
+    /**
+     * 查询转场转入时间
+     * ysq
+     */
+    public String selectDate(Date time, long farmId, long pigId){
+        Map params = new HashMap();
+        params.put("time",time);
+        params.put("farmId",farmId);
+        params.put("pigId",pigId);
+        return  sqlSession.selectOne(sqlId("selectDate"), params);
+    }
+    /**
+     * 查询npd开始数据
+     * ysq
+     */
+    public List<Map<String, Object>> selectStartNPD(Map<String, Object> params) {
+        return sqlSession.selectList(sqlId("selectStartNPD"), params);
     }
 
     /**
