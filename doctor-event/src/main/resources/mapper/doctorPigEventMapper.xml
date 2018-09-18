@@ -2544,7 +2544,7 @@
         <if test="endMonth != null">AND a.fiscal_period &lt;= #{endMonth} </if>
         GROUP BY a.pig_id, a.barn_id
         ) tt
-        WHERE <![CDATA[tt.npddate <> 0]]>
+        WHERE tt.npddate <![CDATA[<>]]> 0
         limit #{offset}, #{limit}
     </select>
 </mapper>
