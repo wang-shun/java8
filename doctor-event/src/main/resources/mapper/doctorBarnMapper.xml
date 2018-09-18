@@ -178,6 +178,7 @@
             <if test="status == null">AND status = 1</if>
         </where>
     </select>
+
     <select id="findByEnums1" parameterType="map" resultMap="DoctorBarnMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
@@ -199,6 +200,22 @@
             <if test="status != null and status == 5">AND status in (0,1,-1) </if>
         </where>
     </select>
+
+    <!--/*
+    * 根据farmId和当前用户查猪舍
+    * 冯雨晴 2019.9.18
+    *
+    * */-->
+    <select id="findByEnumss" parameterType="map" resultType="map">
+        SELECT a.id, a.name, a.org_id, a.org_name, a.farm_id, a.farm_name, a.pig_type,
+        a.can_open_group, a.status, a.capacity, a.staff_id, a.staff_name, a.out_id, a.extra,
+        a.created_at, a.updated_at, b.updator_name,b.barn_ids
+        from doctor_barns a left join doctor_user_data_permissions b on a.id = b.barn_ids
+        where b.user_id = #{userId}
+        and a.farm_id = #{farmId}
+    </select>
+
+
     <!-- search api start -->
     <select id="maxId" resultType="long">
         SELECT MAX(id) FROM

@@ -271,6 +271,21 @@ public class DoctorBarns {
                 null, status, null)), pigIds);
     }
 
+    /**
+     * 根据farmId和当前用户查猪舍
+     * 冯雨晴 2019.9.18
+     * @param farmId   猪场id
+     * @param userId   用户id
+     * @return 猪舍表列表
+     */
+    @RequestMapping(value = "/pigTypess", method = RequestMethod.GET)
+    public List<Map> findBarnsByfarmIdAndTypes(@RequestParam("farmId") Long farmId,
+                                                     @RequestParam("userId") Long userId) {
+        return RespHelper.or500(doctorBarnReadService.findBarnsByEnumss(farmId,userId));
+    }
+
+
+
 
     /**
      * 猪舍批量转舍时, 根据猪id, 求一下可转猪舍的交集

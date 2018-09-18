@@ -65,6 +65,18 @@ public interface DoctorBarnReadService {
                                                 List<Integer> pigTypes, Integer canOpenGroup,
                                                 Integer status, List<Long> barnIds);
 
+
+
+    /*
+    * 根据farmId和当前用户查猪舍
+    * 冯雨晴 2019.9.18
+    *
+    * */
+    Response<List<Map>> findBarnsByEnumss(@NotNull(message = "farmId.not.null") Long farmId,
+                                               Long userId);
+
+
+
     /**
      * 查询当前猪舍的存栏量
      * @param barnId 猪舍id

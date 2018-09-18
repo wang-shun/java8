@@ -142,6 +142,16 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             return Response.fail("barn.find.fail");
         }
     }
+    /*
+        * 根据farmId和当前用户查猪舍
+        * 冯雨晴 2019.9.18
+        *
+        * */
+    @Override
+    public Response<List<Map>> findBarnsByEnumss(Long farmId, Long userId) {
+        List<Map> maps = doctorBarnDao.findByEnumss(farmId,userId);
+        return Response.ok(maps);
+    }
 
     @Override
     public Response<Integer> countPigByBarnId(Long barnId) {

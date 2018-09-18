@@ -65,6 +65,21 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
         }
     }
 
+
+    /*
+       * 根据farmId和当前用户查猪舍
+       * 冯雨晴 2019.9.18
+       *
+       * */
+    public List<Map> findByEnumss(@NotNull Long farmId,Long userId) {
+
+            return getSqlSession().selectList(sqlId("findByEnumss"), MapBuilder.<String, Object>newHashMap()
+                    .put("farmId", farmId)
+                    .put("userId", userId)
+                    .map());
+
+    }
+
     /**
      * 猪舍的当前最大的id
      */
