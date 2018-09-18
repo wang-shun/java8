@@ -152,7 +152,13 @@ public class SubService {
             User subUser = RespHelper.orServEx(doctorUserReadService.findById(sub.getId()));
 
             //子账号@主账号
-            String userName = subAccount(sub, user);
+            String userName;
+            if(subUser.getName().indexOf("@")!=-1){
+                userName = subAccount(sub, user);
+            }else{
+                userName = sub.getUsername();
+            }
+
 //            if(!Objects.equals(subUser.getName(), userName)){
 //                checkSubUserAccount(userName);
 //            }
