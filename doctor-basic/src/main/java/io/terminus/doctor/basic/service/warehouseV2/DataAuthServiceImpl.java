@@ -386,7 +386,10 @@ public class DataAuthServiceImpl implements DataAuthService{
             } else {
                 farmIdList = Lists.newArrayList();
             }
-            List<Long> orgIdList = dataAuthDao.getOrgIdList(farmIdList);
+            String groupIdsString;
+            String orgIdsString;
+            if(farmIdList != null && farmIdList.size() != 0) {
+                List<Long> orgIdList = dataAuthDao.getOrgIdList(farmIdList);
 //            List<Long> orgIds;
 //            if (StringUtils.isNotBlank(dataSubRole.getOrgIds())) {
 //                orgIds = Splitters.COMMA.splitToList(dataSubRole.getOrgIds()).stream().map(Long::valueOf).collect(Collectors.toList());
@@ -394,10 +397,10 @@ public class DataAuthServiceImpl implements DataAuthService{
 //                orgIds = Lists.newArrayList();
 //            }
 //            orgIdList.addAll(orgIds);
-             List<Long> OrgIdsList = removeDuplicate(orgIdList);
-            String orgIdsString =  StringUtils.join(OrgIdsList.toArray(), ",");
+                List<Long> OrgIdsList = removeDuplicate(orgIdList);
+                orgIdsString = StringUtils.join(OrgIdsList.toArray(), ",");
 
-            List<Long> groupIdList = dataAuthDao.getGroupIdList(orgIdList);
+                List<Long> groupIdList = dataAuthDao.getGroupIdList(orgIdList);
 //            List<Long> groupIds;
 //            if (StringUtils.isNotBlank(dataSubRole.getGroupIds())) {
 //                groupIds = Splitters.COMMA.splitToList(dataSubRole.getGroupIds()).stream().map(Long::valueOf).collect(Collectors.toList());
@@ -405,8 +408,11 @@ public class DataAuthServiceImpl implements DataAuthService{
 //                groupIds = Lists.newArrayList();
 //            }
 //            groupIdList.addAll(groupIds);
-            String groupIdsString =  StringUtils.join(removeDuplicate(groupIdList).toArray(), ",");
-
+                groupIdsString = StringUtils.join(removeDuplicate(groupIdList).toArray(), ",");
+            }else{
+                groupIdsString = null;
+                orgIdsString = null;
+            }
             List<Map<String,String>> dataSubRoleParams = Lists.newArrayList();
             for (String userId : userIds) {
                 Map<String,String> dataSubRoleParam = Maps.newHashMap();
