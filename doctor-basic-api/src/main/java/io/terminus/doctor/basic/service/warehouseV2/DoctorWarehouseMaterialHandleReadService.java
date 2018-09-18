@@ -22,6 +22,12 @@ import java.util.List;
  */
 public interface DoctorWarehouseMaterialHandleReadService {
 
+    // 盘点 （陈娟 2018-09-18）
+
+    // 删除单据时判断该是否有物料已盘点 （陈娟 2018-09-18）
+    Response<String> deleteCheckInventory(Long id);
+
+
     // 结算误差（陈娟 2018-8-21）
     Boolean getErrorAmount(Long warehouseId,Long materialId,Date settlementDate);
 

@@ -415,6 +415,13 @@ public class StockHandleController {
         }
         if (doctorWarehouseSettlementService.isSettled(orgId,date))
             throw new JsonResponseException("already.settlement");
+
+        //  删除单据时判断该是否有物料已盘点 （陈娟 2018-09-18）
+        String str = RespHelper.or500(doctorWarehouseMaterialHandleReadService.deleteCheckInventory(id));
+        if(str!=null&&!str.equals("")){
+            throw new JsonResponseException(str);
+        }
+
         return doctorWarehouseStockHandleWriteService.delete(id);
            /*if (!response.isSuccess())
                throw new JsonResponseException(response.getError());

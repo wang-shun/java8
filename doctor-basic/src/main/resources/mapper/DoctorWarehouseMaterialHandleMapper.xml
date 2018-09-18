@@ -865,7 +865,7 @@
     <!--得到领料出库的物料名称-->
     <select id="getMaterialNameByID" parameterType="Long" resultType="map">
         select DISTINCT material_id,material_name from doctor_warehouse_material_handle
-        where stock_handle_id = #{id} and delete_flag=1
+        where stock_handle_id = #{id} and delete_flag=1 ORDER BY material_id
     </select>
 
 
@@ -931,6 +931,13 @@
     <!--得到调拨入库单 （陈娟 2018-09-14）-->
     <select id="findByRelMaterialHandleIdAndWarehouseId" parameterType="map" resultType="DoctorWarehouseMaterialHandle">
         select * from doctor_warehouse_material_handle where rel_material_handle_id=#{relMaterialHandleId} and delete_flag=1 and warehouse_id=#{warehouseId} and material_id=#{materialId}
+    </select>
+
+    <!--盘点 （陈娟 2018-09-18）-->
+    <select id="getMaxInventoryDate" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
+        select `material_id`, `material_name`, `type`,`handle_date` from doctor_warehouse_material_handle
+        where delete_flag=1 and ( type = 7 or type = 8 ) and warehouse_id=#{warehouseId} and material_id=#{materialId}
+        and handle_date>=#{handleDate}  ORDER BY handle_date desc limit 1
     </select>
 
 </mapper>

@@ -14,6 +14,7 @@ import io.terminus.doctor.basic.model.DoctorWareHouse;
 import io.terminus.doctor.basic.model.DoctorWarehouseOrgSettlement;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialHandle;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseStockHandle;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.ResponseUtil;
@@ -46,6 +47,9 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     private DoctorWarehouseMaterialHandleDao doctorWarehouseMaterialHandleDao;
 
     @Autowired
+    private DoctorWarehouseStockHandleDao doctorWarehouseStockHandleDao;
+
+    @Autowired
     private DoctorWarehouseSettlementService doctorWarehouseSettlementService;
 
     @Autowired
@@ -59,6 +63,24 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
     @Autowired
     private DoctorWarehouseMaterialApplyDao doctorWarehouseMaterialApplyDao;
+
+    @Override
+    public Response<String> deleteCheckInventory(Long id) {
+        // 删除单据时判断该是否有物料已盘点 （陈娟 2018-09-18）
+        DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleDao.findById(id);
+        List<Map> materialNameByID = doctorWarehouseMaterialHandleDao.getMaterialNameByID(id);
+        String str=new String();
+        for (Map mm: materialNameByID) {
+            DoctorWarehouseMaterialHandle material = doctorWarehouseMaterialHandleDao.getMaxInventoryDate(stockHandle.getWarehouseId(), (Long) mm.get("material_id"), stockHandle.getHandleDate());
+            if(material!=null){
+                str = str + material.getMaterialName()+",";
+            }
+        }
+        if(str!=null){
+            str = str+ "【已盘点,不可删除】";
+        }
+        return Response.ok(str);
+    }
 
     @Override
     public Boolean getErrorAmount(Long warehouseId, Long materialId, Date settlementDate) {
