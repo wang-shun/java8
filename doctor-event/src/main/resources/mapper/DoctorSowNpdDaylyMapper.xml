@@ -47,13 +47,13 @@
 
     <sql id="cols_exclude_id">
         `org_id`,`farm_id`,`fiscal_year`,`fiscal_period`,`fiscal_quarter`,`barn_id`,`event_id`,`pig_id`,`last_event_type`,
-        `last_event_name`,`current_event_date`,`gestation_date`,`lactation_date`,`npd_date`,`jc_npd`,`dnpz_npd`,`lc_npd`,
+        `last_event_name`,`current_event_name`,`current_event_date`,`gestation_date`,`lactation_date`,`npd_date`,`jc_npd`,`dnpz_npd`,`lc_npd`,
         `fq_npd`,`sw_npd`,`tt_npd`,`parity`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
         #{orgId},#{farmId},#{fiscalYear},#{fiscalPeriod},#{fiscalQuarter}, #{barnId}, #{eventId}, #{pigId},#{lastEventType},
-        #{lastEventName},#{currentEventDate},#{gestationDate},#{lactationDate},#{npdDate},#{jcNpd},#{dnpzNpd},#{lcNpd},
+        #{lastEventName},#{currentEventName},#{currentEventDate},#{gestationDate},#{lactationDate},#{npdDate},#{jcNpd},#{dnpzNpd},#{lcNpd},
         #{fqNpd},#{swNpd},#{ttNpd},#{parity},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
@@ -107,7 +107,7 @@
         <foreach collection="list" separator="," item="item">
             (
             #{orgId},#{farmId},#{fiscalYear},#{fiscalPeriod},#{fiscalQuarter}, #{barnId}, #{eventId}, #{pigId},#{lastEventType},
-            #{lastEventName},#{currentEventDate},#{gestationDate},#{lactationDate},#{npdDate},#{jcNpd},#{dnpzNpd},#{lcNpd},
+            #{lastEventName},#{currentEventName},#{currentEventDate},#{gestationDate},#{lactationDate},#{npdDate},#{jcNpd},#{dnpzNpd},#{lcNpd},
             #{fqNpd},#{swNpd},#{ttNpd},#{parity},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
             )
         </foreach>

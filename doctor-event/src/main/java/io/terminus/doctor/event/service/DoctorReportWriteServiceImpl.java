@@ -234,6 +234,11 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                             entity.setNpdDate(diffDay1);
                             entity.setLactationDate(0);
                             entity.setGestationDate(0);
+                            entity.setFqNpd(0);
+                            entity.setLcNpd(0);
+                            entity.setTtNpd(0);
+                            entity.setSwNpd(0);
+                            entity.setDnpzNpd(0);
                             entity.setEventId(Long.parseLong(mapType.get("id").toString().trim()));
                             entity.setBarnId(Long.parseLong(mapType.get("barn_id").toString().trim()));
                             entity.setParity(Integer.parseInt(mapType.get("parity").toString()));
@@ -426,83 +431,123 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                                 entity.setGestationDate(diffDay); // 孕期天数
                                 entity.setLactationDate(0);
                                 entity.setNpdDate(0);
+                                entity.setJcNpd(0);
+                                entity.setFqNpd(0);
+                                entity.setLcNpd(0);
+                                entity.setTtNpd(0);
+                                entity.setSwNpd(0);
+                                entity.setDnpzNpd(0);
                             } else if (eventType.equals("9")) {
+                                entity.setCurrentEventName("断奶");
                                 entity.setGestationDate(0);
                                 entity.setLactationDate(diffDay); // 哺乳期天数
                                 entity.setNpdDate(0);
+                                entity.setJcNpd(0);
+                                entity.setFqNpd(0);
+                                entity.setLcNpd(0);
+                                entity.setTtNpd(0);
+                                entity.setSwNpd(0);
+                                entity.setDnpzNpd(0);
                             } else if(eventType.equals("2") && (thenEventType.equals("1") || thenEventType.equals("11"))) {
+                                entity.setCurrentEventName("配种");
                                 entity.setGestationDate(0);
                                 entity.setLactationDate(0);
                                 entity.setJcNpd(diffDay); // jc非生产天数(pz)
-                                if (entity.getNpdDate() == null){
-                                    entity.setNpdDate(diffDay);
-                                } else {
-                                    entity.setNpdDate(entity.getNpdDate() + diffDay);
-                                }
+                                entity.setNpdDate(diffDay);
+                                entity.setFqNpd(0);
+                                entity.setLcNpd(0);
+                                entity.setTtNpd(0);
+                                entity.setSwNpd(0);
+                                entity.setDnpzNpd(0);
                             } else if(eventType.equals("2") && thenEventType.equals("9")) {
+                                entity.setCurrentEventName("配种");
                                 entity.setGestationDate(0);
                                 entity.setLactationDate(0);
                                 entity.setDnpzNpd(diffDay); // dnpz非生产天数（配种）
-                                if (entity.getNpdDate() == null){
-                                    entity.setNpdDate(diffDay);
-                                } else {
-                                    entity.setNpdDate(entity.getNpdDate() + diffDay);
-                                }
-                            } else if(listType.size() == 0 && (eventType.equals("4") || eventType.equals("6"))) {
+                                entity.setNpdDate(diffDay);
+                                entity.setJcNpd(0);
+                                entity.setFqNpd(0);
+                                entity.setLcNpd(0);
+                                entity.setTtNpd(0);
+                                entity.setSwNpd(0);
+                            } else if(listType.size() == 0 && eventType.equals("6")) {
+                                entity.setCurrentEventName("妊检返情");
                                 entity.setGestationDate(0);
                                 entity.setLactationDate(0);
                                 entity.setFqNpd(diffDay); // fq非生产天数
-                                if (entity.getNpdDate() == null){
-                                    entity.setNpdDate(diffDay);
-                                } else {
-                                    entity.setNpdDate(entity.getNpdDate() + diffDay);
-                                }
+                                entity.setNpdDate(diffDay);
+                                entity.setJcNpd(0);
+                                entity.setLcNpd(0);
+                                entity.setTtNpd(0);
+                                entity.setSwNpd(0);
+                                entity.setDnpzNpd(0);
+                            } else if(listType.size() == 0 && eventType.equals("4")) {
+                                entity.setCurrentEventName("妊检阴性");
+                                entity.setGestationDate(0);
+                                entity.setLactationDate(0);
+                                entity.setFqNpd(diffDay); // fq非生产天数
+                                entity.setNpdDate(diffDay);
+                                entity.setJcNpd(0);
+                                entity.setLcNpd(0);
+                                entity.setTtNpd(0);
+                                entity.setSwNpd(0);
+                                entity.setDnpzNpd(0);
                             } else if((eventType.equals("2") && thenEventType.equals("6"))
                                     || (eventType.equals("2") && thenEventType.equals("4"))){
+                                entity.setCurrentEventName("配种");
                                 entity.setGestationDate(0);
                                 entity.setLactationDate(0);
                                 entity.setFqNpd(diffDay); // fq非生产天数（配种）
-                                if (entity.getNpdDate() == null){
-                                    entity.setNpdDate(diffDay);
-                                } else {
-                                    entity.setNpdDate(entity.getNpdDate() + diffDay);
-                                }
+                                entity.setNpdDate(diffDay);
+                                entity.setJcNpd(0);
+                                entity.setLcNpd(0);
+                                entity.setTtNpd(0);
+                                entity.setSwNpd(0);
+                                entity.setDnpzNpd(0);
                             } else if((eventType.equals("2") && thenEventType.equals("5"))){
+                                entity.setCurrentEventName("配种");
                                 entity.setGestationDate(0);
                                 entity.setLactationDate(0);
                                 entity.setLcNpd(diffDay); // lc非生产天数(配种)
-                                if (entity.getNpdDate() == null){
-                                    entity.setNpdDate(diffDay);
-                                } else {
-                                    entity.setNpdDate(entity.getNpdDate() + diffDay);
-                                }
+                                entity.setNpdDate(diffDay);
+                                entity.setJcNpd(0);
+                                entity.setFqNpd(0);
+                                entity.setTtNpd(0);
+                                entity.setSwNpd(0);
+                                entity.setDnpzNpd(0);
                             }else if(listType.size() == 0 && eventType.equals("5")) {
+                                entity.setCurrentEventName("妊检流产");
                                 entity.setGestationDate(0);
                                 entity.setLactationDate(0);
                                 entity.setLcNpd(diffDay); // lc非生产天数
-                                if (entity.getNpdDate() == null){
-                                    entity.setNpdDate(diffDay);
-                                } else {
-                                    entity.setNpdDate(entity.getNpdDate() + diffDay);
-                                }
+                                entity.setNpdDate(diffDay);
+                                entity.setJcNpd(0);
+                                entity.setFqNpd(0);
+                                entity.setTtNpd(0);
+                                entity.setSwNpd(0);
+                                entity.setDnpzNpd(0);
                             } else if(changeTypeId.equals("110")) {
+                                entity.setCurrentEventName("死亡");
                                 entity.setGestationDate(0);
                                 entity.setLactationDate(0);
                                 entity.setSwNpd(diffDay); // sw非生产天数
-                                if (entity.getNpdDate() == null){
-                                    entity.setNpdDate(diffDay);
-                                } else {
-                                    entity.setNpdDate(entity.getNpdDate() + diffDay);
-                                }
-                            } else if(changeTypeId.equals("111") || changeTypeId.equals("109")) {
+                                entity.setNpdDate(diffDay);
+                                entity.setJcNpd(0);
+                                entity.setFqNpd(0);
+                                entity.setLcNpd(0);
+                                entity.setTtNpd(0);
+                                entity.setDnpzNpd(0);
+                            } else if(!changeTypeId.equals("110")) {
+                                entity.setCurrentEventName("淘汰");
                                 entity.setGestationDate(0);
                                 entity.setLactationDate(0);
                                 entity.setTtNpd(diffDay); // tt非生产天数
-                                if (entity.getNpdDate() == null){
-                                    entity.setNpdDate(diffDay);
-                                } else {
-                                    entity.setNpdDate(entity.getNpdDate() + diffDay);
-                                }
+                                entity.setNpdDate(diffDay);
+                                entity.setJcNpd(0);
+                                entity.setFqNpd(0);
+                                entity.setLcNpd(0);
+                                entity.setSwNpd(0);
+                                entity.setDnpzNpd(0);
                             }
                             entity.setEventId(Long.parseLong(thisObj.get("eventId").toString().trim()));
                             entity.setBarnId(Long.parseLong(thisObj.get("barnId").toString().trim()));

@@ -2517,14 +2517,14 @@
         <if test="startMonth != null">AND a.fiscal_period >= #{startMonth}</if>
         <if test="endMonth != null">AND a.fiscal_period &lt;= #{endMonth} </if>
         GROUP BY a.pig_id, a.barn_id
-        limit #{offset}, #{limit}
         ) dd
     </select>
 
     <select id="sumNpd" parameterType="map" resultType="map">
-        SELECT a.pig_id,
+        SELECT  tt.pigId, tt.pigCode, tt.barnId, tt.barnName, tt.jcnpd, tt.dnpznpd, tt.lcnpd, tt.fqnpd, tt.swnpd, tt.ttnpd,tt.npddate  FROM (
+        SELECT a.pig_id as pigId,
         b.pig_code as pigCode,
-        a.barn_id,
+        a.barn_id as barnId,
         c.name as barnName,
         SUM(a.jc_npd) as jcnpd,
         SUM(a.dnpz_npd) as dnpznpd,
@@ -2544,5 +2544,7 @@
         <if test="endMonth != null">AND a.fiscal_period &lt;= #{endMonth} </if>
         GROUP BY a.pig_id, a.barn_id
         limit #{offset}, #{limit}
+        ) tt
+        WHERE <![CDATA[tt.npddate <> 0]]>
     </select>
 </mapper>
