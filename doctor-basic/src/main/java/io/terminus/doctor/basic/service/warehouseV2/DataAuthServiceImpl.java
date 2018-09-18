@@ -388,7 +388,7 @@ public class DataAuthServiceImpl implements DataAuthService{
             }
             String groupIdsString;
             String orgIdsString;
-            if(farmIdList != null) {
+            if(farmIdList != null && farmIdList.size() != 0) {
                 List<Long> orgIdList = dataAuthDao.getOrgIdList(farmIdList);
 //            List<Long> orgIds;
 //            if (StringUtils.isNotBlank(dataSubRole.getOrgIds())) {
