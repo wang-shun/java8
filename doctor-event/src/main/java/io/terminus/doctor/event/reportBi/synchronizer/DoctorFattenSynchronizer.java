@@ -94,7 +94,7 @@ public class DoctorFattenSynchronizer {
         if (DateDimension.YEARLY.contains(reportBi.getDateType())) {
             reportBi.setDeadWeedOutRate(fieldHelper.deadWeedOutRate(groupDaily, reportBi.getOrzType()));
             reportBi.setLivingRate(1 - reportBi.getDeadWeedOutRate());
-            Integer sum = reportBi.getStart() + Integer.valueOf(reportBi.getTurnInto());
+            Integer sum = groupDaily.getStart() + groupDaily.getTurnInto();
             if(sum == 0){
                 reportBi.setDeadWeedOutRate(0.00);
                 reportBi.setLivingRate(0.00);
