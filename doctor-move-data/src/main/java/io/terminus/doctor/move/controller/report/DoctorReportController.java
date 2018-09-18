@@ -128,7 +128,7 @@ public class DoctorReportController {
             to = DateUtil.toDateString(new Date());
         }
 
-        if (!isNull(farmId)) {
+        if (!isNull(farmId) ) {
             return RespHelper.or500(doctorDailyReportV2Service.flushGroupDaily(farmId, from, to));
         }
 
