@@ -153,7 +153,7 @@ public class SubService {
 
             //子账号@主账号
             String userName;
-            if(sub.getUsername().indexOf("@")!=-1){
+            if(subUser.getName().indexOf("@")!=-1){
                 userName = subAccount(sub, user);
             }else{
                 userName = sub.getUsername();
