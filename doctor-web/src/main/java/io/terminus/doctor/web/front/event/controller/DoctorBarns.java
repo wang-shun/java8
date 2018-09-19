@@ -275,13 +275,14 @@ public class DoctorBarns {
      * 根据farmId和当前用户查猪舍
      * 冯雨晴 2019.9.18
      * @param farmId   猪场id
-     * @param userId   用户id
      * @return 猪舍表列表
      */
     @RequestMapping(value = "/pigTypess", method = RequestMethod.GET)
-    public List<Map> findBarnsByfarmIdAndTypes(@RequestParam("farmId") Long farmId,
-                                                     @RequestParam("userId") Long userId) {
-        return RespHelper.or500(doctorBarnReadService.findBarnsByEnumss(farmId,userId));
+    public List<Map> findBarnsByfarmIdAndTypes(@RequestParam("farmId") Long farmId
+                                                    ) {
+
+        BaseUser currentUser = UserUtil.getCurrentUser();
+        return RespHelper.or500(doctorBarnReadService.findBarnsByEnumss(farmId,currentUser.getId()));
     }
 
 
