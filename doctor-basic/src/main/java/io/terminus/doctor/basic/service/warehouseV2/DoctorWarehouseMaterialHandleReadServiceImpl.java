@@ -76,7 +76,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
                 str = str + material.getMaterialName()+",";
             }
         }
-        if(str!=null){
+        if(!str.equals("")){
             str = str+ "【已盘点,不可删除】";
         }
         return Response.ok(str);

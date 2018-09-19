@@ -93,12 +93,12 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
             DoctorWarehouseStockHandle stockHandle;
             if (null == stockDto.getStockHandleId()) {
                 //新增
-                if(str!=null){
+                if(!str.equals("")){
                     str = str + "【已盘点,不可新增】";
                 }
                 stockHandle = create(stockDto, wareHouse);
             } else {
-                if(str!=null){
+                if(!str.equals("")){
                     str = str + "【已盘点,不可编辑】";
                 }
                 stockHandle = doctorWarehouseStockHandleDao.findById(stockDto.getStockHandleId());
