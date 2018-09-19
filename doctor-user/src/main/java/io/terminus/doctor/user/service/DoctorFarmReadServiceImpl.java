@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -166,9 +167,9 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
 
     //  ---------------------  新增代码  2018年8月28日17:50:56 ----------------------
     @Override
-    public Response<List<DoctorFarmInformation>> findSubordinatePig() {
+    public Response<List<DoctorFarmInformation>> findSubordinatePig(Date date) {
         try {
-            return Response.ok(doctorFarmDao.findSubordinatePig());
+            return Response.ok(doctorFarmDao.findSubordinatePig(date));
         }catch (Exception e) {
             log.error(Throwables.getStackTraceAsString(e));
             return Response.fail("error");

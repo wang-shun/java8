@@ -15,23 +15,13 @@ import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorCheckPregDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
-import io.terminus.doctor.event.model.DoctorDailyGroup;
-import io.terminus.doctor.event.model.DoctorDailyReport;
-import io.terminus.doctor.event.model.DoctorDailyReportSum;
-import io.terminus.doctor.event.model.DoctorGroupChangeSum;
-import io.terminus.doctor.event.model.DoctorRangeReport;
+import io.terminus.doctor.event.model.*;
 import io.terminus.doctor.event.service.DoctorCommonReportReadService;
 import io.terminus.doctor.event.service.DoctorDailyGroupReadService;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.util.EventUtil;
-import io.terminus.doctor.open.dto.DoctorDailyReportOpen;
-import io.terminus.doctor.open.dto.DoctorDeadDailyReportOpen;
-import io.terminus.doctor.open.dto.DoctorGroupLiveStockDetailOpen;
-import io.terminus.doctor.open.dto.DoctorLiveStockDailyReportOpen;
-import io.terminus.doctor.open.dto.DoctorMatingDailyReportOpen;
-import io.terminus.doctor.open.dto.DoctorMonthlyReportOpen;
-import io.terminus.doctor.open.dto.DoctorSaleDailyReportOpen;
+import io.terminus.doctor.open.dto.*;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorFarmInformation;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -45,11 +35,9 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import sun.misc.BASE64Encoder;
 
 import java.io.BufferedReader;
 import java.net.HttpURLConnection;
-import java.security.MessageDigest;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -95,13 +83,13 @@ public class PhoenixCrmReports {
     /**
      * 查询全部下属猪场的存栏数据
      *
-     * @param appKey 身份验证
+     * @param date 日期
      * @return jsonArray
      */
-    @OpenMethod(key = "get.pig.farms.living", paramNames = "appKey")
-    public String getPigFarmsLiving(@NotEmpty(message = "appKey.not.empty") String appKey){
+    @OpenMethod(key = "get.pig.farms.living1", paramNames = "date")
+    public String getPigFarmsLiving(@NotEmpty(message = "date.not.empty") String date){
         try {
-            String key = "pigDoctorCRM";
+//            String key = "pigDoctorCRM";
 //            MD5 32位加密
 //            MessageDigest md5 = MessageDigest.getInstance("MD5");
 //            byte[] md5Bytes = md5.digest(key.getBytes());
@@ -117,10 +105,10 @@ public class PhoenixCrmReports {
 //                return "";
 //            }
 
-            if(!key.equals(appKey)){
-                return "";
-            }
-            Response<List<DoctorFarmInformation>> farmInforMation = doctorFarmReadService.findSubordinatePig();
+//            if(!key.equals(appKey)){
+//                return "";
+//            }
+            Response<List<DoctorFarmInformation>> farmInforMation = doctorFarmReadService.findSubordinatePig(DTF.parseDateTime(date).toDate());
             if(!farmInforMation.isSuccess() || farmInforMation.getResult() == null){
                 return "";
             }

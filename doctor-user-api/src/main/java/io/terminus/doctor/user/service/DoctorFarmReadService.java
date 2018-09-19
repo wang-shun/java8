@@ -7,6 +7,7 @@ import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorFarmInformation;
 
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -81,7 +82,7 @@ public interface DoctorFarmReadService {
     Response<DoctorFarm> findByNumber(String number);
 
     //  ---------------------  新增代码  2018年8月28日17:50:56 ----------------------
-    Response<List<DoctorFarmInformation>> findSubordinatePig();
+    Response<List<DoctorFarmInformation>> findSubordinatePig(Date date);
 
 
 }

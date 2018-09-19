@@ -23,28 +23,14 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.ToJsonMapper;
-import io.terminus.doctor.event.dto.DoctorBarnDto;
-import io.terminus.doctor.event.dto.DoctorGroupDetail;
-import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
-import io.terminus.doctor.event.dto.DoctorSuggestPig;
-import io.terminus.doctor.event.dto.GroupPigPaging;
+import io.terminus.doctor.event.dto.*;
 import io.terminus.doctor.event.dto.msg.DoctorMessageUserDto;
-import io.terminus.doctor.event.dto.search.DoctorGroupCountDto;
-import io.terminus.doctor.event.dto.search.DoctorLiveStockDto;
-import io.terminus.doctor.event.dto.search.DoctorPigCountDto;
-import io.terminus.doctor.event.dto.search.SearchedBarn;
-import io.terminus.doctor.event.dto.search.SearchedBarnDto;
-import io.terminus.doctor.event.dto.search.SearchedGroup;
-import io.terminus.doctor.event.dto.search.SearchedPig;
+import io.terminus.doctor.event.dto.search.*;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.*;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.event.service.DoctorMessageUserReadService;
-import io.terminus.doctor.event.service.DoctorPigEventReadService;
-import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.event.service.*;
 import io.terminus.doctor.user.model.DoctorFarmInformation;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
@@ -54,6 +40,7 @@ import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -64,12 +51,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.isEmpty;
@@ -936,8 +918,8 @@ public class DoctorSearches {
     }
 
     @RequestMapping(value = "/findSubordinatePig",produces="application/json;charset=UTF-8", method = RequestMethod.GET)
-    public String findSubordinatePig(){
-        Response<List<DoctorFarmInformation>> farmInformation = doctorFarmReadService.findSubordinatePig();
+    public String findSubordinatePig(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date){
+        Response<List<DoctorFarmInformation>> farmInformation = doctorFarmReadService.findSubordinatePig(date);
         return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(farmInformation);
     }
 

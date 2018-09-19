@@ -1,12 +1,15 @@
 package io.terminus.doctor.user.dao;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorFarmInformation;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -64,8 +67,8 @@ public class DoctorFarmDao extends MyBatisDao<DoctorFarm> {
         return getSqlSession().selectList(sqlId("findByName"), name);
     }
 
-    public List<DoctorFarmInformation> findSubordinatePig(){
-        return getSqlSession().selectList(sqlId("findSubordinatePig"));
+    public List<DoctorFarmInformation> findSubordinatePig(Date date){
+        return getSqlSession().selectList(sqlId("findSubordinatePig"), ImmutableMap.of("sumAt", DateUtil.toDateString(date)));
     }
 
 }
