@@ -153,7 +153,7 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     @Override
     @Transactional
     @ExceptionHandle("doctor.warehouse.stock.in.fail")
-    public Response<Long> in(WarehouseStockInDto stockIn) {
+    public Response<InventoryDto> in(WarehouseStockInDto stockIn) {
 
         return warehouseInStockService.handle(stockIn);
 
@@ -236,12 +236,12 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
     }
 
     @Override
-    public Response<Long> out(WarehouseStockOutDto stockOut) {
+    public Response<InventoryDto> out(WarehouseStockOutDto stockOut) {
         return warehouseOutStockService.handle(stockOut);
     }
 
     @Override
-    public Response<Long> refund(WarehouseStockRefundDto stockRefundDto) {
+    public Response<InventoryDto> refund(WarehouseStockRefundDto stockRefundDto) {
         return warehouseRefundStockService.handle(stockRefundDto);
     }
 
@@ -285,23 +285,23 @@ public class DoctorWarehouseStockWriteServiceImpl implements DoctorWarehouseStoc
 
 
     @Override
-    public Response<Long> inventory(WarehouseStockInventoryDto stockInventory) {
+    public Response<InventoryDto> inventory(WarehouseStockInventoryDto stockInventory) {
 
         return warehouseInventoryStockService.handle(stockInventory);
     }
 
     @Override
-    public Response<Long> transfer(WarehouseStockTransferDto stockTransfer) {
+    public Response<InventoryDto> transfer(WarehouseStockTransferDto stockTransfer) {
         return warehouseTransferStockService.handle(stockTransfer);
     }
 
     @Override
-    public Response<Long> formula(WarehouseFormulaDto formulaDto) {
+    public Response<InventoryDto> formula(WarehouseFormulaDto formulaDto) {
         return warehouseFormulaStockService.handle(formulaDto);
     }
 
     @Override
-    public Response<Long> updateFormula(WarehouseFormulaDto formulaDto) {
+    public Response<InventoryDto> updateFormula(WarehouseFormulaDto formulaDto) {
         return warehouseFormulaStockService.handle(formulaDto);
     }
 

@@ -24,7 +24,7 @@ public interface DoctorWarehouseMaterialHandleReadService {
 
     // 盘点 （陈娟 2018-09-18）
 
-    // 删除单据时判断该是否有物料已盘点 （陈娟 2018-09-18）
+    // 删除单据时判断是否有物料已盘点 （陈娟 2018-09-18）
     Response<String> deleteCheckInventory(Long id);
 
 

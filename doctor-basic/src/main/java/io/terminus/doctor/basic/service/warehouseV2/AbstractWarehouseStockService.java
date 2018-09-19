@@ -49,7 +49,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
 
     @Transactional
     @ExceptionHandle("stock.handle.fail")
-    public Response<Long> handle(T stockDto) {
+    public Response<InventoryDto> handle(T stockDto) {
 
         lockedIfNecessary(stockDto);
         try {
@@ -58,12 +58,30 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
             if (null == wareHouse)
                 throw new ServiceException("warehouse.not.found");
 
+            // 判断新增或编辑的物料是否已盘点 （陈娟 2018-09-18）
+            List<F> details = this.getDetails(stockDto);
+            Iterator<F> it= details.iterator();
+            String str = new String();
+            while(it.hasNext()){
+                Date handleDate = stockDto.getHandleDate().getTime();
+                DoctorWarehouseMaterialHandle material = doctorWarehouseMaterialHandleDao.getMaxInventoryDate(stockDto.getWarehouseId(),it.next().getMaterialId() , handleDate);
+                if(material!=null){
+                    str = str + material.getMaterialName()+",";
+                    it.remove();
+                }
+            }
+
             DoctorWarehouseStockHandle stockHandle;
             if (null == stockDto.getStockHandleId()) {
                 //新增
+                if(str!=null){
+                    str = str + "【已盘点,不可新增】";
+                }
                 stockHandle = create(stockDto, wareHouse);
             } else {
-
+                if(str!=null){
+                    str = str + "【已盘点,不可编辑】";
+                }
                 stockHandle = doctorWarehouseStockHandleDao.findById(stockDto.getStockHandleId());
                 //编辑之前，可以做一些校验等
                 beforeUpdate(stockDto, stockHandle);
@@ -71,7 +89,11 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
                 stockHandle = update(stockDto, wareHouse, stockHandle);
             }
 
-            return Response.ok(stockHandle.getId());
+            InventoryDto inventoryDto = new InventoryDto();
+            inventoryDto.setId(stockHandle.getId());
+            inventoryDto.setDesc(str);
+
+            return Response.ok(inventoryDto);
 
         } catch (Throwable e) {
             throw e;

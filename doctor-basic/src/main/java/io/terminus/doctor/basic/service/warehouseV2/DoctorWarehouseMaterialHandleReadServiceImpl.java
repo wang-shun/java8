@@ -66,7 +66,7 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
 
     @Override
     public Response<String> deleteCheckInventory(Long id) {
-        // 删除单据时判断该是否有物料已盘点 （陈娟 2018-09-18）
+        // 删除单据时判断是否有物料已盘点 （陈娟 2018-09-18）
         DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleDao.findById(id);
         List<Map> materialNameByID = doctorWarehouseMaterialHandleDao.getMaterialNameByID(id);
         String str=new String();
