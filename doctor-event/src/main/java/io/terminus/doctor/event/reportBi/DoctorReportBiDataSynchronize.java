@@ -40,10 +40,7 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static io.terminus.doctor.common.utils.Checks.expectNotNull;
@@ -138,6 +135,13 @@ public class DoctorReportBiDataSynchronize {
             log.info("synchronize delta orgId ending: orgId:{}, date:{}", entry.getKey(), entry.getValue());
         });
 
+        //循环集团（孔景军）
+        /*List<Long> groupList = doctorPigDailyDao.getAllGroup();
+        groupList.parallelStream().forEach(groupId ->{
+            synchronizeDeltaBiData(groupId, OrzDimension.ORG.getValue(), entry.getValue(), 1);
+            log.info("synchronize delta orgId ending: orgId:{}, date:{}", entry.getKey(), entry.getValue());
+        });*/
+
         //如果当天更改了历史数据，找出历史数据，重刷历史数据所在的期间
         List<Date> dates = warehouseSynchronizer.getChangedDate(new Date());
         for (Date d : dates) {
@@ -212,6 +216,9 @@ public class DoctorReportBiDataSynchronize {
                 synchronizeDeltaBiData(doctorFarm.getId(), OrzDimension.FARM.getValue(), pigDate, groupDate, type, isRealTime);
             });
             synchronizeDeltaBiData(orzId, orzType, pigDate, groupDate, type, isRealTime);
+        }else if (Objects.equals(orzType, OrzDimension.CLIQUE.getValue())){
+            //如果组织维度是集团，则同步集团下的数据
+            synchronizeDeltaBiData(orzId, OrzDimension.CLIQUE.getValue(), pigDate, groupDate, type, isRealTime);
         }
     }
 
@@ -556,8 +563,10 @@ public class DoctorReportBiDataSynchronize {
         log.debug("dimension:orgId{}, farmId:{}, dimensionCriteria:{}", dailyExtend.getOrgId(), dailyExtend.getFarmId(), dimensionCriteria);
         if (Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.ORG.getValue())) {
             dimensionCriteria.setOrzId(dailyExtend.getOrgId());
-        } else {
+        } else if(Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.FARM.getValue())){
             dimensionCriteria.setOrzId(dailyExtend.getFarmId());
+        } else if(Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.CLIQUE.getValue())){
+            dimensionCriteria.setOrzId(dailyExtend.getGroupId());
         }
         dimensionCriteria.setSumAt(dailyExtend.getSumAt());
 //        if (!Objects.equals(dimensionCriteria.getDateType(), DateDimension.DAY.getValue())
@@ -567,7 +576,7 @@ public class DoctorReportBiDataSynchronize {
             if (Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.FARM.getValue())) {
                 start = doctorPigDailyDao.farmStart(dimensionCriteria);
                 end = doctorPigDailyDao.farmEnd(dimensionCriteria);
-            } else {
+            } else if(Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.ORG.getValue())){
                 Date minDate = doctorPigDailyDao.minDate(dimensionCriteria);
                 Date maxDate = doctorPigDailyDao.maxDate(dimensionCriteria);
                 start = doctorPigDailyDao.orgStart(dimensionCriteria.getOrzId(), minDate);
@@ -576,6 +585,11 @@ public class DoctorReportBiDataSynchronize {
                 int count = DateUtil.getDeltaDaysAbs(maxDate, minDate);
                 dailyExtend.setBoarDailyPigCount(FieldHelper.getInteger(dayAvgLiveStock.getBoarDailyPigCount(), count));
                 dailyExtend.setSowDailyPigCount(FieldHelper.getInteger(dayAvgLiveStock.getSowDailyPigCount(), count));
+            }else{//(孔景军)
+                Date minDate = doctorPigDailyDao.minDate(dimensionCriteria);
+                Date maxDate = doctorPigDailyDao.maxDate(dimensionCriteria);
+                start = doctorPigDailyDao.groupStart(dimensionCriteria.getOrzId(), minDate);
+                end = doctorPigDailyDao.groupEnd(dimensionCriteria.getOrzId(), maxDate);
             }
             dailyExtend.setSowCfStart(start.getSowCfStart());
             dailyExtend.setSowPhStart(start.getSowPhStart());

@@ -592,6 +592,7 @@
         FROM
         <include refid="tb"/>
         GROUP BY
+        <if test="orzType == 1">group_id,</if>
         <if test="orzType == 2">org_id,</if>
         <if test="orzType == 3">farm_id,</if>
         <if test="dateType == 1">date_format(sum_at, '%y-%m-%d')</if>
@@ -604,6 +605,7 @@
     <sql id="dimensionCri">
         <where>
             1=1
+            <if test="orzType == 1">AND group_id = #{orzId}</if>
             <if test="orzType == 2">AND org_id = #{orzId}</if>
             <if test="orzType == 3">AND farm_id = #{orzId}</if>
             and sum_at &gt;= #{startAt} AND sum_at &lt;= #{endAt}
@@ -630,6 +632,7 @@
             <if test="type == 2">
                 updated_at &gt;= date_format(#{sumAt}, '%Y-%m-%d %H:%i:%s')
             </if>
+            <if test="orzType == 1">and group_id = #{groupId}</if>
             <if test="orzType == 2">and org_id = #{orzId}</if>
             <if test="orzType == 3">and farm_id = #{orzId}</if>
         </where>
@@ -637,7 +640,7 @@
 
     <select id="findByDateType" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorDimensionCriteria">
         SELECT
-        case WHEN #{orzType} = 2 then org_id else farm_id end as orzId,
+        case WHEN #{orzType} = 2 then org_id  WHEN #{orzType} = 1 then group_id else farm_id end as orzId,
         #{orzType} as orzType,
         sum_at as sumAt,
         #{dateType} as dateType
@@ -650,10 +653,12 @@
             <if test="type == 2">
                 updated_at &gt;= date_format(#{sumAt}, '%Y-%m-%d %H:%i:%s')
             </if>
+            <if test="orzType == 1">and group_id = #{groupId}</if>
             <if test="orzType == 2">and org_id = #{orzId}</if>
             <if test="orzType == 3">and farm_id = #{orzId}</if>
         </where>
         GROUP BY
+        <if test="orzType == 1">group_id,</if>
         <if test="orzType == 2">org_id,</if>
         <if test="orzType == 3">farm_id,</if>
         <if test="dateType == 1">date_format(sum_at, '%y-%m-%d')</if>
@@ -776,5 +781,43 @@
 
     <select id="getGroupByOrgId" parameterType="long" resultType="map">
         select a.parent_id as parentId, b.name as parentName from doctor_orgs a ,doctor_orgs b where a.parent_id = b.id and a.id = #{orgId}
+    </select>
+
+
+
+
+    <select id="groupStart" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
+            resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
+        SELECT
+        sum(sow_ph_start) as sowPhStart,
+        sum(sow_cf_start) as sowCfStart,
+        sum(boar_start) as boarStart,
+        sum(sow_ph_start + sow_cf_start) as sowStart
+        FROM
+        <include refid="tb"/>
+        WHERE
+        group_id = #{groupId}
+        AND sum_at = #{sumAt}
+    </select>
+
+    <select id="groupEnd" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria"
+            resultType="io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend">
+        SELECT
+        sum(sow_ph_end) as sowPhEnd,
+        sum(sow_cf_end) as sowCfEnd,
+        sum(sow_ph_end + sow_cf_end) as sowEnd,
+        sum(boar_end) as boarEnd,
+        sum(sow_ph_mating) as sowPhMating,
+        sum(sow_ph_konghuai) as sowPhKonghuai,
+        sum(sow_ph_pregnant) as sowPhPregnant
+        FROM
+        <include refid="tb"/>
+        WHERE
+        group_id = #{groupId}
+        AND sum_at = #{sumAt}
+    </select>
+
+    <select id="getAllGroup" resultType="Long">
+        select id from doctor_orgs where type = 1
     </select>
 </mapper>
