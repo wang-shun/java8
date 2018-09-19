@@ -147,6 +147,8 @@ public class DoctorDailyReportV2Manager {
         if (isNull(doctorPigDaily)) {
             DoctorDepartmentLinerDto departmentLinerDto = departmentCache.getUnchecked(criteria.getFarmId());
             doctorPigDaily = new DoctorPigDaily();
+            doctorPigDaily.setGroupId(departmentLinerDto.getCliqueId());
+            doctorPigDaily.setGroupName(departmentLinerDto.getCliqueName());
             doctorPigDaily.setOrgId(departmentLinerDto.getOrgId());
             doctorPigDaily.setOrgName(departmentLinerDto.getOrgName());
             doctorPigDaily.setFarmId(criteria.getFarmId());
