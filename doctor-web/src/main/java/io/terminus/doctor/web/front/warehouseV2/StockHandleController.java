@@ -229,6 +229,16 @@ public class StockHandleController {
                             //单据明细里面的值全部复制到detail里面去
                             BeanUtils.copyProperties(mh, detail);
 
+                            //  编辑单据时判断是否有物料已盘点：如果已盘点，则不可编辑 （陈娟 2018-09-19）
+                            String desc=new String();
+                            DoctorWarehouseMaterialHandle material = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getMaxInventoryDate(stockHandle.getWarehouseId(), mh.getMaterialId(), stockHandle.getHandleDate()));
+                            if(material!=null){
+                                if(material!=null){
+                                    detail.setIsInventory(1);
+                                    desc = desc + material.getMaterialName()+",【已盘点,不可编辑】;";
+                                }
+                            }
+
                             if ((!stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.IN.getValue()))&&(!stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue()))) {
                                 try {
                                     //会计年月支持选择未结算过的会计年月，如果选择未结算的会计区间，则报表不显示金额和单价
@@ -289,6 +299,7 @@ public class StockHandleController {
                                     detail.setGroupStatus(doctorGroup.getStatus());
                                     if(doctorGroup.getStatus()==-1){
                                         vo.setStatus(doctorGroup.getStatus());
+                                        desc = desc +doctorGroup.getGroupCode()+ "【该猪群已关闭,不可编辑】;";
                                     }
                                 }
 
@@ -329,6 +340,7 @@ public class StockHandleController {
                                     detail.setGroupStatus(doctorGroup.getStatus());
                                     if(doctorGroup.getStatus()==-1){
                                         vo.setStatus(doctorGroup.getStatus());
+                                        desc = desc +doctorGroup.getGroupCode()+ "【该猪群已关闭,不可编辑】;";
                                     }
                                 }
                             }
@@ -357,6 +369,8 @@ public class StockHandleController {
                                 detail.setStorageWarehouseNames(sh.getWarehouseName());
                             }
 
+                            // 设置注释 （陈娟 2018-09-19）
+                            detail.setDesc(desc);
 
                             return detail;
                         })

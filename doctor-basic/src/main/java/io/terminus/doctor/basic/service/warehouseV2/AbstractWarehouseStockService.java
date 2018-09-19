@@ -63,11 +63,30 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
             Iterator<F> it= details.iterator();
             String str = new String();
             while(it.hasNext()){
-                Date handleDate = stockDto.getHandleDate().getTime();
-                DoctorWarehouseMaterialHandle material = doctorWarehouseMaterialHandleDao.getMaxInventoryDate(stockDto.getWarehouseId(),it.next().getMaterialId() , handleDate);
-                if(material!=null){
-                    str = str + material.getMaterialName()+",";
-                    it.remove();
+                if(null == it.next().getMaterialHandleId()) {// 新增：判斷物料是否盘点，是的話，刪除該物料
+                    Date handleDate = stockDto.getHandleDate().getTime();
+                    DoctorWarehouseMaterialHandle material = doctorWarehouseMaterialHandleDao.getMaxInventoryDate(stockDto.getWarehouseId(), it.next().getMaterialId(), handleDate);
+                    if (material != null) {// 已盘点
+                        str = str + material.getMaterialName() + ",";
+                        it.remove();
+                    }
+                }else{ // 编辑：判断物料是否盘点，是的话，物料不修改 （陈娟 2018-09-19)
+                    //之前的明细单
+                    Map<Long, List<DoctorWarehouseMaterialHandle>> oldMaterialHandles = doctorWarehouseMaterialHandleDao.findByStockHandle(stockDto.getStockHandleId()).stream().collect(Collectors.groupingBy(DoctorWarehouseMaterialHandle::getId));
+                    if (oldMaterialHandles.containsKey(it.next().getMaterialHandleId())) {
+                        DoctorWarehouseMaterialHandle materialHandle = oldMaterialHandles.get(it.next().getMaterialHandleId()).get(0);
+                        if (!materialHandle.getMaterialId().equals(it.next().getMaterialId())) {// 判断该单据物料是否更改
+                            Date handleDate = stockDto.getHandleDate().getTime();
+                            DoctorWarehouseMaterialHandle material = doctorWarehouseMaterialHandleDao.getMaxInventoryDate(stockDto.getWarehouseId(), it.next().getMaterialId(), handleDate);
+                            if (material != null) {// 已盘点 （物料信息不可更改）
+                                str = str + material.getMaterialName() + ",";
+                                it.next().setBeforeStockQuantity(materialHandle.getBeforeStockQuantity().toString());
+                                it.next().setMaterialId(materialHandle.getMaterialId());
+                                it.next().setQuantity(materialHandle.getQuantity());
+                                it.next().setRemark(materialHandle.getRemark());
+                            }
+                        }
+                    }
                 }
             }
 

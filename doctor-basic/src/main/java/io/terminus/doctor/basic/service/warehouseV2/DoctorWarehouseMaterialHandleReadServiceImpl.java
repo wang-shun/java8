@@ -83,6 +83,13 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
     }
 
     @Override
+    public Response<DoctorWarehouseMaterialHandle> getMaxInventoryDate(Long warehouseId, Long materialId, Date handleDate) {
+        // 判断是否盘点（陈娟 2018-09-19）
+        DoctorWarehouseMaterialHandle material = doctorWarehouseMaterialHandleDao.getMaxInventoryDate(warehouseId, materialId, handleDate);
+        return Response.ok(material);
+    }
+
+    @Override
     public Boolean getErrorAmount(Long warehouseId, Long materialId, Date settlementDate) {
         // 结算误差（陈娟 2018-8-21）
         Map<String, Object> lastMap = doctorWarehouseMaterialHandleDao.getLastAmount(warehouseId, materialId, settlementDate);

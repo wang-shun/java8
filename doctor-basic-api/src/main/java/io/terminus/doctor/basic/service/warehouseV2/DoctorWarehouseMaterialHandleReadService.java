@@ -22,10 +22,11 @@ import java.util.List;
  */
 public interface DoctorWarehouseMaterialHandleReadService {
 
-    // 盘点 （陈娟 2018-09-18）
-
     // 删除单据时判断是否有物料已盘点 （陈娟 2018-09-18）
     Response<String> deleteCheckInventory(Long id);
+
+    // 编辑单据时判断是否有物料已盘点 （陈娟 2018-09-19）
+    Response<DoctorWarehouseMaterialHandle> getMaxInventoryDate(Long warehouseId,Long materialId,Date handleDate);
 
 
     // 结算误差（陈娟 2018-8-21）
