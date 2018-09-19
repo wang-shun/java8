@@ -204,4 +204,8 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
     public List<Map<String, Object>> orgMinDate(){
         return getSqlSession().selectList(sqlId("orgMinDate"));
     }
+
+    public Map<String,Object> getGroupByOrgId(Long orgId){
+        return getSqlSession().selectOne(sqlId("getGroupByOrgId"),orgId);
+    }
 }

@@ -146,9 +146,20 @@ public class DoctorDailyReportV2Manager {
         DoctorPigDaily doctorPigDaily = pigDailyDao.findBy(criteria.getFarmId(), criteria.getSumAt());
         if (isNull(doctorPigDaily)) {
             DoctorDepartmentLinerDto departmentLinerDto = departmentCache.getUnchecked(criteria.getFarmId());
+            //根据公司id找到集团id(孔景军)
+            Map<String,Object> org = pigDailyDao.getGroupByOrgId(departmentLinerDto.getOrgId());
+            Long groupId;
+            String groupName;
+            if(org != null){
+                groupId = (Long)org.get("parentId");
+                groupName = (String)org.get("parentName");
+            }else{
+                groupId = 0L;
+                groupName = "无集团";
+            }
             doctorPigDaily = new DoctorPigDaily();
-            doctorPigDaily.setGroupId(departmentLinerDto.getCliqueId());
-            doctorPigDaily.setGroupName(departmentLinerDto.getCliqueName());
+            doctorPigDaily.setGroupId(groupId);
+            doctorPigDaily.setGroupName(groupName);
             doctorPigDaily.setOrgId(departmentLinerDto.getOrgId());
             doctorPigDaily.setOrgName(departmentLinerDto.getOrgName());
             doctorPigDaily.setFarmId(criteria.getFarmId());

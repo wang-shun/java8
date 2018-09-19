@@ -91,7 +91,7 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `sum_at`,`group_id` ,`group_name`,``org_id`, `org_name`, `farm_id`, `farm_name`, `sow_ph_start`, `sow_ph_reserve_in`, `sow_ph_wean_in`,
+        `sum_at`,`group_id` ,`group_name`,`org_id`, `org_name`, `farm_id`, `farm_name`, `sow_ph_start`, `sow_ph_reserve_in`, `sow_ph_wean_in`,
         `sow_ph_entry_in`, `sow_ph_chg_farm_in`, `sow_ph_dead`, `sow_ph_weed_out`, `sow_ph_sale`, `sow_ph_chg_farm`,
         `sow_ph_other_out`, `mate_hb`, `mate_dn`, `mate_fq`, `mate_lc`, `mate_yx`, `mating_count`, `sow_ph_mating`,
         `sow_ph_konghuai`, `sow_ph_pregnant`, `preg_positive`, `preg_negative`, `preg_fanqing`, `preg_liuchan`,
@@ -772,5 +772,9 @@
         <if test="orzType == 2">org_id = #{orzId}</if>
         <if test="orzType == 3">farm_id = #{orzId}</if>
         AND updated_at &gt;= date_format(#{updateAt}, '%Y-%m-%d %H:%i:%s')
+    </select>
+
+    <select id="getGroupByOrgId" parameterType="long" resultType="map">
+        select a.parent_id as parentId, b.name as parentName from doctor_orgs a ,doctor_orgs b where a.parent_id = b.id and a.id = #{orgId}
     </select>
 </mapper>
