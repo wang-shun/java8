@@ -93,12 +93,13 @@ public class DoctorFattenSynchronizer {
         reportBi.setOutAvgWeight180(outAvgWeight180(groupDaily));
         if (DateDimension.YEARLY.contains(reportBi.getDateType())) {
             reportBi.setDeadWeedOutRate(fieldHelper.deadWeedOutRate(groupDaily, reportBi.getOrzType()));
-            reportBi.setLivingRate(1 - reportBi.getDeadWeedOutRate());
-            Integer sum = groupDaily.getStart() + groupDaily.getTurnInto();
-            if(sum == 0){
-                reportBi.setDeadWeedOutRate(0.00);
-                reportBi.setLivingRate(0.00);
-            }
+            reportBi.setLivingRate(1.00);
+//            reportBi.setLivingRate(1 - reportBi.getDeadWeedOutRate());
+//            Integer sum = groupDaily.getStart() + groupDaily.getTurnInto();
+//            if(sum == 0){
+//                reportBi.setDeadWeedOutRate(0.00);
+//                reportBi.setLivingRate(0.00);
+//            }
             reportBi.setFeedMeatRate(feedMeatRate(groupDaily,
                     new DoctorDimensionCriteria(reportBi.getOrzId(), reportBi.getOrzType(), reportBi.getSumAt(),
                             reportBi.getDateType(), groupDaily.getPigType())));
