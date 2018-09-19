@@ -86,7 +86,7 @@ public class PhoenixCrmReports {
      * @param date 日期
      * @return jsonArray
      */
-    @OpenMethod(key = "get.pig.farms.living1", paramNames = "date")
+    @OpenMethod(key = "get.pig.farms.living", paramNames = "date")
     public String getPigFarmsLiving(@NotEmpty(message = "date.not.empty") String date){
         try {
 //            String key = "pigDoctorCRM";
