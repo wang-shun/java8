@@ -217,18 +217,8 @@
     </select>
 
     <select id="paging" parameterType="map" resultMap="DoctorMessageMap">
-        SELECT a.id as id,a.farm_id as farmId, a.rule_id as ruleId, a.role_id as roleId, a.template_id as templateId,
-        a.template_name as templateName, a.business_id as businessId,
-        a.business_type as businessType, a.rule_value_id as ruleValueId, a.message_template as messageTemplate,
-        a.type as type, a.event_type as eventType, a.category as category, a.data as data,
-        a.event_at as eventAt, a.other_at as otherAt, a.rule_time_diff as ruleTimeDiff, a.time_diff as timeDiff,
-        a.barn_id as barnId, a.barn_name as barnName, a.status as status, a.status_name as statusName,
-        a.operator_id as operatorId, a.operator_name as operatorName, a.reason as reason, a.code as code,
-        a.parity as parity, a.ware_house_id as wareHouseId, a.ware_house_name as wareHouseName,
-        a.lot_number as lotNumber, a.quantity as quantity,
-        a.avg_day_age as avgDayAge, a.dose as dose, a.material_id as materiaId, a.material_name as materialName,
-        a.url as url, a.created_by as createdBy, a.created_at as createdAt, a.updated_at as updatedAt, b.staff_name as staffName
-        FROM doctor_messages a JOIN doctor_barns b on a.barn_id = b.id
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
         <include refid="criteria"/>
         <if test="sortBy != null">
             <if test="desc != null">
