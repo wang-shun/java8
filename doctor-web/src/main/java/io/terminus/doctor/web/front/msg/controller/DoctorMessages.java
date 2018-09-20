@@ -129,8 +129,8 @@ public class DoctorMessages {
             messageUserDto.setUserId(UserUtil.getUserId());
             messageUserDto.setMessageId(doctorMessage.getId());
 
-            String staffName = doctorBarnReadService.fingStaffName(doctorMessage.getBarnId());
-            doctorMessage.setStaffName(staffName);
+//            String staffName = doctorBarnReadService.fingStaffName(doctorMessage.getBarnId());
+//            doctorMessage.setStaffName(staffName);
             DoctorMessageUser messageUser = RespHelper.or500(doctorMessageUserReadService.findDoctorMessageUsersByCriteria(messageUserDto)).get(0);
             if (Objects.equals(doctorMessage.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())) {
                 DoctorGroupTrack doctorGroupTrack = RespHelper.or500(doctorGroupReadService.findTrackByGroupId(doctorMessage.getBusinessId()));
