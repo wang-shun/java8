@@ -63,14 +63,21 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
             Iterator<F> it= details.iterator();
             String str = new String();
             while(it.hasNext()){
+                // 只提交一条单据
                 Long materialId;
-                if(details.size()>1){// 只提交一条单据
+                if(details.size()>1){
                     materialId = it.next().getMaterialId();
                 }else{
                     materialId = details.get(0).getMaterialId();
                 }
+                Long materialHandleId;
+                if(details.size()>1){
+                    materialHandleId = it.next().getMaterialHandleId();
+                }else{
+                    materialHandleId = details.get(0).getMaterialHandleId();
+                }
 
-                if(null == it.next().getMaterialHandleId()) {// 新增：判斷物料是否盘点，是的話，刪除該物料
+                if(null == materialHandleId) {// 新增：判斷物料是否盘点，是的話，刪除該物料
                     Date handleDate = stockDto.getHandleDate().getTime();
                     DoctorWarehouseMaterialHandle material = doctorWarehouseMaterialHandleDao.getMaxInventoryDate(stockDto.getWarehouseId(), materialId, handleDate);
                     if (material != null) {// 已盘点
@@ -80,8 +87,8 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
                 }else{ // 编辑：判断物料是否盘点，是的话，物料不修改 （陈娟 2018-09-19)
                     //之前的明细单
                     Map<Long, List<DoctorWarehouseMaterialHandle>> oldMaterialHandles = doctorWarehouseMaterialHandleDao.findByStockHandle(stockDto.getStockHandleId()).stream().collect(Collectors.groupingBy(DoctorWarehouseMaterialHandle::getId));
-                    if (oldMaterialHandles.containsKey(it.next().getMaterialHandleId())) {
-                        DoctorWarehouseMaterialHandle materialHandle = oldMaterialHandles.get(it.next().getMaterialHandleId()).get(0);
+                    if (oldMaterialHandles.containsKey(materialHandleId)) {
+                        DoctorWarehouseMaterialHandle materialHandle = oldMaterialHandles.get(materialHandleId).get(0);
                         if (!materialHandle.getMaterialId().equals(it.next().getMaterialId())) {// 判断该单据物料是否更改
                             Date handleDate = stockDto.getHandleDate().getTime();
                             DoctorWarehouseMaterialHandle material = doctorWarehouseMaterialHandleDao.getMaxInventoryDate(stockDto.getWarehouseId(), materialId, handleDate);
@@ -89,10 +96,17 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
                                 // 判断此单据是否是最后一笔盘点单据：Yes：可编辑 （陈娟 2018-09-20）
                                 if(!material.getStockHandleId().equals(stockDto.getStockHandleId())){
                                     str = str + material.getMaterialName() + ",";
-                                    it.next().setBeforeStockQuantity(materialHandle.getBeforeStockQuantity().toString());
-                                    it.next().setMaterialId(materialHandle.getMaterialId());
-                                    it.next().setQuantity(materialHandle.getQuantity());
-                                    it.next().setRemark(materialHandle.getRemark());
+                                    if(details.size()>1) {
+                                        it.next().setBeforeStockQuantity(materialHandle.getBeforeStockQuantity().toString());
+                                        it.next().setMaterialId(materialHandle.getMaterialId());
+                                        it.next().setQuantity(materialHandle.getQuantity());
+                                        it.next().setRemark(materialHandle.getRemark());
+                                    }else{
+                                        details.get(0).setBeforeStockQuantity(materialHandle.getBeforeStockQuantity().toString());
+                                        details.get(0).setMaterialId(materialHandle.getMaterialId());
+                                        details.get(0).setQuantity(materialHandle.getQuantity());
+                                        details.get(0).setRemark(materialHandle.getRemark());
+                                    }
                                 }
                             }
                         }
