@@ -145,8 +145,10 @@ public class DoctorReportBiDataSynchronize {
             }
         });
         groupIdToSumAt.entrySet().parallelStream().forEach(entry -> {
-            synchronizeDeltaBiData(entry.getKey(), OrzDimension.CLIQUE.getValue(), entry.getValue(), 1);
-            log.info("synchronize delta groupId ending: groupId:{}, date:{}", entry.getKey(), entry.getValue());
+            if(entry.getKey() != 0) {
+                synchronizeDeltaBiData(entry.getKey(), OrzDimension.CLIQUE.getValue(), entry.getValue(), 1);
+                log.info("synchronize delta groupId ending: groupId:{}, date:{}", entry.getKey(), entry.getValue());
+            }
         });
 
 
