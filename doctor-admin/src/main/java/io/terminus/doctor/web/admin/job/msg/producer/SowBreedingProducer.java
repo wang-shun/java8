@@ -112,7 +112,7 @@ public class SowBreedingProducer extends AbstractJobProducer {
                                 .barnId(pigDto.getBarnId())
                                 .barnName(pigDto.getBarnName())
                                 .staffName(staffName)
-                                .timeDiff(0.0)
+                                .timeDiff(timeDiff)
                                 .ruleTimeDiff(ruleTimeDiff)
                                 .reason(ruleValue.getDescribe())
                                 .eventAt(pigEvent.getEventAt())
@@ -122,8 +122,7 @@ public class SowBreedingProducer extends AbstractJobProducer {
                                 .businessId(pigDto.getPigId())
                                 .businessType(DoctorMessage.BUSINESS_TYPE.PIG.getValue())
                                 .operatorId(pigEvent.getOperatorId())
-                                //.operatorName(pigEvent.getOperatorName())
-                                .operatorName(staffName)
+                                .operatorName(pigEvent.getOperatorName())
                                 .status(pigDto.getStatus())
                                 .statusName(pigDto.getStatusName())
                                 .build();
