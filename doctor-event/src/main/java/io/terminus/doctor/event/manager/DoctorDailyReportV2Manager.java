@@ -79,19 +79,12 @@ public class DoctorDailyReportV2Manager {
         DoctorGroupDaily doctorGroupDaily = groupDailyDao.findBy(criteria.getFarmId(), criteria.getPigType(), criteria.getSumAt());
         if (isNull(doctorGroupDaily)) {
             DoctorDepartmentLinerDto departmentLinerDto = departmentCache.getUnchecked(criteria.getFarmId());
-            //根据公司id找到集团id(孔景军)
-            Map<String,Object> org = pigDailyDao.getGroupByOrgId(departmentLinerDto.getOrgId());
-            Long groupId;
-            String groupName;
-            if(org != null){
-                groupId = (Long)org.get("parentId");
-                groupName = (String)org.get("parentName");
-            }else{
-                groupId = 0L;
-                groupName = "无集团";
-            }
+
             doctorGroupDaily = new DoctorGroupDaily();
-            doctorGroupDaily.setGroupId(groupId);
+            //(孔景军)
+            doctorGroupDaily.setGroupId(departmentLinerDto.getCliqueId() == null?0L:departmentLinerDto.getCliqueId());
+            doctorGroupDaily.setGroupName(departmentLinerDto.getCliqueName() == null?"无集团":departmentLinerDto.getCliqueName());
+
             doctorGroupDaily.setOrgId(departmentLinerDto.getOrgId());
             doctorGroupDaily.setOrgName(departmentLinerDto.getOrgName());
             doctorGroupDaily.setFarmId(criteria.getFarmId());
@@ -158,20 +151,11 @@ public class DoctorDailyReportV2Manager {
         DoctorPigDaily doctorPigDaily = pigDailyDao.findBy(criteria.getFarmId(), criteria.getSumAt());
         if (isNull(doctorPigDaily)) {
             DoctorDepartmentLinerDto departmentLinerDto = departmentCache.getUnchecked(criteria.getFarmId());
-            //根据公司id找到集团id(孔景军)
-            Map<String,Object> org = pigDailyDao.getGroupByOrgId(departmentLinerDto.getOrgId());
-            Long groupId;
-            String groupName;
-            if(org != null){
-                groupId = (Long)org.get("parentId");
-                groupName = (String)org.get("parentName");
-            }else{
-                groupId = 0L;
-                groupName = "无集团";
-            }
             doctorPigDaily = new DoctorPigDaily();
-            doctorPigDaily.setGroupId(groupId);
-            doctorPigDaily.setGroupName(groupName);
+            //(孔景军)
+            doctorPigDaily.setGroupId(departmentLinerDto.getCliqueId() == null?0L:departmentLinerDto.getCliqueId());
+            doctorPigDaily.setGroupName(departmentLinerDto.getCliqueName() == null?"无集团":departmentLinerDto.getCliqueName());
+
             doctorPigDaily.setOrgId(departmentLinerDto.getOrgId());
             doctorPigDaily.setOrgName(departmentLinerDto.getOrgName());
             doctorPigDaily.setFarmId(criteria.getFarmId());

@@ -136,11 +136,17 @@ public class DoctorReportBiDataSynchronize {
         });
 
         //循环集团（孔景军）
-        /*List<Long> groupList = doctorPigDailyDao.getAllGroup();
-        groupList.parallelStream().forEach(groupId ->{
-            synchronizeDeltaBiData(groupId, OrzDimension.ORG.getValue(), entry.getValue(), 1);
-            log.info("synchronize delta orgId ending: orgId:{}, date:{}", entry.getKey(), entry.getValue());
-        });*/
+        Map<Long, Date> groupIdToSumAt = Maps.newHashMap();
+        farmIdToSumAt.forEach((key, value) -> {
+            Long groupId = cache.getUnchecked(key).getCliqueId();
+            if (!groupIdToSumAt.containsKey(groupId) || value.before(groupIdToSumAt.get(groupId))) {
+                groupIdToSumAt.put(groupId, value);
+            }
+        });
+        groupIdToSumAt.entrySet().parallelStream().forEach(entry -> {
+            synchronizeDeltaBiData(entry.getKey(), OrzDimension.CLIQUE.getValue(), entry.getValue(), 1);
+            log.info("synchronize delta groupId ending: groupId:{}, date:{}", entry.getKey(), entry.getValue());
+        });
 
         //如果当天更改了历史数据，找出历史数据，重刷历史数据所在的期间
         List<Date> dates = warehouseSynchronizer.getChangedDate(new Date());
@@ -514,8 +520,10 @@ public class DoctorReportBiDataSynchronize {
         PigType pigType = expectNotNull(PigType.from(groupDaily.getPigType()), "pigType.is.illegal");
         if (Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.ORG.getValue())) {
             dimensionCriteria.setOrzId(groupDaily.getOrgId());
-        } else {
+        } else if (Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.FARM.getValue())){
             dimensionCriteria.setOrzId(groupDaily.getFarmId());
+        } else if(Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.CLIQUE.getValue())){
+            dimensionCriteria.setOrzId(groupDaily.getGroupId());
         }
         dimensionCriteria.setSumAt(groupDaily.getSumAt());
         dimensionCriteria.setPigType(groupDaily.getPigType());
@@ -526,12 +534,17 @@ public class DoctorReportBiDataSynchronize {
             if (Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.FARM.getValue())) {
                 start = doctorGroupDailyDao.farmStart(dimensionCriteria);
                 end = doctorGroupDailyDao.farmEnd(dimensionCriteria);
-            } else {
+            } else if(Objects.equals(dimensionCriteria.getOrzType(), OrzDimension.ORG.getValue())){
                 Date minDate = doctorGroupDailyDao.minDate(dimensionCriteria);
                 Date maxDate = doctorGroupDailyDao.maxDate(dimensionCriteria);
                 start = doctorGroupDailyDao.orgDayStartStock(dimensionCriteria.getOrzId(), minDate, dimensionCriteria.getPigType());
                 end = doctorGroupDailyDao.orgDayEndStock(dimensionCriteria.getOrzId(), maxDate, dimensionCriteria.getPigType());
                 groupDaily.setDailyLivestockOnHand(FieldHelper.getInteger(doctorGroupDailyDao.orgDayAvgLiveStock(dimensionCriteria), DateUtil.getDeltaDaysAbs(maxDate, minDate)));
+            } else{
+                Date minDate = doctorGroupDailyDao.minDate(dimensionCriteria);
+                Date maxDate = doctorGroupDailyDao.maxDate(dimensionCriteria);
+                start = doctorGroupDailyDao.groupDayStartStock(dimensionCriteria.getOrzId(), minDate, dimensionCriteria.getPigType());
+                end = doctorGroupDailyDao.groupDayEndStock(dimensionCriteria.getOrzId(), maxDate, dimensionCriteria.getPigType());
             }
             groupDaily.setStart(start);
             groupDaily.setEnd(end);

@@ -119,9 +119,12 @@ public class DoctorDeliverSynchronizer {
         if (Objects.equals(reportBi.getOrzType(), OrzDimension.FARM.getValue())) {
             reportBi.setOrzId(dailyExtend.getFarmId());
             reportBi.setOrzName(dailyExtend.getFarmName());
-        } else {
+        } else if (Objects.equals(reportBi.getOrzType(), OrzDimension.ORG.getValue())){
             reportBi.setOrzId(dailyExtend.getOrgId());
             reportBi.setOrzName(dailyExtend.getOrgName());
+        }else{
+            reportBi.setOrzId(dailyExtend.getGroupId());
+            reportBi.setOrzName(dailyExtend.getGroupName());
         }
         DateDimension dateDimension = DateDimension.from(reportBi.getDateType());
         reportBi.setSumAt(withDateStartDay(dailyExtend.getSumAt(), dateDimension));

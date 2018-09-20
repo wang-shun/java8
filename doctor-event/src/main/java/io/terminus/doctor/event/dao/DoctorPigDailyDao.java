@@ -205,17 +205,14 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
         return getSqlSession().selectList(sqlId("orgMinDate"));
     }
 
-    public Map<String,Object> getGroupByOrgId(Long orgId){
-        return getSqlSession().selectOne(sqlId("getGroupByOrgId"),orgId);
-    }
 
     //孔景军
     public DoctorPigDailyExtend groupStart(Long groupId, Date sumAt) {
-        return getSqlSession().selectOne(sqlId("groupStart"), ImmutableMap.of("orgId", groupId, "sumAt", sumAt));
+        return getSqlSession().selectOne(sqlId("groupStart"), ImmutableMap.of("groupId", groupId, "sumAt", sumAt));
     }
 
     public DoctorPigDailyExtend groupEnd(Long groupId, Date sumAt) {
-        return getSqlSession().selectOne(sqlId("groupEnd"), ImmutableMap.of("orgId", groupId, "sumAt", sumAt));
+        return getSqlSession().selectOne(sqlId("groupEnd"), ImmutableMap.of("groupId", groupId, "sumAt", sumAt));
     }
 
     public List<Long> getAllGroup(){

@@ -779,10 +779,6 @@
         AND updated_at &gt;= date_format(#{updateAt}, '%Y-%m-%d %H:%i:%s')
     </select>
 
-    <select id="getGroupByOrgId" parameterType="long" resultType="map">
-        select a.parent_id as parentId, b.name as parentName from doctor_orgs a ,doctor_orgs b where a.parent_id = b.id and a.id = #{orgId}
-    </select>
-
 
 
 
