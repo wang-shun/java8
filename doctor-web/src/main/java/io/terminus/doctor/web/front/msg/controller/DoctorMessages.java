@@ -136,8 +136,6 @@ public class DoctorMessages {
                 DoctorGroupTrack doctorGroupTrack = RespHelper.or500(doctorGroupReadService.findTrackByGroupId(doctorMessage.getBusinessId()));
                 doctorMessage.setQuantity(doctorGroupTrack.getQuantity());
             }
-            String staffName = doctorBarnReadService.fingStaffName(doctorMessage.getBarnId());
-            doctorMessage.setStaffName(staffName);
 
             return new DoctorMessageWithUserDto(doctorMessage, messageUser);
         }).collect(Collectors.toList());
