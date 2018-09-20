@@ -79,11 +79,14 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
                             Date handleDate = stockDto.getHandleDate().getTime();
                             DoctorWarehouseMaterialHandle material = doctorWarehouseMaterialHandleDao.getMaxInventoryDate(stockDto.getWarehouseId(), it.next().getMaterialId(), handleDate);
                             if (material != null) {// 已盘点 （物料信息不可更改）
-                                str = str + material.getMaterialName() + ",";
-                                it.next().setBeforeStockQuantity(materialHandle.getBeforeStockQuantity().toString());
-                                it.next().setMaterialId(materialHandle.getMaterialId());
-                                it.next().setQuantity(materialHandle.getQuantity());
-                                it.next().setRemark(materialHandle.getRemark());
+                                // 判断此单据是否是最后一笔盘点单据：Yes：可编辑 （陈娟 2018-09-20）
+                                if(!material.getStockHandleId().equals(stockDto.getStockHandleId())){
+                                    str = str + material.getMaterialName() + ",";
+                                    it.next().setBeforeStockQuantity(materialHandle.getBeforeStockQuantity().toString());
+                                    it.next().setMaterialId(materialHandle.getMaterialId());
+                                    it.next().setQuantity(materialHandle.getQuantity());
+                                    it.next().setRemark(materialHandle.getRemark());
+                                }
                             }
                         }
                     }

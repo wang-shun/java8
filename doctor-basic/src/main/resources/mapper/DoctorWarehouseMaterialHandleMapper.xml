@@ -577,7 +577,7 @@
 
     <select id="findByStockHandleIds" parameterType="long" resultMap="DoctorWarehouseMaterialHandleMap">
         select * from  doctor_warehouse_material_handle
-        where  stock_handle_id = #{id} and delete_flag = 1
+        where  stock_handle_id = #{id} and delete_flag = 1 ORDER BY material_id
     </select>
 
     <select id="listByFarmIdTime" parameterType="map" resultType="map">
@@ -935,7 +935,7 @@
 
     <!--盘点 （陈娟 2018-09-18）-->
     <select id="getMaxInventoryDate" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
-        select `material_id`, `material_name`, `type`,`handle_date` from doctor_warehouse_material_handle
+        select id,stock_handle_id,`material_id`, `material_name`, `type`,`handle_date` from doctor_warehouse_material_handle
         where delete_flag=1 and ( type = 7 or type = 8 ) and warehouse_id=#{warehouseId} and material_id=#{materialId}
         and handle_date>=#{handleDate}  ORDER BY handle_date desc limit 1
     </select>

@@ -73,7 +73,10 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
         for (Map mm: materialNameByID) {
             DoctorWarehouseMaterialHandle material = doctorWarehouseMaterialHandleDao.getMaxInventoryDate(stockHandle.getWarehouseId(), (Long) mm.get("material_id"), stockHandle.getHandleDate());
             if(material!=null){
-                str = str + material.getMaterialName()+",";
+                // 判断此单据是否是最后一笔盘点单据：Yes：可删除 （陈娟 2018-09-20）
+                if(!material.getStockHandleId().equals(stockHandle.getId())){
+                    str = str + material.getMaterialName()+",";
+                }
             }
         }
         if(!str.equals("")){
