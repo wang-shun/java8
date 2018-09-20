@@ -127,6 +127,7 @@ public class DoctorMessageInfo implements Serializable{
 
     private Long barnId;
     private String barnName;
+    private String staffName;
 
     /**
      * 消息对象的状态

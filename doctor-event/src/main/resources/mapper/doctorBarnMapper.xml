@@ -419,4 +419,9 @@
         and status = 1
         group by change_type_id
     </select>
+    <select id="findStaffNameByBarnId" parameterType="long" resultType="String">
+        select a.name as staffName
+        from doctor_barns a
+        where barn_id = #{barnId}
+    </select>
 </mapper>

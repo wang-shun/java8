@@ -11,7 +11,6 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import org.springframework.stereotype.Repository;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -220,5 +219,12 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
         map.put("endTime", endTime);
         map.put("beginTime", beginTime);
         return getSqlSession().selectList(sqlId("groupjianshao"), map);
+    }
+
+    /**
+     * 根据barnId查饲养员-ysq
+     */
+    public String findStaffNameByBarnId(Long barnId){
+        return getSqlSession().selectOne(sqlId("findStaffNameByBarnId"),barnId);
     }
 }

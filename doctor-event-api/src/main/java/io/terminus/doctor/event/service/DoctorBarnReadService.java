@@ -131,4 +131,8 @@ public interface DoctorBarnReadService {
      * @return 猪舍信息
      */
     Response<IotBarnInfo> findIotBarnInfo(Long barnId);
+    /**
+     * 根据barnId查饲养员-ysq
+     */
+    String fingStaffName(Long barnId);
 }
