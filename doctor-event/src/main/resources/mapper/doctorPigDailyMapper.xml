@@ -632,7 +632,7 @@
             <if test="type == 2">
                 updated_at &gt;= date_format(#{sumAt}, '%Y-%m-%d %H:%i:%s')
             </if>
-            <if test="orzType == 1">and group_id = #{groupId}</if>
+            <if test="orzType == 1">and group_id = #{orzId}</if>
             <if test="orzType == 2">and org_id = #{orzId}</if>
             <if test="orzType == 3">and farm_id = #{orzId}</if>
         </where>
