@@ -35,8 +35,7 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.terminus.doctor.common.enums.PigType.*;
@@ -149,7 +148,23 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
         * */
     @Override
     public Response<List<Map>> findBarnsByEnumss(Long farmId, Long userId) {
+
         List<Map> maps = doctorBarnDao.findByEnumss(farmId,userId);
+
+      /*  String barn_ids = "366,365,345,632,961,321,333,123,456,789,521,472,996,663,552,205,520";
+        String str[] = barn_ids.split(",");
+        //字符串数组转换成int数组
+        int array[] = new int[str.length];
+        for(int i=0;i<str.length;i++){
+            array[i]=Integer.parseInt(str[i]);
+            //取到barn_id里的每一个ID，可以进行后期操作
+        }
+
+        Map<String, Object> map = new HashMap<String, Object>();
+            map = doctorBarnDao.findByEnumss();
+            map.put("id", map.get("barn_ids"));
+*/
+
         return Response.ok(maps);
     }
 
@@ -386,8 +401,8 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
                 || (Objects.equal(pigType, PigType.NURSERY_PIGLET.getValue()) && NURSERY_ALLOW_TRANS.contains(barnType))
                 //育肥舍 => 育肥舍/后备舍(公母)
                 || (Objects.equal(pigType, PigType.FATTEN_PIG.getValue()) && FATTEN_ALLOW_TRANS.contains(barnType))
-                // 后备群 => 育肥舍/后备舍
-                || (Objects.equal(pigType, PigType.RESERVE.getValue()) && (Objects.equal(barnType, PigType.RESERVE.getValue()) || Objects.equal(barnType, PigType.FATTEN_PIG.getValue())))
+                // 后备群 => 育肥舍/后备舍(公母)
+                || (Objects.equal(pigType, PigType.RESERVE.getValue()) && RESERVE_ALLOW_TRANS.contains(barnType) && (Objects.equal(barnType, PigType.RESERVE.getValue()) || Objects.equal(barnType, PigType.FATTEN_PIG.getValue())))
                 //其他 => 同类型
                 || (Objects.equal(pigType, barnType));
 

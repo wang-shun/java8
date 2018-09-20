@@ -287,7 +287,6 @@ public class DoctorBarns {
 
 
 
-
     /**
      * 猪舍批量转舍时, 根据猪id, 求一下可转猪舍的交集
      *
