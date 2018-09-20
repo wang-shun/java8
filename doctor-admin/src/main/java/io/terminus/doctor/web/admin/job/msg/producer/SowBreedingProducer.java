@@ -122,7 +122,8 @@ public class SowBreedingProducer extends AbstractJobProducer {
                                 .businessId(pigDto.getPigId())
                                 .businessType(DoctorMessage.BUSINESS_TYPE.PIG.getValue())
                                 .operatorId(pigEvent.getOperatorId())
-                                .operatorName(pigEvent.getOperatorName())
+//                                .operatorName(pigEvent.getOperatorName())
+                                .operatorName(staffName)
                                 .status(pigDto.getStatus())
                                 .statusName(pigDto.getStatusName())
                                 .build();
