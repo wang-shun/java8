@@ -63,16 +63,17 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
             Iterator<F> it= details.iterator();
             String str = new String();
             while(it.hasNext()){
+                F next = it.next();
                 // 只提交一条单据
                 Long materialId;
                 if(details.size()>1){
-                    materialId = it.next().getMaterialId();
+                    materialId = next.getMaterialId();
                 }else{
                     materialId = details.get(0).getMaterialId();
                 }
                 Long materialHandleId;
                 if(details.size()>1){
-                    materialHandleId = it.next().getMaterialHandleId();
+                    materialHandleId = next.getMaterialHandleId();
                 }else{
                     materialHandleId = details.get(0).getMaterialHandleId();
                 }
@@ -89,7 +90,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
                     Map<Long, List<DoctorWarehouseMaterialHandle>> oldMaterialHandles = doctorWarehouseMaterialHandleDao.findByStockHandle(stockDto.getStockHandleId()).stream().collect(Collectors.groupingBy(DoctorWarehouseMaterialHandle::getId));
                     if (oldMaterialHandles.containsKey(materialHandleId)) {
                         DoctorWarehouseMaterialHandle materialHandle = oldMaterialHandles.get(materialHandleId).get(0);
-                        if (!materialHandle.getMaterialId().equals(it.next().getMaterialId())) {// 判断该单据物料是否更改
+                        if (!materialHandle.getMaterialId().equals(next.getMaterialId())) {// 判断该单据物料是否更改
                             Date handleDate = stockDto.getHandleDate().getTime();
                             DoctorWarehouseMaterialHandle material = doctorWarehouseMaterialHandleDao.getMaxInventoryDate(stockDto.getWarehouseId(), materialId, handleDate);
                             if (material != null) {// 已盘点 （物料信息不可更改）
@@ -97,10 +98,10 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
                                 if(!material.getStockHandleId().equals(stockDto.getStockHandleId())){
                                     str = str + material.getMaterialName() + ",";
                                     if(details.size()>1) {
-                                        it.next().setBeforeStockQuantity(materialHandle.getBeforeStockQuantity().toString());
-                                        it.next().setMaterialId(materialHandle.getMaterialId());
-                                        it.next().setQuantity(materialHandle.getQuantity());
-                                        it.next().setRemark(materialHandle.getRemark());
+                                        next.setBeforeStockQuantity(materialHandle.getBeforeStockQuantity().toString());
+                                        next.setMaterialId(materialHandle.getMaterialId());
+                                        next.setQuantity(materialHandle.getQuantity());
+                                        next.setRemark(materialHandle.getRemark());
                                     }else{
                                         details.get(0).setBeforeStockQuantity(materialHandle.getBeforeStockQuantity().toString());
                                         details.get(0).setMaterialId(materialHandle.getMaterialId());
@@ -143,6 +144,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
             return Response.ok(inventoryDto);
 
         } catch (Throwable e) {
+            log.info(e.getMessage());
             throw e;
         } finally {
             releaseLocks();

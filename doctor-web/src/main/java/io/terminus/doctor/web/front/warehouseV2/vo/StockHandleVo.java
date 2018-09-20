@@ -30,6 +30,8 @@ public class StockHandleVo extends DoctorWarehouseStockHandle {
 
     private Integer status;
 
+    private Integer hasInventory;
+
     private List<Detail> details;
 
     @Data
