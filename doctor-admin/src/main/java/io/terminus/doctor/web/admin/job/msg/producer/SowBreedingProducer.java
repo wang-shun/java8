@@ -104,14 +104,11 @@ public class SowBreedingProducer extends AbstractJobProducer {
                     }else {
                         ruleTimeDiff = getRuleTimeDiff(warnRule.getRule().getValues().get(0), timeDiff);
                     }
-                    //查饲养员--ysq
-                    String staffName = doctorBarnReadService.fingStaffName(pigDto.getBarnId());
                     if (isSend) {
                         DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
                                 .code(pigDto.getPigCode())
                                 .barnId(pigDto.getBarnId())
                                 .barnName(pigDto.getBarnName())
-                                .staffName(staffName)
                                 .timeDiff(timeDiff)
                                 .ruleTimeDiff(ruleTimeDiff)
                                 .reason(ruleValue.getDescribe())

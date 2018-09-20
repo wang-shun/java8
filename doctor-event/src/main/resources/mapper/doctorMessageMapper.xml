@@ -217,8 +217,8 @@
     </select>
 
     <select id="paging" parameterType="map" resultMap="DoctorMessageMap">
-        SELECT <include refid="cols_all"/>, b.staff_name as staffName
-        FROM <include refid="tb"/> a JOIN doctor_barns b on a.barn_id = b.id
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
         <include refid="criteria"/>
         <if test="sortBy != null">
             <if test="desc != null">
