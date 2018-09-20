@@ -235,7 +235,7 @@ public class StockHandleController {
                             if(material!=null){
                                 if(material!=null){
                                     detail.setIsInventory(1);
-                                    desc = desc + ",【该物料已盘点,不可编辑】;";
+                                    desc = desc + "【该物料已盘点,不可编辑】;";
                                 }
                             }
 

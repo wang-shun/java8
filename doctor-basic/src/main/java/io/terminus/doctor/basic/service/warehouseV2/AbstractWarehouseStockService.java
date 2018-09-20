@@ -63,9 +63,16 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
             Iterator<F> it= details.iterator();
             String str = new String();
             while(it.hasNext()){
+                Long materialId;
+                if(details.size()>1){// 只提交一条单据
+                    materialId = it.next().getMaterialId();
+                }else{
+                    materialId = details.get(0).getMaterialId();
+                }
+
                 if(null == it.next().getMaterialHandleId()) {// 新增：判斷物料是否盘点，是的話，刪除該物料
                     Date handleDate = stockDto.getHandleDate().getTime();
-                    DoctorWarehouseMaterialHandle material = doctorWarehouseMaterialHandleDao.getMaxInventoryDate(stockDto.getWarehouseId(), it.next().getMaterialId(), handleDate);
+                    DoctorWarehouseMaterialHandle material = doctorWarehouseMaterialHandleDao.getMaxInventoryDate(stockDto.getWarehouseId(), materialId, handleDate);
                     if (material != null) {// 已盘点
                         str = str + material.getMaterialName() + ",";
                         it.remove();
@@ -77,7 +84,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
                         DoctorWarehouseMaterialHandle materialHandle = oldMaterialHandles.get(it.next().getMaterialHandleId()).get(0);
                         if (!materialHandle.getMaterialId().equals(it.next().getMaterialId())) {// 判断该单据物料是否更改
                             Date handleDate = stockDto.getHandleDate().getTime();
-                            DoctorWarehouseMaterialHandle material = doctorWarehouseMaterialHandleDao.getMaxInventoryDate(stockDto.getWarehouseId(), it.next().getMaterialId(), handleDate);
+                            DoctorWarehouseMaterialHandle material = doctorWarehouseMaterialHandleDao.getMaxInventoryDate(stockDto.getWarehouseId(), materialId, handleDate);
                             if (material != null) {// 已盘点 （物料信息不可更改）
                                 // 判断此单据是否是最后一笔盘点单据：Yes：可编辑 （陈娟 2018-09-20）
                                 if(!material.getStockHandleId().equals(stockDto.getStockHandleId())){
