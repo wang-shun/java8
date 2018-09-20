@@ -119,6 +119,20 @@ public class DoctorReportBiDataSynchronize {
     public void synchronizeDeltaDayBiData(Map<Long, Date> farmIdToSumAt) {
         log.info("synchronize delta day bi data starting");
         Stopwatch stopwatch = Stopwatch.createStarted();
+        //循环集团（孔景军）
+        Map<Long, Date> groupIdToSumAt = Maps.newHashMap();
+        farmIdToSumAt.forEach((key, value) -> {
+            Long groupId = cache.getUnchecked(key).getCliqueId();
+            if (!groupIdToSumAt.containsKey(groupId) || value.before(groupIdToSumAt.get(groupId))) {
+                groupIdToSumAt.put(groupId, value);
+            }
+        });
+        groupIdToSumAt.entrySet().parallelStream().forEach(entry -> {
+            synchronizeDeltaBiData(entry.getKey(), OrzDimension.CLIQUE.getValue(), entry.getValue(), 1);
+            log.info("synchronize delta groupId ending: groupId:{}, date:{}", entry.getKey(), entry.getValue());
+        });
+
+
         farmIdToSumAt.entrySet().parallelStream().forEach(entry -> {
             synchronizeDeltaBiData(entry.getKey(), OrzDimension.FARM.getValue(), entry.getValue(), 1);
             log.info("synchronize delta farm ending: farmId:{}, date:{}", entry.getKey(), entry.getValue());
@@ -135,18 +149,7 @@ public class DoctorReportBiDataSynchronize {
             log.info("synchronize delta orgId ending: orgId:{}, date:{}", entry.getKey(), entry.getValue());
         });
 
-        //循环集团（孔景军）
-        Map<Long, Date> groupIdToSumAt = Maps.newHashMap();
-        farmIdToSumAt.forEach((key, value) -> {
-            Long groupId = cache.getUnchecked(key).getCliqueId();
-            if (!groupIdToSumAt.containsKey(groupId) || value.before(groupIdToSumAt.get(groupId))) {
-                groupIdToSumAt.put(groupId, value);
-            }
-        });
-        groupIdToSumAt.entrySet().parallelStream().forEach(entry -> {
-            synchronizeDeltaBiData(entry.getKey(), OrzDimension.CLIQUE.getValue(), entry.getValue(), 1);
-            log.info("synchronize delta groupId ending: groupId:{}, date:{}", entry.getKey(), entry.getValue());
-        });
+
 
         //如果当天更改了历史数据，找出历史数据，重刷历史数据所在的期间
         List<Date> dates = warehouseSynchronizer.getChangedDate(new Date());
