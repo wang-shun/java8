@@ -95,11 +95,15 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
                 //新增
                 if(!str.equals("")){
                     str = str + "【已盘点,不可新增】";
+                }else{
+                    str = "数据已经提交";
                 }
                 stockHandle = create(stockDto, wareHouse);
             } else {
                 if(!str.equals("")){
                     str = str + "【已盘点,不可编辑】";
+                }else{
+                    str = "数据已经提交";
                 }
                 stockHandle = doctorWarehouseStockHandleDao.findById(stockDto.getStockHandleId());
                 //编辑之前，可以做一些校验等

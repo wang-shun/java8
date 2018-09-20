@@ -235,7 +235,7 @@ public class StockHandleController {
                             if(material!=null){
                                 if(material!=null){
                                     detail.setIsInventory(1);
-                                    desc = desc + material.getMaterialName()+",【已盘点,不可编辑】;";
+                                    desc = desc + ",【该物料已盘点,不可编辑】;";
                                 }
                             }
 
@@ -299,13 +299,16 @@ public class StockHandleController {
                                     detail.setGroupStatus(doctorGroup.getStatus());
                                     if(doctorGroup.getStatus()==-1){
                                         vo.setStatus(doctorGroup.getStatus());
-                                        desc = desc +doctorGroup.getGroupCode()+ "【该猪群已关闭,不可编辑】;";
+                                        desc = desc + "【该猪群已关闭,不可编辑】;";
                                     }
                                 }
 
                                 //得到该领料出库的退料入库的数量
                                 Integer count = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findCountByRelMaterialHandleId(mh.getId(), mh.getFarmId()));
                                 detail.setRetreatingCount(count);
+                                if(count>=1){
+                                    desc = desc + "【该物料有退料入库,不可编辑】;";
+                                }
 
                             }
 
@@ -340,7 +343,7 @@ public class StockHandleController {
                                     detail.setGroupStatus(doctorGroup.getStatus());
                                     if(doctorGroup.getStatus()==-1){
                                         vo.setStatus(doctorGroup.getStatus());
-                                        desc = desc +doctorGroup.getGroupCode()+ "【该猪群已关闭,不可编辑】;";
+                                        desc = desc + "【该猪群已关闭,不可编辑】;";
                                     }
                                 }
                             }
