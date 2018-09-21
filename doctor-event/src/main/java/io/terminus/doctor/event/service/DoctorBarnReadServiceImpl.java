@@ -151,21 +151,28 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
 
         List<Map> maps = doctorBarnDao.findByEnumss(farmId,userId);
 
-      /*  String barn_ids = "366,365,345,632,961,321,333,123,456,789,521,472,996,663,552,205,520";
+        String barn_ids = "";
+        for ( Map<String,Object> map : maps ) {
+            for ( String s : map.keySet() ) {
+                barn_ids = (String) map.get("barn_ids");
+            }
+        }
+
+        List<Map> result = new ArrayList<>();
         String str[] = barn_ids.split(",");
         //字符串数组转换成int数组
         int array[] = new int[str.length];
         for(int i=0;i<str.length;i++){
-            array[i]=Integer.parseInt(str[i]);
-            //取到barn_id里的每一个ID，可以进行后期操作
+
+            array[i] = Integer.parseInt(str[i]);
+            maps = doctorBarnDao.findNameByBarnIds((long) Integer.parseInt(str[i]));
+            for ( Map<String,Object> map : maps ) {
+                result.add(map);
+            }
+
         }
 
-        Map<String, Object> map = new HashMap<String, Object>();
-            map = doctorBarnDao.findByEnumss();
-            map.put("id", map.get("barn_ids"));
-*/
-
-        return Response.ok(maps);
+        return Response.ok(result);
     }
 
     @Override
@@ -203,11 +210,24 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
              * 当前所属猪舍
              */
             Integer barnType = doctorBarnDao.findById(currentBarnId).getPigType();
+
+
             /**
              * 要转入猪场的猪舍
              */
             List<DoctorBarn> doctorBarns = doctorBarnDao.findByFarmId(farmId);
-            return Response.ok(doctorBarns.stream().filter(doctorBarn -> doctorBarn != null
+
+          /*  *//**
+             * 2018920
+             * 当前所属猪舍及其所带性别
+             *//*
+            List<Map> sex = doctorBarnDao.findByBarnsId(farmId);
+
+            return Response.ok(doctorBarns.stream().filter(map -> map != null
+                    && checkCanTransBarn(barnType, map.getPigType() ,map.getSex())
+                    && Objects.equal(map.getStatus(), DoctorBarn.Status.USING.getValue())).collect(Collectors.toList()));*/
+
+         return Response.ok(doctorBarns.stream().filter(doctorBarn -> doctorBarn != null
                     && checkCanTransBarn(barnType, doctorBarn.getPigType())
                     && Objects.equal(doctorBarn.getStatus(), DoctorBarn.Status.USING.getValue())).collect(Collectors.toList()));
         } catch (Exception e) {

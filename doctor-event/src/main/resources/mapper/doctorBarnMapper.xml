@@ -106,6 +106,19 @@
         WHERE id = #{id}
     </select>
 
+   <!--
+    /**2018920f
+    * 当前所属猪舍的性别
+    */-->
+    <select id="findByBarnsId" parameterType="long"  resultType="map">
+       SELECT  a.id, a.name, a.org_id, a.org_name, a.farm_id, a.farm_name, a.pig_type,
+        a.can_open_group, a.status, a.capacity, a.staff_id, a.staff_name, a.out_id, a.extra,
+        a.created_at, a.updated_at ,b.sex
+        from doctor_barns a left JOIN doctor_group_tracks b on  a.farm_id = b.group_id
+        WHERE a.id = #{id}
+    </select>
+
+
     <update id="update" parameterType="DoctorBarn">
         UPDATE
         <include refid="tb"/>
@@ -213,6 +226,12 @@
         from doctor_barns a left join doctor_user_data_permissions b on a.id = b.barn_ids
         where b.user_id = #{userId}
         and a.farm_id = #{farmId}
+    </select>
+
+    <select id="findNameByBarnIds" parameterType="map" resultType="map">
+        SELECT id, name
+        from doctor_barns
+        where id= #{id}
     </select>
 
 

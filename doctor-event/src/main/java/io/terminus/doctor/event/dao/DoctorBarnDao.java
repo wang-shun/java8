@@ -76,8 +76,20 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
                     .put("farmId", farmId)
                     .put("userId", userId)
                     .map());
-
     }
+
+
+    public List<Map> findNameByBarnIds(@NotNull Long id) {
+        return getSqlSession().selectList(sqlId("findNameByBarnIds"),id);
+    }
+
+    /**
+     * 当前所属猪舍的性别
+     */
+    public List<Map> findByBarnsId(Long farmId) {
+        return getSqlSession().selectList(sqlId("findByBarnsId"), farmId);
+    }
+
 
     /**
      * 猪舍的当前最大的id

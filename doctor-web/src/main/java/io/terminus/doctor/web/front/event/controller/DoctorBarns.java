@@ -280,11 +280,10 @@ public class DoctorBarns {
     @RequestMapping(value = "/pigTypess", method = RequestMethod.GET)
     public List<Map> findBarnsByfarmIdAndTypes(@RequestParam("farmId") Long farmId
                                                     ) {
-
         BaseUser currentUser = UserUtil.getCurrentUser();
         return RespHelper.or500(doctorBarnReadService.findBarnsByEnumss(farmId,currentUser.getId()));
-    }
 
+    }
 
 
     /**
