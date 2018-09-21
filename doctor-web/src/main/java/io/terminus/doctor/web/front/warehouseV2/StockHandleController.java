@@ -234,9 +234,11 @@ public class StockHandleController {
                             DoctorWarehouseMaterialHandle material = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getMaxInventoryDate(stockHandle.getWarehouseId(), mh.getMaterialId(), stockHandle.getHandleDate()));
                             if(material!=null){
                                 if(material!=null){
-                                    detail.setIsInventory(1);
-                                    vo.setHasInventory(1);
-                                    desc = desc + "【该物料已盘点,不可编辑】;";
+                                    if(!material.getStockHandleId().equals(stockHandle.getId())){
+                                        detail.setIsInventory(1);
+                                        vo.setHasInventory(1);
+                                        desc = desc + "【该物料已盘点,不可编辑】;";
+                                    }
                                 }
                             }
 

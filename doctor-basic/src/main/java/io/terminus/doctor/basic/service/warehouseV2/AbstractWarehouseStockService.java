@@ -144,7 +144,6 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
             return Response.ok(inventoryDto);
 
         } catch (Throwable e) {
-            log.info(e.getMessage());
             throw e;
         } finally {
             releaseLocks();
