@@ -118,7 +118,7 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
                 }
             }
 
-            DoctorWarehouseStockHandle stockHandle;
+            DoctorWarehouseStockHandle stockHandle = new DoctorWarehouseStockHandle();
             if (null == stockDto.getStockHandleId()) {
                 //新增
                 if(!str.equals("")){
@@ -126,7 +126,10 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
                 }else{
                     str = "数据已经提交";
                 }
-                stockHandle = create(stockDto, wareHouse);
+                List<F> dd = this.getDetails(stockDto);
+                if(dd.size()>=1){
+                    stockHandle = create(stockDto, wareHouse);
+                }
             } else {
                 if(!str.equals("")){
                     str = str + "【已盘点,不可编辑】";
