@@ -599,7 +599,7 @@
 
         left join (SELECT ifnull(
             sum(case type	when '2' then amount	when '8' then amount	when '10' then amount
-            when '12' then amount  when '13' then -amount end	),0) as outAmount,farm_id FROM doctor_warehouse_material_handle
+            when '12' then amount  when '13' then amount end	),0) as outAmount,farm_id FROM doctor_warehouse_material_handle
             WHERE org_id = #{orgId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')	AND delete_flag=1
             group by farm_id ORDER BY farm_id
         ) temp2 on a.farm_id = temp2.farm_id
