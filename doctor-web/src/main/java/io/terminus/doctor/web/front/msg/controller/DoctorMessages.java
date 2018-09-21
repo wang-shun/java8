@@ -136,10 +136,10 @@ public class DoctorMessages {
                 DoctorGroupTrack doctorGroupTrack = RespHelper.or500(doctorGroupReadService.findTrackByGroupId(doctorMessage.getBusinessId()));
                 doctorMessage.setQuantity(doctorGroupTrack.getQuantity());
             }
-//            if (Objects.equals(doctorMessage.getCategory(), Category.SOW_BREEDING.getKey())) {
-//                String staffName = doctorBarnReadService.fingStaffName(doctorMessage.getBarnId());
-//                doctorMessage.setStaffName(staffName);
-//            }
+            if (Objects.equals(doctorMessage.getCategory(), Category.SOW_BREEDING.getKey())) {
+                String staffName = doctorBarnReadService.fingStaffName(doctorMessage.getBarnId());
+                doctorMessage.setOperatorName(staffName);
+            }
 
             return new DoctorMessageWithUserDto(doctorMessage, messageUser);
         }).collect(Collectors.toList());
