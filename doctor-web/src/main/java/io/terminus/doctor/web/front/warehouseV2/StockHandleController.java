@@ -235,9 +235,11 @@ public class StockHandleController {
                             if(material!=null){
                                 if(material!=null){
                                     if(!material.getStockHandleId().equals(stockHandle.getId())){
-                                        detail.setIsInventory(1);
-                                        vo.setHasInventory(1);
-                                        desc = desc + "【该物料已盘点,不可编辑】;";
+                                        if(stockHandle.getUpdatedAt().compareTo(material.getHandleDate())<0){
+                                            detail.setIsInventory(1);
+                                            vo.setHasInventory(1);
+                                            desc = desc + "【该物料已盘点,不可编辑】;";
+                                        }
                                     }
                                 }
                             }

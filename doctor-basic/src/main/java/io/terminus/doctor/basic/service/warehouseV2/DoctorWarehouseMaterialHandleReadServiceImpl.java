@@ -75,7 +75,9 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
             if(material!=null){
                 // 判断此单据是否是最后一笔盘点单据：Yes：可删除 （陈娟 2018-09-20）
                 if(!material.getStockHandleId().equals(stockHandle.getId())){
-                    str = str + material.getMaterialName()+",";
+                    if(stockHandle.getUpdatedAt().compareTo(material.getHandleDate())<0){
+                        str = str + material.getMaterialName()+",";
+                    }
                 }
             }
         }

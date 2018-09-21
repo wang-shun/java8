@@ -95,18 +95,21 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
                             DoctorWarehouseMaterialHandle material = doctorWarehouseMaterialHandleDao.getMaxInventoryDate(stockDto.getWarehouseId(), materialId, handleDate);
                             if (material != null) {// 已盘点 （物料信息不可更改）
                                 // 判断此单据是否是最后一笔盘点单据：Yes：可编辑 （陈娟 2018-09-20）
-                                if(!material.getStockHandleId().equals(stockDto.getStockHandleId())){
-                                    str = str + material.getMaterialName() + ",";
-                                    if(details.size()>1) {
-                                        next.setBeforeStockQuantity(materialHandle.getBeforeStockQuantity().toString());
-                                        next.setMaterialId(materialHandle.getMaterialId());
-                                        next.setQuantity(materialHandle.getQuantity());
-                                        next.setRemark(materialHandle.getRemark());
-                                    }else{
-                                        details.get(0).setBeforeStockQuantity(materialHandle.getBeforeStockQuantity().toString());
-                                        details.get(0).setMaterialId(materialHandle.getMaterialId());
-                                        details.get(0).setQuantity(materialHandle.getQuantity());
-                                        details.get(0).setRemark(materialHandle.getRemark());
+                                DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleDao.findById(stockDto.getStockHandleId());
+                                if(!material.getStockHandleId().equals(stockHandle.getId())){
+                                    if(stockHandle.getUpdatedAt().compareTo(material.getHandleDate())<0){
+                                        str = str + material.getMaterialName() + ",";
+                                        if(details.size()>1) {
+                                            next.setBeforeStockQuantity(materialHandle.getBeforeStockQuantity().toString());
+                                            next.setMaterialId(materialHandle.getMaterialId());
+                                            next.setQuantity(materialHandle.getQuantity());
+                                            next.setRemark(materialHandle.getRemark());
+                                        }else{
+                                            details.get(0).setBeforeStockQuantity(materialHandle.getBeforeStockQuantity().toString());
+                                            details.get(0).setMaterialId(materialHandle.getMaterialId());
+                                            details.get(0).setQuantity(materialHandle.getQuantity());
+                                            details.get(0).setRemark(materialHandle.getRemark());
+                                        }
                                     }
                                 }
                             }
