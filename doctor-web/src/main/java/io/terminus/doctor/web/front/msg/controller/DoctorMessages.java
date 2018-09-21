@@ -75,6 +75,7 @@ public class DoctorMessages {
                           DoctorMessageRuleTemplateWriteService doctorMessageRuleTemplateWriteService,
                           DoctorMessageRuleReadService doctorMessageRuleReadService,
                           DoctorMessageUserReadService doctorMessageUserReadService,
+                          DoctorBarnReadService doctorBarnReadService,
                           DoctorMessageUserWriteService doctorMessageUserWriteService, DoctorGroupReadService doctorGroupReadService) {
         this.doctorMessageReadService = doctorMessageReadService;
         this.doctorMessageWriteService = doctorMessageWriteService;
@@ -84,6 +85,7 @@ public class DoctorMessages {
         this.doctorMessageUserReadService = doctorMessageUserReadService;
         this.doctorMessageUserWriteService = doctorMessageUserWriteService;
         this.doctorGroupReadService = doctorGroupReadService;
+        this.doctorBarnReadService = doctorBarnReadService;
     }
 
 
@@ -129,8 +131,6 @@ public class DoctorMessages {
             messageUserDto.setUserId(UserUtil.getUserId());
             messageUserDto.setMessageId(doctorMessage.getId());
 
-//            String staffName = doctorBarnReadService.fingStaffName(doctorMessage.getBarnId());
-//            doctorMessage.setStaffName(staffName);
             DoctorMessageUser messageUser = RespHelper.or500(doctorMessageUserReadService.findDoctorMessageUsersByCriteria(messageUserDto)).get(0);
             if (Objects.equals(doctorMessage.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())) {
                 DoctorGroupTrack doctorGroupTrack = RespHelper.or500(doctorGroupReadService.findTrackByGroupId(doctorMessage.getBusinessId()));
@@ -138,7 +138,7 @@ public class DoctorMessages {
             }
             if (Objects.equals(doctorMessage.getCategory(), Category.SOW_BREEDING.getKey())) {
                 String staffName = doctorBarnReadService.fingStaffName(doctorMessage.getBarnId());
-                doctorMessage.setOperatorName(staffName);
+                doctorMessage.setStaffName(staffName);
             }
 
             return new DoctorMessageWithUserDto(doctorMessage, messageUser);
