@@ -110,7 +110,7 @@ public class PhoenixCrmReports {
 //            }
             Response<List<DoctorFarmInformation>> farmInforMation = doctorFarmReadService.findSubordinatePig(DTF.parseDateTime(date).toDate());
             if(!farmInforMation.isSuccess() || farmInforMation.getResult() == null){
-                return "";
+                    return "";
             }
             return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(farmInforMation);
         }catch (Exception e) {
