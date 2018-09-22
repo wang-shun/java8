@@ -119,10 +119,10 @@ public enum PigType {
             PigType.RESERVE.getValue());
 
 
-    //后备猪允许转入的猪舍: 育肥舍/后备舍(公母)//冯920
-    public static final List<Integer> RESERVE_ALLOW_TRANS = Lists.newArrayList(
-            PigType.FATTEN_PIG.getValue(),
-            PigType.RESERVE.getValue());
+//    //后备猪允许转入的猪舍: 育肥舍/后备舍(公母)//冯920
+//    public static final List<Integer> RESERVE_ALLOW_TRANS = Lists.newArrayList(
+//            PigType.FATTEN_PIG.getValue(),
+//            PigType.RESERVE.getValue());
 
 
     //所有类型

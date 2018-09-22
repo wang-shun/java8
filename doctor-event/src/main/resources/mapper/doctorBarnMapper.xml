@@ -111,23 +111,29 @@
     * 当前所属猪舍的性别
     */-->
     <select id="findByBarnsId" parameterType="long"  resultType="map">
-       SELECT  a.id, a.name, a.org_id, a.org_name, a.farm_id, a.farm_name, a.pig_type,
+
+        SELECT  a.id, a.name, a.org_id, a.org_name, a.farm_id, a.farm_name, a.pig_type,
         a.can_open_group, a.status, a.capacity, a.staff_id, a.staff_name, a.out_id, a.extra,
-        a.created_at, a.updated_at ,b.sex
-        from doctor_barns a left JOIN doctor_group_tracks b on  a.farm_id = b.group_id
-        WHERE a.id = #{id}
+        a.created_at, a.updated_at , b.id, b.group_code ,c.sex
+        FROM doctor_barns a
+		left JOIN doctor_groups b on  a.farm_id = b.farm_id
+		left JOIN doctor_group_tracks c on  b.id = c.group_id
+        WHERE  a.id = #{id} and b.id = #{groupId}
+
     </select>
 
     <!--
    /**2018920f
-   * 转入猪场的猪舍及其性别
+   * 转入猪场的猪舍及其里的猪群信息性别
    */-->
     <select id="findSexByFarmsId" parameterType="long" resultType="map">
         SELECT a.id, a.name, a.org_id, a.org_name, a.farm_id, a.farm_name, a.pig_type,
         a.can_open_group, a.status, a.capacity, a.staff_id, a.staff_name, a.out_id, a.extra,
-        a.created_at, a.updated_at ,b.sex
-        FROM doctor_barns a left JOIN doctor_group_tracks b on  a.farm_id = b.group_id
-        WHERE farm_id = #{farmId}
+        a.created_at, a.updated_at , b.id, b.group_code ,c.sex
+        FROM doctor_barns a
+		left JOIN doctor_groups b on  a.farm_id = b.farm_id
+		left JOIN doctor_group_tracks c on  b.id = c.group_id
+        WHERE a.farm_id = #{farmId} and b.id = #{groupId}
     </select>
 
 

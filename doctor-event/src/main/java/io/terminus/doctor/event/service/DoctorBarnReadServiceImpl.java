@@ -248,7 +248,7 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
                     && Objects.equal(doctorBarn.getStatus(), DoctorBarn.Status.USING.getValue())).collect(Collectors.toList());
 
             /*判断所属猪舍和转入猪舍的性别*/
-            List<Map<String, Object>> currentDoctorBarnInfoList = doctorBarnDao.findByBarnsId(currentBarnId);
+            List<Map<String, Object>> currentDoctorBarnInfoList = doctorBarnDao.findByBarnsId(currentBarnId,groupId);
             if (null == currentDoctorBarnInfoList || currentDoctorBarnInfoList.isEmpty()) {
                 return Response.fail("为获取到当前猪舍和性别");
             }
@@ -259,7 +259,7 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             }
 
             // 可转入的所有猪舍（未排除性别）
-            List<Map<String, Object>> allDoctorBarnList = doctorBarnDao.findSexByFarmsId(farmId);
+            List<Map<String, Object>> allDoctorBarnList = doctorBarnDao.findSexByFarmsId(farmId,groupId);
             if (null == allDoctorBarnList || allDoctorBarnList.isEmpty()) {
                 return Response.fail("为查询到可转入的猪舍信息");
             }
@@ -476,7 +476,7 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
                 //育肥舍 => 育肥舍/后备舍(公母)
                 || (Objects.equal(pigType, PigType.FATTEN_PIG.getValue()) && FATTEN_ALLOW_TRANS.contains(barnType))
                 // 后备群 => 育肥舍/后备舍(公母)
-                || (Objects.equal(pigType, PigType.RESERVE.getValue()) && RESERVE_ALLOW_TRANS.contains(barnType) && (Objects.equal(barnType, PigType.RESERVE.getValue()) || Objects.equal(barnType, PigType.FATTEN_PIG.getValue())))
+                || (Objects.equal(pigType, PigType.RESERVE.getValue()) && (Objects.equal(barnType, PigType.RESERVE.getValue()) || Objects.equal(barnType, PigType.FATTEN_PIG.getValue())))
                 //其他 => 同类型
                 || (Objects.equal(pigType, barnType));
 

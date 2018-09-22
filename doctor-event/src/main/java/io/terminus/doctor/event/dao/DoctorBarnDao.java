@@ -86,15 +86,21 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
     /**
      * 当前所属猪舍的性别feng920
      */
-    public List<Map<String, Object>> findByBarnsId(Long id) {
-        return getSqlSession().selectList(sqlId("findByBarnsId"), id);
+    public List<Map<String, Object>> findByBarnsId(Long id, Long groupId) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("id", id);
+        map.put("groupId", groupId);
+        return getSqlSession().selectList(sqlId("findByBarnsId"), map);
     }
 
     /**2018920f
-     * 转入猪场的猪舍及其性别
+     * 转入猪场的猪舍的猪群及其性别
      */
-    public List<Map<String, Object>> findSexByFarmsId(Long farmId) {
-        return getSqlSession().selectList(sqlId("findSexByFarmsId"), farmId);
+    public List<Map<String, Object>> findSexByFarmsId(Long farmId,Long groupId) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("farmId", farmId);
+        map.put("groupId", groupId);
+        return getSqlSession().selectList(sqlId("findSexByFarmsId"), map);
     }
 
 
