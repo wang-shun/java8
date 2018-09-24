@@ -259,7 +259,7 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             }
 
             // 可转入的所有猪舍（未排除性别）
-            List<Map<String, Object>> allDoctorBarnList = doctorBarnDao.findSexByFarmsId(farmId,groupId);
+            List<Map<String, Object>> allDoctorBarnList = doctorBarnDao.findSexByFarmsId(farmId);
             if (null == allDoctorBarnList || allDoctorBarnList.isEmpty()) {
                 return Response.fail("为查询到可转入的猪舍信息");
             }
