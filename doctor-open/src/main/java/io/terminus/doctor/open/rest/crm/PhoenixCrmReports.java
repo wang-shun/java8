@@ -88,35 +88,11 @@ public class PhoenixCrmReports {
      */
     @OpenMethod(key = "get.pig.farms.living", paramNames = "date")
     public String getPigFarmsLiving(@NotEmpty(message = "date.not.empty") String date){
-        try {
-//            String key = "pigDoctorCRM";
-//            MD5 32位加密
-//            MessageDigest md5 = MessageDigest.getInstance("MD5");
-//            byte[] md5Bytes = md5.digest(key.getBytes());
-//            StringBuffer hexValue = new StringBuffer();
-//            for (int i = 0; i < md5Bytes.length; i++) {
-//                int val = ((int) md5Bytes[i]) & 0xff;
-//                if (val < 16)
-//                    hexValue.append("0");
-//                hexValue.append(Integer.toHexString(val));
-//            }
-//            String m = hexValue.toString();
-//            if(!m.equals(appKey)){
-//                return "";
-//            }
-
-//            if(!key.equals(appKey)){
-//                return "";
-//            }
             Response<List<DoctorFarmInformation>> farmInforMation = doctorFarmReadService.findSubordinatePig(DTF.parseDateTime(date).toDate());
             if(!farmInforMation.isSuccess() || farmInforMation.getResult() == null){
                     return "";
             }
             return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(farmInforMation);
-        }catch (Exception e) {
-            e.printStackTrace();
-            return "";
-        }
     }
 
 

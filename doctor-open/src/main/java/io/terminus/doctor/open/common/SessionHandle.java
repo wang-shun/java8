@@ -34,6 +34,7 @@ import static io.terminus.common.utils.Arguments.isEmpty;
         "user.register",  //用户注册
         "get.mobile.code",
         "user.test.push",
+        "get.pig.farms.living",
         "get.daily.report",
         "get.monthly.report",
         "get.group.live.stock.detail",
