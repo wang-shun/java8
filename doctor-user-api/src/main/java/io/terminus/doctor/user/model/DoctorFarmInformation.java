@@ -23,7 +23,7 @@ public class DoctorFarmInformation implements Serializable {
     /**
      * 记录时间
      */
-    private Date record_at;
+    private Date record_dt;
 
     /**
      * 猪场id
