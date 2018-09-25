@@ -214,6 +214,8 @@ public interface DoctorPigEventReadService {
      */
     Response<Paging<DoctorNpdExportDto>> pagingFindNpd(Map<String, Object> map, Integer offset, Integer limit);
 
+    Response<Map<String, Object>> findNpd(Map<String, Object> map, Integer offset, Integer limit);
+
     /**
      * 查询猪的销售情况
      *

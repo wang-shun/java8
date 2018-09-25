@@ -118,13 +118,6 @@ public class StockHandleController {
         return maps;
     }
 
-    //得到盘点：盘盈盘亏的最大时间节点//冯雨晴2018-09-10
-    @RequestMapping(method = RequestMethod.GET, value = "/getPYTime")
-    public List<Map> getPYTime(@RequestParam Long id){
-        List<Map> maps = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getPYTime(id));
-        return maps;
-    }
-
 
     //根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注
     @RequestMapping(method = RequestMethod.GET, value = "/getDataByMaterialName")
@@ -236,6 +229,21 @@ public class StockHandleController {
                             //单据明细里面的值全部复制到detail里面去
                             BeanUtils.copyProperties(mh, detail);
 
+                            //  编辑单据时判断是否有物料已盘点：如果已盘点，则不可编辑 （陈娟 2018-09-19）
+                            String desc=new String();
+                            DoctorWarehouseMaterialHandle material = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getMaxInventoryDate(stockHandle.getWarehouseId(), mh.getMaterialId(), stockHandle.getHandleDate()));
+                            if(material!=null){
+                                if(material!=null){
+                                    if(!material.getStockHandleId().equals(stockHandle.getId())){
+                                        if(stockHandle.getUpdatedAt().compareTo(material.getHandleDate())<0){
+                                            detail.setIsInventory(1);
+                                            vo.setHasInventory(1);
+                                            desc = desc + "【该物料已盘点,不可编辑】;";
+                                        }
+                                    }
+                                }
+                            }
+
                             if ((!stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.IN.getValue()))&&(!stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue()))) {
                                 try {
                                     //会计年月支持选择未结算过的会计年月，如果选择未结算的会计区间，则报表不显示金额和单价
@@ -296,12 +304,16 @@ public class StockHandleController {
                                     detail.setGroupStatus(doctorGroup.getStatus());
                                     if(doctorGroup.getStatus()==-1){
                                         vo.setStatus(doctorGroup.getStatus());
+                                        desc = desc + "【该猪群已关闭,不可编辑】;";
                                     }
                                 }
 
                                 //得到该领料出库的退料入库的数量
                                 Integer count = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findCountByRelMaterialHandleId(mh.getId(), mh.getFarmId()));
                                 detail.setRetreatingCount(count);
+                                if(count>=1){
+                                    desc = desc + "【该物料有退料入库,不可编辑】;";
+                                }
 
                             }
 
@@ -336,6 +348,7 @@ public class StockHandleController {
                                     detail.setGroupStatus(doctorGroup.getStatus());
                                     if(doctorGroup.getStatus()==-1){
                                         vo.setStatus(doctorGroup.getStatus());
+                                        desc = desc + "【该猪群已关闭,不可编辑】;";
                                     }
                                 }
                             }
@@ -364,6 +377,8 @@ public class StockHandleController {
                                 detail.setStorageWarehouseNames(sh.getWarehouseName());
                             }
 
+                            // 设置注释 （陈娟 2018-09-19）
+                            detail.setDesc(desc);
 
                             return detail;
                         })
@@ -422,6 +437,13 @@ public class StockHandleController {
         }
         if (doctorWarehouseSettlementService.isSettled(orgId,date))
             throw new JsonResponseException("already.settlement");
+
+        //  删除单据时判断是否有物料已盘点 （陈娟 2018-09-18）
+        String str = RespHelper.or500(doctorWarehouseMaterialHandleReadService.deleteCheckInventory(id));
+        if(str!=null&&!str.equals("")){
+            throw new JsonResponseException(str);
+        }
+
         return doctorWarehouseStockHandleWriteService.delete(id);
            /*if (!response.isSuccess())
                throw new JsonResponseException(response.getError());
@@ -846,7 +868,7 @@ public class StockHandleController {
                         //对齐
                         style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
                         countCell.setCellStyle(style);
-                        countCell.setCellValue("合计");
+                        countCell.setCellValue("盘亏");
 
                         countRow.createCell(6).setCellValue(totalQuantity.doubleValue());
 

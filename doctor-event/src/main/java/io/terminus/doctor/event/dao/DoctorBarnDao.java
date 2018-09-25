@@ -11,7 +11,6 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import org.springframework.stereotype.Repository;
 
 import javax.validation.constraints.NotNull;
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -64,6 +63,44 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
                     .map());
         }
     }
+
+
+    /*
+       * 根据farmId和当前用户查猪舍
+       * 冯雨晴 2019.9.18
+       *
+       * */
+    public List<Map> findByEnumss(@NotNull Long farmId,Long userId) {
+
+        return getSqlSession().selectList(sqlId("findByEnumss"), MapBuilder.<String, Object>newHashMap()
+                    .put("farmId", farmId)
+                    .put("userId", userId)
+                    .map());
+    }
+
+
+    public List<Map> findNameByBarnIds(@NotNull Long id) {
+        return getSqlSession().selectList(sqlId("findNameByBarnIds"),id);
+    }
+
+    /**
+     * 当前所属猪舍猪场的性别feng920
+     */
+    public List<Map<String, Object>> findByBarnsId(Long id, Long groupId) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("id", id);
+        map.put("groupId", groupId);
+        return getSqlSession().selectList(sqlId("findByBarnsId"), map);
+    }
+
+    /**2018920f
+     * 转入猪场的猪舍的猪群及其性别
+     */
+    public List<Map<String, Object>> findSexByFarmsId(Long farmId) {
+        return getSqlSession().selectList(sqlId("findSexByFarmsId"), farmId);
+    }
+
+
 
     /**
      * 猪舍的当前最大的id
@@ -205,5 +242,12 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
         map.put("endTime", endTime);
         map.put("beginTime", beginTime);
         return getSqlSession().selectList(sqlId("groupjianshao"), map);
+    }
+
+    /**
+     * 根据barnId查饲养员-ysq
+     */
+    public String findStaffNameByBarnId(Long barnId){
+        return getSqlSession().selectOne(sqlId("findStaffNameByBarnId"),barnId);
     }
 }

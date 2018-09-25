@@ -436,12 +436,6 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return getMaterialNameByID;
     }
 
-    //<!--得到盘点：盘盈盘亏的最大时间节点-->
-    public List<Map> getPYTime(Long id) {
-        List<Map> getPYTime = this.sqlSession.selectList(this.sqlId("getPYTime"), id);
-        return getPYTime;
-
-    }
 
     //<!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注-->
     public List<Map> getDataByMaterialName(Long id) {
@@ -483,6 +477,15 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         criteria.put("warehouseId", warehouseId);
         criteria.put("materialId", materialId);
         return this.sqlSession.selectOne(this.sqlId("findByRelMaterialHandleIdAndWarehouseId"), criteria);
+    }
+
+    // 盘点 （陈娟 2018-09-18）
+    public DoctorWarehouseMaterialHandle getMaxInventoryDate(Long warehouseId,Long materialId,Date handleDate) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("warehouseId", warehouseId);
+        criteria.put("materialId", materialId);
+        criteria.put("handleDate", handleDate);
+        return this.sqlSession.selectOne(this.sqlId("getMaxInventoryDate"), criteria);
     }
 
 }

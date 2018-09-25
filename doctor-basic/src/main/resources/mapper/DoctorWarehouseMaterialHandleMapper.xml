@@ -577,7 +577,7 @@
 
     <select id="findByStockHandleIds" parameterType="long" resultMap="DoctorWarehouseMaterialHandleMap">
         select * from  doctor_warehouse_material_handle
-        where  stock_handle_id = #{id} and delete_flag = 1
+        where  stock_handle_id = #{id} and delete_flag = 1 ORDER BY material_id
     </select>
 
     <select id="listByFarmIdTime" parameterType="map" resultType="map">
@@ -599,7 +599,7 @@
 
         left join (SELECT ifnull(
             sum(case type	when '2' then amount	when '8' then amount	when '10' then amount
-            when '12' then amount  when '13' then -amount end	),0) as outAmount,farm_id FROM doctor_warehouse_material_handle
+            when '12' then amount  when '13' then amount end	),0) as outAmount,farm_id FROM doctor_warehouse_material_handle
             WHERE org_id = #{orgId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')	AND delete_flag=1
             group by farm_id ORDER BY farm_id
         ) temp2 on a.farm_id = temp2.farm_id
@@ -865,14 +865,7 @@
     <!--得到领料出库的物料名称-->
     <select id="getMaterialNameByID" parameterType="Long" resultType="map">
         select DISTINCT material_id,material_name from doctor_warehouse_material_handle
-        where stock_handle_id = #{id} and delete_flag=1
-    </select>
-
-
-    <!--得到盘点：盘盈盘亏的最大时间节点-->
-    <select id="getPYTime" parameterType="Long" resultType="map">
-        select DISTINCT material_id,MAX(handle_date) as maxDate from doctor_warehouse_material_handle
-        where warehouse_id = #{id} and delete_flag=1 and (type = 7 or type =  8 )
+        where stock_handle_id = #{id} and delete_flag=1 ORDER BY material_id
     </select>
 
 
@@ -938,6 +931,13 @@
     <!--得到调拨入库单 （陈娟 2018-09-14）-->
     <select id="findByRelMaterialHandleIdAndWarehouseId" parameterType="map" resultType="DoctorWarehouseMaterialHandle">
         select * from doctor_warehouse_material_handle where rel_material_handle_id=#{relMaterialHandleId} and delete_flag=1 and warehouse_id=#{warehouseId} and material_id=#{materialId}
+    </select>
+
+    <!--盘点 （陈娟 2018-09-18）-->
+    <select id="getMaxInventoryDate" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
+        select id,stock_handle_id,`material_id`, `material_name`, `type`,`handle_date` from doctor_warehouse_material_handle
+        where delete_flag=1 and ( type = 7 or type = 8 ) and warehouse_id=#{warehouseId} and material_id=#{materialId}
+        and handle_date>=#{handleDate}  ORDER BY handle_date desc limit 1
     </select>
 
 </mapper>

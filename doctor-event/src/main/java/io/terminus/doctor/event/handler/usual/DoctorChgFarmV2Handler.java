@@ -64,7 +64,7 @@ public class DoctorChgFarmV2Handler extends DoctorAbstractEventHandler{
     public void handleCheck(DoctorPigEvent executeEvent, DoctorPigTrack fromTrack) {
         super.handleCheck(executeEvent, fromTrack);
         DoctorChgFarmDto chgFarmDto = JSON_MAPPER.fromJson(executeEvent.getExtra(), DoctorChgFarmDto.class);
-        expectTrue(!Objects.equals(fromTrack.getStatus(), PigStatus.FEED.getKey()), "feed.sow.not.chg.farm");
+        //expectTrue(!Objects.equals(fromTrack.getStatus(), PigStatus.FEED.getKey()), "feed.sow.not.chg.farm");(孔景军，哺乳母猪可以转场)
         DoctorBarn doctorCurrentBarn = doctorBarnDao.findById(fromTrack.getCurrentBarnId());
         expectTrue(notNull(doctorCurrentBarn), "barn.not.null", fromTrack.getCurrentBarnId());
         DoctorBarn doctorToBarn = doctorBarnDao.findById(chgFarmDto.getToBarnId());

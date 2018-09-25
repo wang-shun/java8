@@ -109,7 +109,7 @@ public class StockController {
      * @return
      */
     @RequestMapping(method = RequestMethod.PUT, value = "in")
-    public Long in(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockInDto stockIn, Errors errors) {
+    public InventoryDto in(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockInDto stockIn, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
@@ -142,7 +142,7 @@ public class StockController {
      * @return
      */
     @RequestMapping(method = RequestMethod.PUT, value = "out")
-    public Long out(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockOutDto stockOut, Errors errors) {
+    public InventoryDto out(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockOutDto stockOut, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
@@ -186,7 +186,7 @@ public class StockController {
      * @return
      */
     @RequestMapping(method = RequestMethod.PUT, value = "refund")
-    public Long refund(@RequestBody
+    public InventoryDto refund(@RequestBody
                        @Validated(AbstractWarehouseStockDetail.StockRefundValid.class)
                                WarehouseStockRefundDto stockRefund,
                        Errors errors) {
@@ -230,7 +230,7 @@ public class StockController {
      * @return
      */
     @RequestMapping(method = RequestMethod.PUT, value = "inventory")
-    public Long inventory(@RequestBody @Validated(AbstractWarehouseStockDetail.StockInventoryValid.class) WarehouseStockInventoryDto stockInventory,
+    public InventoryDto inventory(@RequestBody @Validated(AbstractWarehouseStockDetail.StockInventoryValid.class) WarehouseStockInventoryDto stockInventory,
                           Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
@@ -280,7 +280,7 @@ public class StockController {
      * @return
      */
     @RequestMapping(method = RequestMethod.PUT, value = "transfer")
-    public Long transfer(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockTransferDto stockTransfer, Errors errors) {
+    public InventoryDto transfer(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockTransferDto stockTransfer, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
@@ -323,7 +323,7 @@ public class StockController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "formula")
-    public Long produce(
+    public InventoryDto produce(
             @RequestParam("orgId") Long orgId,
             @RequestParam("warehouseId") Long warehouseId,
             @RequestParam("feedFormulaId") Long feedFormulaId,
@@ -405,7 +405,7 @@ public class StockController {
 
     //配方
     @RequestMapping(method = RequestMethod.PUT, value = "formula")
-    public Long formula(@RequestBody @Validated(AbstractWarehouseStockDetail.StockFormulaValid.class) WarehouseFormulaDto formulaDto, Errors errors) {
+    public InventoryDto formula(@RequestBody @Validated(AbstractWarehouseStockDetail.StockFormulaValid.class) WarehouseFormulaDto formulaDto, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 

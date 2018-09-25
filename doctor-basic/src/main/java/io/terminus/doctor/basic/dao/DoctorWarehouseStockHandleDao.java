@@ -28,7 +28,7 @@ public class DoctorWarehouseStockHandleDao extends MyBatisDao<DoctorWarehouseSto
         return findwarehouseName;
     }
 
-    public DoctorWarehouseStockHandle findByRelStockHandleId(Long id, int type) {
+    public DoctorWarehouseStockHandle findByRelStockHandleId(Long id) {
         Map<String, Object> criteria = Maps.newHashMap();
         criteria.put("id", id);
         return this.sqlSession.selectOne(this.sqlId("findByRelStockHandleId"), criteria);
