@@ -202,8 +202,7 @@ public class DoctorSearches {
 
         BaseUser user = UserUtil.getCurrentUser();
         if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){
-            BaseUser currentUser = UserUtil.getCurrentUser();
-            objectMap.put("barnIds", RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(currentUser.getId())).getBarnIdsList());
+            objectMap.put("barnIds", RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId())).getBarnIdsList());
         }
 
         if(objectMap.containsKey("statuses")){
@@ -598,10 +597,32 @@ public class DoctorSearches {
     private DoctorBarnDto getBarnSearchMap(Map<String, String> params) {
         DoctorBarnDto barnDto = new DoctorBarnDto();
 
+        replaceKey(params, "pigTypes", "pigTypeCommas");
+
+        List<Integer> pigTypes = null;
+        if(params.get("pigTypes") != null){
+            pigTypes = Splitters.splitToInteger(params.get("pigTypes"), Splitters.UNDERSCORE);
+            params.remove("pigTypes");
+        }
+        DoctorGroupSearchDto searchDto = JsonMapper.nonEmptyMapper().fromJson(ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(params), DoctorGroupSearchDto.class);
+        searchDto.setPigTypes(pigTypes);
+
+
         //主账号不用校验，直接拥有全部猪舍权限
         BaseUser user = UserUtil.getCurrentUser();
-        if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){
-            barnDto.setBarnIds(RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId())).getBarnIdsList());
+        List<Long> permission = RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId())).getBarnIdsList();
+
+        if(StringUtils.isBlank(params.get("barnId"))){
+            if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){
+                searchDto.setBarnIdList(permission);
+            }
+        }else{
+            Long barnId = Long.valueOf(params.get("barnId"));
+            if(Objects.equals(user.getType(), UserType.FARM_SUB.value()) && !permission.contains(barnId)){
+                return null;
+            }else{
+                searchDto.setBarnIdList(Lists.newArrayList(barnId));
+            }
         }
 
         if (Params.containsNotEmpty(params, "q")) {
