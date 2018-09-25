@@ -249,7 +249,7 @@
         select f.org_id AS orgId,f.org_name AS orgName,NULL AS record_dt,f.id AS farmId,f.name AS farmName,CONCAT(f.province_name,f.city_name,f.district_name,f.detail_address) AS address,
 				NULL AS legalPerson,NULL AS personPhone,NULL AS head,o.mobile AS contactPhone,f.created_at AS factoryDate,NULL AS construction,NULL AS capacity,
 				IFNULL((select `end` from doctor_report_sows
-						where orz_id = f.id and orz_type = 3 and sum_at = #{date}),0) AS basisSowAmount,
+						where orz_id = f.id and orz_type = 3 and sum_at = #{date}),0) AS sowAmount,
 				IFNULL((select `end` from doctor_report_matings
 						where orz_id = f.id and orz_type = 3 and sum_at = #{date}),0) AS pregnantSowAmount,
 				IFNULL((select `end` from doctor_report_delivers

@@ -1,7 +1,6 @@
 package io.terminus.doctor.user.model;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -14,7 +13,7 @@ public class DoctorFarmInformation implements Serializable {
     /**
      * 公司id
      */
-    private int orgId;
+//    private int orgId;
 
     /**
      * 公司名称
@@ -24,7 +23,7 @@ public class DoctorFarmInformation implements Serializable {
     /**
      * 记录时间
      */
-    private Date recordDt;
+    private Date record_at;
 
     /**
      * 猪场id
@@ -74,47 +73,47 @@ public class DoctorFarmInformation implements Serializable {
     /**
      * 产能
      */
-    private BigDecimal capacity;
+    private  Integer capacity;
 
     /**
-     * 基础母猪存栏数量
+     * 母猪存栏数量
      */
-    private int basisSowAmount;
+    private  Integer sowAmount;
 
     /**
      * 配怀母猪存栏数量
      */
-    private int pregnantSowAmount;
+//    private  Integer pregnantSowAmount;
 
     /**
      * 产房母猪存栏数量
      */
-    private int roomSowAmount;
+//    private  Integer roomSowAmount;
 
     /**
      * 公猪存栏数量
      */
-    private int boarAmount;
+    private  Integer boarAmount;
 
     /**
      * 保育猪存栏数量
      */
-    private int conservationAmount;
+    private  Integer conservationAmount;
 
     /**
      * 育肥猪存栏数量
      */
-    private int fatteningAmount;
+    private  Integer fatteningAmount;
 
     /**
      * 后备猪存栏数量
      */
-    private int backupAmount;
+//    private  Integer backupAmount;
 
     /**
      * 仔猪存栏数量
      */
-    private int pigletsAmount;
+    private  Integer pigletsAmount;
 
 
 }
