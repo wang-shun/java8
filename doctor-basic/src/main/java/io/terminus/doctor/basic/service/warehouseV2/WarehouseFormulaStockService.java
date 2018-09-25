@@ -35,7 +35,8 @@ public class WarehouseFormulaStockService extends AbstractWarehouseStockService<
 
     @Override
     protected List<WarehouseFormulaDto.WarehouseFormulaDetail> getDetails(WarehouseFormulaDto stockDto) {
-        throw new UnsupportedOperationException();
+//        throw new UnsupportedOperationException();
+        return stockDto.getDetails();
     }
 
     @Override
