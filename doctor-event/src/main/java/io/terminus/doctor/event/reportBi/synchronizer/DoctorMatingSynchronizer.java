@@ -112,13 +112,17 @@ public class DoctorMatingSynchronizer {
     }
 
     private Double matingRate(DoctorPigDailyExtend dailyExtend,DoctorDimensionCriteria dimensionCriteria) {
-        Date startAt = dimensionCriteria.getStartAt();
-        Date endAt = dimensionCriteria.getEndAt();
-        Integer weanMateCount = doctorReportMatingDao.getWeanMateCount(dailyExtend.getFarmId(),startAt,endAt,1);
-        Integer wwanCount = doctorReportMatingDao.getWeanMateCount(dailyExtend.getFarmId(),startAt,endAt,0);
-        //断奶母猪7日配种数-断奶母猪7日死淘数/断奶窝数-断奶母猪7日死淘数
-        //return FieldHelper.get((dailyExtend.getWeanMate()-dailyExtend.getWeanDeadWeedOut()), (dailyExtend.getWeanNest() - dailyExtend.getWeanDeadWeedOut()));
-        return FieldHelper.get(weanMateCount, wwanCount);
+        if(dimensionCriteria.getOrzType() == 3) {
+            //孔景军
+            Date startAt = dimensionCriteria.getStartAt();
+            Date endAt = dimensionCriteria.getEndAt();
+            Integer weanMateCount = doctorReportMatingDao.getWeanMateCount(dailyExtend.getFarmId(), startAt, endAt, 1);
+            Integer weanCount = doctorReportMatingDao.getWeanMateCount(dailyExtend.getFarmId(), startAt, endAt, 0);
+            return FieldHelper.get(weanMateCount, weanCount);
+        }else {
+            //断奶母猪7日配种数-断奶母猪7日死淘数/断奶窝数-断奶母猪7日死淘数
+            return FieldHelper.get((dailyExtend.getWeanMate() - dailyExtend.getWeanDeadWeedOut()), (dailyExtend.getWeanNest() - dailyExtend.getWeanDeadWeedOut()));
+        }
     }
 
     public void deleteAll() {
