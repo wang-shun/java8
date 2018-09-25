@@ -200,9 +200,10 @@
     <select id="pagingCompany" parameterType="map" resultMap="DoctorOrgMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE (type=1 or (type=2 and parent_id=0))
+        WHERE 1=1
+        <if test="type == 1"> AND type=1</if>
+        <if test="type == 2"> AND type=2 and parent_id=0</if>
         <if test="fuzzyName != null">AND `name` LIKE concat('%', #{fuzzyName}, '%')</if>
-        <if test="type != null">AND `type` = #{type}</if>
         <if test="fuzzyName != null">
             ORDER BY instr(`name`, #{fuzzyName}) ASC, LENGTH (`name`) ASC
         </if>
@@ -411,7 +412,7 @@
     </select>
 
     <select id="staffQuery" parameterType="map" resultType="map">
-        select  a.user_name as userName,
+        select  d.realname as userName,
                  a.mobile as mobile,
                  b1.`name` as groupName,
                  b2.`name` as orgName,
@@ -421,11 +422,12 @@
         left join doctor_orgs b1 on a.group_id = b1.id
         left join doctor_orgs b2 on	a.org_id = b2.id
         left join doctor_farms c on a.farm_id = c.id
+        left join parana_user_profiles d on a.user_id = d.user_id
         where 1 = 1
         <if test="groupId != null and groupId != ''"> and a.group_id = #{groupId}</if>
         <if test="orgId != null and orgId != ''"> and a.org_id = #{orgId}</if>
         <if test="farmId != null and farmId != ''"> and a.farm_id = #{farmId}</if>
-        <if test="userName != null and userName != ''"> and a.user_name like  CONCAT(CONCAT('%',#{userName},'%')) </if>
+        <if test="userName != null and userName != ''"> and d.realname like  CONCAT(CONCAT('%',#{userName},'%')) </if>
         <if test="mobile != null and mobile != ''"> and a.mobile like  CONCAT(CONCAT('%',#{mobile},'%')) </if>
         <if test="status != null and status != ''"> and a.status = #{status}</if>
         limit #{pageNo},#{pageSize}
