@@ -193,7 +193,6 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             for ( Map<String,Object> map : maps ) {
                 result.add(map);
             }
-
         }
 
         return Response.ok(result);

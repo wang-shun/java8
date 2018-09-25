@@ -202,7 +202,8 @@ public class DoctorSearches {
 
         BaseUser user = UserUtil.getCurrentUser();
         if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){
-            objectMap.put("barnIds", RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId())).getBarnIdsList());
+            BaseUser currentUser = UserUtil.getCurrentUser();
+            objectMap.put("barnIds", RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(currentUser.getId())).getBarnIdsList());
         }
 
         if(objectMap.containsKey("statuses")){
