@@ -291,6 +291,7 @@ public class DoctorBarns {
             throw new JsonResponseException("user.not.permission");
         }
         List<Long> barnIds = dataPermissionResponse.getResult().getBarnIdsList();
+        log.error("==============barnIds="+barnIds);
         return RespHelper.or500(doctorBarnReadService.findBarnsByEnumss(farmId,barnIds));
 
     }
