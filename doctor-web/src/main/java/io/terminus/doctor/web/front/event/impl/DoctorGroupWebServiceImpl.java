@@ -364,6 +364,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         try {
             DoctorGroupDetail groupDetail = expectNotNull(RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId)), "group.detail.not.found");
             Map<String, Object> params = JSON_MAPPER.fromJson(data, JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
+            //过滤null和“”值
+            params = Params.filterNullOrEmpty(params);
             DoctorGroupInputInfo groupInputInfo = buildGroupEventInfo(eventType, groupDetail, params);
             return doctorModifyEventService.modifyGroupEvent(groupInputInfo.getInput(), eventId, eventType);
         } catch (InvalidException e) {
