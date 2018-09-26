@@ -292,6 +292,7 @@ public class DoctorBarns {
         }
         List<Long> barnIds = dataPermissionResponse.getResult().getBarnIdsList();
         log.error("==============barnIds="+barnIds);
+        log.error("==============="+doctorBarnReadService.findBarnsByEnumss(farmId,barnIds));
         return RespHelper.or500(doctorBarnReadService.findBarnsByEnumss(farmId,barnIds));
 
     }
