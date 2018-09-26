@@ -196,7 +196,7 @@ public class DoctorDepartmentManager {
             linerDto.setCliqueName(doctorOrg.getName());
         } else {
             //（孔景军）
-            if(doctorOrg.getParentId() != null || doctorOrg.getParentId() != 0L) {
+            if(doctorOrg.getParentId() != 0L) {
                 DoctorOrg clique = doctorOrgDao.findById(doctorOrg.getParentId());
                 linerDto.setCliqueId(clique.getId());
                 linerDto.setCliqueName(clique.getName());
