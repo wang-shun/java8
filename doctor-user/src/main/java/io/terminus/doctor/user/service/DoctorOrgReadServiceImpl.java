@@ -203,4 +203,11 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
         return Response.ok(doctorOrgDao.findGroupByOrgId(groupId));
     }
 
+    /*
+    查询所有集团（孔景军）
+     */
+    @Override
+    public List<Long> findAllGroups(){
+        return doctorOrgDao.findAllGroups();
+    }
 }

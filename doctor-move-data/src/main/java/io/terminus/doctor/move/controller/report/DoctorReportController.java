@@ -235,6 +235,9 @@ public class DoctorReportController {
             List<Long> orgList = RespHelper.or500(doctorOrgReadService.findAllOrgs())
                     .stream().map(DoctorOrg::getId).collect(Collectors.toList());
             orgList.parallelStream().forEach(orgId -> doctorDailyReportV2Service.synchronizeDeltaDayBiData(orgId, start, orzType));
+        } else if(Objects.equals(orzType, OrzDimension.ORG.getValue())) {
+            List<Long> groupList = doctorOrgReadService.findAllGroups();
+            groupList.parallelStream().forEach(groupId -> doctorDailyReportV2Service.synchronizeDeltaDayBiData(groupId, start, orzType));
         }
         return Boolean.TRUE;
     }
@@ -271,6 +274,9 @@ public class DoctorReportController {
         orzList = doctorFarms.stream().map(DoctorFarm::getOrgId).collect(Collectors.toSet());
         orzList.parallelStream().forEach(orzId ->
                 doctorDailyReportV2Service.synchronizeDeltaDayBiData(orzId, start, OrzDimension.ORG.getValue()));
+        List<Long> groupList = doctorOrgReadService.findAllGroups();
+        groupList.parallelStream().forEach(groupId ->
+                doctorDailyReportV2Service.synchronizeDeltaDayBiData(groupId, start, OrzDimension.CLIQUE.getValue()));
         log.info("synchronize all day bi data end");
         return Boolean.TRUE;
     }
@@ -291,6 +297,9 @@ public class DoctorReportController {
         orzList = doctorFarms.stream().map(DoctorFarm::getOrgId).collect(Collectors.toSet());
         orzList.parallelStream().forEach(orzId ->
                 doctorDailyReportV2Service.flushDeliverRate(orzId, OrzDimension.ORG.getValue(), start));
+        List<Long> groupList = doctorOrgReadService.findAllGroups();
+        groupList.parallelStream().forEach(groupId ->
+                doctorDailyReportV2Service.flushDeliverRate(groupId, OrzDimension.CLIQUE.getValue(),start));
         log.info("synchronize all deliver rate end");
         return Boolean.TRUE;
     }
