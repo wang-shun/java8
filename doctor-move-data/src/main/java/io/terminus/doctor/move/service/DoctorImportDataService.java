@@ -719,7 +719,7 @@ public class DoctorImportDataService {
      * 导入公猪
      */
     @Transactional
-    private void importBoar(DoctorFarm farm, Map<String, DoctorBarn> barnMap, Map<String, Long> breedMap, Sheet shit) {
+    public void importBoar(DoctorFarm farm, Map<String, DoctorBarn> barnMap, Map<String, Long> breedMap, Sheet shit) {
         for (Row row : shit) {
             if (!canImport(row)) {
                 continue;
