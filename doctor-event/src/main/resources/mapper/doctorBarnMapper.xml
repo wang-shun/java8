@@ -240,6 +240,7 @@
         SELECT id, name
         from doctor_barns
         where farm_id = #{farmId}
+        and pig_type in (5,6,7)
         and id in
         <foreach collection="barnIds" item="barnId" open="(" separator="," close=")">
             #{barnId}
