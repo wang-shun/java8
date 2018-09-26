@@ -67,8 +67,8 @@ public class DoctorFarmDao extends MyBatisDao<DoctorFarm> {
         return getSqlSession().selectList(sqlId("findByName"), name);
     }
 
-    public List<DoctorFarmInformation> findSubordinatePig(Date date){
-        return getSqlSession().selectList(sqlId("findSubordinatePig"), ImmutableMap.of("sumAt", DateUtil.toDateString(date)));
+    public List<DoctorFarmInformation> findSubordinatePig(Date sumAt){
+        return getSqlSession().selectList(sqlId("findSubordinatePig"), ImmutableMap.of("sumAt", DateUtil.toDateString(sumAt)));
     }
 
 }
