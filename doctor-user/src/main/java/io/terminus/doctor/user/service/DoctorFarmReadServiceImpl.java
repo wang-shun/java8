@@ -167,13 +167,8 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
 
     //  ---------------------  新增代码  2018年8月28日17:50:56 ----------------------
     @Override
-    public Response<List<DoctorFarmInformation>> findSubordinatePig(Date date) {
-        try {
-            return Response.ok(doctorFarmDao.findSubordinatePig(date));
-        }catch (Exception e) {
-            log.error(Throwables.getStackTraceAsString(e));
-            return Response.fail("error");
-        }
+    public List<DoctorFarmInformation> findSubordinatePig(Date date) {
+        return doctorFarmDao.findSubordinatePig(date);
     }
 
 }

@@ -320,7 +320,7 @@ public class ServiceConfiguration {
             }
 
             @Override
-            public Response<List<DoctorFarmInformation>> findSubordinatePig(Date date) {
+            public List<DoctorFarmInformation> findSubordinatePig(Date date) {
                 return null;
             }
         };

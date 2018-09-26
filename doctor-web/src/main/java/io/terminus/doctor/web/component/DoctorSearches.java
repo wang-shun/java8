@@ -9,7 +9,6 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
-import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
@@ -939,7 +938,7 @@ public class DoctorSearches {
 
     @RequestMapping(value = "/findSubordinatePig",produces="application/json;charset=UTF-8", method = RequestMethod.GET)
     public String findSubordinatePig(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date){
-        Response<List<DoctorFarmInformation>> farmInformation = doctorFarmReadService.findSubordinatePig(date);
+        List<DoctorFarmInformation> farmInformation = doctorFarmReadService.findSubordinatePig(date);
         return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(farmInformation);
     }
 

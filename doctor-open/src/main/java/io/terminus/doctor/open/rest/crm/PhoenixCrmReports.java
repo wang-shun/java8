@@ -88,11 +88,15 @@ public class PhoenixCrmReports {
      */
     @OpenMethod(key = "get.pig.farms.living", paramNames = "date")
     public String getPigFarmsLiving(@NotEmpty(message = "date.not.empty") String date){
-            Response<List<DoctorFarmInformation>> farmInforMation = doctorFarmReadService.findSubordinatePig(DTF.parseDateTime(date).toDate());
-            if(!farmInforMation.isSuccess() || Arguments.isNullOrEmpty(farmInforMation.getResult())){
-                    return "";
-            }
+        List<DoctorFarmInformation> farmInforMation = doctorFarmReadService.findSubordinatePig(DTF.parseDateTime(date).toDate());
+//        if(!farmInforMation.isSuccess() || Arguments.isNullOrEmpty(farmInforMation.getResult())){
+//            return "";
+//        }
+        if(farmInforMation.equals("") || farmInforMation == null){
+            return "";
+        }
         Response<Map<Long, String>> mapResponse = primaryUserReadService.findFarmIdToUserName();
+
         if (!mapResponse.isSuccess()) {
             return "";
         }

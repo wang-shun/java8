@@ -82,7 +82,7 @@ public interface DoctorFarmReadService {
     Response<DoctorFarm> findByNumber(String number);
 
     //  ---------------------  新增代码  2018年8月28日17:50:56 ----------------------
-    Response<List<DoctorFarmInformation>> findSubordinatePig(Date date);
+    List<DoctorFarmInformation> findSubordinatePig(Date date);
 
 
 }
