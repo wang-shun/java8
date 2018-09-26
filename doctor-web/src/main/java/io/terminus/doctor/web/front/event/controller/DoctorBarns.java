@@ -281,7 +281,6 @@ public class DoctorBarns {
     @RequestMapping(value = "/pigTypess", method = RequestMethod.GET)
     public List<Map> findBarnsByfarmIdAndTypes(@RequestParam("farmId") Long farmId
                                                     ) {
-        log.error("=========================farmId="+farmId);
         BaseUser baseUser = UserUtil.getCurrentUser();
         if (baseUser == null) {
             throw new JsonResponseException("user.not.login");
@@ -291,8 +290,6 @@ public class DoctorBarns {
             throw new JsonResponseException("user.not.permission");
         }
         List<Long> barnIds = dataPermissionResponse.getResult().getBarnIdsList();
-        log.error("==============barnIds="+barnIds);
-        log.error("==============="+doctorBarnReadService.findBarnsByEnumss(farmId,barnIds));
         return RespHelper.or500(doctorBarnReadService.findBarnsByEnumss(farmId,barnIds));
 
     }
