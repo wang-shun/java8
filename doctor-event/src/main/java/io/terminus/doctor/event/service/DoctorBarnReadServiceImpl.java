@@ -171,31 +171,11 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
         *
         * */
     @Override
-    public Response<List<Map>> findBarnsByEnumss(Long farmId, Long userId) {
+    public Response<List<Map>> findBarnsByEnumss(Long farmId, List<Long> barnIds) {
 
-        List<Map> maps = doctorBarnDao.findByEnumss(farmId,userId);
+        List<Map> maps = doctorBarnDao.findByEnumss(farmId,barnIds);
 
-        String barn_ids = "";
-        for ( Map<String,Object> map : maps ) {
-            for ( String s : map.keySet() ) {
-                barn_ids = (String) map.get("barn_ids");
-            }
-        }
-
-        List<Map> result = new ArrayList<>();
-        String str[] = barn_ids.split(",");
-        //字符串数组转换成int数组
-        int array[] = new int[str.length];
-        for(int i=0;i<str.length;i++){
-
-            array[i] = Integer.parseInt(str[i]);
-            maps = doctorBarnDao.findNameByBarnIds((long) Integer.parseInt(str[i]));
-            for ( Map<String,Object> map : maps ) {
-                result.add(map);
-            }
-        }
-
-        return Response.ok(result);
+        return Response.ok(maps);
     }
 
     @Override

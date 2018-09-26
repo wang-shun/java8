@@ -73,7 +73,7 @@ public interface DoctorBarnReadService {
     *
     * */
     Response<List<Map>> findBarnsByEnumss(@NotNull(message = "farmId.not.null") Long farmId,
-                                               Long userId);
+                                          List<Long> barnIds);
 
 
 
