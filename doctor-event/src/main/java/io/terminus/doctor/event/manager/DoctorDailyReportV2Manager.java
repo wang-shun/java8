@@ -82,8 +82,8 @@ public class DoctorDailyReportV2Manager {
 
             doctorGroupDaily = new DoctorGroupDaily();
             //(孔景军)
-            doctorGroupDaily.setGroupId(departmentLinerDto.getCliqueId() );
-            doctorGroupDaily.setGroupName(departmentLinerDto.getCliqueName());
+            doctorGroupDaily.setGroupId(departmentLinerDto.getCliqueId() == null? 0L: departmentLinerDto.getCliqueId());
+            doctorGroupDaily.setGroupName(departmentLinerDto.getCliqueName() == null? "无集团":departmentLinerDto.getCliqueName());
 
             doctorGroupDaily.setOrgId(departmentLinerDto.getOrgId());
             doctorGroupDaily.setOrgName(departmentLinerDto.getOrgName());
@@ -153,8 +153,8 @@ public class DoctorDailyReportV2Manager {
             DoctorDepartmentLinerDto departmentLinerDto = departmentCache.getUnchecked(criteria.getFarmId());
             doctorPigDaily = new DoctorPigDaily();
             //(孔景军)
-            doctorPigDaily.setGroupId(departmentLinerDto.getCliqueId());
-            doctorPigDaily.setGroupName(departmentLinerDto.getCliqueName());
+            doctorPigDaily.setGroupId(departmentLinerDto.getCliqueId() == null? 0L :departmentLinerDto.getCliqueId());
+            doctorPigDaily.setGroupName(departmentLinerDto.getCliqueName()==null? "无集团":departmentLinerDto.getCliqueName());
 
             doctorPigDaily.setOrgId(departmentLinerDto.getOrgId());
             doctorPigDaily.setOrgName(departmentLinerDto.getOrgName());
