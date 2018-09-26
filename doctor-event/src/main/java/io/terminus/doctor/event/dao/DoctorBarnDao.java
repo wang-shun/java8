@@ -70,11 +70,11 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
        * 冯雨晴 2019.9.18
        *
        * */
-    public List<Map> findByEnumss(@NotNull Long farmId,Long userId) {
+    public List<Map> findByEnumss(@NotNull Long farmId,List<Long> barnIds) {
 
         return getSqlSession().selectList(sqlId("findByEnumss"), MapBuilder.<String, Object>newHashMap()
                     .put("farmId", farmId)
-                    .put("userId", userId)
+                    .put("barnIds", barnIds)
                     .map());
     }
 

@@ -237,12 +237,13 @@
     *
     * */-->
     <select id="findByEnumss" parameterType="map" resultType="map">
-        SELECT a.id, a.name, a.org_id, a.org_name, a.farm_id, a.farm_name, a.pig_type,
-        a.can_open_group, a.status, a.capacity, a.staff_id, a.staff_name, a.out_id, a.extra,
-        a.created_at, a.updated_at, b.updator_name,b.barn_ids
-        from doctor_barns a left join doctor_user_data_permissions b on a.id = b.barn_ids
-        where b.user_id = #{userId}
-        and a.farm_id = #{farmId}
+        SELECT id, name
+        from doctor_barns
+        where farm_id = #{farmId}
+        and id in
+        <foreach collection="barnIds" item="barnId" open="(" separator="," close=")">
+            #{barnId}
+        </foreach>
     </select>
 
     <select id="findNameByBarnIds" parameterType="map" resultType="map">

@@ -7,6 +7,7 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Splitters;
@@ -280,8 +281,17 @@ public class DoctorBarns {
     @RequestMapping(value = "/pigTypess", method = RequestMethod.GET)
     public List<Map> findBarnsByfarmIdAndTypes(@RequestParam("farmId") Long farmId
                                                     ) {
-        BaseUser currentUser = UserUtil.getCurrentUser();
-        return RespHelper.or500(doctorBarnReadService.findBarnsByEnumss(farmId,currentUser.getId()));
+        log.error("=========================farmId="+farmId);
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        if (baseUser == null) {
+            throw new JsonResponseException("user.not.login");
+        }
+        Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
+        if (!dataPermissionResponse.isSuccess()) {
+            throw new JsonResponseException("user.not.permission");
+        }
+        List<Long> barnIds = dataPermissionResponse.getResult().getBarnIdsList();
+        return RespHelper.or500(doctorBarnReadService.findBarnsByEnumss(farmId,barnIds));
 
     }
 
