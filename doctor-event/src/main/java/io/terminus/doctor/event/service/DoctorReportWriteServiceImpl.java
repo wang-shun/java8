@@ -62,7 +62,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
 
         DoctorPigReportReadService.DateDuration dateDuration = doctorPigReportReadService.getDuration(countDate, reportTime);
 
-        flushNPD(farmIds, dateDuration.getStart(), dateDuration.getEnd());
+//        flushNPD(farmIds, dateDuration.getStart(), dateDuration.getEnd());
         NPD(farmIds, dateDuration.getStart(), dateDuration.getEnd());
     }
 
@@ -222,9 +222,11 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                             if(type == 2){
                                 diffDay1 = differentDaysByMillisecond(simpleDateFormat.parse(eventDate),
                                         simpleDateFormat.parse(eventAt));
+                                entity.setLastEventName("转场");
                             } else {
                                 diffDay1 = differentDaysByMillisecond(simpleDateFormat.parse(eventTime),
                                         simpleDateFormat.parse(eventAt));
+                                entity.setLastEventName("转场转入");
                             }
                             entity.setFarmId(farmId);
                             entity.setOrgId(orgId);
@@ -234,6 +236,8 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                             entity.setNpdDate(diffDay1);
                             entity.setLactationDate(0);
                             entity.setGestationDate(0);
+                            entity.setCurrentEventType((int)type);
+                            entity.setLastEventDate(simpleDateFormat.parse(eventAt));
                             entity.setFqNpd(0);
                             entity.setLcNpd(0);
                             entity.setTtNpd(0);
@@ -320,16 +324,17 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                             if (existsAryValue(fm, thenEventType)) // 匹配上了
                             {
                                 // 查询最后一次配种事件
-                                params.put("inderDate", eventTime);
-                                List<Map<String, Object>> sel = doctorPigEventDao.selectStartNPD(params);
-                                if (sel.size() > 0) {
-                                    prevObj = new LinkedHashMap<String, Object>();
-                                    // 真正比较的时间
-                                    prevObj.put("compareEventAt", sel.get(0).get("currentEventDate"));
-                                    prevObj.put("eventType", thenEventType);
-                                    prevObj.put("name", thenObj.get("name"));
-                                    prevObj.put("eventAt", thenObj.get("eventAt"));
-                                }
+//                                params.put("inderDate", eventTime);
+//                                List<Map<String, Object>> sel = doctorPigEventDao.selectStartNPD(params);
+//                                if (sel.size() > 0) {
+//                                    prevObj = new LinkedHashMap<String, Object>();
+//                                    // 真正比较的时间
+//                                    prevObj.put("compareEventAt", sel.get(0).get("currentEventDate"));
+//                                    prevObj.put("eventType", thenEventType);
+//                                    prevObj.put("name", thenObj.get("name"));
+//                                    prevObj.put("eventAt", thenObj.get("eventAt"));
+//                                }
+                                prevObj = thenObj;
                             }
                         } else if (eventType.equals("9")) { // 断奶
                             if (existsAryValue(dn, thenEventType)) // 匹配上了
@@ -364,7 +369,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                                     simpleDateFormat.parse(prevDate));
                         } else if (eventType.equals("7") && prevObj != null) // 分娩
                         {
-                            String prevDate = prevObj.get("compareEventAt").toString();
+                            String prevDate = prevObj.get("eventAt").toString();
                             diffDay = differentDaysByMillisecond(simpleDateFormat.parse(eventTime),
                                     simpleDateFormat.parse(prevDate));
                         } else if (eventType.equals("9") && prevObj != null) // 断奶
@@ -423,7 +428,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                                 entity.setCurrentEventName(thisObj.get("name").toString());
                             }
                             entity.setCurrentEventDate(simpleDateFormat.parse(eventTime));
-                            entity.setCurrentEventType(Integer.parseInt(eventType));
+
                             if (eventType.equals("7")) {
                                 if (liveCount == 0) { // 分娩死胎或0胎的情况下
                                     entity.setCurrentEventName("分娩(全死胎)");
@@ -437,6 +442,8 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                                 entity.setTtNpd(0);
                                 entity.setSwNpd(0);
                                 entity.setDnpzNpd(0);
+                                entity.setCurrentEventType(Integer.parseInt(eventType.toString()));
+                                entity.setLastEventDate(simpleDateFormat.parse(prevObj.get("eventAt").toString()));
                             } else if (eventType.equals("9")) {
                                 entity.setCurrentEventName("断奶");
                                 entity.setGestationDate(0);
@@ -448,6 +455,8 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                                 entity.setTtNpd(0);
                                 entity.setSwNpd(0);
                                 entity.setDnpzNpd(0);
+                                entity.setCurrentEventType(Integer.parseInt(eventType.toString()));
+                                entity.setLastEventDate(simpleDateFormat.parse(prevObj.get("eventAt").toString()));
                             } else if(eventType.equals("2") && (thenEventType.equals("1") || thenEventType.equals("11"))) {
                                 entity.setCurrentEventName("配种");
                                 entity.setGestationDate(0);
@@ -459,6 +468,8 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                                 entity.setTtNpd(0);
                                 entity.setSwNpd(0);
                                 entity.setDnpzNpd(0);
+                                entity.setCurrentEventType(Integer.parseInt(eventType.toString()));
+                                entity.setLastEventDate(simpleDateFormat.parse(prevObj.get("eventAt").toString()));
                             } else if(eventType.equals("2") && thenEventType.equals("9")) {
                                 entity.setCurrentEventName("配种");
                                 entity.setGestationDate(0);
@@ -470,6 +481,8 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                                 entity.setLcNpd(0);
                                 entity.setTtNpd(0);
                                 entity.setSwNpd(0);
+                                entity.setCurrentEventType(Integer.parseInt(eventType.toString()));
+                                entity.setLastEventDate(simpleDateFormat.parse(prevObj.get("eventAt").toString()));
                             } else if(listType.size() == 0 && eventType.equals("6")) {
                                 entity.setCurrentEventName("妊检返情");
                                 entity.setGestationDate(0);
@@ -481,6 +494,8 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                                 entity.setTtNpd(0);
                                 entity.setSwNpd(0);
                                 entity.setDnpzNpd(0);
+                                entity.setCurrentEventType(Integer.parseInt(eventType.toString()));
+                                entity.setLastEventDate(simpleDateFormat.parse(prevObj.get("eventAt").toString()));
                             } else if(listType.size() == 0 && eventType.equals("4")) {
                                 entity.setCurrentEventName("妊检阴性");
                                 entity.setGestationDate(0);
@@ -492,6 +507,8 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                                 entity.setTtNpd(0);
                                 entity.setSwNpd(0);
                                 entity.setDnpzNpd(0);
+                                entity.setCurrentEventType(Integer.parseInt(eventType.toString()));
+                                entity.setLastEventDate(simpleDateFormat.parse(prevObj.get("eventAt").toString()));
                             } else if((eventType.equals("2") && thenEventType.equals("6"))
                                     || (eventType.equals("2") && thenEventType.equals("4"))){
                                 entity.setCurrentEventName("配种");
@@ -504,6 +521,8 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                                 entity.setTtNpd(0);
                                 entity.setSwNpd(0);
                                 entity.setDnpzNpd(0);
+                                entity.setCurrentEventType(Integer.parseInt(eventType.toString()));
+                                entity.setLastEventDate(simpleDateFormat.parse(prevObj.get("eventAt").toString()));
                             } else if((eventType.equals("2") && thenEventType.equals("5"))){
                                 entity.setCurrentEventName("配种");
                                 entity.setGestationDate(0);
@@ -515,6 +534,8 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                                 entity.setTtNpd(0);
                                 entity.setSwNpd(0);
                                 entity.setDnpzNpd(0);
+                                entity.setCurrentEventType(Integer.parseInt(eventType.toString()));
+                                entity.setLastEventDate(simpleDateFormat.parse(prevObj.get("eventAt").toString()));
                             }else if(listType.size() == 0 && eventType.equals("5")) {
                                 entity.setCurrentEventName("妊检流产");
                                 entity.setGestationDate(0);
@@ -526,6 +547,8 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                                 entity.setTtNpd(0);
                                 entity.setSwNpd(0);
                                 entity.setDnpzNpd(0);
+                                entity.setCurrentEventType(Integer.parseInt(eventType.toString()));
+                                entity.setLastEventDate(simpleDateFormat.parse(prevObj.get("eventAt").toString()));
                             } else if(changeTypeId.equals("110")) {
                                 entity.setCurrentEventName("死亡");
                                 entity.setGestationDate(0);
@@ -537,6 +560,8 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                                 entity.setLcNpd(0);
                                 entity.setTtNpd(0);
                                 entity.setDnpzNpd(0);
+                                entity.setCurrentEventType(Integer.parseInt(eventType.toString()));
+                                entity.setLastEventDate(simpleDateFormat.parse(prevObj.get("eventAt").toString()));
                             } else if(!changeTypeId.equals("110")) {
                                 entity.setCurrentEventName("淘汰");
                                 entity.setGestationDate(0);
@@ -548,6 +573,8 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                                 entity.setLcNpd(0);
                                 entity.setSwNpd(0);
                                 entity.setDnpzNpd(0);
+                                entity.setCurrentEventType(Integer.parseInt(eventType.toString()));
+                                entity.setLastEventDate(simpleDateFormat.parse(prevObj.get("eventAt").toString()));
                             }
                             entity.setEventId(Long.parseLong(thisObj.get("eventId").toString().trim()));
                             entity.setBarnId(Long.parseLong(thisObj.get("barnId").toString().trim()));
