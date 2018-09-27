@@ -62,7 +62,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
 
         DoctorPigReportReadService.DateDuration dateDuration = doctorPigReportReadService.getDuration(countDate, reportTime);
 
-        flushNPD(farmIds, dateDuration.getStart(), dateDuration.getEnd());
+//        flushNPD(farmIds, dateDuration.getStart(), dateDuration.getEnd());
         NPD(farmIds, dateDuration.getStart(), dateDuration.getEnd());
     }
 
