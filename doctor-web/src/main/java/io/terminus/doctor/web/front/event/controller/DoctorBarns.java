@@ -264,12 +264,21 @@ public class DoctorBarns {
                                                      @RequestParam(value = "pigTypes", required = false) String pigTypes,
                                                      @RequestParam(value = "status", required = false) Integer status,
                                                      @RequestParam(value = "pigIds", required = false) String pigIds) {
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        if (baseUser == null) {
+            throw new JsonResponseException("user.not.login");
+        }
+        Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
+        if (!dataPermissionResponse.isSuccess()) {
+            throw new JsonResponseException("user.not.permission");
+        }
+        List<Long> barnIds = dataPermissionResponse.getResult().getBarnIdsList();
         List<Integer> types = Lists.newArrayList();
         if (notEmpty(pigTypes)) {
             types = Splitters.splitToInteger(pigTypes, Splitters.COMMA);
         }
         return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, types,
-                null, status, null)), pigIds);
+                null, status, barnIds)), pigIds);
     }
 
     /**
