@@ -46,6 +46,7 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
 
     public List<DoctorBarn> findByEnums(@NotNull Long farmId, List<Integer> pigTypes, Integer canOpenGroup, Integer status, List<Long> barnIds) {
         if(status != null && status == 5){
+            //显示为停用和停用的
             return getSqlSession().selectList(sqlId("findByEnums1"), MapBuilder.<String, Object>newHashMap()
                     .put("farmId", farmId)
                     .put("pigTypes", Iters.emptyToNull(pigTypes))
