@@ -116,6 +116,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
 //            }
             params.put("pigId", listPIG == null ? "0" : String.valueOf(listPIG.get(i).get("id")));
             flushSowNPD(params);
+            flushReportNpd(params, startDate, endDate);
         }
     }
 
@@ -222,9 +223,11 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                             if(type == 2){
                                 diffDay1 = differentDaysByMillisecond(simpleDateFormat.parse(eventDate),
                                         simpleDateFormat.parse(eventAt));
+                                entity.setLastEventName("转场");
                             } else {
                                 diffDay1 = differentDaysByMillisecond(simpleDateFormat.parse(eventTime),
                                         simpleDateFormat.parse(eventAt));
+                                entity.setLastEventName("转场转入");
                             }
                             entity.setFarmId(farmId);
                             entity.setOrgId(orgId);
@@ -234,6 +237,8 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                             entity.setNpdDate(diffDay1);
                             entity.setLactationDate(0);
                             entity.setGestationDate(0);
+                            entity.setCurrentEventType((int)type);
+                            entity.setLastEventDate(simpleDateFormat.parse(eventAt));
                             entity.setFqNpd(0);
                             entity.setLcNpd(0);
                             entity.setTtNpd(0);
@@ -364,7 +369,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                                     simpleDateFormat.parse(prevDate));
                         } else if (eventType.equals("7") && prevObj != null) // 分娩
                         {
-                            String prevDate = prevObj.get("compareEventAt").toString();
+                            String prevDate = prevObj.get("eventAt").toString();
                             diffDay = differentDaysByMillisecond(simpleDateFormat.parse(eventTime),
                                     simpleDateFormat.parse(prevDate));
                         } else if (eventType.equals("9") && prevObj != null) // 断奶
@@ -423,7 +428,8 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                                 entity.setCurrentEventName(thisObj.get("name").toString());
                             }
                             entity.setCurrentEventDate(simpleDateFormat.parse(eventTime));
-                            entity.setCurrentEventType(Integer.parseInt(eventType));
+                            entity.setCurrentEventType(Integer.parseInt(thisObj.get("type").toString()));
+                            entity.setLastEventDate(simpleDateFormat.parse(prevObj.get("eventAt").toString()));
                             if (eventType.equals("7")) {
                                 if (liveCount == 0) { // 分娩死胎或0胎的情况下
                                     entity.setCurrentEventName("分娩(全死胎)");
@@ -560,6 +566,46 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
         } catch (Exception e) {
             System.out.println("NpdJournelError===>   " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    public void flushReportNpd(Map<String, Object> params, Date startDate, Date endDate){
+        Map<Long/*farmID*/, Map<String/*year-month*/, Integer/*怀孕天数*/>> farmPregnancy = new HashMap<>();
+        Map<Long/*farmID*/, Map<String/*year-month*/, Integer/*哺乳天数*/>> farmLactation = new HashMap<>();
+        Map<Long/*farmID*/, Map<String/*year-month*/, Integer/*非生产天数*/>> farmNPD = new HashMap<>();
+        Long farmId = Long.parseLong(params.get("farmId").toString());
+        DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(farmId));
+
+        for (Date i = startDate; i.before(endDate); i = DateUtils.addMonths(i, 1)) {
+
+            Date monthEndDate = DateUtil.monthEnd(i);
+
+            int dayCount = DateUtil.getDeltaDays(i, monthEndDate) + 1;
+
+            DoctorReportNpd npd = doctorReportNpdDao.findByFarmAndSumAt(farmId, i).orElseGet(() -> new DoctorReportNpd());
+            npd.setFarmId(farmId);
+            npd.setDays(dayCount);
+
+            if (log.isDebugEnabled())
+                log.debug("刷新猪场{},从{}到{}", farm.getId(), DateUtil.toDateString(i), DateUtil.toDateString(monthEndDate));
+            Integer sowCount = doctorPigDailyDao.countSow(farmId, i, monthEndDate);
+            npd.setSowCount(sowCount);
+
+            npd.setSumAt(i);
+
+            int year = new DateTime(i).getYear();
+            int month = new DateTime(i).getMonthOfYear();
+            String monthAndYearKey = year + "-" + month;
+
+            npd.setNpd(getCount(farmId, monthAndYearKey, farmNPD));
+            npd.setPregnancy(getCount(farmId, monthAndYearKey, farmPregnancy));
+            npd.setLactation(getCount(farmId, monthAndYearKey, farmLactation));
+
+            npd.setOrgId(null == farm ? null : farm.getOrgId());
+            if (null == npd.getId())
+                doctorReportNpdDao.create(npd);
+            else
+                doctorReportNpdDao.update(npd);
         }
     }
 
