@@ -204,12 +204,12 @@
     </update>
 
     <insert id="insertPerssion" parameterType="java.util.List">
-        insert into doctor_user_data_permissions(user_id,group_ids,org_ids,farm_ids,created_at,updated_at)
+        insert into doctor_user_data_permissions(user_id,group_ids,org_ids,farm_ids,barn_ids,created_at,updated_at)
         values
         <foreach collection="list" item="item" index="index"
                  separator=",">
             (
-              #{item.userId},#{item.groupIds},#{item.orgIds},#{item.farmIds},now(),now()
+              #{item.userId},#{item.groupIds},#{item.orgIds},#{item.farmIds},#{item.barnIds},now(),now()
             )
         </foreach>
     </insert>
