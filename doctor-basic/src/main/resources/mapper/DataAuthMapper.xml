@@ -228,6 +228,13 @@
             #{id}
         </foreach>
     </select>
+    <select id="getBarnIdList" parameterType="Long" resultType="Long">
+        select id from doctor_barns
+        where farm_id in
+        <foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
 
     <!--user profile 的新增与编辑（陈娟 2018-09-16）-->
     <insert id="insertUserProfile" parameterType="Map">

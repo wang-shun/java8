@@ -388,30 +388,19 @@ public class DataAuthServiceImpl implements DataAuthService{
             }
             String groupIdsString;
             String orgIdsString;
+            String barnIdsString;
             if(farmIdList != null && farmIdList.size() != 0) {
                 List<Long> orgIdList = dataAuthDao.getOrgIdList(farmIdList);
-//            List<Long> orgIds;
-//            if (StringUtils.isNotBlank(dataSubRole.getOrgIds())) {
-//                orgIds = Splitters.COMMA.splitToList(dataSubRole.getOrgIds()).stream().map(Long::valueOf).collect(Collectors.toList());
-//            } else {
-//                orgIds = Lists.newArrayList();
-//            }
-//            orgIdList.addAll(orgIds);
                 List<Long> OrgIdsList = removeDuplicate(orgIdList);
                 orgIdsString = StringUtils.join(OrgIdsList.toArray(), ",");
-
                 List<Long> groupIdList = dataAuthDao.getGroupIdList(orgIdList);
-//            List<Long> groupIds;
-//            if (StringUtils.isNotBlank(dataSubRole.getGroupIds())) {
-//                groupIds = Splitters.COMMA.splitToList(dataSubRole.getGroupIds()).stream().map(Long::valueOf).collect(Collectors.toList());
-//            } else {
-//                groupIds = Lists.newArrayList();
-//            }
-//            groupIdList.addAll(groupIds);
+                List<Long> barnIdList = dataAuthDao.getBarnIdList(farmIdList);
                 groupIdsString = StringUtils.join(removeDuplicate(groupIdList).toArray(), ",");
+                barnIdsString = StringUtils.join(removeDuplicate(barnIdList).toArray(), ",");
             }else{
                 groupIdsString = null;
                 orgIdsString = null;
+                barnIdsString = null;
             }
             List<Map<String,String>> dataSubRoleParams = Lists.newArrayList();
             for (String userId : userIds) {
@@ -420,6 +409,7 @@ public class DataAuthServiceImpl implements DataAuthService{
                 dataSubRoleParam.put("groupIds",groupIdsString);
                 dataSubRoleParam.put("orgIds",orgIdsString);
                 dataSubRoleParam.put("farmIds",dataSubRole.getFarmIds());
+                dataSubRoleParam.put("barnIds",barnIdsString);
                 dataSubRoleParams.add(dataSubRoleParam);
             }
             dataAuthDao.insertPerssion(dataSubRoleParams);
