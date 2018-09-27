@@ -816,4 +816,8 @@
     <select id="getAllGroup" resultType="Long">
         select id from doctor_orgs where type = 1
     </select>
+    <select id="getGroupIdByOrgId" parameterType="Long" resultType="Long">
+        select parent_id from doctor_orgs where id=#{orgId}
+    </select>
+
 </mapper>

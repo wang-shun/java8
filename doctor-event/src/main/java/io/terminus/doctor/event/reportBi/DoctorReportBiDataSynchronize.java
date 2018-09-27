@@ -219,6 +219,11 @@ public class DoctorReportBiDataSynchronize {
             DoctorFarm doctorFarm = RespHelper.orServEx(doctorFarmReadService.findFarmById(orzId));
             synchronizeDeltaBiData(orzId, orzType, pigDate, groupDate, type, isRealTime);
             synchronizeDeltaBiData(doctorFarm.getOrgId(), OrzDimension.ORG.getValue(), pigDate, groupDate, type, isRealTime);
+            //通过公司id查集团id
+            Long groupId = doctorPigDailyDao.getGroupIdByOrgId(doctorFarm.getOrgId());
+            if(groupId !=null && groupId!= 0L) {
+                synchronizeDeltaBiData(groupId, OrzDimension.CLIQUE.getValue(), pigDate, groupDate, type, isRealTime);
+            }
         } else if (Objects.equals(orzType, OrzDimension.ORG.getValue())) {
             //如果组织维度是公司，则同步公司下所有猪场，以及公司数据
             List<DoctorFarm> farmList = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orzId));

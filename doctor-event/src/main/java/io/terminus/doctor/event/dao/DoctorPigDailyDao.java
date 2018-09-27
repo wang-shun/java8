@@ -218,4 +218,9 @@ public class DoctorPigDailyDao extends MyBatisDao<DoctorPigDaily> {
     public List<Long> getAllGroup(){
         return getSqlSession().selectList(sqlId("getAllGroup"));
     }
+
+    //通过公司id查集团id(孔景军)
+    public Long getGroupIdByOrgId(Long orgId){
+        return getSqlSession().selectOne(sqlId("getGroupIdByOrgId"),orgId);
+    }
 }
