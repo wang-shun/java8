@@ -279,7 +279,8 @@ public class DoctorBarns {
      * @return 猪舍表列表
      */
     @RequestMapping(value = "/pigTypess", method = RequestMethod.GET)
-    public List<Map> findBarnsByfarmIdAndTypes(@RequestParam("farmId") Long farmId
+    public List<Map> findBarnsByfarmIdAndTypes(@RequestParam("farmId") Long farmId,
+                                               @RequestParam(value = "pigTypes", required = false) String pigTypes
                                                     ) {
         BaseUser baseUser = UserUtil.getCurrentUser();
         if (baseUser == null) {
@@ -290,7 +291,12 @@ public class DoctorBarns {
             throw new JsonResponseException("user.not.permission");
         }
         List<Long> barnIds = dataPermissionResponse.getResult().getBarnIdsList();
-        return RespHelper.or500(doctorBarnReadService.findBarnsByEnumss(farmId,barnIds));
+
+        List<Integer> types = Lists.newArrayList();
+        if (notEmpty(pigTypes)) {
+            types = Splitters.splitToInteger(pigTypes, Splitters.COMMA);
+        }
+        return RespHelper.or500(doctorBarnReadService.findBarnsByEnumss(farmId,types,barnIds));
 
     }
 

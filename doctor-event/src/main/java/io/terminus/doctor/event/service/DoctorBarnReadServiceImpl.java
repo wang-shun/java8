@@ -171,9 +171,9 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
         *
         * */
     @Override
-    public Response<List<Map>> findBarnsByEnumss(Long farmId, List<Long> barnIds) {
+    public Response<List<Map>> findBarnsByEnumss(Long farmId, List<Integer> pigTypes, List<Long> barnIds) {
 
-        List<Map> maps = doctorBarnDao.findByEnumss(farmId,barnIds);
+        List<Map> maps = doctorBarnDao.findByEnumss(farmId,pigTypes,barnIds);
 
         return Response.ok(maps);
     }

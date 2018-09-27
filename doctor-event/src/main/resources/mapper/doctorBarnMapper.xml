@@ -244,6 +244,10 @@
         <foreach collection="barnIds" item="barnId" open="(" separator="," close=")">
             #{barnId}
         </foreach>
+        and pig_type in
+        <foreach collection="pigTypes" item="type" open="(" separator="," close=")">
+            #{type}
+        </foreach>
     </select>
 
     <select id="findNameByBarnIds" parameterType="map" resultType="map">
