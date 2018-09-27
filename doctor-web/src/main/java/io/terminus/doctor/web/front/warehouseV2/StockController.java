@@ -132,6 +132,7 @@ public class StockController {
         Calendar handleDateWithTime = Calendar.getInstance();
         handleDateWithTime.set(stockIn.getHandleDate().get(Calendar.YEAR), stockIn.getHandleDate().get(Calendar.MONTH), stockIn.getHandleDate().get(Calendar.DAY_OF_MONTH));
         stockIn.setHandleDate(handleDateWithTime);
+        stockIn.setIsFormula(false);
 
         return RespHelper.or500(doctorWarehouseStockWriteService.in(stockIn));
     }
@@ -177,6 +178,7 @@ public class StockController {
         Calendar handleDateWithTime = Calendar.getInstance();
         handleDateWithTime.set(stockOut.getHandleDate().get(Calendar.YEAR), stockOut.getHandleDate().get(Calendar.MONTH), stockOut.getHandleDate().get(Calendar.DAY_OF_MONTH));
         stockOut.setHandleDate(handleDateWithTime);
+        stockOut.setIsFormula(false);
 
         return RespHelper.or500(doctorWarehouseStockWriteService.out(stockOut));
     }
@@ -212,7 +214,7 @@ public class StockController {
         Calendar handleDateWithTime = Calendar.getInstance();
         handleDateWithTime.set(stockRefund.getHandleDate().get(Calendar.YEAR), stockRefund.getHandleDate().get(Calendar.MONTH), stockRefund.getHandleDate().get(Calendar.DAY_OF_MONTH));
         stockRefund.setHandleDate(handleDateWithTime);
-
+        stockRefund.setIsFormula(false);
 
         return RespHelper.or500(doctorWarehouseStockWriteService.refund(stockRefund));
     }
@@ -270,6 +272,7 @@ public class StockController {
         Calendar handleDateWithTime = Calendar.getInstance();
         handleDateWithTime.set(stockInventory.getHandleDate().get(Calendar.YEAR), stockInventory.getHandleDate().get(Calendar.MONTH), stockInventory.getHandleDate().get(Calendar.DAY_OF_MONTH));
         stockInventory.setHandleDate(handleDateWithTime);
+        stockInventory.setIsFormula(false);
 
         return RespHelper.or500(doctorWarehouseStockWriteService.inventory(stockInventory));
     }
@@ -320,10 +323,12 @@ public class StockController {
         Calendar handleDateWithTime = Calendar.getInstance();
         handleDateWithTime.set(stockTransfer.getHandleDate().get(Calendar.YEAR), stockTransfer.getHandleDate().get(Calendar.MONTH), stockTransfer.getHandleDate().get(Calendar.DAY_OF_MONTH));
         stockTransfer.setHandleDate(handleDateWithTime);
+        stockTransfer.setIsFormula(false);
 
         return RespHelper.or500(doctorWarehouseStockWriteService.transfer(stockTransfer));
     }
 
+    //配方
     @RequestMapping(method = RequestMethod.POST, value = "formula")
     public InventoryDto produce(
             @RequestParam("orgId") Long orgId,
@@ -428,6 +433,7 @@ public class StockController {
         Calendar handleDateWithTime = Calendar.getInstance();
         handleDateWithTime.set(formulaDto.getHandleDate().get(Calendar.YEAR), formulaDto.getHandleDate().get(Calendar.MONTH), formulaDto.getHandleDate().get(Calendar.DAY_OF_MONTH));
         formulaDto.setHandleDate(handleDateWithTime);
+        formulaDto.setIsFormula(true);
 
         return RespHelper.or500(doctorWarehouseStockWriteService.updateFormula(formulaDto));
     }
