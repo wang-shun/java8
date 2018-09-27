@@ -19,6 +19,7 @@ import io.terminus.doctor.move.dto.DoctorImportSheet;
 import io.terminus.doctor.move.dto.DoctorMoveBasicData;
 import io.terminus.doctor.move.manager.DoctorMoveAndImportManager;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.PrimaryUser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.joda.time.DateTime;
@@ -145,8 +146,12 @@ public class DoctorMoveAndImportService {
         Map<String, Long> userMap = moveBasicService.getSubMap(farm.getOrgId());
         Map<String, DoctorBarn> barnMap = moveBasicService.getBarnMap2(farm.getId());
         Map<String, Long> breedMap = moveBasicService.getBreedMap();
+        PrimaryUser primaryUser = new PrimaryUser();
+        primaryUser.setUserId(null);
+        primaryUser.setUserName(null);
+        //moveAndImportManager.getPrimaryUser(farm.getId())
         return DoctorImportBasicData.builder().doctorFarm(farm).userMap(userMap).barnMap(barnMap)
-                .breedMap(breedMap).defaultUser(moveAndImportManager.getPrimaryUser(farm.getId()))
+                .breedMap(breedMap).defaultUser(primaryUser)
                 .build();
     }
 
