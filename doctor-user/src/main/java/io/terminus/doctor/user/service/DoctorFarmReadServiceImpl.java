@@ -12,6 +12,7 @@ import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.dto.FarmCriteria;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorFarmInformation;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.parana.common.utils.RespHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -162,4 +164,11 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
             return Response.fail("find.by.number.failed");
         }
     }
+
+    //  ---------------------  新增代码  2018年8月28日17:50:56 ----------------------
+    @Override
+    public List<DoctorFarmInformation> findSubordinatePig(Date date) {
+        return doctorFarmDao.findSubordinatePig(date);
+    }
+
 }

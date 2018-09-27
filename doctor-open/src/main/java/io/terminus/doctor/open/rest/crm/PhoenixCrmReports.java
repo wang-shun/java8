@@ -15,24 +15,15 @@ import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorCheckPregDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
-import io.terminus.doctor.event.model.DoctorDailyGroup;
-import io.terminus.doctor.event.model.DoctorDailyReport;
-import io.terminus.doctor.event.model.DoctorDailyReportSum;
-import io.terminus.doctor.event.model.DoctorGroupChangeSum;
-import io.terminus.doctor.event.model.DoctorRangeReport;
+import io.terminus.doctor.event.model.*;
 import io.terminus.doctor.event.service.DoctorCommonReportReadService;
 import io.terminus.doctor.event.service.DoctorDailyGroupReadService;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.util.EventUtil;
-import io.terminus.doctor.open.dto.DoctorDailyReportOpen;
-import io.terminus.doctor.open.dto.DoctorDeadDailyReportOpen;
-import io.terminus.doctor.open.dto.DoctorGroupLiveStockDetailOpen;
-import io.terminus.doctor.open.dto.DoctorLiveStockDailyReportOpen;
-import io.terminus.doctor.open.dto.DoctorMatingDailyReportOpen;
-import io.terminus.doctor.open.dto.DoctorMonthlyReportOpen;
-import io.terminus.doctor.open.dto.DoctorSaleDailyReportOpen;
+import io.terminus.doctor.open.dto.*;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorFarmInformation;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.PrimaryUserReadService;
 import io.terminus.pampas.openplatform.annotations.OpenBean;
@@ -88,6 +79,29 @@ public class PhoenixCrmReports {
         this.primaryUserReadService = primaryUserReadService;
     }
 
+
+    /**
+     * 查询全部下属猪场的存栏数据
+     *
+     * @param date 日期
+     * @return jsonArray
+     */
+    @OpenMethod(key = "get.pig.farms.living", paramNames = "date")
+    public String getPigFarmsLiving(@NotEmpty(message = "date.not.empty") String date){
+        List<DoctorFarmInformation> farmInforMation = doctorFarmReadService.findSubordinatePig(DTF.parseDateTime(date).toDate());
+//        if(!farmInforMation.isSuccess() || Arguments.isNullOrEmpty(farmInforMation.getResult())){
+//            return "";
+//        }
+        if(farmInforMation.equals("") || farmInforMation == null){
+            return "";
+        }
+        Response<Map<Long, String>> mapResponse = primaryUserReadService.findFarmIdToUserName();
+
+        if (!mapResponse.isSuccess()) {
+            return "";
+        }
+            return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(farmInforMation);
+    }
 
 
     /**

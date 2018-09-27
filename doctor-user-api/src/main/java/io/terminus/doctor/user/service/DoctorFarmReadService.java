@@ -4,8 +4,10 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dto.FarmCriteria;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorFarmInformation;
 
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -78,4 +80,9 @@ public interface DoctorFarmReadService {
      * @return
      */
     Response<DoctorFarm> findByNumber(String number);
+
+    //  ---------------------  新增代码  2018年8月28日17:50:56 ----------------------
+    List<DoctorFarmInformation> findSubordinatePig(Date date);
+
+
 }

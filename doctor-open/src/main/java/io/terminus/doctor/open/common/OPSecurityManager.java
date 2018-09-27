@@ -37,7 +37,7 @@ public class OPSecurityManager implements SecurityManager {
         clientMap.put("pigDoctorJXY", new OPClientInfo(5L, "pigDoctorJXY", "gzYEVmIHZ24JQHcX"));    //JXY系统
 
         idClientMap = clientMap.values().stream().collect(Collectors.toMap(OpClient::getClientId, o->o));
-        clientPermissionMap.put(4L, ImmutableSet.of("get.daily.report", "get.monthly.report", "get.group.live.stock.detail", "get.shop.item.sale"));
+        clientPermissionMap.put(4L, ImmutableSet.of("get.daily.report", "get.monthly.report", "get.group.live.stock.detail", "get.shop.item.sale","get.pig.farms.living"));
         clientPermissionMap.put(5L, ImmutableSet.of("get.user.by.sessionId"));
     }
 

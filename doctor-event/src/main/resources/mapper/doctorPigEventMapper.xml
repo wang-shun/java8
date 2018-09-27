@@ -2518,6 +2518,7 @@
         <if test="endMonth != null">AND a.fiscal_period &lt;= #{endMonth} </if>
         GROUP BY a.pig_id, a.barn_id
         ) dd
+        WHERE dd.npddate <![CDATA[<>]]> 0
     </select>
 
     <select id="sumNpd" parameterType="map" resultType="map">
