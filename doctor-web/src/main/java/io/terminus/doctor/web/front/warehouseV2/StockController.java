@@ -35,6 +35,7 @@ import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.util.CollectionUtils;
@@ -100,6 +101,7 @@ public class StockController {
 
     @RpcConsumer
     private DoctorWarehouseSettlementService doctorWarehouseSettlementService;
+    private final String handleDate = "handleDate";
 
     /**
      * 采购入库
@@ -329,6 +331,7 @@ public class StockController {
             @RequestParam("feedFormulaId") Long feedFormulaId,
             @RequestParam("operatorId") Long operatorId,
             @RequestParam("operatorName") String operatorName,
+            @RequestParam("handleDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Calendar handleDate,
             @RequestParam("materialProduceJson") String materialProduceJson) {
 
 
@@ -337,7 +340,7 @@ public class StockController {
             throw new JsonResponseException("under.settlement");
 
         //会计年月
-        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(new Date());
+        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(handleDate.getTime());
         //会计年月已经结算后，不允许新增或编辑单据
         if (doctorWarehouseSettlementService.isSettled(orgId, settlementDate))
             throw new JsonResponseException("already.settlement");
@@ -368,11 +371,11 @@ public class StockController {
 //        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
 
         WarehouseFormulaDto formulaDto = new WarehouseFormulaDto();
-//        formulaDto.setFarmId(farmId);
+        formulaDto.setIsFormula(true);// 用来判断是否是配方 （陈娟 2018-09-26）
         formulaDto.setOrgId(orgId);
 //        formulaDto.setFarmName(farm.getName());
         formulaDto.setWarehouseId(warehouseId);
-        formulaDto.setHandleDate(Calendar.getInstance());
+        formulaDto.setHandleDate(handleDate);
         formulaDto.setSettlementDate(settlementDate);
         formulaDto.setOperatorId(operatorId);
         formulaDto.setOperatorName(operatorName);

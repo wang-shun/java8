@@ -51,6 +51,28 @@ public class WarehouseFormulaStockService extends AbstractWarehouseStockService<
     @Override
     protected DoctorWarehouseStockHandle create(WarehouseFormulaDto stockDto, DoctorWareHouse wareHouse) {
 
+        // 配方是否有物料已盘点 （陈娟 2018-09-27）
+        DoctorWarehouseMaterialHandle material;
+        String str = new String();
+        // 入库单据是否盘点
+        material = doctorWarehouseMaterialHandleDao.getMaxInventoryDate(stockDto.getWarehouseId(), stockDto.getFeedMaterialId(), stockDto.getHandleDate().getTime());
+        if(material!=null){
+            str = str + material.getMaterialName() + ",";
+        }
+        // 出库单据是否盘点
+        List<WarehouseFormulaDto.WarehouseFormulaDetail> details = stockDto.getDetails();
+        for (WarehouseFormulaDto.WarehouseFormulaDetail dd: details) {
+            material = doctorWarehouseMaterialHandleDao.getMaxInventoryDate(dd.getWarehouseId(), dd.getMaterialId(), stockDto.getHandleDate().getTime());
+            if(material!=null){
+                str = str + material.getMaterialName() + ",";
+            }
+        }
+
+        if(!str.equals("")){
+            str = str+ "【已盘点,不可新增配方】";
+            throw new ServiceException(str);
+        }
+
         DoctorWarehouseStockHandle inStockHandle = doctorWarehouseStockHandleManager.create(stockDto, wareHouse, WarehouseMaterialHandleType.FORMULA_IN, null);
 
         WarehouseFormulaDto.WarehouseFormulaDetail inDetail = new WarehouseFormulaDto.WarehouseFormulaDetail();
