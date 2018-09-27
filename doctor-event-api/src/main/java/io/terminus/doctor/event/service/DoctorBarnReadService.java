@@ -93,6 +93,19 @@ public interface DoctorBarnReadService {
      */
     Response<List<DoctorBarn>> findAvailableBarns(@NotNull(message = "farmId.can.not.be.null") Long farmId,
                                                   @NotNull(message = "groupId.can.not.be.null") Long groupId);
+
+
+
+
+    /**
+     * 根据当前猪舍查询可以转种猪的猪舍
+     * @param farmId  转入的猪场id
+     * @param groupId  当前猪群id
+     * @return  可以转入的猪舍
+     */
+    Response<List<DoctorBarn>> findAvailablePigBarns(@NotNull(message = "farmId.can.not.be.null") Long farmId,
+                                                  @NotNull(message = "groupId.can.not.be.null") Long groupId);
+
     /**
      * 统计每种猪舍类型猪舍数量
      * @param criteria 查询条件

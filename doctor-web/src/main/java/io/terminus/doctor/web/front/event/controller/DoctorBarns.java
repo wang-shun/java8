@@ -551,6 +551,23 @@ public class DoctorBarns {
         return RespHelper.orServEx(doctorBarnReadService.findAvailableBarns(farmId, groupId));
     }
 
+
+    /**
+     * 查询可以转种猪猪舍
+     *
+     * @param farmId  转入的猪场
+     * @param groupId 当前猪群id
+     * @return 可以转入的猪舍
+     */
+    @RequestMapping(value = "/findAvailablePigBarns", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<DoctorBarn> findAvailablePigBarns(@RequestParam("farmId") Long farmId,
+                                               @RequestParam("groupId") Long groupId) {
+        return RespHelper.orServEx(doctorBarnReadService.findAvailablePigBarns(farmId, groupId));
+    }
+
+
+
     @RequestMapping(value = "/updateBarnName", method = RequestMethod.POST)
     public Boolean updateBarnName(@RequestParam Long barnId, @RequestParam String barnName) {
         Long groupEvent = RespHelper.or500(doctorGroupReadService.countByBarnId(barnId));

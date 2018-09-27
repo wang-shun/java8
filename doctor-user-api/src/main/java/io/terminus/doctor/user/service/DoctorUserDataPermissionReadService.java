@@ -21,6 +21,7 @@ public interface DoctorUserDataPermissionReadService {
      */
     Response<DoctorUserDataPermission> findDataPermissionByUserId(Long userId);
 
+
     /**
      * 根据用户id 批量查询所属数据权限
      * @param userIds  用户id

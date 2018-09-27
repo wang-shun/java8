@@ -202,6 +202,34 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
 
     @Override
     public Response<List<DoctorBarn>> findAvailableBarns(Long farmId, Long groupId) {
+        try {
+            DoctorGroup existed = doctorGroupDao.findById(groupId);
+            if (existed == null) {
+                return Response.fail("doctor.group.not.exist");
+            }
+            //获取当前猪舍id
+            Long currentBarnId = existed.getCurrentBarnId();
+            /**
+             * 当前所属猪舍
+             */
+            Integer barnType = doctorBarnDao.findById(currentBarnId).getPigType();
+            /**
+             * 要转入猪场的猪舍
+             */
+            List<DoctorBarn> doctorBarns = doctorBarnDao.findByFarmId(farmId);
+            return Response.ok(doctorBarns.stream().filter(doctorBarn -> doctorBarn != null
+                    && checkCanTransBarn(barnType, doctorBarn.getPigType())
+                    && Objects.equal(doctorBarn.getStatus(), DoctorBarn.Status.USING.getValue())).collect(Collectors.toList()));
+        } catch (Exception e) {
+            log.error("fail to find available barns,current group id:{},farm id:{},cause:{}",
+                    groupId, farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.available.barns.failed");
+        }
+    }
+
+
+    @Override
+    public Response<List<DoctorBarn>> findAvailablePigBarns(Long farmId, Long groupId) {
 
         try {
             DoctorGroup existed = doctorGroupDao.findById(groupId);
