@@ -380,7 +380,9 @@ public class StockController {
         formulaDto.setOrgId(orgId);
 //        formulaDto.setFarmName(farm.getName());
         formulaDto.setWarehouseId(warehouseId);
-        formulaDto.setHandleDate(handleDate);
+        Calendar handleDateWithTime = Calendar.getInstance();
+        handleDateWithTime.set(handleDate.get(Calendar.YEAR), handleDate.get(Calendar.MONTH), handleDate.get(Calendar.DAY_OF_MONTH));
+        formulaDto.setHandleDate(handleDateWithTime);
         formulaDto.setSettlementDate(settlementDate);
         formulaDto.setOperatorId(operatorId);
         formulaDto.setOperatorName(operatorName);
