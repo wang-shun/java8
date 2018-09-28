@@ -331,7 +331,7 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
                 DoctorDimensionReport report = doctorReportBiManager.dimensionReport(dimensionCriteria);
                 return DoctorFarmLiveStockDto.builder()
                         .farmId(farmId)
-                        .boar(notNull(report.getReportBoar()) ? report.getReportBoar().getEnd(): 0)
+                        .boar(notNull(report.getReportBoar()) ? report.getReportBoar().getEnd() : 0)
                         .farrow(notNull(report.getReportDeliver()) ? report.getReportDeliver().getPigletEnd() : 0)
                         .deliverSow(notNull(report.getReportDeliver()) ? report.getReportDeliver().getEnd() : 0)
                         .sow(notNull(report.getReportSow()) ? report.getReportSow().getEnd() : 0)
@@ -404,7 +404,7 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
                 DoctorDimensionReport report = doctorReportBiManager.dimensionReport(dimensionCriteria);
                 return DoctorFarmLiveStockDto.builder()
                         .farmId(farmId)
-                        .boar(notNull(report.getReportBoar()) ? report.getReportBoar().getEnd(): 0)
+                        .boar(notNull(report.getReportBoar()) ? report.getReportBoar().getEnd() : 0)
                         .farrow(notNull(report.getReportDeliver()) ? report.getReportDeliver().getPigletEnd() : 0)
                         .deliverSow(notNull(report.getReportDeliver()) ? report.getReportDeliver().getEnd() : 0)
                         .sow(notNull(report.getReportSow()) ? report.getReportSow().getEnd() : 0)
@@ -420,6 +420,7 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
             log.error("find farms live stock failed, farmIdList:{}, cause:{}", farmIdList, Throwables.getStackTraceAsString(e));
             return Response.fail("find.farms.live.stock.failed");
         }
+    }
 }
 
 
