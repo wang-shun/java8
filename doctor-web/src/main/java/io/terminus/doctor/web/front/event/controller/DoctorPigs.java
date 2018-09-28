@@ -166,6 +166,9 @@ public class DoctorPigs {
         return pigDetail;
     }
 
+    /*
+    * 查看母猪历史事件
+    * */
     @RequestMapping(value = "/getSowPigDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public DoctorSowDetailDto querySowPigDetailInfoDto(@RequestParam("farmId") Long farmId,

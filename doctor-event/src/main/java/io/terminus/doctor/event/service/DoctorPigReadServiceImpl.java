@@ -128,6 +128,11 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
         return Response.ok(maps);
     }
 
+    /**
+     * 通过pigId 获取对应的详细信息
+     * @param pigId
+     * @return
+     */
     @Override
     public RespWithEx<DoctorPigInfoDetailDto> queryPigDetailInfoByPigId(Long farmId, Long pigId, Integer eventSize) {
         try {

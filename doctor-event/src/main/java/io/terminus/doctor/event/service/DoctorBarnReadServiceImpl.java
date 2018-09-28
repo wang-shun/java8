@@ -171,9 +171,9 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
         *
         * */
     @Override
-    public Response<List<Map>> findBarnsByEnumss(Long farmId, List<Integer> pigTypes, List<Long> barnIds) {
+    public Response<List<Map>> findBarnsByEnumss(Long farmId, List<Integer> pigTypes,Integer status, List<Long> barnIds) {
 
-        List<Map> maps = doctorBarnDao.findByEnumss(farmId,pigTypes,barnIds);
+        List<Map> maps = doctorBarnDao.findByEnumss(farmId,pigTypes,status,barnIds);
 
         return Response.ok(maps);
     }
@@ -226,6 +226,7 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             return Response.fail("find.available.barns.failed");
         }
     }
+
 
 
     @Override
@@ -482,7 +483,7 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
                 || (Objects.equal(pigType, PigType.NURSERY_PIGLET.getValue()) && NURSERY_ALLOW_TRANS.contains(barnType))
                 //育肥舍 => 育肥舍/后备舍(公母)
                 || (Objects.equal(pigType, PigType.FATTEN_PIG.getValue()) && FATTEN_ALLOW_TRANS.contains(barnType))
-                // 后备群 => 育肥舍/后备舍(公母)
+                // 后备群 => 育肥舍/后备舍
                 || (Objects.equal(pigType, PigType.RESERVE.getValue()) && (Objects.equal(barnType, PigType.RESERVE.getValue()) || Objects.equal(barnType, PigType.FATTEN_PIG.getValue())))
                 //其他 => 同类型
                 || (Objects.equal(pigType, barnType));

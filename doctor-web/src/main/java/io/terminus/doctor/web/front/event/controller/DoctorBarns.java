@@ -280,6 +280,7 @@ public class DoctorBarns {
      */
     @RequestMapping(value = "/pigTypess", method = RequestMethod.GET)
     public List<Map> findBarnsByfarmIdAndTypes(@RequestParam("farmId") Long farmId,
+                                               @RequestParam(value = "status", required = false) Integer status,
                                                @RequestParam(value = "pigTypes", required = false) String pigTypes
                                                     ) {
         BaseUser baseUser = UserUtil.getCurrentUser();
@@ -296,7 +297,7 @@ public class DoctorBarns {
         if (notEmpty(pigTypes)) {
             types = Splitters.splitToInteger(pigTypes, Splitters.COMMA);
         }
-        return RespHelper.or500(doctorBarnReadService.findBarnsByEnumss(farmId,types,barnIds));
+        return RespHelper.or500(doctorBarnReadService.findBarnsByEnumss(farmId,types,status,barnIds));
 
     }
 

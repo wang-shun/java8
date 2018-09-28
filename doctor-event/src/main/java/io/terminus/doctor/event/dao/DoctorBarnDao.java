@@ -70,13 +70,24 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
        * 冯雨晴 2019.9.18
        *
        * */
-    public List<Map> findByEnumss(@NotNull Long farmId,List<Integer> pigTypes,List<Long> barnIds) {
+    public List<Map> findByEnumss(@NotNull Long farmId,List<Integer> pigTypes, Integer status,List<Long> barnIds) {
 
-        return getSqlSession().selectList(sqlId("findByEnumss"), MapBuilder.<String, Object>newHashMap()
+        if(status != null && status == 5){
+            return getSqlSession().selectList(sqlId("findByEnums2"), MapBuilder.<String, Object>newHashMap()
                     .put("farmId", farmId)
                     .put("pigTypes", Iters.emptyToNull(pigTypes))
+                    .put("status", status)
+                    .put("barnIds", Iters.emptyToNull(barnIds))
+                    .map());
+        }else {
+            return getSqlSession().selectList(sqlId("findByEnumss"), MapBuilder.<String, Object>newHashMap()
+                    .put("farmId", farmId)
+                    .put("pigTypes", Iters.emptyToNull(pigTypes))
+                    .put("status", status)
                     .put("barnIds", barnIds)
                     .map());
+        }
+
     }
 
 
