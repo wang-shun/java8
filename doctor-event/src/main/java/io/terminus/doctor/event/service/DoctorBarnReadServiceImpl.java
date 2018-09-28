@@ -171,9 +171,9 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
         *
         * */
     @Override
-    public Response<List<Map>> findBarnsByEnumss(Long farmId, List<Integer> pigTypes, List<Long> barnIds) {
+    public Response<List<Map>> findBarnsByEnumss(Long farmId, List<Integer> pigTypes,Integer status, List<Long> barnIds) {
 
-        List<Map> maps = doctorBarnDao.findByEnumss(farmId,pigTypes,barnIds);
+        List<Map> maps = doctorBarnDao.findByEnumss(farmId,pigTypes,status,barnIds);
 
         return Response.ok(maps);
     }
@@ -226,6 +226,7 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             return Response.fail("find.available.barns.failed");
         }
     }
+
 
 
     @Override
