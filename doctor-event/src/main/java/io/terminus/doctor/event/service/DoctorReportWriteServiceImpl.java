@@ -110,13 +110,13 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
         for (int i = 0; i < listPIG.size(); i++) {
             // 加载猪id
             String pigId = String.valueOf(listPIG.get(i).get("id"));
-//            if(pigId.equals("997036") || pigId.equals("1004428") || pigId.equals("1004429")){
-//                params.put("pigId",pigId);
-//                flushSowNPD(params);
-//             }
-            params.put("pigId", listPIG == null ? "0" : String.valueOf(listPIG.get(i).get("id")));
-            flushSowNPD(params);
-            flushReportNpd(params, startDate, endDate);
+            if(pigId.equals("997036") || pigId.equals("1004428") || pigId.equals("1004429")){
+                params.put("pigId",pigId);
+                flushSowNPD(params);
+             }
+//            params.put("pigId", listPIG == null ? "0" : String.valueOf(listPIG.get(i).get("id")));
+//            flushSowNPD(params);
+//            flushReportNpd(params, startDate, endDate);
         }
     }
 
@@ -325,17 +325,17 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                             if (existsAryValue(fm, thenEventType)) // 匹配上了
                             {
                                 // 查询最后一次配种事件
-//                                params.put("inderDate", eventTime);
-//                                List<Map<String, Object>> sel = doctorPigEventDao.selectStartNPD(params);
-//                                if (sel.size() > 0) {
-//                                    prevObj = new LinkedHashMap<String, Object>();
-//                                    // 真正比较的时间
-//                                    prevObj.put("compareEventAt", sel.get(0).get("currentEventDate"));
-//                                    prevObj.put("eventType", thenEventType);
-//                                    prevObj.put("name", thenObj.get("name"));
-//                                    prevObj.put("eventAt", thenObj.get("eventAt"));
-//                                }
-                                prevObj = thenObj;
+                                params.put("inderDate", eventTime);
+                                List<Map<String, Object>> sel = doctorPigEventDao.selectStartNPD(params);
+                                if (sel.size() > 0) {
+                                    prevObj = new LinkedHashMap<String, Object>();
+                                    // 真正比较的时间
+                                    prevObj.put("compareEventAt", sel.get(0).get("currentEventDate"));
+                                    prevObj.put("eventType", thenEventType);
+                                    prevObj.put("name", thenObj.get("name"));
+                                    prevObj.put("eventAt", thenObj.get("eventAt"));
+                                }
+                              //  prevObj = thenObj;
                             }
                         } else if (eventType.equals("9")) { // 断奶
                             if (existsAryValue(dn, thenEventType)) // 匹配上了

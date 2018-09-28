@@ -2487,7 +2487,7 @@
 			AND farm_id=#{farmId}
 			AND pig_id=#{pigId}
 			AND current_event_type=2
-			AND current_event_date < #{startDate}
+			AND current_event_date < #{inderDate}
 			order by current_event_date desc limit 0,1
 		]]>
     </select>
