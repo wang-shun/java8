@@ -169,6 +169,21 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 
             log.info("update material handle unit price and amount under org {} use :{}ms", orgId, stopwatch.elapsed(TimeUnit.MILLISECONDS));
 
+            // 配方入库金额，单价的结算（陈娟 2018-09-28）
+            // 得到配方入库单据
+            List<DoctorWarehouseMaterialHandle> materialHandleIns = doctorWarehouseMaterialHandleDao.findFormulaStorage(orgId, settlementDate);
+            for (DoctorWarehouseMaterialHandle materialHandleIn : materialHandleIns) {
+                List<DoctorWarehouseMaterialHandle> materialHandleOuts = doctorWarehouseMaterialHandleDao.findFormulaByRelMaterialHandleId(materialHandleIn.getId(), 12);
+                // 得到配方出库单据
+                BigDecimal amout = new BigDecimal(0);
+                for (DoctorWarehouseMaterialHandle materialHandleOut : materialHandleOuts) {
+                    amout = amout.add(materialHandleOut.getAmount());
+                }
+                Boolean flag = doctorWarehouseMaterialHandleDao.updateUnitPriceAndAmountById(materialHandleIn.getId(), amout.divide(materialHandleIn.getQuantity()), amout);
+            }
+
+            log.info("update formula storage unit price and amount under org {} use :{}ms", orgId, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+
 //            //处理结算金额的误差（陈娟 2018-8-21）
 //            for (DoctorWarehouseMaterialHandle materialHandle : materialHandles) {
 //
@@ -370,11 +385,13 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             historyStockQuantity = historyStockQuantity.add(materialHandle.getQuantity());
             historyStockAmount = historyStockAmount.add(new BigDecimal(materialHandle.getUnitPrice().toString()).multiply(materialHandle.getQuantity()));
         } else {
-            //出库类型：领料出库，盘亏出库，调拨出库，配方生产出库
-            log.debug("material handle:{},history amount:{},history quantity:{}", materialHandle.getId(), historyStockAmount, historyStockQuantity);
-            if (historyStockAmount.compareTo(new BigDecimal("0")) <= 0 || historyStockQuantity.compareTo(new BigDecimal("0")) <= 0) {
-                log.error("history amount or quantity is small then zero,can not settlement for material handle:{}", materialHandle.getId());
-                throw new InvalidException("settlement.history.quantity.amount.zero");
+            if (!materialHandle.getType().equals(WarehouseMaterialHandleType.RETURN.getValue())) {
+                //出库类型：领料出库，盘亏出库，调拨出库，配方生产出库
+                log.debug("material handle:{},history amount:{},history quantity:{}", materialHandle.getId(), historyStockAmount, historyStockQuantity);
+                if (historyStockAmount.compareTo(new BigDecimal("0")) <= 0 || historyStockQuantity.compareTo(new BigDecimal("0")) <= 0) {
+                    log.error("history amount or quantity is small then zero,can not settlement for material handle:{}", materialHandle.getId());
+                    throw new InvalidException("settlement.history.quantity.amount.zero");
+                }
             }
             if (materialHandle.getType().equals(WarehouseMaterialHandleType.RETURN.getValue())) {
 
