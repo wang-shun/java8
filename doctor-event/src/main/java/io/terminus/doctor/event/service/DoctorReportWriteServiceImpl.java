@@ -117,7 +117,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
 //            params.put("pigId", listPIG == null ? "0" : String.valueOf(listPIG.get(i).get("id")));
 //            flushSowNPD(params);
 //            flushReportNpd(params, startDate, endDate);
-//        }
+        }
     }
 
     private boolean existsAryValue(String[] arys, String exy) {
