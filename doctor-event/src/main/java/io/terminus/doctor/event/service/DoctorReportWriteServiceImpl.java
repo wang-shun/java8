@@ -116,6 +116,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
 //            }
             params.put("pigId", listPIG == null ? "0" : String.valueOf(listPIG.get(i).get("id")));
             flushSowNPD(params);
+            flushReportNpd(params, startDate, endDate);
         }
     }
 
@@ -657,6 +658,48 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
         } catch (Exception e) {
             System.out.println("NpdJournelError===>   " + e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    public void flushReportNpd(Map<String, Object> params, Date startDate, Date endDate){
+        Map<Long/*farmID*/, Map<String/*year-month*/, Integer/*怀孕天数*/>> farmPregnancy = new HashMap<>();
+        Map<Long/*farmID*/, Map<String/*year-month*/, Integer/*哺乳天数*/>> farmLactation = new HashMap<>();
+        Map<Long/*farmID*/, Map<String/*year-month*/, Integer/*非生产天数*/>> farmNPD = new HashMap<>();
+        Long farmId = Long.parseLong(params.get("farmId").toString());
+        DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(farmId));
+
+        for (Date i = startDate; i.before(endDate); i = DateUtils.addMonths(i, 1)) {
+
+            Date monthEndDate = DateUtil.monthEnd(i);
+
+            int dayCount = DateUtil.getDeltaDays(i, monthEndDate) + 1;
+
+            DoctorReportNpd npd = doctorReportNpdDao.findByFarmAndSumAt(farmId, i).orElseGet(() -> new DoctorReportNpd());
+            npd.setFarmId(farmId);
+            npd.setDays(dayCount);
+
+            if (log.isDebugEnabled())
+                log.debug("刷新猪场{},从{}到{}", farm.getId(), DateUtil.toDateString(i), DateUtil.toDateString(monthEndDate));
+            Integer sowCount = doctorPigDailyDao.countSow(farmId, i, monthEndDate);
+            npd.setSowCount(sowCount);
+
+            npd.setSumAt(i);
+
+            int year = new DateTime(i).getYear();
+            int month = new DateTime(i).getMonthOfYear();
+            String monthAndYearKey = year + "-" + month;
+            npd.setNpd(doctorPigEventDao.getNpds(year, month, farmId));
+            npd.setPregnancy(doctorPigEventDao.getPregnancys(year, month, farmId));
+            npd.setLactation(doctorPigEventDao.getLactations(year, month, farmId));
+//            npd.setNpd(getCount(farmId, monthAndYearKey, farmNPD));
+//            npd.setPregnancy(getCount(farmId, monthAndYearKey, farmPregnancy));
+//            npd.setLactation(getCount(farmId, monthAndYearKey, farmLactation));
+
+            npd.setOrgId(null == farm ? null : farm.getOrgId());
+            if (null == npd.getId())
+                doctorReportNpdDao.create(npd);
+            else
+                doctorReportNpdDao.update(npd);
         }
     }
 
