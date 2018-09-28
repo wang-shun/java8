@@ -110,13 +110,14 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
         for (int i = 0; i < listPIG.size(); i++) {
             // 加载猪id
             String pigId = String.valueOf(listPIG.get(i).get("id"));
-            if(pigId.equals("997036") || pigId.equals("364859") || pigId.equals("1004429")){
-                params.put("pigId",pigId);
-                flushSowNPD(params);
-             }
-//            params.put("pigId", listPIG == null ? "0" : String.valueOf(listPIG.get(i).get("id")));
-//            flushSowNPD(params);
-//            flushReportNpd(params, startDate, endDate);
+//            if(pigId.equals("997036") || pigId.equals("364859") || pigId.equals("1004429")){
+//                params.put("pigId",pigId);
+//                flushSowNPD(params);
+//                flushReportNpd(params, startDate, endDate);
+//             }
+            params.put("pigId", listPIG == null ? "0" : String.valueOf(listPIG.get(i).get("id")));
+            flushSowNPD(params);
+            flushReportNpd(params, startDate, endDate);
         }
     }
 
@@ -688,10 +689,12 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
             int year = new DateTime(i).getYear();
             int month = new DateTime(i).getMonthOfYear();
             String monthAndYearKey = year + "-" + month;
-
-            npd.setNpd(getCount(farmId, monthAndYearKey, farmNPD));
-            npd.setPregnancy(getCount(farmId, monthAndYearKey, farmPregnancy));
-            npd.setLactation(getCount(farmId, monthAndYearKey, farmLactation));
+            npd.setNpd(doctorPigEventDao.getNpds(year, month, farmId));
+            npd.setPregnancy(doctorPigEventDao.getNpds(year, month, farmId));
+            npd.setLactation(doctorPigEventDao.getNpds(year, month, farmId));
+//            npd.setNpd(getCount(farmId, monthAndYearKey, farmNPD));
+//            npd.setPregnancy(getCount(farmId, monthAndYearKey, farmPregnancy));
+//            npd.setLactation(getCount(farmId, monthAndYearKey, farmLactation));
 
             npd.setOrgId(null == farm ? null : farm.getOrgId());
             if (null == npd.getId())

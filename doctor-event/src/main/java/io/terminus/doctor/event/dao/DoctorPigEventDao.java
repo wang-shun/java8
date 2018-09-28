@@ -1277,4 +1277,26 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         return getSqlSession().selectOne(sqlId("getKongHuaiStatus"), pigId);
     }
 
+    public Integer getNpds(int year, int month, long farmId){
+        Map<String, Object> map = new HashMap<>();
+        map.put("year",year);
+        map.put("month",month);
+        map.put("farmId",farmId);
+        return getSqlSession().selectOne(sqlId("getNpds"), map);
+    }
+
+    public Integer getPregnancys(int year, int month, long farmId){
+        Map<String, Object> map = new HashMap<>();
+        map.put("year",year);
+        map.put("month",month);
+        map.put("farmId",farmId);
+        return getSqlSession().selectOne(sqlId("getPregnancys"), map);
+    }
+    public Integer getLactations(int year, int month, long farmId){
+        Map<String, Object> map = new HashMap<>();
+        map.put("year",year);
+        map.put("month",month);
+        map.put("farmId",farmId);
+        return getSqlSession().selectOne(sqlId("getLactations"), map);
+    }
 }
