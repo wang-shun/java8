@@ -102,6 +102,6 @@ public class ReportBoardController {
 
     @RequestMapping(value = "/live/stock")
     public DoctorFarmLiveStockDto realTimeLiveStock(@PathVariable Long farmId,Integer type){
-        return RespHelper.or500(doctorDailyReportV2Service.findFarmsLiveStock(Lists.newArrayList(farmId)),type).get(0);
+        return RespHelper.or500(doctorDailyReportV2Service.findFarmsLiveStock(Lists.newArrayList(farmId),type)).get(0);
     }
 }
