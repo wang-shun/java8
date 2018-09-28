@@ -102,7 +102,7 @@ public interface DoctorDailyReportV2Service {
      * @param farmIdList 猪场id列表
      * @return
      */
-    Response<List<DoctorFarmLiveStockDto>> findFarmsLiveStock(List<Long> farmIdList,Integer type);
+    Response<List<DoctorFarmLiveStockDto>> findFarmsLiveStock(List<Long> farmIdList);
 
     Response<Boolean> syncWarehouse(Date date);
 
@@ -140,4 +140,6 @@ public interface DoctorDailyReportV2Service {
      * @return
      */
     Response<Boolean> flushDeliverRate(Long orzId, Integer orzType, Date start);
+
+    Response<List<DoctorFarmLiveStockDto>> findFarmsLiveStock1(List<Long> farmIdList,Integer type);
 }

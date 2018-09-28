@@ -322,12 +322,12 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
     }
 
     @Override
-    public Response<List<DoctorFarmLiveStockDto>> findFarmsLiveStock(List<Long> farmIdList,Integer Type) {
+    public Response<List<DoctorFarmLiveStockDto>> findFarmsLiveStock(List<Long> farmIdList) {
         try {
             Date now = new Date();
             List<DoctorFarmLiveStockDto> dtos = farmIdList.parallelStream().map(farmId -> {
                 DoctorDimensionCriteria dimensionCriteria =
-                        new DoctorDimensionCriteria(farmId, Type, now, DateDimension.DAY.getValue());
+                        new DoctorDimensionCriteria(farmId, OrzDimension.FARM.getValue(), now, DateDimension.DAY.getValue());
                 DoctorDimensionReport report = doctorReportBiManager.dimensionReport(dimensionCriteria);
                 return DoctorFarmLiveStockDto.builder()
                         .farmId(farmId)
@@ -392,6 +392,34 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
             return Response.fail("flush.deliver.rate.failed");
         }
     }
+
+    //孔景军
+    @Override
+    public Response<List<DoctorFarmLiveStockDto>> findFarmsLiveStock1(List<Long> farmIdList, Integer Type) {
+        try {
+            Date now = new Date();
+            List<DoctorFarmLiveStockDto> dtos = farmIdList.parallelStream().map(farmId -> {
+                DoctorDimensionCriteria dimensionCriteria =
+                        new DoctorDimensionCriteria(farmId, Type, now, DateDimension.DAY.getValue());
+                DoctorDimensionReport report = doctorReportBiManager.dimensionReport(dimensionCriteria);
+                return DoctorFarmLiveStockDto.builder()
+                        .farmId(farmId)
+                        .boar(notNull(report.getReportBoar()) ? report.getReportBoar().getEnd(): 0)
+                        .farrow(notNull(report.getReportDeliver()) ? report.getReportDeliver().getPigletEnd() : 0)
+                        .deliverSow(notNull(report.getReportDeliver()) ? report.getReportDeliver().getEnd() : 0)
+                        .sow(notNull(report.getReportSow()) ? report.getReportSow().getEnd() : 0)
+                        .houbei(notNull(report.getReportReserve()) ? report.getReportReserve().getEnd() : 0)
+                        .peihuai(notNull(report.getReportMating()) ? report.getReportMating().getEnd() : 0)
+                        .nursery(notNull(report.getReportNursery()) ? report.getReportNursery().getEnd() : 0)
+                        .fatten(notNull(report.getReportFatten()) ? report.getReportFatten().getEnd() : 0)
+                        .build();
+
+            }).collect(Collectors.toList());
+            return Response.ok(dtos);
+        } catch (Exception e) {
+            log.error("find farms live stock failed, farmIdList:{}, cause:{}", farmIdList, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.farms.live.stock.failed");
+        }
 }
 
 
