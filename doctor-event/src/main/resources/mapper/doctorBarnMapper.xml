@@ -248,7 +248,25 @@
         <foreach collection="pigTypes" item="type" open="(" separator="," close=")">
             #{type}
         </foreach>
+        <if test="status != null">AND status = #{status}</if>
+        <if test="status == null">AND status = 1</if>
     </select>
+
+    <select id="findByEnums2" parameterType="map" resultMap="DoctorBarnMap">
+        SELECT id, name
+        from doctor_barns
+        where farm_id = #{farmId}
+        and id in
+        <foreach collection="barnIds" item="barnId" open="(" separator="," close=")">
+            #{barnId}
+        </foreach>
+        and pig_type in
+        <foreach collection="pigTypes" item="type" open="(" separator="," close=")">
+            #{type}
+        </foreach>
+        <if test="status != null and status == 5">AND status in (0,1,-1) </if>
+    </select>
+
 
     <select id="findNameByBarnIds" parameterType="map" resultType="map">
         SELECT id, name

@@ -770,6 +770,20 @@
         ) as t
     </select>
 
+    <select id="countSow1" parameterType="map" resultType="int">
+        <![CDATA[
+        select count(1) as quantity from doctor_pigs a
+        where a.pig_type = 1 and a.org_id = #{orgId} and a.farm_id = #{farmId}
+        and (a.in_farm_date <= #{sumAt}
+        and (a.is_removal = 0 or (a.is_removal = 1
+        and (exists(select 1 from doctor_pig_events c
+        where c.pig_id = a.id
+        and (c.type = 2 or c.type = 6) and c.event_at > #{sumAt})))))
+        and (not exists(select 1 from doctor_pig_events d
+        where d.pig_id = a.id and d.type = 9 and d.event_at <= #{sumAt}))
+        ]]>
+    </select>
+
     <select id="mateLeadToFarrow" parameterType="map" resultType="int">
         select count(*)
         from doctor_pig_events a left join doctor_pig_events b on a.pig_id = b.pig_id
