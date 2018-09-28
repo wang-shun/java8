@@ -44,8 +44,10 @@ public class ReportBoardController {
     public List<DoctorReportFieldTypeDto> dailyBoard(@ApiParam("猪场名称")
                                                      @PathVariable Long farmId,
                                                      @ApiParam("查询日期")
-                                                     @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
-        DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, OrzDimension.FARM.getValue(),
+                                                     @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
+                                                     Integer type) {
+        log.error("=============type"+type);
+        DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, type,
                 date, DateDimension.DAY.getValue());
         return helper.fieldWithHidden(dimensionCriteria);
     }
