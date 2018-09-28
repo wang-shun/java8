@@ -47,7 +47,7 @@ public class ReportBoardController {
                                                      @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
                                                      Integer type) {
         log.error("=============type"+type);
-        DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, OrzDimension.FARM.getValue(),
+        DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, type,
                 date, DateDimension.DAY.getValue());
         return helper.fieldWithHidden(dimensionCriteria);
     }
