@@ -335,7 +335,6 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                                     prevObj.put("name", thenObj.get("name"));
                                     prevObj.put("eventAt", thenObj.get("eventAt"));
                                 }
-                              //  prevObj = thenObj;
                             }
                         } else if (eventType.equals("9")) { // 断奶
                             if (existsAryValue(dn, thenEventType)) // 匹配上了
@@ -370,7 +369,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                                     simpleDateFormat.parse(prevDate));
                         } else if (eventType.equals("7") && prevObj != null) // 分娩
                         {
-                            String prevDate = prevObj.get("eventAt").toString();
+                            String prevDate = prevObj.get("compareEventAt").toString();
                             diffDay = differentDaysByMillisecond(simpleDateFormat.parse(eventTime),
                                     simpleDateFormat.parse(prevDate));
                         } else if (eventType.equals("9") && prevObj != null) // 断奶
