@@ -102,7 +102,7 @@ public interface DoctorDailyReportV2Service {
      * @param farmIdList 猪场id列表
      * @return
      */
-    Response<List<DoctorFarmLiveStockDto>> findFarmsLiveStock(List<Long> farmIdList);
+    Response<List<DoctorFarmLiveStockDto>> findFarmsLiveStock(List<Long> farmIdList,Integer type);
 
     Response<Boolean> syncWarehouse(Date date);
 

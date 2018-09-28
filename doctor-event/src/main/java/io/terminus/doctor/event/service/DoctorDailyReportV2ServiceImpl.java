@@ -322,12 +322,12 @@ public class DoctorDailyReportV2ServiceImpl implements DoctorDailyReportV2Servic
     }
 
     @Override
-    public Response<List<DoctorFarmLiveStockDto>> findFarmsLiveStock(List<Long> farmIdList) {
+    public Response<List<DoctorFarmLiveStockDto>> findFarmsLiveStock(List<Long> farmIdList,Integer Type) {
         try {
             Date now = new Date();
             List<DoctorFarmLiveStockDto> dtos = farmIdList.parallelStream().map(farmId -> {
                 DoctorDimensionCriteria dimensionCriteria =
-                        new DoctorDimensionCriteria(farmId, OrzDimension.CLIQUE.getValue(), now, DateDimension.DAY.getValue());
+                        new DoctorDimensionCriteria(farmId, Type, now, DateDimension.DAY.getValue());
                 DoctorDimensionReport report = doctorReportBiManager.dimensionReport(dimensionCriteria);
                 return DoctorFarmLiveStockDto.builder()
                         .farmId(farmId)
