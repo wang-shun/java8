@@ -110,7 +110,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
         for (int i = 0; i < listPIG.size(); i++) {
             // 加载猪id
             String pigId = String.valueOf(listPIG.get(i).get("id"));
-//            if(pigId.equals("997036") || pigId.equals("1004428") || pigId.equals("1004429")){
+//            if(pigId.equals("997036") || pigId.equals("364859") || pigId.equals("1004429")){
 //                params.put("pigId",pigId);
 //                flushSowNPD(params);
 //             }
@@ -192,7 +192,7 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                         quat = 4;
                     }
                     entity.setFiscalQuarter(quat);
-                    //查找转场猪的前一个事件
+                    //查找转场猪的,前一个事件
                     params.put("eTime", eventTime);
                     List<Map<String, Object>> listEvent = doctorPigEventDao.selectEvent(params);
                     String eventAt = null;
@@ -220,24 +220,95 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
                             if (listDate != null){
                                 eventAt = listDate;
                             }
+                            // 非生产天数
                             if(type == 2){
                                 diffDay1 = differentDaysByMillisecond(simpleDateFormat.parse(eventDate),
                                         simpleDateFormat.parse(eventAt));
                                 entity.setLastEventName("转场");
+                                entity.setLastEventType(10);
                             } else {
                                 diffDay1 = differentDaysByMillisecond(simpleDateFormat.parse(eventTime),
                                         simpleDateFormat.parse(eventAt));
                                 entity.setLastEventName("转场转入");
+                                entity.setLastEventType(11);
                             }
+                            if(eventType.equals("1")){
+                                entity.setLactationDate(0);
+                                entity.setGestationDate(0);
+                                entity.setJcNpd(diffDay1);
+                                entity.setNpdDate(diffDay1);
+                                entity.setCurrentEventType(Integer.parseInt(eventType.toString()));
+                                entity.setCurrentEventName(thisObj.get("name").toString());
+                            } else if(eventType.equals("2")){
+                                entity.setLactationDate(0);
+                                entity.setGestationDate(0);
+                                entity.setJcNpd(diffDay1);
+                                entity.setNpdDate(diffDay1);
+                                entity.setCurrentEventType(Integer.parseInt(eventType.toString()));
+                                entity.setCurrentEventName(thisObj.get("name").toString());
+                                entity.setCurrentEventDate(simpleDateFormat.parse(eventTime));
+                            } else if(eventType.equals("3")){
+                                entity.setLactationDate(0);
+                                entity.setGestationDate(0);
+                                entity.setJcNpd(diffDay1);
+                                entity.setNpdDate(diffDay1);
+                                entity.setCurrentEventType(Integer.parseInt(eventType.toString()));
+                                entity.setCurrentEventName(thisObj.get("name").toString());
+                                entity.setCurrentEventDate(simpleDateFormat.parse(eventTime));
+                            }else if(eventType.equals("4")){
+                                entity.setLactationDate(0);
+                                entity.setGestationDate(0);
+                                entity.setJcNpd(diffDay1);
+                                entity.setNpdDate(diffDay1);
+                                entity.setCurrentEventType(Integer.parseInt(eventType.toString()));
+                                entity.setCurrentEventName(thisObj.get("name").toString());
+                                entity.setCurrentEventDate(simpleDateFormat.parse(eventTime));
+                            }else if(eventType.equals("5")){
+                                entity.setLactationDate(0);
+                                entity.setGestationDate(0);
+                                entity.setJcNpd(diffDay1);
+                                entity.setNpdDate(diffDay1);
+                                entity.setCurrentEventType(Integer.parseInt(eventType.toString()));
+                                entity.setCurrentEventName(thisObj.get("name").toString());
+                                entity.setCurrentEventDate(simpleDateFormat.parse(eventTime));
+                            }else if(eventType.equals("6")){
+                                entity.setLactationDate(0);
+                                entity.setGestationDate(0);
+                                entity.setJcNpd(diffDay1);
+                                entity.setNpdDate(diffDay1);
+                                entity.setCurrentEventType(Integer.parseInt(eventType.toString()));
+                                entity.setCurrentEventName(thisObj.get("name").toString());
+                                entity.setCurrentEventDate(simpleDateFormat.parse(eventTime));
+                            }else if(eventType.equals("7")){
+                                entity.setLactationDate(0);
+                                entity.setGestationDate(diffDay1);
+                                entity.setJcNpd(0);
+                                entity.setNpdDate(0);
+                                entity.setCurrentEventType(Integer.parseInt(eventType.toString()));
+                                entity.setCurrentEventName(thisObj.get("name").toString());
+                                entity.setCurrentEventDate(simpleDateFormat.parse(eventTime));
+                            }else if(eventType.equals("8")){
+                                entity.setLactationDate(0);
+                                entity.setGestationDate(0);
+                                entity.setJcNpd(diffDay1);
+                                entity.setNpdDate(diffDay1);
+                                entity.setCurrentEventType(Integer.parseInt(eventType.toString()));
+                                entity.setCurrentEventName(thisObj.get("name").toString());
+                                entity.setCurrentEventDate(simpleDateFormat.parse(eventTime));
+                            } else if(eventType.equals("9")){
+                                entity.setLactationDate(diffDay1);
+                                entity.setGestationDate(0);
+                                entity.setJcNpd(0);
+                                entity.setNpdDate(0);
+                                entity.setCurrentEventType(Integer.parseInt(eventType.toString()));
+                                entity.setCurrentEventName(thisObj.get("name").toString());
+                                entity.setCurrentEventDate(simpleDateFormat.parse(eventTime));
+                            }
+
                             entity.setFarmId(farmId);
                             entity.setOrgId(orgId);
                             entity.setPigId(pigId);
                             entity.setBarnId(Long.parseLong(mapType.get("barn_id").toString()));
-                            entity.setJcNpd(diffDay1);
-                            entity.setNpdDate(diffDay1);
-                            entity.setLactationDate(0);
-                            entity.setGestationDate(0);
-                            entity.setCurrentEventType((int)type);
                             entity.setLastEventDate(simpleDateFormat.parse(eventAt));
                             entity.setFqNpd(0);
                             entity.setLcNpd(0);
