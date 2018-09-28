@@ -251,6 +251,23 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
 
     /**
+     * 查找一只猪(在指定时间)的前一个事件
+     *
+     * @param pigId    猪id, 不可为空
+     * @param fromDate 可为空
+     * @return
+     */
+    public DoctorPigEvent findEndLastPigEvent(Long pigId, Date fromDate) {
+        Map<String, Object> param;
+        if (fromDate == null) {
+            param = ImmutableMap.of("pigId", pigId);
+        } else {
+            param = ImmutableMap.of("pigId", pigId, "fromDate", fromDate);
+        }
+        return sqlSession.selectOne(sqlId("findEndLastPigEvent"), param);
+    }
+
+    /**
      * 查询一个猪舍累计有多少个事件
      *
      * @param barnId 猪舍id

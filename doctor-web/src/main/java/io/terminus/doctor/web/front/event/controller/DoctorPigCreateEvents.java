@@ -29,6 +29,7 @@ import io.terminus.doctor.common.utils.RespWithExHelper;
 import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorEventModifyRequestDto;
+import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorBoarConditionDto;
@@ -56,6 +57,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -672,13 +674,62 @@ public class DoctorPigCreateEvents {
                 doctorChgLocationDto = doctorValidService.valid(doctorChgLocationDto, doctorPig.getPigCode());
                 return doctorChgLocationDto;
             case CONDITION:
+/*
+                //判断编辑体况日期之后的当前猪舍是否是上一个事件之后的所在猪舍
+                DoctorConditionDto conditionDtos = jsonMapper.fromJson(eventInfoDtoJson, DoctorConditionDto.class);
+                //取出体况的编辑时间
+                Long conditionEditTime = conditionDtos.getConditionDate().getTime();
+                //取最新一次事件时间
+                DoctorPigEvent latestIncidentTime = RespHelper.or500(doctorPigEventReadService.lastEvent(pigId));
+                //判断体况编辑时间与最新时间的大小
+                Long times = conditionEditTime - latestIncidentTime.getEventAt().getTime();
+                DoctorPigTrack doctorPigTrack1 = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(realPigId));
+                if (times >= 0) {
+                    conditionDtos.setBarnName(doctorPigTrack1.getCurrentBarnName());
+                }else {
+                    //取出上一条事件是否是转舍事件
+                    DoctorPigEvent types = RespHelper.or500(doctorPigEventReadService.findEndLastPigEvent(pigId, conditionDtos.getConditionDate()));
+
+                    if (types.getType().equals(1)) {
+                        //取下一条事件的猪舍
+                        DoctorPigEvent doctorBarnName = RespHelper.or500(doctorPigEventReadService.findFirstPigEvent(pigId, conditionDtos.getConditionDate()));
+                        conditionDtos.setBarnName(doctorBarnName.getBarnName());
+                    }else {
+                        conditionDtos.setBarnName(conditionDtos.getBarnName());
+                    }
+                }*/
+
+                //判断公猪,母猪的体况事件
                 if (Objects.equals(pigType, DoctorPig.PigSex.SOW.getKey())) {
-                    DoctorConditionDto conditionDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorConditionDto.class);
-                    return doctorValidService.valid(conditionDto, doctorPig.getPigCode());
+                    //判断编辑体况日期之后的当前猪舍是否是上一个事件之后的所在猪舍
+                    DoctorConditionDto conditionDtos = jsonMapper.fromJson(eventInfoDtoJson, DoctorConditionDto.class);
+                    //取出体况的编辑时间
+                    Long conditionEditTime = conditionDtos.getConditionDate().getTime();
+                    //取最新一次事件时间
+                    DoctorPigEvent latestIncidentTime = RespHelper.or500(doctorPigEventReadService.lastEvent(pigId));
+                    //判断体况编辑时间与最新时间的大小
+                    Long times = conditionEditTime - latestIncidentTime.getEventAt().getTime();
+                    DoctorPigTrack doctorPigTrack1 = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(realPigId));
+                    if (times >= 0) {
+                        conditionDtos.setBarnName(doctorPigTrack1.getCurrentBarnName());
+                    }else {
+                        //取出上一条事件是否是转舍事件
+                        DoctorPigEvent types = RespHelper.or500(doctorPigEventReadService.findEndLastPigEvent(pigId, conditionDtos.getConditionDate()));
+
+                        if (types.getType().equals(1)) {
+                            //取下一条事件的猪舍
+                            DoctorPigEvent doctorBarnName = RespHelper.or500(doctorPigEventReadService.findFirstPigEvent(pigId, conditionDtos.getConditionDate()));
+                            conditionDtos.setBarnName(doctorBarnName.getBarnName());
+                        }else {
+                            conditionDtos.setBarnName(conditionDtos.getBarnName());
+                        }
+                    }
+                    return doctorValidService.valid(conditionDtos, doctorPig.getPigCode());
                 } else {
                     DoctorBoarConditionDto boarConditionDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorBoarConditionDto.class);
                     return doctorValidService.valid(boarConditionDto, doctorPig.getPigCode());
                 }
+
             case DISEASE:
                 DoctorDiseaseDto diseaseDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorDiseaseDto.class);
                 diseaseDto = doctorValidService.valid(diseaseDto, doctorPig.getPigCode());

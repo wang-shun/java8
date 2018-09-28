@@ -548,6 +548,22 @@
         limit 1
     </select>
 
+    <select id="findEndLastPigEvent" parameterType="map" resultMap="DoctorPigEventMap">
+        select
+        <include refid="cols_all"/>
+        from
+        <include refid="tb"/>
+        where pig_id = #{pigId} and event_at = (
+        select max(event_at) from
+        <include refid="tb"/>
+        where pig_id = #{pigId} AND status =1
+        <if test="fromDate != null">
+            <![CDATA[ and event_at <= #{fromDate} ]]>
+        </if>
+        ) AND status =1
+        limit 1
+    </select>
+
     <select id="countByBarnId" parameterType="long" resultType="long">
         select count(id) from
         <include refid="tb"/>
