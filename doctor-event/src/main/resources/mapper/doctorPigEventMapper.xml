@@ -2564,4 +2564,25 @@
         WHERE tt.npddate <![CDATA[<>]]> 0
         limit #{offset}, #{limit}
     </select>
+
+    <select id="getNpds" parameterType="map" resultType="int">
+        select sum(npd_date) as npds from doctor_sow_npd_dayly
+        where farm_id = #{farmId}
+        and fiscal_year = #{year}
+        and fiscal_period = #{month}
+    </select>
+
+    <select id="getPregnancys" parameterType="map" resultType="int">
+        select sum(gestation_date) as pregnancys from doctor_sow_npd_dayly
+        where farm_id = #{farmId}
+        and fiscal_year = #{year}
+        and fiscal_period = #{month}
+    </select>
+
+    <select id="getLactations" parameterType="map" resultType="int">
+        select sum(lactation_date) as lactations from doctor_sow_npd_dayly
+        where farm_id = #{farmId}
+        and fiscal_year = #{year}
+        and fiscal_period = #{month}
+    </select>
 </mapper>

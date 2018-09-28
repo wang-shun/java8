@@ -690,8 +690,8 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
             int month = new DateTime(i).getMonthOfYear();
             String monthAndYearKey = year + "-" + month;
             npd.setNpd(doctorPigEventDao.getNpds(year, month, farmId));
-            npd.setPregnancy(doctorPigEventDao.getNpds(year, month, farmId));
-            npd.setLactation(doctorPigEventDao.getNpds(year, month, farmId));
+            npd.setPregnancy(doctorPigEventDao.getPregnancys(year, month, farmId));
+            npd.setLactation(doctorPigEventDao.getLactations(year, month, farmId));
 //            npd.setNpd(getCount(farmId, monthAndYearKey, farmNPD));
 //            npd.setPregnancy(getCount(farmId, monthAndYearKey, farmPregnancy));
 //            npd.setLactation(getCount(farmId, monthAndYearKey, farmLactation));
