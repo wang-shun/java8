@@ -684,19 +684,19 @@ public class DoctorPigCreateEvents {
                     DoctorPigEvent latestIncidentTime = RespHelper.or500(doctorPigEventReadService.lastEvent(realPigId));
                     //判断体况编辑时间与最新时间的大小
                     Long times = conditionEditTime - latestIncidentTime.getEventAt().getTime();
-                    DoctorPigTrack doctorPigTrack1 = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(realPigId));
+                    DoctorPigEvent doctorPigTrack1 = RespHelper.or500(doctorPigEventReadService.lastEvent(realPigId));
                     if (times >= 0) {
-                        conditionDtos.setBarnName(doctorPigTrack1.getCurrentBarnName());
+                        conditionDtos.setBarnName(doctorPigTrack1.getBarnName());
                     }else {
                         //取出上一条事件是否是转舍事件
                         DoctorPigEvent types = RespHelper.or500(doctorPigEventReadService.findEndLastPigEvent(realPigId, conditionDtos.getConditionDate()));
-
                         if (types.getType().equals(1)) {
                             //取下一条事件的猪舍
                             DoctorPigEvent doctorBarnName = RespHelper.or500(doctorPigEventReadService.findFirstPigEvent(realPigId, conditionDtos.getConditionDate()));
                             conditionDtos.setBarnName(doctorBarnName.getBarnName());
                         }else {
-                            conditionDtos.setBarnName(conditionDtos.getBarnName());
+                            DoctorPigEvent lastEndDoctorBarnNames = RespHelper.or500(doctorPigEventReadService.findEndLastPigEvent(realPigId, conditionDtos.getConditionDate()));
+                            conditionDtos.setBarnName(lastEndDoctorBarnNames.getBarnName());
                         }
                     }
                     return doctorValidService.valid(conditionDtos, doctorPig.getPigCode());

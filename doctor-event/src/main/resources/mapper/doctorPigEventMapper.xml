@@ -558,7 +558,7 @@
         <include refid="tb"/>
         where pig_id = #{pigId} AND status =1
         <if test="fromDate != null">
-            <![CDATA[ and event_at <= #{fromDate} ]]>
+            <![CDATA[ and event_at < #{fromDate} ]]>
         </if>
         ) AND status =1
         limit 1
