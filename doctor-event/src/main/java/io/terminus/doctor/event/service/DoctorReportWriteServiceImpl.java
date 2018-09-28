@@ -110,14 +110,14 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
         for (int i = 0; i < listPIG.size(); i++) {
             // 加载猪id
             String pigId = String.valueOf(listPIG.get(i).get("id"));
-//            if(pigId.equals("997036") || pigId.equals("364859") || pigId.equals("1004429")){
-//                params.put("pigId",pigId);
-//                flushSowNPD(params);
-//             }
-            params.put("pigId", listPIG == null ? "0" : String.valueOf(listPIG.get(i).get("id")));
-            flushSowNPD(params);
-            flushReportNpd(params, startDate, endDate);
-        }
+            if(pigId.equals("997036") || pigId.equals("364859") || pigId.equals("1004429")){
+                params.put("pigId",pigId);
+                flushSowNPD(params);
+             }
+//            params.put("pigId", listPIG == null ? "0" : String.valueOf(listPIG.get(i).get("id")));
+//            flushSowNPD(params);
+//            flushReportNpd(params, startDate, endDate);
+//        }
     }
 
     private boolean existsAryValue(String[] arys, String exy) {
