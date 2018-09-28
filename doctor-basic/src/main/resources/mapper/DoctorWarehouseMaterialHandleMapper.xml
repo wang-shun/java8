@@ -940,4 +940,31 @@
         and handle_date>=#{handleDate}  ORDER BY handle_date desc limit 1
     </select>
 
+    <!--根据公司和会计年月得到配方入库单据 （陈娟 2018-09-28）-->
+    <select id="findFormulaStorage" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE org_id=#{orgId}
+        AND settlement_date=#{settlementDate}
+        AND delete_flag=1
+        AND type=11
+        ORDER BY handle_date ASC,id ASC
+    </select>
+
+    <!--根据relMaterialHandleId得到配方出库单据 （陈娟 2018-09-28）-->
+    <select id="findFormulaByRelMaterialHandleId" parameterType="map" resultMap="DoctorWarehouseMaterialHandleMap">
+        select * from  doctor_warehouse_material_handle
+        where  rel_material_handle_id = #{relMaterialHandleId} and type = #{type} and delete_flag=1
+    </select>
+
+    <!--配方入库金额，单价的结算（陈娟 2018-09-28）-->
+    <update id="updateUnitPriceAndAmountById" parameterType="map">
+        UPDATE
+        <include refid="tb"/>
+        set unit_price=#{unitPrice},amount=#{amount}
+        where id = #{id}
+    </update>
+
 </mapper>

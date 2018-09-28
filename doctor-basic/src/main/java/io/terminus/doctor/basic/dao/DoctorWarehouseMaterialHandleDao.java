@@ -488,4 +488,26 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectOne(this.sqlId("getMaxInventoryDate"), criteria);
     }
 
+    // 根据公司和会计年月得到配方入库单据 （陈娟 2018-09-28）
+    public List<DoctorWarehouseMaterialHandle> findFormulaStorage(Long orgId, Date settlementDate) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("orgId", orgId);
+        criteria.put("settlementDate", settlementDate);
+        return this.sqlSession.selectList(this.sqlId("findFormulaStorage"), criteria);
+    }
+    // 根据relMaterialHandleId得到配方出库单据 （陈娟 2018-09-28）
+    public List<DoctorWarehouseMaterialHandle> findFormulaByRelMaterialHandleId(Long relMaterialHandleId,Integer type) {
+        Map<String, Object> criteria = Maps.newHashMap();
+        criteria.put("relMaterialHandleId", relMaterialHandleId);
+        criteria.put("type", type);
+        return this.sqlSession.selectList(this.sqlId("findFormulaByRelMaterialHandleId"), criteria);
+    }
+    // 配方入库金额，单价的结算（陈娟 2018-09-28）
+    public Boolean updateUnitPriceAndAmountById(Long id, BigDecimal unitPrice, BigDecimal amount) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("id", id);
+        map.put("unitPrice", unitPrice);
+        map.put("amount", amount);
+        return this.sqlSession.update(this.sqlId("updateUnitPriceAndAmountById"), map)>=1;
+    }
 }

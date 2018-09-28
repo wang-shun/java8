@@ -17,6 +17,8 @@ import java.util.List;
 @Data
 public class AbstractWarehouseStockDto {
 
+    // 用来判断是否是配方 （陈娟 2018-09-26）
+    private Boolean isFormula;
 
     private Long orgId;
 

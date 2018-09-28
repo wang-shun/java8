@@ -59,56 +59,58 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
                 throw new ServiceException("warehouse.not.found");
 
             // 判断新增或编辑的物料是否已盘点 （陈娟 2018-09-18）
-            List<F> details = this.getDetails(stockDto);
-            Iterator<F> it= details.iterator();
             String str = new String();
-            while(it.hasNext()){
-                F next = it.next();
-                // 只提交一条单据
-                Long materialId;
-                if(details.size()>1){
-                    materialId = next.getMaterialId();
-                }else{
-                    materialId = details.get(0).getMaterialId();
-                }
-                Long materialHandleId;
-                if(details.size()>1){
-                    materialHandleId = next.getMaterialHandleId();
-                }else{
-                    materialHandleId = details.get(0).getMaterialHandleId();
-                }
-
-                if(null == materialHandleId) {// 新增：判斷物料是否盘点，是的話，刪除該物料
-                    Date handleDate = stockDto.getHandleDate().getTime();
-                    DoctorWarehouseMaterialHandle material = doctorWarehouseMaterialHandleDao.getMaxInventoryDate(stockDto.getWarehouseId(), materialId, handleDate);
-                    if (material != null) {// 已盘点
-                        str = str + material.getMaterialName() + ",";
-                        it.remove();
+            if(!stockDto.getIsFormula()) { // 判断单据是否是配方 （陈娟 2018-09-27）
+                List<F> details = this.getDetails(stockDto);
+                Iterator<F> it = details.iterator();
+                while (it.hasNext()) {
+                    F next = it.next();
+                    // 只提交一条单据
+                    Long materialId;
+                    if (details.size() > 1) {
+                        materialId = next.getMaterialId();
+                    } else {
+                        materialId = details.get(0).getMaterialId();
                     }
-                }else{ // 编辑：判断物料是否盘点，是的话，物料不修改 （陈娟 2018-09-19)
-                    //之前的明细单
-                    Map<Long, List<DoctorWarehouseMaterialHandle>> oldMaterialHandles = doctorWarehouseMaterialHandleDao.findByStockHandle(stockDto.getStockHandleId()).stream().collect(Collectors.groupingBy(DoctorWarehouseMaterialHandle::getId));
-                    if (oldMaterialHandles.containsKey(materialHandleId)) {
-                        DoctorWarehouseMaterialHandle materialHandle = oldMaterialHandles.get(materialHandleId).get(0);
-                        if (!materialHandle.getMaterialId().equals(next.getMaterialId())) {// 判断该单据物料是否更改
-                            Date handleDate = stockDto.getHandleDate().getTime();
-                            DoctorWarehouseMaterialHandle material = doctorWarehouseMaterialHandleDao.getMaxInventoryDate(stockDto.getWarehouseId(), materialId, handleDate);
-                            if (material != null) {// 已盘点 （物料信息不可更改）
-                                // 判断此单据是否是最后一笔盘点单据：Yes：可编辑 （陈娟 2018-09-20）
-                                DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleDao.findById(stockDto.getStockHandleId());
-                                if(!material.getStockHandleId().equals(stockHandle.getId())){
-                                    if(stockHandle.getUpdatedAt().compareTo(material.getHandleDate())<0){
-                                        str = str + material.getMaterialName() + ",";
-                                        if(details.size()>1) {
-                                            next.setBeforeStockQuantity(materialHandle.getBeforeStockQuantity().toString());
-                                            next.setMaterialId(materialHandle.getMaterialId());
-                                            next.setQuantity(materialHandle.getQuantity());
-                                            next.setRemark(materialHandle.getRemark());
-                                        }else{
-                                            details.get(0).setBeforeStockQuantity(materialHandle.getBeforeStockQuantity().toString());
-                                            details.get(0).setMaterialId(materialHandle.getMaterialId());
-                                            details.get(0).setQuantity(materialHandle.getQuantity());
-                                            details.get(0).setRemark(materialHandle.getRemark());
+                    Long materialHandleId;
+                    if (details.size() > 1) {
+                        materialHandleId = next.getMaterialHandleId();
+                    } else {
+                        materialHandleId = details.get(0).getMaterialHandleId();
+                    }
+
+                    if (null == materialHandleId) {// 新增：判斷物料是否盘点，是的話，刪除該物料
+                        Date handleDate = stockDto.getHandleDate().getTime();
+                        DoctorWarehouseMaterialHandle material = doctorWarehouseMaterialHandleDao.getMaxInventoryDate(stockDto.getWarehouseId(), materialId, handleDate);
+                        if (material != null) {// 已盘点
+                            str = str + material.getMaterialName() + ",";
+                            it.remove();
+                        }
+                    } else { // 编辑：判断物料是否盘点，是的话，物料不修改 （陈娟 2018-09-19)
+                        //之前的明细单
+                        Map<Long, List<DoctorWarehouseMaterialHandle>> oldMaterialHandles = doctorWarehouseMaterialHandleDao.findByStockHandle(stockDto.getStockHandleId()).stream().collect(Collectors.groupingBy(DoctorWarehouseMaterialHandle::getId));
+                        if (oldMaterialHandles.containsKey(materialHandleId)) {
+                            DoctorWarehouseMaterialHandle materialHandle = oldMaterialHandles.get(materialHandleId).get(0);
+                            if (!materialHandle.getMaterialId().equals(next.getMaterialId())) {// 判断该单据物料是否更改
+                                Date handleDate = stockDto.getHandleDate().getTime();
+                                DoctorWarehouseMaterialHandle material = doctorWarehouseMaterialHandleDao.getMaxInventoryDate(stockDto.getWarehouseId(), materialId, handleDate);
+                                if (material != null) {// 已盘点 （物料信息不可更改）
+                                    // 判断此单据是否是最后一笔盘点单据：Yes：可编辑 （陈娟 2018-09-20）
+                                    DoctorWarehouseStockHandle stockHandle = doctorWarehouseStockHandleDao.findById(stockDto.getStockHandleId());
+                                    if (!material.getStockHandleId().equals(stockHandle.getId())) {
+                                        if (stockHandle.getUpdatedAt().compareTo(material.getHandleDate()) < 0) {
+                                            str = str + material.getMaterialName() + ",";
+                                            if (details.size() > 1) {
+                                                next.setBeforeStockQuantity(materialHandle.getBeforeStockQuantity().toString());
+                                                next.setMaterialId(materialHandle.getMaterialId());
+                                                next.setQuantity(materialHandle.getQuantity());
+                                                next.setRemark(materialHandle.getRemark());
+                                            } else {
+                                                details.get(0).setBeforeStockQuantity(materialHandle.getBeforeStockQuantity().toString());
+                                                details.get(0).setMaterialId(materialHandle.getMaterialId());
+                                                details.get(0).setQuantity(materialHandle.getQuantity());
+                                                details.get(0).setRemark(materialHandle.getRemark());
+                                            }
                                         }
                                     }
                                 }
@@ -121,20 +123,26 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
             DoctorWarehouseStockHandle stockHandle = new DoctorWarehouseStockHandle();
             if (null == stockDto.getStockHandleId()) {
                 //新增
-                if(!str.equals("")){
-                    str = str + "【已盘点,不可新增】";
+                if(!stockDto.getIsFormula()){
+                    if(!str.equals("")){
+                        str = str + "【已盘点,不可新增】";
+                    }else{
+                        str = "数据已经提交";
+                    }
+                    List<F> dd = this.getDetails(stockDto);
+                    if(dd.size()>=1){
+                        stockHandle = create(stockDto, wareHouse);
+                    }
                 }else{
-                    str = "数据已经提交";
-                }
-                List<F> dd = this.getDetails(stockDto);
-                if(dd.size()>=1){
                     stockHandle = create(stockDto, wareHouse);
                 }
             } else {
-                if(!str.equals("")){
-                    str = str + "【已盘点,不可编辑】";
-                }else{
-                    str = "数据已经提交";
+                if(!stockDto.getIsFormula()){
+                    if(!str.equals("")){
+                        str = str + "【已盘点,不可编辑】";
+                    }else{
+                        str = "数据已经提交";
+                    }
                 }
                 stockHandle = doctorWarehouseStockHandleDao.findById(stockDto.getStockHandleId());
                 //编辑之前，可以做一些校验等
