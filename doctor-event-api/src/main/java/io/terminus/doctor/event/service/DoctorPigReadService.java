@@ -184,6 +184,16 @@ public interface DoctorPigReadService {
      */
     Response<List<DoctorPigTrack>> queryCurrentStatus(List<Long> pigIds);
 
+
+    /**
+     * 获取猪所在的最新当前猪舍
+     *
+     * @param pigId
+     * @return
+     * */
+
+    Response<DoctorPigTrack> lastEventBarnName(@NotNull(message = "input.pigId.empty") Long pigId);
+
     /**
      * 模糊搜索pigCode猪舍下符合
      * @param barnId 猪舍id

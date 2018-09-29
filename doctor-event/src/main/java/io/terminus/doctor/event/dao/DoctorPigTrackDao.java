@@ -136,6 +136,16 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
     }
 
     /**
+     * 获取猪所在的最新当前猪舍
+     *
+     * @param pigId
+     * @return
+     * */
+    public DoctorPigTrack queryLastEventBarnName(Long pigId) {
+        return this.getSqlSession().selectOne(sqlId("queryLastEventBarnName"), pigId);
+    }
+
+    /**
      * 根据猪场id查询猪跟踪
      * @param farmId 猪场id
      * @return 猪跟踪

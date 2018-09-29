@@ -6,6 +6,7 @@ import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dto.*;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -170,6 +171,8 @@ public interface DoctorPigEventReadService {
      * @return
      */
     Response<DoctorPigEvent> lastEvent(@NotNull(message = "input.pigId.empty") Long pigId);
+
+
 
     /**
      * 获取多个猪时的最新事件

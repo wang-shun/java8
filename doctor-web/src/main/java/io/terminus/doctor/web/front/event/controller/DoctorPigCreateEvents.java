@@ -23,10 +23,7 @@ import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseSkuReadService;
 import io.terminus.doctor.common.enums.SourceType;
 import io.terminus.doctor.common.exception.InvalidException;
-import io.terminus.doctor.common.utils.JsonMapperUtil;
-import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.common.utils.RespWithExHelper;
-import io.terminus.doctor.common.utils.ToJsonMapper;
+import io.terminus.doctor.common.utils.*;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorEventModifyRequestDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
@@ -561,7 +558,7 @@ public class DoctorPigCreateEvents {
         try {
             DoctorFarm doctorFarm = RespHelper.orServEx(this.doctorFarmReadService.findFarmById(farmId));
             Long userId = UserUtil.getUserId();
-            String name = RespHelper.orServEx(doctorGroupWebService.findRealName(userId));
+            String name = RespHelper.orServEx(doctorGroupWebService.findRealName(18171L));
             if (Strings.isNullOrEmpty(name)) {
                 name = UserUtil.getCurrentUser().getName();
             }
@@ -676,30 +673,30 @@ public class DoctorPigCreateEvents {
             case CONDITION:
                 //判断公猪,母猪的体况事件
                 if (Objects.equals(pigType, DoctorPig.PigSex.SOW.getKey())) {
-                    //判断编辑体况日期之后的当前猪舍是否是上一个事件之后的所在猪舍
-                    DoctorConditionDto conditionDtos = jsonMapper.fromJson(eventInfoDtoJson, DoctorConditionDto.class);
-                    //取出体况的编辑时间
-                    Long conditionEditTime = conditionDtos.getConditionDate().getTime();
-                    //取最新一次事件时间
-                    DoctorPigEvent latestIncidentTime = RespHelper.or500(doctorPigEventReadService.lastEvent(realPigId));
-                    //判断体况编辑时间与最新时间的大小
-                    Long times = conditionEditTime - latestIncidentTime.getEventAt().getTime();
-                    DoctorPigEvent doctorPigTrack1 = RespHelper.or500(doctorPigEventReadService.lastEvent(realPigId));
-                    if (times >= 0) {
-                        conditionDtos.setBarnName(doctorPigTrack1.getBarnName());
-                    }else {
-                        //取出上一条事件是否是转舍事件
-                        DoctorPigEvent types = RespHelper.or500(doctorPigEventReadService.findEndLastPigEvent(realPigId, conditionDtos.getConditionDate()));
-                        if (types.getType().equals(1)) {
-                             //取转舍之后的猪舍
-                             DoctorPigEvent doctorPigEvent = JSON_NON_DEFAULT_MAPPER.fromJson(types.getExtra(), DoctorPigEvent.class);
-                             conditionDtos.setBarnName(doctorPigEvent.getBarnName());
-                        }else {
-                            DoctorPigEvent lastEndDoctorBarnNames = RespHelper.or500(doctorPigEventReadService.findEndLastPigEvent(realPigId, conditionDtos.getConditionDate()));
-                            conditionDtos.setBarnName(lastEndDoctorBarnNames.getBarnName());
+                        //判断编辑体况日期之后的当前猪舍是否是上一个事件之后的所在猪舍
+                        DoctorConditionDto conditionDtos = jsonMapper.fromJson(eventInfoDtoJson, DoctorConditionDto.class);
+                        //取出体况的编辑时间
+                        Long conditionEditTime = conditionDtos.getConditionDate().getTime();
+                        //取最新一次事件时间
+                        DoctorPigTrack latestIncidentTime = RespHelper.or500(doctorPigReadService.lastEventBarnName(realPigId));
+                        //判断体况编辑时间与最新时间的大小
+                        Long times = conditionEditTime - latestIncidentTime.getUpdatedAt().getTime();
+                        if (times >= 0) {
+                            String name = latestIncidentTime.getCurrentBarnName();
+                            conditionDtos.setBarnName(name);
+                        } else {
+                            //取出上一条事件是否是转舍事件
+                            DoctorPigEvent types = RespHelper.or500(doctorPigEventReadService.findEndLastPigEvent(realPigId, conditionDtos.getConditionDate()));
+                            if (types.getType().equals(1)) {
+                                //取转舍之后的猪舍
+                                DoctorPigEvent doctorPigEvent = jsonMapper.fromJson(types.getExtra(), DoctorPigEvent.class);
+                                conditionDtos.setBarnName(doctorPigEvent.getBarnName());
+                            } else {
+                                DoctorPigEvent lastEndDoctorBarnNames = RespHelper.or500(doctorPigEventReadService.findEndLastPigEvent(realPigId, conditionDtos.getConditionDate()));
+                                conditionDtos.setBarnName(lastEndDoctorBarnNames.getBarnName());
+                            }
                         }
-                    }
-                    return doctorValidService.valid(conditionDtos, doctorPig.getPigCode());
+                        return doctorValidService.valid(conditionDtos, doctorPig.getPigCode());
                 } else {
                     DoctorBoarConditionDto boarConditionDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorBoarConditionDto.class);
                     return doctorValidService.valid(boarConditionDto, doctorPig.getPigCode());

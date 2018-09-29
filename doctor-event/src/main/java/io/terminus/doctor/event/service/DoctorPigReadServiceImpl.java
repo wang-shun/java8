@@ -392,6 +392,17 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     }
 
     @Override
+    public Response<DoctorPigTrack> lastEventBarnName(@NotNull(message = "input.pigTId.empty") Long pigId){
+        try {
+            return Response.ok(doctorPigTrackDao.queryLastEventBarnName(pigId));
+        } catch (Exception e) {
+            log.error("last.event.failed, cause {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("last.event.failed");
+        }
+    }
+
+
+    @Override
     public Response<List<DoctorPig>> findPigsByFarmId(Long farmId) {
         try {
             return Response.ok(doctorPigDao.findPigsByFarmId(farmId));

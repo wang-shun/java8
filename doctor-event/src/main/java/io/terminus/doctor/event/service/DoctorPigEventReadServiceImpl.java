@@ -414,6 +414,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         }
     }
 
+
     @Override
     public Response<DoctorPigEvent> lastEvent(@NotNull(message = "input.pigIds.empty") List<Long> pigIds) {
         try {

@@ -607,6 +607,7 @@
         order by event_at desc, id desc limit 1;
     </select>
 
+
     <select id="queryLastManualPigEventById" parameterType="long" resultMap="DoctorPigEventMap">
         select
         <include refid="cols_all"/>

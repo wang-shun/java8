@@ -318,6 +318,14 @@
         WHERE farm_id = #{farmId} AND `status` = #{status}
     </select>
 
+
+    <select id="queryLastEventBarnName" parameterType="long" resultMap="DoctorPigTrackMap">
+        SELECT current_barn_name , updated_at
+        from doctor_pig_tracks
+        where pig_id = #{pigId} AND status =1
+    </select>
+
+
     <delete id="deleteByFarmId" parameterType="long">
         DELETE FROM <include refid="tb"/>
         WHERE farm_id = #{farmId}

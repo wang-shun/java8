@@ -13,6 +13,7 @@ import io.terminus.doctor.event.dto.DoctorProfitExportDto;
 import io.terminus.doctor.event.dto.event.DoctorEventOperator;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigInteger;
@@ -60,6 +61,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public DoctorPigEvent queryLastPigEventById(Long pigId) {
         return this.getSqlSession().selectOne(sqlId("queryLastPigEventById"), pigId);
     }
+
 
     /**
      * 根据查询这一事件之前的最新的一个type事件
