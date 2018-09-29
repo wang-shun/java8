@@ -9,6 +9,7 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.DoctorReportFieldTypeDto;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.report.daily.DoctorFarmLiveStockDto;
@@ -67,7 +68,7 @@ public class ReportBoardController {
             List<Long> groupIdsList = dataPermissionResponse.getResult().getGroupIdsList();
             log.error("groupIdsList"+groupIdsList);
             if(groupIdsList == null || groupIdsList.size() == 0 || groupIdsList.contains(0L)){
-                throw new JsonResponseException("你没有可查看集团的权限");
+                throw new InvalidException("你没有可查看集团的权限");
             }
             log.error("!groupIdsList.contains(farmIds)+"+!groupIdsList.contains(farmIds));
             log.error("groupIdsList.get(0);"+groupIdsList.get(0));
