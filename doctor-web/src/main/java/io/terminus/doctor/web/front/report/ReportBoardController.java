@@ -57,12 +57,15 @@ public class ReportBoardController {
         log.error("============"+farmId+"=========+"+type);
         Long farmIds = farmId;
         if(type == 1){
+            log.error("111111111");
             BaseUser baseUser = UserUtil.getCurrentUser();
             if (baseUser == null) {
                 throw new JsonResponseException("user.not.login");
             }
+            log.error("222222222222");
             Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
             List<Long> groupIdsList = dataPermissionResponse.getResult().getGroupIdsList();
+            log.error("groupIdsList"+groupIdsList);
             if(groupIdsList != null || groupIdsList.size() != 0 || groupIdsList.contains(0L)){
                 throw new JsonResponseException("你没有可查看集团的权限");
             }
