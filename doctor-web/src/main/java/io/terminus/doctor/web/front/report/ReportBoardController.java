@@ -66,6 +66,8 @@ public class ReportBoardController {
             if(groupIdsList != null || groupIdsList.size() != 0 || groupIdsList.contains(0L)){
                 throw new JsonResponseException("你没有可查看集团的权限");
             }
+            log.error("!groupIdsList.contains(farmIds)+"+!groupIdsList.contains(farmIds));
+            log.error("groupIdsList.get(0);"+groupIdsList.get(0));
             if(!groupIdsList.contains(farmIds)) {
                 farmIds = groupIdsList.get(0);
             }
