@@ -49,7 +49,7 @@ public class ReportBoardController {
         log.error("============"+farmId+"=========+"+type);
         DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, type,
                 date, DateDimension.DAY.getValue());
-        return helper.fieldWithHidden(dimensionCriteria);
+        return helper.fieldWithHidden(dimensionCriteria,type);
     }
 
 
@@ -63,7 +63,7 @@ public class ReportBoardController {
         log.error("============"+farmId+"=========+"+type);
         DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, type,
                 date, DateDimension.WEEK.getValue());
-        return helper.fieldWithHidden(dimensionCriteria);
+        return helper.fieldWithHidden(dimensionCriteria,type);
     }
 
     @ApiOperation("看板月报表")
@@ -76,7 +76,7 @@ public class ReportBoardController {
         log.error("============"+farmId+"=========+"+type);
         DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, type,
                 date, DateDimension.MONTH.getValue());
-        return helper.fieldWithHidden(dimensionCriteria);
+        return helper.fieldWithHidden(dimensionCriteria,type);
     }
 
     @ApiOperation("看板季报表")
@@ -89,7 +89,7 @@ public class ReportBoardController {
         log.error("============"+farmId+"=========+"+type);
         DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, type,
                 date, DateDimension.QUARTER.getValue());
-        return helper.fieldWithHidden(dimensionCriteria);
+        return helper.fieldWithHidden(dimensionCriteria,type);
     }
 
     @ApiOperation("看板年报表")
@@ -102,7 +102,7 @@ public class ReportBoardController {
         log.error("============"+farmId+"=========+"+type);
         DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, type,
                 date, DateDimension.YEAR.getValue());
-        return helper.fieldWithHidden(dimensionCriteria);
+        return helper.fieldWithHidden(dimensionCriteria,type);
     }
 
     @RequestMapping(value = "/live/stock")

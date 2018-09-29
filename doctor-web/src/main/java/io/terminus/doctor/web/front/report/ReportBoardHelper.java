@@ -93,8 +93,8 @@ public class ReportBoardHelper {
      * @param dimensionCriteria 查询条件
      * @return 报表数据
      */
-    List<DoctorReportFieldTypeDto> fieldWithHidden(DoctorDimensionCriteria dimensionCriteria) {
-        List<DoctorReportFieldTypeDto> reportFieldTypeDtoList = RespHelper.or500(doctorReportFieldCustomizesReadService.getAllWithSelected(dimensionCriteria.getOrzId()));
+    List<DoctorReportFieldTypeDto> fieldWithHidden(DoctorDimensionCriteria dimensionCriteria,Integer type) {
+        List<DoctorReportFieldTypeDto> reportFieldTypeDtoList = RespHelper.or500(doctorReportFieldCustomizesReadService.getAllWithSelected(dimensionCriteria.getOrzId(),type));
         DoctorDimensionReport report = RespHelper.or500(doctorDailyReportV2Service.dimensionReport(dimensionCriteria));
         reportFieldTypeDtoList.forEach(doctorReportFieldTypeDto -> fillRegionReport(doctorReportFieldTypeDto, report, dimensionCriteria));
         return reportFieldTypeDtoList;

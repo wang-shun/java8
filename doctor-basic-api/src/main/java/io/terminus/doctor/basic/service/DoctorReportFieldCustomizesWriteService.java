@@ -39,8 +39,8 @@ public interface DoctorReportFieldCustomizesWriteService {
     Response<Boolean> delete(Long id);
 
 
-    Response<Boolean> customize(Long farmId, DoctorReportFieldTypeDto fieldDto);
+    Response<Boolean> customize(Long farmId, DoctorReportFieldTypeDto fieldDto,Integer type);
 
-    Response<Boolean> customize(Long farmId, List<DoctorReportFieldTypeDto> fieldDto);
+    Response<Boolean> customize(Long farmId, List<DoctorReportFieldTypeDto> fieldDto,Integer type);
 
 }

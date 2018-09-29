@@ -112,11 +112,11 @@ public class DoctorReportFieldCustomizesReadServiceImpl implements DoctorReportF
     }
 
     @Override
-    public Response<List<DoctorReportFieldTypeDto>> getAllWithSelected(Long farmId) {
+    public Response<List<DoctorReportFieldTypeDto>> getAllWithSelected(Long farmId, Integer type) {
         try {
             Map<Long, List<DoctorReportFieldCustomizes>> selectedTypeCustomizes = doctorReportFieldCustomizesDao.
                     list(DoctorReportFieldCustomizes.builder()
-                            .farmId(farmId)
+                            .farmId(farmId).type(type)
                             .build()).stream().collect(Collectors.groupingBy(DoctorReportFieldCustomizes::getTypeId));
 
 
