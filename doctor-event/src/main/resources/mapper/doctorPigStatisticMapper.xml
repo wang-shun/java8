@@ -773,7 +773,7 @@
     <select id="countSow1" parameterType="map" resultType="int">
         <![CDATA[
         select count(1) as quantity from doctor_pigs a
-        where a.pig_type = 1 and a.org_id = #{orgId} and a.farm_id = #{farmId}
+        where a.pig_type = 1 and  a.farm_id = #{farmId}
         and (a.in_farm_date <= #{sumAt}
         and (a.is_removal = 0 or (a.is_removal = 1
         and (exists(select 1 from doctor_pig_events c
