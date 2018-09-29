@@ -138,6 +138,19 @@ public class ReportBoardController {
     @RequestMapping(value = "/live/stock")
     public DoctorFarmLiveStockDto realTimeLiveStock(@PathVariable Long farmId,Integer type){
         log.error("============"+farmId+"=========+"+type);
-        return RespHelper.or500(doctorDailyReportV2Service.findFarmsLiveStock1(Lists.newArrayList(farmId),type)).get(0);
+        Long farmIds = farmId;
+        if(type == 1){
+            BaseUser baseUser = UserUtil.getCurrentUser();
+            if (baseUser == null) {
+                throw new JsonResponseException("user.not.login");
+            }
+            log.error("baseUser.getId()"+baseUser.getId());
+            Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
+            List<Long> groupIdsList = dataPermissionResponse.getResult().getGroupIdsList();
+            if(!groupIdsList.contains(farmIds)) {
+                farmIds = groupIdsList.get(0);
+            }
+        }
+        return RespHelper.or500(doctorDailyReportV2Service.findFarmsLiveStock1(Lists.newArrayList(farmIds),type)).get(0);
     }
 }
