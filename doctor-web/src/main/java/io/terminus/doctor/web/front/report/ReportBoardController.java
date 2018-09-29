@@ -55,6 +55,7 @@ public class ReportBoardController {
                                                      @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
                                                      Integer type) {
         log.error("============"+farmId+"=========+"+type);
+        Long farmIds = farmId;
         if(type == 1){
             BaseUser baseUser = UserUtil.getCurrentUser();
             if (baseUser == null) {
@@ -65,11 +66,12 @@ public class ReportBoardController {
             if(groupIdsList != null || groupIdsList.size() != 0 || groupIdsList.contains(0L)){
                 throw new JsonResponseException("你没有可查看集团的权限");
             }
-            if(!groupIdsList.contains(farmId)) {
-                farmId = groupIdsList.get(0);
+            if(!groupIdsList.contains(farmIds)) {
+                farmIds = groupIdsList.get(0);
             }
         }
-        DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, type,
+        log.error("fRM_iS"+farmIds);
+        DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmIds, type,
                 date, DateDimension.DAY.getValue());
         return helper.fieldWithHidden(dimensionCriteria,type);
     }
