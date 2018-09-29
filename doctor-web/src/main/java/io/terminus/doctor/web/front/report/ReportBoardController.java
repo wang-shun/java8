@@ -67,7 +67,7 @@ public class ReportBoardController {
             Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
             List<Long> groupIdsList = dataPermissionResponse.getResult().getGroupIdsList();
             log.error("groupIdsList"+groupIdsList);
-            if(groupIdsList == null || groupIdsList.size() == 0 || groupIdsList.contains(0L)){
+            if(groupIdsList == null || groupIdsList.size() == 0 || (groupIdsList.contains(0L) && groupIdsList.size()==1)){
                 throw new InvalidException("你没有可查看集团的权限");
             }
             log.error("!groupIdsList.contains(farmIds)+"+!groupIdsList.contains(farmIds));
