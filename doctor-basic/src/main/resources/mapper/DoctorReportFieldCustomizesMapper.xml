@@ -33,7 +33,7 @@
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{typeId}, #{fieldId}, type,
+        #{farmId}, #{typeId}, #{fieldId}, #{type},
         now(), now()
     </sql>
 
