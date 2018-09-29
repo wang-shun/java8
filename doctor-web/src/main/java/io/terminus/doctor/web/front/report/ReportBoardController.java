@@ -62,7 +62,7 @@ public class ReportBoardController {
             if (baseUser == null) {
                 throw new JsonResponseException("user.not.login");
             }
-            log.error("222222222222");
+            log.error("baseUser.getId()"+baseUser.getId());
             Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
             List<Long> groupIdsList = dataPermissionResponse.getResult().getGroupIdsList();
             log.error("groupIdsList"+groupIdsList);
