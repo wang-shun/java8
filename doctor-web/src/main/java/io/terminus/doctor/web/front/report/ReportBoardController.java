@@ -62,16 +62,11 @@ public class ReportBoardController {
             }
             Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
             List<Long> groupIdsList = dataPermissionResponse.getResult().getGroupIdsList();
-            if( farmId == null) {
-                if (groupIdsList != null || groupIdsList.size() != 0 || groupIdsList.contains(0L)) {
-                    throw new JsonResponseException("你没有可查看集团的权限");
-                } else {
-                    farmId = groupIdsList.get(0);
-                }
-            }else {
-                if(!groupIdsList.contains(farmId)){
-                    throw new JsonResponseException("你没有权限查看该集团");
-                }
+            if(groupIdsList != null || groupIdsList.size() != 0 || groupIdsList.contains(0L)){
+                throw new JsonResponseException("你没有可查看集团的权限");
+            }
+            if(!groupIdsList.contains(farmId)) {
+                farmId = groupIdsList.get(0);
             }
         }
         DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, type,
