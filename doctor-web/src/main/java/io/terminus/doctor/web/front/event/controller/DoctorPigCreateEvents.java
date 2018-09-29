@@ -558,7 +558,7 @@ public class DoctorPigCreateEvents {
         try {
             DoctorFarm doctorFarm = RespHelper.orServEx(this.doctorFarmReadService.findFarmById(farmId));
             Long userId = UserUtil.getUserId();
-            String name = RespHelper.orServEx(doctorGroupWebService.findRealName(18171L));
+            String name = RespHelper.orServEx(doctorGroupWebService.findRealName(userId));
             if (Strings.isNullOrEmpty(name)) {
                 name = UserUtil.getCurrentUser().getName();
             }
