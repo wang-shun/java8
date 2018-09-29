@@ -5,6 +5,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.model.BaseUser;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.DoctorReportFieldTypeDto;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
@@ -12,6 +15,9 @@ import io.terminus.doctor.event.dto.report.daily.DoctorFarmLiveStockDto;
 import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.service.DoctorDailyReportV2Service;
+import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
+import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -35,6 +41,8 @@ public class ReportBoardController {
 
     @RpcConsumer
     private DoctorDailyReportV2Service doctorDailyReportV2Service;
+    @RpcConsumer
+    private DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
 
     @Autowired
     private ReportBoardHelper helper;
@@ -47,6 +55,25 @@ public class ReportBoardController {
                                                      @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
                                                      Integer type) {
         log.error("============"+farmId+"=========+"+type);
+        if(type == 1){
+            BaseUser baseUser = UserUtil.getCurrentUser();
+            if (baseUser == null) {
+                throw new JsonResponseException("user.not.login");
+            }
+            Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
+            List<Long> groupIdsList = dataPermissionResponse.getResult().getGroupIdsList();
+            if( farmId == null) {
+                if (groupIdsList != null || groupIdsList.size() != 0 || groupIdsList.contains(0L)) {
+                    throw new JsonResponseException("你没有可查看集团的权限");
+                } else {
+                    farmId = groupIdsList.get(0);
+                }
+            }else {
+                if(!groupIdsList.contains(farmId)){
+                    throw new JsonResponseException("你没有权限查看该集团");
+                }
+            }
+        }
         DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, type,
                 date, DateDimension.DAY.getValue());
         return helper.fieldWithHidden(dimensionCriteria,type);
