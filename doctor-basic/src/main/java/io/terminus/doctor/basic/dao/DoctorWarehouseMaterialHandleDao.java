@@ -510,4 +510,12 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         map.put("amount", amount);
         return this.sqlSession.update(this.sqlId("updateUnitPriceAndAmountById"), map)>=1;
     }
+
+    // 修改配方出库的关联ID （陈娟 2018-09-29）
+    public Boolean updateRelMaterialHandleId(Long newRelMaterialHandleId, Long oldRelMaterialHandleId) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("newRelMaterialHandleId", newRelMaterialHandleId);
+        map.put("oldRelMaterialHandleId", oldRelMaterialHandleId);
+        return this.sqlSession.update(this.sqlId("updateRelMaterialHandleId"), map)>=1;
+    }
 }

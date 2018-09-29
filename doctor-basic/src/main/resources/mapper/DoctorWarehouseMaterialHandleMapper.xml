@@ -967,4 +967,9 @@
         where id = #{id}
     </update>
 
+    <!--修改配方出库的关联ID （陈娟 2018-09-29）-->
+    <update id="updateRelMaterialHandleId" parameterType="map">
+        update doctor_warehouse_material_handle set rel_material_handle_id = #{newRelMaterialHandleId} where rel_material_handle_id = #{oldRelMaterialHandleId}
+    </update>
+
 </mapper>
