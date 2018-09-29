@@ -691,9 +691,9 @@ public class DoctorPigCreateEvents {
                         //取出上一条事件是否是转舍事件
                         DoctorPigEvent types = RespHelper.or500(doctorPigEventReadService.findEndLastPigEvent(realPigId, conditionDtos.getConditionDate()));
                         if (types.getType().equals(1)) {
-                            //取下一条事件的猪舍
-                            DoctorPigEvent doctorBarnName = RespHelper.or500(doctorPigEventReadService.findFirstPigEvent(realPigId, conditionDtos.getConditionDate()));
-                            conditionDtos.setBarnName(doctorBarnName.getBarnName());
+                             //取转舍之后的猪舍
+                             DoctorPigEvent doctorPigEvent = JSON_NON_DEFAULT_MAPPER.fromJson(types.getExtra(), DoctorPigEvent.class);
+                             conditionDtos.setBarnName(doctorPigEvent.getBarnName());
                         }else {
                             DoctorPigEvent lastEndDoctorBarnNames = RespHelper.or500(doctorPigEventReadService.findEndLastPigEvent(realPigId, conditionDtos.getConditionDate()));
                             conditionDtos.setBarnName(lastEndDoctorBarnNames.getBarnName());
