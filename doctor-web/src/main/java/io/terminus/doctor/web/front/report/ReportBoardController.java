@@ -72,6 +72,9 @@ public class ReportBoardController {
             }
             log.error("!groupIdsList.contains(farmIds)+"+!groupIdsList.contains(farmIds));
             log.error("groupIdsList.get(0);"+groupIdsList.get(0));
+            if(groupIdsList.contains(0L)){
+                groupIdsList.remove(0L);
+            }
             if(!groupIdsList.contains(farmIds)) {
                 farmIds = groupIdsList.get(0);
             }
@@ -90,7 +93,6 @@ public class ReportBoardController {
                                                       @ApiParam("查询日期， 本周第一天")
                                                       @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
                                                       Integer type) {
-        log.error("============"+farmId+"=========+"+type);
         DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, type,
                 date, DateDimension.WEEK.getValue());
         return helper.fieldWithHidden(dimensionCriteria,type);
@@ -103,7 +105,6 @@ public class ReportBoardController {
                                                        @ApiParam("查询日期， 本月第一天")
                                                        @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
                                                        Integer type) {
-        log.error("============"+farmId+"=========+"+type);
         DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, type,
                 date, DateDimension.MONTH.getValue());
         return helper.fieldWithHidden(dimensionCriteria,type);
@@ -116,7 +117,6 @@ public class ReportBoardController {
                                                          @ApiParam("查询日期， 本季第一天")
                                                          @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
                                                          Integer type) {
-        log.error("============"+farmId+"=========+"+type);
         DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, type,
                 date, DateDimension.QUARTER.getValue());
         return helper.fieldWithHidden(dimensionCriteria,type);
@@ -129,7 +129,6 @@ public class ReportBoardController {
                                                       @ApiParam("查询日期， 本年第一天")
                                                       @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
                                                       Integer type) {
-        log.error("============"+farmId+"=========+"+type);
         DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, type,
                 date, DateDimension.YEAR.getValue());
         return helper.fieldWithHidden(dimensionCriteria,type);
@@ -137,7 +136,6 @@ public class ReportBoardController {
 
     @RequestMapping(value = "/live/stock")
     public DoctorFarmLiveStockDto realTimeLiveStock(@PathVariable Long farmId,Integer type){
-        log.error("============"+farmId+"=========+"+type);
         Long farmIds = farmId;
         if(type == 1){
             BaseUser baseUser = UserUtil.getCurrentUser();
