@@ -177,6 +177,21 @@
             #{farmId}
         </foreach>
     </select>
+    <select id="findByFarmId1" parameterType="map" resultMap="DoctorBarnMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE farm_id = #{farmId} and (pig_type = 5 or pig_type = 6) and status = 1
+    </select>
+    <select id="findByFarmId2" parameterType="map" resultMap="DoctorBarnMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE farm_id = #{farmId} and pig_type = 9 and status = 1
+    </select>
+    <select id="findByFarmId3" parameterType="map" resultMap="DoctorBarnMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE farm_id = #{farmId} and (pig_type = 9 or pig_type = 5 or pig_type = 6) and status = 1
+    </select>
 
     <select id="findByOutId" parameterType="map" resultMap="DoctorBarnMap">
         SELECT <include refid="cols_all"/>

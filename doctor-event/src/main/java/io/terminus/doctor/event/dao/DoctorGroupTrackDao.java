@@ -6,6 +6,7 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -85,5 +86,11 @@ public class DoctorGroupTrackDao extends MyBatisDao<DoctorGroupTrack> {
      */
     public Integer sumPigletCount(List<Long> list) {
         return getSqlSession().selectOne(sqlId("sumPigletCount"), list);
+    }
+
+    public Integer findSex(Long groupId){
+        Map<String,Object> map = new HashMap<>();
+        map.put("groupId", groupId);
+        return getSqlSession().selectOne(sqlId("findSex"), map);
     }
 }

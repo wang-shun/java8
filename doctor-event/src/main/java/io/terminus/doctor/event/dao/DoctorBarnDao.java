@@ -11,10 +11,7 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import org.springframework.stereotype.Repository;
 
 import javax.validation.constraints.NotNull;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Desc: 猪舍表Dao类
@@ -36,7 +33,21 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
     public List<DoctorBarn> findByFarmId(Long farmId) {
         return getSqlSession().selectList(sqlId("findByFarmId"), farmId);
     }
-
+    public List<DoctorBarn> findByFarmId1(Long farmId) {
+        Map<String,Object> map = new HashMap<>();
+        map.put("farmId", farmId);
+        return getSqlSession().selectList(sqlId("findByFarmId1"), farmId);
+    }
+    public List<DoctorBarn> findByFarmId2(Long farmId) {
+        Map<String,Object> map = new HashMap<>();
+        map.put("farmId", farmId);
+        return getSqlSession().selectList(sqlId("findByFarmId2"), farmId);
+    }
+    public List<DoctorBarn> findByFarmId3(Long farmId) {
+        Map<String,Object> map = new HashMap<>();
+        map.put("farmId", farmId);
+        return getSqlSession().selectList(sqlId("findByFarmId3"), farmId);
+    }
     public List<DoctorBarn> findByFarmIds(List<Long> farmIds) {
         if(farmIds == null || farmIds.isEmpty()){
             return Collections.emptyList();
@@ -46,7 +57,6 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
 
     public List<DoctorBarn> findByEnums(@NotNull Long farmId, List<Integer> pigTypes, Integer canOpenGroup, Integer status, List<Long> barnIds) {
         if(status != null && status == 5){
-            //显示为停用和停用的
             return getSqlSession().selectList(sqlId("findByEnums1"), MapBuilder.<String, Object>newHashMap()
                     .put("farmId", farmId)
                     .put("pigTypes", Iters.emptyToNull(pigTypes))
