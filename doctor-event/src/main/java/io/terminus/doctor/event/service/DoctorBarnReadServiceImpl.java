@@ -253,9 +253,7 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             }
 //            doctorBarns = doctorBarnDao.findByFarmId(farmId);
             // 根据某些条件过滤之后的猪舍
-            return Response.ok(doctorBarns.stream().filter(doctorBarn -> doctorBarn != null
-                    && checkCanTransBarn(barnType, doctorBarn.getPigType())
-                    && Objects.equal(doctorBarn.getStatus(), DoctorBarn.Status.USING.getValue())).collect(Collectors.toList()));
+            return Response.ok(doctorBarns);
 
         } catch (Exception e) {
             log.error("fail to find available barns,current group id:{},farm id:{},cause:{}",
