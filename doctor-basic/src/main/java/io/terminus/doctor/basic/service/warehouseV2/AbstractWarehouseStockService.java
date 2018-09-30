@@ -143,6 +143,8 @@ public abstract class AbstractWarehouseStockService<T extends AbstractWarehouseS
                     }else{
                         str = "数据已经提交";
                     }
+                }else{
+                    str = "数据已经提交";
                 }
                 stockHandle = doctorWarehouseStockHandleDao.findById(stockDto.getStockHandleId());
                 //编辑之前，可以做一些校验等
