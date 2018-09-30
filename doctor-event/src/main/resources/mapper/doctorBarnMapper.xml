@@ -177,17 +177,17 @@
             #{farmId}
         </foreach>
     </select>
-    <select id="findByFarmIds1" parameterType="list" resultMap="DoctorBarnMap">
+    <select id="findByFarmId1" parameterType="map" resultMap="DoctorBarnMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         WHERE farm_id = #{farmId} and (pig_type = 5 or pig_type = 6)
     </select>
-    <select id="findByFarmIds2" parameterType="list" resultMap="DoctorBarnMap">
+    <select id="findByFarmId2" parameterType="map" resultMap="DoctorBarnMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         WHERE farm_id = #{farmId} and pig_type = 9
     </select>
-    <select id="findByFarmIds3" parameterType="list" resultMap="DoctorBarnMap">
+    <select id="findByFarmId3" parameterType="map" resultMap="DoctorBarnMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         WHERE farm_id = #{farmId} and (pig_type = 9 or pig_type = 5 or pig_type = 6)

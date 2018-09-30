@@ -251,7 +251,7 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             } else {
                 doctorBarns = doctorBarnDao.findByFarmId3(farmId);
             }
-//            List<DoctorBarn> doctorBarns = doctorBarnDao.findByFarmId(farmId);
+//            doctorBarns = doctorBarnDao.findByFarmId(farmId);
             // 根据某些条件过滤之后的猪舍
             return Response.ok(doctorBarns.stream().filter(doctorBarn -> doctorBarn != null
                     && checkCanTransBarn(barnType, doctorBarn.getPigType())

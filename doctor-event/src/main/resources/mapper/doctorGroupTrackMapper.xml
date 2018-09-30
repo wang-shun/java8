@@ -258,7 +258,7 @@
         </foreach>
     </select>
 
-    <select id="findSex" parameterType="int" resultType="map">
+    <select id="findSex" parameterType="map" resultType="int">
         select sex as sex
         from  <include refid="tb"/>
         where group_id = #{groupId}

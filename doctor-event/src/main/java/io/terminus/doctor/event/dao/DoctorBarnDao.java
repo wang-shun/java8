@@ -11,10 +11,7 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import org.springframework.stereotype.Repository;
 
 import javax.validation.constraints.NotNull;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Desc: 猪舍表Dao类
@@ -37,12 +34,18 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
         return getSqlSession().selectList(sqlId("findByFarmId"), farmId);
     }
     public List<DoctorBarn> findByFarmId1(Long farmId) {
+        Map<String,Object> map = new HashMap<>();
+        map.put("farmId", farmId);
         return getSqlSession().selectList(sqlId("findByFarmId1"), farmId);
     }
     public List<DoctorBarn> findByFarmId2(Long farmId) {
+        Map<String,Object> map = new HashMap<>();
+        map.put("farmId", farmId);
         return getSqlSession().selectList(sqlId("findByFarmId2"), farmId);
     }
     public List<DoctorBarn> findByFarmId3(Long farmId) {
+        Map<String,Object> map = new HashMap<>();
+        map.put("farmId", farmId);
         return getSqlSession().selectList(sqlId("findByFarmId3"), farmId);
     }
     public List<DoctorBarn> findByFarmIds(List<Long> farmIds) {
