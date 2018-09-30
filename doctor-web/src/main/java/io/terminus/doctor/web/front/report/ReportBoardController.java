@@ -11,6 +11,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.DoctorReportFieldTypeDto;
 import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.report.daily.DoctorFarmLiveStockDto;
 import io.terminus.doctor.event.enums.DateDimension;
@@ -50,31 +51,26 @@ public class ReportBoardController {
 
     @ApiOperation("看板日报表")
     @RequestMapping(method = RequestMethod.GET, value = "daily")
-    public Response<List<DoctorReportFieldTypeDto>> dailyBoard(@ApiParam("猪场名称")
+    public RespWithEx<List<DoctorReportFieldTypeDto>> dailyBoard(@ApiParam("猪场名称")
                                                      @PathVariable Long farmId,
-                                                     @ApiParam("查询日期")
+                                                                 @ApiParam("查询日期")
                                                      @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
-                                                     Integer type) {
-        log.error("============"+farmId+"=========+"+type);
+                                                                 Integer type) {
         Long farmIds = farmId;
         if(type == 1){
-            log.error("111111111");
             BaseUser baseUser = UserUtil.getCurrentUser();
             if (baseUser == null) {
                 throw new JsonResponseException("user.not.login");
             }
-            log.error("baseUser.getId()"+baseUser.getId());
             Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
             List<Long> groupIdsList = dataPermissionResponse.getResult().getGroupIdsList();
-            log.error("groupIdsList"+groupIdsList);
             if(groupIdsList == null || groupIdsList.size() == 0 || (groupIdsList.contains(0L) && groupIdsList.size()==1)){
                 throw new InvalidException("你没有可查看集团的权限");
             }
-            log.error("!groupIdsList.contains(farmIds)+"+!groupIdsList.contains(farmIds));
-            log.error("groupIdsList.get(0);"+groupIdsList.get(0));
             if(groupIdsList.contains(0L)){
                 groupIdsList.remove(0L);
             }
+            log.error("groupIdsList.size()="+groupIdsList.size());
             if(groupIdsList.size()==0){
                 throw new InvalidException("你没有可查看集团的权限");
             }else {
@@ -83,10 +79,9 @@ public class ReportBoardController {
                 }
             }
         }
-        log.error("fRM_iS"+farmIds);
         DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmIds, type,
                 date, DateDimension.DAY.getValue());
-        return Response.ok(helper.fieldWithHidden(dimensionCriteria,type));
+        return RespWithEx.ok(helper.fieldWithHidden(dimensionCriteria,type));
     }
 
 
