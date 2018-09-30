@@ -243,15 +243,15 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
              * 要转入猪场的猪舍
              */
             Integer sex = doctorGroupTrackDao.findSex(groupId);
-            List<DoctorBarn> doctorBarns = null;
-            if(sex == 0){
-                doctorBarns = doctorBarnDao.findByFarmId1(farmId);
-            } else if(sex == 1){
-                doctorBarns = doctorBarnDao.findByFarmId2(farmId);
-            } else {
-                doctorBarns = doctorBarnDao.findByFarmId3(farmId);
-            }
-//            List<DoctorBarn> doctorBarns = doctorBarnDao.findByFarmId(farmId);
+//            List<DoctorBarn> doctorBarns = null;
+//            if(sex == 0){
+//                doctorBarns = doctorBarnDao.findByFarmId1(farmId);
+//            } else if(sex == 1){
+//                doctorBarns = doctorBarnDao.findByFarmId2(farmId);
+//            } else {
+//                doctorBarns = doctorBarnDao.findByFarmId3(farmId);
+//            }
+            List<DoctorBarn> doctorBarns = doctorBarnDao.findByFarmId(farmId);
             // 根据某些条件过滤之后的猪舍
             return Response.ok(doctorBarns.stream().filter(doctorBarn -> doctorBarn != null
                     && checkCanTransBarn(barnType, doctorBarn.getPigType())
