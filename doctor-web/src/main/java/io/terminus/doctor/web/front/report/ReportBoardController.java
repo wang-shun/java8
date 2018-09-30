@@ -50,7 +50,7 @@ public class ReportBoardController {
 
     @ApiOperation("看板日报表")
     @RequestMapping(method = RequestMethod.GET, value = "daily")
-    public List<DoctorReportFieldTypeDto> dailyBoard(@ApiParam("猪场名称")
+    public Response<List<DoctorReportFieldTypeDto>> dailyBoard(@ApiParam("猪场名称")
                                                      @PathVariable Long farmId,
                                                      @ApiParam("查询日期")
                                                      @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
@@ -86,7 +86,7 @@ public class ReportBoardController {
         log.error("fRM_iS"+farmIds);
         DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmIds, type,
                 date, DateDimension.DAY.getValue());
-        return helper.fieldWithHidden(dimensionCriteria,type);
+        return Response.ok(helper.fieldWithHidden(dimensionCriteria,type));
     }
 
 
