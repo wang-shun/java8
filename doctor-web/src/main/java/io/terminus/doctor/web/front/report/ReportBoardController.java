@@ -51,7 +51,7 @@ public class ReportBoardController {
 
     @ApiOperation("看板日报表")
     @RequestMapping(method = RequestMethod.GET, value = "daily")
-    public RespWithEx<List<DoctorReportFieldTypeDto>> dailyBoard(@ApiParam("猪场名称")
+    public Response<List<DoctorReportFieldTypeDto>> dailyBoard(@ApiParam("猪场名称")
                                                      @PathVariable Long farmId,
                                                                  @ApiParam("查询日期")
                                                      @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
@@ -65,14 +65,14 @@ public class ReportBoardController {
             Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
             List<Long> groupIdsList = dataPermissionResponse.getResult().getGroupIdsList();
             if(groupIdsList == null || groupIdsList.size() == 0 || (groupIdsList.contains(0L) && groupIdsList.size()==1)){
-                throw new InvalidException("你没有可查看集团的权限");
+                throw new JsonResponseException("你没有可查看集团的权限");
             }
             if(groupIdsList.contains(0L)){
                 groupIdsList.remove(0L);
             }
             log.error("groupIdsList.size()="+groupIdsList.size());
             if(groupIdsList.size()==0){
-                throw new InvalidException("你没有可查看集团的权限");
+                throw new JsonResponseException("你没有可查看集团的权限");
             }else {
                 if (!groupIdsList.contains(farmIds)) {
                     farmIds = groupIdsList.get(0);
@@ -81,7 +81,7 @@ public class ReportBoardController {
         }
         DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmIds, type,
                 date, DateDimension.DAY.getValue());
-        return RespWithEx.ok(helper.fieldWithHidden(dimensionCriteria,type));
+        return Response.ok(helper.fieldWithHidden(dimensionCriteria,type));
     }
 
 
@@ -141,7 +141,6 @@ public class ReportBoardController {
             if (baseUser == null) {
                 throw new JsonResponseException("user.not.login");
             }
-            log.error("baseUser.getId()"+baseUser.getId());
             Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
             List<Long> groupIdsList = dataPermissionResponse.getResult().getGroupIdsList();
             if(groupIdsList.contains(0L)){
