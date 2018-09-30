@@ -36,7 +36,15 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
     public List<DoctorBarn> findByFarmId(Long farmId) {
         return getSqlSession().selectList(sqlId("findByFarmId"), farmId);
     }
-
+    public List<DoctorBarn> findByFarmId1(Long farmId) {
+        return getSqlSession().selectList(sqlId("findByFarmId1"), farmId);
+    }
+    public List<DoctorBarn> findByFarmId2(Long farmId) {
+        return getSqlSession().selectList(sqlId("findByFarmId2"), farmId);
+    }
+    public List<DoctorBarn> findByFarmId3(Long farmId) {
+        return getSqlSession().selectList(sqlId("findByFarmId3"), farmId);
+    }
     public List<DoctorBarn> findByFarmIds(List<Long> farmIds) {
         if(farmIds == null || farmIds.isEmpty()){
             return Collections.emptyList();

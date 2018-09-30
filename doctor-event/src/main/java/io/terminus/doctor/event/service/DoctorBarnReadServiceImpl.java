@@ -2,7 +2,6 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Throwables;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
@@ -17,26 +16,20 @@ import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.dto.DoctorBarnCountForPigTypeDto;
-import io.terminus.doctor.event.dto.DoctorBarnDto;
-import io.terminus.doctor.event.dto.DoctorGroupDetail;
-import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
-import io.terminus.doctor.event.dto.IotBarnInfo;
-import io.terminus.doctor.event.dto.IotBarnWithStorage;
+import io.terminus.doctor.event.dto.*;
 import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorGroup;
-import io.terminus.doctor.event.model.DoctorGroupTrack;
-import io.terminus.doctor.event.model.DoctorPigStatusCount;
-import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.terminus.doctor.common.enums.PigType.*;
@@ -249,49 +242,21 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             /**
              * 要转入猪场的猪舍
              */
-            List<DoctorBarn> doctorBarns = doctorBarnDao.findByFarmId(farmId);
+            Integer sex = doctorGroupTrackDao.findSex(groupId);
+            List<DoctorBarn> doctorBarns = null;
+            if(sex == 0){
+                doctorBarns = doctorBarnDao.findByFarmId1(farmId);
+            } else if(sex == 1){
+                doctorBarns = doctorBarnDao.findByFarmId2(farmId);
+            } else {
+                doctorBarns = doctorBarnDao.findByFarmId3(farmId);
+            }
+//            List<DoctorBarn> doctorBarns = doctorBarnDao.findByFarmId(farmId);
             // 根据某些条件过滤之后的猪舍
-            List<DoctorBarn> filterDoctorBarns = doctorBarns.stream().filter(doctorBarn -> doctorBarn != null
+            return Response.ok(doctorBarns.stream().filter(doctorBarn -> doctorBarn != null
                     && checkCanTransBarn(barnType, doctorBarn.getPigType())
-                    && Objects.equal(doctorBarn.getStatus(), DoctorBarn.Status.USING.getValue())).collect(Collectors.toList());
+                    && Objects.equal(doctorBarn.getStatus(), DoctorBarn.Status.USING.getValue())).collect(Collectors.toList()));
 
-            /*判断所属猪舍和转入猪舍的性别*/
-            List<Map<String, Object>> currentDoctorBarnInfoList = doctorBarnDao.findByBarnsId(currentBarnId,groupId);
-            if (null == currentDoctorBarnInfoList || currentDoctorBarnInfoList.isEmpty()) {
-                return Response.fail("为获取到当前猪舍和性别");
-            }
-
-            Map<String, Object> currentDoctorBarnInfoMap = currentDoctorBarnInfoList.get(0);
-            if (null == currentDoctorBarnInfoMap || currentDoctorBarnInfoMap.isEmpty()) {
-                return Response.fail("为获取到当前猪舍和性别");
-            }
-
-            // 可转入的所有猪舍（未排除性别）
-            List<Map<String, Object>> allDoctorBarnList = doctorBarnDao.findSexByFarmsId(farmId);
-            if (null == allDoctorBarnList || allDoctorBarnList.isEmpty()) {
-                return Response.fail("为查询到可转入的猪舍信息");
-            }
-
-            // 最终可转入的猪舍
-            List<DoctorBarn> availableDoctorBarnList = new ArrayList<DoctorBarn>();
-            List<String> availableDoctorBarnSexList = null;
-            String doctorBarnSex = String.valueOf(currentDoctorBarnInfoMap.get("sex"));
-            for (Map<String, Object> doctorBarnMap : allDoctorBarnList) {
-                // 1. 获取可转入的猪舍性别
-                availableDoctorBarnSexList = doctorBarnAvailableSexMap.get(doctorBarnSex);
-                // 如果 doctorBarnMap 的性别不在可转入的性别中，则跳过
-                if (!availableDoctorBarnSexList.contains(String.valueOf(doctorBarnMap.get("sex")))) {
-                    continue;
-                }
-
-                for (DoctorBarn doctorBarInfo : filterDoctorBarns) {
-                    if (doctorBarInfo.getId().equals(doctorBarnMap.get("id"))) {
-                        availableDoctorBarnList.add(doctorBarInfo);
-                    }
-                }
-            }
-
-            return Response.ok(availableDoctorBarnList);
         } catch (Exception e) {
             log.error("fail to find available barns,current group id:{},farm id:{},cause:{}",
                     groupId, farmId, Throwables.getStackTraceAsString(e));
