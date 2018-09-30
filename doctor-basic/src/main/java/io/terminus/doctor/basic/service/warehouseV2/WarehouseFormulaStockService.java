@@ -236,14 +236,19 @@ public class WarehouseFormulaStockService extends AbstractWarehouseStockService<
                 //原入库仓库删除配方生产入库明细
                 warehouseFormulaManager.delete(inMaterialHandles.get(0));
 
-                WarehouseFormulaDto.WarehouseFormulaDetail detail = new WarehouseFormulaDto.WarehouseFormulaDetail();
-                detail.setMaterialId(inMaterialHandles.get(0).getMaterialId());
-                detail.setWarehouseId(wareHouse.getId());
-                detail.setQuantity(inMaterialHandles.get(0).getQuantity().add(thisStockHandleChangedQuantity));
-                //新的入库仓库添加配方生产入库明细
-                warehouseFormulaManager.create(detail, stockDto, stockHandle, wareHouse);
+                // 配方出库入库仓库的更改 （陈娟 2018-09-29）
+                WarehouseFormulaDto.WarehouseFormulaDetail indetail = new WarehouseFormulaDto.WarehouseFormulaDetail();
+                indetail.setMaterialId(inMaterialHandles.get(0).getMaterialId());
+                indetail.setWarehouseId(wareHouse.getId());
+                indetail.setQuantity(inMaterialHandles.get(0).getQuantity().add(thisStockHandleChangedQuantity));
+                // 得到对应的配方入库的单据
+                DoctorWarehouseStockHandle stockHandleIn = doctorWarehouseStockHandleDao.findById(stockHandle.getRelStockHandleId());
+                // 新的入库仓库添加配方生产入库明细
+                DoctorWarehouseMaterialHandle doctorWarehouseMaterialHandle = warehouseFormulaManager.create(indetail, stockDto, stockHandleIn, wareHouse);
+                // 修改配方出库的关联ID （陈娟 2018-09-29）
+                doctorWarehouseMaterialHandleDao.updateRelMaterialHandleId(doctorWarehouseMaterialHandle.getId(), inMaterialHandles.get(0).getId());
                 //新的入库仓库添加库存
-                doctorWarehouseStockManager.in(inMaterialHandles.get(0).getMaterialId(), detail.getQuantity(), wareHouse);
+                doctorWarehouseStockManager.in(inMaterialHandles.get(0).getMaterialId(), indetail.getQuantity(), wareHouse);
 
                 inStockHandle.setWarehouseId(wareHouse.getId());
                 inStockHandle.setWarehouseName(wareHouse.getWareHouseName());
