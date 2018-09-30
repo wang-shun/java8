@@ -75,8 +75,12 @@ public class ReportBoardController {
             if(groupIdsList.contains(0L)){
                 groupIdsList.remove(0L);
             }
-            if(!groupIdsList.contains(farmIds)) {
-                farmIds = groupIdsList.get(0);
+            if(groupIdsList.size()==0){
+                throw new InvalidException("你没有可查看集团的权限");
+            }else {
+                if (!groupIdsList.contains(farmIds)) {
+                    farmIds = groupIdsList.get(0);
+                }
             }
         }
         log.error("fRM_iS"+farmIds);
@@ -145,8 +149,15 @@ public class ReportBoardController {
             log.error("baseUser.getId()"+baseUser.getId());
             Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
             List<Long> groupIdsList = dataPermissionResponse.getResult().getGroupIdsList();
-            if(!groupIdsList.contains(farmIds)) {
-                farmIds = groupIdsList.get(0);
+            if(groupIdsList.contains(0L)){
+                groupIdsList.remove(0L);
+            }
+            if(groupIdsList.size()==0){
+                throw new InvalidException("你没有可查看集团的权限");
+            }else {
+                if (!groupIdsList.contains(farmIds)) {
+                    farmIds = groupIdsList.get(0);
+                }
             }
         }
         return RespHelper.or500(doctorDailyReportV2Service.findFarmsLiveStock1(Lists.newArrayList(farmIds),type)).get(0);
