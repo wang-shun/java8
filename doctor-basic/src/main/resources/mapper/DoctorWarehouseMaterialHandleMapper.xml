@@ -975,4 +975,17 @@
         update doctor_warehouse_material_handle set rel_material_handle_id = #{newRelMaterialHandleId} where rel_material_handle_id = #{oldRelMaterialHandleId}
     </update>
 
+    <!--得到出库之前的单据类型 （陈娟 2018-10-08）-->
+    <select id="getBeforeType" parameterType="map" resultType="map">
+        select DISTINCT type from doctor_warehouse_material_handle
+        where warehouse_id=#{warehouseId} and delete_flag=1 and settlement_date=#{settlementDate} and material_id=#{materialId} and (type=11 or type=1)
+        and <![CDATA[id < #{id}]]> ORDER BY type
+    </select>
+
+    <!--得到出库之前的配方入库单据的总金额和总数量 （陈娟 2018-10-08）-->
+    <select id="getBeforeRecipes" parameterType="map" resultType="map">
+        select SUM(amount) as sumAmount,SUM(quantity) as sumQuantity from doctor_warehouse_material_handle
+        where warehouse_id=#{warehouseId} and delete_flag=1 and settlement_date=#{settlementDate} and material_id=#{materialId} and type=11 and <![CDATA[id < #{id}]]>
+    </select>
+
 </mapper>

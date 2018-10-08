@@ -327,8 +327,24 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                 materialHandle.getWarehouseId(),
                 materialHandle.getQuantity());
 
-        BigDecimal historyStockAmount = historyBalance.getAmount();
-        BigDecimal historyStockQuantity = historyBalance.getQuantity();
+        BigDecimal historyStockAmount = new BigDecimal(0);
+        BigDecimal historyStockQuantity = new BigDecimal(0);
+        // 如果该物料在出库之前只有配方入库，则此时的出库单据的单价与金额和配方出库息息相关（陈娟 2018-10-08）
+        if(materialHandle.getType().equals(WarehouseMaterialHandleType.OUT.getValue())){
+            List<Map> typeMap = doctorWarehouseMaterialHandleDao.getBeforeType(materialHandle.getWarehouseId(), materialHandle.getSettlementDate(), materialHandle.getMaterialId(),materialHandle.getId());
+            if((typeMap.size()<=1&&typeMap.get(0).get("type").equals(WarehouseMaterialHandleType.FORMULA_IN.getValue()))||typeMap.size()>1){
+                // 只有配方入库或者有配方入库也有采购入库时，历史金额(数量)等于配方 + 此时的历史金额(数量)
+                Map<String, Object> recipesSum = doctorWarehouseMaterialHandleDao.getBeforeRecipes(materialHandle.getWarehouseId(), materialHandle.getSettlementDate(), materialHandle.getMaterialId(),materialHandle.getId());
+                historyStockAmount = historyBalance.getAmount().add(new BigDecimal(recipesSum.get("sumAmount").toString()));
+                historyStockQuantity = historyBalance.getQuantity().add(new BigDecimal(recipesSum.get("sumQuantity").toString()));
+            }else{
+                historyStockAmount = historyBalance.getAmount();
+                historyStockQuantity = historyBalance.getQuantity();
+            }
+        }else{
+            historyStockAmount = historyBalance.getAmount();
+            historyStockQuantity = historyBalance.getQuantity();
+        }
 
         if (WarehouseMaterialHandleType.isBigIn(materialHandle.getType())) {
             //入库类型：采购入库，退料入库，盘盈入库，调拨入库，配方生产入库
