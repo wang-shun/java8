@@ -551,4 +551,5 @@ public class Users {
          */
         private Integer reviewStatusDoctor;
     }
+
 }
