@@ -416,6 +416,7 @@ public class DoctorSearches {
 
     //如果是产房，获取一下产房里的母猪数
     private Long getSowCountWhenFarrow(DoctorGroupSearchDto searchDto) {
+        log.error("searchDto="+searchDto);
         Long sowCount = 0L;
         if (notEmpty(searchDto.getBarnIdList())) {
             for (Long barnId : searchDto.getBarnIdList()) {
@@ -431,6 +432,7 @@ public class DoctorSearches {
 
         //如果查产房类型，直接返回所有产房里的母猪数
         if (notEmpty(searchDto.getPigTypes()) && searchDto.getPigTypes().contains(PigType.DELIVER_SOW.getValue())) {
+            log.error("searchDto.getPigTypes()="+searchDto.getPigTypes());
             return RespHelper.or(doctorPigReadService.getPigCountByBarnPigTypes(searchDto.getFarmId(),
                             Lists.newArrayList(PigType.DELIVER_SOW.getValue())), 0L);
         }
