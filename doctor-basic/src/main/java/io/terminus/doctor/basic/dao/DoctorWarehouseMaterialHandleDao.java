@@ -312,8 +312,10 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectOne(this.sqlId("findByApply"), params);
     }
 
-    public void updateHandleDateAndSettlementDate(Calendar handleDate, Date settlementDate, Long materialHandleId) {
+    public void updateHandleDateAndSettlementDate(Calendar handleDate, Date settlementDate, Long materialHandleId,Integer type) {
+        // 更新入库单据的事件日期（陈娟 2018-10-08）
         Map<String, Object> params = new HashMap<>();
+        params.put("type", type);
         params.put("materialHandleId", materialHandleId);
         params.put("handleDate", handleDate.getTime());
         params.put("year", handleDate.get(Calendar.YEAR));
@@ -517,5 +519,26 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         map.put("newRelMaterialHandleId", newRelMaterialHandleId);
         map.put("oldRelMaterialHandleId", oldRelMaterialHandleId);
         return this.sqlSession.update(this.sqlId("updateRelMaterialHandleId"), map)>=1;
+    }
+
+    // 得到出库之前的单据类型 （陈娟 2018-10-08）
+    public List<Map> getBeforeType(Long warehouseId,Date settlementDate,Long materialId,Long id) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("warehouseId", warehouseId);
+        map.put("settlementDate", settlementDate);
+        map.put("materialId", materialId);
+        map.put("id", id);
+        List<Map> typeMap = this.sqlSession.selectList(this.sqlId("getBeforeType"), map);
+        return typeMap;
+    }
+
+    // 得到出库之前的配方入库单据的总金额和总数量 （陈娟 2018-10-08）
+    public Map<String, Object> getBeforeRecipes(Long warehouseId,Date settlementDate,Long materialId,Long id) {
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("warehouseId", warehouseId);
+        map.put("settlementDate", settlementDate);
+        map.put("materialId", materialId);
+        map.put("id", id);
+        return this.sqlSession.selectOne(this.sqlId("getBeforeRecipes"), map);
     }
 }

@@ -218,7 +218,7 @@ public class WarehouseTransferStockService
         if (changedHandleDate) {
             //更新调拨入库单据
             Calendar newDate = warehouseTransferManager.buildNewHandleDate(stockDto.getHandleDate());
-            doctorWarehouseStockHandleDao.updateHandleDateAndSettlementDate(newDate, stockDto.getSettlementDate(), stockHandle.getId());
+            doctorWarehouseStockHandleDao.updateHandleDateAndSettlementDate(newDate, stockDto.getSettlementDate(), stockHandle.getId(),1);
         }
     }
 

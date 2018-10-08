@@ -140,20 +140,20 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 
             log.info("start to settlement org {} material handle for {}", settlementDate);
 
-            // 配方入库金额，单价的结算（陈娟 2018-09-28）
-            // 得到配方入库单据
-            List<DoctorWarehouseMaterialHandle> materialHandleIns = doctorWarehouseMaterialHandleDao.findFormulaStorage(orgId, settlementDate);
-            for (DoctorWarehouseMaterialHandle materialHandleIn : materialHandleIns) {
-                List<DoctorWarehouseMaterialHandle> materialHandleOuts = doctorWarehouseMaterialHandleDao.findFormulaByRelMaterialHandleId(materialHandleIn.getId(), 12);
-                // 得到配方出库单据
-                BigDecimal amout = new BigDecimal(0);
-                for (DoctorWarehouseMaterialHandle materialHandleOut : materialHandleOuts) {
-                    amout = amout.add(materialHandleOut.getAmount());
-                }
-                doctorWarehouseMaterialHandleDao.updateUnitPriceAndAmountById(materialHandleIn.getId(), amout.divide(materialHandleIn.getQuantity()), amout);
-            }
-
-            log.info("update formula storage unit price and amount under org {} use :{}ms", orgId, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+//            // 配方入库金额，单价的结算（陈娟 2018-09-28）
+//            // 得到配方入库单据
+//            List<DoctorWarehouseMaterialHandle> materialHandleIns = doctorWarehouseMaterialHandleDao.findFormulaStorage(orgId, settlementDate);
+//            for (DoctorWarehouseMaterialHandle materialHandleIn : materialHandleIns) {
+//                List<DoctorWarehouseMaterialHandle> materialHandleOuts = doctorWarehouseMaterialHandleDao.findFormulaByRelMaterialHandleId(materialHandleIn.getId(), 12);
+//                // 得到配方出库单据
+//                BigDecimal amout = new BigDecimal(0);
+//                for (DoctorWarehouseMaterialHandle materialHandleOut : materialHandleOuts) {
+//                    amout = amout.add(materialHandleOut.getAmount());
+//                }
+//                doctorWarehouseMaterialHandleDao.updateUnitPriceAndAmountById(materialHandleIn.getId(), amout.divide(materialHandleIn.getQuantity()), amout);
+//            }
+//
+//            log.info("update formula storage unit price and amount under org {} use :{}ms", orgId, stopwatch.elapsed(TimeUnit.MILLISECONDS));
 
             List<DoctorWarehouseMaterialHandle> materialHandles = doctorWarehouseMaterialHandleDao.findByOrgAndSettlementDate(orgId, settlementDate);
 
@@ -327,8 +327,24 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                 materialHandle.getWarehouseId(),
                 materialHandle.getQuantity());
 
-        BigDecimal historyStockAmount = historyBalance.getAmount();
-        BigDecimal historyStockQuantity = historyBalance.getQuantity();
+        BigDecimal historyStockAmount = new BigDecimal(0);
+        BigDecimal historyStockQuantity = new BigDecimal(0);
+        // 如果该物料在出库之前只有配方入库，则此时的出库单据的单价与金额和配方出库息息相关（陈娟 2018-10-08）
+        if(materialHandle.getType().equals(WarehouseMaterialHandleType.OUT.getValue())){
+            List<Map> typeMap = doctorWarehouseMaterialHandleDao.getBeforeType(materialHandle.getWarehouseId(), materialHandle.getSettlementDate(), materialHandle.getMaterialId(),materialHandle.getId());
+            if((typeMap.size()<=1&&typeMap.get(0).get("type").equals(WarehouseMaterialHandleType.FORMULA_IN.getValue()))||typeMap.size()>1){
+                // 只有配方入库或者有配方入库也有采购入库时，历史金额(数量)等于配方 + 此时的历史金额(数量)
+                Map<String, Object> recipesSum = doctorWarehouseMaterialHandleDao.getBeforeRecipes(materialHandle.getWarehouseId(), materialHandle.getSettlementDate(), materialHandle.getMaterialId(),materialHandle.getId());
+                historyStockAmount = historyBalance.getAmount().add(new BigDecimal(recipesSum.get("sumAmount").toString()));
+                historyStockQuantity = historyBalance.getQuantity().add(new BigDecimal(recipesSum.get("sumQuantity").toString()));
+            }else{
+                historyStockAmount = historyBalance.getAmount();
+                historyStockQuantity = historyBalance.getQuantity();
+            }
+        }else{
+            historyStockAmount = historyBalance.getAmount();
+            historyStockQuantity = historyBalance.getQuantity();
+        }
 
         if (WarehouseMaterialHandleType.isBigIn(materialHandle.getType())) {
             //入库类型：采购入库，退料入库，盘盈入库，调拨入库，配方生产入库
@@ -348,29 +364,29 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                     log.info("previous in not found,use user set unit price :{}", materialHandle.getUnitPrice());
                 }
                 materialHandle.setAmount(materialHandle.getUnitPrice().multiply(materialHandle.getQuantity()).setScale(2,BigDecimal.ROUND_HALF_UP));
-            } else if (materialHandle.getType().equals(WarehouseMaterialHandleType.FORMULA_IN.getValue())) {
-                //配方生产入库，根据出库的总价/入库的数量
-                //获取配方入库单据
-                DoctorWarehouseStockHandle formulaInStockHandle = doctorWarehouseStockHandleDao.findById(materialHandle.getStockHandleId());
-                if (null == formulaInStockHandle)
-                    throw new InvalidException("stock.handle.not.found", materialHandle.getStockHandleId());
-                //根据配方入库单据获取对应配方出库单据，再根据配方出库单据获取明细
-                List<Long> formulaOutStockHandleIds = doctorWarehouseStockHandleDao.findRelStockHandle(formulaInStockHandle.getId()).stream().map(DoctorWarehouseStockHandle::getId).collect(Collectors.toList());
-                if (formulaOutStockHandleIds.isEmpty())
-                    throw new InvalidException("formula.out.stock.handle.not.found", formulaInStockHandle.getId());
-
-                List<DoctorWarehouseMaterialHandle> formulaOutMaterialHandles = doctorWarehouseMaterialHandleDao.findByStockHandles(formulaOutStockHandleIds);
-                if (formulaOutMaterialHandles.isEmpty())
-                    throw new InvalidException("formula.out.material.handle.not.found", formulaInStockHandle.getId());
-
-                BigDecimal totalFormulaOutAmount = formulaOutMaterialHandles
-                        .stream()
-                        .map(mh -> new BigDecimal(mh.getUnitPrice().toString()).multiply(mh.getQuantity()))
-                        .reduce((a, b) -> a.add(b))
-                        .orElse(new BigDecimal(0));
-
-                materialHandle.setUnitPrice(totalFormulaOutAmount.divide(materialHandle.getQuantity(), 4, BigDecimal.ROUND_HALF_UP));
-                materialHandle.setAmount(totalFormulaOutAmount.setScale(2,BigDecimal.ROUND_HALF_UP));
+//            } else if (materialHandle.getType().equals(WarehouseMaterialHandleType.FORMULA_IN.getValue())) {
+//                //配方生产入库，根据出库的总价/入库的数量
+//                //获取配方入库单据
+//                DoctorWarehouseStockHandle formulaInStockHandle = doctorWarehouseStockHandleDao.findById(materialHandle.getStockHandleId());
+//                if (null == formulaInStockHandle)
+//                    throw new InvalidException("stock.handle.not.found", materialHandle.getStockHandleId());
+//                //根据配方入库单据获取对应配方出库单据，再根据配方出库单据获取明细
+//                List<Long> formulaOutStockHandleIds = doctorWarehouseStockHandleDao.findRelStockHandle(formulaInStockHandle.getId()).stream().map(DoctorWarehouseStockHandle::getId).collect(Collectors.toList());
+//                if (formulaOutStockHandleIds.isEmpty())
+//                    throw new InvalidException("formula.out.stock.handle.not.found", formulaInStockHandle.getId());
+//
+//                List<DoctorWarehouseMaterialHandle> formulaOutMaterialHandles = doctorWarehouseMaterialHandleDao.findByStockHandles(formulaOutStockHandleIds);
+//                if (formulaOutMaterialHandles.isEmpty())
+//                    throw new InvalidException("formula.out.material.handle.not.found", formulaInStockHandle.getId());
+//
+//                BigDecimal totalFormulaOutAmount = formulaOutMaterialHandles
+//                        .stream()
+//                        .map(mh -> new BigDecimal(mh.getUnitPrice().toString()).multiply(mh.getQuantity()))
+//                        .reduce((a, b) -> a.add(b))
+//                        .orElse(new BigDecimal(0));
+//
+//                materialHandle.setUnitPrice(totalFormulaOutAmount.divide(materialHandle.getQuantity(), 4, BigDecimal.ROUND_HALF_UP));
+//                materialHandle.setAmount(totalFormulaOutAmount.setScale(2,BigDecimal.ROUND_HALF_UP));
 
             } else if (materialHandle.getType().equals(WarehouseMaterialHandleType.TRANSFER_IN.getValue())) {
 
@@ -394,7 +410,14 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
                     throw new InvalidException("settlement.history.quantity.amount.zero");
                 }
             }
-            if (materialHandle.getType().equals(WarehouseMaterialHandleType.RETURN.getValue())) {
+            if(materialHandle.getType().equals(WarehouseMaterialHandleType.FORMULA_OUT.getValue())){
+                materialHandle.setAmount(historyStockAmount.multiply(materialHandle.getQuantity()).divide(historyStockQuantity, 2, BigDecimal.ROUND_HALF_UP));
+                materialHandle.setUnitPrice(historyStockAmount.divide(historyStockQuantity, 4, BigDecimal.ROUND_HALF_UP));
+                // 配方入库单据 （陈娟 2018-10-08）
+                DoctorWarehouseMaterialHandle materialHandleIn = doctorWarehouseMaterialHandleDao.findById(materialHandle.getRelMaterialHandleId());
+                BigDecimal amout = materialHandleIn.getAmount().add(historyStockAmount.multiply(materialHandle.getQuantity()).divide(historyStockQuantity, 2, BigDecimal.ROUND_HALF_UP));
+                doctorWarehouseMaterialHandleDao.updateUnitPriceAndAmountById(materialHandleIn.getId(), amout.divide(materialHandleIn.getQuantity()), amout);
+            }else if (materialHandle.getType().equals(WarehouseMaterialHandleType.RETURN.getValue())) {
 
                 DoctorWarehouseMaterialHandle otherIn = settlementMaterialHandles.get(materialHandle.getRelMaterialHandleId());
                 if (null == otherIn) {
