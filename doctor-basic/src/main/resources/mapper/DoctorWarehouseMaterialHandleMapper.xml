@@ -481,7 +481,10 @@
         settlement_date=#{settlementDate},
         handle_year=#{year},
         handle_month=#{month}
-        WHERE rel_material_handle_id=#{materialHandleId}
+        WHERE
+        <!--更新入库单据的事件日期（陈娟 2018-10-08）-->
+        <if test="type == 1">rel_material_handle_id=#{materialHandleId}</if>
+        <if test="type == 2">id=#{materialHandleId}</if>
     </update>
 
     <select id="findFirstRefundHandleDate" parameterType="list" resultType="Date">

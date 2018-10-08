@@ -312,8 +312,10 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
         return this.sqlSession.selectOne(this.sqlId("findByApply"), params);
     }
 
-    public void updateHandleDateAndSettlementDate(Calendar handleDate, Date settlementDate, Long materialHandleId) {
+    public void updateHandleDateAndSettlementDate(Calendar handleDate, Date settlementDate, Long materialHandleId,Integer type) {
+        // 更新入库单据的事件日期（陈娟 2018-10-08）
         Map<String, Object> params = new HashMap<>();
+        params.put("type", type);
         params.put("materialHandleId", materialHandleId);
         params.put("handleDate", handleDate.getTime());
         params.put("year", handleDate.get(Calendar.YEAR));
