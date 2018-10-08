@@ -325,4 +325,7 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
     public List<Long> findAllGroups(){
         return sqlSession.selectList(sqlId("findAllGroups"));
     }
+    public Integer getUserType(Long userId){
+        return sqlSession.selectOne(sqlId("getUserType"),userId);
+    }
 }

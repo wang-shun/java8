@@ -112,4 +112,5 @@ public interface DoctorOrgReadService {
      */
 
     List<Long> findAllGroups();
+    Integer getUserType(Long userId);
 }
