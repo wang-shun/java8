@@ -506,6 +506,10 @@ public class Users {
         if (baseUser == null) {
             throw new JsonResponseException("user.not.login");
         }
+        Integer userType = doctorOrgReadService.getUserType(baseUser.getId());
+        if(userType != null && userType != 1){
+            return null;
+        }
         Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
         if (!dataPermissionResponse.isSuccess()) {
             throw new JsonResponseException("user.not.permission");
@@ -524,6 +528,10 @@ public class Users {
         BaseUser baseUser = UserUtil.getCurrentUser();
         if (baseUser == null) {
             throw new JsonResponseException("user.not.login");
+        }
+        Integer userType = doctorOrgReadService.getUserType(baseUser.getId());
+        if(userType != null && userType != 1){
+            return null;
         }
         Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
         if (!dataPermissionResponse.isSuccess()) {
