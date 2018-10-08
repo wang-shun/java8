@@ -323,6 +323,16 @@ public class ServiceConfiguration {
             public List<DoctorFarmInformation> findSubordinatePig(Date date) {
                 return null;
             }
+
+            @Override
+            public List<DoctorOrg> findOrgByParentId(Long parent) {
+                return null;
+            }
+
+            @Override
+            public Response<List<DoctorFarm>> findFarmsByOrgId1(Long orgId) {
+                return null;
+            }
         };
     }
 

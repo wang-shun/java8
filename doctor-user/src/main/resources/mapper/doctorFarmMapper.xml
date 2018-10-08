@@ -113,6 +113,12 @@
         WHERE org_id = #{orgId}
         <include refid="singleFrozen"/>
     </select>
+    <!--ysq新增-->
+    <select id="findByOrgId1" parameterType="long" resultMap="DoctorFarmMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE org_id = #{orgId}
+    </select>
 
     <select id="findByOrgIds" parameterType="list" resultMap="DoctorFarmMap" >
         SELECT <include refid="cols_all" />

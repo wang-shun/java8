@@ -33,4 +33,6 @@ public interface DoctorReportWriteService {
     void flushNPD(List<Long> farmIds, Date start);
 
     void flushNPD(Date start);
+
+    void flushNPD(Long orgId, Date start);
 }

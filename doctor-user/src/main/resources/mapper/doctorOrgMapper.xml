@@ -280,4 +280,11 @@
         WHERE
         id =#{id}
     </update>
+
+   <!--ysq新增-->
+    <select id="findOrgByParent" parameterType="long" resultMap="DoctorOrgMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE parent_id = #{parent}
+    </select>
 </mapper>
