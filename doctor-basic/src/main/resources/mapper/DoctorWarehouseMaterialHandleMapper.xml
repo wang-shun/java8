@@ -368,7 +368,7 @@
         <include refid="tb"/>
         WHERE org_id=#{orgId}
         AND settlement_date=#{settlementDate}
-        AND delete_flag=1
+        AND delete_flag=1 and type!=11
         ORDER BY handle_date ASC,id ASC
     </select>
 
