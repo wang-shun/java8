@@ -354,7 +354,7 @@
             <if test="orzType == 3">and farm_id = #{orzId}</if>
         </where>
         GROUP BY
-        <if test="orzType == 2">group_id,</if>
+        <if test="orzType == 1">group_id,</if>
         <if test="orzType == 2">org_id,</if>
         <if test="orzType == 3">farm_id,</if>
         <if test="dateType == 1"> date_format(sum_at, '%y-%m-%d'),</if>
