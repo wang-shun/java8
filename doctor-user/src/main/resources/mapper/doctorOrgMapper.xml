@@ -436,4 +436,10 @@
     <select id="findGroupByOrgId" parameterType="long" resultType="long" >
         select parent_id from doctor_orgs where id = #{groupId}
     </select>
+
+
+    <select id="getUserType" parameterType="long" resultType="Integer" >
+        select user_type from doctor_user_subs  where user_id = #{userId}
+    </select>
+
 </mapper>

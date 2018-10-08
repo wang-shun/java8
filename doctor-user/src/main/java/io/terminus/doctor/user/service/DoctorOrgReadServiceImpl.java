@@ -203,4 +203,8 @@ public class DoctorOrgReadServiceImpl implements DoctorOrgReadService{
         return Response.ok(doctorOrgDao.findGroupByOrgId(groupId));
     }
 
+    @Override
+    public Integer getUserType(Long userId){
+        return doctorOrgDao.getUserType(userId);
+    }
 }

@@ -106,5 +106,5 @@ public interface DoctorOrgReadService {
      * @return
      */
     Response<Long>  findGroupByOrgId(Long groupId);
-
+    Integer getUserType(Long userId);
 }
