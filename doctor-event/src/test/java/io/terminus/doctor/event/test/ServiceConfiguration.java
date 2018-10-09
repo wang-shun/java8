@@ -73,6 +73,7 @@ import io.terminus.doctor.user.dto.DoctorDepartmentDto;
 import io.terminus.doctor.user.dto.DoctorDepartmentLinerDto;
 import io.terminus.doctor.user.dto.FarmCriteria;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorFarmInformation;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorDepartmentReadService;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -92,6 +93,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -364,6 +366,11 @@ public class ServiceConfiguration {
 
             @Override
             public Response<DoctorFarm> findByNumber(String number) {
+                return null;
+            }
+
+            @Override
+            public List<DoctorFarmInformation> findSubordinatePig(Date date) {
                 return null;
             }
 
