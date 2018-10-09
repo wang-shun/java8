@@ -584,14 +584,11 @@
     </select>
 
     <select id="listByFarmIdTime" parameterType="map" resultType="map">
-        select a.farm_id as farmId,ifnull(f.name,'') as farmName,a.type as type,
-        a.handle_year as handleYear,a.handle_Month as handleMonth,a.org_id as orgId,
-        a.settlement_date as settlementDate,
+        select a.farm_id as farmId,a.org_id as orgId,a.settlement_date as settlementDate,
         ifnull(ROUND((temp1.inAmount+ 0.00000001),2),0) as inAmount,
         ifnull(ROUND((temp2.outAmount+ 0.00000001),2),0) as outAmount,
         ifnull(ROUND((temp3.balanceAmount+ 0.00000001),2),0)as balanceAmount
-        from doctor_warehouse_material_handle a
-        left join doctor_farms f on a.farm_id = f.id
+        from doctor_warehouse_stock_monthly a
 
         left join (SELECT ifnull(
             sum(case type	when '1' then amount	when '7' then amount	when '9' then amount
@@ -614,8 +611,7 @@
             GROUP BY b.farm_id
         ) temp3 on a.farm_id = temp3.farm_id
 
-        where a.delete_flag = 1
-        and date_format(a.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+        where date_format(a.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
         and a.org_id = #{orgId}
         group by a.farm_id
         order by a.farm_id;

@@ -99,16 +99,16 @@ public class SettlementController {
                               @DateTimeFormat(pattern = "yyyy-MM")
                               @RequestParam Date settlementDate) {
 
-        Boolean ff = doctorWarehouseSettlementService.findByOrgId(orgId);
-        if(!ff) {
-            Date date = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findSettlementDate(orgId));
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(date);
-            if (DateUtil.toDate(DateUtil.getYearMonth(settlementDate) + "-01").after(date)) {
-                Log.info("该公司的第一笔入库单是从" + cal.get(Calendar.YEAR) + "年" + (cal.get(Calendar.MONTH) + 1) + "月开始的，请重" + cal.get(Calendar.YEAR) + "年" + (cal.get(Calendar.MONTH) + 1) + "月开始结算");
-                throw new InvalidException("Please.pay.attention.to.settlement.in.YYYY-MM", cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1));
-            }
-        }
+//        Boolean ff = doctorWarehouseSettlementService.findByOrgId(orgId);
+//        if(!ff) {
+//            Date date = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findSettlementDate(orgId));
+//            Calendar cal = Calendar.getInstance();
+//            cal.setTime(date);
+//            if (DateUtil.toDate(DateUtil.getYearMonth(settlementDate) + "-01").after(date)) {
+//                Log.info("该公司的第一笔入库单是从" + cal.get(Calendar.YEAR) + "年" + (cal.get(Calendar.MONTH) + 1) + "月开始的，请重" + cal.get(Calendar.YEAR) + "年" + (cal.get(Calendar.MONTH) + 1) + "月开始结算");
+//                throw new InvalidException("Please.pay.attention.to.settlement.in.YYYY-MM", cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1), cal.get(Calendar.YEAR), (cal.get(Calendar.MONTH) + 1));
+//            }
+//        }
 
         if (doctorWarehouseSettlementService.isUnderSettlement(orgId))
             throw new ServiceException("under.settlement");
