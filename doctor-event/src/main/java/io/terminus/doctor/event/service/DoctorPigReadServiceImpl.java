@@ -645,4 +645,17 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
         }
     }
 
+    @Override
+    public Response<List<DoctorPigTrack>> findActivePigTrackByCurrentBarnIds(Long barnId,Long farmId) {
+        try {
+            List<DoctorPigTrack> pigTracks = doctorPigTrackDao.findByBarnIds(barnId,farmId);
+
+            //过滤掉公母猪已离场的
+            return Response.ok(pigTracks.stream().filter(pig -> !pig.getStatus().equals(PigStatus.BOAR_LEAVE.getKey())
+                    && !pig.getStatus().equals(PigStatus.Removal.getKey())).collect(Collectors.toList()));
+        } catch (Exception e) {
+            log.error("find active pig track by current barn id fail, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
+            return Response.fail("pig.track.find.fail");
+        }
+    }
 }
