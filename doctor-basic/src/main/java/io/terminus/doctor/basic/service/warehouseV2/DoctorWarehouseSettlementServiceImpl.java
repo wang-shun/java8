@@ -155,7 +155,8 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 //
 //            log.info("update formula storage unit price and amount under org {} use :{}ms", orgId, stopwatch.elapsed(TimeUnit.MILLISECONDS));
 
-            List<DoctorWarehouseMaterialHandle> materialHandles = doctorWarehouseMaterialHandleDao.findByOrgAndSettlementDate(orgId, settlementDate);
+            // 计算单价、金额时不需要得到配方入库单据，配方入库的单价、金额计算配方出库的时候累加计算 （陈娟 2018-10-09）
+            List<DoctorWarehouseMaterialHandle> materialHandles = doctorWarehouseMaterialHandleDao.findByOrgAndSettlementDate(orgId, settlementDate,1);
 
             log.info("get all need to settlement material handle,total :{}", materialHandles.size());
 
@@ -226,8 +227,10 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
 //            }
 //            log.info("update error amount under org {} use :{}ms", orgId, stopwatch.elapsed(TimeUnit.MILLISECONDS));
 
+            // 结算表需要得到配方入库单据 （陈娟 2018-10-09）
+            List<DoctorWarehouseMaterialHandle> materialHandles2 = doctorWarehouseMaterialHandleDao.findByOrgAndSettlementDate(orgId, settlementDate,0);
             //结算本月有出入库的物料
-            Map<Long/*farmId*/, List<DoctorWarehouseMaterialHandle>> warehouseMaterialHandleMap = materialHandles.
+            Map<Long/*farmId*/, List<DoctorWarehouseMaterialHandle>> warehouseMaterialHandleMap = materialHandles2.
                     stream().collect(Collectors.groupingBy(DoctorWarehouseMaterialHandle::getWarehouseId));
 
             warehouseMaterialHandleMap.forEach((warehouseId, warehouseMaterialHandles) -> {

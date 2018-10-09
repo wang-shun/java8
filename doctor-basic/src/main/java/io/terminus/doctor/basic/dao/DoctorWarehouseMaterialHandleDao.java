@@ -172,11 +172,12 @@ public class DoctorWarehouseMaterialHandleDao extends MyBatisDao<DoctorWarehouse
      * @param settlementDate 会计年月
      * @return
      */
-    public List<DoctorWarehouseMaterialHandle> findByOrgAndSettlementDate(Long orgId, Date settlementDate) {
+    public List<DoctorWarehouseMaterialHandle> findByOrgAndSettlementDate(Long orgId, Date settlementDate,Integer flag) {
 
         Map<String, Object> criteria = Maps.newHashMap();
         criteria.put("orgId", orgId);
         criteria.put("settlementDate", settlementDate);
+        criteria.put("flag", flag);
 
         return this.sqlSession.selectList(this.sqlId("findByOrgAndSettlementDate"), criteria);
     }
