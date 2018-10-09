@@ -343,7 +343,7 @@ public class DoctorSearches {
 
         Paging<SearchedGroup> paging = pagingGroup(pageNo, pageSize, searchDto);
         Long groupCount = RespHelper.orServEx(doctorGroupReadService.getGroupCount(searchDto));
-        Long sowCount = getSowCountWhenFarrow(searchDto);
+        Long sowCount = getSowCountWhenFarrow(searchDto,Long.valueOf(params.get("farmId")));
         return new GroupPigPaging<>(paging, groupCount, sowCount);
     }
 
@@ -427,14 +427,14 @@ public class DoctorSearches {
     }
 
     //如果是产房，获取一下产房里的母猪数
-    private Long getSowCountWhenFarrow(DoctorGroupSearchDto searchDto) {
+    private Long getSowCountWhenFarrow(DoctorGroupSearchDto searchDto,Long farmId) {
         Long sowCount = 0L;
         if (notEmpty(searchDto.getBarnIdList())) {
             for (Long barnId : searchDto.getBarnIdList()) {
                 DoctorBarn barn = RespHelper.or500(doctorBarnReadService.findBarnById(barnId));
                 if (barn != null && Objects.equals(barn.getPigType(), PigType.DELIVER_SOW.getValue())) {
                     List<DoctorPigTrack> pigTracks = RespHelper.or(doctorPigReadService
-                            .findActivePigTrackByCurrentBarnId(barnId), Collections.emptyList());
+                            .findActivePigTrackByCurrentBarnIds(barnId,farmId), Collections.emptyList());
                     sowCount += pigTracks.size();
                 }
             }

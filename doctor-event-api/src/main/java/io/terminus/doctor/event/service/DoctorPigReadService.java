@@ -236,4 +236,9 @@ public interface DoctorPigReadService {
      */
     Response<Paging<SearchedPig>> pagesSowPigById(Map<String, Object> params, Integer pageNo, Integer pageSize);
 
+    /*
+    孔景军
+     */
+    Response<List<DoctorPigTrack>> findActivePigTrackByCurrentBarnIds(@NotNull(message = "barnId.not.null") Long barnId,Long farmId);
+
 }

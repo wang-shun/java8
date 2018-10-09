@@ -3,6 +3,7 @@ package io.terminus.doctor.event.dao;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.event.dto.DoctorSuggestPig;
 import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
@@ -216,5 +217,12 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
 
     public Long queryCurrentEventId(Long pigId){
         return getSqlSession().selectOne(sqlId("queryCurrentEventId"), pigId);
+    }
+
+    public List<DoctorPigTrack> findByBarnIds(Long barnId,Long farmId) {
+        Map map = Maps.newHashMap();
+        map.put("barnId",barnId);
+        map.put("farmId",farmId);
+        return getSqlSession().selectList(sqlId("findByBarnIds"), map);
     }
 }
