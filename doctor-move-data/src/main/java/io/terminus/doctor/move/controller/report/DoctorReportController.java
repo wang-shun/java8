@@ -354,6 +354,7 @@ public class DoctorReportController {
     public void flushNPD1(@PathVariable Long orgId,
                          @RequestParam @DateTimeFormat(pattern = "yyyyMM") Date date) {
         doctorReportWriteService.flushNPD(orgId, date);
+        log.info("===>刷数据");
     }
 
 }
