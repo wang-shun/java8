@@ -608,4 +608,20 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     public DoctorGroupEvent findLastEvent(Long groupId){
         return  doctorGroupEventDao.lastEventByGroupId(groupId);
     }
+
+    /*物联网接口使用（孔景军）*/
+    @Override
+    public Response<List<DoctorGroup>> findGroupByCurrentBarnIdFuzzy(Long barnId,String groupCode) {
+        try {
+            return Response.ok(doctorGroupDao.findGroupByCurrentBarnIdFuzzy(barnId,groupCode));
+        } catch (Exception e) {
+            log.error("find group by current barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.find.fail");
+        }
+    }
+
+    @Override
+    public Integer fingGroupQuantityByGroupCode(String groupCode) {
+        return doctorGroupDao.fingGroupQuantityByGroupCode(groupCode);
+    }
 }

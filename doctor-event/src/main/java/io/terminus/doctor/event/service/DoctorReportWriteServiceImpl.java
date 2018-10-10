@@ -83,6 +83,14 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
         flushNPD(farms.stream().map(DoctorFarm::getId).collect(Collectors.toList()), start);
     }
 
+    @Override
+    public void flushNPD(Long orgId, Date start) {
+
+            List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId1(orgId));
+
+            flushNPD(farms.stream().map(DoctorFarm::getId).collect(Collectors.toList()), start);
+    }
+
     public void deleteNPD(List<Long> farmIds, int year, int month){
         Map<String, Object> params = new HashMap<>();
         for (int i =0; i < farmIds.size(); i++){

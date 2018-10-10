@@ -178,4 +178,15 @@ public class DoctorMessageInfo implements Serializable{
      */
     private String materialName;
 
+    /**
+     * 备注
+     */
+    private String remark;
+
+    /**
+     * 免疫日期类型, 枚举类VaccinationDateType
+     * @see io.terminus.doctor.event.enums.VaccinationDateType
+     */
+    private Integer vaccinationDateType;
+
 }
