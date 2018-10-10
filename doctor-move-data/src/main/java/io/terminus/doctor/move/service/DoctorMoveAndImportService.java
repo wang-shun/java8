@@ -106,8 +106,12 @@ public class DoctorMoveAndImportService {
             //导入基础数据
             importBasic(farm, sheet.getBarn(), sheet.getBreed());
 
+            log.info("========================");
             Long userId = null;
+            log.info("userId========================{}",userId);
+            log.info("farm.Id========================{}",farm.getId());
             Sub sub = moveAndImportManager.selectDefaultUser(farm.getId());
+            log.info("sub========================{}",sub);
             if(sub==null){
                 Row row1 = sheet.getOperator().getRow(1);
                 log.info("row1===================={}",row1);
