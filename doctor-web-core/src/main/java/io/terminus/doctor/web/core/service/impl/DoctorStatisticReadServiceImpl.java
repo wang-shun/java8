@@ -110,6 +110,7 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
     @Override
     public Response<DoctorBasicDto> getOrgStatisticByOrg(Long userId, Long orgId) {
         try {
+            log.error("orgId============="+orgId);
             //如果该账号为集团账号，则返回为空（孔景军）
             Integer userType = doctorOrgReadService.getUserType(userId);
             /*if(userType !=null && userType == 1){
