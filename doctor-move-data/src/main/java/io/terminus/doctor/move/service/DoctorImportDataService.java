@@ -231,8 +231,6 @@ public class DoctorImportDataService {
                 Sheet operator = shit.getOperator();
                 Row row1 = operator.getRow(1);
                 String loginName = ImportExcelUtils.getStringOrThrow(row1, 0);
-                String mobile = ImportExcelUtils.getStringOrThrow(row1, 1);
-                String realName = ImportExcelUtils.getStringOrThrow(row1, 2);
                 Integer userId = dataAuthDao.selectUserByName(loginName);
                 if(userId!=null){
                     user = new User();

@@ -254,4 +254,10 @@
         set frozen = 1
         where user_id = #{userId}
     </update>
+
+    <!--得到导入时猪场里面的账号-公司账号（陈娟 2018-10-10）-->
+    <select id="selectDefaultUser" parameterType="Integer" resultMap="SubMap">
+        select * from doctor_user_subs where farm_id = #{farmId} and user_type=2
+    </select>
+
 </mapper>

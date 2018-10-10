@@ -1,6 +1,7 @@
 package io.terminus.doctor.move.service;
 
 import com.google.common.base.Throwables;
+import io.terminus.doctor.basic.dao.DataAuthDao;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
@@ -18,8 +19,11 @@ import io.terminus.doctor.move.dto.DoctorImportBasicData;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
 import io.terminus.doctor.move.dto.DoctorMoveBasicData;
 import io.terminus.doctor.move.manager.DoctorMoveAndImportManager;
+import io.terminus.doctor.move.util.ImportExcelUtils;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.Sub;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +65,8 @@ public class DoctorMoveAndImportService {
     public DoctorDailyReportV2Service doctorDailyReportV2Service;
     @Autowired
     public DoctorReportWriteService doctorReportWriteService;
+    @Autowired
+    private DataAuthDao dataAuthDao;
 
     public List<DoctorFarm> moveData(Long moveId, Sheet sheet) {
         log.info("move data starting");
@@ -100,8 +106,14 @@ public class DoctorMoveAndImportService {
             //导入基础数据
             importBasic(farm, sheet.getBarn(), sheet.getBreed());
 
+            Row row1 = sheet.getOperator().getRow(1);
+            Long userId = null;
+            if(row1!=null){
+                String loginName = ImportExcelUtils.getStringOrThrow(row1, 0);
+                userId = Long.valueOf(dataAuthDao.selectUserByName(loginName));
+            }
             //打包数据
-            DoctorImportBasicData importBasicData = packageImportBasicData(farm);
+            DoctorImportBasicData importBasicData = packageImportBasicData(farm,userId);
 
             //导入猪事件
             importPig(sheet.getBoar(), sheet.getSow(), importBasicData);
@@ -140,13 +152,18 @@ public class DoctorMoveAndImportService {
     }
 
     @Transactional
-    public DoctorImportBasicData packageImportBasicData(DoctorFarm farm) {
+    public DoctorImportBasicData packageImportBasicData(DoctorFarm farm,Long userId) {
         log.info("package import basic staring");
         Map<String, Long> userMap = moveBasicService.getSubMap(farm.getOrgId());
         Map<String, DoctorBarn> barnMap = moveBasicService.getBarnMap2(farm.getId());
         Map<String, Long> breedMap = moveBasicService.getBreedMap();
+        // 默认用户：猪场表有数据则直接去猪场的公司账号，否则取记录操作人（陈娟 2018-10-10）
+        Sub sub = moveAndImportManager.selectDefaultUser(farm.getId());
+        if(sub==null){
+            sub = moveAndImportManager.findSubsByFarmIdAndStatusAndUserId(farm.getId(), 1, userId);
+        }
         return DoctorImportBasicData.builder().doctorFarm(farm).userMap(userMap).barnMap(barnMap)
-                .breedMap(breedMap).defaultUser(moveAndImportManager.getPrimaryUser(farm.getId()))
+                .breedMap(breedMap).defaultUser(sub)
                 .build();
     }
 
