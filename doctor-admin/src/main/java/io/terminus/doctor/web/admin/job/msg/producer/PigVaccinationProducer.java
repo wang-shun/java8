@@ -570,6 +570,8 @@ public class PigVaccinationProducer extends AbstractJobProducer {
         jsonData.put("dose", warn.getDose());
         jsonData.put("vaccinationDateType", warn.getVaccinationDateType());
         jsonData.put("vaccDate", DateTimeFormat.forPattern("yyyy-MM-dd").print(vaccDate));
+        String groupCode = pigDto.getPigCode();
+        Integer quantity = doctorGroupReadService.fingGroupQuantityByGroupCode(groupCode);
 
         try {
             DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
@@ -586,6 +588,9 @@ public class PigVaccinationProducer extends AbstractJobProducer {
                     .dose(warn.getDose())
                     .materialId(warn.getMaterialId())
                     .materialName(warn.getMaterialName())
+                    .remark(warn.getRemark())
+                    .vaccinationDateType(warn.getVaccinationDateType())
+                    .quantity(quantity)
                     .build();
 
             createMessage(subUsers, ruleRole, messageInfo);

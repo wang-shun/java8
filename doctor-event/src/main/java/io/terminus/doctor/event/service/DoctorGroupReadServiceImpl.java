@@ -619,4 +619,9 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             return Response.fail("group.find.fail");
         }
     }
+
+    @Override
+    public Integer fingGroupQuantityByGroupCode(String groupCode) {
+        return doctorGroupDao.fingGroupQuantityByGroupCode(groupCode);
+    }
 }

@@ -385,4 +385,11 @@
         WHERE current_barn_id = #{currentBarnId} AND status = 1
         <if test="groupCode != null">AND `group_code` like concat('%', #{groupCode}, '%')</if>
     </select>
+
+    <select id="fingGroupQuantityByGroupCode" parameterType="string" resultType="long">
+        select b.quantity
+        from doctor_groups a join doctor_group_tracks b
+        on a.id = b.group_id
+        where a.group_code = #{groupCode}
+    </select>
 </mapper>

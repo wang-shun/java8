@@ -16,7 +16,6 @@ import io.terminus.doctor.event.model.DoctorPigNpd;
 import io.terminus.doctor.event.model.DoctorReportNpd;
 import io.terminus.doctor.event.model.DoctorSowNpdDayly;
 import io.terminus.doctor.user.model.DoctorFarm;
-import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
@@ -85,15 +84,11 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
     }
 
     @Override
-    public void flushNPD(Long parentId, Date start) {
-        List<DoctorOrg> org = doctorFarmReadService.findOrgByParentId(parentId);
-        for (int i = 0; i < org.size(); i++){
-            Long orgId = org.get(i).getId();
+    public void flushNPD(Long orgId, Date start) {
 
             List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId1(orgId));
 
             flushNPD(farms.stream().map(DoctorFarm::getId).collect(Collectors.toList()), start);
-        }
     }
 
     public void deleteNPD(List<Long> farmIds, int year, int month){
