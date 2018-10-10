@@ -53,6 +53,7 @@ public class SubRoleWriteServiceImpl implements SubRoleWriteService {
             subRoleDao.findByUserIdAndStatus(appKey, 0L, 1).forEach(subRole -> {
                 subRole.setUserId(userId);
                 subRole.setFarmId(farmId);
+                subRole.setRoleType(3);
                 subRoleDao.create(subRole);
             });
             return Response.ok(true);

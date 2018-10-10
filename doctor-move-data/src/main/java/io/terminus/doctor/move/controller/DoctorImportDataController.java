@@ -151,6 +151,7 @@ public class DoctorImportDataController {
         DoctorImportSheet sheet = new DoctorImportSheet();
         sheet.setFarm(getSheet(workbook, "猪场"));
         sheet.setStaff(getSheet(workbook, "员工"));
+        sheet.setOperator(getSheet(workbook, "记录操作人"));
         sheet.setBarn(getSheet(workbook, "1.猪舍"));
         sheet.setBreed(getSheet(workbook, "2.品种"));
         sheet.setSow(getSheet(workbook, "3.母猪信息"));
