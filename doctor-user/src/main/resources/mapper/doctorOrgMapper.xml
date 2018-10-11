@@ -442,4 +442,10 @@
         select user_type from doctor_user_subs  where user_id = #{userId}
     </select>
 
+    <select id="findOrgByParent" parameterType="long" resultMap="DoctorOrgMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE parent_id = #{parent}
+    </select>
+
 </mapper>

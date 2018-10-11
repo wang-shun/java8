@@ -349,5 +349,12 @@ public class DoctorReportController {
         doctorReportWriteService.flushNPD(date);
     }
 
+    //刷指定公司的猪场
+    @RequestMapping(method = RequestMethod.GET, value = "/flush/npd/orgId/{orgId:\\d+}")
+    public void flushNPD1(@PathVariable Long orgId,
+                         @RequestParam @DateTimeFormat(pattern = "yyyyMM") Date date) {
+        doctorReportWriteService.flushNPD(orgId, date);
+        log.info("===>刷数据");
+    }
 
 }

@@ -25,6 +25,10 @@ public class DoctorFarmDao extends MyBatisDao<DoctorFarm> {
     public List<DoctorFarm> findByOrgId(Long orgId){
         return sqlSession.selectList(sqlId("findByOrgId"), orgId);
     }
+    //ysq新增
+    public List<DoctorFarm> findByOrgId1(Long orgId){
+        return sqlSession.selectList(sqlId("findByOrgId1"), orgId);
+    }
 
     public List<DoctorFarm> findByOrgIds(List<Long> orgIds){
         return sqlSession.selectList(sqlId("findByOrgIds"), orgIds);

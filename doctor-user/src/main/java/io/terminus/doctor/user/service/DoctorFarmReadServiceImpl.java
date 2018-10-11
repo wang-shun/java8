@@ -13,6 +13,7 @@ import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.dto.FarmCriteria;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorFarmInformation;
+import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.parana.common.utils.RespHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -118,6 +119,17 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
             return Response.fail("farm.find.fail");
         }
     }
+    //ysq新增
+    @Override
+    public Response<List<DoctorFarm>> findFarmsByOrgId1(@NotNull(message = "orgId.not.null") Long orgId) {
+        try {
+
+            return Response.ok(doctorFarmDao.findByOrgId1(orgId));
+        } catch (Exception e) {
+            log.error("find farms by orgId failed, orgId:{}, cause:{}", orgId, Throwables.getStackTraceAsString(e));
+            return Response.fail("farm.find.fail");
+        }
+    }
 
     @Override
     public Response<List<DoctorFarm>> findFarmsByIds(List<Long> ids) {
@@ -170,5 +182,12 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
     public List<DoctorFarmInformation> findSubordinatePig(Date date) {
         return doctorFarmDao.findSubordinatePig(date);
     }
+
+   //ysq新增
+    @Override
+    public List<DoctorOrg> findOrgByParentId(Long parent) {
+            return doctorOrgDao.findOrgByParent(parent);
+    }
+
 
 }

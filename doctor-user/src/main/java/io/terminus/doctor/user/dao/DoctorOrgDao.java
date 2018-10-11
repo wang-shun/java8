@@ -52,6 +52,11 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
         return sqlSession.selectOne(sqlId("findByName"), orgName);
     }
 
+    //ysq新增
+    public List<DoctorOrg> findOrgByParent(Long parentId){
+        return this.sqlSession.selectList(sqlId("findOrgByParent"),parentId);
+    }
+
     public List<DoctorOrg> findAll() {
         return sqlSession.selectList(sqlId("findAll"));
     }

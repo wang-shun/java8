@@ -83,6 +83,14 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
         flushNPD(farms.stream().map(DoctorFarm::getId).collect(Collectors.toList()), start);
     }
 
+    @Override
+    public void flushNPD(Long orgId, Date start) {
+
+            List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId1(orgId));
+
+            flushNPD(farms.stream().map(DoctorFarm::getId).collect(Collectors.toList()), start);
+    }
+
     public void deleteNPD(List<Long> farmIds, int year, int month){
         Map<String, Object> params = new HashMap<>();
         for (int i =0; i < farmIds.size(); i++){
@@ -95,28 +103,28 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
 
     public void NPD (List<Long> farmIds, Date startDate, Date endDate){
         Map<String, Object> params = new HashMap<>();
-        for (int i =0; i < farmIds.size(); i++){
-            params.put("farmId",String.valueOf(farmIds.get(i)));
-            params.put("startDate",startDate);
-            params.put("endDate",endDate);
-        }
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(startDate);
-        int year = cal.get(Calendar.YEAR);
-        int month = cal.get(Calendar.MONTH) + 1;
-        deleteNPD(farmIds, year, month);
+        for (int i =0; i < farmIds.size(); i++) {
+            params.put("farmId", String.valueOf(farmIds.get(i)));
+            params.put("startDate", startDate);
+            params.put("endDate", endDate);
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(startDate);
+            int year = cal.get(Calendar.YEAR);
+            int month = cal.get(Calendar.MONTH) + 1;
+            deleteNPD(farmIds, year, month);
 
-        List<Map<String, Object>> listPIG = doctorPigEventDao.selectPIG(params);
-        for (int i = 0; i < listPIG.size(); i++) {
-            // 加载猪id
+            List<Map<String, Object>> listPIG = doctorPigEventDao.selectPIG(params);
+            for (int j = 0; j < listPIG.size(); j++) {
+                // 加载猪id
 //            String pigId = String.valueOf(listPIG.get(i).get("id"));
 //            if(pigId.equals("1004427") || pigId.equals("1004428") || pigId.equals("1004429")){
 //                params.put("pigId",pigId);
 //                flushSowNPD(params);
 //            }
-            params.put("pigId", listPIG == null ? "0" : String.valueOf(listPIG.get(i).get("id")));
-            flushSowNPD(params);
-            flushReportNpd(params, startDate, endDate);
+                params.put("pigId", listPIG == null ? "0" : String.valueOf(listPIG.get(j).get("id")));
+                flushSowNPD(params);
+                flushReportNpd(params, startDate, endDate);
+            }
         }
     }
 
