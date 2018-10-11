@@ -317,9 +317,7 @@ public class DoctorImportDataService {
         Object[] result = this.importOrgFarm(farmShit);
         User user = (User) result[0];
         DoctorFarm farm = (DoctorFarm) result[1];
-        if(staffShit!=null){
-            this.importStaff(staffShit,farm);
-        }
+        this.importStaff(staffShit,farm);
         return result;
     }
 

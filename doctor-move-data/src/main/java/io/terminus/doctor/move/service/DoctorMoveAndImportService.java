@@ -111,14 +111,19 @@ public class DoctorMoveAndImportService {
             if(sub==null){
                 Row row1 = sheet.getOperator().getRow(1);
                 String loginName = ImportExcelUtils.getStringOrThrow(row1, 0);
+                String realName = ImportExcelUtils.getStringOrThrow(row1, 2);
                 userId = Long.valueOf(dataAuthDao.selectUserByName(loginName));
                 sub = moveAndImportManager.findSubsByStatusAndUserId( 1, userId);
+                if(sub==null&&userId!=null){
+                    sub.setUserId(userId);
+                    sub.setRealName(realName);
+                }
             }
             log.info("userId,{}============================",userId);
             log.info("sub,{}============================",sub);
 
             //打包数据
-            DoctorImportBasicData importBasicData = packageImportBasicData(farm,userId);
+            DoctorImportBasicData importBasicData = packageImportBasicData(farm,sub);
 
             //导入猪事件
             importPig(sheet.getBoar(), sheet.getSow(), importBasicData);
@@ -157,17 +162,11 @@ public class DoctorMoveAndImportService {
     }
 
     @Transactional
-    public DoctorImportBasicData packageImportBasicData(DoctorFarm farm,Long userId) {
+    public DoctorImportBasicData packageImportBasicData(DoctorFarm farm,Sub sub) {
         log.info("package import basic staring");
         Map<String, Long> userMap = moveBasicService.getSubMap(farm.getOrgId());
         Map<String, DoctorBarn> barnMap = moveBasicService.getBarnMap2(farm.getId());
         Map<String, Long> breedMap = moveBasicService.getBreedMap();
-        // 默认用户：猪场表有数据则直接去猪场的公司账号，否则取记录操作人（陈娟 2018-10-10）
-        Sub sub = moveAndImportManager.selectDefaultUser(farm.getId());
-        if(sub==null){
-            sub = moveAndImportManager.findSubsByStatusAndUserId( 1, userId);
-        }
-        log.info("sub,{}============================",sub);
         return DoctorImportBasicData.builder().doctorFarm(farm).userMap(userMap).barnMap(barnMap)
                 .breedMap(breedMap).defaultUser(sub)
                 .build();
