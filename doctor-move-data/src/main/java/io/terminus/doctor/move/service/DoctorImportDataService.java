@@ -509,7 +509,7 @@ public class DoctorImportDataService {
         User user = null;
         // 如果“猪场”页的“登录名”、“主帐号手机号”、“主帐号真实姓名”等三列都为空，则不用导入公司用户，只需导入猪场数据即可，
         if(StringUtils.isNotBlank(mobile)&&StringUtils.isNotBlank(loginName)&&StringUtils.isNotBlank(realName)) {
-            // 主账号
+            // 公司账号
             user = getUser(mobile, loginName, realName);
             Long userId = user.getId();
 

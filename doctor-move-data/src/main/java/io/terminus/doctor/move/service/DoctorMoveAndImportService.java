@@ -110,7 +110,7 @@ public class DoctorMoveAndImportService {
             Sub sub = moveAndImportManager.selectDefaultUser(farm.getId());
             if(sub==null){
                 Row row1 = sheet.getOperator().getRow(1);
-                String loginName = ImportExcelUtils.getString(row1, 0);
+                String loginName = ImportExcelUtils.getStringOrThrow(row1, 0);
                 userId = Long.valueOf(dataAuthDao.selectUserByName(loginName));
             }
             log.info("userId,{}============================",userId);
