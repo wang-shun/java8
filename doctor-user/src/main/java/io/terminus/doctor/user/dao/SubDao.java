@@ -92,4 +92,9 @@ public class SubDao extends MyBatisDao<Sub> {
     public Boolean freezeByUser(Long userId) {
         return getSqlSession().update(sqlId("freezeByUser"), userId) == 1;
     }
+
+    // 得到导入时猪场里面的账号-公司账号（陈娟 2018-10-10）
+    public Sub selectDefaultUser(Long farmId) {
+        return getSqlSession().selectOne(sqlId("selectDefaultUser"), farmId);
+    }
 }

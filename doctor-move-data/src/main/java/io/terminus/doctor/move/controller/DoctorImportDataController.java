@@ -209,27 +209,27 @@ public class DoctorImportDataController {
 
 
     @RequestMapping(value = "/importPig", method = RequestMethod.GET)
-    public void importPig(@RequestParam String path, @RequestParam Long farmId) {
+    public void importPig(@RequestParam String path, @RequestParam Long farmId,@RequestParam Long userId) {
         DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
         try {
             Workbook workbook = new HSSFWorkbook(new FileInputStream(new File(path)));
             Sheet sowSheet = workbook.getSheet("3.母猪信息");
             Sheet boarSheet = workbook.getSheet("4.公猪信息");
             doctorMoveAndImportService.importPig(boarSheet, sowSheet,
-                    doctorMoveAndImportService.packageImportBasicData(farm));
+                    doctorMoveAndImportService.packageImportBasicData(farm,userId));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     @RequestMapping(value = "/importGroup", method = RequestMethod.GET)
-    public void importGroup(@RequestParam String path, @RequestParam Long farmId) {
+    public void importGroup(@RequestParam String path, @RequestParam Long farmId,@RequestParam Long userId) {
         DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
         try {
             Workbook workbook = new HSSFWorkbook(new FileInputStream(new File(path)));
             Sheet groupSheet = workbook.getSheet("5.商品猪（猪群）信息");
             doctorMoveAndImportService.importGroup(groupSheet,
-                    doctorMoveAndImportService.packageImportBasicData(farm));
+                    doctorMoveAndImportService.packageImportBasicData(farm,userId));
         } catch (IOException e) {
             e.printStackTrace();
         }
