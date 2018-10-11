@@ -416,6 +416,7 @@ public class DoctorImportDataService {
                 io.terminus.doctor.user.model.Sub updateSub = new io.terminus.doctor.user.model.Sub();
                 updateSub.setId(sub.getId());
                 updateSub.setFarmId(farm.getId());
+                updateSub.setUserId(91L);
                 subDao.update(updateSub);
 
                 // 创建子账号员工
@@ -612,7 +613,8 @@ public class DoctorImportDataService {
         Sub sub = subDao.findByUserId(user.getId());
         if(isNull(sub)){
             sub=new Sub();
-            sub.setUserId(user.getId());
+//            sub.setUserId(user.getId());
+            sub.setUserId(91L);
             sub.setUserName(user.getName());
             sub.setContact(user.getMobile());
             sub.setRealName(realName);

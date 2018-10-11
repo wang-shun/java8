@@ -163,8 +163,11 @@ public class DoctorMoveAndImportService {
         // 默认用户：猪场表有数据则直接去猪场的公司账号，否则取记录操作人（陈娟 2018-10-10）
         Sub sub = moveAndImportManager.selectDefaultUser(farm.getId());
         if(sub==null){
+            log.info("farm.Id,{}============================",farm.getId());
             sub = moveAndImportManager.findSubsByFarmIdAndStatusAndUserId(farm.getId(), 1, userId);
+            log.info("sub22,{}============================",sub);
         }
+        log.info("sub,{}============================",sub);
         return DoctorImportBasicData.builder().doctorFarm(farm).userMap(userMap).barnMap(barnMap)
                 .breedMap(breedMap).defaultUser(sub)
                 .build();
