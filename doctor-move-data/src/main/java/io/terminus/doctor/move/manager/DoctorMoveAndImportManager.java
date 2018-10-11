@@ -370,8 +370,8 @@ public class DoctorMoveAndImportManager {
     }
 
     // 得到记录操作人（陈娟 2018-10-10）
-    public Sub findSubsByFarmIdAndStatusAndUserId(Long farmId, Integer status, Long userId) {
-        return subDao.findSubsByFarmIdAndStatusAndUserId(farmId, status, userId);
+    public Sub findSubsByStatusAndUserId(Integer status, Long userId) {
+        return subDao.findSubsByStatusAndUserId(status, userId);
     }
 
 }
