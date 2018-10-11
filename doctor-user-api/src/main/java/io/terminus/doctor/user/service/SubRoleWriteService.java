@@ -28,10 +28,9 @@ public interface SubRoleWriteService {
 
     /**
      * 初始化内置子账号角色权限
-     * @param userId 主账号id
      * @param farmId 猪场id
      * @return
      */
-    Response<Boolean> initDefaultRoles(String appKey, Long userId, Long farmId);
+    Response<Boolean> initDefaultRoles(String appKey, Long farmId);
 
 }

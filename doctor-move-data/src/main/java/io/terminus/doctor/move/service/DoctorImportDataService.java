@@ -318,17 +318,17 @@ public class DoctorImportDataService {
         User user = (User) result[0];
         DoctorFarm farm = (DoctorFarm) result[1];
         if(staffShit!=null){
-            this.importStaff(staffShit, user, farm);
+            this.importStaff(staffShit,farm);
         }
         return result;
     }
 
-    private void importStaff(Sheet staffShit, User user, DoctorFarm farm) {
+    private void importStaff(Sheet staffShit, DoctorFarm farm) {
         final String appKey = "MOBILE";
         List<SubRole> existRoles = subRoleDao.findByFarmIdAndStatus(appKey, farm.getId(), 1);
         if (existRoles.isEmpty()) {
             // 初始化权限
-            RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, user.getId(), farm.getId()));
+            RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey,farm.getId()));
             existRoles = subRoleDao.findByFarmIdAndStatus(appKey, farm.getId(), 1);
         }
         // key = roleName, value = roleId
@@ -472,8 +472,8 @@ public class DoctorImportDataService {
             org.setParentId(0L);
             org.setType(DoctorOrg.Type.ORG.getValue());
             doctorOrgDao.create(org);
-        } else {
-            log.warn("org {} has existed, id = {}", orgName, org.getId());
+//        } else {
+//            log.warn("org {} has existed, id = {}", orgName, org.getId());
         }
 
         // 判断猪场编码是否已存在 （陈娟 2018-10-09）
