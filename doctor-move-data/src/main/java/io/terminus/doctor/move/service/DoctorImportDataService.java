@@ -317,7 +317,9 @@ public class DoctorImportDataService {
         Object[] result = this.importOrgFarm(farmShit);
         User user = (User) result[0];
         DoctorFarm farm = (DoctorFarm) result[1];
-        this.importStaff(staffShit, user, farm);
+        if(staffShit!=null){
+            this.importStaff(staffShit, user, farm);
+        }
         return result;
     }
 
@@ -325,6 +327,7 @@ public class DoctorImportDataService {
         final String appKey = "MOBILE";
         List<SubRole> existRoles = subRoleDao.findByFarmIdAndStatus(appKey, farm.getId(), 1);
         if (existRoles.isEmpty()) {
+            // 初始化权限
             RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, user.getId(), farm.getId()));
             existRoles = subRoleDao.findByFarmIdAndStatus(appKey, farm.getId(), 1);
         }
@@ -358,7 +361,7 @@ public class DoctorImportDataService {
                     } else {
                         subRole = new SubRole();
                         subRole.setName(roleName);
-                        subRole.setUserId(user.getId());
+//                        subRole.setUserId(user.getId());
                         subRole.setFarmId(farm.getId());
                         subRole.setAppKey(appKey);
                         subRole.setStatus(1);
@@ -371,7 +374,7 @@ public class DoctorImportDataService {
                     subUser.setRoles(roles);
 
                     subUser.setExtra(MapBuilder.<String, String>of()
-                            .put("pid", user.getId().toString())
+//                            .put("pid", user.getId().toString())
                             .put("contact", contact)
                             .put("realName", realName)
                             .map());
@@ -389,7 +392,7 @@ public class DoctorImportDataService {
                     if (existRole.get(roleName) == null) {
                         SubRole subRole = new SubRole();
                         subRole.setName(roleName);
-                        subRole.setUserId(user.getId());
+//                        subRole.setUserId(user.getId());
                         subRole.setFarmId(farm.getId());
                         subRole.setAppKey(appKey);
                         subRole.setStatus(1);
@@ -402,7 +405,7 @@ public class DoctorImportDataService {
                     subUser.setRoles(roles);
 
                     subUser.setExtra(MapBuilder.<String, String>of()
-                            .put("pid", user.getId().toString())
+//                            .put("pid", user.getId().toString())
                             .put("contact", contact)
                             .put("realName", realName)
                             .map());
