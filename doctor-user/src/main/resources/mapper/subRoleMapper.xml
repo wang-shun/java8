@@ -95,7 +95,7 @@
         <include refid="cols_all"/>
         FROM
         <include refid="tb"/>
-        WHERE app_key = #{appKey} AND user_id = #{userId} AND `status` = #{status}
+        WHERE app_key = #{appKey} AND user_id = #{userId} AND `status` = #{status} AND farm_id is null
     </select>
 
     <select id="findByFarmIdAndStatus" parameterType="map" resultMap="SubRoleMap">
