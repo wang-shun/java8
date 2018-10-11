@@ -158,7 +158,8 @@ public class DoctorUserManager {
             sub.setRealName(Params.get(user.getExtra(), "realName"));
             sub.setRoleId(roleId);
             sub.setRoleName(subRole.getName());
-            sub.setParentUserId(Long.valueOf(Params.get(user.getExtra(), "pid")));
+            //sub.setParentUserId(Long.valueOf(Params.get(user.getExtra(), "pid")));
+            sub.setParentUserId(91L);
             sub.setContact(Params.get(user.getExtra(), "contact"));
             sub.setStatus(UserStatus.NORMAL.value());
             sub.setUserType(3);
