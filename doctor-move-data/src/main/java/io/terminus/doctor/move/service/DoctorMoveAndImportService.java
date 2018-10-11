@@ -115,6 +115,7 @@ public class DoctorMoveAndImportService {
                 userId = Long.valueOf(dataAuthDao.selectUserByName(loginName));
                 sub = moveAndImportManager.findSubsByStatusAndUserId( 1, userId);
                 if(sub==null&&userId!=null){
+                    sub = new Sub();
                     sub.setUserId(userId);
                     sub.setRealName(realName);
                 }
