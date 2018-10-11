@@ -112,8 +112,10 @@ public class DoctorMoveAndImportService {
                 Row row1 = sheet.getOperator().getRow(1);
                 String loginName = ImportExcelUtils.getStringOrThrow(row1, 0);
                 userId = Long.valueOf(dataAuthDao.selectUserByName(loginName));
+                sub = moveAndImportManager.findSubsByStatusAndUserId( 1, userId);
             }
             log.info("userId,{}============================",userId);
+            log.info("sub,{}============================",sub);
 
             //打包数据
             DoctorImportBasicData importBasicData = packageImportBasicData(farm,userId);
