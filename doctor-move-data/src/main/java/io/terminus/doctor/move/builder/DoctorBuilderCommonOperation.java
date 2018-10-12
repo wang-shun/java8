@@ -129,8 +129,8 @@ public class DoctorBuilderCommonOperation {
         groupInput.setRemark(importGroupEvent.getRemark());
         groupInput.setEventSource(SourceType.IMPORT.getValue());
         groupInput.setIsAuto(IsOrNot.NO.getValue());
-//        groupInput.setCreatorId(importBasicData.getDefaultUser().getUserId());
-//        groupInput.setCreatorName(importBasicData.getDefaultUser().getRealName());
+        groupInput.setCreatorId(importBasicData.getDefaultUser().getUserId());
+        groupInput.setCreatorName(importBasicData.getDefaultUser().getRealName());
     }
 
     private DoctorBarn nullToDefaultBarn(DoctorMoveBasicData moveBasicData,

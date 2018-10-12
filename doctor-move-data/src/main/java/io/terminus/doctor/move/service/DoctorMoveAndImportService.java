@@ -106,25 +106,14 @@ public class DoctorMoveAndImportService {
             //导入基础数据
             importBasic(farm, sheet.getBarn(), sheet.getBreed());
 
-//            Long userId = null;
-//            Sub sub = moveAndImportManager.selectDefaultUser(farm.getId());
-//            if(sub==null){
-//                Row row1 = sheet.getOperator().getRow(1);
-//                String loginName = ImportExcelUtils.getStringOrThrow(row1, 0);
-//                String realName = ImportExcelUtils.getStringOrThrow(row1, 2);
-//                userId = Long.valueOf(dataAuthDao.selectUserByName(loginName));
-//                sub = moveAndImportManager.findSubsByStatusAndUserId( 1, userId);
-//                if(sub==null&&userId!=null){
-//                    sub = new Sub();
-//                    sub.setUserId(userId);
-//                    sub.setRealName(realName);
-//                }
-//            }
-//            log.info("userId,{}============================",userId);
-//            log.info("sub,{}============================",sub);
-
+            Sub sub = moveAndImportManager.selectDefaultUser(farm.getId());
+            if(sub==null){
+                sub = new Sub();
+                sub.setUserId(null);
+                sub.setRealName(null);
+            }
             //打包数据
-            DoctorImportBasicData importBasicData = packageImportBasicData(farm);
+            DoctorImportBasicData importBasicData = packageImportBasicData(farm,sub);
 
             //导入猪事件
             importPig(sheet.getBoar(), sheet.getSow(), importBasicData);
@@ -163,14 +152,13 @@ public class DoctorMoveAndImportService {
     }
 
     @Transactional
-    public DoctorImportBasicData packageImportBasicData(DoctorFarm farm) {
+    public DoctorImportBasicData packageImportBasicData(DoctorFarm farm,Sub sub) {
         log.info("package import basic staring");
         Map<String, Long> userMap = moveBasicService.getSubMap(farm.getOrgId());
         Map<String, DoctorBarn> barnMap = moveBasicService.getBarnMap2(farm.getId());
         Map<String, Long> breedMap = moveBasicService.getBreedMap();
         return DoctorImportBasicData.builder().doctorFarm(farm).userMap(userMap).barnMap(barnMap)
-                .breedMap(breedMap)
-//                .defaultUser(sub)
+                .breedMap(breedMap).defaultUser(sub)
                 .build();
     }
 

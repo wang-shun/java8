@@ -142,8 +142,8 @@ public class DoctorImportEventExecutor {
                 .farmName(farm.getName())
                 .orgId(farm.getOrgId())
                 .orgName(farm.getOrgName())
-//                .staffId(importBasicData.getDefaultUser().getUserId())
-//                .staffName(importBasicData.getDefaultUser().getRealName())
+                .staffId(importBasicData.getDefaultUser().getUserId())
+                .staffName(importBasicData.getDefaultUser().getRealName())
                 .build();
     }
 
