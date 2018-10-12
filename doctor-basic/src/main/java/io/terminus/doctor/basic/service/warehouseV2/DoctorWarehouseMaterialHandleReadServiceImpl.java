@@ -128,7 +128,11 @@ public class DoctorWarehouseMaterialHandleReadServiceImpl implements DoctorWareh
             e.printStackTrace();
         }
         DoctorWarehouseMaterialHandle previous = doctorWarehouseMaterialHandleDao.findPrevious(mh, WarehouseMaterialHandleType.IN);
-        return Response.ok(previous.getUnitPrice());
+        BigDecimal unitPrice = null;
+        if(previous!=null){
+            unitPrice = previous.getUnitPrice();
+        }
+        return Response.ok(unitPrice);
     }
 
     @Override
