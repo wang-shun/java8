@@ -303,9 +303,11 @@ public class DoctorImportDataService {
         User user = (User) result[0];
         DoctorFarm farm = (DoctorFarm) result[1];
         // 公司账号或者猪场账号必须存在一个（陈娟 2018-10-12）
+        log.info("=====================user,{}",user);
         if(user==null){
             Row row = staffShit.getRow(1);
             if(row==null){
+                log.info("=====================row,{}",row);
                 throw new JsonResponseException("company.account.and.farm.account.is.null");
             }
         }
