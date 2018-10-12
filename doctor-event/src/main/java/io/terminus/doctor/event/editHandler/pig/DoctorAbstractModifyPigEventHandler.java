@@ -157,6 +157,10 @@ public abstract class DoctorAbstractModifyPigEventHandler implements DoctorModif
 
     @Override
     public Boolean canRollback(DoctorPigEvent deletePigEvent) {
+        boolean falg = doctorEventBaseHelper.isLastPigManualEvent(deletePigEvent);
+        log.info("===================canRollback.isLastPigManualEvent.flag,{}",falg);
+        boolean b = !UN_MODIFY.contains(deletePigEvent.getEventSource());
+        log.info("==================canRollback.UN_MODIFY.flag,{}",b);
         return doctorEventBaseHelper.isLastPigManualEvent(deletePigEvent)
                 && rollbackHandleCheck(deletePigEvent)
                 && !UN_MODIFY.contains(deletePigEvent.getEventSource());
