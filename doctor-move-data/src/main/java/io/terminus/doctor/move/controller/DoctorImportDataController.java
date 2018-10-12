@@ -178,7 +178,7 @@ public class DoctorImportDataController {
         String errorReason = null;
         Long farmId = null;
         try {
-            // 导入数据
+            // 导入数据 公司账号或者猪场账号必须存在一个（陈娟 2018-10-12）
             farmId = doctorMoveAndImportService.importData(sheet);
             status = DoctorFarmExport.Status.SUCCESS.getValue();
         } catch (Exception e) {
