@@ -152,7 +152,7 @@ public class DoctorImportDataController {
         DoctorImportSheet sheet = new DoctorImportSheet();
         sheet.setFarm(getSheet(workbook, "猪场"));
         sheet.setStaff(getSheet(workbook, "员工"));
-        sheet.setOperator(getSheet(workbook, "记录操作人"));
+//        sheet.setOperator(getSheet(workbook, "记录操作人"));
         sheet.setBarn(getSheet(workbook, "1.猪舍"));
         sheet.setBreed(getSheet(workbook, "2.品种"));
         sheet.setSow(getSheet(workbook, "3.母猪信息"));
@@ -210,27 +210,27 @@ public class DoctorImportDataController {
 
 
     @RequestMapping(value = "/importPig", method = RequestMethod.GET)
-    public void importPig(@RequestParam String path, @RequestParam Long farmId,@RequestParam Sub sub) {
+    public void importPig(@RequestParam String path, @RequestParam Long farmId) {
         DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
         try {
             Workbook workbook = new HSSFWorkbook(new FileInputStream(new File(path)));
             Sheet sowSheet = workbook.getSheet("3.母猪信息");
             Sheet boarSheet = workbook.getSheet("4.公猪信息");
             doctorMoveAndImportService.importPig(boarSheet, sowSheet,
-                    doctorMoveAndImportService.packageImportBasicData(farm,sub));
+                    doctorMoveAndImportService.packageImportBasicData(farm));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     @RequestMapping(value = "/importGroup", method = RequestMethod.GET)
-    public void importGroup(@RequestParam String path, @RequestParam Long farmId,@RequestParam Sub sub) {
+    public void importGroup(@RequestParam String path, @RequestParam Long farmId) {
         DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
         try {
             Workbook workbook = new HSSFWorkbook(new FileInputStream(new File(path)));
             Sheet groupSheet = workbook.getSheet("5.商品猪（猪群）信息");
             doctorMoveAndImportService.importGroup(groupSheet,
-                    doctorMoveAndImportService.packageImportBasicData(farm,sub));
+                    doctorMoveAndImportService.packageImportBasicData(farm));
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -17,7 +17,7 @@ public class DoctorImportSheet implements Serializable {
 
     private Sheet farm;       //猪场信息
     private Sheet staff;      //员工
-    private Sheet operator ;  //记录操作人
+//    private Sheet operator ;  //记录操作人
     private Sheet barn;       //猪舍
     private Sheet breed;      //品种
     private Sheet sow;        //母猪

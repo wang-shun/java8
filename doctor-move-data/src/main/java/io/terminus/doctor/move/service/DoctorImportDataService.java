@@ -227,21 +227,6 @@ public class DoctorImportDataService {
             // 猪场和员工
             Object[] result = this.importOrgFarmUser(shit.getFarm(), shit.getStaff());
             User user = (User) result[0];
-            log.info("user====================={}",user);
-            if(user==null){
-                Sheet operator = shit.getOperator();
-                Row row1 = operator.getRow(1);
-                String loginName = ImportExcelUtils.getStringOrThrow(row1, 0);
-                log.info("loginName======================={}",loginName);
-                Integer userId = dataAuthDao.selectUserByName(loginName);
-                if(userId!=null){
-                    user = new User();
-                    // Integer.valueOf(userId).longValue()
-                    user.setId(Long.valueOf(userId));
-                }else{
-                    throw new JsonResponseException("farm.account.and.record.operator.is.null");
-                }
-            }
             farm = (DoctorFarm) result[1];
             Map<String, Long> userMap = doctorMoveBasicService.getSubMap(farm.getOrgId());
 
