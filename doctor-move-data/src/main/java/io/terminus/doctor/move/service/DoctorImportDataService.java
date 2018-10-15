@@ -407,7 +407,7 @@ public class DoctorImportDataService {
                 io.terminus.doctor.user.model.Sub updateSub = new io.terminus.doctor.user.model.Sub();
                 updateSub.setId(sub.getId());
                 updateSub.setFarmId(farm.getId());
-                updateSub.setUserId(91L);
+                updateSub.setParentUserId(91L);
                 subDao.update(updateSub);
 
                 // 创建子账号员工
