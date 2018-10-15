@@ -598,6 +598,8 @@ public class DoctorImportDataService {
         Sub sub = subDao.findByUserId(user.getId());
         SubRole companyRole = subRoleDao.getCompanyRole();
         log.info("=======================companyRole,{}",companyRole);
+        log.info("=======================companyRole.id,{}",companyRole.getId());
+        log.info("=======================companyRole.name,{}",companyRole.getName());
         if(isNull(sub)){
             sub=new Sub();
             sub.setUserId(91L);
@@ -605,7 +607,7 @@ public class DoctorImportDataService {
             sub.setContact(user.getMobile());
             sub.setRealName(realName);
             sub.setRoleId(companyRole.getId());
-            sub.setRoleName(companyRole.getName());
+            sub.setRoleName("公司角色");
             sub.setStatus(UserStatus.NORMAL.value());
             sub.setUserType(2);
             subDao.create(sub);
