@@ -35,6 +35,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -92,7 +94,19 @@ public class DoctorFarms {
      * @return 公司信息
      */
     @RequestMapping(value = "/companyInfo", method = RequestMethod.GET)
-    public DoctorBasicDto getCompanyInfo(@RequestParam(value = "orgId", required = false) Long orgId) {
+    public DoctorBasicDto getCompanyInfo(@RequestParam(value = "orgId", required = false) Long orgId,HttpServletRequest request) {
+        String isshow = null;
+        Cookie[] cookie = request.getCookies();
+        for (int i = 0; i < cookie.length; i++) {
+            Cookie cook = cookie[i];
+            if(cook.getName().equalsIgnoreCase("msid")){ //获取键
+                isshow = cook.getValue().toString();    //获取值
+            }
+        }
+        log.error("=====ishwo="+isshow);
+        if(isshow == null){
+            return null;
+        }
         return RespHelper.or500(doctorStatisticReadService.getOrgStatisticByOrg(UserUtil.getUserId(), orgId));
     }
 
