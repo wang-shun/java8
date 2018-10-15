@@ -14,12 +14,7 @@ import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
-import io.terminus.doctor.user.service.DoctorFarmReadService;
-import io.terminus.doctor.user.service.DoctorStaffReadService;
-import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
-import io.terminus.doctor.user.service.DoctorUserProfileReadService;
-import io.terminus.doctor.user.service.DoctorUserReadService;
-import io.terminus.doctor.user.service.PrimaryUserReadService;
+import io.terminus.doctor.user.service.*;
 import io.terminus.doctor.web.core.dto.DoctorBasicDto;
 import io.terminus.doctor.web.core.dto.FarmStaff;
 import io.terminus.doctor.web.core.service.DoctorStatisticReadService;
@@ -56,6 +51,7 @@ import static io.terminus.common.utils.Arguments.notNull;
 public class DoctorFarms {
 
     private final DoctorFarmReadService doctorFarmReadService;
+    private final DoctorOrgReadService doctorOrgReadService;
     private final DoctorStaffReadService doctorStaffReadService;
     private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
     private final DoctorUserReadService doctorUserReadService;
@@ -67,11 +63,13 @@ public class DoctorFarms {
 
     @Autowired
     public DoctorFarms(DoctorFarmReadService doctorFarmReadService,
+                       DoctorOrgReadService doctorOrgReadService,
                        DoctorStaffReadService doctorStaffReadService,
                        DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
                        DoctorUserReadService doctorUserReadService,
                        DoctorStatisticReadService doctorStatisticReadService) {
         this.doctorFarmReadService = doctorFarmReadService;
+        this.doctorOrgReadService = doctorOrgReadService;
         this.doctorStaffReadService = doctorStaffReadService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
         this.doctorUserReadService = doctorUserReadService;
@@ -99,12 +97,13 @@ public class DoctorFarms {
         Cookie[] cookie = request.getCookies();
         for (int i = 0; i < cookie.length; i++) {
             Cookie cook = cookie[i];
-            if(cook.getName().equalsIgnoreCase("msid")){ //获取键
+            if(cook.getName().equalsIgnoreCase("isshow")){ //获取键
                 isshow = cook.getValue().toString();    //获取值
             }
         }
-        log.error("=====ishwo="+isshow);
-        if(isshow == null){
+        Integer userType = doctorOrgReadService.getUserType(UserUtil.getUserId());
+        log.error("=====ishwo="+isshow+"=userType="+userType);
+        if(userType == 1 && isshow == null){
             return null;
         }
         return RespHelper.or500(doctorStatisticReadService.getOrgStatisticByOrg(UserUtil.getUserId(), orgId));
