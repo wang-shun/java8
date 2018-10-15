@@ -322,6 +322,14 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
     public Long findGroupByOrgId(Long groupId){
         return sqlSession.selectOne(sqlId("findGroupByOrgId"), groupId);
     }
+
+    /**
+     * 查询所有集团
+     * @return
+     */
+    public List<Long> findAllGroups(){
+        return sqlSession.selectList(sqlId("findAllGroups"));
+    }
     public Integer getUserType(Long userId){
         return sqlSession.selectOne(sqlId("getUserType"),userId);
     }

@@ -541,6 +541,47 @@ public class Users {
         Map<Object,String> orgList = doctorOrgReadService.getGroupcunlan(groupId,orgIds);
         return orgList;
     }
+
+    /**
+     * 根据登录用户筛选集团(孔景军)
+     * @return
+     */
+    @RequestMapping(value = "/groupLists", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Map groupLists() {
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        if (baseUser == null) {
+            throw new JsonResponseException("user.not.login");
+        }
+        Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
+        if (!dataPermissionResponse.isSuccess()) {
+            throw new JsonResponseException("user.not.permission");
+        }
+        List<Long> groupIds = dataPermissionResponse.getResult().getGroupIdsList();
+        List<DoctorOrg> data = new ArrayList<>();
+        if(groupIds == null || groupIds.size() == 0){
+            data = null;
+        } else {
+            Iterator<Long> it = groupIds.iterator();
+            while (it.hasNext()) {
+                Long groupId = it.next();
+                if(groupId == 0L){
+                    it.remove();
+                }
+            }
+            Response<List<DoctorOrg>> result = doctorOrgReadService.findOrgByIds(groupIds);
+            if (!result.isSuccess()) {
+                throw new JsonResponseException(result.getError());
+            }
+            data =  result.getResult();
+        }
+        List<Long> OrgIdsList = dataPermissionResponse.getResult().getOrgIdsList();
+        Long groupId = doctorOrgReadService.findGroupByOrgId(OrgIdsList.get(0)).getResult();
+        Map map = new HashMap();
+        map.put("data",data);
+        map.put("groupId",groupId);
+        return map;
+    }
     @Data
     private static class UserWithServiceStatus extends User implements Serializable {
         private static final long serialVersionUID = -4515482071656393479L;

@@ -206,11 +206,14 @@ public class DoctorDepartmentManager {
             linerDto.setCliqueId(doctorOrg.getId());
             linerDto.setCliqueName(doctorOrg.getName());
         } else {
-            //此处判断还需测试，正式系统没有判断不报错，但是测试系统报错（孔景军）
+            //（孔景军）
             if(doctorOrg.getParentId() != 0L) {
                 DoctorOrg clique = doctorOrgDao.findById(doctorOrg.getParentId());
                 linerDto.setCliqueId(clique.getId());
                 linerDto.setCliqueName(clique.getName());
+            } else{
+                linerDto.setCliqueId(0L);
+                linerDto.setCliqueName("无集团");
             }
         }
         return linerDto;

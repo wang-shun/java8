@@ -7,6 +7,8 @@
 <mapper namespace="DoctorGroupDaily">
     <resultMap id="DoctorGroupDailyMap" type="DoctorGroupDaily">
         <id property="id" column="id"/>
+        <result property="groupId" column="group_id"/>
+        <result property="groupName" column="group_name"/>
         <result property="orgId" column="org_id"/>
         <result property="orgName" column="org_name"/>
         <result property="farmId" column="farm_id"/>
@@ -57,17 +59,19 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `org_id`, `org_name`, `farm_id`, `farm_name`, `pig_type`, `sum_at`, `start`, `turn_into`, `turn_into_weight`, `turn_into_age`, `chg_farm_in_weight`, `chg_farm_in_age`, `chg_farm_in`, `deliver_hand_turn_into`, `chg_farm`, `chg_farm_weight`, `sale`, `sale_weight`, `dead`, `weed_out`, `other_change`, `to_nursery`, `to_nursery_weight`, `to_fatten`, `to_fatten_weight`, `to_houbei`, `to_houbei_weight`, `turn_seed`, `turn_out_weight`, `turn_actual_count`, `turn_actual_weight`, `turn_actual_age`, `net_weight_gain`, `deliver_turn_out_age`, `end`, `version`,
+       `group_id`,`group_name`, `org_id`, `org_name`, `farm_id`, `farm_name`, `pig_type`, `sum_at`, `start`, `turn_into`, `turn_into_weight`, `turn_into_age`, `chg_farm_in_weight`, `chg_farm_in_age`, `chg_farm_in`, `deliver_hand_turn_into`, `chg_farm`, `chg_farm_weight`, `sale`, `sale_weight`, `dead`, `weed_out`, `other_change`, `to_nursery`, `to_nursery_weight`, `to_fatten`, `to_fatten_weight`, `to_houbei`, `to_houbei_weight`, `turn_seed`, `turn_out_weight`, `turn_actual_count`, `turn_actual_weight`, `turn_actual_age`, `net_weight_gain`, `deliver_turn_out_age`, `end`, `version`,
         created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{pigType}, #{sumAt}, #{start}, #{turnInto}, #{turnIntoWeight}, #{turnIntoAge}, #{chgFarmInWeight},#{chgFarmInAge},#{chgFarmIn}, #{deliverHandTurnInto}, #{chgFarm}, #{chgFarmWeight}, #{sale}, #{saleWeight}, #{dead}, #{weedOut}, #{otherChange}, #{toNursery}, #{toNurseryWeight}, #{toFatten}, #{toFattenWeight}, #{toHoubei}, #{toHoubeiWeight}, #{turnSeed}, #{turnOutWeight}, #{turnActualCount}, #{turnActualWeight}, #{turnActualAge}, #{netWeightGain}, #{deliverTurnOutAge}, #{end}, 1,
+        #{groupId},#{groupName},#{orgId}, #{orgName}, #{farmId}, #{farmName}, #{pigType}, #{sumAt}, #{start}, #{turnInto}, #{turnIntoWeight}, #{turnIntoAge}, #{chgFarmInWeight},#{chgFarmInAge},#{chgFarmIn}, #{deliverHandTurnInto}, #{chgFarm}, #{chgFarmWeight}, #{sale}, #{saleWeight}, #{dead}, #{weedOut}, #{otherChange}, #{toNursery}, #{toNurseryWeight}, #{toFatten}, #{toFattenWeight}, #{toHoubei}, #{toHoubeiWeight}, #{turnSeed}, #{turnOutWeight}, #{turnActualCount}, #{turnActualWeight}, #{turnActualAge}, #{netWeightGain}, #{deliverTurnOutAge}, #{end}, 1,
         now(), now()
     </sql>
 
     <sql id="criteria">
         <where>
+            <if test="groupId != null">AND `group_id` = #{groupId}</if>
+            <if test="groupName != null">AND `group_name` = #{groupName}</if>
             <if test="orgId != null">AND `org_id` = #{orgId}</if>
             <if test="orgName != null">AND `org_name` = #{orgName}</if>
             <if test="farmId != null">AND `farm_id` = #{farmId}</if>
@@ -140,6 +144,8 @@
         UPDATE
         <include refid="tb"/>
         <set>
+            <if test="groupId != null"> `group_id` = #{groupId},</if>
+            <if test="groupName != null"> `group_name` = #{groupName},</if>
             <if test="orgId != null">`org_id` = #{orgId},</if>
             <if test="orgName != null">`org_name` = #{orgName},</if>
             <if test="farmId != null">`farm_id` = #{farmId},</if>
@@ -241,6 +247,8 @@
     </select>
 
     <sql id="forSum">
+        group_id as groupId,
+        group_name as groupName,
         org_id as orgId,
         org_name as orgName,
         farm_id as farmId,
@@ -282,6 +290,7 @@
         <include refid="forSum"/>
         FROM <include refid="tb"/>
         GROUP BY
+        <if test="orzType == 1">group_id,</if>
         <if test="orzType == 2">org_id,</if>
         <if test="orzType == 3">farm_id,</if>
         <if test="dateType == 1"> date_format(sum_at, '%y-%m-%d'),</if>
@@ -295,6 +304,7 @@
     <sql id="dimensionCri">
         <where>
             1=1
+            <if test="orzType == 1">AND group_id = #{orzId}</if>
             <if test="orzType == 2">AND org_id = #{orzId}</if>
             <if test="orzType == 3">AND  farm_id = #{orzId}</if>
             and sum_at &gt;= #{startAt} AND sum_at &lt;= #{endAt}
@@ -318,6 +328,7 @@
             <if test="type == 2">
                 updated_at &gt;= date_format(#{sumAt}, '%Y-%m-%d %H:%i:%s')
             </if>
+            <if test="orzType == 1">and group_id = #{orzId}</if>
             <if test="orzType == 2">and org_id = #{orzId}</if>
             <if test="orzType == 3">and farm_id = #{orzId}</if>
         </where>
@@ -325,7 +336,7 @@
 
     <select id="findByDateType" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorDimensionCriteria">
         SELECT
-        case WHEN #{orzType} = 2 then org_id else farm_id end as orzId,
+        case WHEN #{orzType} = 2 then org_id   WHEN #{orzType} = 1 then group_id else farm_id end as orzId,
         #{orzType} as orzType,
         sum_at as sumAt,
         #{dateType} as dateType,
@@ -338,10 +349,12 @@
             <if test="type == 2">
                 updated_at &gt;= date_format(#{sumAt}, '%Y-%m-%d %H:%i:%s')
             </if>
+            <if test="orzType == 1">and group_id = #{orzId}</if>
             <if test="orzType == 2">and org_id = #{orzId}</if>
             <if test="orzType == 3">and farm_id = #{orzId}</if>
         </where>
         GROUP BY
+        <if test="orzType == 1">group_id,</if>
         <if test="orzType == 2">org_id,</if>
         <if test="orzType == 3">farm_id,</if>
         <if test="dateType == 1"> date_format(sum_at, '%y-%m-%d'),</if>
@@ -412,9 +425,30 @@
         SELECT ifnull(min(sum_at), date_add(now(), INTERVAL 1 DAY))
         FROM <include refid="tb"/>
         WHERE
+        <if test="orzType == 1">group_id = #{orzId}</if>
         <if test="orzType == 2">org_id = #{orzId}</if>
         <if test="orzType == 3">farm_id = #{orzId}</if>
         AND updated_at &gt;= date_format(#{updateAt}, '%Y-%m-%d %H:%i:%s')
     </select>
 
+
+
+    <select id="groupDayStartStock" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="int">
+        SELECT
+        sum(`start`)
+        FROM <include refid="tb"/>
+        WHERE
+        group_id = #{groupId}
+        AND pig_type = #{pigType}
+        AND sum_at = date_format(#{sumAt}, '%Y-%m-%d')
+    </select>
+    <select id="groupDayEndStock" parameterType="io.terminus.doctor.event.dto.DoctorDimensionCriteria" resultType="int">
+        SELECT
+        sum(`end`)
+        FROM <include refid="tb"/>
+        WHERE
+        group_id = #{groupId}
+        AND pig_type = #{pigType}
+        AND sum_at = date_format(#{sumAt}, '%Y-%m-%d')
+    </select>
 </mapper>

@@ -65,11 +65,11 @@ public class DoctorReportFieldCustomizesWriteServiceImpl implements DoctorReport
 
     @Override
     @Transactional
-    public Response<Boolean> customize(Long farmId, DoctorReportFieldTypeDto fieldDto) {
+    public Response<Boolean> customize(Long farmId, DoctorReportFieldTypeDto fieldDto,Integer type) {
         try {
 
             //删除原有的绑定关系
-            doctorReportFieldCustomizesDao.deleteByFarmAndType(farmId, Collections.singletonList(fieldDto.getId()));
+            doctorReportFieldCustomizesDao.deleteByFarmAndType(farmId, Collections.singletonList(fieldDto.getId()),type);
 
 
             fieldDto.getFields().stream().forEach(f -> {
@@ -77,6 +77,7 @@ public class DoctorReportFieldCustomizesWriteServiceImpl implements DoctorReport
                 customizes.setTypeId(fieldDto.getId());
                 customizes.setFarmId(farmId);
                 customizes.setFieldId(f.getId());
+                customizes.setType(type);
                 doctorReportFieldCustomizesDao.create(customizes);
             });
 
@@ -90,11 +91,12 @@ public class DoctorReportFieldCustomizesWriteServiceImpl implements DoctorReport
 
     @Override
     @Transactional
-    public Response<Boolean> customize(Long farmId, List<DoctorReportFieldTypeDto> fieldDto) {
+    public Response<Boolean> customize(Long farmId, List<DoctorReportFieldTypeDto> fieldDto,Integer type) {
 
         try {
+            log.error("farmId="+farmId+"===========type="+type);
             //删除原有的绑定关系
-            doctorReportFieldCustomizesDao.deleteByFarmAndType(farmId, fieldDto.stream().map(DoctorReportFieldTypeDto::getId).collect(Collectors.toList()));
+            doctorReportFieldCustomizesDao.deleteByFarmAndType(farmId, fieldDto.stream().map(DoctorReportFieldTypeDto::getId).collect(Collectors.toList()),type);
 
 
             fieldDto.stream().forEach(f -> {
@@ -103,6 +105,7 @@ public class DoctorReportFieldCustomizesWriteServiceImpl implements DoctorReport
                     customizes.setTypeId(f.getId());
                     customizes.setFarmId(farmId);
                     customizes.setFieldId(fi.getId());
+                    customizes.setType(type);
                     doctorReportFieldCustomizesDao.create(customizes);
                 });
             });

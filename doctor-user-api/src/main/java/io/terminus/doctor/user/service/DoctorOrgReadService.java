@@ -106,5 +106,11 @@ public interface DoctorOrgReadService {
      * @return
      */
     Response<Long>  findGroupByOrgId(Long groupId);
+
+    /**
+     * 查询所有的集团（孔景军）
+     */
+
+    List<Long> findAllGroups();
     Integer getUserType(Long userId);
 }

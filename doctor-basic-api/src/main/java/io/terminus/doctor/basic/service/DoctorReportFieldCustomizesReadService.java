@@ -47,5 +47,5 @@ public interface DoctorReportFieldCustomizesReadService {
 
     Response<List<DoctorReportFieldTypeDto>> getSelected(Long farmId);
 
-    Response<List<DoctorReportFieldTypeDto>> getAllWithSelected(Long farmId);
+    Response<List<DoctorReportFieldTypeDto>> getAllWithSelected(Long farmId,Integer type);
 }

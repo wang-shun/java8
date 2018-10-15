@@ -52,4 +52,9 @@ public class DoctorReportFieldCustomizes implements Serializable {
      */
     private Date updatedAt;
 
+    /**
+     * 1为集团,3为猪场
+     */
+    private Integer type;
+
 }

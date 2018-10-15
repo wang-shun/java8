@@ -140,4 +140,6 @@ public interface DoctorDailyReportV2Service {
      * @return
      */
     Response<Boolean> flushDeliverRate(Long orzId, Integer orzType, Date start);
+
+    Response<List<DoctorFarmLiveStockDto>> findFarmsLiveStock1(List<Long> farmIdList,Integer type);
 }

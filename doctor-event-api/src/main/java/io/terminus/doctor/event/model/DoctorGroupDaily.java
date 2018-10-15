@@ -15,7 +15,12 @@ public class DoctorGroupDaily implements Serializable {
     private static final long serialVersionUID = -395777802984439446L;
 
     private Long id;
+    /**
+     * 所属集团id
+     */
+    private Long groupId;
 
+    private String groupName;
     /**
      * 所属公司id
      */

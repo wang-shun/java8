@@ -6,6 +6,7 @@ import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.reportBi.DoctorGroupDailyExtend;
+import io.terminus.doctor.event.dto.reportBi.DoctorPigDailyExtend;
 import io.terminus.doctor.event.model.DoctorGroupDaily;
 import org.springframework.stereotype.Repository;
 
@@ -114,5 +115,15 @@ public class DoctorGroupDailyDao extends MyBatisDao<DoctorGroupDaily> {
     public Date minSumAtForUpdated(Long orzId, Integer orzType, Date updateAt){
         return getSqlSession().selectOne(sqlId("minSumAtForUpdated"),
                 ImmutableMap.of("orzId", orzId, "orzType", orzType, "updateAt", updateAt));
+    }
+
+
+//孔景军
+    public Integer groupDayStartStock(Long groupId, Date sumAt, Integer pigType) {
+        return getSqlSession().selectOne(sqlId("groupDayStartStock"), ImmutableMap.of("groupId", groupId, "sumAt", sumAt, "pigType", pigType));
+    }
+    public Integer groupDayEndStock(Long groupId, Date sumAt, Integer pigType){
+        return getSqlSession().selectOne(sqlId("groupDayEndStock"),
+                ImmutableMap.of("groupId", groupId, "sumAt", sumAt, "pigType", pigType));
     }
 }

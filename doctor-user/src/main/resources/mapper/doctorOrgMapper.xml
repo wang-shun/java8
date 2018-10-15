@@ -437,6 +437,9 @@
         select parent_id from doctor_orgs where id = #{groupId}
     </select>
 
+    <select id="findAllGroups" resultType="long" >
+        select id from doctor_orgs  where type = 1
+    </select>
 
     <select id="getUserType" parameterType="long" resultType="Integer" >
         select user_type from doctor_user_subs  where user_id = #{userId}

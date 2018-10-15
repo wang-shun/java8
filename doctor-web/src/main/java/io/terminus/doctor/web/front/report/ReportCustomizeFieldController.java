@@ -60,16 +60,16 @@ public class ReportCustomizeFieldController {
      * 获取所有类型下所有字段，并标记可显示的字段
      */
     @RequestMapping(method = RequestMethod.GET, value = "field/{farmId}/customize/all")
-    public Response<List<DoctorReportFieldTypeDto>> getAllFieldWithSelected(@PathVariable Long farmId) {
-        return doctorReportFieldCustomizesReadService.getAllWithSelected(farmId);
+    public Response<List<DoctorReportFieldTypeDto>> getAllFieldWithSelected(@PathVariable Long farmId,Integer type) {
+        return doctorReportFieldCustomizesReadService.getAllWithSelected(farmId,type);
     }
 
 
     /**
      * 设置指定类型的需要显示的字段
      */
-    @RequestMapping(method = RequestMethod.PUT, value = "field/{farmId}/{id}/customize")
-    public void selectField(@PathVariable Long farmId, @PathVariable("id") Long typeId, @RequestBody List<Long> fieldIds) {
+    @RequestMapping(method = RequestMethod.PUT, value = "field/{farmId}/{id}/customize/{type}")
+    public void selectField(@PathVariable Long farmId,@PathVariable Integer type, @PathVariable("id") Long typeId, @RequestBody List<Long> fieldIds) {
 
         DoctorReportFieldTypeDto fieldDto = new DoctorReportFieldTypeDto();
         fieldDto.setId(typeId);
@@ -78,18 +78,17 @@ public class ReportCustomizeFieldController {
             child.setId(id);
             return child;
         }).collect(Collectors.toList()));
-        doctorReportFieldCustomizesWriteService.customize(farmId, fieldDto);
+        doctorReportFieldCustomizesWriteService.customize(farmId, fieldDto,type);
     }
 
     /**
      * 设置所有类型的需要显示的字段
      */
-    @RequestMapping(method = RequestMethod.PUT, value = "field/{farmId}/customize")
-    public void selectField(@PathVariable Long farmId, @RequestBody @Valid List<DoctorReportFieldTypeDto> fieldDto, Errors errors) {
+    @RequestMapping(method = RequestMethod.PUT, value = "field/{farmId}/customize/{type}")
+    public void selectField(@PathVariable Long farmId,@PathVariable Integer type, @RequestBody @Valid List<DoctorReportFieldTypeDto> fieldDto, Errors errors) {
         if (errors.hasErrors())
             throw new ServiceException(errors.getFieldError().getDefaultMessage());
-
-        doctorReportFieldCustomizesWriteService.customize(farmId, fieldDto);
+        doctorReportFieldCustomizesWriteService.customize(farmId, fieldDto,type);
     }
 
 }

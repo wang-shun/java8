@@ -5,13 +5,21 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.model.BaseUser;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dto.DoctorReportFieldTypeDto;
+import io.terminus.doctor.common.exception.InvalidException;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dto.DoctorDimensionCriteria;
 import io.terminus.doctor.event.dto.report.daily.DoctorFarmLiveStockDto;
 import io.terminus.doctor.event.enums.DateDimension;
 import io.terminus.doctor.event.enums.OrzDimension;
 import io.terminus.doctor.event.service.DoctorDailyReportV2Service;
+import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
+import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -35,19 +43,45 @@ public class ReportBoardController {
 
     @RpcConsumer
     private DoctorDailyReportV2Service doctorDailyReportV2Service;
+    @RpcConsumer
+    private DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
 
     @Autowired
     private ReportBoardHelper helper;
 
     @ApiOperation("看板日报表")
     @RequestMapping(method = RequestMethod.GET, value = "daily")
-    public List<DoctorReportFieldTypeDto> dailyBoard(@ApiParam("猪场名称")
+    public Response<List<DoctorReportFieldTypeDto>> dailyBoard(@ApiParam("猪场名称")
                                                      @PathVariable Long farmId,
-                                                     @ApiParam("查询日期")
-                                                     @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
-        DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, OrzDimension.FARM.getValue(),
+                                                                 @ApiParam("查询日期")
+                                                     @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
+                                                                 Integer type) {
+        Long farmIds = farmId;
+        if(type == 1){
+            BaseUser baseUser = UserUtil.getCurrentUser();
+            if (baseUser == null) {
+                throw new JsonResponseException("user.not.login");
+            }
+            Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
+            List<Long> groupIdsList = dataPermissionResponse.getResult().getGroupIdsList();
+            if(groupIdsList == null || groupIdsList.size() == 0 || (groupIdsList.contains(0L) && groupIdsList.size()==1)){
+                throw new JsonResponseException("你没有可查看集团的权限");
+            }
+            if(groupIdsList.contains(0L)){
+                groupIdsList.remove(0L);
+            }
+            log.error("groupIdsList.size()="+groupIdsList.size());
+            if(groupIdsList.size()==0){
+                throw new JsonResponseException("你没有可查看集团的权限");
+            }else {
+                if (!groupIdsList.contains(farmIds)) {
+                    farmIds = groupIdsList.get(0);
+                }
+            }
+        }
+        DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmIds, type,
                 date, DateDimension.DAY.getValue());
-        return helper.fieldWithHidden(dimensionCriteria);
+        return Response.ok(helper.fieldWithHidden(dimensionCriteria,type));
     }
 
 
@@ -56,10 +90,11 @@ public class ReportBoardController {
     public List<DoctorReportFieldTypeDto> weeklyBoard(@ApiParam("猪场名称")
                                                       @PathVariable Long farmId,
                                                       @ApiParam("查询日期， 本周第一天")
-                                                      @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
-        DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, OrzDimension.FARM.getValue(),
+                                                      @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
+                                                      Integer type) {
+        DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, type,
                 date, DateDimension.WEEK.getValue());
-        return helper.fieldWithHidden(dimensionCriteria);
+        return helper.fieldWithHidden(dimensionCriteria,type);
     }
 
     @ApiOperation("看板月报表")
@@ -67,10 +102,11 @@ public class ReportBoardController {
     public List<DoctorReportFieldTypeDto> monthlyBoard(@ApiParam("猪场名称")
                                                        @PathVariable Long farmId,
                                                        @ApiParam("查询日期， 本月第一天")
-                                                       @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
-        DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, OrzDimension.FARM.getValue(),
+                                                       @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
+                                                       Integer type) {
+        DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, type,
                 date, DateDimension.MONTH.getValue());
-        return helper.fieldWithHidden(dimensionCriteria);
+        return helper.fieldWithHidden(dimensionCriteria,type);
     }
 
     @ApiOperation("看板季报表")
@@ -78,10 +114,11 @@ public class ReportBoardController {
     public List<DoctorReportFieldTypeDto> quarterlyBoard(@ApiParam("猪场名称")
                                                          @PathVariable Long farmId,
                                                          @ApiParam("查询日期， 本季第一天")
-                                                         @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
-        DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, OrzDimension.FARM.getValue(),
+                                                         @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
+                                                         Integer type) {
+        DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, type,
                 date, DateDimension.QUARTER.getValue());
-        return helper.fieldWithHidden(dimensionCriteria);
+        return helper.fieldWithHidden(dimensionCriteria,type);
     }
 
     @ApiOperation("看板年报表")
@@ -89,14 +126,34 @@ public class ReportBoardController {
     public List<DoctorReportFieldTypeDto> yearlyBoard(@ApiParam("猪场名称")
                                                       @PathVariable Long farmId,
                                                       @ApiParam("查询日期， 本年第一天")
-                                                      @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
-        DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, OrzDimension.FARM.getValue(),
+                                                      @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date,
+                                                      Integer type) {
+        DoctorDimensionCriteria dimensionCriteria = new DoctorDimensionCriteria(farmId, type,
                 date, DateDimension.YEAR.getValue());
-        return helper.fieldWithHidden(dimensionCriteria);
+        return helper.fieldWithHidden(dimensionCriteria,type);
     }
 
     @RequestMapping(value = "/live/stock")
-    public DoctorFarmLiveStockDto realTimeLiveStock(@PathVariable Long farmId){
-        return RespHelper.or500(doctorDailyReportV2Service.findFarmsLiveStock(Lists.newArrayList(farmId))).get(0);
+    public DoctorFarmLiveStockDto realTimeLiveStock(@PathVariable Long farmId,Integer type){
+        Long farmIds = farmId;
+        if(type == 1){
+            BaseUser baseUser = UserUtil.getCurrentUser();
+            if (baseUser == null) {
+                throw new JsonResponseException("user.not.login");
+            }
+            Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
+            List<Long> groupIdsList = dataPermissionResponse.getResult().getGroupIdsList();
+            if(groupIdsList.contains(0L)){
+                groupIdsList.remove(0L);
+            }
+            if(groupIdsList.size()==0){
+                throw new InvalidException("你没有可查看集团的权限");
+            }else {
+                if (!groupIdsList.contains(farmIds)) {
+                    farmIds = groupIdsList.get(0);
+                }
+            }
+        }
+        return RespHelper.or500(doctorDailyReportV2Service.findFarmsLiveStock1(Lists.newArrayList(farmIds),type)).get(0);
     }
 }

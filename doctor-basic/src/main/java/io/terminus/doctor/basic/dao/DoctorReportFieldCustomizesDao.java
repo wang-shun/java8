@@ -20,12 +20,12 @@ import java.util.Map;
 public class DoctorReportFieldCustomizesDao extends MyBatisDao<DoctorReportFieldCustomizes> {
 
 
-    public void deleteByFarmAndType(Long farmId, List<Long> typeIds) {
+    public void deleteByFarmAndType(Long farmId, List<Long> typeIds,Integer type) {
 
         Map<String, Object> params = new HashMap<>();
         params.put("farmId", farmId);
         params.put("ids", typeIds);
-
+        params.put("type", type);
         this.sqlSession.delete(this.sqlId("deleteByFarmAndType"), params);
     }
 

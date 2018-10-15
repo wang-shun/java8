@@ -31,7 +31,16 @@ public class DoctorPigDaily implements Serializable {
      * 日期（yyyy-MM-dd）
      */
     private Date sumAt;
-    
+    /**
+     * 所属集团id
+     */
+    private Long groupId;
+
+    /**
+     * 所属集团name
+     */
+    private String groupName;
+
     /**
      * 所属公司id
      */

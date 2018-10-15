@@ -98,9 +98,12 @@ public class DoctorDeliverSynchronizer {
         if (Objects.equals(reportBi.getOrzType(), OrzDimension.FARM.getValue())) {
             reportBi.setOrzId(pigDaily.getFarmId());
             reportBi.setOrzName(pigDaily.getFarmName());
-        } else {
+        } else if (Objects.equals(reportBi.getOrzType(), OrzDimension.ORG.getValue())){
             reportBi.setOrzId(pigDaily.getOrgId());
             reportBi.setOrzName(pigDaily.getOrgName());
+        } else {
+            reportBi.setOrzId(pigDaily.getGroupId());
+            reportBi.setOrzName(pigDaily.getGroupName());
         }
         DateDimension dateDimension = DateDimension.from(reportBi.getDateType());
         reportBi.setSumAt(withDateStartDay(pigDaily.getSumAt(), dateDimension));
@@ -116,9 +119,12 @@ public class DoctorDeliverSynchronizer {
         if (Objects.equals(reportBi.getOrzType(), OrzDimension.FARM.getValue())) {
             reportBi.setOrzId(dailyExtend.getFarmId());
             reportBi.setOrzName(dailyExtend.getFarmName());
-        } else {
+        } else if (Objects.equals(reportBi.getOrzType(), OrzDimension.ORG.getValue())){
             reportBi.setOrzId(dailyExtend.getOrgId());
             reportBi.setOrzName(dailyExtend.getOrgName());
+        }else{
+            reportBi.setOrzId(dailyExtend.getGroupId());
+            reportBi.setOrzName(dailyExtend.getGroupName());
         }
         DateDimension dateDimension = DateDimension.from(reportBi.getDateType());
         reportBi.setSumAt(withDateStartDay(dailyExtend.getSumAt(), dateDimension));
