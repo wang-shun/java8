@@ -18,6 +18,11 @@ import java.util.Map;
 @Repository
 public class SubRoleDao extends MyBatisDao<SubRole> {
 
+    // 得到默认的公司角色（2018-10-15）
+    public SubRole getCompanyRole() {
+        return this.sqlSession.selectOne(this.sqlId("getCompanyRole"));
+    }
+
     /**
      * 以userId查询信息
      *

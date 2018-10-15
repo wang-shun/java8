@@ -303,12 +303,9 @@ public class DoctorImportDataService {
         User user = (User) result[0];
         DoctorFarm farm = (DoctorFarm) result[1];
         // 公司账号或者猪场账号必须存在一个（陈娟 2018-10-12）
-        log.info("=====================user,{}",user);
         if(user==null){
             Row row = staffShit.getRow(1);
             String loginName = ImportExcelUtils.getString(row, 1);
-            log.info("=====================row,{}",row);
-            log.info("=====================loginName,{}",loginName);
             if(loginName.equals("")){
                 throw new JsonResponseException("company.account.and.farm.account.is.null");
             }
@@ -513,13 +510,6 @@ public class DoctorImportDataService {
             userProfile.setRealName(realName);
             userProfileDao.update(userProfile);
 
-            // 给公司账号关联猪场 （陈娟 2018-08-30）
-            Sub sub = subDao.findByUserId(userId);
-            Sub updateSub = new Sub();
-            updateSub.setId(sub.getId());
-            updateSub.setFarmId(farm.getId());
-            subDao.update(updateSub);
-
             // 在员工表里面添加数据
             DoctorStaff doctorStaff = doctorStaffDao.findByFarmIdAndUserId(user.getId(), farm.getId());
             if (isNull(doctorStaff)) {
@@ -604,14 +594,16 @@ public class DoctorImportDataService {
         }
 
         // 猪场的主账号变成公司账号添加到doctor_user_subs表中（陈娟 2018-08-30）
+        // 公司账号farmId为空, roleId默认第一个公司角色（2018-10-15）
         Sub sub = subDao.findByUserId(user.getId());
+        SubRole companyRole = subRoleDao.getCompanyRole();
         if(isNull(sub)){
             sub=new Sub();
-//            sub.setUserId(user.getId());
             sub.setUserId(91L);
             sub.setUserName(user.getName());
             sub.setContact(user.getMobile());
             sub.setRealName(realName);
+            sub.setRoleId(companyRole.getId());
             sub.setStatus(UserStatus.NORMAL.value());
             sub.setUserType(2);
             subDao.create(sub);

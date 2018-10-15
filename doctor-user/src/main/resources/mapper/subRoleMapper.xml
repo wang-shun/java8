@@ -159,4 +159,9 @@
         </where>
     </select>
 
+    <!--得到默认的公司角色（2018-10-15）-->
+    <select id="getCompanyRole"  resultMap="SubRoleMap">
+        select * from doctor_sub_roles where role_type=2 limit 1
+    </select>
+
 </mapper>
