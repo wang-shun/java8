@@ -597,6 +597,7 @@ public class DoctorImportDataService {
         // 公司账号farmId为空, roleId默认第一个公司角色（2018-10-15）
         Sub sub = subDao.findByUserId(user.getId());
         SubRole companyRole = subRoleDao.getCompanyRole();
+        log.info("=======================companyRole,{}",companyRole);
         if(isNull(sub)){
             sub=new Sub();
             sub.setUserId(91L);
@@ -604,6 +605,7 @@ public class DoctorImportDataService {
             sub.setContact(user.getMobile());
             sub.setRealName(realName);
             sub.setRoleId(companyRole.getId());
+            sub.setRoleName(companyRole.getName());
             sub.setStatus(UserStatus.NORMAL.value());
             sub.setUserType(2);
             subDao.create(sub);
