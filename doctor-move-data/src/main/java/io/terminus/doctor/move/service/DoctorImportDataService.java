@@ -611,6 +611,14 @@ public class DoctorImportDataService {
             sub.setUserType(2);
             log.info("=======================sub222,{}",sub);
             subDao.create(sub);
+        }else{
+            sub.setUserId(91L);
+            sub.setRoleId(companyRole.getId());
+            sub.setRoleName(companyRole.getName());
+            sub.setStatus(UserStatus.NORMAL.value());
+            sub.setUserType(2);
+            log.info("=======================sub333,{}",sub);
+            subDao.update(sub);
         }
         return user;
     }
