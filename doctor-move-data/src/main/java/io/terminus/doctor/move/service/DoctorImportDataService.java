@@ -306,6 +306,7 @@ public class DoctorImportDataService {
         log.info("=====================user,{}",user);
         if(user==null){
             Row row = staffShit.getRow(1);
+            log.info("=====================row,{}",row);
             if(row==null){
                 log.info("=====================row,{}",row);
                 throw new JsonResponseException("company.account.and.farm.account.is.null");
