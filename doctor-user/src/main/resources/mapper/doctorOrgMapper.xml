@@ -200,9 +200,10 @@
     <select id="pagingCompany" parameterType="map" resultMap="DoctorOrgMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE (type=1 or (type=2 and parent_id=0))
+        WHERE 1=1
+        <if test="type == 1"> AND type=1</if>
+        <if test="type == 2"> AND type=2 and parent_id=0</if>
         <if test="fuzzyName != null">AND `name` LIKE concat('%', #{fuzzyName}, '%')</if>
-        <if test="type != null">AND `type` = #{type}</if>
         <if test="fuzzyName != null">
             ORDER BY instr(`name`, #{fuzzyName}) ASC, LENGTH (`name`) ASC
         </if>

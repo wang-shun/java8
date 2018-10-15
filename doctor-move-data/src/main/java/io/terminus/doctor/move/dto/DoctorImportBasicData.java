@@ -3,7 +3,7 @@ package io.terminus.doctor.move.dto;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.user.model.DoctorFarm;
-import io.terminus.doctor.user.model.PrimaryUser;
+import io.terminus.doctor.user.model.Sub;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -54,7 +54,7 @@ public class DoctorImportBasicData {
     /**
      * 默认操作人(猪场主账户)
      */
-    private PrimaryUser defaultUser;
+    private Sub defaultUser;
 
     /**
      * 默认配种公猪

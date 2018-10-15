@@ -18,6 +18,11 @@ import java.util.Map;
 @Repository
 public class DoctorFarmDao extends MyBatisDao<DoctorFarm> {
 
+    // 判断猪场编码是否已存在 （陈娟 2018-10-09）
+    public DoctorFarm findByCode(String farmCode) {
+        return sqlSession.selectOne(sqlId("findByCode"), farmCode);
+    }
+
     public List<DoctorFarm> findByOrgId(Long orgId){
         return sqlSession.selectList(sqlId("findByOrgId"), orgId);
     }

@@ -95,7 +95,7 @@
         <include refid="cols_all"/>
         FROM
         <include refid="tb"/>
-        WHERE app_key = #{appKey} AND user_id = #{userId} AND `status` = #{status}
+        WHERE app_key = #{appKey} AND user_id = #{userId} AND `status` = #{status} AND farm_id is null
     </select>
 
     <select id="findByFarmIdAndStatus" parameterType="map" resultMap="SubRoleMap">
@@ -157,6 +157,11 @@
             <include refid="criteria"/>
             and role_type in (0,1,2)
         </where>
+    </select>
+
+    <!--得到默认的公司角色（2018-10-15）-->
+    <select id="getCompanyRole"  resultMap="SubRoleMap">
+        select * from doctor_sub_roles where role_type=2 limit 1
     </select>
 
 </mapper>

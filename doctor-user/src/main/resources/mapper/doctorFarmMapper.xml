@@ -242,4 +242,10 @@
             <include refid="singleFrozen"/>
         </where>
     </select>
+
+    <!-- 判断猪场编码是否已存在 （陈娟 2018-10-09）-->
+    <select id="findByCode" parameterType="string" resultMap="DoctorFarmMap" >
+        select * from doctor_farms where farm_code = #{farmCode}
+    </select>
+
 </mapper>
