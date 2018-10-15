@@ -197,7 +197,7 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
         return getSqlSession().selectList(sqlId("findGroupByCurrentBarnIdFuzzy"), map);
     }
 
-    public Integer fingGroupQuantityByGroupCode(String groupCode){
-        return getSqlSession().selectOne(sqlId("fingGroupQuantityByGroupCode"),groupCode);
+    public Integer findGroupQuantityByGroupCode(String groupCode){
+        return getSqlSession().selectOne(sqlId("findGroupQuantityByGroupCode"),groupCode);
     }
 }

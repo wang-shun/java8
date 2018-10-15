@@ -621,7 +621,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
-    public Integer fingGroupQuantityByGroupCode(String groupCode) {
-        return doctorGroupDao.fingGroupQuantityByGroupCode(groupCode);
+    public Integer findGroupQuantityByGroupCode(String groupCode) {
+        return doctorGroupDao.findGroupQuantityByGroupCode(groupCode);
     }
 }

@@ -763,7 +763,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
         jsonData.put("vaccinationDateType", warn.getVaccinationDateType());
         jsonData.put("vaccDate", DateTimeFormat.forPattern("yyyy-MM-dd").print(vaccDate));
         String groupCode = detail.getGroup().getGroupCode();
-        Integer quantity = doctorGroupReadService.fingGroupQuantityByGroupCode(groupCode);
+        Integer quantity = doctorGroupReadService.findGroupQuantityByGroupCode(groupCode);
         String pigType = "猪群";
         String vaccinationType = null;
         if(warn.getVaccinationDateType().equals(VaccinationDateType.FIXED_DAY_AGE.getValue())){
