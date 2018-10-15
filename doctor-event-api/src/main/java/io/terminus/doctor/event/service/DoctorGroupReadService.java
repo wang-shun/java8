@@ -341,5 +341,5 @@ public interface DoctorGroupReadService {
     /**
      * ysq
      */
-    Integer findGroupQuantityByGroupCode(String groupCode);
+    Long findGroupQuantityByGroupCode(String groupCode);
 }
