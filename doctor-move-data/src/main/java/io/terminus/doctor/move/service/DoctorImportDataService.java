@@ -599,24 +599,20 @@ public class DoctorImportDataService {
         SubRole companyRole = subRoleDao.getCompanyRole();
         log.info("=======================companyRole,{}",companyRole);
         log.info("=======================sub111,{}",sub);
+        sub.setUserId(user.getId());
+        sub.setParentUserId(91L);
+        sub.setContact(user.getMobile());
+        sub.setRoleId(companyRole.getId());
+        sub.setRoleName(companyRole.getName());
+        sub.setStatus(UserStatus.NORMAL.value());
+        sub.setUserType(2);
         if(isNull(sub)){
             sub=new Sub();
-            sub.setUserId(91L);
             sub.setUserName(user.getName());
-            sub.setContact(user.getMobile());
             sub.setRealName(realName);
-            sub.setRoleId(companyRole.getId());
-            sub.setRoleName("公司角色");
-            sub.setStatus(UserStatus.NORMAL.value());
-            sub.setUserType(2);
             log.info("=======================sub222,{}",sub);
             subDao.create(sub);
         }else{
-            sub.setUserId(91L);
-            sub.setRoleId(companyRole.getId());
-            sub.setRoleName(companyRole.getName());
-            sub.setStatus(UserStatus.NORMAL.value());
-            sub.setUserType(2);
             log.info("=======================sub333,{}",sub);
             subDao.update(sub);
         }
