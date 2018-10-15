@@ -235,7 +235,7 @@ public class DoctorReportController {
             List<Long> orgList = RespHelper.or500(doctorOrgReadService.findAllOrgs())
                     .stream().map(DoctorOrg::getId).collect(Collectors.toList());
             orgList.parallelStream().forEach(orgId -> doctorDailyReportV2Service.synchronizeDeltaDayBiData(orgId, start, orzType));
-        } else if(Objects.equals(orzType, OrzDimension.ORG.getValue())) {
+        } else if(Objects.equals(orzType, OrzDimension.CLIQUE.getValue())) {
             List<Long> groupList = doctorOrgReadService.findAllGroups();
             groupList.parallelStream().forEach(groupId -> doctorDailyReportV2Service.synchronizeDeltaDayBiData(groupId, start, orzType));
         }
