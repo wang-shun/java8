@@ -309,7 +309,7 @@ public class DoctorImportDataService {
             String loginName = ImportExcelUtils.getString(row, 1);
             log.info("=====================row,{}",row);
             log.info("=====================loginName,{}",loginName);
-            if(loginName==null){
+            if(loginName.equals("")){
                 throw new JsonResponseException("company.account.and.farm.account.is.null");
             }
         }
