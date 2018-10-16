@@ -1404,7 +1404,7 @@
         DATEDIFF(a.event_at,b.birth_date) as ages,
         ifnull(a.weight, 0) AS pigWeight,
         ifnull(a.amount / a.weight,0) AS pigPrice,
-        ifnull(a.amount, 0) AS pigAmount,
+        ifnull(a.amount * count(1), 0) AS pigAmount,
         b.breed_id as breedId,
         b.breed_name as breedName
         from doctor_pig_events a left join doctor_pigs b on a.pig_id = b.id
