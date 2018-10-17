@@ -335,4 +335,8 @@ public interface DoctorGroupReadService {
 
 
     DoctorGroupEvent findLastEvent(Long groupId);
+    /**
+     * ysq
+     */
+    Long findGroupQuantityByGroupCode(String groupCode);
 }

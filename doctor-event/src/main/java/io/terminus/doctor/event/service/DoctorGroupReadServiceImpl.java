@@ -608,4 +608,10 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     public DoctorGroupEvent findLastEvent(Long groupId){
         return  doctorGroupEventDao.lastEventByGroupId(groupId);
     }
+
+
+    @Override
+    public Long findGroupQuantityByGroupCode(String groupCode) {
+        return doctorGroupDao.findGroupQuantityByGroupCode(groupCode);
+    }
 }

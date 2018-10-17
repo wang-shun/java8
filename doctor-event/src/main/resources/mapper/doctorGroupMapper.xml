@@ -378,4 +378,11 @@
             AND (close_at is null or close_at &gt;= #{date})
         </where>
     </select>
+
+    <select id="findGroupQuantityByGroupCode" parameterType="string" resultType="long">
+        select b.quantity
+        from doctor_groups a join doctor_group_tracks b
+        on a.id = b.group_id
+        where a.group_code = #{groupCode}
+    </select>
 </mapper>

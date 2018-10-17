@@ -189,4 +189,8 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
     public List<DoctorGroup> listOpenGroupsBy(String date){
         return getSqlSession().selectList(sqlId("listOpenGroupsBy"), date);
     }
+
+    public Long findGroupQuantityByGroupCode(String groupCode){
+        return getSqlSession().selectOne(sqlId("findGroupQuantityByGroupCode"),groupCode);
+    }
 }

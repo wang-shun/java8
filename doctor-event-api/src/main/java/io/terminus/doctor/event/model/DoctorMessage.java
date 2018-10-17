@@ -208,6 +208,31 @@ public class DoctorMessage implements Serializable {
      * 疫苗名称
      */
     private String materialName;
+    /**
+     * 备注
+     */
+    private String remark;
+
+    /**
+     * 免疫日期类型, 枚举类VaccinationDateType
+     * @see io.terminus.doctor.event.enums.VaccinationDateType
+     */
+    private String vaccinationDateType;
+
+    /**
+     * 免疫日期
+     */
+    private Date vaccinationDate;
+
+    /**
+     * 事件日期
+     */
+    private String eventDate;
+
+    /**
+     * 猪类
+     */
+    private String pigType;
 
     public enum BUSINESS_TYPE{
         PIG(1, "猪"),

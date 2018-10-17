@@ -45,6 +45,11 @@
         <result column="created_by" property="createdBy"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
+        <result column="remark" property="remark"/>
+        <result column="vaccinationDateType" property="vaccinationDateType"/>
+        <result column="vaccinationDate" property="vaccinationDate"/>
+        <result column="eventDate" property="eventDate"/>
+        <result column="pigType" property="pigType"/>
     </resultMap>
 
     <sql id="tb">
@@ -56,11 +61,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, rule_id, role_id, template_id, template_name, business_id, business_type, rule_value_id, message_template, type, event_type, category, data, event_at, other_at, rule_time_diff, time_diff, barn_id, barn_name, status, status_name, operator_id, operator_name, reason, code, parity, ware_house_id, ware_house_name,lot_number, quantity, avg_day_age,dose,material_id,material_name, url, created_by, created_at, updated_at
+        farm_id, rule_id, role_id, template_id, template_name, business_id, business_type, rule_value_id, message_template, type, event_type, category, data, event_at, other_at, rule_time_diff, time_diff, barn_id, barn_name, status, status_name, operator_id, operator_name, reason, code, parity, ware_house_id, ware_house_name,lot_number, quantity, avg_day_age,dose,material_id,material_name, url, created_by, created_at, updated_at, remark, vaccinationDateType, vaccinationDate, eventDate, pigType
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{ruleId}, #{roleId}, #{templateId}, #{templateName}, #{businessId},#{businessType}, #{ruleValueId}, #{messageTemplate}, #{type}, #{eventType},  #{category}, #{data}, #{eventAt}, #{otherAt}, #{ruleTimeDiff}, #{timeDiff}, #{barnId}, #{barnName}, #{status}, #{statusName}, #{operatorId}, #{operatorName}, #{reason}, #{code}, #{parity}, #{wareHouseId}, #{wareHouseName}, #{lotNumber}, #{quantity}, #{avgDayAge}, #{dose}, #{materialId}, #{materialName}, #{url}, #{createdBy}, now(), now()
+        #{farmId}, #{ruleId}, #{roleId}, #{templateId}, #{templateName}, #{businessId},#{businessType}, #{ruleValueId}, #{messageTemplate}, #{type}, #{eventType},  #{category}, #{data}, #{eventAt}, #{otherAt}, #{ruleTimeDiff}, #{timeDiff}, #{barnId}, #{barnName}, #{status}, #{statusName}, #{operatorId}, #{operatorName}, #{reason}, #{code}, #{parity}, #{wareHouseId}, #{wareHouseName}, #{lotNumber}, #{quantity}, #{avgDayAge}, #{dose}, #{materialId}, #{materialName}, #{url}, #{createdBy}, now(), now(), #{remark}, #{vaccinationDateType}, #{vaccinationDate}, #{eventDate}, #{pigType}
     </sql>
 
     <insert id="create" parameterType="DoctorMessage" keyProperty="id" useGeneratedKeys="true">
@@ -77,7 +82,7 @@
         (<include refid="cols_exclude_id" />)
         VALUES
         <foreach collection="list" item="i" separator=",">
-            (#{i.farmId}, #{i.ruleId}, #{i.roleId}, #{i.templateId}, #{i.templateName}, #{i.businessId}, #{businessType}, #{i.messageTemplate}, #{i.type}, #{i.eventType},#{i.category}, #{i.data}, #{i.eventAt}, #{i.otherAt}, #{i.ruleTimeDiff}, #{i.timeDiff}, #{i.barnId}, #{i.barnName}, #{i.status}, #{i.statusName}, #{i.operatorId}, #{i.operatorName}, #{i.reason}, #{i.code}, #{i.parity}, #{i.wareHouseId}, #{i.wareHouseName}, #{i.lotNumber}, #{i.quantity}, #{i.avgDayAge}, #{i.dose}, #{i.materialId}, #{i.materialName}, #{i.url} ,#{i.createdBy}, now(), now())
+            (#{i.farmId}, #{i.ruleId}, #{i.roleId}, #{i.templateId}, #{i.templateName}, #{i.businessId}, #{businessType}, #{i.messageTemplate}, #{i.type}, #{i.eventType},#{i.category}, #{i.data}, #{i.eventAt}, #{i.otherAt}, #{i.ruleTimeDiff}, #{i.timeDiff}, #{i.barnId}, #{i.barnName}, #{i.status}, #{i.statusName}, #{i.operatorId}, #{i.operatorName}, #{i.reason}, #{i.code}, #{i.parity}, #{i.wareHouseId}, #{i.wareHouseName}, #{i.lotNumber}, #{i.quantity}, #{i.avgDayAge}, #{i.dose}, #{i.materialId}, #{i.materialName}, #{i.url} ,#{i.createdBy}, now(), now(), #{i.remark}, #{i.vaccinationDateType}, #{i.vaccinationDate}, #{i.eventDate}, #{i.pigType})
         </foreach>
     </insert>
 
@@ -135,6 +140,11 @@
             <if test="materialName != null">material_name = #{materialName},</if>
             <if test="url != null">url = #{url},</if>
             <if test="createdBy != null">created_by = #{createdBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="vaccinationDateType != null">vaccinationDateType = #{vaccinationDateType},</if>
+            <if test="vaccinationDate != null">vaccinationDate = #{vaccinationDate},</if>
+            <if test="eventDate != null">eventDate = #{eventDate},</if>
+            <if test="pigType != null">pigType = #{pigType},</if>
             updated_at=now()
         </set>
         WHERE id = #{id}
@@ -181,6 +191,11 @@
             <if test="dose != null">AND dose = #{dose}</if>
             <if test="materialId != null">AND material_id = #{materialId}</if>
             <if test="materialName != null">AND material_name = #{materialName}</if>
+            <if test="remark != null">AND remark = #{remark}</if>
+            <if test="vaccinationDateType != null">AND vaccinationDateType = #{vaccinationDateType}</if>
+            <if test="vaccinationDate != null">AND vaccinationDate = #{vaccinationDate}</if>
+            <if test="eventDate != null">AND eventDate = #{eventDate}</if>
+            <if test="pigType != null">AND pigType = #{pigType}</if>
             <if test="types != null &amp;&amp; types.size() > 0">
                 AND `type` IN
                 <foreach collection="types" item="i" open="(" separator="," close=")">
