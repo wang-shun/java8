@@ -8,10 +8,8 @@ import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.enums.OrzDimension;
-import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
-import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
-import io.terminus.doctor.event.service.DoctorDailyReportV2Service;
-import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
+import io.terminus.doctor.event.enums.ReportTime;
+import io.terminus.doctor.event.service.*;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorDepartmentReadService;
@@ -57,6 +55,8 @@ public class DoctorReportJobs {
     private DoctorDepartmentReadService doctorDepartmentReadService;
     @RpcConsumer
     private DoctorDailyReportV2Service doctorDailyReportV2Service;
+    @RpcConsumer
+    private DoctorReportWriteService doctorReportWriteService;
 
     private final HostLeader hostLeader;
 
@@ -173,7 +173,26 @@ public class DoctorReportJobs {
             log.error("deliver rate  report job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
     }
+    @Scheduled(cron = "0 0 0 1 * ?")
+    @RequestMapping(value = "/deliver/rate", method = RequestMethod.GET)
+    public void monthNpd(){
+        try {
+            if (!hostLeader.isLeader()) {
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
+            log.info("npd monthly job start, now is:{}", DateUtil.toDateTimeString(new Date()));
 
+            //获取上一个月
+            Date month = new DateTime(Dates.startOfDay(new Date())).plusMonths(-1).toDate();
+            log.info("month ===>",  month);
+            doctorReportWriteService.flushNPD(getAllFarmIds(), month, ReportTime.MONTH);
+
+            log.info("npd monthly job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+        } catch (Exception e) {
+            log.error("parity monthly report job failed, cause:{}", Throwables.getStackTraceAsString(e));
+        }
+    }
     private List<Long> getAllFarmIds() {
         return RespHelper.orServEx(doctorFarmReadService.findAllFarms()).stream().map(DoctorFarm::getId).collect(Collectors.toList());
     }
