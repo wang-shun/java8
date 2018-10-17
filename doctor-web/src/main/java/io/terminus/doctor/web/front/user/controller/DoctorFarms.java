@@ -103,8 +103,10 @@ public class DoctorFarms {
         }
         Integer userType = doctorOrgReadService.getUserType(UserUtil.getUserId());
         log.error("=====ishwo="+isshow+"=userType="+userType);
-        if(userType == 1 && isshow == null){
-            return null;
+        if(userType != null) {
+            if (userType == 1 && isshow == null) {
+                return null;
+            }
         }
         return RespHelper.or500(doctorStatisticReadService.getOrgStatisticByOrg(UserUtil.getUserId(), orgId));
     }
