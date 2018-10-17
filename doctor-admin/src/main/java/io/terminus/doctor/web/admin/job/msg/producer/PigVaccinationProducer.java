@@ -10,25 +10,14 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
-import io.terminus.doctor.event.enums.GroupEventType;
-import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.enums.VaccinationDateType;
-import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorGroupTrack;
-import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorVaccinationPigWarn;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.event.service.DoctorVaccinationPigWarnReadService;
 import io.terminus.doctor.event.dto.msg.Rule;
 import io.terminus.doctor.event.dto.msg.RuleValue;
 import io.terminus.doctor.event.dto.msg.SubUser;
-import io.terminus.doctor.event.enums.Category;
-import io.terminus.doctor.event.model.DoctorMessage;
-import io.terminus.doctor.event.model.DoctorMessageRuleRole;
+import io.terminus.doctor.event.enums.*;
+import io.terminus.doctor.event.model.*;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.event.service.DoctorVaccinationPigWarnReadService;
 import io.terminus.doctor.web.admin.job.msg.dto.DoctorMessageInfo;
 import io.terminus.doctor.web.admin.job.msg.producer.factory.GroupDetailFactory;
 import io.terminus.doctor.web.admin.job.msg.producer.factory.PigDtoFactory;
@@ -38,11 +27,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -679,44 +664,58 @@ public class PigVaccinationProducer extends AbstractJobProducer {
             pigType = "猪群";
         }
         String vaccinationType = null;
+        String vaccinationDateType = null;
         if(warn.getVaccinationDateType().equals(VaccinationDateType.FIXED_DAY_AGE.getValue())){
             vaccinationType = VaccinationDateType.FIXED_DAY_AGE.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.FIXED_DAY_AGE.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.FIXED_DATE.getValue())){
             vaccinationType = VaccinationDateType.FIXED_DATE.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.FIXED_DATE.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.FIXED_WEIGHT.getValue())){
             vaccinationType = VaccinationDateType.FIXED_WEIGHT.getDesc() + ":" + warn.getInputDate().toString();
+            vaccinationDateType = VaccinationDateType.FIXED_WEIGHT.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.CHANGE_LOC.getValue())){
             vaccinationType = VaccinationDateType.CHANGE_LOC.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.CHANGE_LOC.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.CHANGE_GROUP.getValue())){
             vaccinationType = VaccinationDateType.CHANGE_GROUP.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.CHANGE_GROUP.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.PREG_CHECK.getValue())){
             vaccinationType = VaccinationDateType.PREG_CHECK.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.PREG_CHECK.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.BREEDING.getValue())){
             vaccinationType = VaccinationDateType.BREEDING.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.BREEDING.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.DELIVER.getValue())){
             vaccinationType = VaccinationDateType.DELIVER.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.DELIVER.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.WEAN.getValue())){
             vaccinationType = VaccinationDateType.WEAN.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.WEAN.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.BACK_TO_LOVE.getValue())){
             vaccinationType = VaccinationDateType.BACK_TO_LOVE.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.BACK_TO_LOVE.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.MISCARRY.getValue())){
             vaccinationType = VaccinationDateType.MISCARRY.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.MISCARRY.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.FEMININE.getValue())){
             vaccinationType = VaccinationDateType.FEMININE.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.FEMININE.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.ENTER.getValue())){
             vaccinationType = VaccinationDateType.ENTER.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.ENTER.getDesc().toString();
         }
         try {
             DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
@@ -735,7 +734,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
                     .materialName(warn.getMaterialName())
                     .remark(warn.getRemark())
                     .vaccinationDateType(vaccinationType)
-                    .vaccinationDate(vaccDate.toDate())
+                    .vaccinationDate(new Date())
                     .eventDate(vaccinationType)
                     .pigType(pigType)
                     .build();
@@ -766,44 +765,58 @@ public class PigVaccinationProducer extends AbstractJobProducer {
         Integer quantity = Integer.parseInt(doctorGroupReadService.findGroupQuantityByGroupCode(groupCode).toString());
         String pigType = "猪群";
         String vaccinationType = null;
+        String vaccinationDateType = null;
         if(warn.getVaccinationDateType().equals(VaccinationDateType.FIXED_DAY_AGE.getValue())){
             vaccinationType = VaccinationDateType.FIXED_DAY_AGE.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.FIXED_DAY_AGE.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.FIXED_DATE.getValue())){
             vaccinationType = VaccinationDateType.FIXED_DATE.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.FIXED_DATE.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.FIXED_WEIGHT.getValue())){
             vaccinationType = VaccinationDateType.FIXED_WEIGHT.getDesc() + ":" + warn.getInputDate().toString();
+            vaccinationDateType = VaccinationDateType.FIXED_WEIGHT.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.CHANGE_LOC.getValue())){
             vaccinationType = VaccinationDateType.CHANGE_LOC.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.CHANGE_LOC.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.CHANGE_GROUP.getValue())){
             vaccinationType = VaccinationDateType.CHANGE_GROUP.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.CHANGE_GROUP.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.PREG_CHECK.getValue())){
             vaccinationType = VaccinationDateType.PREG_CHECK.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.PREG_CHECK.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.BREEDING.getValue())){
             vaccinationType = VaccinationDateType.BREEDING.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.BREEDING.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.DELIVER.getValue())){
             vaccinationType = VaccinationDateType.DELIVER.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.DELIVER.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.WEAN.getValue())){
             vaccinationType = VaccinationDateType.WEAN.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.WEAN.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.BACK_TO_LOVE.getValue())){
             vaccinationType = VaccinationDateType.BACK_TO_LOVE.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.BACK_TO_LOVE.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.MISCARRY.getValue())){
             vaccinationType = VaccinationDateType.MISCARRY.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.MISCARRY.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.FEMININE.getValue())){
             vaccinationType = VaccinationDateType.FEMININE.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.FEMININE.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.ENTER.getValue())){
             vaccinationType = VaccinationDateType.ENTER.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationDateType = VaccinationDateType.ENTER.getDesc().toString();
         }
         try {
             DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
@@ -819,9 +832,9 @@ public class PigVaccinationProducer extends AbstractJobProducer {
                     .materialId(warn.getMaterialId())
                     .materialName(warn.getMaterialName())
                     .remark(warn.getRemark())
-                    .vaccinationDateType(vaccinationType)
+                    .vaccinationDateType(vaccinationDateType)
                     .quantity(quantity)
-                    .vaccinationDate(vaccDate.toDate())
+                    .vaccinationDate(new Date())
                     .eventDate(vaccinationType)
                     .pigType(pigType)
                     .build();
