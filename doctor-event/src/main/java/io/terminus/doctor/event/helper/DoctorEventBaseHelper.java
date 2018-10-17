@@ -243,30 +243,25 @@ public class DoctorEventBaseHelper {
      */
     public boolean isLastPigManualEvent(DoctorPigEvent pigEvent) {
         if (IGNORE_EVENT.contains(pigEvent.getType())) {
-            log.info("体况，疾病，防疫，采精");
             return true;
         }
 
         if (Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM.getKey())) {
-            log.info("转场转出");
             return true;
         }
 
         if (Objects.equals(pigEvent.getIsAuto(), IsOrNot.YES.getValue())) {
-            log.info("自动生成的事件");
             return false;
         }
 
         DoctorPigEvent lastEvent = doctorPigEventDao.findLastEventExcludeTypes(pigEvent.getPigId(), IGNORE_EVENT);
 
         if (isNull(lastEvent)) {
-            log.info("lastEvent");
             return false;
         }
 
         //手动事件，比较是否是最新事件
         if (!Objects.equals(lastEvent.getIsAuto(), IsOrNot.YES.getValue())) {
-            log.info("手动事件，比较是否是最新事件");
             return Objects.equals(lastEvent.getId(), pigEvent.getId());
         }
 
