@@ -733,7 +733,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
                     .materialId(warn.getMaterialId())
                     .materialName(warn.getMaterialName())
                     .remark(warn.getRemark())
-                    .vaccinationDateType(vaccinationType)
+                    .vaccinationDateType(vaccinationDateType)
                     .vaccinationDate(new Date())
                     .eventDate(vaccinationType)
                     .pigType(pigType)
