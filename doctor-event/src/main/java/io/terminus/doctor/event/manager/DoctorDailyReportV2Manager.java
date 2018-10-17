@@ -217,7 +217,7 @@ public class DoctorDailyReportV2Manager {
             }
         });
 
-        doctorReportWriteService.flushNPD(farmIds, today, ReportTime.MONTH);
+        //doctorReportWriteService.flushNPD(farmIds, today, ReportTime.MONTH);
         return longDateMap;
     }
 
