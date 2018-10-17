@@ -173,7 +173,7 @@ public class DoctorReportJobs {
             log.error("deliver rate  report job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
     }
-    @Scheduled(cron = "0 0 4 18 * ?")
+    @Scheduled(cron = "0 22 16 17 * ?")
     @RequestMapping(value = "/month/npd", method = RequestMethod.GET)
     public void monthNpd(){
         try {
