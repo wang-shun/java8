@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.warehouseV2;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
 import io.terminus.doctor.basic.service.warehouseV2.DoctorWarehouseMaterialApplyReadService;
@@ -42,6 +43,21 @@ public class PiggeryCollarController {
 
     @Autowired
     private Exporter exporter;
+
+    // 仓库领用明细报表 （陈娟 2018-10-17）
+    @RequestMapping(method = RequestMethod.GET, value = "/collarReport")
+    public Map collarReport(@RequestParam Long orgId,
+                            @RequestParam Long farmId,
+                            @RequestParam String startDate,
+                            @RequestParam String endDate,
+                            @RequestParam(required = false) Integer materialType,
+                            @RequestParam(required = false) String materialName,
+                            @RequestParam(required = false) Integer pigType,
+                            @RequestParam(required = false) Long pigBarnId,
+                            @RequestParam(required = false) Long pigGroupId){
+        Map map = RespHelper.or500(doctorWarehouseMaterialApplyReadService.collarReport(orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnId, pigGroupId));
+        return  map;
+    }
 
     /**
      * 猪舍领用报表

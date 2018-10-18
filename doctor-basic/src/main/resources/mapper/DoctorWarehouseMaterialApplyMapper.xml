@@ -836,4 +836,65 @@
         <if test="skuId != null"> AND b.material_id = #{skuId}</if>
     </select>
     <!--猪群End-->
+
+    <!--仓库领用明细报表start （陈娟 2018-10-17）-->
+    <select id="collarReport" parameterType="map" resultType="map">
+
+        <!--得到猪舍单据-->
+        <if test="flag==0">
+            select ma.material_handle_id,ma.apply_date,ma.settlement_date,ma.type,ma.material_id,ma.material_name,ma.warehouse_id,ma.warehouse_name,ma.pig_type,ma.pig_barn_id,ma.pig_barn_name,ma.pig_group_id,ma.pig_group_name,
+            (ma.quantity+ma.refund_quantity) as quantity,(ma.amount+ma.refund_amount)/(ma.quantity+ma.refund_quantity) as unit_price,(ma.amount+ma.refund_amount) as amount,
+            db.`name` as unit,s.specification,v.short_name as vendor_name
+            from doctor_warehouse_material_apply as ma
+            inner join doctor_warehouse_sku as s
+            on s.id=ma.material_id
+            inner join doctor_warehouse_vendor as v
+            on v.id=s.vendor_id
+            inner join doctor_basics as db
+            on db.id=ma.unit
+            where ma.apply_type=0 and ma.org_id=#{orgId} and  ma.farm_id=#{farmId}
+            <if test="startDate !=null">AND <![CDATA[ma.apply_date >= #{startDate}]]></if>
+            <if test="endDate !=null">AND <![CDATA[ma.apply_date <= #{endDate}]]></if>
+            <if test="materialType !=null">and  ma.type=#{materialType}</if>
+            <if test="materialName !=null">   and ma.material_name like concat('%',#{materialName},'%')</if>
+            <if test="pigType !=null">and  ma.pig_type=#{pigType}</if>
+            <if test="pigBarnId !=null">    and  ma.pig_barn_id=#{pigBarnId}</if>
+            ORDER BY ma.apply_date,ma.pig_barn_id,ma.pig_group_id
+        </if>
+
+        <!--得到猪群单据-->
+        <if test="flag==1">
+            select ma.material_handle_id,ma.apply_date,ma.settlement_date,ma.type,ma.material_id,ma.material_name,ma.warehouse_id,ma.warehouse_name,ma.pig_type,ma.pig_barn_id,ma.pig_barn_name,ma.pig_group_id,ma.pig_group_name,
+            (ma.quantity+ma.refund_quantity) as quantity,(ma.amount+ma.refund_amount)/(ma.quantity+ma.refund_quantity) as unit_price,(ma.amount+ma.refund_amount) as amount,
+            db.`name` as unit,s.specification,v.short_name as vendor_name
+            from doctor_warehouse_material_apply as ma
+            inner join doctor_warehouse_sku as s
+            on s.id=ma.material_id
+            inner join doctor_warehouse_vendor as v
+            on v.id=s.vendor_id
+            inner join doctor_basics as db
+            on db.id=ma.unit
+            where (ma.apply_type=1 or ma.apply_type=2) and ma.org_id=#{orgId} and  ma.farm_id=#{farmId}
+            <if test="startDate !=null">AND <![CDATA[ma.apply_date >= #{startDate}]]></if>
+            <if test="endDate !=null">AND <![CDATA[ma.apply_date <= #{endDate}]]></if>
+            <if test="materialType !=null">and  ma.type=#{materialType}</if>
+            <if test="materialName !=null">   and ma.material_name like concat('%',#{materialName},'%')</if>
+            <if test="pigType !=null">and  ma.pig_type=#{pigType}</if>
+            <if test="pigBarnId !=null">    and  ma.pig_barn_id=#{pigBarnId}</if>
+            <if test="pigGroupId !=null">    and  ma.pig_group_id=#{pigGroupId}</if>
+            ORDER BY ma.apply_date,ma.pig_barn_id,ma.pig_group_id
+        </if>
+    </select>
+    <!--仓库领用明细报表end-->
+
+    <!--得到领用猪舍对应的领用猪群单据-->
+    <select id="getGroupById" parameterType="Long" resultMap="DoctorWarehouseMaterialApplyMap">
+      select * from doctor_warehouse_material_apply where material_handle_id=#{materialHandleId} and (apply_type=1 or apply_type=2)
+    </select>
+
+    <!--判断猪群是否关闭 （陈娟 2018-10-18）-->
+    <select id="getGroupStatus" parameterType="Long" resultType="Integer">
+        select `status` from doctor_groups where id=#{groupId}
+    </select>
+
 </mapper>
