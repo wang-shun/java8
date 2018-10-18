@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -70,7 +71,7 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
             }
 
             // 判断猪群是否关闭 （陈娟 2018-10-18）
-            if(!mm.get("pig_group_id").toString().equals("--")){
+            if((!mm.get("pig_group_id").toString().equals("--")&&(!mm.get("pig_group_id").toString().equals("-1")))){
                 Integer status = doctorWarehouseMaterialApplyDao.getGroupStatus((Long) mm.get("pig_group_id"));
                 if(status==-1){
                     mm.put("pig_group_name",mm.get("pig_group_name").toString()+"（已关闭）");
@@ -98,8 +99,30 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         }
         Map<String, Object> maps = new HashMap<>();
         maps.put("collarMaps", collarMaps);
-        maps.put("allQuantity", allQuantity);
-        maps.put("allAmount", allAmount);
+
+        // 总金额判断是否结算
+        if(allAmount.compareTo(BigDecimal.ZERO)==0){
+            maps.put("allAmount", "--");
+        }else{
+            maps.put("allAmount", allAmount);
+        }
+
+        // 总数量判断物料类型
+        if(allQuantity.compareTo(BigDecimal.ZERO)==0){
+            maps.put("allQuantity", "--");
+        }else{
+            List<Map> typeMaps = doctorWarehouseMaterialApplyDao.getMaterialTypes(orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnId, pigGroupId);
+            if((typeMaps.size()==1)&&(Integer.parseInt(typeMaps.get(0).get("type").toString())==1)){
+                maps.put("allQuantity", allQuantity);
+            }else if((typeMaps.size()==1)&&(Integer.parseInt(typeMaps.get(0).get("type").toString())==2)){
+                maps.put("allQuantity", allQuantity);
+            }else if((typeMaps.size()==2)&&(Integer.parseInt(typeMaps.get(0).get("type").toString())==1&&Integer.parseInt(typeMaps.get(1).get("type").toString())==2)){
+                maps.put("allQuantity", allQuantity);
+            }else{
+                maps.put("allQuantity", "--");
+            }
+        }
+
         return Response.ok(maps);
     }
 

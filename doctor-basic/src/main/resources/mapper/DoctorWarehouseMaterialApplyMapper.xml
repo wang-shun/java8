@@ -860,6 +860,7 @@
             <if test="pigType !=null">and  ma.pig_type=#{pigType}</if>
             <if test="pigBarnId !=null">    and  ma.pig_barn_id=#{pigBarnId}</if>
             ORDER BY ma.apply_date,ma.pig_barn_id,ma.pig_group_id
+            limit #{offset}, #{limit}
         </if>
 
         <!--得到猪群单据-->
@@ -883,6 +884,7 @@
             <if test="pigBarnId !=null">    and  ma.pig_barn_id=#{pigBarnId}</if>
             <if test="pigGroupId !=null">    and  ma.pig_group_id=#{pigGroupId}</if>
             ORDER BY ma.apply_date,ma.pig_barn_id,ma.pig_group_id
+            limit #{offset}, #{limit}
         </if>
     </select>
     <!--仓库领用明细报表end-->
@@ -895,6 +897,20 @@
     <!--判断猪群是否关闭 （陈娟 2018-10-18）-->
     <select id="getGroupStatus" parameterType="Long" resultType="Integer">
         select `status` from doctor_groups where id=#{groupId}
+    </select>
+
+    <!--得到物料类型 （陈娟 2018-10-18）-->
+    <select id="getMaterialTypes" parameterType="map" resultType="map">
+        select DISTINCT ma.type from doctor_warehouse_material_apply as ma
+        where ma.org_id=#{orgId} and  ma.farm_id=#{farmId}
+        <if test="startDate !=null">AND <![CDATA[ma.apply_date >= #{startDate}]]></if>
+        <if test="endDate !=null">AND <![CDATA[ma.apply_date <= #{endDate}]]></if>
+        <if test="materialType !=null">and  ma.type=#{materialType}</if>
+        <if test="materialName !=null">   and ma.material_name like concat('%',#{materialName},'%')</if>
+        <if test="pigType !=null">and  ma.pig_type=#{pigType}</if>
+        <if test="pigBarnId !=null">    and  ma.pig_barn_id=#{pigBarnId}</if>
+        <if test="pigGroupId !=null">    and  ma.pig_group_id=#{pigGroupId}</if>
+        ORDER BY ma.type
     </select>
 
 </mapper>

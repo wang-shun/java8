@@ -374,5 +374,32 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         return this.sqlSession.selectOne(this.sqlId("getGroupStatus"),groupId);
     }
 
+    // 得到物料类型 （陈娟 2018-10-18）
+    public List<Map> getMaterialTypes(Long orgId,Long farmId,String startDate,String endDate,Integer materialType,String materialName,Integer pigType,Long pigBarnId,Long pigGroupId) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date startDate1 = null;
+        Date endDate1 = null;
+        try {
+            if(startDate != null){
+                startDate1 = sdf.parse(startDate);
+            }
+            if(endDate != null){
+                endDate1 = sdf.parse(endDate);
+            }
+        }catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Map<String,Object> map = Maps.newHashMap();
+        map.put("orgId",orgId);
+        map.put("farmId",farmId);
+        map.put("startDate",startDate1);
+        map.put("endDate",endDate1);
+        map.put("materialType",materialType);
+        map.put("materialName",materialName);
+        map.put("pigType",pigType);
+        map.put("pigBarnId",pigBarnId);
+        map.put("pigGroupId",pigGroupId);
+        return this.sqlSession.selectList(this.sqlId("getMaterialTypes"),map);
+    }
 }
 
