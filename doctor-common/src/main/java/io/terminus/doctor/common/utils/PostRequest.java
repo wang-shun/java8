@@ -14,7 +14,7 @@ import java.util.Map;
 
 
 public class PostRequest {
-    public static Response<Boolean> postRequest(String path,Map<String,String> params){
+    public static void postRequest(String path,Map<String,String> params){
         try {
             URL url = new URL("https://iot-test.xrnm.com"+path);
             //打开和url之间的连接
@@ -58,15 +58,13 @@ public class PostRequest {
             //断开连接，最好写上，disconnect是在底层tcp socket链接空闲时才切断。如果正在被其他线程使用就不切断。
             //固定多线程的话，如果不disconnect，链接会增多，直到收发不出信息。写上disconnect后正常一些。
             conn.disconnect();
-            return Response.ok(true);
         } catch (Exception e) {
-            return Response.fail(e.toString());
         }
     }
     public static void main(String[] arg){
         Map<String,String> map = Maps.newHashMap();
-        map.put("pigId","1");
-        map.put("newStatus","1");
-        postRequest("/api/iot/pig/sow-status-change",map);
+        map.put("pigGroupId","38965");
+        map.put("newQuantity","25");
+        postRequest("/api/iot/pig/group-stock-change",map);
     }
 }
