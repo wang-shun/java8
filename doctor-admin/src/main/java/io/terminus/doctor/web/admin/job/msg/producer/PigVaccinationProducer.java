@@ -655,31 +655,44 @@ public class PigVaccinationProducer extends AbstractJobProducer {
         jsonData.put("dose", warn.getDose());
         jsonData.put("vaccinationDateType", warn.getVaccinationDateType());
         jsonData.put("vaccDate", DateTimeFormat.forPattern("yyyy-MM-dd").print(vaccDate));
+        DateTime ruleTime = null;
         String pigType = null;
-        if(pigDto.getPigType() == 5 || pigDto.getPigType() == 6 || pigDto.getPigType() == 7){
-            pigType = "母猪";
-        } else if(pigDto.getPigType() == 9){
-            pigType = "公猪";
-        } else {
-            pigType = "猪群";
+        if(warn.getPigType() == 2){
+            pigType = "保育猪";
+        } else if(warn.getPigType() == 3){
+            pigType = "育肥猪";
+        }else if(warn.getPigType() == 4){
+            pigType = "后备猪";
+        }else if(warn.getPigType() == 5){
+            pigType = "配种母猪";
+        }else if(warn.getPigType() == 6){
+            pigType = "妊娠母猪";
+        }else if(warn.getPigType() == 7){
+            pigType = "分娩母猪";
+        }else if(warn.getPigType() == 9){
+            pigType = "种公猪";
         }
         String vaccinationType = null;
         String vaccinationDateType = null;
         if(warn.getVaccinationDateType().equals(VaccinationDateType.FIXED_DAY_AGE.getValue())){
             vaccinationType = VaccinationDateType.FIXED_DAY_AGE.getDesc() + ":" + warn.getInputValue().toString();
             vaccinationDateType = VaccinationDateType.FIXED_DAY_AGE.getDesc().toString();
+            ruleTime = DateTime.now().minusDays(pigDto.getDateAge() - warn.getInputValue());
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.FIXED_DATE.getValue())){
-            vaccinationType = VaccinationDateType.FIXED_DATE.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationType = VaccinationDateType.FIXED_DATE.getDesc() + ":" + warn.getInputDate().toString();
             vaccinationDateType = VaccinationDateType.FIXED_DATE.getDesc().toString();
+            ruleTime = new DateTime(warn.getInputDate());
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.FIXED_WEIGHT.getValue())){
-            vaccinationType = VaccinationDateType.FIXED_WEIGHT.getDesc() + ":" + warn.getInputDate().toString();
+            vaccinationType = VaccinationDateType.FIXED_WEIGHT.getDesc() + ":" + warn.getInputValue().toString();
             vaccinationDateType = VaccinationDateType.FIXED_WEIGHT.getDesc().toString();
+            ruleTime = getCheckWeightDate(pigDto);
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.CHANGE_LOC.getValue())){
             vaccinationType = VaccinationDateType.CHANGE_LOC.getDesc() + ":" + warn.getInputValue().toString();
             vaccinationDateType = VaccinationDateType.CHANGE_LOC.getDesc().toString();
+            ruleTime = getChangeLocationDate(pigDto);
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.CHANGE_GROUP.getValue())){
             vaccinationType = VaccinationDateType.CHANGE_GROUP.getDesc() + ":" + warn.getInputValue().toString();
@@ -688,34 +701,42 @@ public class PigVaccinationProducer extends AbstractJobProducer {
         if(warn.getVaccinationDateType().equals(VaccinationDateType.PREG_CHECK.getValue())){
             vaccinationType = VaccinationDateType.PREG_CHECK.getDesc() + ":" + warn.getInputValue().toString();
             vaccinationDateType = VaccinationDateType.PREG_CHECK.getDesc().toString();
+            ruleTime = new DateTime(pigDto.getUpdatedAt());
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.BREEDING.getValue())){
             vaccinationType = VaccinationDateType.BREEDING.getDesc() + ":" + warn.getInputValue().toString();
             vaccinationDateType = VaccinationDateType.BREEDING.getDesc().toString();
+            ruleTime = new DateTime(pigDto.getUpdatedAt());
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.DELIVER.getValue())){
             vaccinationType = VaccinationDateType.DELIVER.getDesc() + ":" + warn.getInputValue().toString();
             vaccinationDateType = VaccinationDateType.DELIVER.getDesc().toString();
+            ruleTime = new DateTime(pigDto.getUpdatedAt());
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.WEAN.getValue())){
             vaccinationType = VaccinationDateType.WEAN.getDesc() + ":" + warn.getInputValue().toString();
             vaccinationDateType = VaccinationDateType.WEAN.getDesc().toString();
+            ruleTime = new DateTime(pigDto.getUpdatedAt());
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.BACK_TO_LOVE.getValue())){
             vaccinationType = VaccinationDateType.BACK_TO_LOVE.getDesc() + ":" + warn.getInputValue().toString();
             vaccinationDateType = VaccinationDateType.BACK_TO_LOVE.getDesc().toString();
+            ruleTime = new DateTime(pigDto.getUpdatedAt());
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.MISCARRY.getValue())){
             vaccinationType = VaccinationDateType.MISCARRY.getDesc() + ":" + warn.getInputValue().toString();
             vaccinationDateType = VaccinationDateType.MISCARRY.getDesc().toString();
+            ruleTime = new DateTime(pigDto.getUpdatedAt());
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.FEMININE.getValue())){
             vaccinationType = VaccinationDateType.FEMININE.getDesc() + ":" + warn.getInputValue().toString();
             vaccinationDateType = VaccinationDateType.FEMININE.getDesc().toString();
+            ruleTime = new DateTime(pigDto.getUpdatedAt());
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.ENTER.getValue())){
             vaccinationType = VaccinationDateType.ENTER.getDesc() + ":" + warn.getInputValue().toString();
             vaccinationDateType = VaccinationDateType.ENTER.getDesc().toString();
+            ruleTime = new DateTime(pigDto.getUpdatedAt());
         }
         try {
             DoctorMessageInfo messageInfo = DoctorMessageInfo.builder()
@@ -734,7 +755,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
                     .materialName(warn.getMaterialName())
                     .remark(warn.getRemark())
                     .vaccinationDateType(vaccinationDateType)
-                    .vaccinationDate(new Date())
+                    .vaccinationDate(ruleTime.toDate())
                     .eventDate(vaccinationType)
                     .pigType(pigType)
                     .build();
@@ -763,19 +784,37 @@ public class PigVaccinationProducer extends AbstractJobProducer {
         jsonData.put("vaccDate", DateTimeFormat.forPattern("yyyy-MM-dd").print(vaccDate));
         String groupCode = detail.getGroup().getGroupCode();
         Integer quantity = Integer.parseInt(doctorGroupReadService.findGroupQuantityByGroupCode(groupCode).toString());
-        String pigType = "猪群";
+        DateTime ruleTime = null;
+        String pigType = null;
+        if(warn.getPigType() == 2){
+            pigType = "保育猪";
+        } else if(warn.getPigType() == 3){
+            pigType = "育肥猪";
+        }else if(warn.getPigType() == 4){
+            pigType = "后备猪";
+        }else if(warn.getPigType() == 5){
+            pigType = "配种母猪";
+        }else if(warn.getPigType() == 6){
+            pigType = "妊娠母猪";
+        }else if(warn.getPigType() == 7){
+            pigType = "分娩母猪";
+        }else if(warn.getPigType() == 9){
+            pigType = "种公猪";
+        }
         String vaccinationType = null;
         String vaccinationDateType = null;
         if(warn.getVaccinationDateType().equals(VaccinationDateType.FIXED_DAY_AGE.getValue())){
             vaccinationType = VaccinationDateType.FIXED_DAY_AGE.getDesc() + ":" + warn.getInputValue().toString();
             vaccinationDateType = VaccinationDateType.FIXED_DAY_AGE.getDesc().toString();
+            ruleTime = DateTime.now().minusDays(detail.getGroupTrack().getAvgDayAge()- warn.getInputValue());
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.FIXED_DATE.getValue())){
-            vaccinationType = VaccinationDateType.FIXED_DATE.getDesc() + ":" + warn.getInputValue().toString();
+            vaccinationType = VaccinationDateType.FIXED_DATE.getDesc() + ":" + warn.getInputDate().toString();
             vaccinationDateType = VaccinationDateType.FIXED_DATE.getDesc().toString();
+            ruleTime = new DateTime(warn.getInputDate());
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.FIXED_WEIGHT.getValue())){
-            vaccinationType = VaccinationDateType.FIXED_WEIGHT.getDesc() + ":" + warn.getInputDate().toString();
+            vaccinationType = VaccinationDateType.FIXED_WEIGHT.getDesc() + ":" + warn.getInputValue().toString();
             vaccinationDateType = VaccinationDateType.FIXED_WEIGHT.getDesc().toString();
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.CHANGE_LOC.getValue())){
@@ -785,6 +824,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
         if(warn.getVaccinationDateType().equals(VaccinationDateType.CHANGE_GROUP.getValue())){
             vaccinationType = VaccinationDateType.CHANGE_GROUP.getDesc() + ":" + warn.getInputValue().toString();
             vaccinationDateType = VaccinationDateType.CHANGE_GROUP.getDesc().toString();
+            ruleTime = getChangeGroupDate(detail.getGroupTrack()).minusDays(warn.getInputValue());
         }
         if(warn.getVaccinationDateType().equals(VaccinationDateType.PREG_CHECK.getValue())){
             vaccinationType = VaccinationDateType.PREG_CHECK.getDesc() + ":" + warn.getInputValue().toString();
@@ -834,7 +874,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
                     .remark(warn.getRemark())
                     .vaccinationDateType(vaccinationDateType)
                     .quantity(quantity)
-                    .vaccinationDate(new Date())
+                    .vaccinationDate(ruleTime.toDate())
                     .eventDate(vaccinationType)
                     .pigType(pigType)
                     .build();
