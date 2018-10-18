@@ -326,6 +326,7 @@ public class SubService {
 
     //创建staff
     private void createStaff(Long userId, Sub sub) {
+        log.error("======sub="+sub);
         if (!sub.isAsStaff()) {
             log.info("this sub need not create staff, user:{}", sub);
             return;
