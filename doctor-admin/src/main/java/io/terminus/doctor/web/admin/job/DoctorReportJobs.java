@@ -182,11 +182,9 @@ public class DoctorReportJobs {
                 return;
             }
             log.info("npd monthly job start, now is:{}", DateUtil.toDateTimeString(new Date()));
-
-            //获取上一个月
-            Date month = new DateTime(Dates.startOfDay(new Date())).plusMonths(-1).toDate();
-            log.info("month ===>",  month);
-            doctorReportWriteService.flushNPD(getAllFarmIds(), month, ReportTime.MONTH);
+            Date today = Dates.startOfDay(new Date());
+            log.info("month ===>",  today);
+            doctorReportWriteService.flushNPD(getAllFarmIds(), today, ReportTime.MONTH);
 
             log.info("npd monthly job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
