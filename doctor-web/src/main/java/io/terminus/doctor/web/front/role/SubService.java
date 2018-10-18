@@ -326,7 +326,6 @@ public class SubService {
 
     //创建staff
     private void createStaff(Long userId, Sub sub) {
-        log.error("======sub="+sub);
         if (!sub.isAsStaff()) {
             log.info("this sub need not create staff, user:{}", sub);
             return;
@@ -345,8 +344,7 @@ public class SubService {
             doctorStaff.setGroupId(groupId);
             doctorStaff.setUserName(sub.getRealName());
             doctorStaff.setMobile(sub.getContact());
-            doctorStaff.setStatus(Objects.equals(sub.getStatus(), io.terminus.doctor.user.model.Sub.Status.ACTIVE.value())
-                    ? DoctorStaff.Status.PRESENT.value() : DoctorStaff.Status.ABSENT.value());
+            doctorStaff.setStatus(DoctorStaff.Status.PRESENT.value());
             RespHelper.orServEx(doctorStaffWriteService.createDoctorStaff(doctorStaff));
         });
     }
