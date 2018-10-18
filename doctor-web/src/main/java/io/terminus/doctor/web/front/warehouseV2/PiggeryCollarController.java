@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.warehouseV2;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.enums.WarehouseMaterialHandleType;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseMaterialApply;
@@ -46,7 +47,9 @@ public class PiggeryCollarController {
 
     // 仓库领用明细报表 （陈娟 2018-10-17）
     @RequestMapping(method = RequestMethod.GET, value = "/collarReport")
-    public Map collarReport(@RequestParam Long orgId,
+    public Paging<Map> collarReport(@RequestParam Integer pageNo,
+                            @RequestParam Integer pageSize,
+                            @RequestParam Long orgId,
                             @RequestParam Long farmId,
                             @RequestParam String startDate,
                             @RequestParam String endDate,
@@ -55,8 +58,8 @@ public class PiggeryCollarController {
                             @RequestParam(required = false) Integer pigType,
                             @RequestParam(required = false) Long pigBarnId,
                             @RequestParam(required = false) Long pigGroupId){
-        Map map = RespHelper.or500(doctorWarehouseMaterialApplyReadService.collarReport(orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnId, pigGroupId));
-        return  map;
+        Paging<Map> mapPaging = RespHelper.or500(doctorWarehouseMaterialApplyReadService.collarReport(pageNo, pageSize, orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnId, pigGroupId));
+        return  mapPaging;
     }
 
     /**

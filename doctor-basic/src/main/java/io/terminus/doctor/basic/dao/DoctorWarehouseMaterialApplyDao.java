@@ -1,6 +1,8 @@
 package io.terminus.doctor.basic.dao;
 
 import com.google.common.collect.Maps;
+import io.terminus.common.model.PageInfo;
+import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.enums.WarehouseMaterialApplyType;
@@ -333,10 +335,8 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         return this.sqlSession.selectList(this.sqlId("selectPigGroupApply1"),map);
     }
 
-
-
     // 仓库领用明细报表 （陈娟 2018-10-17）
-    public List<Map> collarReport(Integer flag,Long orgId,Long farmId,String startDate,String endDate,Integer materialType,String materialName,Integer pigType,Long pigBarnId,Long pigGroupId) {
+    public Paging<Map> collarReport(Integer pageNo, Integer pageSize,Integer flag,Long orgId,Long farmId,String startDate,String endDate,Integer materialType,String materialName,Integer pigType,Long pigBarnId,Long pigGroupId) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date startDate1 = null;
         Date endDate1 = null;
@@ -361,7 +361,17 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         map.put("pigType",pigType);
         map.put("pigBarnId",pigBarnId);
         map.put("pigGroupId",pigGroupId);
-        return this.sqlSession.selectList(this.sqlId("collarReport"),map);
+
+        Long total = (Long)this.sqlSession.selectOne(this.sqlId("collarCount"), map);
+        if (total.longValue() <= 0L) {
+            return new Paging(0L, Collections.emptyList());
+        } else {
+            PageInfo info = new PageInfo(pageNo, pageSize);
+            map.put("offset", info.getOffset());
+            map.put("limit", info.getLimit());
+            List<Map> datas = this.sqlSession.selectList(this.sqlId("collarReport"), map);
+            return new Paging(total, datas);
+        }
     }
 
     // 得到领用猪舍对应的领用猪群单据

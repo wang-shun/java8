@@ -47,17 +47,17 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
     // 仓库领用明细报表 （陈娟 2018-10-17）
     @Override
-    public Response<Map> collarReport(Long orgId, Long farmId, String startDate, String endDate, Integer materialType, String materialName, Integer pigType, Long pigBarnId, Long pigGroupId) {
-
+    public Response<Paging<Map>> collarReport(Integer pageNo, Integer pageSize, Long orgId, Long farmId, String startDate, String endDate, Integer materialType, String materialName, Integer pigType, Long pigBarnId, Long pigGroupId) {
         // 判断筛选条件是否有猪群
         Integer flag = 0;
         if(null != pigGroupId && !pigGroupId.equals("")){
             flag = 1;
         }
-        List<Map> collarMaps = doctorWarehouseMaterialApplyDao.collarReport(flag, orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnId, pigGroupId);
+        Paging<Map> collarBarnMaps = doctorWarehouseMaterialApplyDao.collarReport(pageNo, pageSize,flag, orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnId, pigGroupId);
+        List<Map> data = collarBarnMaps.getData();
         BigDecimal allQuantity = new BigDecimal(0);
         BigDecimal allAmount = new BigDecimal(0);
-        for (Map mm:collarMaps) {
+        for (Map mm:data) {
             if(flag==0){
                 // 如果筛选条件没有猪群，则先得到猪舍单据，再判断是否领用到猪群（是：展示猪群；否：无）
                 DoctorWarehouseMaterialApply groupApply = doctorWarehouseMaterialApplyDao.getGroupById((Long) mm.get("material_handle_id"));
@@ -97,33 +97,43 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
                 allQuantity = allQuantity.add(BigDecimal.ZERO);
             }
         }
-        Map<String, Object> maps = new HashMap<>();
-        maps.put("collarMaps", collarMaps);
 
+        Map<String, Object> allMaps = new HashMap<>();
         // 总金额判断是否结算
         if(allAmount.compareTo(BigDecimal.ZERO)==0){
-            maps.put("allAmount", "--");
+            allMaps.put("allAmount", "--");
         }else{
-            maps.put("allAmount", allAmount);
+            allMaps.put("allAmount", allAmount);
         }
-
         // 总数量判断物料类型
         if(allQuantity.compareTo(BigDecimal.ZERO)==0){
-            maps.put("allQuantity", "--");
+            allMaps.put("allQuantity", "--");
         }else{
             List<Map> typeMaps = doctorWarehouseMaterialApplyDao.getMaterialTypes(orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnId, pigGroupId);
             if((typeMaps.size()==1)&&(Integer.parseInt(typeMaps.get(0).get("type").toString())==1)){
-                maps.put("allQuantity", allQuantity);
+                allMaps.put("allQuantity", allQuantity);
             }else if((typeMaps.size()==1)&&(Integer.parseInt(typeMaps.get(0).get("type").toString())==2)){
-                maps.put("allQuantity", allQuantity);
+                allMaps.put("allQuantity", allQuantity);
             }else if((typeMaps.size()==2)&&(Integer.parseInt(typeMaps.get(0).get("type").toString())==1&&Integer.parseInt(typeMaps.get(1).get("type").toString())==2)){
-                maps.put("allQuantity", allQuantity);
+                allMaps.put("allQuantity", allQuantity);
             }else{
-                maps.put("allQuantity", "--");
+                allMaps.put("allQuantity", "--");
             }
         }
 
-        return Response.ok(maps);
+        // 合计：不用每页显示合计，根据筛选条件出来的所有数据最后一条显示合计
+        Long total = collarBarnMaps.getTotal();
+        if(pageNo==null){
+            if(total<=20){
+                data.add(allMaps);
+            }
+        }else{
+            if(total<=pageNo*pageSize){
+                data.add(allMaps);
+            }
+        }
+
+        return Response.ok(new Paging<Map>(total, data));
     }
 
     @Override
