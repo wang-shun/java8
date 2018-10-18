@@ -1,11 +1,13 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.exception.InvalidException;
+import io.terminus.doctor.common.utils.PostRequest;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
@@ -20,7 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
+import static io.terminus.doctor.event.enums.PigEvent.*;
 import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.IGNORE_EVENT;
 import static io.terminus.doctor.event.manager.DoctorPigEventManager.checkAndPublishEvent;
 
@@ -108,6 +112,16 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     @Override
     public Response<Boolean> createPigEvent(DoctorPigEvent doctorPigEvent) {
         try {
+            //通知物联网接口(孔景军)
+            /*
+            当母猪发生转舍、离场、销售、离场事件时，需调用物联网提供的接口，以此通知物联网。(孔景军)
+             */
+            if(doctorPigEvent.getType() == CHG_LOCATION.getKey() || doctorPigEvent.getType() == TO_PREG.getKey() || doctorPigEvent.getType() == TO_MATING.getKey()
+                    || doctorPigEvent.getType() == TO_FARROWING.getKey()  || doctorPigEvent.getType() == REMOVAL.getKey()  || (doctorPigEvent.getType() == PIGLETS_CHG.getKey() && doctorPigEvent.getChangeTypeId()==109) ){
+                Map<String,String> params = Maps.newHashMap();
+                params.put("pigId",doctorPigEvent.getPigId().toString());
+                new PostRequest().postRequest("/api/iot/pig/sow-leaving",params);
+            }
             return Response.ok(doctorPigEventDao.create(doctorPigEvent));
         } catch (Exception e) {
             log.error("create.pig.event.failed, event:{}, basic:{}, cause:{}", doctorPigEvent, Throwables.getStackTraceAsString(e));

@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.doctor.common.utils.PostRequest;
 import io.terminus.doctor.event.dto.DoctorSuggestPig;
 import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -23,6 +24,84 @@ import java.util.Map;
  */
 @Repository
 public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
+
+    public Boolean update( DoctorPigTrack t) {
+
+        //通知物联网接口(孔景军)
+            /*
+            当母猪状态变更为进场、哺乳，配种、断奶、妊娠检查阴性、妊娠检查返情、妊娠检查流产时，需调用物联网提供的接口，以此通知网联网。
+             */
+        if(t.getStatus() != null && t.getPigType() == 1){
+            if(t.getStatus() == 1){
+                Map<String,String> params = Maps.newHashMap();
+                params.put("pigId",t.getPigId().toString());
+                params.put("newStatus","1");
+                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
+            }
+            if(t.getStatus() == 3){
+                Map<String,String> params = Maps.newHashMap();
+                params.put("pigId",t.getPigId().toString());
+                params.put("newStatus","3");
+                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
+            }
+            if(t.getStatus() == 4){
+                Map<String,String> params = Maps.newHashMap();
+                params.put("pigId",t.getPigId().toString());
+                params.put("newStatus","4");
+                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
+            }
+            if(t.getStatus() == 7){
+                Map<String,String> params = Maps.newHashMap();
+                params.put("pigId",t.getPigId().toString());
+                params.put("newStatus","7");
+                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
+            }
+            if(t.getStatus() == 8){
+                Map<String,String> params = Maps.newHashMap();
+                params.put("pigId",t.getPigId().toString());
+                params.put("newStatus","8");
+                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
+            }
+            if(t.getStatus() == 9){
+                Map<String,String> params = Maps.newHashMap();
+                params.put("pigId",t.getPigId().toString());
+                params.put("newStatus","9");
+                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
+            }
+            if(t.getStatus() == 5){
+                //得到母猪的最后一次妊娠检查事件
+                Integer status = this.sqlSession.selectOne(this.sqlId("getLastEvent"), t.getPigId());
+                if(status != null){
+                    if(status == 2){
+                        Map<String,String> params = Maps.newHashMap();
+                        params.put("pigId",t.getPigId().toString());
+                        params.put("newStatus","51");
+                        new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
+                    }
+                    if(status == 3){
+                        Map<String,String> params = Maps.newHashMap();
+                        params.put("pigId",t.getPigId().toString());
+                        params.put("newStatus","52");
+                        new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
+                    }
+                    if(status == 4){
+                        Map<String,String> params = Maps.newHashMap();
+                        params.put("pigId",t.getPigId().toString());
+                        params.put("newStatus","53");
+                        new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
+                    }
+                }
+            }
+        }
+        //当母猪下的仔猪数量发生变动时，需要调用物联网提供的接口，以此通知物联网。(孔景军)
+        if(t.getUnweanQty() != null && t.getPigType() == 1){
+            Map<String,String> params = Maps.newHashMap();
+            params.put("pigId",t.getPigId().toString());
+            params.put("newQuantity",t.getUnweanQty().toString());
+            new PostRequest().postRequest("/api/iot/pig/ sow-stock-change",params);
+        }
+        return this.sqlSession.update(this.sqlId("update"), t) == 1;
+    }
 
     /**
      * 更新公猪的当前配种次数

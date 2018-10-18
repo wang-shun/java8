@@ -2,7 +2,9 @@ package io.terminus.doctor.event.dao;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.doctor.common.utils.PostRequest;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import org.springframework.stereotype.Repository;
 
@@ -27,7 +29,17 @@ public class DoctorGroupTrackDao extends MyBatisDao<DoctorGroupTrack> {
     public DoctorGroupTrack findByGroupId(Long groupId) {
         return getSqlSession().selectOne("findGroupTrackByGroupId", groupId);
     }
-
+    @Override
+    public Boolean update(DoctorGroupTrack t) {
+        if(t.getQuantity() != null){
+            /*当猪群的存栏数量发生变动时，通知物联网接口（孔景军）*/
+            Map<String,String> param = Maps.newHashMap();
+            param.put("pigGroupId",t.getGroupId().toString());
+            param.put("newQuantity",t.getQuantity().toString());
+            new PostRequest().postRequest("api/iot/pig/ group-stock-change",param);
+        }
+        return this.sqlSession.update(this.sqlId("update"), t) == 1;
+    }
     /**
      * 重新计算下日龄
      * @param groupIds 猪群ids
