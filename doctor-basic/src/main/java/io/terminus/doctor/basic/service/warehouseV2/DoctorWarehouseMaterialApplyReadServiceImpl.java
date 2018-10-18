@@ -68,6 +68,16 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
                     mm.put("pig_group_name","--");
                 }
             }
+
+            // 判断猪群是否关闭
+            if(!mm.get("pig_group_id").toString().equals("--")){
+                Integer status = doctorWarehouseMaterialApplyDao.getGroupStatus((Long) mm.get("pig_group_id"));
+                if(status==-1){
+                    mm.put("pig_group_name",mm.get("pig_group_name").toString()+"（已关闭）");
+                }
+            }
+
+            // 判断是否结算
             boolean b = doctorWarehouseOrgSettlementDao.isSettled(orgId,(Date) mm.get("settlement_date"));
             if(!b){
                 mm.put("unit_price","--");

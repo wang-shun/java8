@@ -892,6 +892,9 @@
       select * from doctor_warehouse_material_apply where material_handle_id=#{materialHandleId} and (apply_type=1 or apply_type=2)
     </select>
 
-
+    <!--判断猪群是否关闭 （陈娟 2018-10-18）-->
+    <select id="getGroupStatus" parameterType="Long" resultType="Integer">
+        select `status` from doctor_groups where id=#{groupId}
+    </select>
 
 </mapper>

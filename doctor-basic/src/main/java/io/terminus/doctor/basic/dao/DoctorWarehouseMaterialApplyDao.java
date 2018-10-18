@@ -369,5 +369,10 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         return this.sqlSession.selectOne(this.sqlId("getGroupById"),materialHandleId);
     }
 
+    // 得到领用猪舍对应的领用猪群单据
+    public Integer getGroupStatus(Long groupId){
+        return this.sqlSession.selectOne(this.sqlId("getGroupStatus"),groupId);
+    }
+
 }
 
