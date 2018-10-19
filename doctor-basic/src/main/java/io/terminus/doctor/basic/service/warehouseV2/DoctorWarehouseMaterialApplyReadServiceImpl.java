@@ -55,8 +55,6 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         }
         Paging<Map> collarBarnMaps = doctorWarehouseMaterialApplyDao.collarReport(pageNo, pageSize,flag, orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnId, pigGroupId);
         List<Map> data = collarBarnMaps.getData();
-        BigDecimal allQuantity = new BigDecimal(0);
-        BigDecimal allAmount = new BigDecimal(0);
         for (Map mm:data) {
             if(flag==0){
                 // 如果筛选条件没有猪群，则先得到猪舍单据，再判断是否领用到猪群（是：展示猪群；否：无）
@@ -83,24 +81,16 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
             if(!b){
                 mm.put("unit_price","--");
                 mm.put("amount","--");
-                allAmount = allAmount.add(BigDecimal.ZERO);
-            }else{
-                if (mm.get("amount").toString() != null) {
-                    allAmount = allAmount.add(new BigDecimal(mm.get("amount").toString()));
-                }else{
-                    allAmount = allAmount.add(BigDecimal.ZERO);
-                }
-            }
-            if (mm.get("quantity").toString() != null) {
-                allQuantity = allQuantity.add(new BigDecimal(mm.get("quantity").toString()));
-            }else{
-                allQuantity = allQuantity.add(BigDecimal.ZERO);
             }
         }
 
+        // 合计
         Map<String, Object> allMaps = new HashMap<>();
+        Map<String, Object> sumMaps = doctorWarehouseMaterialApplyDao.collarSum(flag, orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnId, pigGroupId);
+        BigDecimal allQuantity = (BigDecimal) sumMaps.get("sumQuantity");
+        BigDecimal allAmount = (BigDecimal) sumMaps.get("sumAmount");
         // 总金额判断是否结算
-        if(allAmount.compareTo(BigDecimal.ZERO)==0){
+        if(allAmount.compareTo(BigDecimal.ZERO)<=0){
             allMaps.put("allAmount", "--");
         }else{
             allMaps.put("allAmount", allAmount);

@@ -878,6 +878,22 @@
         limit #{offset}, #{limit}
     </select>
 
+    <!--合计（陈娟 2018-10-19）-->
+    <select id="collarSum" parameterType="map" resultType="map">
+        SELECT SUM(ma.quantity+ma.refund_quantity) as sumQuantity ,SUM(ma.amount+ma.refund_amount) as sumAmount
+        from doctor_warehouse_material_apply as ma
+        where ma.org_id=#{orgId} and  ma.farm_id=#{farmId}
+        <if test="flag == 0">and ma.apply_type=0 </if>
+        <if test="flag == 1">and (ma.apply_type=1 or ma.apply_type=2) </if>
+        <if test="startDate !=null">and <![CDATA[ma.apply_date >= #{startDate}]]></if>
+        <if test="endDate !=null">and <![CDATA[ma.apply_date <= #{endDate}]]></if>
+        <if test="materialType !=null">and  ma.type=#{materialType}</if>
+        <if test="materialName !=null">and ma.material_name like concat('%',#{materialName},'%')</if>
+        <if test="pigType !=null">and  ma.pig_type=#{pigType}</if>
+        <if test="pigBarnId !=null">and  ma.pig_barn_id=#{pigBarnId}</if>
+        <if test="pigGroupId !=null">and  ma.pig_group_id=#{pigGroupId}</if>
+    </select>
+
     <!--仓库领用明细报表end-->
 
     <!--得到领用猪舍对应的领用猪群单据-->
