@@ -69,11 +69,11 @@
         <include refid="tb"/>
         <set>
             <if test="farmId != null">farm_id = #{farmId},</if>
-            <if test="farmId != null">org_id = #{orgId},</if>
-            <if test="farmId != null">group_id = #{groupId},</if>
+            <if test="orgId != null">org_id = #{orgId},</if>
+            <if test="groupId != null">group_id = #{groupId},</if>
             <if test="userId != null">user_id = #{userId},</if>
-            <if test="farmId != null">user_name = #{userName},</if>
-            <if test="farmId != null">mobile = #{mobile},</if>
+            <if test="userName != null">user_name = #{userName},</if>
+            <if test="mobile != null">mobile = #{mobile},</if>
             <if test="status != null">status = #{status},</if>
             updated_at=now()
         </set>
