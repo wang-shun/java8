@@ -12,8 +12,8 @@ public interface DoctorStaffReadService {
     /**
      * 根据猪场id和用户id，唯一确定一个猪场员工
      */
-    Response<DoctorStaff> findStaffByFarmIdAndUserId(@NotNull(message = "farmId.not.null") Long farmId,
-                                                     @NotNull(message = "userId.not.null") Long userId);
+    Response<DoctorStaff> findStaffByFarmIdAndUserId(Long farmId,
+                                                      Long userId);
 
     /**
      * 查询猪场员工
