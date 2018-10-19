@@ -17,7 +17,7 @@ import java.util.List;
 @Repository
 public class DoctorStaffDao extends MyBatisDao<DoctorStaff> {
 
-    public DoctorStaff findByFarmIdAndUserId(Long userId, Long farmId){
+    public DoctorStaff findByFarmIdAndUserId(Long farmId, Long userId){
         return sqlSession.selectOne(sqlId("findByFarmIdAndUserId"), ImmutableMap.of("farmId", farmId, "userId", userId));
     }
 
