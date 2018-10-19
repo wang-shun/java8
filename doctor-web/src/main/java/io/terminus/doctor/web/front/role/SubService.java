@@ -220,7 +220,7 @@ public class SubService {
     private void updateStaffStatus(List<Long> farmIds, Long userId, DoctorStaff.Status status) {
         if (farmIds != null) {
             farmIds.forEach(farmId -> {
-                log.error("====================farmId="+farmId);
+                log.error("====================farmId="+farmId+"============userId="+userId);
                 DoctorStaff staff = RespHelper.orServEx(doctorStaffReadService.findStaffByFarmIdAndUserId(farmId, userId));
                 log.error("====================staff="+staff);
                 staff.setStatus(status.value());
