@@ -201,7 +201,7 @@ public class SubService {
     private void updateSubStaffStatus(List<Long> farmIds, User subUser, io.terminus.doctor.user.model.Sub.Status status){
         io.terminus.doctor.user.model.Sub sub = RespHelper.orServEx(primaryUserReadService.findSubByUserId(subUser.getId()));
         sub.setStatus(status.value());
-
+        log.error("farmIds="+farmIds+"subUser="+subUser);
         if(Objects.equals(status.value(), io.terminus.doctor.user.model.Sub.Status.ACTIVE.value())){
             subUser.setStatus(UserStatus.NORMAL.value());
             //// TODO: 17/5/4 staff表已经不使用了
