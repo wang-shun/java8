@@ -894,6 +894,31 @@
         <if test="pigGroupId !=null">and  ma.pig_group_id=#{pigGroupId}</if>
     </select>
 
+    <!--导出（陈娟 2018-10-19）-->
+    <select id="collarReportExport" parameterType="map" resultType="map">
+        select ma.material_handle_id,date_format(ma.apply_date,'%Y-%m-%d %k:%i:%s') as apply_date,ma.settlement_date,ma.type,ma.material_id,ma.material_name,ma.warehouse_id,ma.warehouse_name,ma.pig_type,ma.pig_barn_id,ma.pig_barn_name,ma.pig_group_id,ma.pig_group_name,
+        (ma.quantity+ma.refund_quantity) as quantity,(ma.amount+ma.refund_amount)/(ma.quantity+ma.refund_quantity) as unit_price,(ma.amount+ma.refund_amount) as amount,
+        db.`name` as unit,s.specification,v.short_name as vendor_name
+        from doctor_warehouse_material_apply as ma
+        inner join doctor_warehouse_sku as s
+        on s.id=ma.material_id
+        inner join doctor_warehouse_vendor as v
+        on v.id=s.vendor_id
+        inner join doctor_basics as db
+        on db.id=ma.unit
+        where ma.org_id=#{orgId} and  ma.farm_id=#{farmId}
+        <if test="flag == 0">and ma.apply_type=0 </if>
+        <if test="flag == 1">and (ma.apply_type=1 or ma.apply_type=2) </if>
+        <if test="startDate !=null">and <![CDATA[ma.apply_date >= #{startDate}]]></if>
+        <if test="endDate !=null">and <![CDATA[ma.apply_date <= #{endDate}]]></if>
+        <if test="materialType !=null">and  ma.type=#{materialType}</if>
+        <if test="materialName !=null">and ma.material_name like concat('%',#{materialName},'%')</if>
+        <if test="pigType !=null">and  ma.pig_type=#{pigType}</if>
+        <if test="pigBarnId !=null">and  ma.pig_barn_id=#{pigBarnId}</if>
+        <if test="pigGroupId !=null">and  ma.pig_group_id=#{pigGroupId}</if>
+        ORDER BY ma.apply_date,ma.pig_barn_id,ma.pig_group_id
+    </select>
+
     <!--仓库领用明细报表end-->
 
     <!--得到领用猪舍对应的领用猪群单据-->

@@ -12,8 +12,12 @@ import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.web.core.export.Exporter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,8 +27,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -60,6 +67,99 @@ public class PiggeryCollarController {
                             @RequestParam(required = false) Long pigGroupId){
         Paging<Map> mapPaging = RespHelper.or500(doctorWarehouseMaterialApplyReadService.collarReport(pageNo, pageSize, orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnId, pigGroupId));
         return  mapPaging;
+    }
+
+    // 仓库领用明细报表导出 （陈娟 2018-10-19）
+    @RequestMapping(method = RequestMethod.GET, value = "/collarReport/export")
+    public void collarReportExport(@RequestParam Long orgId,
+                                    @RequestParam Long farmId,
+                                    @RequestParam String startDate,
+                                    @RequestParam String endDate,
+                                    @RequestParam(required = false) Integer materialType,
+                                    @RequestParam(required = false) String materialName,
+                                    @RequestParam(required = false) Integer pigType,
+                                    @RequestParam(required = false) Long pigBarnId,
+                                    @RequestParam(required = false) Long pigGroupId,
+                                    HttpServletRequest request, HttpServletResponse response){
+
+        List<Map> maps = doctorWarehouseMaterialApplyReadService.collarReportExport(orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnId, pigGroupId);
+        //开始导出
+        try {
+            //导出名称
+            exporter.setHttpServletResponse(request, response, "仓库领用明细报表");
+
+            try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+                //表
+                Sheet sheet = workbook.createSheet();
+                sheet.createRow(0).createCell(0).setCellValue("仓库领用明细统计");
+
+                Row title = sheet.createRow(1);
+                int pos = 2;
+
+                title.createCell(0).setCellValue("领用日期");
+                title.createCell(1).setCellValue("物料类型");
+                title.createCell(2).setCellValue("物料名称");
+                title.createCell(3).setCellValue("仓库名称");
+                title.createCell(4).setCellValue("猪舍类型");
+                title.createCell(5).setCellValue("猪舍名称");
+                title.createCell(6).setCellValue("猪群名称");
+                title.createCell(7).setCellValue("数量");
+                title.createCell(8).setCellValue("单价");
+                title.createCell(9).setCellValue("金额");
+                title.createCell(10).setCellValue("单位");
+                title.createCell(11).setCellValue("规格");
+                title.createCell(12).setCellValue("厂家");
+
+                for(Map m: maps){
+                    Row row = sheet.createRow(pos++);
+
+                    row.createCell(0).setCellValue(String.valueOf(m.get("apply_date")));
+                    String b=String.valueOf(m.get("type"));
+                    if(b.equals(String.valueOf(WareHouseType.FEED.getKey()))){
+                        row.createCell(1).setCellValue(WareHouseType.FEED.getDesc());
+                    }else if(b.equals(String.valueOf(WareHouseType.MATERIAL.getKey()))){
+                        row.createCell(1).setCellValue(WareHouseType.MATERIAL.getDesc());
+                    }else if(b.equals(String.valueOf(WareHouseType.VACCINATION.getKey()))){
+                        row.createCell(1).setCellValue(WareHouseType.VACCINATION.getDesc());
+                    }else if(b.equals(String.valueOf(WareHouseType.MEDICINE.getKey()))){
+                        row.createCell(1).setCellValue(WareHouseType.MEDICINE.getDesc());
+                    }else if(b.equals(String.valueOf(WareHouseType.CONSUME.getKey()))){
+                        row.createCell(1).setCellValue(WareHouseType.CONSUME.getDesc());
+                    }
+
+                    row.createCell(2).setCellValue(String.valueOf(m.get("material_name")));
+                    row.createCell(3).setCellValue(String.valueOf(m.get("warehouse_name")));
+                    String a=String.valueOf(m.get("pig_type"));
+                    if(a.equals(String.valueOf(PigType.NURSERY_PIGLET.getValue()))){
+                        row.createCell(4).setCellValue(PigType.NURSERY_PIGLET.getDesc());
+                    }else if(a.equals(String.valueOf(PigType.FATTEN_PIG.getValue()))){
+                        row.createCell(4).setCellValue(PigType.FATTEN_PIG.getDesc());
+                    }else if(a.equals(String.valueOf(PigType.RESERVE.getValue()))){
+                        row.createCell(4).setCellValue(PigType.RESERVE.getDesc());
+                    }else if(a.equals(String.valueOf(PigType.MATE_SOW.getValue()))){
+                        row.createCell(4).setCellValue(PigType.MATE_SOW.getDesc());
+                    }else if(a.equals(String.valueOf(PigType.PREG_SOW.getValue()))){
+                        row.createCell(4).setCellValue(PigType.PREG_SOW.getDesc());
+                    }else if(a.equals(String.valueOf(PigType.DELIVER_SOW.getValue()))){
+                        row.createCell(4).setCellValue(PigType.DELIVER_SOW.getDesc());
+                    }else if(a.equals(String.valueOf(PigType.BOAR.getValue()))){
+                        row.createCell(4).setCellValue(PigType.BOAR.getDesc());
+                    }
+                    row.createCell(5).setCellValue(String.valueOf(m.get("pig_barn_name")));
+                    row.createCell(6).setCellValue(String.valueOf(m.get("pig_group_name")));
+                    row.createCell(7).setCellValue(String.valueOf(m.get("quantity")));
+                    row.createCell(8).setCellValue(String.valueOf(m.get("unit_price")));
+                    row.createCell(9).setCellValue(String.valueOf(m.get("amount")));
+                    row.createCell(10).setCellValue(String.valueOf(m.get("unit")));
+                    row.createCell(11).setCellValue(String.valueOf(m.get("specification")));
+                    row.createCell(12).setCellValue(String.valueOf(m.get("vendor_name")));
+                }
+
+                workbook.write(response.getOutputStream());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
