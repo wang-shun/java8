@@ -336,7 +336,7 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
     }
 
     // 仓库领用明细报表 （陈娟 2018-10-17）
-    public Paging<Map> collarReport(Integer pageNo, Integer pageSize,Integer flag,Long orgId,Long farmId,String startDate,String endDate,Integer materialType,String materialName,Integer pigType,Long pigBarnId,Long pigGroupId) {
+    public Paging<Map> collarReport(Integer pageNo, Integer pageSize,Integer flag,Long orgId,Long farmId,String startDate,String endDate,Integer materialType,String materialName,Integer pigType,String pigBarnName, String pigGroupName) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date startDate1 = null;
         Date endDate1 = null;
@@ -359,8 +359,8 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         map.put("materialType",materialType);
         map.put("materialName",materialName);
         map.put("pigType",pigType);
-        map.put("pigBarnId",pigBarnId);
-        map.put("pigGroupId",pigGroupId);
+        map.put("pigBarnName",pigBarnName);
+        map.put("pigGroupName",pigGroupName);
 
         Long total = (Long)this.sqlSession.selectOne(this.sqlId("collarCount"), map);
         if (total.longValue() <= 0L) {
@@ -375,7 +375,7 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
     }
 
     // 仓库领用明细报表导出 （陈娟 2018-10-19）
-    public List<Map> collarReportExport(Integer flag,Long orgId,Long farmId,String startDate,String endDate,Integer materialType,String materialName,Integer pigType,Long pigBarnId,Long pigGroupId) {
+    public List<Map> collarReportExport(Integer flag,Long orgId,Long farmId,String startDate,String endDate,Integer materialType,String materialName,Integer pigType,String pigBarnName, String pigGroupName) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date startDate1 = null;
         Date endDate1 = null;
@@ -398,13 +398,13 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         map.put("materialType",materialType);
         map.put("materialName",materialName);
         map.put("pigType",pigType);
-        map.put("pigBarnId",pigBarnId);
-        map.put("pigGroupId",pigGroupId);
+        map.put("pigBarnName",pigBarnName);
+        map.put("pigGroupName",pigGroupName);
         return this.sqlSession.selectList(this.sqlId("collarReportExport"),map);
     }
 
     // 合计 （陈娟 2018-10-19）
-    public Map<String,Object> collarSum(Integer flag,Long orgId,Long farmId,String startDate,String endDate,Integer materialType,String materialName,Integer pigType,Long pigBarnId,Long pigGroupId) {
+    public Map<String,Object> collarSum(Integer flag,Long orgId,Long farmId,String startDate,String endDate,Integer materialType,String materialName,Integer pigType,String pigBarnName, String pigGroupName) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date startDate1 = null;
         Date endDate1 = null;
@@ -427,8 +427,8 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         map.put("materialType",materialType);
         map.put("materialName",materialName);
         map.put("pigType",pigType);
-        map.put("pigBarnId",pigBarnId);
-        map.put("pigGroupId",pigGroupId);
+        map.put("pigBarnName",pigBarnName);
+        map.put("pigGroupName",pigGroupName);
 
         return this.sqlSession.selectOne(this.sqlId("collarSum"),map);
     }
@@ -444,7 +444,7 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
     }
 
     // 得到物料类型 （陈娟 2018-10-18）
-    public List<Map> getMaterialTypes(Long orgId,Long farmId,String startDate,String endDate,Integer materialType,String materialName,Integer pigType,Long pigBarnId,Long pigGroupId) {
+    public List<Map> getMaterialTypes(Long orgId,Long farmId,String startDate,String endDate,Integer materialType,String materialName,Integer pigType,String pigBarnName, String pigGroupName) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date startDate1 = null;
         Date endDate1 = null;
@@ -466,8 +466,8 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         map.put("materialType",materialType);
         map.put("materialName",materialName);
         map.put("pigType",pigType);
-        map.put("pigBarnId",pigBarnId);
-        map.put("pigGroupId",pigGroupId);
+        map.put("pigBarnName",pigBarnName);
+        map.put("pigGroupName",pigGroupName);
         return this.sqlSession.selectList(this.sqlId("getMaterialTypes"),map);
     }
 }

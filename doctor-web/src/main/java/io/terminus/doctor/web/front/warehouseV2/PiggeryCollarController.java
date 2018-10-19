@@ -63,9 +63,9 @@ public class PiggeryCollarController {
                             @RequestParam(required = false) Integer materialType,
                             @RequestParam(required = false) String materialName,
                             @RequestParam(required = false) Integer pigType,
-                            @RequestParam(required = false) Long pigBarnId,
-                            @RequestParam(required = false) Long pigGroupId){
-        Paging<Map> mapPaging = RespHelper.or500(doctorWarehouseMaterialApplyReadService.collarReport(pageNo, pageSize, orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnId, pigGroupId));
+                            @RequestParam(required = false) String pigBarnName,
+                            @RequestParam(required = false) String pigGroupName){
+        Paging<Map> mapPaging = RespHelper.or500(doctorWarehouseMaterialApplyReadService.collarReport(pageNo, pageSize, orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnName, pigGroupName));
         return  mapPaging;
     }
 
@@ -78,11 +78,11 @@ public class PiggeryCollarController {
                                     @RequestParam(required = false) Integer materialType,
                                     @RequestParam(required = false) String materialName,
                                     @RequestParam(required = false) Integer pigType,
-                                    @RequestParam(required = false) Long pigBarnId,
-                                    @RequestParam(required = false) Long pigGroupId,
+                                    @RequestParam(required = false) String pigBarnName,
+                                    @RequestParam(required = false) String pigGroupName,
                                     HttpServletRequest request, HttpServletResponse response){
 
-        List<Map> maps = doctorWarehouseMaterialApplyReadService.collarReportExport(orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnId, pigGroupId);
+        List<Map> maps = doctorWarehouseMaterialApplyReadService.collarReportExport(orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnName, pigGroupName);
         //开始导出
         try {
             //导出名称

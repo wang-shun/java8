@@ -849,8 +849,8 @@
         <if test="materialType !=null">and  ma.type=#{materialType}</if>
         <if test="materialName !=null">and ma.material_name like concat('%',#{materialName},'%')</if>
         <if test="pigType !=null">and  ma.pig_type=#{pigType}</if>
-        <if test="pigBarnId !=null">and  ma.pig_barn_id=#{pigBarnId}</if>
-        <if test="pigGroupId !=null">and  ma.pig_group_id=#{pigGroupId}</if>
+        <if test="pigBarnName !=null">and  ma.pig_barn_name like concat('%',#{pigBarnName},'%')</if>
+        <if test="pigGroupName !=null">and  ma.pig_group_name like concat('%',#{pigGroupName},'%')</if>
     </select>
 
     <select id="collarReport" parameterType="map" resultType="map">
@@ -872,8 +872,8 @@
         <if test="materialType !=null">and  ma.type=#{materialType}</if>
         <if test="materialName !=null">and ma.material_name like concat('%',#{materialName},'%')</if>
         <if test="pigType !=null">and  ma.pig_type=#{pigType}</if>
-        <if test="pigBarnId !=null">and  ma.pig_barn_id=#{pigBarnId}</if>
-        <if test="pigGroupId !=null">and  ma.pig_group_id=#{pigGroupId}</if>
+        <if test="pigBarnName !=null">and  ma.pig_barn_name like concat('%',#{pigBarnName},'%')</if>
+        <if test="pigGroupName !=null">and  ma.pig_group_name like concat('%',#{pigGroupName},'%')</if>
         ORDER BY ma.apply_date,ma.pig_barn_id,ma.pig_group_id
         limit #{offset}, #{limit}
     </select>
@@ -890,8 +890,8 @@
         <if test="materialType !=null">and  ma.type=#{materialType}</if>
         <if test="materialName !=null">and ma.material_name like concat('%',#{materialName},'%')</if>
         <if test="pigType !=null">and  ma.pig_type=#{pigType}</if>
-        <if test="pigBarnId !=null">and  ma.pig_barn_id=#{pigBarnId}</if>
-        <if test="pigGroupId !=null">and  ma.pig_group_id=#{pigGroupId}</if>
+        <if test="pigBarnName !=null">and  ma.pig_barn_name like concat('%',#{pigBarnName},'%')</if>
+        <if test="pigGroupName !=null">and  ma.pig_group_name like concat('%',#{pigGroupName},'%')</if>
     </select>
 
     <!--导出（陈娟 2018-10-19）-->
@@ -914,8 +914,8 @@
         <if test="materialType !=null">and  ma.type=#{materialType}</if>
         <if test="materialName !=null">and ma.material_name like concat('%',#{materialName},'%')</if>
         <if test="pigType !=null">and  ma.pig_type=#{pigType}</if>
-        <if test="pigBarnId !=null">and  ma.pig_barn_id=#{pigBarnId}</if>
-        <if test="pigGroupId !=null">and  ma.pig_group_id=#{pigGroupId}</if>
+        <if test="pigBarnName !=null">and  ma.pig_barn_name like concat('%',#{pigBarnName},'%')</if>
+        <if test="pigGroupName !=null">and  ma.pig_group_name like concat('%',#{pigGroupName},'%')</if>
         ORDER BY ma.apply_date,ma.pig_barn_id,ma.pig_group_id
     </select>
 
@@ -940,8 +940,8 @@
         <if test="materialType !=null">and  ma.type=#{materialType}</if>
         <if test="materialName !=null">and ma.material_name like concat('%',#{materialName},'%')</if>
         <if test="pigType !=null">and  ma.pig_type=#{pigType}</if>
-        <if test="pigBarnId !=null">and  ma.pig_barn_id=#{pigBarnId}</if>
-        <if test="pigGroupId !=null">and  ma.pig_group_id=#{pigGroupId}</if>
+        <if test="pigBarnName !=null">and  ma.pig_barn_name like concat('%',#{pigBarnName},'%')</if>
+        <if test="pigGroupName !=null">and  ma.pig_group_name like concat('%',#{pigGroupName},'%')</if>
         ORDER BY ma.type
     </select>
 
