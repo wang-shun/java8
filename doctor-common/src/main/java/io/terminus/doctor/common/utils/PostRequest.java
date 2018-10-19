@@ -16,7 +16,7 @@ import java.util.Map;
 public class PostRequest {
     public static void postRequest(String path,Map<String,String> params){
         try {
-            URL url = new URL("https://iot-test.xrnm.com"+path);
+            URL url = new URL("https://swagger.iot-test.xrnm.com"+path);
             //打开和url之间的连接
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             PrintWriter out = null;
