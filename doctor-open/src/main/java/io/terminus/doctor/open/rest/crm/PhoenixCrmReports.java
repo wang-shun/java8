@@ -100,7 +100,8 @@ public class PhoenixCrmReports {
         if (!mapResponse.isSuccess()) {
             return "";
         }
-            return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(farmInforMation);
+        log.info("json==>",ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(farmInforMation));
+        return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(farmInforMation);
     }
 
 
