@@ -89,7 +89,7 @@ public interface DoctorFarmReadService {
     Response<List<DoctorFarm>> findFarmsByOrgId1(@NotNull(message = "orgId.not.null") Long orgId);
 
     //查集团下的猪场
-    Response<List<DoctorFarm>> findFarmsByGroupId(@NotNull(message = "group.not.null") Long groupId);
+    Response<List<DoctorFarm>> findFarmsByGroupId( Long groupId);
 
 
 }
