@@ -168,6 +168,9 @@ public class DoctorReportJobs {
             orzList = doctorFarms.stream().map(DoctorFarm::getOrgId).collect(Collectors.toSet());
             orzList.parallelStream().forEach(orzId ->
                     doctorDailyReportV2Service.flushDeliverRate(orzId, OrzDimension.ORG.getValue(), start));
+            List<Long> groupList = doctorOrgReadService.findAllGroups();
+            groupList.parallelStream().forEach(groupId ->
+                    doctorDailyReportV2Service.flushDeliverRate(groupId, OrzDimension.CLIQUE.getValue(), start));
             log.info("synchronize all deliver rate end");
         } catch (Exception e) {
             log.error("deliver rate  report job failed, cause:{}", Throwables.getStackTraceAsString(e));
