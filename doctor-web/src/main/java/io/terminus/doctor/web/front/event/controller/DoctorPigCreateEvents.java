@@ -56,6 +56,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -674,6 +675,12 @@ public class DoctorPigCreateEvents {
             case CONDITION:
                 if (Objects.equals(pigType, DoctorPig.PigSex.SOW.getKey())) {
                     DoctorConditionDto conditionDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorConditionDto.class);
+                    Date conditionDate = conditionDto.getConditionDate();
+                    Long pigId1 = conditionDto.getPigId();
+                    //取猪舍
+                    Map<String,Object> maps = doctorPigEventReadService.getBranName(pigId1, conditionDate);
+                    conditionDto.setBarnId(Long.valueOf(maps.get("barnId").toString()));
+                    conditionDto.setBarnName(maps.get("barnName").toString());
                     return doctorValidService.valid(conditionDto, doctorPig.getPigCode());
                 } else {
                     DoctorBoarConditionDto boarConditionDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorBoarConditionDto.class);

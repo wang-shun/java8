@@ -2569,4 +2569,13 @@
         and fiscal_year = #{year}
         and fiscal_period = #{month}
     </select>
+
+    <select id="getBranName" parameterType="map" resultType="map">
+        select barn_name as barnName, barn_id as barnId
+        from doctor_pig_events a
+        where a.event_at >= #{date}
+        and a.pig_id = #{pigId}
+        ORDER BY a.id desc
+        limit 1
+    </select>
 </mapper>
