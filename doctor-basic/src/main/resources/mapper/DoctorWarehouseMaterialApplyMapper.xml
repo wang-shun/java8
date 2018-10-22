@@ -847,10 +847,10 @@
         <if test="startDate !=null">and <![CDATA[ma.apply_date >= #{startDate}]]></if>
         <if test="endDate !=null">and <![CDATA[ma.apply_date <= #{endDate}]]></if>
         <if test="materialType !=null">and  ma.type=#{materialType}</if>
-        <if test="materialName !=null">and ma.material_name like concat('%',#{materialName},'%')</if>
+        <if test="materialName !=null and '' != materialName">and ma.material_name like concat('%',#{materialName},'%')</if>
         <if test="pigType !=null">and  ma.pig_type=#{pigType}</if>
-        <if test="pigBarnName !=null">and  ma.pig_barn_name like concat('%',#{pigBarnName},'%')</if>
-        <if test="pigGroupName !=null">and  ma.pig_group_name like concat('%',#{pigGroupName},'%')</if>
+        <if test="pigBarnName !=null and '' != pigBarnName">and  ma.pig_barn_name like concat('%',#{pigBarnName},'%')</if>
+        <if test="pigGroupName !=null and '' != pigGroupName">and  ma.pig_group_name like concat('%',#{pigGroupName},'%')</if>
     </select>
 
     <select id="collarReport" parameterType="map" resultType="map">
@@ -870,10 +870,10 @@
         <if test="startDate !=null">and <![CDATA[ma.apply_date >= #{startDate}]]></if>
         <if test="endDate !=null">and <![CDATA[ma.apply_date <= #{endDate}]]></if>
         <if test="materialType !=null">and  ma.type=#{materialType}</if>
-        <if test="materialName !=null">and ma.material_name like concat('%',#{materialName},'%')</if>
+        <if test="materialName !=null and '' != materialName">and ma.material_name like concat('%',#{materialName},'%')</if>
         <if test="pigType !=null">and  ma.pig_type=#{pigType}</if>
-        <if test="pigBarnName !=null">and  ma.pig_barn_name like concat('%',#{pigBarnName},'%')</if>
-        <if test="pigGroupName !=null">and  ma.pig_group_name like concat('%',#{pigGroupName},'%')</if>
+        <if test="pigBarnName !=null and '' != pigBarnName">and  ma.pig_barn_name like concat('%',#{pigBarnName},'%')</if>
+        <if test="pigGroupName !=null and '' != pigGroupName">and  ma.pig_group_name like concat('%',#{pigGroupName},'%')</if>
         ORDER BY ma.apply_date,ma.pig_barn_id,ma.pig_group_id
         limit #{offset}, #{limit}
     </select>
@@ -888,10 +888,10 @@
         <if test="startDate !=null">and <![CDATA[ma.apply_date >= #{startDate}]]></if>
         <if test="endDate !=null">and <![CDATA[ma.apply_date <= #{endDate}]]></if>
         <if test="materialType !=null">and  ma.type=#{materialType}</if>
-        <if test="materialName !=null">and ma.material_name like concat('%',#{materialName},'%')</if>
+        <if test="materialName !=null and '' != materialName">and ma.material_name like concat('%',#{materialName},'%')</if>
         <if test="pigType !=null">and  ma.pig_type=#{pigType}</if>
-        <if test="pigBarnName !=null">and  ma.pig_barn_name like concat('%',#{pigBarnName},'%')</if>
-        <if test="pigGroupName !=null">and  ma.pig_group_name like concat('%',#{pigGroupName},'%')</if>
+        <if test="pigBarnName !=null and '' != pigBarnName">and  ma.pig_barn_name like concat('%',#{pigBarnName},'%')</if>
+        <if test="pigGroupName !=null and '' != pigGroupName">and  ma.pig_group_name like concat('%',#{pigGroupName},'%')</if>
     </select>
 
     <!--导出（陈娟 2018-10-19）-->
@@ -912,10 +912,10 @@
         <if test="startDate !=null">and <![CDATA[ma.apply_date >= #{startDate}]]></if>
         <if test="endDate !=null">and <![CDATA[ma.apply_date <= #{endDate}]]></if>
         <if test="materialType !=null">and  ma.type=#{materialType}</if>
-        <if test="materialName !=null">and ma.material_name like concat('%',#{materialName},'%')</if>
+        <if test="materialName !=null and '' != materialName">and ma.material_name like concat('%',#{materialName},'%')</if>
         <if test="pigType !=null">and  ma.pig_type=#{pigType}</if>
-        <if test="pigBarnName !=null">and  ma.pig_barn_name like concat('%',#{pigBarnName},'%')</if>
-        <if test="pigGroupName !=null">and  ma.pig_group_name like concat('%',#{pigGroupName},'%')</if>
+        <if test="pigBarnName !=null and '' != pigBarnName">and  ma.pig_barn_name like concat('%',#{pigBarnName},'%')</if>
+        <if test="pigGroupName !=null and '' != pigGroupName">and  ma.pig_group_name like concat('%',#{pigGroupName},'%')</if>
         ORDER BY ma.apply_date,ma.pig_barn_id,ma.pig_group_id
     </select>
 
@@ -938,10 +938,10 @@
         <if test="startDate !=null">and <![CDATA[ma.apply_date >= #{startDate}]]></if>
         <if test="endDate !=null">and <![CDATA[ma.apply_date <= #{endDate}]]></if>
         <if test="materialType !=null">and  ma.type=#{materialType}</if>
-        <if test="materialName !=null">and ma.material_name like concat('%',#{materialName},'%')</if>
+        <if test="materialName !=null and '' != materialName">and ma.material_name like concat('%',#{materialName},'%')</if>
         <if test="pigType !=null">and  ma.pig_type=#{pigType}</if>
-        <if test="pigBarnName !=null">and  ma.pig_barn_name like concat('%',#{pigBarnName},'%')</if>
-        <if test="pigGroupName !=null">and  ma.pig_group_name like concat('%',#{pigGroupName},'%')</if>
+        <if test="pigBarnName !=null and '' != pigBarnName">and  ma.pig_barn_name like concat('%',#{pigBarnName},'%')</if>
+        <if test="pigGroupName !=null and '' != pigGroupName">and  ma.pig_group_name like concat('%',#{pigGroupName},'%')</if>
         ORDER BY ma.type
     </select>
 

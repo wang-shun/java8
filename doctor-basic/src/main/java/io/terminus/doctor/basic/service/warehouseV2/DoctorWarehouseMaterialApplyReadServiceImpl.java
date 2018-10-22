@@ -85,41 +85,43 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
         }
 
         // 合计
+        Long total = collarBarnMaps.getTotal();
         Map<String, Object> allMaps = new HashMap<>();
         Map<String, Object> sumMaps = doctorWarehouseMaterialApplyDao.collarSum(flag, orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnName, pigGroupName);
-        BigDecimal allQuantity = (BigDecimal) sumMaps.get("sumQuantity");
-        BigDecimal allAmount = (BigDecimal) sumMaps.get("sumAmount");
-        // 总金额判断是否结算
-        if(allAmount.compareTo(BigDecimal.ZERO)<=0){
-            allMaps.put("allAmount", "--");
-        }else{
-            allMaps.put("allAmount", allAmount);
-        }
-        // 总数量判断物料类型
-        if(allQuantity.compareTo(BigDecimal.ZERO)==0){
-            allMaps.put("allQuantity", "--");
-        }else{
-            List<Map> typeMaps = doctorWarehouseMaterialApplyDao.getMaterialTypes(orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnName, pigGroupName);
-            if((typeMaps.size()==1)&&(Integer.parseInt(typeMaps.get(0).get("type").toString())==1)){
-                allMaps.put("allQuantity", allQuantity);
-            }else if((typeMaps.size()==1)&&(Integer.parseInt(typeMaps.get(0).get("type").toString())==2)){
-                allMaps.put("allQuantity", allQuantity);
-            }else if((typeMaps.size()==2)&&(Integer.parseInt(typeMaps.get(0).get("type").toString())==1&&Integer.parseInt(typeMaps.get(1).get("type").toString())==2)){
-                allMaps.put("allQuantity", allQuantity);
+        if(sumMaps!=null){
+            BigDecimal allQuantity = (BigDecimal) sumMaps.get("sumQuantity");
+            BigDecimal allAmount = (BigDecimal) sumMaps.get("sumAmount");
+            // 总金额判断是否结算
+            if(allAmount.compareTo(BigDecimal.ZERO)<=0){
+                allMaps.put("allAmount", "--");
             }else{
+                allMaps.put("allAmount", allAmount);
+            }
+            // 总数量判断物料类型
+            if(allQuantity.compareTo(BigDecimal.ZERO)==0){
                 allMaps.put("allQuantity", "--");
+            }else{
+                List<Map> typeMaps = doctorWarehouseMaterialApplyDao.getMaterialTypes(orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnName, pigGroupName);
+                if((typeMaps.size()==1)&&(Integer.parseInt(typeMaps.get(0).get("type").toString())==1)){
+                    allMaps.put("allQuantity", allQuantity);
+                }else if((typeMaps.size()==1)&&(Integer.parseInt(typeMaps.get(0).get("type").toString())==2)){
+                    allMaps.put("allQuantity", allQuantity);
+                }else if((typeMaps.size()==2)&&(Integer.parseInt(typeMaps.get(0).get("type").toString())==1&&Integer.parseInt(typeMaps.get(1).get("type").toString())==2)){
+                    allMaps.put("allQuantity", allQuantity);
+                }else{
+                    allMaps.put("allQuantity", "--");
+                }
             }
-        }
 
-        // 合计：不用每页显示合计，根据筛选条件出来的所有数据最后一条显示合计
-        Long total = collarBarnMaps.getTotal();
-        if(pageNo==null){
-            if(total<=20){
-                data.add(allMaps);
-            }
-        }else{
-            if(total<=pageNo*pageSize){
-                data.add(allMaps);
+            // 合计：不用每页显示合计，根据筛选条件出来的所有数据最后一条显示合计
+            if(pageNo==null){
+                if(total<=20){
+                    data.add(allMaps);
+                }
+            }else{
+                if(total<=pageNo*pageSize){
+                    data.add(allMaps);
+                }
             }
         }
 
