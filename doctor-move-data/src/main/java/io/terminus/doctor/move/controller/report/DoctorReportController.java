@@ -287,20 +287,29 @@ public class DoctorReportController {
      * @return
      */
     @RequestMapping(value = "/flush/all/deliver/rate")
-    public Boolean flushAllDeliverRate(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start) {
+    public Boolean flushAllDeliverRate(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date start,
+                                       Integer orzType) {
         log.info("synchronize all deliver rate starting start:{}");
-        List<DoctorFarm> doctorFarms = RespHelper.orServEx(doctorFarmReadService.findAllFarms());
-        Set<Long> orzList = doctorFarms.stream().map(DoctorFarm::getId).collect(Collectors.toSet());
-        orzList.parallelStream().forEach(orzId ->
-                doctorDailyReportV2Service.flushDeliverRate(orzId, OrzDimension.FARM.getValue(), start));
+        if(orzType == null) {
+            List<DoctorFarm> doctorFarms = RespHelper.orServEx(doctorFarmReadService.findAllFarms());
+            Set<Long> orzList = doctorFarms.stream().map(DoctorFarm::getId).collect(Collectors.toSet());
+            orzList.parallelStream().forEach(orzId ->
+                    doctorDailyReportV2Service.flushDeliverRate(orzId, OrzDimension.FARM.getValue(), start));
 
-        orzList = doctorFarms.stream().map(DoctorFarm::getOrgId).collect(Collectors.toSet());
-        orzList.parallelStream().forEach(orzId ->
-                doctorDailyReportV2Service.flushDeliverRate(orzId, OrzDimension.ORG.getValue(), start));
-        List<Long> groupList = doctorOrgReadService.findAllGroups();
-        groupList.parallelStream().forEach(groupId ->
-                doctorDailyReportV2Service.flushDeliverRate(groupId, OrzDimension.CLIQUE.getValue(),start));
-        log.info("synchronize all deliver rate end");
+            orzList = doctorFarms.stream().map(DoctorFarm::getOrgId).collect(Collectors.toSet());
+            orzList.parallelStream().forEach(orzId ->
+                    doctorDailyReportV2Service.flushDeliverRate(orzId, OrzDimension.ORG.getValue(), start));
+            List<Long> groupList = doctorOrgReadService.findAllGroups();
+            groupList.parallelStream().forEach(groupId ->
+                    doctorDailyReportV2Service.flushDeliverRate(groupId, OrzDimension.CLIQUE.getValue(), start));
+            log.info("synchronize all deliver rate end");
+        }
+        if(orzType == 1){
+            List<Long> groupList = doctorOrgReadService.findAllGroups();
+            groupList.parallelStream().forEach(groupId ->
+                    doctorDailyReportV2Service.flushDeliverRate(groupId, OrzDimension.CLIQUE.getValue(), start));
+            log.info("synchronize all deliver rate end");
+        }
         return Boolean.TRUE;
     }
 
