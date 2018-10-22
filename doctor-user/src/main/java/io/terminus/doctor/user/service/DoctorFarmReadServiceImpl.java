@@ -190,7 +190,7 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
     }
 
     @Override
-    public Response<List<DoctorFarm>> findFarmsByGroupId(@NotNull(message = "groupId.not.null") Long groupId) {
+    public Response<List<DoctorFarm>> findFarmsByGroupId( Long groupId) {
         try {
 
             return Response.ok(doctorFarmDao.findFarmsByGroupId(groupId));
