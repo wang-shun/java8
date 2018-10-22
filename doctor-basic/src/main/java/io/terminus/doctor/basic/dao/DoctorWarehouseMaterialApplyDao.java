@@ -1,6 +1,8 @@
 package io.terminus.doctor.basic.dao;
 
 import com.google.common.collect.Maps;
+import io.terminus.common.model.PageInfo;
+import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.enums.WarehouseMaterialApplyType;
@@ -331,6 +333,142 @@ public class DoctorWarehouseMaterialApplyDao extends MyBatisDao<DoctorWarehouseM
         map.put("closeAtStart",closeAtStart1);
         map.put("closeAtEnd",closeAtEnd1);
         return this.sqlSession.selectList(this.sqlId("selectPigGroupApply1"),map);
+    }
+
+    // 仓库领用明细报表 （陈娟 2018-10-17）
+    public Paging<Map> collarReport(Integer pageNo, Integer pageSize,Integer flag,Long orgId,Long farmId,String startDate,String endDate,Integer materialType,String materialName,Integer pigType,String pigBarnName, String pigGroupName) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date startDate1 = null;
+        Date endDate1 = null;
+        try {
+            if(startDate != null){
+                startDate1 = sdf.parse(startDate);
+            }
+            if(endDate != null){
+                endDate1 = sdf.parse(endDate);
+            }
+        }catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Map<String,Object> map = Maps.newHashMap();
+        map.put("flag",flag);
+        map.put("orgId",orgId);
+        map.put("farmId",farmId);
+        map.put("startDate",startDate1);
+        map.put("endDate",endDate1);
+        map.put("materialType",materialType);
+        map.put("materialName",materialName);
+        map.put("pigType",pigType);
+        map.put("pigBarnName",pigBarnName);
+        map.put("pigGroupName",pigGroupName);
+
+        Long total = (Long)this.sqlSession.selectOne(this.sqlId("collarCount"), map);
+        if (total.longValue() <= 0L) {
+            return new Paging(0L, Collections.emptyList());
+        } else {
+            PageInfo info = new PageInfo(pageNo, pageSize);
+            map.put("offset", info.getOffset());
+            map.put("limit", info.getLimit());
+            List<Map> datas = this.sqlSession.selectList(this.sqlId("collarReport"), map);
+            return new Paging(total, datas);
+        }
+    }
+
+    // 仓库领用明细报表导出 （陈娟 2018-10-19）
+    public List<Map> collarReportExport(Integer flag,Long orgId,Long farmId,String startDate,String endDate,Integer materialType,String materialName,Integer pigType,String pigBarnName, String pigGroupName) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date startDate1 = null;
+        Date endDate1 = null;
+        try {
+            if(startDate != null){
+                startDate1 = sdf.parse(startDate);
+            }
+            if(endDate != null){
+                endDate1 = sdf.parse(endDate);
+            }
+        }catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Map<String,Object> map = Maps.newHashMap();
+        map.put("flag",flag);
+        map.put("orgId",orgId);
+        map.put("farmId",farmId);
+        map.put("startDate",startDate1);
+        map.put("endDate",endDate1);
+        map.put("materialType",materialType);
+        map.put("materialName",materialName);
+        map.put("pigType",pigType);
+        map.put("pigBarnName",pigBarnName);
+        map.put("pigGroupName",pigGroupName);
+        return this.sqlSession.selectList(this.sqlId("collarReportExport"),map);
+    }
+
+    // 合计 （陈娟 2018-10-19）
+    public Map<String,Object> collarSum(Integer flag,Long orgId,Long farmId,String startDate,String endDate,Integer materialType,String materialName,Integer pigType,String pigBarnName, String pigGroupName) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date startDate1 = null;
+        Date endDate1 = null;
+        try {
+            if(startDate != null){
+                startDate1 = sdf.parse(startDate);
+            }
+            if(endDate != null){
+                endDate1 = sdf.parse(endDate);
+            }
+        }catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Map<String,Object> map = Maps.newHashMap();
+        map.put("flag",flag);
+        map.put("orgId",orgId);
+        map.put("farmId",farmId);
+        map.put("startDate",startDate1);
+        map.put("endDate",endDate1);
+        map.put("materialType",materialType);
+        map.put("materialName",materialName);
+        map.put("pigType",pigType);
+        map.put("pigBarnName",pigBarnName);
+        map.put("pigGroupName",pigGroupName);
+
+        return this.sqlSession.selectOne(this.sqlId("collarSum"),map);
+    }
+
+    // 得到领用猪舍对应的领用猪群单据
+    public DoctorWarehouseMaterialApply getGroupById(Long materialHandleId){
+        return this.sqlSession.selectOne(this.sqlId("getGroupById"),materialHandleId);
+    }
+
+    // 判断猪群是否关闭 （陈娟 2018-10-18）
+    public Integer getGroupStatus(Long groupId){
+        return this.sqlSession.selectOne(this.sqlId("getGroupStatus"),groupId);
+    }
+
+    // 得到物料类型 （陈娟 2018-10-18）
+    public List<Map> getMaterialTypes(Long orgId,Long farmId,String startDate,String endDate,Integer materialType,String materialName,Integer pigType,String pigBarnName, String pigGroupName) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date startDate1 = null;
+        Date endDate1 = null;
+        try {
+            if(startDate != null){
+                startDate1 = sdf.parse(startDate);
+            }
+            if(endDate != null){
+                endDate1 = sdf.parse(endDate);
+            }
+        }catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Map<String,Object> map = Maps.newHashMap();
+        map.put("orgId",orgId);
+        map.put("farmId",farmId);
+        map.put("startDate",startDate1);
+        map.put("endDate",endDate1);
+        map.put("materialType",materialType);
+        map.put("materialName",materialName);
+        map.put("pigType",pigType);
+        map.put("pigBarnName",pigBarnName);
+        map.put("pigGroupName",pigGroupName);
+        return this.sqlSession.selectList(this.sqlId("getMaterialTypes"),map);
     }
 }
 

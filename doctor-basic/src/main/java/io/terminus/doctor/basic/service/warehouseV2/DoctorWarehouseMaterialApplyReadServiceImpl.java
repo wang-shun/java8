@@ -18,13 +18,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -46,6 +44,169 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
     @Autowired
     private DoctorWarehouseMaterialHandleDao doctorWarehouseMaterialHandleDao;
+
+    // 仓库领用明细报表 （陈娟 2018-10-17）
+    @Override
+    public Response<Paging<Map>> collarReport(Integer pageNo, Integer pageSize, Long orgId, Long farmId, String startDate, String endDate, Integer materialType, String materialName, Integer pigType, String pigBarnName, String pigGroupName) {
+        // 判断筛选条件是否有猪群
+        Integer flag = 0;
+        if(null != pigGroupName && !pigGroupName.equals("")){
+            flag = 1;
+        }
+        Paging<Map> collarBarnMaps = doctorWarehouseMaterialApplyDao.collarReport(pageNo, pageSize,flag, orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnName, pigGroupName);
+        List<Map> data = collarBarnMaps.getData();
+        for (Map mm:data) {
+            if(flag==0){
+                // 如果筛选条件没有猪群，则先得到猪舍单据，再判断是否领用到猪群（是：展示猪群；否：无）
+                DoctorWarehouseMaterialApply groupApply = doctorWarehouseMaterialApplyDao.getGroupById((Long) mm.get("material_handle_id"));
+                if(groupApply!=null){
+                    mm.put("pig_group_id",groupApply.getPigGroupId());
+                    mm.put("pig_group_name",groupApply.getPigGroupName());
+                }else{
+                    mm.put("pig_group_id","--");
+                    mm.put("pig_group_name","--");
+                }
+            }
+
+            // 判断猪群是否关闭 （陈娟 2018-10-18）
+            if((!mm.get("pig_group_id").toString().equals("--")&&(!mm.get("pig_group_id").toString().equals("-1")))){
+                Integer status = doctorWarehouseMaterialApplyDao.getGroupStatus((Long) mm.get("pig_group_id"));
+                if(status==-1){
+                    mm.put("pig_group_name",mm.get("pig_group_name").toString()+"（已关闭）");
+                }
+            }
+
+            // 判断是否结算
+            boolean b = doctorWarehouseOrgSettlementDao.isSettled(orgId,(Date) mm.get("settlement_date"));
+            if(!b){
+                mm.put("unit_price","--");
+                mm.put("amount","--");
+            }
+        }
+
+        // 合计
+        Long total = collarBarnMaps.getTotal();
+        Map<String, Object> allMaps = new HashMap<>();
+        Map<String, Object> sumMaps = doctorWarehouseMaterialApplyDao.collarSum(flag, orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnName, pigGroupName);
+        if(sumMaps!=null){
+            BigDecimal allQuantity = (BigDecimal) sumMaps.get("sumQuantity");
+            BigDecimal allAmount = (BigDecimal) sumMaps.get("sumAmount");
+            // 总金额判断是否结算
+            if(allAmount.compareTo(BigDecimal.ZERO)<=0){
+                allMaps.put("allAmount", "--");
+            }else{
+                allMaps.put("allAmount", allAmount);
+            }
+            // 总数量判断物料类型
+            if(allQuantity.compareTo(BigDecimal.ZERO)==0){
+                allMaps.put("allQuantity", "--");
+            }else{
+                List<Map> typeMaps = doctorWarehouseMaterialApplyDao.getMaterialTypes(orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnName, pigGroupName);
+                if((typeMaps.size()==1)&&(Integer.parseInt(typeMaps.get(0).get("type").toString())==1)){
+                    allMaps.put("allQuantity", allQuantity);
+                }else if((typeMaps.size()==1)&&(Integer.parseInt(typeMaps.get(0).get("type").toString())==2)){
+                    allMaps.put("allQuantity", allQuantity);
+                }else if((typeMaps.size()==2)&&(Integer.parseInt(typeMaps.get(0).get("type").toString())==1&&Integer.parseInt(typeMaps.get(1).get("type").toString())==2)){
+                    allMaps.put("allQuantity", allQuantity);
+                }else{
+                    allMaps.put("allQuantity", "--");
+                }
+            }
+
+            // 合计：不用每页显示合计，根据筛选条件出来的所有数据最后一条显示合计
+            if(pageNo==null){
+                if(total<=20){
+                    data.add(allMaps);
+                }
+            }else{
+                if(total<=pageNo*pageSize){
+                    data.add(allMaps);
+                }
+            }
+        }
+
+        return Response.ok(new Paging<Map>(total, data));
+    }
+
+    // 仓库领用明细报表导出 （陈娟 2018-10-19）
+    @Override
+    public List<Map> collarReportExport(Long orgId, Long farmId, String startDate, String endDate, Integer materialType, String materialName, Integer pigType, String pigBarnName, String pigGroupName) {
+        // 判断筛选条件是否有猪群
+        Integer flag = 0;
+        if(null != pigGroupName && !pigGroupName.equals("")){
+            flag = 1;
+        }
+        List<Map> data = doctorWarehouseMaterialApplyDao.collarReportExport(flag, orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnName, pigGroupName);
+        for (Map mm:data) {
+            if(flag==0){
+                // 如果筛选条件没有猪群，则先得到猪舍单据，再判断是否领用到猪群（是：展示猪群；否：无）
+                DoctorWarehouseMaterialApply groupApply = doctorWarehouseMaterialApplyDao.getGroupById((Long) mm.get("material_handle_id"));
+                if(groupApply!=null){
+                    mm.put("pig_group_id",groupApply.getPigGroupId());
+                    mm.put("pig_group_name",groupApply.getPigGroupName());
+                }else{
+                    mm.put("pig_group_id","--");
+                    mm.put("pig_group_name","--");
+                }
+            }
+
+            // 判断猪群是否关闭 （陈娟 2018-10-18）
+            if((!mm.get("pig_group_id").toString().equals("--")&&(!mm.get("pig_group_id").toString().equals("-1")))){
+                Integer status = doctorWarehouseMaterialApplyDao.getGroupStatus((Long) mm.get("pig_group_id"));
+                if(status==-1){
+                    mm.put("pig_group_name",mm.get("pig_group_name").toString()+"（已关闭）");
+                }
+            }
+
+            // 判断是否结算
+            boolean b = doctorWarehouseOrgSettlementDao.isSettled(orgId,(Date) mm.get("settlement_date"));
+            if(!b){
+                mm.put("unit_price","--");
+                mm.put("amount","--");
+            }
+        }
+
+        // 合计
+        Map<String, Object> allMaps = new HashMap<>();
+        Map<String, Object> sumMaps = doctorWarehouseMaterialApplyDao.collarSum(flag, orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnName, pigGroupName);
+        BigDecimal allQuantity = (BigDecimal) sumMaps.get("sumQuantity");
+        BigDecimal allAmount = (BigDecimal) sumMaps.get("sumAmount");
+        // 总金额判断是否结算
+        if(allAmount.compareTo(BigDecimal.ZERO)<=0){
+            allMaps.put("amount", "--");
+        }else{
+            allMaps.put("amount", allAmount);
+        }
+        // 总数量判断物料类型
+        if(allQuantity.compareTo(BigDecimal.ZERO)==0){
+            allMaps.put("quantity", "--");
+        }else{
+            List<Map> typeMaps = doctorWarehouseMaterialApplyDao.getMaterialTypes(orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnName, pigGroupName);
+            if((typeMaps.size()==1)&&(Integer.parseInt(typeMaps.get(0).get("type").toString())==1)){
+                allMaps.put("quantity", allQuantity);
+            }else if((typeMaps.size()==1)&&(Integer.parseInt(typeMaps.get(0).get("type").toString())==2)){
+                allMaps.put("quantity", allQuantity);
+            }else if((typeMaps.size()==2)&&(Integer.parseInt(typeMaps.get(0).get("type").toString())==1&&Integer.parseInt(typeMaps.get(1).get("type").toString())==2)){
+                allMaps.put("quantity", allQuantity);
+            }else{
+                allMaps.put("quantity", "--");
+            }
+        }
+        allMaps.put("apply_date", "合计");
+        allMaps.put("type", "");
+        allMaps.put("material_name", "");
+        allMaps.put("warehouse_name", "");
+        allMaps.put("pig_type", "");
+        allMaps.put("pig_barn_name", "");
+        allMaps.put("pig_group_name", "");
+        allMaps.put("unit_price", "");
+        allMaps.put("unit", "");
+        allMaps.put("specification", "");
+        allMaps.put("vendor_name", "");
+
+        data.add(allMaps);
+        return data;
+    }
 
     @Override
     public Response<DoctorWarehouseMaterialApply> findById(Long id) {
