@@ -272,4 +272,8 @@
         select * from doctor_farms where farm_code = #{farmCode}
     </select>
 
+    <select id="findFarmsByGroupId" parameterType="long" resultMap="DoctorFarmMap" >
+        select * from doctor_farms where org_id in (select  id from doctor_orgs where parent_id = #{groupId} )
+    </select>
+
 </mapper>

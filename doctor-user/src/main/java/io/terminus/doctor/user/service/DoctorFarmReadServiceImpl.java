@@ -189,5 +189,14 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
             return doctorOrgDao.findOrgByParent(parent);
     }
 
+    @Override
+    public Response<List<DoctorFarm>> findFarmsByGroupId(@NotNull(message = "orgId.not.null") Long groupId) {
+        try {
 
+            return Response.ok(doctorFarmDao.findFarmsByGroupId(groupId));
+        } catch (Exception e) {
+            log.error("find farms by orgId failed, orgId:{}, cause:{}", groupId, Throwables.getStackTraceAsString(e));
+            return Response.fail("farm.find.fail");
+        }
+    }
 }
