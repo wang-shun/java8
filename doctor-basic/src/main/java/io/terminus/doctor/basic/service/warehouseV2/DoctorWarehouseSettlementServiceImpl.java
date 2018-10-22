@@ -408,7 +408,7 @@ public class DoctorWarehouseSettlementServiceImpl implements DoctorWarehouseSett
             if (!materialHandle.getType().equals(WarehouseMaterialHandleType.RETURN.getValue())) {
                 //出库类型：领料出库，盘亏出库，调拨出库，配方生产出库
                 log.debug("material handle:{},history amount:{},history quantity:{}", materialHandle.getId(), historyStockAmount, historyStockQuantity);
-                if (historyStockAmount.compareTo(new BigDecimal("0")) <= 0 || historyStockQuantity.compareTo(new BigDecimal("0")) <= 0) {
+                if (historyStockAmount.compareTo(new BigDecimal("0")) < 0 || historyStockQuantity.compareTo(new BigDecimal("0")) <= 0) {
                     log.error("history amount or quantity is small then zero,can not settlement for material handle:{}", materialHandle.getId());
                     throw new InvalidException("settlement.history.quantity.amount.zero");
                 }
