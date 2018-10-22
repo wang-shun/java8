@@ -2,15 +2,17 @@ package io.terminus.doctor.event.dao;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import io.terminus.common.mysql.dao.MyBatisDao;
-import io.terminus.doctor.common.utils.PostRequest;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import org.apache.http.NameValuePair;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.terminus.doctor.common.utils.PostRequest.httpPostWithJson;
 
 /**
  * Desc: 猪群卡片明细表Dao类
@@ -33,10 +35,32 @@ public class DoctorGroupTrackDao extends MyBatisDao<DoctorGroupTrack> {
     public Boolean update(DoctorGroupTrack t) {
         if(t.getQuantity() != null){
             /*当猪群的存栏数量发生变动时，通知物联网接口（孔景军）*/
-            Map<String,String> param = Maps.newHashMap();
-            param.put("pigGroupId",t.getGroupId().toString());
-            param.put("newQuantity",t.getQuantity().toString());
-            new PostRequest().postRequest("api/iot/pig/ group-stock-change",param);
+
+            List<NameValuePair> nameValueList = new ArrayList<>();
+            nameValueList.add(new NameValuePair() {
+                @Override
+                public String getName() {
+                    return "pigGroupId";
+                }
+
+                @Override
+                public String getValue() {
+                    return t.getGroupId().toString();
+                }
+            });
+            nameValueList.add(new NameValuePair() {
+                @Override
+                public String getName() {
+                    return "newQuantity";
+                }
+
+                @Override
+                public String getValue() {
+                    return t.getQuantity().toString();
+                }
+            });
+            String url = "api/iot/pig/ group-stock-change";
+            httpPostWithJson(nameValueList,url,null);
         }
         return this.sqlSession.update(this.sqlId("update"), t) == 1;
     }

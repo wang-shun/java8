@@ -5,16 +5,19 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.common.mysql.dao.MyBatisDao;
-import io.terminus.doctor.common.utils.PostRequest;
 import io.terminus.doctor.event.dto.DoctorSuggestPig;
 import io.terminus.doctor.event.dto.DoctorSuggestPigSearch;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPigStatusCount;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import org.apache.http.NameValuePair;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static io.terminus.doctor.common.utils.PostRequest.httpPostWithJson;
 
 /**
  * Created by yaoqijun.
@@ -33,72 +36,282 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
              */
         if(t.getStatus() != null && t.getPigType() == 1){
             if(t.getStatus() == 1){
-                Map<String,String> params = Maps.newHashMap();
-                params.put("pigId",t.getPigId().toString());
-                params.put("newStatus","1");
-                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
+                List<NameValuePair> nameValueList = new ArrayList<>();
+                nameValueList.add(new NameValuePair() {
+                    @Override
+                    public String getName() {
+                        return "pigId";
+                    }
+
+                    @Override
+                    public String getValue() {
+                        return t.getPigId().toString();
+                    }
+                });
+                nameValueList.add(new NameValuePair() {
+                    @Override
+                    public String getName() {
+                        return "newStatus";
+                    }
+
+                    @Override
+                    public String getValue() {
+                        return "1";
+                    }
+                });
+                String url = "api/iot/pig/sow-status-change";
+                httpPostWithJson(nameValueList,url,null);
             }
             if(t.getStatus() == 3){
-                Map<String,String> params = Maps.newHashMap();
-                params.put("pigId",t.getPigId().toString());
-                params.put("newStatus","3");
-                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
+                List<NameValuePair> nameValueList = new ArrayList<>();
+                nameValueList.add(new NameValuePair() {
+                    @Override
+                    public String getName() {
+                        return "pigId";
+                    }
+
+                    @Override
+                    public String getValue() {
+                        return t.getPigId().toString();
+                    }
+                });
+                nameValueList.add(new NameValuePair() {
+                    @Override
+                    public String getName() {
+                        return "newStatus";
+                    }
+
+                    @Override
+                    public String getValue() {
+                        return "3";
+                    }
+                });
+                String url = "api/iot/pig/sow-status-change";
+                httpPostWithJson(nameValueList,url,null);
             }
             if(t.getStatus() == 4){
-                Map<String,String> params = Maps.newHashMap();
-                params.put("pigId",t.getPigId().toString());
-                params.put("newStatus","4");
-                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
+                List<NameValuePair> nameValueList = new ArrayList<>();
+                nameValueList.add(new NameValuePair() {
+                    @Override
+                    public String getName() {
+                        return "pigId";
+                    }
+
+                    @Override
+                    public String getValue() {
+                        return t.getPigId().toString();
+                    }
+                });
+                nameValueList.add(new NameValuePair() {
+                    @Override
+                    public String getName() {
+                        return "newStatus";
+                    }
+
+                    @Override
+                    public String getValue() {
+                        return "4";
+                    }
+                });
+                String url = "api/iot/pig/sow-status-change";
+                httpPostWithJson(nameValueList,url,null);
             }
             if(t.getStatus() == 7){
-                Map<String,String> params = Maps.newHashMap();
-                params.put("pigId",t.getPigId().toString());
-                params.put("newStatus","7");
-                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
+                List<NameValuePair> nameValueList = new ArrayList<>();
+                nameValueList.add(new NameValuePair() {
+                    @Override
+                    public String getName() {
+                        return "pigId";
+                    }
+
+                    @Override
+                    public String getValue() {
+                        return t.getPigId().toString();
+                    }
+                });
+                nameValueList.add(new NameValuePair() {
+                    @Override
+                    public String getName() {
+                        return "newStatus";
+                    }
+
+                    @Override
+                    public String getValue() {
+                        return "7";
+                    }
+                });
+                String url = "api/iot/pig/sow-status-change";
+                httpPostWithJson(nameValueList,url,null);
             }
             if(t.getStatus() == 8){
-                Map<String,String> params = Maps.newHashMap();
-                params.put("pigId",t.getPigId().toString());
-                params.put("newStatus","8");
-                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
+                List<NameValuePair> nameValueList = new ArrayList<>();
+                nameValueList.add(new NameValuePair() {
+                    @Override
+                    public String getName() {
+                        return "pigId";
+                    }
+
+                    @Override
+                    public String getValue() {
+                        return t.getPigId().toString();
+                    }
+                });
+                nameValueList.add(new NameValuePair() {
+                    @Override
+                    public String getName() {
+                        return "newStatus";
+                    }
+
+                    @Override
+                    public String getValue() {
+                        return "8";
+                    }
+                });
+                String url = "api/iot/pig/sow-status-change";
+                httpPostWithJson(nameValueList,url,null);
             }
             if(t.getStatus() == 9){
-                Map<String,String> params = Maps.newHashMap();
-                params.put("pigId",t.getPigId().toString());
-                params.put("newStatus","9");
-                new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
+                List<NameValuePair> nameValueList = new ArrayList<>();
+                nameValueList.add(new NameValuePair() {
+                    @Override
+                    public String getName() {
+                        return "pigId";
+                    }
+
+                    @Override
+                    public String getValue() {
+                        return t.getPigId().toString();
+                    }
+                });
+                nameValueList.add(new NameValuePair() {
+                    @Override
+                    public String getName() {
+                        return "newStatus";
+                    }
+
+                    @Override
+                    public String getValue() {
+                        return "9";
+                    }
+                });
+                String url = "api/iot/pig/sow-status-change";
+                httpPostWithJson(nameValueList,url,null);
             }
             if(t.getStatus() == 5){
                 //得到母猪的最后一次妊娠检查事件
                 Integer status = this.sqlSession.selectOne(this.sqlId("getLastEvent"), t.getPigId());
                 if(status != null){
                     if(status == 2){
-                        Map<String,String> params = Maps.newHashMap();
-                        params.put("pigId",t.getPigId().toString());
-                        params.put("newStatus","51");
-                        new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
+                        List<NameValuePair> nameValueList = new ArrayList<>();
+                        nameValueList.add(new NameValuePair() {
+                            @Override
+                            public String getName() {
+                                return "pigId";
+                            }
+
+                            @Override
+                            public String getValue() {
+                                return t.getPigId().toString();
+                            }
+                        });
+                        nameValueList.add(new NameValuePair() {
+                            @Override
+                            public String getName() {
+                                return "newStatus";
+                            }
+
+                            @Override
+                            public String getValue() {
+                                return "51";
+                            }
+                        });
+                        String url = "api/iot/pig/sow-status-change";
+                        httpPostWithJson(nameValueList,url,null);
                     }
                     if(status == 3){
-                        Map<String,String> params = Maps.newHashMap();
-                        params.put("pigId",t.getPigId().toString());
-                        params.put("newStatus","52");
-                        new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
+                        List<NameValuePair> nameValueList = new ArrayList<>();
+                        nameValueList.add(new NameValuePair() {
+                            @Override
+                            public String getName() {
+                                return "pigId";
+                            }
+
+                            @Override
+                            public String getValue() {
+                                return t.getPigId().toString();
+                            }
+                        });
+                        nameValueList.add(new NameValuePair() {
+                            @Override
+                            public String getName() {
+                                return "newStatus";
+                            }
+
+                            @Override
+                            public String getValue() {
+                                return "52";
+                            }
+                        });
+                        String url = "api/iot/pig/sow-status-change";
+                        httpPostWithJson(nameValueList,url,null);
                     }
                     if(status == 4){
-                        Map<String,String> params = Maps.newHashMap();
-                        params.put("pigId",t.getPigId().toString());
-                        params.put("newStatus","53");
-                        new PostRequest().postRequest("/api/iot/pig/sow-status-change",params);
+                        List<NameValuePair> nameValueList = new ArrayList<>();
+                        nameValueList.add(new NameValuePair() {
+                            @Override
+                            public String getName() {
+                                return "pigId";
+                            }
+
+                            @Override
+                            public String getValue() {
+                                return t.getPigId().toString();
+                            }
+                        });
+                        nameValueList.add(new NameValuePair() {
+                            @Override
+                            public String getName() {
+                                return "newStatus";
+                            }
+
+                            @Override
+                            public String getValue() {
+                                return "54";
+                            }
+                        });
+                        String url = "api/iot/pig/sow-status-change";
+                        httpPostWithJson(nameValueList,url,null);
                     }
                 }
             }
         }
         //当母猪下的仔猪数量发生变动时，需要调用物联网提供的接口，以此通知物联网。(孔景军)
         if(t.getUnweanQty() != null && t.getPigType() == 1){
-            Map<String,String> params = Maps.newHashMap();
-            params.put("pigId",t.getPigId().toString());
-            params.put("newQuantity",t.getUnweanQty().toString());
-            new PostRequest().postRequest("/api/iot/pig/ sow-stock-change",params);
+            List<NameValuePair> nameValueList = new ArrayList<>();
+            nameValueList.add(new NameValuePair() {
+                @Override
+                public String getName() {
+                    return "pigId";
+                }
+
+                @Override
+                public String getValue() {
+                    return t.getPigId().toString();
+                }
+            });
+            nameValueList.add(new NameValuePair() {
+                @Override
+                public String getName() {
+                    return "newQuantity";
+                }
+
+                @Override
+                public String getValue() {
+                    return t.getUnweanQty().toString();
+                }
+            });
+            String url = "api/iot/pig/sow-stock-change";
+            httpPostWithJson(nameValueList,url,null);
         }
         return this.sqlSession.update(this.sqlId("update"), t) == 1;
     }

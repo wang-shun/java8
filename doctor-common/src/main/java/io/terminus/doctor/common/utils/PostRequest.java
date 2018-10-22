@@ -1,70 +1,133 @@
 package io.terminus.doctor.common.utils;
 
-import com.google.common.collect.Maps;
-import io.terminus.common.model.Response;
-import jdk.internal.dynalink.beans.StaticClass;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Map;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.CoreConnectionPNames;
+import org.apache.http.NameValuePair;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class PostRequest {
-    public static void postRequest(String path,Map<String,String> params){
-        try {
-            URL url = new URL("https://swagger.iot-test.xrnm.com"+path);
-            //打开和url之间的连接
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            PrintWriter out = null;
-            //请求方式
-            conn.setRequestMethod("POST");
-//           //设置通用的请求属性
-            conn.setRequestProperty("accept", "*/*");
-            conn.setRequestProperty("connection", "Keep-Alive");
-            conn.setRequestProperty("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
-            conn.setRequestProperty("Content-type", "application/x-www-form-urlencoded");
-            //设置是否向httpUrlConnection输出，设置是否从httpUrlConnection读入，此外发送post请求必须设置这两个
-            //最常用的Http请求无非是get和post，get请求可以获取静态页面，也可以把参数放在URL字串后面，传递给servlet，
-            //post与get的 不同之处在于post的参数不是放在URL字串里面，而是放在http请求的正文内。
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
-            //获取URLConnection对象对应的输出流
-            out = new PrintWriter(conn.getOutputStream());
-            //发送请求参数即数据
-            String paramsStr = "";   //拼接Post 请求的参数
-            for(String param : params.keySet()){
-                paramsStr += "&" + param + "=" + params.get(param);
-            }
-            if(!paramsStr.isEmpty()){
-                paramsStr = paramsStr.substring(1);
-            }
-            out.print(paramsStr);
-            //缓冲数据
-            out.flush();
-            //获取URLConnection对象对应的输入流
-            InputStream is = conn.getInputStream();
-            //构造一个字符流缓存
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            String str = "";
-            while ((str = br.readLine()) != null) {
-                System.out.println(str);
-            }
-            //关闭流
-            is.close();
-            //断开连接，最好写上，disconnect是在底层tcp socket链接空闲时才切断。如果正在被其他线程使用就不切断。
-            //固定多线程的话，如果不disconnect，链接会增多，直到收发不出信息。写上disconnect后正常一些。
-            conn.disconnect();
-        } catch (Exception e) {
-        }
-    }
     public static void main(String[] arg){
-        Map<String,String> map = Maps.newHashMap();
-        map.put("pigGroupId","38965");
-        map.put("newQuantity","25");
-        postRequest("/api/iot/pig/group-stock-change",map);
+        List<NameValuePair> nameValueList = new ArrayList<>();
+        nameValueList.add(new NameValuePair() {
+            @Override
+            public String getName() {
+                return "pigGroupId";
+            }
+
+            @Override
+            public String getValue() {
+                return "38965";
+            }
+        });
+        nameValueList.add(new NameValuePair() {
+            @Override
+            public String getName() {
+                return "newQuantity";
+            }
+
+            @Override
+            public String getValue() {
+                return "25";
+            }
+        });
+        String url = "api/iot/pig/group-stock-change";
+        httpPostWithJson(nameValueList,url,null);
+    }
+
+
+    //////////////////////
+
+    public static boolean httpPostWithJson(List<NameValuePair> nameValuePairList, String url, String appId){
+        boolean isSuccess = false;
+
+        HttpPost post = null;
+        try {
+            HttpClient httpClient = new DefaultHttpClient();
+
+            // 设置超时时间
+            httpClient.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 3000);
+            httpClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 3000);
+
+            post = new HttpPost("http://swagger.iot-test.xrnm.com/"+url);
+            // 构造消息头
+            //post.setHeader("Content-Type", "application/json");
+            post.setHeader("Content-Type", "application/x-www-form-urlencoded");
+            post.setHeader("Accept", "*/*");
+            post.setHeader("Connection", "Keep-Alive");
+            post.setHeader("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
+
+            //post.setHeader("Connection", "Close");
+            /*String sessionId = getSessionId();
+            post.setHeader("SessionId", sessionId);
+            post.setHeader("appid", appid);*/
+
+            // 构建消息实体
+           /* String str = jsonObj.toString();
+            StringEntity entity = new StringEntity(str, Charset.forName("UTF-8"));*/
+            //entity.setContentEncoding("UTF-8");
+            // 发送Json格式的数据请求
+            //entity.setContentType("application/json");
+            post.setEntity(new UrlEncodedFormEntity(nameValuePairList,"UTF-8"));
+
+            HttpResponse response = httpClient.execute(post);
+
+            // 检验返回码
+            int statusCode = response.getStatusLine().getStatusCode();
+            if(statusCode != HttpStatus.SC_OK){
+                if (statusCode == 302) {
+                    Header location = response.getFirstHeader("location");
+                    String newUrl = location.getValue();
+                    System.out.println(newUrl);
+
+                    HttpPost newPost = new HttpPost(newUrl);
+                    newPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+                    newPost.setHeader("Accept", "*/*");
+                    newPost.setHeader("Connection", "Keep-Alive");
+                    newPost.setHeader("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)");
+
+                    newPost.setEntity(new UrlEncodedFormEntity(nameValuePairList,"UTF-8"));
+                    HttpResponse newResponse = httpClient.execute(newPost);
+                    int statusCode1 = newResponse.getStatusLine().getStatusCode();
+                    if (statusCode1 != HttpStatus.SC_OK) {
+                        System.out.println("请求出错: "+statusCode);
+                        isSuccess = false;
+                    }
+                    else {
+                        System.out.println("success");
+
+                    }
+
+                }
+                System.out.println("请求出错: "+statusCode);
+                isSuccess = false;
+            }else{
+                int retCode = 0;
+                String sessendId = "";
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            isSuccess = false;
+        }finally{
+            if(post != null){
+                try {
+                    // post.releaseConnection();
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return isSuccess;
     }
 }

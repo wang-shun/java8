@@ -1,13 +1,11 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
-import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.exception.InvalidException;
-import io.terminus.doctor.common.utils.PostRequest;
 import io.terminus.doctor.common.utils.RespWithEx;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
@@ -18,12 +16,15 @@ import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.NameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static io.terminus.doctor.common.utils.PostRequest.httpPostWithJson;
 import static io.terminus.doctor.event.enums.PigEvent.*;
 import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.IGNORE_EVENT;
 import static io.terminus.doctor.event.manager.DoctorPigEventManager.checkAndPublishEvent;
@@ -118,9 +119,21 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
              */
             if(doctorPigEvent.getType() == CHG_LOCATION.getKey() || doctorPigEvent.getType() == TO_PREG.getKey() || doctorPigEvent.getType() == TO_MATING.getKey()
                     || doctorPigEvent.getType() == TO_FARROWING.getKey()  || doctorPigEvent.getType() == REMOVAL.getKey()  || (doctorPigEvent.getType() == PIGLETS_CHG.getKey() && doctorPigEvent.getChangeTypeId()==109) ){
-                Map<String,String> params = Maps.newHashMap();
-                params.put("pigId",doctorPigEvent.getPigId().toString());
-                new PostRequest().postRequest("/api/iot/pig/sow-leaving",params);
+
+                List<NameValuePair> nameValueList = new ArrayList<>();
+                nameValueList.add(new NameValuePair() {
+                    @Override
+                    public String getName() {
+                        return "pigId";
+                    }
+
+                    @Override
+                    public String getValue() {
+                        return doctorPigEvent.getPigId().toString();
+                    }
+                });
+                String url = "api/iot/pig/sow-leaving";
+                httpPostWithJson(nameValueList,url,null);
             }
             return Response.ok(doctorPigEventDao.create(doctorPigEvent));
         } catch (Exception e) {
