@@ -337,11 +337,6 @@ public class ServiceConfiguration {
                 return null;
             }
 
-            @Override
-            public Response<List<DoctorFarm>> findFarmsByGroupId(Long groupId) {
-                return null;
-            }
-
         };
     }
 
