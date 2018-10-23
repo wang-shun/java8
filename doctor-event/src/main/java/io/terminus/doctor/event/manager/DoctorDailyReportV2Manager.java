@@ -13,6 +13,7 @@ import io.terminus.doctor.event.dao.*;
 import io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.enums.ReportTime;
 import io.terminus.doctor.event.model.*;
 import io.terminus.doctor.event.service.DoctorReportWriteService;
 import io.terminus.doctor.user.dto.DoctorDepartmentLinerDto;
@@ -207,7 +208,7 @@ public class DoctorDailyReportV2Manager {
             }
         });
 
-//        doctorReportWriteService.flushNPD(farmIds, today, ReportTime.MONTH);
+        doctorReportWriteService.flushNPD(farmIds, today, ReportTime.MONTH);
         return longDateMap;
     }
 

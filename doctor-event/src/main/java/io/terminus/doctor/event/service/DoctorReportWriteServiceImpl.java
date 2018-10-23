@@ -103,7 +103,9 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
 
     public void NPD (List<Long> farmIds, Date startDate, Date endDate){
         Map<String, Object> params = new HashMap<>();
+        Stopwatch stopWatch = null;
         for (int i =0; i < farmIds.size(); i++) {
+            stopWatch = Stopwatch.createStarted();
             params.put("farmId", String.valueOf(farmIds.get(i)));
             params.put("startDate", startDate);
             params.put("endDate", endDate);
@@ -112,7 +114,8 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
             int year = cal.get(Calendar.YEAR);
             int month = cal.get(Calendar.MONTH) + 1;
             deleteNPD(farmIds, year, month);
-
+            log.info("删除历史记录", stopWatch.elapsed(TimeUnit.MINUTES));
+            stopWatch = Stopwatch.createStarted();
             List<Map<String, Object>> listPIG = doctorPigEventDao.selectPIG(params);
             for (int j = 0; j < listPIG.size(); j++) {
                 // 加载猪id
@@ -123,7 +126,10 @@ public class DoctorReportWriteServiceImpl implements DoctorReportWriteService {
 //            }
                 params.put("pigId", listPIG == null ? "0" : String.valueOf(listPIG.get(j).get("id")));
                 flushSowNPD(params);
+                log.info("刷NPD", stopWatch.elapsed(TimeUnit.MINUTES));
+                stopWatch = Stopwatch.createStarted();
                 flushReportNpd(params, startDate, endDate);
+                log.info("刷ReportNPD", stopWatch.elapsed(TimeUnit.MINUTES));
             }
         }
     }
