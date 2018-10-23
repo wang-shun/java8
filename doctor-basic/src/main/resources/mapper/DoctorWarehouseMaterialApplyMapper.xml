@@ -843,7 +843,7 @@
         from doctor_warehouse_material_apply as ma
         where ma.org_id=#{orgId} and  ma.farm_id=#{farmId}
         <if test="flag == 0">and ma.apply_type=0 </if>
-        <if test="flag == 1">and (ma.apply_type=1 or ma.apply_type=2) </if>
+        <if test="flag == 1">and ma.apply_type between 1 and 2 </if>
         <if test="pigType !=null">and  ma.pig_type=#{pigType}</if>
         <if test="materialType !=null">and  ma.type=#{materialType}</if>
         <if test="startDate !=null">and <![CDATA[ma.apply_date >= #{startDate}]]></if>
@@ -866,7 +866,7 @@
         on db.id=ma.unit
         where ma.org_id=#{orgId} and  ma.farm_id=#{farmId}
         <if test="flag == 0">and ma.apply_type=0 </if>
-        <if test="flag == 1">and (ma.apply_type=1 or ma.apply_type=2) </if>
+        <if test="flag == 1">and ma.apply_type between 1 and 2 </if>
         <if test="pigType !=null">and  ma.pig_type=#{pigType}</if>
         <if test="materialType !=null">and  ma.type=#{materialType}</if>
         <if test="startDate !=null">and <![CDATA[ma.apply_date >= #{startDate}]]></if>
@@ -884,7 +884,7 @@
         from doctor_warehouse_material_apply as ma
         where ma.org_id=#{orgId} and  ma.farm_id=#{farmId}
         <if test="flag == 0">and ma.apply_type=0 </if>
-        <if test="flag == 1">and (ma.apply_type=1 or ma.apply_type=2) </if>
+        <if test="flag == 1">and ma.apply_type between 1 and 2 </if>
         <if test="pigType !=null">and  ma.pig_type=#{pigType}</if>
         <if test="materialType !=null">and  ma.type=#{materialType}</if>
         <if test="startDate !=null">and <![CDATA[ma.apply_date >= #{startDate}]]></if>
@@ -908,7 +908,7 @@
         on db.id=ma.unit
         where ma.org_id=#{orgId} and  ma.farm_id=#{farmId}
         <if test="flag == 0">and ma.apply_type=0 </if>
-        <if test="flag == 1">and (ma.apply_type=1 or ma.apply_type=2) </if>
+        <if test="flag == 1">and ma.apply_type between 1 and 2 </if>
         <if test="pigType !=null">and  ma.pig_type=#{pigType}</if>
         <if test="materialType !=null">and  ma.type=#{materialType}</if>
         <if test="startDate !=null">and <![CDATA[ma.apply_date >= #{startDate}]]></if>
@@ -923,7 +923,7 @@
 
     <!--得到领用猪舍对应的领用猪群单据-->
     <select id="getGroupById" parameterType="Long" resultMap="DoctorWarehouseMaterialApplyMap">
-      select group_id,group_name from doctor_warehouse_material_apply where material_handle_id=#{materialHandleId} and (apply_type=1 or apply_type=2)
+      select group_id,group_name from doctor_warehouse_material_apply where material_handle_id=#{materialHandleId} and apply_type between 1 and 2
     </select>
 
     <!--判断猪群是否关闭 （陈娟 2018-10-18）-->
