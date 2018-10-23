@@ -66,6 +66,7 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorMessageRuleWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
+import io.terminus.doctor.event.util.EventUtil;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
 import io.terminus.doctor.move.dto.DoctorImportSow;
 import io.terminus.doctor.move.util.ImportExcelUtils;
@@ -114,6 +115,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -970,7 +972,8 @@ public class DoctorImportDataService {
         event.setPigType(group.getPigType());
         event.setQuantity(groupTrack.getQuantity());
         event.setAvgWeight(avgWeight);
-        event.setWeight(event.getQuantity() * avgWeight);
+//        event.setWeight(event.getQuantity() * avgWeight);
+        event.setWeight(new BigDecimal(event.getQuantity() * avgWeight).setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue());
         event.setDesc("转移类型：仔猪转入#猪只数：" + groupTrack.getQuantity() + "#平均日龄：" + groupTrack.getAvgDayAge() + "#均重：" + avgWeight);
         event.setAvgDayAge(dayAge);
         event.setIsAuto(IsOrNot.YES.getValue());

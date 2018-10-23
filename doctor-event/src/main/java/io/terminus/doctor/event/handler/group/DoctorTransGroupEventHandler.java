@@ -28,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 
@@ -166,7 +167,9 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
             }
         }
 
-        Double avgWeight = EventUtil.getAvgWeight(transGroup.getWeight(), transGroup.getQuantity());   //后台计算的总重
+//        Double avgWeight = EventUtil.getAvgWeight(transGroup.getWeight(), transGroup.getQuantity());   //后台计算的总重
+        //后台计算的均重（四舍五入保留三位小数 陈娟 2018-10-23）
+        Double avgWeight= new BigDecimal(EventUtil.getAvgWeight(transGroup.getWeight(), transGroup.getQuantity())).setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue();
         //checkDayAge(groupTrack.getAvgDayAge(), transGroup);
 
         //转入猪舍

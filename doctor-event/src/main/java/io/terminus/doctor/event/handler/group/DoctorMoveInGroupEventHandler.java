@@ -26,6 +26,7 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -109,7 +110,9 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         event.setQuantity(moveIn.getQuantity());
         event.setAvgDayAge(moveIn.getAvgDayAge());
         event.setAvgWeight(moveIn.getAvgWeight());
-        event.setWeight(EventUtil.getWeight(event.getAvgWeight(), event.getQuantity()));
+//        event.setWeight(EventUtil.getWeight(event.getAvgWeight(), event.getQuantity()));
+        // 得到总重量（四舍五入保留三位小数 陈娟 2018-10-23）
+        event.setWeight(new BigDecimal(EventUtil.getWeight(event.getAvgWeight(), event.getQuantity())).setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue());
         event.setAmount(moveIn.getAmount());
         event.setInType(moveIn.getInType());
         event.setOrigin(moveIn.getOrigin());
