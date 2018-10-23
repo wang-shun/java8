@@ -677,10 +677,13 @@ public class DoctorPigCreateEvents {
                     DoctorConditionDto conditionDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorConditionDto.class);
                     Date conditionDate = conditionDto.getConditionDate();
                     Long pigId1 = conditionDto.getPigId();
-                    //取猪舍
                     Map<String,Object> maps = doctorPigEventReadService.getBranName(pigId1, conditionDate);
-                    conditionDto.setBarnId(Long.valueOf(maps.get("barnId").toString()));
-                    conditionDto.setBarnName(maps.get("barnName").toString());
+                    if(maps.size() != 0){
+                        Long barnId = Long.valueOf(maps.get("barnId").toString());
+                        String barnName = maps.get("barnName").toString();
+                        conditionDto.setBarnId(barnId);
+                        conditionDto.setBarnName(barnName);
+                    }
                     return doctorValidService.valid(conditionDto, doctorPig.getPigCode());
                 } else {
                     DoctorBoarConditionDto boarConditionDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorBoarConditionDto.class);
