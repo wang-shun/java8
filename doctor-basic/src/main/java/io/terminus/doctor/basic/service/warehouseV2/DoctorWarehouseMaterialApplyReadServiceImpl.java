@@ -47,15 +47,10 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
     // 仓库领用明细报表 （陈娟 2018-10-17）
     @Override
-    public Response<Paging<Map>> collarReport(Integer pageNo, Integer pageSize, Long orgId, Long farmId, String startDate, String endDate, Integer materialType, String materialName, Integer pigType, String pigBarnName, String pigGroupName) {
-        // 判断筛选条件是否有猪群
-        Integer flag = 0;
-        if(null != pigGroupName && !pigGroupName.equals("")){
-            flag = 1;
-        }
+    public Response<Paging<Map>> collarReport(Integer flag,Integer pageNo, Integer pageSize, Long orgId, Long farmId, String startDate, String endDate, Integer materialType, String materialName, Integer pigType, String pigBarnName, String pigGroupName) {
         Paging<Map> collarBarnMaps = doctorWarehouseMaterialApplyDao.collarReport(pageNo, pageSize,flag, orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnName, pigGroupName);
         List<Map> data = collarBarnMaps.getData();
-        for (Map mm:data) {
+        data.parallelStream().forEach(mm -> {
             if(flag==0){
                 // 如果筛选条件没有猪群，则先得到猪舍单据，再判断是否领用到猪群（是：展示猪群；否：无）
                 DoctorWarehouseMaterialApply groupApply = doctorWarehouseMaterialApplyDao.getGroupById((Long) mm.get("material_handle_id"));
@@ -82,7 +77,7 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
                 mm.put("unit_price","--");
                 mm.put("amount","--");
             }
-        }
+        });
 
         // 合计
         Long total = collarBarnMaps.getTotal();
@@ -130,14 +125,11 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
 
     // 仓库领用明细报表导出 （陈娟 2018-10-19）
     @Override
-    public List<Map> collarReportExport(Long orgId, Long farmId, String startDate, String endDate, Integer materialType, String materialName, Integer pigType, String pigBarnName, String pigGroupName) {
-        // 判断筛选条件是否有猪群
-        Integer flag = 0;
-        if(null != pigGroupName && !pigGroupName.equals("")){
-            flag = 1;
-        }
+    public List<Map> collarReportExport(Integer flag,Long orgId, Long farmId, String startDate, String endDate, Integer materialType, String materialName, Integer pigType, String pigBarnName, String pigGroupName) {
+        log.info("============collarReportExport111111");
         List<Map> data = doctorWarehouseMaterialApplyDao.collarReportExport(flag, orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnName, pigGroupName);
-        for (Map mm:data) {
+        log.info("============collarReportExport222222");
+        data.parallelStream().forEach(mm -> {
             if(flag==0){
                 // 如果筛选条件没有猪群，则先得到猪舍单据，再判断是否领用到猪群（是：展示猪群；否：无）
                 DoctorWarehouseMaterialApply groupApply = doctorWarehouseMaterialApplyDao.getGroupById((Long) mm.get("material_handle_id"));
@@ -164,7 +156,7 @@ public class DoctorWarehouseMaterialApplyReadServiceImpl implements DoctorWareho
                 mm.put("unit_price","--");
                 mm.put("amount","--");
             }
-        }
+        });
 
         // 合计
         Map<String, Object> allMaps = new HashMap<>();

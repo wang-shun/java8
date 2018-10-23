@@ -854,7 +854,7 @@
     </select>
 
     <select id="collarReport" parameterType="map" resultType="map">
-        select ma.material_handle_id,ma.apply_date,ma.settlement_date,ma.type,ma.material_id,ma.material_name,ma.warehouse_id,ma.warehouse_name,ma.pig_type,ma.pig_barn_id,ma.pig_barn_name,ma.pig_group_id,ma.pig_group_name,
+        select ma.material_handle_id,ma.apply_date,ma.settlement_date,ma.type,ma.material_name,ma.warehouse_name,ma.pig_type,ma.pig_barn_name,ma.pig_group_id,ma.pig_group_name,
         (ma.quantity+ma.refund_quantity) as quantity,(ma.amount+ma.refund_amount)/(ma.quantity+ma.refund_quantity) as unit_price,(ma.amount+ma.refund_amount) as amount,
         db.`name` as unit,s.specification,v.short_name as vendor_name
         from doctor_warehouse_material_apply as ma
@@ -896,7 +896,7 @@
 
     <!--导出（陈娟 2018-10-19）-->
     <select id="collarReportExport" parameterType="map" resultType="map">
-        select ma.material_handle_id,date_format(ma.apply_date,'%Y-%m-%d %k:%i:%s') as apply_date,ma.settlement_date,ma.type,ma.material_id,ma.material_name,ma.warehouse_id,ma.warehouse_name,ma.pig_type,ma.pig_barn_id,ma.pig_barn_name,ma.pig_group_id,ma.pig_group_name,
+        select ma.material_handle_id,date_format(ma.apply_date,'%Y-%m-%d') as apply_date,ma.settlement_date,ma.type,ma.material_name,ma.warehouse_name,ma.pig_type,ma.pig_barn_name,ma.pig_group_id,ma.pig_group_name,
         (ma.quantity+ma.refund_quantity) as quantity,(ma.amount+ma.refund_amount)/(ma.quantity+ma.refund_quantity) as unit_price,(ma.amount+ma.refund_amount) as amount,
         db.`name` as unit,s.specification,v.short_name as vendor_name
         from doctor_warehouse_material_apply as ma
