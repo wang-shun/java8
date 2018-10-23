@@ -320,6 +320,7 @@ public class DoctorPigs {
     public DoctorBoarDetailDto queryBoarPigDetailInfoDto(@RequestParam("farmId") Long farmId,
                                                          @RequestParam("pigId") Long pigId,
                                                          @RequestParam(value = "eventSize", required = false) Integer eventSize){
+            log.error("====farmId="+farmId+"pigId="+pigId+"eventSize="+eventSize);
             return buildDoctorBoarDetailDto(getPigDetail(farmId, pigId, eventSize));
           }
 
