@@ -2543,7 +2543,7 @@
         <if test="endYear != null">AND a.fiscal_year &lt;= #{endYear} </if>
         <if test="startMonth != null">AND a.fiscal_period >= #{startMonth}</if>
         <if test="endMonth != null">AND a.fiscal_period &lt;= #{endMonth} </if>
-        GROUP BY a.pig_id, a.barn_id
+        GROUP BY a.pig_id
         ) tt
         WHERE tt.npddate <![CDATA[<>]]> 0
         limit #{offset}, #{limit}
