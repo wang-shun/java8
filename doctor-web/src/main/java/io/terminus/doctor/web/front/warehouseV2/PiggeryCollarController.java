@@ -65,7 +65,12 @@ public class PiggeryCollarController {
                             @RequestParam(required = false) Integer pigType,
                             @RequestParam(required = false) String pigBarnName,
                             @RequestParam(required = false) String pigGroupName){
-        Paging<Map> mapPaging = RespHelper.or500(doctorWarehouseMaterialApplyReadService.collarReport(pageNo, pageSize, orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnName, pigGroupName));
+        // 判断筛选条件是否有猪群
+        Integer flag = 0;
+        if(null != pigGroupName && !pigGroupName.equals("")){
+            flag = 1;
+        }
+        Paging<Map> mapPaging = RespHelper.or500(doctorWarehouseMaterialApplyReadService.collarReport(flag,pageNo, pageSize, orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnName, pigGroupName));
         return  mapPaging;
     }
 
@@ -81,8 +86,12 @@ public class PiggeryCollarController {
                                     @RequestParam(required = false) String pigBarnName,
                                     @RequestParam(required = false) String pigGroupName,
                                     HttpServletRequest request, HttpServletResponse response){
-
-        List<Map> maps = doctorWarehouseMaterialApplyReadService.collarReportExport(orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnName, pigGroupName);
+        // 判断筛选条件是否有猪群
+        Integer flag = 0;
+        if(null != pigGroupName && !pigGroupName.equals("")){
+            flag = 1;
+        }
+        List<Map> maps = doctorWarehouseMaterialApplyReadService.collarReportExport(flag,orgId, farmId, startDate, endDate, materialType, materialName, pigType, pigBarnName, pigGroupName);
         //开始导出
         try {
             //导出名称
