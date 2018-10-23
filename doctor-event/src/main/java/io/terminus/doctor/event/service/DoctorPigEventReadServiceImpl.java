@@ -650,4 +650,9 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         return Response.ok(doctorPigEventDao.getKongHuaiStatus(pigId));
     }
 
+    @Override
+    public Map<String,Object> getBranName(Long pigId, Date date) {
+        return doctorPigEventDao.getBranName(pigId, date);
+    }
+
 }

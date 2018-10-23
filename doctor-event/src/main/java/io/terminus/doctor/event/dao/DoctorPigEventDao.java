@@ -1282,4 +1282,11 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         map.put("farmId",farmId);
         return getSqlSession().selectOne(sqlId("getLactations"), map);
     }
+
+    public Map<String,Object> getBranName(Long pigId, Date date) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("pigId",pigId);
+        map.put("date",date);
+        return getSqlSession().selectOne(sqlId("getBranName"), map);
+    }
 }

@@ -320,4 +320,5 @@ public interface DoctorPigEventReadService {
 
     Response<DoctorPigEvent> getKongHuaiStatus(Long pigId);
 
+    public Map<String,Object> getBranName(Long pigId, Date date);
 }
