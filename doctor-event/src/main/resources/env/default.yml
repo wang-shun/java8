@@ -18,7 +18,7 @@ datasource:
 rpc.mode: true
 rpc.dubbo:
     module: doctor-event
-    registryAddress: 101.201.44.35:2181
+    registryAddress: ${RPC_REGISTRY:127.0.0.1:2181}
     version: 1.0.0
 
 logging:
