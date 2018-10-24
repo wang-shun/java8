@@ -163,7 +163,7 @@ public class DoctorBasics {
     }
 
     // 客户数据分页（陈娟 2018-10-24）
-    @RequestMapping(method = RequestMethod.GET, value = "pagingWarehouseSku")
+    @RequestMapping(method = RequestMethod.GET, value = "/customers/paging")
     public Paging<DoctorCustomer> pagingWarehouseSku(@RequestParam(required = false) Long farmId,
                                                       @RequestParam(required = false) String name,
                                                       @RequestParam(required = false) String mobile,
