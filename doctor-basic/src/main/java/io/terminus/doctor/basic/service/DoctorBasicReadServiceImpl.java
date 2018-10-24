@@ -269,6 +269,18 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
         }
     }
 
+    // 客户数据分页（陈娟 2018-10-24）
+    @Override
+    public Response<Paging<DoctorCustomer>> pagingCustomers(Integer pageNo, Integer pageSize, Map<String, Object> criteria) {
+        try {
+            PageInfo pageInfo = new PageInfo(pageNo, pageSize);
+            return Response.ok(doctorCustomerDao.pagingCustomers(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
+        } catch (Exception e) {
+            log.error("failed to paging doctor customers by pageNo:{} pageSize:{}, cause:{}", pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            return Response.fail("doctor.customers.paging.fail");
+        }
+    }
+
     @Override
     public Response<Paging<DoctorChangeReason>> pagingChangeReason(Integer pageNo, Integer pageSize, Map<String, Object> criteria) {
         try {

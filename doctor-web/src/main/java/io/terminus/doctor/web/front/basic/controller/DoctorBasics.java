@@ -1,10 +1,13 @@
 package io.terminus.doctor.web.front.basic.controller;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.model.Paging;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
+import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.common.utils.JsonMapperUtil;
@@ -22,7 +25,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -155,6 +160,33 @@ public class DoctorBasics {
     @RequestMapping(value = "/customer/farmId", method = RequestMethod.GET)
     public List<DoctorCustomer> findCustomersByfarmId(@RequestParam("farmId") Long farmId) {
         return RespHelper.or500(doctorBasicReadService.findCustomersByFarmId(farmId));
+    }
+
+    // 客户数据分页（陈娟 2018-10-24）
+    @RequestMapping(method = RequestMethod.GET, value = "pagingWarehouseSku")
+    public Paging<DoctorCustomer> pagingWarehouseSku(@RequestParam(required = false) Long farmId,
+                                                      @RequestParam(required = false) String name,
+                                                      @RequestParam(required = false) String mobile,
+                                                      @RequestParam(required = false) String email,
+                                                      @RequestParam(required = false) Integer pageNo,
+                                                      @RequestParam(required = false) Integer pageSize) {
+
+        if (null == farmId )
+            throw new JsonResponseException("farmId.not.null");
+
+        Map<String, Object> params = new HashMap<>();
+        if (null != farmId)
+            params.put("farmId", farmId);
+        if (null != name)
+            params.put("name", name);
+        if (null != mobile)
+            params.put("mobile", mobile);
+        if (null != email)
+            params.put("email", email);
+
+        Paging<DoctorCustomer> doctorCustomerPaging = RespHelper.or500(doctorBasicReadService.pagingCustomers(pageNo, pageSize, params));
+
+        return doctorCustomerPaging;
     }
 
     /**
