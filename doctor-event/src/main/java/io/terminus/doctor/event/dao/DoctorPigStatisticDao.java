@@ -260,8 +260,11 @@ public class DoctorPigStatisticDao {
         //某一日配种母猪数
         Integer matingNum = sqlSession.selectOne(sqlId("countSow"), params);
 
+        Integer countSow = sqlSession.selectOne(sqlId("countSow1"), params);
 
-        return entryNum - matingNum;
+        return countSow;
+
+//        return entryNum - matingNum;
     }
 
     public List<DoctorFarmEarlyEventAtDto> earlyMateDate(String startAt){

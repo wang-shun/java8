@@ -175,6 +175,8 @@
         SET handle_date=#{handleDate},
         settlement_date=#{settlementDate}
         WHERE
-        rel_stock_handle_id=#{stockHandleId}
+        <!--更新入库单据的事件日期（陈娟 2018-10-08）-->
+        <if test="type == 1">rel_stock_handle_id=#{stockHandleId}</if>
+        <if test="type == 2">id=#{stockHandleId}</if>
     </update>
 </mapper>

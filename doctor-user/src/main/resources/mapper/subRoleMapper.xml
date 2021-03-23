@@ -19,6 +19,7 @@
         <result column="extra_json" property="extraJson"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
+        <result column="role_type" property="roleType"/>
     </resultMap>
 
     <sql id="tb">
@@ -31,11 +32,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `name`,`desc`, user_id, farm_id, app_key, status, allow_json, extra_json, created_at, updated_at
+        `name`,`desc`, user_id, farm_id, app_key, status, allow_json, extra_json, created_at, updated_at,role_type
     </sql>
 
     <sql id="vals">
-        #{name}, #{desc}, #{userId}, #{farmId}, #{appKey}, #{status}, #{allowJson}, #{extraJson}, now(), now()
+        #{name}, #{desc}, #{userId}, #{farmId}, #{appKey}, #{status}, #{allowJson}, #{extraJson}, now(), now(),#{roleType}
     </sql>
 
     <insert id="create" parameterType="SubRole" keyProperty="id" useGeneratedKeys="true">
@@ -77,6 +78,7 @@
             <if test="status!=null">status = #{status},</if>
             <if test="allowJson!=null">allow_json = #{allowJson},</if>
             <if test="extraJson!=null">extra_json = #{extraJson},</if>
+            <if test="roleType!=null">role_type = #{roleType},</if>
             updated_at = now()
         </set>
         where id = #{id}
@@ -93,7 +95,7 @@
         <include refid="cols_all"/>
         FROM
         <include refid="tb"/>
-        WHERE app_key = #{appKey} AND user_id = #{userId} AND `status` = #{status}
+        WHERE app_key = #{appKey} AND user_id = #{userId} AND `status` = #{status} AND farm_id is null
     </select>
 
     <select id="findByFarmIdAndStatus" parameterType="map" resultMap="SubRoleMap">
@@ -110,6 +112,7 @@
         <if test="status != null">AND status = #{status}</if>
         <if test="userId != null">AND user_id = #{userId}</if>
         <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="roleType != null">AND role_type = #{roleType}</if>
     </sql>
 
 
@@ -132,4 +135,33 @@
             <include refid="criteria"/>
         </where>
     </select>
+
+
+    <select id="pagingMainRole" parameterType="map" resultMap="SubRoleMap">
+        select id,
+        <include refid="cols_exclude_id"/>
+        from
+        <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+            and role_type in (0,1,2)
+        </where>
+        order by `id` desc
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="countMainRole" parameterType="map" resultType="long">
+        select count(1) from
+        <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+            and role_type in (0,1,2)
+        </where>
+    </select>
+
+    <!--得到默认的公司角色（2018-10-15）-->
+    <select id="getCompanyRole"  resultMap="SubRoleMap">
+        select * from doctor_sub_roles where role_type=2 limit 1
+    </select>
+
 </mapper>

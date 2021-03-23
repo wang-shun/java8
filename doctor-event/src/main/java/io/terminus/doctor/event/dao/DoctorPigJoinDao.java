@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,16 +30,19 @@ public class DoctorPigJoinDao extends MyBatisDao<SearchedPig> {
         if (params == null) {    //如果查询条件为空
             params = Maps.newHashMap();
         }
-        log.info("pigPagingWithJoin"+params.toString());
+        if(params.get("pigType") != null &&((String)params.get("pigType")).equals("2") && params.get("statuses")!=null && (int)((List)params.get("statuses")).get(0)==12){
+            params.put("isRemoval",1);
+            params.remove("statuses");
+        }
         Long total = sqlSession.selectOne(sqlId(COUNT), params);
-        log.error("pigPagingWithJoin"+total.toString());
+        log.error("pigPagingWithJoin2"+total.toString());
         if (total <= 0){
             return new Paging<>(0L, Collections.emptyList());
         }
         params.put(Constants.VAR_OFFSET, offset);
         params.put(Constants.VAR_LIMIT, limit);
         List<SearchedPig> datas = sqlSession.selectList(sqlId(PAGING), params);
-        log.error("pigPagingWithJoin"+datas.toString());
+        log.error("pigPagingWithJoin3"+datas.toString());
         return new Paging<>(total, datas);
     }
 
@@ -77,4 +81,60 @@ public class DoctorPigJoinDao extends MyBatisDao<SearchedPig> {
     public List<DoctorPig> findUnRemovalPigsBy(Long barnId){
         return getSqlSession().selectList(sqlId("findUnRemovalPigsBy"), barnId);
     }
+
+
+    // -------------------- 新增代码-----------------------
+    /**
+     * 未转场的母猪
+     * @param farmId
+     * @param barnId
+     * @param valueMap
+     * @param pigCode
+     * @param rfid
+     * @return
+     */
+    public List<Long> findNotTransitionsSow(Long farmId,Long barnId,Map<String,Object> valueMap,String pigCode,String rfid,Integer isRemoval){
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("farmId", farmId);
+        map.put("barnId", barnId);
+        map.put("statuses", valueMap.get("statuses"));
+        map.put("pigCode", pigCode);
+        map.put("rfid", rfid);
+        map.put("isRemoval",isRemoval);
+        return getSqlSession().selectList(sqlId("findNotTransitionsSow"), map);
+    }
+
+    /**
+     * 已转场的母猪
+     * @param farmId
+     * @param pigCode
+     * @return
+     */
+    public List<Long> findHaveTransitionsSow(Long farmId,Long barnId,String pigCode,String rfid){
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("farmId", farmId);
+        map.put("barnId", barnId);
+        map.put("pigCode", pigCode);
+        map.put("rfid", rfid);
+        return  getSqlSession().selectList(sqlId("findHaveTransitionsSow"),map);
+    }
+
+
+    public Paging<SearchedPig> pagesSowPig(Map<String, Object> params, Integer offset, Integer limit) {
+        if (params == null) {
+            params = Maps.newHashMap();
+        }
+        log.info("pagesSowPig"+params.toString());
+        Long total = sqlSession.selectOne(sqlId("leaveCount"), params);
+        log.error("pagesSowPig"+total.toString());
+        if (total <= 0){
+            return new Paging<>(0L, Collections.emptyList());
+        }
+        params.put(Constants.VAR_OFFSET, offset);
+        params.put(Constants.VAR_LIMIT, limit);
+        List<SearchedPig> datas = sqlSession.selectList(sqlId("leavePaging"), params);
+        log.error("pagesSowPig"+datas.toString());
+        return new Paging<>(total, datas);
+    }
+
 }

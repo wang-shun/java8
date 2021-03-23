@@ -89,7 +89,7 @@
 
     <update id="updateName" parameterType="map">
         UPDATE doctor_orgs
-        set name = #{name}
+        set name = #{name}, type=#{type}
         WHERE id = #{id}
     </update>
 
@@ -188,6 +188,43 @@
         limit #{offset}, #{limit}
     </select>
 
+    <!--集团，公司的数据展示（陈娟 2018-8-29）-->
+    <select id="countCompany" parameterType="map" resultType="long">
+        SELECT count(*)
+        FROM <include refid="tb"/>
+        WHERE (type=1 or (type=2 and parent_id=0))
+        <if test="fuzzyName != null">AND `name` LIKE concat('%', #{fuzzyName}, '%')</if>
+        <if test="type != null">AND `type` = #{type}</if>
+    </select>
+
+    <select id="pagingCompany" parameterType="map" resultMap="DoctorOrgMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE 1=1
+        <if test="type == 1"> AND type=1</if>
+        <if test="type == 2"> AND type=2 and parent_id=0</if>
+        <if test="fuzzyName != null">AND `name` LIKE concat('%', #{fuzzyName}, '%')</if>
+        <if test="fuzzyName != null">
+            ORDER BY instr(`name`, #{fuzzyName}) ASC, LENGTH (`name`) ASC
+        </if>
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--查询公司时得到有集团的公司 （陈娟 2018-08-31）-->
+    <select id="getParentId" parameterType="map" resultMap="DoctorOrgMap">
+        select DISTINCT parent_id from doctor_orgs
+        where parent_id!=0 and type=2
+        <if test="fuzzyName != null">AND `name` LIKE concat('%', #{fuzzyName}, '%')</if>
+        ORDER BY parent_id
+    </select>
+
+    <select id="findOrgByParentIdAndName" parameterType="map" resultMap="DoctorOrgMap" >
+        select * from doctor_orgs
+        where parent_id!=0 and type=2 and parent_id = #{parentId}
+        <if test="fuzzyName != null">AND `name` LIKE concat('%', #{fuzzyName}, '%')</if>
+        ORDER BY id
+    </select>
+
     <select id="findByFuzzyName" parameterType="map" resultMap="DoctorOrgMap">
         SELECT id, `name`
         FROM <include refid="tb" />
@@ -200,7 +237,7 @@
     <update id="bindDepartment" parameterType="map" >
         UPDATE
         <include refid="tb"/>
-        SET parent_id = #{parentId}, `type` = 2
+        SET parent_id = #{parentId}
         WHERE
         id IN
         <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
@@ -211,13 +248,20 @@
     <update id="unbindDepartment" parameterType="map">
         UPDATE
         <include refid="tb"/>
-        SET parent_id = 0, `type` = 1
+        SET parent_id = 0
         WHERE
         id IN
         <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
             #{orgId}
         </foreach>
     </update>
+
+    <!-- 关联子公司得到公司（陈娟 2018-08-29）-->
+    <select id="getCompanyByName" parameterType="map" resultMap="DoctorOrgMap" >
+        select * from doctor_orgs where type=2
+        <if test="name != null">AND `name` LIKE concat('%', #{name}, '%')</if>
+    </select>
+
 
     <select id="findExcludeIds" parameterType="map" resultMap="DoctorOrgMap" >
         SELECT <include refid="cols_all" />
@@ -245,4 +289,163 @@
         WHERE
         `mobile` = #{mobile}
     </select>
+    <select id="findGroupcompanyByOrgId" parameterType="long" resultMap="DoctorOrgMap">
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb"/>
+        WHERE
+        id = #{orgId}
+    </select>
+
+
+    <select id="findOrgByGroup" parameterType="map" resultMap="DoctorOrgMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE
+        id in
+        <foreach collection="orgIds" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        and parent_id = #{groupId}
+    </select>
+
+    <select id="findUserTypeById" parameterType="long" resultType="Integer" >
+        select user_type from doctor_user_subs where user_id = #{userId}
+    </select>
+
+    <select id="getOrgByGroupId" parameterType="map" resultType="map" >
+       select id,name from doctor_orgs where parent_id = #{groupId} and id IN
+        <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
+            #{orgId}
+        </foreach>
+    </select>
+
+    <select id="getOrgByGroupId1" parameterType="map" resultType="long" >
+        select id from doctor_orgs where parent_id = #{groupId} and id IN
+        <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
+            #{orgId}
+        </foreach>
+    </select>
+
+    <select id="getCunlan" parameterType="long" resultType="map" >
+        select ifnull((select ifnull(end,0) from doctor_report_resevers where orz_id = #{orgId} and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0) as end, '后备猪' as 'type'
+        union
+        select ifnull((select ifnull(end,0) from doctor_report_boars where orz_id = #{orgId} and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0) as end, '种公猪' as 'type'
+        union
+        select ifnull((select ifnull(end,0) from doctor_report_sows where orz_id = #{orgId} and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0)  as end, '基础母猪' as 'type'
+        union
+        select ifnull((select ifnull(end,0) from doctor_report_matings where orz_id = #{orgId} and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0)  as end, '配怀母猪' as 'type'
+        union
+        select ifnull((select ifnull(end,0) from doctor_report_delivers where orz_id = #{orgId} and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0)  as end, '产房母猪' as 'type'
+        union
+        select ifnull((select ifnull(piglet_end,0) from doctor_report_delivers where orz_id = #{orgId} and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0)  as end, '产房仔猪' as 'type'
+        union
+        select ifnull((select ifnull(end,0) from doctor_report_nurseries where orz_id = #{orgId} and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0)  as end, '保育猪' as 'type'
+        union
+        select ifnull((select ifnull(end,0) from doctor_report_fattens where orz_id = #{orgId} and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d') limit 1),0)  as end, '育肥猪' as 'type'
+    </select>
+
+    <select id="getGroupCunlan" parameterType="long" resultType="map" >
+        select ifnull((select sum(end) from doctor_report_resevers where orz_id in
+            <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+                           #{item}
+            </foreach>
+        and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')),0) as end, '后备猪' as 'type'
+        union
+        select ifnull((select sum(end) from doctor_report_boars where orz_id in
+            <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')),0) as end, '种公猪' as 'type'
+        union
+        select ifnull((select sum(end) from doctor_report_sows where orz_id IN
+            <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')),0) as end, '基础母猪' as 'type'
+        union
+        select ifnull((select sum(end) from doctor_report_matings where orz_id in
+            <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')),0) as end, '配怀母猪' as 'type'
+        union
+        select ifnull((select sum(end) from doctor_report_delivers where orz_id in
+            <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')),0) as end, '产房母猪' as 'type'
+        union
+        select ifnull((select sum(piglet_end) from doctor_report_delivers where orz_id in
+            <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        and orz_type = 2 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')),0) as end, '产房仔猪' as 'type'
+        union
+        select ifnull((select sum(end) from doctor_report_nurseries where orz_id in
+            <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')),0) as end, '保育猪' as 'type'
+        union
+        select ifnull((select sum(end) from doctor_report_fattens where orz_id in
+            <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        and orz_type = 2 and date_type=1 and sum_at = DATE_FORMAT(now(),'%Y-%m-%d')),0) as end, '育肥猪' as 'type'
+    </select>
+    <select id="getGroupNameById" parameterType="long" resultType="String" >
+        select name from doctor_orgs where id = #{orgId}
+    </select>
+    <select id="staffCount" parameterType="map" resultType="long">
+        select  count(1) as count
+        from doctor_staffs a
+        left join doctor_orgs b1 on a.group_id = b1.id
+        left join doctor_orgs b2 on	a.org_id = b2.id
+        left join doctor_farms c on a.farm_id = c.id
+        where 1 = 1
+        <if test="groupId != null and groupId != ''"> and a.group_id = #{groupId}</if>
+        <if test="orgId != null and orgId != ''"> and a.org_id = #{orgId}</if>
+        <if test="farmId != null and farmId != ''"> and a.farm_id = #{farmId}</if>
+        <if test="userName != null and userName != ''"> and a.user_name like  CONCAT(CONCAT('%',#{userName},'%')) </if>
+        <if test="mobile != null and mobile != ''"> and a.mobile like  CONCAT(CONCAT('%',#{mobile},'%')) </if>
+        <if test="status != null and status != ''"> and a.status = #{status}</if>
+    </select>
+
+    <select id="staffQuery" parameterType="map" resultType="map">
+        select  d.realname as userName,
+                 a.mobile as mobile,
+                 b1.`name` as groupName,
+                 b2.`name` as orgName,
+                 c.name as farmName,
+                 a.status as `status`
+        from doctor_staffs a
+        left join doctor_orgs b1 on a.group_id = b1.id
+        left join doctor_orgs b2 on	a.org_id = b2.id
+        left join doctor_farms c on a.farm_id = c.id
+        left join parana_user_profiles d on a.user_id = d.user_id
+        where 1 = 1
+        <if test="groupId != null and groupId != ''"> and a.group_id = #{groupId}</if>
+        <if test="orgId != null and orgId != ''"> and a.org_id = #{orgId}</if>
+        <if test="farmId != null and farmId != ''"> and a.farm_id = #{farmId}</if>
+        <if test="userName != null and userName != ''"> and d.realname like  CONCAT(CONCAT('%',#{userName},'%')) </if>
+        <if test="mobile != null and mobile != ''"> and a.mobile like  CONCAT(CONCAT('%',#{mobile},'%')) </if>
+        <if test="status != null and status != ''"> and a.status = #{status}</if>
+        limit #{pageNo},#{pageSize}
+    </select>
+
+    <select id="findGroupByOrgId" parameterType="long" resultType="long" >
+        select parent_id from doctor_orgs where id = #{groupId}
+    </select>
+
+
+    <select id="getUserType" parameterType="long" resultType="Integer" >
+        select user_type from doctor_user_subs  where user_id = #{userId}
+    </select>
+
+    <select id="findOrgByParent" parameterType="long" resultMap="DoctorOrgMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE parent_id = #{parent}
+    </select>
+
 </mapper>

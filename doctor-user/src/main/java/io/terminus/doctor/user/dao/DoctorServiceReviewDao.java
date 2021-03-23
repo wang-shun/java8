@@ -57,6 +57,15 @@ public class DoctorServiceReviewDao extends MyBatisDao<DoctorServiceReview> {
         return sqlSession.selectOne(sqlId("findByUserIdAndType"), ImmutableMap.of("userId", userId, "type", type.getValue()));
     }
 
+    /**
+     * （jiangsj）用户审核通过后把公司的parent_id置为0、type置为2
+     * @param id
+     * @return
+     */
+    public boolean updateOrgPidTpye(Long id){
+        return sqlSession.update(sqlId("updateOrgPidTpye"),ImmutableMap.of("id",id))==1;
+    }
+
     public Paging<DoctorServiceReviewExt> pagingExt(Map<String, Object> criteria){
         if (criteria == null) {    //如果查询条件为空
             criteria = Maps.newHashMap();

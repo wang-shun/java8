@@ -160,6 +160,8 @@ public class WarehouseInventoryStockService extends
 
             materialHandle.setRemark(detail.getRemark());
             materialHandle.setSettlementDate(stockDto.getSettlementDate());
+            materialHandle.setUnitPrice(detail.getUnitPrice());
+            materialHandle.setAmount(detail.getAmount());
 
             boolean changeHandleDate = !DateUtil.inSameDate(stockHandle.getHandleDate(), stockDto.getHandleDate().getTime());
 
@@ -239,7 +241,7 @@ public class WarehouseInventoryStockService extends
                             log.info("deficit decrease.now deficit is {},original deficit is {},stock change quantity is {}", changedQuantity, materialHandle.getQuantity(), stockChangedQuantity);
                         } else if (c < 0) {
                             //出库1
-                            stockChangedQuantity = changedQuantity.subtract(materialHandle.getQuantity());
+                            stockChangedQuantity = materialHandle.getQuantity().subtract(changedQuantity);
                             log.info("deficit increase.now deficit is {},original deficit is {},stock change quantity is {}", changedQuantity, materialHandle.getQuantity(), stockChangedQuantity);
                         }
                     }

@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -74,7 +75,8 @@ public class DoctorLiveStockGroupEventHandler extends DoctorAbstractGroupEventHa
 
 
         event.setAvgWeight(liveStock.getAvgWeight());
-        event.setWeight(event.getQuantity() * event.getAvgWeight()); // 总活体重 = 数量 * 均重
+//        event.setWeight(event.getQuantity() * event.getAvgWeight()); // 总活体重 = 数量 * 均重
+        event.setWeight(new BigDecimal(event.getQuantity() * event.getAvgWeight()).setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue());
         event.setExtraMap(liveStock);
         doctorGroupEventDao.create(event);
      }

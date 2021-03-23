@@ -199,114 +199,342 @@
 
     <select id="copyDoctorWarehouseWtockMonthly" parameterType="map" resultMap="DoctorWarehouseStockMonthlyMap">
         select * from doctor_warehouse_stock_monthly where warehouse_id=#{warehouseId} and settlement_date = #{lastSettlementDate} and material_id not in(
-	      select DISTINCT material_id from doctor_warehouse_material_handle where settlement_date = #{settlementDate} and warehouse_id=#{warehouseId})
+	      select DISTINCT material_id from doctor_warehouse_material_handle where delete_flag=1 and  settlement_date = #{settlementDate} and warehouse_id=#{warehouseId})
     </select>
 
     <select id="listByHouseIdTime" parameterType="map" resultType="map">
        select a.farm_id as farmId,a.warehouse_id as warehouseId,a.warehouse_name as warehouseName,
-        a.handle_year as handleYear,a.handle_month as handleMonth,a.org_id as orgId,a.settlement_date as settlementDate,
-         ifnull(ROUND(temp1.inAmount,2),0) as inAmount,
-				 ifnull(ROUND(temp2.outAmount,2),0) as outAmount,
-				 ifnull(ROUND(temp3.balanceAmount,2),0) as balanceAmount
+         a.handle_year as handleYear,a.handle_month as handleMonth,a.org_id as orgId,a.settlement_date as settlementDate,
+         ifnull(ROUND((temp1.inAmount+ 0.00000001),2),0) as inAmount,
+         ifnull(ROUND((temp2.outAmount+ 0.00000001),2),0) as outAmount,
+         ifnull(ROUND((temp3.balanceAmount+ 0.00000001),2),0) as balanceAmount
 
         from doctor_warehouse_material_handle a
 
-        left join (select  sum(c.amount) as inAmount,c.warehouse_id
-                            from doctor_warehouse_material_handle c ,doctor_warehouse_stock_handle c1
-                            where c.stock_handle_id = c1.id
-                            and c.farm_id = #{farmId}
-                            and c.delete_flag = 1
-                            and date_format(c.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
-                            and c1.handle_type = 1
-                            GROUP BY c.warehouse_id
-                            ) temp1 on a.warehouse_id = temp1.warehouse_id
+        left join (SELECT ifnull(sum(case type	when '1' then amount	when '7' then amount	when '9' then amount
+            when '11' then amount end	),0) as inAmount,
+            warehouse_id FROM doctor_warehouse_material_handle
+            WHERE farm_id = #{farmId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
+            group by warehouse_id
+        ) temp1 on a.warehouse_id = temp1.warehouse_id
 
-        left join (select sum(d.amount) as outAmount,d.warehouse_id
-            from doctor_warehouse_material_handle d,doctor_warehouse_stock_handle d1
-            where d.stock_handle_id = d1.id
-			and d.farm_id = #{farmId}
-            and d.delete_flag = 1
-            and date_format(d.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
-            and d1.handle_type = 2
-			GROUP BY d.warehouse_id
-			) temp2 on a.warehouse_id = temp2.warehouse_id
+        left join (SELECT ifnull(sum(case type	when '2' then amount	when '8' then amount	when '10' then amount
+	        when '12' then amount	when '13' then amount end	),0) as outAmount,
+            warehouse_id FROM doctor_warehouse_material_handle
+            WHERE farm_id = #{farmId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
+            group by warehouse_id
+        ) temp2 on a.warehouse_id = temp2.warehouse_id
 
         left join (select sum(b.balance_amount) as balanceAmount,b.warehouse_id
-                from doctor_warehouse_stock_monthly b
-                where b.farm_id = #{farmId}
-                and date_format(b.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
-                GROUP BY b.warehouse_id
+            from doctor_warehouse_stock_monthly b
+            where b.farm_id = #{farmId}
+            and date_format(b.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+            GROUP BY b.warehouse_id
         ) temp3 on a.warehouse_id = temp3.warehouse_id
 
         where a.delete_flag = 1
         and a.farm_id = #{farmId}
         and date_format(a.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
         GROUP BY a.warehouse_id
-        order by a.warehouse_id
+
+        <!--仓库报表（陈娟 2018-9-12）-->
+        union all
+
+		select a.farm_id as farmId,a.warehouse_id as warehouseId,b.ware_house_name as warehouseName,
+          YEAR(a.settlement_date) as handleYear,MONTH(a.settlement_date) as handleMonth,a.org_id as orgId,a.settlement_date as settlementDate,
+          0 as inAmount,
+          0 as outAmount,
+          sum(a.balance_amount) as balanceAmount
+
+        from doctor_warehouse_stock_monthly as a
+        inner join doctor_ware_houses as b
+        on a.warehouse_id=b.id
+
+        where  a.farm_id = #{farmId}
+        and date_format(a.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
+        and a.warehouse_id not in(
+            select DISTINCT warehouse_id from doctor_warehouse_material_handle
+            where farm_id = #{farmId} and DATE_FORMAT(settlement_date,'%Y-%M') = DATE_FORMAT(#{settlementDate},'%Y-%M')
+        )
+        GROUP BY a.warehouse_id
     </select>
 
     <select id="monthWarehouseDetail" parameterType="map" resultType="map">
-       select b.id as materialId,b.name as materialName,b.code as code,a.vendor_name as vendorName,
-        b.specification as specification,a.warehouse_id as warehouseId,a.warehouse_type as warehouseType,
-        ifnull(round(temp1.balance_quantity,2),0) as lastQuantity,
-        ifnull(round(temp1.balance_amount),0) as lastAmount,
-        ifnull(round(temp2.balance_quantity,2),0) as balanceQuantity,
-        ifnull(round(temp2.balance_amount),0) as balanceAmount,
+        <!--1.本月已结算，上月已结算-->
+        <if test=" flag==1 and lastFlag==1 ">
+            select b.id as materialId,b.name as materialName,b.code as code,v.short_name as vendorName,
+            b.specification as specification,a.warehouse_id as warehouseId,a.warehouse_type as warehouseType,
+            ifnull(round((temp1.balance_quantity+ 0.00000001),3),0) as lastQuantity,
+            ifnull(round((temp1.balance_amount+ 0.00000001),2),0) as lastAmount,
+            ifnull(round((ifnull(temp1.balance_quantity,0)+ifnull(temp3.inQuantity,0)-ifnull(temp4.outQuantity,0)+ 0.00000001),3),0) as balanceQuantity,
+            ifnull(round((ifnull(temp1.balance_amount,0)+ifnull(temp3.inAmount,0)-ifnull(temp4.outAmount,0)+ 0.00000001),2),0) as balanceAmount,
 
-        ifnull(round(temp3.inAmount,2),0) as inAmount,
-        ifnull(round(temp3.inQuantity,2),0) as inQuantity,
-        ifnull(round(temp4.outAmount,2),0) as outAmount,
-        ifnull(round(temp4.outQuantity,2),0) as outQuantity,
+            ifnull(round((temp3.inAmount+ 0.00000001),2),0) as inAmount,
+            ifnull(round((temp3.inQuantity+ 0.00000001),3),0) as inQuantity,
+            ifnull(round((temp4.outAmount+ 0.00000001),2),0) as outAmount,
+            ifnull(round((temp4.outQuantity+ 0.00000001),3),0) as outQuantity,
 
-        db.name as unit
-        from doctor_warehouse_material_handle a
-        left join doctor_warehouse_sku b
-        on a.material_id = b.id
-        left join doctor_basics db
-        on a.unit = db.id
+            db.name as unit
+            from doctor_warehouse_material_handle a
+            left join doctor_warehouse_sku b
+            on a.material_id = b.id and a.org_id=b.org_id
+            left join doctor_basics db
+            on a.unit = db.id
+            left join doctor_warehouse_vendor as v
+            on v.id=b.vendor_id
 
-        left join (
-         select c.balance_quantity,c.balance_amount,c.material_id
-         from doctor_warehouse_stock_monthly c
-         where c.warehouse_id = #{warehouseId}
-         and date_format(c.settlement_date,'%Y-%m')=date_format(date_sub(#{settlementDate}, interval 1 month),'%Y-%m')
-				 GROUP BY c.material_id
-        )temp1 on a.material_id = temp1.material_id
+            left join (
+            select c.balance_quantity,c.balance_amount,c.material_id,c.warehouse_id
+            from doctor_warehouse_stock_monthly c
+            where c.warehouse_id = #{warehouseId}
+            and date_format(c.settlement_date,'%Y-%m')=date_format(date_sub(#{settlementDate}, interval 1 month),'%Y-%m')
+            GROUP BY c.material_id
+            )temp1 on a.material_id = temp1.material_id and a.warehouse_id=temp1.warehouse_id
 
-        left join (
-         select c.balance_quantity,c.balance_amount,c.material_id
-         from doctor_warehouse_stock_monthly c
-         where c.warehouse_id = #{warehouseId}
-         and date_format(c.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
-         GROUP BY c.material_id
-        )temp2 on a.material_id = temp2.material_id
+            left join (
+            SELECT ifnull(sum(case type	when '1' then amount	when '7' then amount	when '9' then amount
+            when '11' then amount end	),0) as inAmount,
+            ifnull(sum(case type	when '1' then quantity 	when '7' then quantity 	when '9' then quantity
+            when '11' then quantity end	),0) as inQuantity,material_id,warehouse_id FROM doctor_warehouse_material_handle
+            WHERE warehouse_id = #{warehouseId} and date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
+            group by material_id
+            )temp3 on a.material_id = temp3.material_id and a.warehouse_id=temp3.warehouse_id
 
-        left join (
-                select  sum(e.amount) as inAmount , sum(e.quantity) as inQuantity,e.material_id
-                from doctor_warehouse_material_handle e,doctor_warehouse_stock_handle e1
-                where e.stock_handle_id = e1.id
-                and e.warehouse_id = #{warehouseId}
-                and date_format(e.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
-                and e.delete_flag = 1
-                and e1.handle_type =1
-                GROUP BY e.material_id
-        )temp3 on a.material_id = temp3.material_id
+            left join (
+            SELECT ifnull(sum(case type	when '2' then amount	when '8' then amount	when '10' then amount
+            when '12' then amount	when '13' then amount end	),0) as outAmount,
+            ifnull(sum(case type	when '2' then quantity	 when '8' then quantity	when '10' then quantity
+            when '12' then quantity	when '13' then quantity end	),0) as outQuantity,material_id,warehouse_id FROM doctor_warehouse_material_handle
+            WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
+            group by material_id
+            )temp4 on a.material_id = temp4.material_id and a.warehouse_id=temp4.warehouse_id
 
-        left join (
-                select  sum(e.amount) as outAmount , sum(e.quantity) as outQuantity,e.material_id
-                from doctor_warehouse_material_handle e,doctor_warehouse_stock_handle e1
-                where e.stock_handle_id = e1.id
-                and e.warehouse_id = #{warehouseId}
-                and date_format(e.settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m')
-                and e.delete_flag = 1
-                and e1.handle_type =2
-                GROUP BY e.material_id
-        )temp4 on a.material_id = temp4.material_id
-        where
-           a.delete_flag=1
-        and a.warehouse_id = #{warehouseId}
-        and DATE_FORMAT(a.settlement_date,'%Y-%M') = DATE_FORMAT(#{settlementDate},'%Y-%M')
-        group by a.material_id
+            where a.delete_flag=1
+            and a.warehouse_id = #{warehouseId}
+            and DATE_FORMAT(a.settlement_date,'%Y-%M') = DATE_FORMAT(#{settlementDate},'%Y-%M')
+            group by a.material_id
+
+            UNION ALL
+
+            select b.id as materialId,b.name as materialName,b.code as code,v.short_name as vendorName,
+            b.specification as specification,a.warehouse_id as warehouseId,a.warehouse_type as warehouseType,
+            ifnull(round((sm.balance_quantity+ 0.00000001),3),0) as lastQuantity,
+            ifnull(round((sm.balance_amount+ 0.00000001),2),0) as lastAmount,
+            ifnull(round((sm.balance_quantity+ 0.00000001),3),0) as balanceQuantity,
+            ifnull(round((sm.balance_amount+ 0.00000001),2),0) as balanceAmount,
+
+            0 as inAmount,
+            0 as inQuantity,
+            0 as outAmount,
+            0 as outQuantity,
+
+            db.name as unit
+            from doctor_warehouse_stock_monthly sm
+            left join doctor_warehouse_material_handle a
+            on a.farm_id=sm.farm_id and a.warehouse_id=sm.warehouse_id and a.material_id=sm.material_id
+            left join doctor_warehouse_sku b
+            on a.material_id = b.id and a.org_id=b.org_id
+            left join doctor_basics db
+            on a.unit = db.id
+            left join doctor_warehouse_vendor as v
+            on v.id=b.vendor_id
+
+            where sm.warehouse_id = #{warehouseId} and sm.balance_quantity!=0
+            and date_format(sm.settlement_date,'%Y-%m')=date_format(date_sub(#{settlementDate}, interval 1 month),'%Y-%m')
+            and sm.material_id not in(
+            select DISTINCT material_id from doctor_warehouse_material_handle
+            where warehouse_id = #{warehouseId} and DATE_FORMAT(settlement_date,'%Y-%M') = DATE_FORMAT(#{settlementDate},'%Y-%M')
+            )
+            GROUP BY sm.material_id
+        </if>
+
+        <!--2.本月未结算，上月已结算-->
+        <if test=" flag==0 and lastFlag==1 ">
+            select b.id as materialId,b.name as materialName,b.code as code,v.short_name as vendorName,
+            b.specification as specification,a.warehouse_id as warehouseId,a.warehouse_type as warehouseType,
+            ifnull(round((temp1.balance_quantity+ 0.00000001),3),0) as lastQuantity,
+            ifnull(round((temp1.balance_amount+ 0.00000001),2),0) as lastAmount,
+            ifnull(round((ifnull(temp1.balance_quantity,0)+ifnull(temp3.inQuantity,0)-ifnull(temp4.outQuantity,0)+ 0.00000001),3),0) as balanceQuantity,
+            '--' as balanceAmount,
+
+            ifnull(round((temp3.inAmount+ 0.00000001),2),0) as inAmount,
+            ifnull(round((temp3.inQuantity+ 0.00000001),3),0) as inQuantity,
+            '--' as outAmount,
+            ifnull(round((temp4.outQuantity+ 0.00000001),3),0) as outQuantity,
+
+            db.name as unit
+            from doctor_warehouse_material_handle a
+            left join doctor_warehouse_sku b
+            on a.material_id = b.id and a.org_id=b.org_id
+            left join doctor_basics db
+            on a.unit = db.id
+            left join doctor_warehouse_vendor as v
+            on v.id=b.vendor_id
+
+            left join (
+            select c.balance_quantity,c.balance_amount,c.material_id,c.warehouse_id
+            from doctor_warehouse_stock_monthly c
+            where c.warehouse_id = #{warehouseId}
+            and date_format(c.settlement_date,'%Y-%m')=date_format(date_sub(#{settlementDate}, interval 1 month),'%Y-%m')
+            GROUP BY c.material_id
+            )temp1 on a.material_id = temp1.material_id and a.warehouse_id=temp1.warehouse_id
+
+            left join (
+            SELECT ifnull(sum(case type	when '1' then amount	when '7' then amount	when '9' then amount
+            when '11' then amount end	),0) as inAmount,
+            ifnull(sum(case type	when '1' then quantity 	when '7' then quantity	 when '9' then quantity
+            when '11' then quantity end	),0) as inQuantity,material_id,warehouse_id FROM doctor_warehouse_material_handle
+            WHERE warehouse_id = #{warehouseId} and date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
+            group by material_id
+            )temp3 on a.material_id = temp3.material_id and a.warehouse_id=temp3.warehouse_id
+
+            left join (
+            SELECT ifnull(sum(case type	when '2' then amount	when '8' then amount	when '10' then amount
+            when '12' then amount	when '13' then amount end	),0) as outAmount,
+            ifnull(sum(case type	when '2' then quantity	 when '8' then quantity	when '10' then quantity
+            when '12' then quantity	when '13' then quantity end	),0) as outQuantity,material_id,warehouse_id
+            FROM doctor_warehouse_material_handle
+            WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
+            group by material_id
+            )temp4 on a.material_id = temp4.material_id and a.warehouse_id=temp4.warehouse_id
+
+            where a.delete_flag=1
+            and a.warehouse_id = #{warehouseId}
+            and DATE_FORMAT(a.settlement_date,'%Y-%M') = DATE_FORMAT(#{settlementDate},'%Y-%M')
+            group by a.material_id
+
+            UNION ALL
+
+            select b.id as materialId,b.name as materialName,b.code as code,v.short_name as vendorName,
+            b.specification as specification,a.warehouse_id as warehouseId,a.warehouse_type as warehouseType,
+            ifnull(round((sm.balance_quantity+ 0.00000001),3),0) as lastQuantity,
+            ifnull(round((sm.balance_amount+ 0.00000001),2),0) as lastAmount,
+            ifnull(round((sm.balance_quantity+ 0.00000001),3),0) as balanceQuantity,
+            '--' as balanceAmount,
+
+            0 as inAmount,
+            0 as inQuantity,
+            '--' as outAmount,
+            0 as outQuantity,
+
+            db.name as unit
+            from doctor_warehouse_stock_monthly sm
+            left join doctor_warehouse_material_handle a
+            on a.farm_id=sm.farm_id and a.warehouse_id=sm.warehouse_id and a.material_id=sm.material_id
+            left join doctor_warehouse_sku b
+            on a.material_id = b.id and a.org_id=b.org_id
+            left join doctor_basics db
+            on a.unit = db.id
+            left join doctor_warehouse_vendor as v
+            on v.id=b.vendor_id
+
+            where sm.warehouse_id = #{warehouseId} and sm.balance_quantity!=0
+            and date_format(sm.settlement_date,'%Y-%m')=date_format(date_sub(#{settlementDate}, interval 1 month),'%Y-%m')
+            and sm.material_id not in(
+            select DISTINCT material_id from doctor_warehouse_material_handle
+            where warehouse_id = #{warehouseId} and DATE_FORMAT(settlement_date,'%Y-%M') = DATE_FORMAT(#{settlementDate},'%Y-%M')
+            )
+            GROUP BY sm.material_id
+        </if>
+
+        <!--3.本月未结算，上月未结算-->
+        <if test=" flag==0 and lastFlag==0 ">
+            select b.id as materialId,b.name as materialName,b.code as code,v.short_name as vendorName,
+            b.specification as specification,a.warehouse_id as warehouseId,a.warehouse_type as warehouseType,
+            ifnull(round((temp1.balance_quantity+ 0.00000001),3),0) as lastQuantity,
+            '--' as lastAmount,
+            ifnull(round((ifnull(temp1.balance_quantity,0)+ifnull(temp3.inQuantity,0)-ifnull(temp4.outQuantity,0)+ 0.00000001),3),0) as balanceQuantity,
+            '--' as balanceAmount,
+
+            ifnull(round((temp3.inAmount+ 0.00000001),2),0) as inAmount,
+            ifnull(round((temp3.inQuantity+ 0.00000001),3),0) as inQuantity,
+            '--' as outAmount,
+            ifnull(round((temp4.outQuantity+ 0.00000001),3),0) as outQuantity,
+
+            db.name as unit
+            from doctor_warehouse_material_handle a
+            left join doctor_warehouse_sku b
+            on a.material_id = b.id and a.org_id=b.org_id
+            left join doctor_basics db
+            on a.unit = db.id
+            left join doctor_warehouse_vendor as v
+            on v.id=b.vendor_id
+
+            left join (
+            SELECT ifnull(sum( case mh.type	when '1' then quantity  when '2' then -quantity	when '7' then quantity 	when '8' then -quantity
+            when '9' then quantity 	when '10' then -quantity	when '11' then quantity	when '12' then -quantity	when '13' then -quantity end	),0)
+            as balance_quantity,material_id,warehouse_id	FROM doctor_warehouse_material_handle as mh
+            inner join doctor_warehouse_sku as s	on mh.material_id=s.id
+            WHERE delete_flag=1 AND mh.warehouse_id=#{warehouseId}
+            AND <![CDATA[ date_format(settlement_date,'%Y-%m')<=date_format(DATE_SUB(#{settlementDate}, INTERVAL 1 MONTH),'%Y-%m')]]>
+            GROUP BY material_id
+            )temp1 on a.material_id = temp1.material_id and a.warehouse_id=temp1.warehouse_id
+
+            left join (
+            SELECT ifnull(sum(case type	when '1' then amount	when '7' then amount	when '9' then amount
+            when '11' then amount end	),0) as inAmount,
+            ifnull(sum(case type	when '1' then quantity 	when '7' then quantity 	when '9' then quantity
+            when '11' then quantity end	),0) as inQuantity,material_id,warehouse_id FROM doctor_warehouse_material_handle
+            WHERE warehouse_id = #{warehouseId} and date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
+            group by material_id
+            )temp3 on a.material_id = temp3.material_id and a.warehouse_id=temp3.warehouse_id
+
+            left join (
+            SELECT ifnull(sum(case type	when '2' then amount	when '8' then amount	when '10' then amount
+            when '12' then amount	when '13' then amount end	),0) as outAmount,
+            ifnull(sum(case type	when '2' then quantity	 when '8' then quantity	when '10' then quantity
+            when '12' then quantity	when '13' then quantity end	),0) as outQuantity,material_id,warehouse_id
+            FROM doctor_warehouse_material_handle
+            WHERE warehouse_id = #{warehouseId} AND date_format(settlement_date,'%Y-%m')=date_format(#{settlementDate},'%Y-%m') AND delete_flag=1
+            group by material_id
+            )temp4 on a.material_id = temp4.material_id and a.warehouse_id=temp4.warehouse_id
+
+            where a.delete_flag=1
+            and a.warehouse_id = #{warehouseId}
+            and DATE_FORMAT(a.settlement_date,'%Y-%M') = DATE_FORMAT(#{settlementDate},'%Y-%M')
+            group by a.material_id
+
+            UNION ALL
+
+            select b.id as materialId,b.name as materialName,b.code as code,v.short_name as vendorName,
+            b.specification as specification,a.warehouse_id as warehouseId,a.warehouse_type as warehouseType,
+            ifnull(round((temp.balance_quantity+ 0.00000001),3),0) as lastQuantity,
+            '--' as lastAmount,
+            ifnull(round((temp.balance_quantity+ 0.00000001),3),0) as balanceQuantity,
+            '--' as balanceAmount,
+
+            0 as inAmount,
+            0 as inQuantity,
+            '--' as outAmount,
+            0 as outQuantity,
+
+            db.name as unit
+            from doctor_warehouse_material_handle a
+            left join doctor_warehouse_sku b
+            on a.material_id = b.id and a.org_id=b.org_id
+            left join doctor_basics db
+            on a.unit = db.id
+            left join doctor_warehouse_vendor as v
+            on v.id=b.vendor_id
+
+            left join(
+            SELECT ifnull(sum( case mh.type	when '1' then quantity when '2' then -quantity	when '7' then quantity  when '8' then -quantity
+            when '9' then quantity	 when '10' then -quantity	when '11' then quantity	when '12' then -quantity	when '13' then -quantity end	),0)
+            as balance_quantity,material_id,warehouse_id	FROM doctor_warehouse_material_handle as mh
+            inner join doctor_warehouse_sku as s	on mh.material_id=s.id
+            WHERE delete_flag=1 AND mh.warehouse_id=#{warehouseId}
+            AND <![CDATA[ date_format(settlement_date,'%Y-%m')<=date_format(DATE_SUB(#{settlementDate}, INTERVAL 1 MONTH),'%Y-%m')]]>
+            GROUP BY material_id
+            )temp on a.material_id=temp.material_id and a.warehouse_id=temp.warehouse_id
+
+            where a.warehouse_id = #{warehouseId} and temp.balance_quantity!=0
+            and temp.material_id not in(
+            select DISTINCT material_id from doctor_warehouse_material_handle
+            where warehouse_id = #{warehouseId} and DATE_FORMAT(settlement_date,'%Y-%M') = DATE_FORMAT(#{settlementDate},'%Y-%M') order by material_id
+            )
+            GROUP BY a.material_id
+
+        </if>
     </select>
 
     <sql id="detail">

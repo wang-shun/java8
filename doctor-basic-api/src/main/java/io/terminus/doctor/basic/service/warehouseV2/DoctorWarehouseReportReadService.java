@@ -172,7 +172,8 @@ public interface DoctorWarehouseReportReadService {
      * @param materialName
      * @return
      */
-    List<Map<String,Object>> getMeterails(
+    List<Map<String,Object>>  getMeterails(
+            Long orgId,
             Long farmId,
             String settlementDate,
             Integer type,
@@ -187,7 +188,7 @@ public interface DoctorWarehouseReportReadService {
             String settlementDate,
             Integer type,
             Long warehouseId,
-            String materialName);
+            Long materialId);
 
 
     /**
@@ -198,6 +199,6 @@ public interface DoctorWarehouseReportReadService {
             String settlementDate,
             Integer type,
             Long warehouseId,
-            String materialName);
+            Long materialId);
 
 }

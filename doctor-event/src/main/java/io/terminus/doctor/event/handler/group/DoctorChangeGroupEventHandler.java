@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 
@@ -94,7 +95,9 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         event.setCustomerName(change.getCustomerName());
 
         event.setWeight(change.getWeight());            //总重
-        event.setAvgWeight(EventUtil.getAvgWeight(change.getWeight(), change.getQuantity()));
+        // 得到均重（四舍五入保留三位小数 陈娟 2018-10-23）
+        event.setAvgWeight(new BigDecimal(EventUtil.getAvgWeight(change.getWeight(), change.getQuantity())).setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue());
+        //        event.setAvgWeight(EventUtil.getAvgWeight(change.getWeight(), change.getQuantity()));
         event.setAvgDayAge(groupTrack.getAvgDayAge());
         event.setChangeTypeId(changeEvent.getChangeTypeId());   //变动类型id
         event.setSowId(change.getSowId());

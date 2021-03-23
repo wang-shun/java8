@@ -12,6 +12,8 @@ import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.dto.FarmCriteria;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorFarmInformation;
+import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.parana.common.utils.RespHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -116,6 +119,17 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
             return Response.fail("farm.find.fail");
         }
     }
+    //ysq新增
+    @Override
+    public Response<List<DoctorFarm>> findFarmsByOrgId1(@NotNull(message = "orgId.not.null") Long orgId) {
+        try {
+
+            return Response.ok(doctorFarmDao.findByOrgId1(orgId));
+        } catch (Exception e) {
+            log.error("find farms by orgId failed, orgId:{}, cause:{}", orgId, Throwables.getStackTraceAsString(e));
+            return Response.fail("farm.find.fail");
+        }
+    }
 
     @Override
     public Response<List<DoctorFarm>> findFarmsByIds(List<Long> ids) {
@@ -160,6 +174,29 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
         } catch (Exception e) {
             log.error("find by number failed, number:{},cause:{}", number, Throwables.getStackTraceAsString(e));
             return Response.fail("find.by.number.failed");
+        }
+    }
+
+    //  ---------------------  新增代码  2018年8月28日17:50:56 ----------------------
+    @Override
+    public List<DoctorFarmInformation> findSubordinatePig(Date date) {
+        return doctorFarmDao.findSubordinatePig(date);
+    }
+
+   //ysq新增
+    @Override
+    public List<DoctorOrg> findOrgByParentId(Long parent) {
+            return doctorOrgDao.findOrgByParent(parent);
+    }
+
+    @Override
+    public Response<List<DoctorFarm>> findFarmsByGroupId( Long groupId) {
+        try {
+
+            return Response.ok(doctorFarmDao.findFarmsByGroupId(groupId));
+        } catch (Exception e) {
+            log.error("find farms by orgId failed, orgId:{}, cause:{}", groupId, Throwables.getStackTraceAsString(e));
+            return Response.fail("farm.find.fail");
         }
     }
 }

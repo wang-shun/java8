@@ -118,6 +118,7 @@ public class StockHandleController {
         return maps;
     }
 
+
     //根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注
     @RequestMapping(method = RequestMethod.GET, value = "/getDataByMaterialName")
     public List<Map> getDataByMaterialName(@RequestParam Long id) {
@@ -228,6 +229,21 @@ public class StockHandleController {
                             //单据明细里面的值全部复制到detail里面去
                             BeanUtils.copyProperties(mh, detail);
 
+                            //  编辑单据时判断是否有物料已盘点：如果已盘点，则不可编辑 （陈娟 2018-09-19）
+                            String desc=new String();
+                            DoctorWarehouseMaterialHandle material = RespHelper.or500(doctorWarehouseMaterialHandleReadService.getMaxInventoryDate(stockHandle.getWarehouseId(), mh.getMaterialId(), stockHandle.getHandleDate()));
+                            if(material!=null){
+                                if(material!=null){
+                                    if(!material.getStockHandleId().equals(stockHandle.getId())){
+                                        if(stockHandle.getUpdatedAt().compareTo(material.getHandleDate())<0){
+                                            detail.setIsInventory(1);
+                                            vo.setHasInventory(1);
+                                            desc = desc + "【该物料已盘点,不可编辑】;";
+                                        }
+                                    }
+                                }
+                            }
+
                             if ((!stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.IN.getValue()))&&(!stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.INVENTORY_PROFIT.getValue()))) {
                                 try {
                                     //会计年月支持选择未结算过的会计年月，如果选择未结算的会计区间，则报表不显示金额和单价
@@ -288,12 +304,16 @@ public class StockHandleController {
                                     detail.setGroupStatus(doctorGroup.getStatus());
                                     if(doctorGroup.getStatus()==-1){
                                         vo.setStatus(doctorGroup.getStatus());
+                                        desc = desc + "【该猪群已关闭,不可编辑】;";
                                     }
                                 }
 
                                 //得到该领料出库的退料入库的数量
                                 Integer count = RespHelper.or500(doctorWarehouseMaterialHandleReadService.findCountByRelMaterialHandleId(mh.getId(), mh.getFarmId()));
                                 detail.setRetreatingCount(count);
+                                if(count>=1){
+                                    desc = desc + "【该物料有退料入库,不可编辑】;";
+                                }
 
                             }
 
@@ -328,6 +348,7 @@ public class StockHandleController {
                                     detail.setGroupStatus(doctorGroup.getStatus());
                                     if(doctorGroup.getStatus()==-1){
                                         vo.setStatus(doctorGroup.getStatus());
+                                        desc = desc + "【该猪群已关闭,不可编辑】;";
                                     }
                                 }
                             }
@@ -356,6 +377,9 @@ public class StockHandleController {
                                 detail.setStorageWarehouseNames(sh.getWarehouseName());
                             }
 
+                            // 设置注释 （陈娟 2018-09-19）
+                            detail.setDesc(desc);
+
                             return detail;
                         })
                         .collect(Collectors.toList()));
@@ -366,6 +390,7 @@ public class StockHandleController {
             vo.setStorageWarehouseId(sh.getWarehouseId());
             vo.setStorageWarehouseName(sh.getWarehouseName());
         }
+
 
         DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(vo.getFarmId()));
         if (farm != null) {
@@ -384,13 +409,16 @@ public class StockHandleController {
 
         BigDecimal totalQuantity = new BigDecimal(0);
         BigDecimal totalUnitPrice = new BigDecimal(0);
+        double totalAmount = 0L;
         for (StockHandleVo.Detail detail : vo.getDetails()) {
             totalQuantity = totalQuantity.add(detail.getQuantity());
             totalUnitPrice = totalUnitPrice.add(null == detail.getUnitPrice() ? new BigDecimal(0) : detail.getUnitPrice());
+            totalAmount += detail.getQuantity().multiply(detail.getUnitPrice()).doubleValue();
         }
-        vo.setTotalQuantity(totalQuantity.doubleValue());
-        vo.setTotalAmount(totalQuantity.multiply(totalUnitPrice).doubleValue());
 
+        vo.setTotalQuantity(totalQuantity.doubleValue());
+        vo.setTotalAmount(totalAmount);
+        //vo.setTotalAmount(totalQuantity.multiply(totalUnitPrice).doubleValue());
         return vo;
     }
 
@@ -409,6 +437,13 @@ public class StockHandleController {
         }
         if (doctorWarehouseSettlementService.isSettled(orgId,date))
             throw new JsonResponseException("already.settlement");
+
+        //  删除单据时判断是否有物料已盘点 （陈娟 2018-09-18）
+        String str = RespHelper.or500(doctorWarehouseMaterialHandleReadService.deleteCheckInventory(id));
+        if(str!=null&&!str.equals("")){
+            throw new JsonResponseException(str);
+        }
+
         return doctorWarehouseStockHandleWriteService.delete(id);
            /*if (!response.isSuccess())
                throw new JsonResponseException(response.getError());
@@ -724,7 +759,7 @@ public class StockHandleController {
                     title.createCell(3).setCellValue("规格");
                     title.createCell(4).setCellValue("单位");
                     title.createCell(5).setCellValue("账面数量");
-                    title.createCell(6).setCellValue("盘点数量");
+                    title.createCell(6).setCellValue("入库数量");
                     title.createCell(7).setCellValue("单价");
                     title.createCell(8).setCellValue("金额（元）");
                     title.createCell(9).setCellValue("备注");
@@ -739,7 +774,7 @@ public class StockHandleController {
                         row.createCell(3).setCellValue(vo.getMaterialSpecification());
                         row.createCell(4).setCellValue(vo.getUnit());
                         row.createCell(5).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
-                        row.createCell(6).setCellValue(vo.getBeforeInventoryQuantity().add(vo.getQuantity()).doubleValue());
+                        row.createCell(6).setCellValue(vo.getQuantity().doubleValue());
                         if(vo.getUnitPrice()==0.0&&vo.getAmount()==0.0){
                             CellStyle style = workbook.createCellStyle();
                             //对齐
@@ -782,12 +817,16 @@ public class StockHandleController {
                         title.createCell(3).setCellValue("规格");
                         title.createCell(4).setCellValue("单位");
                         title.createCell(5).setCellValue("账面数量");
-                        title.createCell(6).setCellValue("盘点数量");
+                        title.createCell(6).setCellValue("出库数量");
                         title.createCell(7).setCellValue("单价");
                         title.createCell(8).setCellValue("金额（元）");
                         title.createCell(9).setCellValue("备注");
 
                         BigDecimal totalQuantity = new BigDecimal(0);
+                       // BigDecimal inventoryQuantity = new BigDecimal(0);
+                        double totalUnitPrice = 0L;
+                        double totalAmount = 0L;
+
                         for (StockHandleExportVo vo : exportVos) {
 
                             Row row = sheet.createRow(pos++);
@@ -797,7 +836,7 @@ public class StockHandleController {
                             row.createCell(3).setCellValue(vo.getMaterialSpecification());
                             row.createCell(4).setCellValue(vo.getUnit());
                             row.createCell(5).setCellValue(vo.getBeforeInventoryQuantity().doubleValue());
-                            row.createCell(6).setCellValue(vo.getBeforeInventoryQuantity().subtract(vo.getQuantity()).doubleValue());
+                            row.createCell(6).setCellValue(vo.getQuantity().doubleValue());
                             if(vo.getUnitPrice()==0.0&&vo.getAmount()==0.0){
                                 CellStyle style = workbook.createCellStyle();
                                 //对齐
@@ -812,7 +851,10 @@ public class StockHandleController {
                             }
                             row.createCell(9).setCellValue(vo.getRemark());
 
-                            totalQuantity = vo.getQuantity();
+                            totalQuantity = totalQuantity.add(vo.getQuantity());
+                            //inventoryQuantity = vo.getBeforeInventoryQuantity();
+                            totalUnitPrice += vo.getUnitPrice();
+                            totalAmount += vo.getAmount();
                         }
 
                         Row countRow = sheet.createRow(pos);
@@ -829,6 +871,18 @@ public class StockHandleController {
                         countCell.setCellValue("盘亏");
 
                         countRow.createCell(6).setCellValue(totalQuantity.doubleValue());
+
+                        if(totalUnitPrice==0.0){
+                            countRow.createCell(7).setCellValue("--");
+                        }else{
+                            countRow.createCell(7).setCellValue(totalUnitPrice);
+                        }
+
+                        if(totalAmount==0.0){
+                            countRow.createCell(8).setCellValue("--");
+                        }else{
+                            countRow.createCell(8).setCellValue(totalAmount);
+                        }
                         pos++;
 
                     }
@@ -846,6 +900,9 @@ public class StockHandleController {
                     title.createCell(9).setCellValue("单价");
                     title.createCell(10).setCellValue("金额（元）");
                     title.createCell(11).setCellValue("备注");
+
+                    BigDecimal totalQuantity = new BigDecimal(0);
+                    double totalAmount = 0L;
 
                     for (StockHandleExportVo vo : exportVos) {
                         Row row = sheet.createRow(pos++);
@@ -872,7 +929,31 @@ public class StockHandleController {
                         }
 
                         row.createCell(11).setCellValue(vo.getRemark());
+
+                        totalQuantity = totalQuantity.add(vo.getQuantity());
+                        totalAmount += vo.getAmount();
                     }
+                    Row countRow = sheet.createRow(pos);
+                    //表格范围
+                    CellRangeAddress countRange = new CellRangeAddress(pos, pos, 0, 5);
+                    //合并区域
+                    sheet.addMergedRegion(countRange);
+
+                    Cell countCell = countRow.createCell(0);
+                    CellStyle style = workbook.createCellStyle();
+                    //对齐
+                    style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                    countCell.setCellStyle(style);
+                    countCell.setCellValue("合计：");
+
+                    countRow.createCell(8).setCellValue(totalQuantity.doubleValue());
+
+                    if(totalAmount==0.0){
+                        countRow.createCell(10).setCellValue("--");
+                    }else{
+                        countRow.createCell(10).setCellValue(totalAmount);
+                    }
+                    pos++;
                 }
                 //调拨入库
                 else if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.TRANSFER_IN.getValue())) {
@@ -885,6 +966,9 @@ public class StockHandleController {
                     title.createCell(6).setCellValue("单价");
                     title.createCell(7).setCellValue("金额（元）");
                     title.createCell(8).setCellValue("备注");
+
+                    BigDecimal totalQuantity = new BigDecimal(0);
+                    double totalAmount = 0L;
 
                     for (StockHandleExportVo vo : exportVos) {
                         Row row = sheet.createRow(pos++);
@@ -907,7 +991,28 @@ public class StockHandleController {
                            row.createCell(7).setCellValue(vo.getAmount());
                        }
                         row.createCell(8).setCellValue(vo.getRemark());
+
+                        totalQuantity = totalQuantity.add(vo.getQuantity());
+                        totalAmount += vo.getAmount();
                     }
+
+                    Row countRow = sheet.createRow(pos);
+                    //表格范围
+                    CellRangeAddress countRange = new CellRangeAddress(pos, pos, 0, 4);
+                    //合并区域
+                    sheet.addMergedRegion(countRange);
+
+                    Cell countCell = countRow.createCell(0);
+                    CellStyle style = workbook.createCellStyle();
+                    //对齐
+                    style.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+                    countCell.setCellStyle(style);
+                    countCell.setCellValue("合计");
+
+                    countRow.createCell(5).setCellValue(totalQuantity.doubleValue());
+                    countRow.createCell(7).setCellValue(totalAmount);
+
+                    pos++;
                 }
                 //配方生成出库
                 else if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.FORMULA_OUT.getValue())) {
@@ -943,6 +1048,7 @@ public class StockHandleController {
                         }
                         row.createCell(8).setCellValue(vo.getRemark());
                     }
+
                 }
                 //配方生产入库
                 else if (stockHandle.getHandleSubType().equals(WarehouseMaterialHandleType.FORMULA_IN.getValue())) {
@@ -1030,7 +1136,7 @@ public class StockHandleController {
                     }
 
                     Row countRow = sheet.createRow(pos);
-                    CellRangeAddress cra = new CellRangeAddress(pos, pos, 0, 4);
+                    CellRangeAddress cra = new CellRangeAddress(pos, pos, 0, 5);
                     sheet.addMergedRegion(cra);
 
                     Cell countCell = countRow.createCell(0);
@@ -1040,12 +1146,12 @@ public class StockHandleController {
                     countRow.createCell(8).setCellStyle(style);
                     countCell.setCellValue("合计");
 
-                    countRow.createCell(6).setCellValue(totalQuantity.doubleValue());
+                    countRow.createCell(8).setCellValue(totalQuantity.doubleValue());
 
                     if(totalAmount==0.0){
-                        countRow.createCell(8).setCellValue("--");
+                        countRow.createCell(10).setCellValue("--");
                     }else{
-                        countRow.createCell(8).setCellValue(totalAmount);
+                        countRow.createCell(10).setCellValue(totalAmount);
                     }
 
                     pos++;

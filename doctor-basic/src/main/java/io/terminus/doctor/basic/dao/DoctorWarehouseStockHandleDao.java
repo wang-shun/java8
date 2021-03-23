@@ -28,7 +28,7 @@ public class DoctorWarehouseStockHandleDao extends MyBatisDao<DoctorWarehouseSto
         return findwarehouseName;
     }
 
-    public DoctorWarehouseStockHandle findByRelStockHandleId(Long id, int type) {
+    public DoctorWarehouseStockHandle findByRelStockHandleId(Long id) {
         Map<String, Object> criteria = Maps.newHashMap();
         criteria.put("id", id);
         return this.sqlSession.selectOne(this.sqlId("findByRelStockHandleId"), criteria);
@@ -44,9 +44,10 @@ public class DoctorWarehouseStockHandleDao extends MyBatisDao<DoctorWarehouseSto
         return this.sqlSession.selectList(this.sqlId("findRelStockHandle"), stockHandleId);
     }
 
-    public void updateHandleDateAndSettlementDate(Calendar handleDate, Date SettlementDate, Long stockHandleId) {
-
+    public void updateHandleDateAndSettlementDate(Calendar handleDate, Date SettlementDate, Long stockHandleId,Integer type) {
+        // 更新入库单据的事件日期（陈娟 2018-10-08）
         Map<String, Object> params = new HashMap<>();
+        params.put("type", type);
         params.put("stockHandleId", stockHandleId);
         params.put("handleDate", handleDate.getTime());
         params.put("settlementDate", SettlementDate);

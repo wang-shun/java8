@@ -14,12 +14,7 @@ import io.terminus.doctor.event.dto.DoctorFarmEarlyEventAtDto;
 import io.terminus.doctor.event.dto.DoctorStatisticCriteria;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.ReportTime;
-import io.terminus.doctor.event.model.DoctorEventModifyLog;
-import io.terminus.doctor.event.model.DoctorEventModifyRequest;
-import io.terminus.doctor.event.model.DoctorGroupDaily;
-import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorPigDaily;
-import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.*;
 import io.terminus.doctor.event.service.DoctorReportWriteService;
 import io.terminus.doctor.user.dto.DoctorDepartmentLinerDto;
 import lombok.extern.slf4j.Slf4j;
@@ -27,11 +22,7 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.isNull;

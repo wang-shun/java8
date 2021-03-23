@@ -16,25 +16,18 @@ import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.dto.DoctorBarnCountForPigTypeDto;
-import io.terminus.doctor.event.dto.DoctorBarnDto;
-import io.terminus.doctor.event.dto.DoctorGroupDetail;
-import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
-import io.terminus.doctor.event.dto.IotBarnInfo;
-import io.terminus.doctor.event.dto.IotBarnWithStorage;
+import io.terminus.doctor.event.dto.*;
 import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorGroup;
-import io.terminus.doctor.event.model.DoctorGroupTrack;
-import io.terminus.doctor.event.model.DoctorPigStatusCount;
-import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -58,6 +51,29 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
     private final DoctorPigTrackDao doctorPigTrackDao;
     private final DoctorGroupReadService doctorGroupReadService;
     private final DoctorPigReadService doctorPigReadService;
+
+    // 猪舍可转入的性别初始化 map
+    private static final Map<String, List<String>> doctorBarnAvailableSexMap = new HashMap<String, List<String>>();
+    // 母猪舍可转入的性别的集合
+    private static final List<String> sowAvailableSex = new ArrayList<String>();
+    // 公猪舍可转入的性别的集合
+    private static final List<String> boarAvailableSex = new ArrayList<String>();
+    // 混合舍可转入的性别的集合
+    private static final List<String> blendAvailableSex = new ArrayList<String>();
+
+    static {
+        sowAvailableSex.add("0");
+        sowAvailableSex.add("2");
+
+        boarAvailableSex.add("1");
+        boarAvailableSex.add("2");
+
+        blendAvailableSex.add("2");
+
+        doctorBarnAvailableSexMap.put("0", sowAvailableSex);
+        doctorBarnAvailableSexMap.put("1", boarAvailableSex);
+        doctorBarnAvailableSexMap.put("2", blendAvailableSex);
+    }
 
     @Autowired
     public DoctorBarnReadServiceImpl(DoctorBarnDao doctorBarnDao,
@@ -142,6 +158,18 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             return Response.fail("barn.find.fail");
         }
     }
+    /*
+        * 根据farmId和当前用户查猪舍
+        * 冯雨晴 2019.9.18
+        *
+        * */
+    @Override
+    public Response<List<Map>> findBarnsByEnumss(Long farmId, List<Integer> pigTypes,Integer status, List<Long> barnIds) {
+
+        List<Map> maps = doctorBarnDao.findByEnumss(farmId,pigTypes,status,barnIds);
+
+        return Response.ok(maps);
+    }
 
     @Override
     public Response<Integer> countPigByBarnId(Long barnId) {
@@ -185,6 +213,48 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             return Response.ok(doctorBarns.stream().filter(doctorBarn -> doctorBarn != null
                     && checkCanTransBarn(barnType, doctorBarn.getPigType())
                     && Objects.equal(doctorBarn.getStatus(), DoctorBarn.Status.USING.getValue())).collect(Collectors.toList()));
+        } catch (Exception e) {
+            log.error("fail to find available barns,current group id:{},farm id:{},cause:{}",
+                    groupId, farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.available.barns.failed");
+        }
+    }
+
+
+
+    @Override
+    public Response<List<DoctorBarn>> findAvailablePigBarns(Long farmId, Long groupId) {
+
+        try {
+            DoctorGroup existed = doctorGroupDao.findById(groupId);
+            if (existed == null) {
+                return Response.fail("doctor.group.not.exist");
+            }
+
+            //获取当前猪舍id
+            Long currentBarnId = existed.getCurrentBarnId();
+
+            /**
+             * 当前所属猪舍的猪的类型
+             */
+            Integer barnType = doctorBarnDao.findById(currentBarnId).getPigType();
+
+            /**
+             * 要转入猪场的猪舍
+             */
+            Integer sex = doctorGroupTrackDao.findSex(groupId);
+            List<DoctorBarn> doctorBarns = null;
+            if(sex == 0){
+                doctorBarns = doctorBarnDao.findByFarmId1(farmId);
+            } else if(sex == 1){
+                doctorBarns = doctorBarnDao.findByFarmId2(farmId);
+            } else {
+                doctorBarns = doctorBarnDao.findByFarmId3(farmId);
+            }
+//            doctorBarns = doctorBarnDao.findByFarmId(farmId);
+            // 根据某些条件过滤之后的猪舍
+            return Response.ok(doctorBarns);
+
         } catch (Exception e) {
             log.error("fail to find available barns,current group id:{},farm id:{},cause:{}",
                     groupId, farmId, Throwables.getStackTraceAsString(e));
@@ -355,6 +425,16 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             log.error("find.iot.barn.info.faled,cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("find.Iot.Barn.Info.failed");
         }
+    }
+
+    /**
+     * ysq
+     * @param barnId
+     * @return
+     */
+    @Override
+    public String fingStaffName(Long barnId) {
+        return doctorBarnDao.findStaffNameByBarnId(barnId);
     }
 
     //校验能否转入此舍(产房 => 产房(分娩母猪舍)/保育舍，保育舍 => 保育舍/育肥舍/育种舍，同类型可以互转)

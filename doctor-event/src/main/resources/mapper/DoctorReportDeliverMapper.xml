@@ -395,4 +395,19 @@
         and id > #{id}
         order by id asc limit 1
     </select>
+    <select id="getMatingCount" parameterType="map" resultType="map">
+    select current_mating_count
+    from doctor_pig_events
+    where pig_id = #{pigId}
+    and type = 9
+    and status = 1
+    AND event_source != 5
+    and event_at >= #{event_at} and event_at &lt;= date_sub(#{event_at}, INTERVAL -3 DAY )
+    order by id DESC limit 1
+</select>
+    <select id = "getFarmId" parameterType="map" resultType="map">
+        SELECT a.farm_id as farm_id
+        FROM doctor_pigs a
+        WHERE a.id = #{pigId}
+    </select>
 </mapper>

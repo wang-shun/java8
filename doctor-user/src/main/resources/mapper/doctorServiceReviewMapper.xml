@@ -117,4 +117,12 @@
         <if test="type != null"> and `type` = #{type} </if>
         <if test="status != null"> and status = #{status} </if>
     </sql>
+
+    <update id="updateOrgPidTpye" parameterType="map">
+        UPDATE
+        doctor_orgs
+        SET parent_id = 0 , `type` = 2
+        WHERE
+        id =#{id}
+    </update>
 </mapper>

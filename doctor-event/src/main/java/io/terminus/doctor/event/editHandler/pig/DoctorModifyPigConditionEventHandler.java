@@ -25,10 +25,16 @@ public class DoctorModifyPigConditionEventHandler extends DoctorAbstractModifyPi
             newEvent.setWeight(boarConditionDto.getWeight());
             return newEvent;
         }
-        //2.母猪体况
+            //2.母猪体况
         DoctorConditionDto conditionDto = (DoctorConditionDto) inputDto;
         if (conditionDto.getConditionWeight() != null) {
             newEvent.setWeight(conditionDto.getConditionWeight());
+        }
+        if(conditionDto.getBarnId() != null){
+            newEvent.setBarnId(conditionDto.getBarnId());
+        }
+        if(conditionDto.getBarnName() != null){
+            newEvent.setBarnName(conditionDto.getBarnName());
         }
         return newEvent;
     }

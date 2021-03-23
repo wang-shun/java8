@@ -202,6 +202,8 @@ public interface DoctorGroupReadService {
      */
     Response<Paging<DoctorGroupEvent>> queryGroupEventsByCriteria(Map<String, Object> criteria, Integer pageNo, Integer pageSize);
 
+    Response<List<DoctorGroupEvent>> getGroupEventsByCriteria(Map<String, Object> criteria);
+
     /**
      * 判断是否是最新事件
      *
@@ -330,4 +332,14 @@ public interface DoctorGroupReadService {
      * @return 猪群列表
      */
     Response<List<DoctorGroup>> listOpenGroupsBy(String date);
+
+
+    DoctorGroupEvent findLastEvent(Long groupId);
+
+    /*物联网接口使用（孔景军）*/
+    Response<List<DoctorGroup>> findGroupByCurrentBarnIdFuzzy(@NotNull(message = "barnId.not.null") Long barnId,String groupCode);
+    /**
+     * ysq
+     */
+    Long findGroupQuantityByGroupCode(String groupCode);
 }

@@ -145,12 +145,20 @@ public class SubService {
                 Response.fail("sub.id.miss");
             }
 
-            Long primaryId = this.getPrimaryUserId(user);
+            //Long primaryId = this.getPrimaryUserId(user);
+            //孔景军
+            Long primaryId = user.getId();
 
             User subUser = RespHelper.orServEx(doctorUserReadService.findById(sub.getId()));
 
             //子账号@主账号
-            String userName = subAccount(sub, user);
+            String userName;
+            if(subUser.getName().indexOf("@")!=-1){
+                userName = subAccount(sub, user);
+            }else{
+                userName = sub.getUsername();
+            }
+
 //            if(!Objects.equals(subUser.getName(), userName)){
 //                checkSubUserAccount(userName);
 //            }
@@ -193,15 +201,15 @@ public class SubService {
     private void updateSubStaffStatus(List<Long> farmIds, User subUser, io.terminus.doctor.user.model.Sub.Status status){
         io.terminus.doctor.user.model.Sub sub = RespHelper.orServEx(primaryUserReadService.findSubByUserId(subUser.getId()));
         sub.setStatus(status.value());
-
+        log.error("farmIds="+farmIds+"subUser="+subUser);
         if(Objects.equals(status.value(), io.terminus.doctor.user.model.Sub.Status.ACTIVE.value())){
             subUser.setStatus(UserStatus.NORMAL.value());
             //// TODO: 17/5/4 staff表已经不使用了
-//            updateStaffStatus(farmIds, subUser.getId(), DoctorStaff.Status.PRESENT);
+            updateStaffStatus(farmIds, subUser.getId(), DoctorStaff.Status.PRESENT);
         }else if(Objects.equals(status.value(), io.terminus.doctor.user.model.Sub.Status.ABSENT.value())){
             subUser.setStatus(UserStatus.LOCKED.value());
             //// TODO: 17/5/4 staff表已经不使用了
-//            updateStaffStatus(farmIds, subUser.getId(), DoctorStaff.Status.ABSENT);
+           updateStaffStatus(farmIds, subUser.getId(), DoctorStaff.Status.ABSENT);
         }else{
             throw new ServiceException("sub.user.status.error");
         }
@@ -212,8 +220,11 @@ public class SubService {
     private void updateStaffStatus(List<Long> farmIds, Long userId, DoctorStaff.Status status) {
         if (farmIds != null) {
             farmIds.forEach(farmId -> {
+                log.error("====================farmId="+farmId+"============userId="+userId);
                 DoctorStaff staff = RespHelper.orServEx(doctorStaffReadService.findStaffByFarmIdAndUserId(farmId, userId));
+                log.error("====================staff="+staff);
                 staff.setStatus(status.value());
+                log.error("====================staff="+staff);
                 RespHelper.orServEx(doctorStaffWriteService.updateDoctorStaff(staff));
             });
         }
@@ -246,7 +257,9 @@ public class SubService {
      */
     public Response<Long> createSub(BaseUser user, Sub sub){
         try {
-            Long primaryId = this.getPrimaryUserId(user);
+            //Long primaryId = this.getPrimaryUserId(user);
+            //孔景军
+            Long primaryId = user.getId();
             //先查下主账号的猪场, 以避免子账号的猪场不属于主账号
             DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(primaryId));
             List<Long> primaryFarms = permission.getFarmIdsList();
@@ -255,21 +268,20 @@ public class SubService {
                     throw new ServiceException("authorize.fail");
                 }
             }
-
             RespHelper.or500(doctorUserReadService.checkExist(sub.getContact(), sub.getUsername()));
 
             User subUser;
             String password = sub.getPassword();
-            Response<User> userResponse = doctorUserReadService.findBy(sub.getContact(), LoginType.MOBILE);
+            /*Response<User> userResponse = doctorUserReadService.findBy(sub.getContact(), LoginType.MOBILE);
             if (userResponse.isSuccess() && notNull(userResponse.getResult())) {
                 subUser = userResponse.getResult();
+                log.error("================subUser="+subUser);
                 if (org.springframework.util.StringUtils.hasText(sub.getPassword())) {  //对密码加盐加密
                     password = EncryptUtil.encrypt(sub.getPassword());
                 }
-            } else {
+            } else {*/
                 subUser = new User();
-            }
-
+           //}
             //子账号@主账号
             String userName = subAccount(sub, user);
 //            checkSubUserAccount(userName);
@@ -305,7 +317,7 @@ public class SubService {
 
             //create farm staff if necessary
             createStaff(subUserId, sub);
-            this.createPermission(user, subUserId, sub.getFarmIds(), sub.getBarnIds(), permission.getOrgIdsList());
+            this.createPermission(user, subUserId, sub.getFarmIds(), sub.getBarnIds(), permission.getOrgIdsList(),permission.getGroupIdsList());
             return Response.ok(subUserId);
         } catch (ServiceException | JsonResponseException e) {
             return Response.fail(e.getMessage());
@@ -322,16 +334,25 @@ public class SubService {
             return;
         }
         sub.getFarmIds().forEach(farmId -> {
+            //通过猪场查公司和集团(孔景军)
+            Long orgId = doctorStaffReadService.getOrgId(farmId);
+            Long groupId = doctorStaffReadService.getGroupId(orgId);
+            if(groupId == 0L){
+                groupId = null;
+            }
             DoctorStaff doctorStaff = new DoctorStaff();
             doctorStaff.setUserId(userId);
             doctorStaff.setFarmId(farmId);
-            doctorStaff.setStatus(Objects.equals(sub.getStatus(), io.terminus.doctor.user.model.Sub.Status.ACTIVE.value())
-                    ? DoctorStaff.Status.PRESENT.value() : DoctorStaff.Status.ABSENT.value());
+            doctorStaff.setOrgId(orgId);
+            doctorStaff.setGroupId(groupId);
+            doctorStaff.setUserName(sub.getRealName());
+            doctorStaff.setMobile(sub.getContact());
+            doctorStaff.setStatus(DoctorStaff.Status.PRESENT.value());
             RespHelper.orServEx(doctorStaffWriteService.createDoctorStaff(doctorStaff));
         });
     }
 
-    private void createPermission(BaseUser currentUser, Long userId, List<Long> farmIds, List<Long> barnIds, List<Long> orgIds){
+    private void createPermission(BaseUser currentUser, Long userId, List<Long> farmIds, List<Long> barnIds, List<Long> orgIds,List<Long> groupIds){
         //创建 数据权限
         DoctorUserDataPermission permission = new DoctorUserDataPermission();
         permission.setUserId(userId);
@@ -344,6 +365,7 @@ public class SubService {
         permission.setUpdatorId(currentUser.getId());
         permission.setUpdatorName(currentUser.getName());
         permission.setOrgIdsList(orgIds);
+        permission.setGroupIdsList(groupIds);
         RespHelper.orServEx(doctorUserDataPermissionWriteService.createDataPermission(permission));
     }
 
@@ -450,12 +472,12 @@ public class SubService {
     private String subAccount(Sub sub, BaseUser user){
         User primaryUser;
         // 子账号特别处理
-        if((Objects.equals(user.getType(), UserType.FARM_SUB.value()))){
+        /*if((Objects.equals(user.getType(), UserType.FARM_SUB.value()))){
             Long primaryUserId = this.getPrimaryUserId(user);
             primaryUser = RespHelper.orServEx(doctorUserReadService.findById(primaryUserId));
-        }else{
+        }else{*/
             primaryUser = RespHelper.orServEx(doctorUserReadService.findById(user.getId()));
-        }
+        //}
         DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(sub.getFarmIds().get(0)));
 
         return AT.join(sub.getUsername(), farm.getFarmCode() == null ? primaryUser.getMobile() : farm.getFarmCode());

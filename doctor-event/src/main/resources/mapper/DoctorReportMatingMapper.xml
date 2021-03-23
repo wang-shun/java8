@@ -242,5 +242,29 @@
             <if test="endAt != null"> AND sum_at &lt;= date_format(#{endAt}, '%y-%m-%d')</if>
         </where>
     </select>
-
+    <select id="getWeanMateCount" parameterType="map" resultType="Integer">
+        SELECT count(DISTINCT b.pig_id)
+        FROM doctor_pig_events a left join doctor_pig_events b on a.pig_id = b.pig_id
+        where
+        b.farm_id = #{farmId}
+        and a.type = 16
+        and b.type = 9
+        and b.current_mating_count = 1
+        <if test = "a == 1">and datediff(b.event_at, a.event_at) &lt;= 7</if>
+        and b.event_at &lt;= #{endAt}
+        and b.event_at >= #{startAt}
+        and a.parity + 1 = b.parity
+        and a.status = 1
+        and a.event_source != 5
+        and b.status = 1
+        and b.pig_id not in (
+        select pig_id from doctor_pig_events
+        where pig_id = b.pig_id
+        and datediff(event_at, a.event_at) &lt;= 7
+        and type = 6
+        and change_type_id in (110,111)
+        and b.parity = parity
+        and status = 1
+        and event_at >=b.event_at)
+    </select>
 </mapper>

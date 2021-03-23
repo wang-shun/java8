@@ -11,7 +11,7 @@ public interface DoctorOrgWriteService {
 
     Response<Boolean> deleteOrg(Long orgId);
 
-    Response<Boolean> updateOrgName(Long id,String name);
+    Response<Boolean> updateOrgName(Long id,String name,Integer type);
 
     Response<Boolean> updateBarnName(Long id,String name);
 

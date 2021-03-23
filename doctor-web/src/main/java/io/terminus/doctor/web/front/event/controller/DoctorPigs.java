@@ -171,7 +171,6 @@ public class DoctorPigs {
     public DoctorSowDetailDto querySowPigDetailInfoDto(@RequestParam("farmId") Long farmId,
                                                        @RequestParam("pigId") Long pigId,
                                                        @RequestParam(value = "eventSize", required = false) Integer eventSize){
-
             return buildSowDetailDto(getPigDetail(farmId, pigId, eventSize));
     }
 
@@ -345,12 +344,21 @@ public class DoctorPigs {
             if (Objects.equals(dto.getIsChgFarm(), true)) {
                 DoctorChgFarmInfo doctorChgFarmInfo = RespHelper.or500(doctorPigReadService.findByFarmIdAndPigId(doctorPigTrack.getFarmId(), doctorPigTrack.getPigId()));
                 DoctorPigEvent chgFarm = RespHelper.or500(doctorPigEventReadService.findById(doctorChgFarmInfo.getEventId()));
-                statusDay = DateUtil.getDeltaDays(chgFarm.getEventAt(), new Date());
+                statusDay = DateUtil.getDeltaDays(chgFarm.getEventAt(), new Date()) + 1;
             } else {
                 String extra = doctorPigTrack.getExtra();
-                Date eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(dto.getDoctorPig().getId()
-                        , dto.getDoctorPigTrack().getStatus()));
-                statusDay = DateUtil.getDeltaDays(eventAt, new Date());
+                Integer status = dto.getDoctorPigTrack().getStatus();
+                Date eventAt = null;
+                Long pigId = dto.getDoctorPig().getId();
+                // 最近一次的配种时间
+                if (status == 4 || status == 7){
+                    eventAt = RespHelper.or500(doctorPigEventReadService.findMateEventToPigId(pigId));
+                } else {
+                    eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(pigId, status));
+                }
+//                Date eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(dto.getDoctorPig().getId()
+//                        , dto.getDoctorPigTrack().getStatus()));
+                statusDay = DateUtil.getDeltaDays(eventAt, new Date()) + 1;
 
                 if (doctorPigTrack.getStatus() == PigStatus.KongHuai.getKey() && StringUtils.isNotBlank(extra)) {
                     Map<String, Object> extraMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(extra, JacksonType.MAP_OF_OBJECT);

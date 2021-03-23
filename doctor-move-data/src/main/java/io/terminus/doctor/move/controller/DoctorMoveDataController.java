@@ -657,11 +657,18 @@ public class DoctorMoveDataController {
      * 月报
      */
     @RequestMapping(value = "/monthly/date", method = RequestMethod.GET)
-    public Boolean moveDoctorRangeReportOnlyOne(@RequestParam("farmId") Long farmId,
+    public Boolean moveDoctorRangeReportOnlyOne(@RequestParam(value = "farmId", required = false) Long farmId,
                                                 @RequestParam("date") String date) {
         try {
             log.warn("move monthly report date start, farmId:{}, date:{}", farmId, date);
-            doctorMoveReportService.moveDoctorRangeReport(farmId, DateUtil.toDate(date));
+            if (farmId == null) {
+                List<Long> farmIds = getAllFarmIds();
+                farmIds.forEach(fid -> {
+                    doctorMoveReportService.moveDoctorRangeReport(fid, DateUtil.toDate(date));
+                });
+            } else {
+                doctorMoveReportService.moveDoctorRangeReport(farmId, DateUtil.toDate(date));
+            }
             log.warn("move monthly report date end");
             
             return true;

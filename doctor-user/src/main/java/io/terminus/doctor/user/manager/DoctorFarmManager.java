@@ -184,6 +184,13 @@ public class DoctorFarmManager {
                 subDao.update(sub);
             }
         }
+//        Sub sub = doctorUserUnfreezeDto.getSub();
+//        if (isNull(sub.getId())) {
+//            subDao.create(sub);
+//        } else {
+//            sub.setFrozen(IsOrNot.NO.getKey());
+//            subDao.update(sub);
+//        }
 
         //更新用户个人
         UserProfile userProfile = doctorUserUnfreezeDto.getUserProfile();

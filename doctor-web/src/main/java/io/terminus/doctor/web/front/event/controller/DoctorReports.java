@@ -163,7 +163,7 @@ public class DoctorReports {
 
     /**
      * 根据farmId和日期查询猪场月报表
-     * @param farmId 猪场id
+     * @param farmId 猪场id00
      * @param date   日期 yyyy-MM-dd
      * @return 猪场月报表
      */

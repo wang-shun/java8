@@ -7,6 +7,7 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Splitters;
@@ -34,6 +35,7 @@ import io.terminus.doctor.web.component.DoctorSearches;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.dto.DoctorBarnDetail;
 import io.terminus.doctor.web.front.event.dto.DoctorBarnSelect;
+import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -268,6 +270,35 @@ public class DoctorBarns {
         }
         return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, types,
                 null, status, null)), pigIds);
+    }
+
+    /**
+     * 根据farmId和当前用户查猪舍
+     * 冯雨晴 2019.9.18
+     * @param farmId   猪场id
+     * @return 猪舍表列表
+     */
+    @RequestMapping(value = "/pigTypess", method = RequestMethod.GET)
+    public List<Map> findBarnsByfarmIdAndTypes(@RequestParam("farmId") Long farmId,
+                                               @RequestParam(value = "status", required = false) Integer status,
+                                               @RequestParam(value = "pigTypes", required = false) String pigTypes
+                                                    ) {
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        if (baseUser == null) {
+            throw new JsonResponseException("user.not.login");
+        }
+        Response<DoctorUserDataPermission> dataPermissionResponse = doctorUserDataPermissionReadService.findDataPermissionByUserId(baseUser.getId());
+        if (!dataPermissionResponse.isSuccess()) {
+            throw new JsonResponseException("user.not.permission");
+        }
+        List<Long> barnIds = dataPermissionResponse.getResult().getBarnIdsList();
+
+        List<Integer> types = Lists.newArrayList();
+        if (notEmpty(pigTypes)) {
+            types = Splitters.splitToInteger(pigTypes, Splitters.COMMA);
+        }
+        return RespHelper.or500(doctorBarnReadService.findBarnsByEnumss(farmId,types,status,barnIds));
+
     }
 
 
@@ -521,6 +552,23 @@ public class DoctorBarns {
         return RespHelper.orServEx(doctorBarnReadService.findAvailableBarns(farmId, groupId));
     }
 
+
+    /**
+     * 查询可以转种猪猪舍
+     *
+     * @param farmId  转入的猪场
+     * @param groupId 当前猪群id
+     * @return 可以转入的猪舍
+     */
+    @RequestMapping(value = "/findAvailablePigBarns", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<DoctorBarn> findAvailablePigBarns(@RequestParam("farmId") Long farmId,
+                                               @RequestParam("groupId") Long groupId) {
+        return RespHelper.orServEx(doctorBarnReadService.findAvailablePigBarns(farmId, groupId));
+    }
+
+
+
     @RequestMapping(value = "/updateBarnName", method = RequestMethod.POST)
     public Boolean updateBarnName(@RequestParam Long barnId, @RequestParam String barnName) {
         Long groupEvent = RespHelper.or500(doctorGroupReadService.countByBarnId(barnId));
@@ -555,7 +603,12 @@ public class DoctorBarns {
             return new DoctorBarnCountForPigTypeDto();
         }
         doctorFarmAuthCenter.checkFarmAuth(farmId);
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        params.put("userId",baseUser.getId());
         params.put("farmId", farmId);
+        if(params.get("status")==null ||params.get("status").equals("")){
+            params.put("status",1);
+        }
         return RespHelper.or500(doctorBarnReadService.countForTypes(params));
     }
 

@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 
@@ -138,7 +139,9 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         event.setQuantity(transFarm.getQuantity());
 
         event.setWeight(transFarm.getWeight());
-        event.setAvgWeight(EventUtil.getAvgWeight(transFarm.getWeight(), transFarm.getQuantity()));
+        // 得到均重（四舍五入保留三位小数 陈娟 2018-10-23）
+        event.setAvgWeight(new BigDecimal(EventUtil.getAvgWeight(transFarm.getWeight(), transFarm.getQuantity())).setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue());
+//        event.setAvgWeight(EventUtil.getAvgWeight(transFarm.getWeight(), transFarm.getQuantity()));
         event.setAvgDayAge(groupTrack.getAvgDayAge());  //重算日龄
         event.setTransGroupType(DoctorGroupEvent.TransGroupType.OUT.getValue());   //转场肯定是外转
         event.setOtherBarnId(toBarn.getId());          //目标猪舍id

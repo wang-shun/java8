@@ -1,12 +1,17 @@
 package io.terminus.doctor.user.dao;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.user.model.DoctorOrg;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 公司表Dao类
@@ -17,8 +22,39 @@ import java.util.List;
 @Repository
 public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
 
+    // 查询公司时得到有集团的公司 （陈娟 2018-08-31）
+    public List<DoctorOrg> getParentId(Map<String, Object> criteria) {
+        return this.sqlSession.selectList(this.sqlId("getParentId"), criteria);
+    }
+
+    public List<DoctorOrg> findOrgByParentIdAndName(Long parentId,String fuzzyName) {
+        return sqlSession.selectList("findOrgByParentIdAndName", ImmutableMap.of("parentId", parentId, "fuzzyName", fuzzyName));
+    }
+
+    // 集团，公司的数据展示（陈娟 2018-8-29）
+    public Paging<DoctorOrg> pagingCompany(Integer offset, Integer limit, Map<String, Object> criteria) {
+        if (criteria == null) {
+            criteria = Maps.newHashMap();
+        }
+
+        Long total = (Long)this.sqlSession.selectOne(this.sqlId("countCompany"), criteria);
+        if (total.longValue() <= 0L) {
+            return new Paging(0L, Collections.emptyList());
+        } else {
+            ((Map)criteria).put("offset", offset);
+            ((Map)criteria).put("limit", limit);
+            List<DoctorOrg> datas = this.sqlSession.selectList(this.sqlId("pagingCompany"), criteria);
+            return new Paging(total, datas);
+        }
+    }
+
     public DoctorOrg findByName(String orgName) {
         return sqlSession.selectOne(sqlId("findByName"), orgName);
+    }
+
+    //ysq新增
+    public List<DoctorOrg> findOrgByParent(Long parentId){
+        return this.sqlSession.selectList(sqlId("findOrgByParent"),parentId);
     }
 
     public List<DoctorOrg> findAll() {
@@ -67,6 +103,11 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
         return sqlSession.update(sqlId("unbindDepartment"), ImmutableMap.of("orgIds", orgIds)) == 1;
     }
 
+    //关联子公司得到公司（陈娟 2018-08-29）
+    public List<DoctorOrg> getCompanyByName(String name) {
+        return getSqlSession().selectList(sqlId("getCompanyByName"), ImmutableMap.of("name", name));
+    }
+
     /**
      * 查询排除这些id的公司
      *
@@ -106,8 +147,8 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
      * @param name
      * @return
      */
-    public boolean updateName(Long id,String name){
-        return sqlSession.update(sqlId("updateName"),ImmutableMap.of("id",id,"name",name))==1;
+    public boolean updateName(Long id,String name,Integer type){
+        return sqlSession.update(sqlId("updateName"),ImmutableMap.of("id",id,"name",name,"type",type))==1;
     }
 
     /**
@@ -211,5 +252,77 @@ public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
     public DoctorOrg findName(Long id) {
         return sqlSession.selectOne(sqlId("findName"), id);
     }
+    /**
+     * 通过公司id查集团(孔景军)
+     * @param orgId
+     * @return
+     */
+    public DoctorOrg  findGroupcompanyByOrgId(Long orgId){
+        return sqlSession.selectOne(sqlId("findGroupcompanyByOrgId"), orgId);
+    }
+    /*
+    孔景军
+     */
+    public List<DoctorOrg>  findOrgByGroup(List<Long> orgIds,Long groupId){
+        Map map = new HashMap();
+        map.put("orgIds",orgIds);
+        map.put("groupId",groupId);
+        return sqlSession.selectList(sqlId("findOrgByGroup"), map);
+    }
+    public Integer findUserTypeById(Long userId){
+        return sqlSession.selectOne(sqlId("findUserTypeById"), userId);
+    }
 
+    public List<Map<String,Object>> getOrgByGroupId(Long groupId,List<Long> orgIds){
+        Map map = new HashMap();
+        map.put("groupId",groupId);
+        map.put("orgIds",orgIds);
+        return sqlSession.selectList(sqlId("getOrgByGroupId"), map);
+    }
+    public List<Long> getOrgByGroupId1(Long groupId,List<Long> orgIds){
+        Map map = new HashMap();
+        map.put("groupId",groupId);
+        map.put("orgIds",orgIds);
+        return sqlSession.selectList(sqlId("getOrgByGroupId1"), map);
+    }
+    public List<Map<Object,String>> getCunlan(Long orgId){
+        return sqlSession.selectList(sqlId("getCunlan"), orgId);
+    }
+    public List<Map<Object,String>> getGroupCunlan(List<Long> orgId){
+        return sqlSession.selectList(sqlId("getGroupCunlan"), orgId);
+    }
+    public String getGroupNameById(Long orgId) {
+        return sqlSession.selectOne(sqlId("getGroupNameById"), orgId);
+    }
+    /**
+     * 员工查询1
+     */
+    public Paging<Map<String,Object>> staffQuery(Map<String, Object> params){
+        Long total = this.sqlSession.selectOne(sqlId("staffCount"), params);
+        if (total == 0){
+            return new Paging(0L, Collections.emptyList());
+        } else {
+            int pageNo = (Integer.parseInt(String.valueOf(params.get("pageNo"))))  * (Integer.parseInt(String.valueOf(params.get("pageSize"))))
+                    - (Integer.parseInt(String.valueOf(params.get("pageSize"))));
+            params.put("pageNo", pageNo);
+            params.put("pageSize", (Integer.parseInt(String.valueOf(params.get("pageSize")))));
+            List<Map<String,Object>> datas = this.sqlSession.selectList(this.sqlId("staffQuery"), params);
+//            for (Iterator<Map<String,Object>> it = datas.iterator(); it.hasNext();){
+//
+//            }
+            return new Paging(total, datas);
+        }
+    }
+    /**
+     * 通过公司查集团(孔景军)
+     * @param groupId
+     * @return
+     */
+
+    public Long findGroupByOrgId(Long groupId){
+        return sqlSession.selectOne(sqlId("findGroupByOrgId"), groupId);
+    }
+    public Integer getUserType(Long userId){
+        return sqlSession.selectOne(sqlId("getUserType"),userId);
+    }
 }

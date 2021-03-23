@@ -463,7 +463,20 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     }
 
     @Override
+    public Response findNpd(Map<String, Object> map, Integer offset, Integer limit) {
+
+        try {
+            PageInfo pageInfo = new PageInfo(offset, limit);
+            return Response.ok(doctorPigEventDao.sumNpd(map, pageInfo.getOffset(), pageInfo.getLimit()));
+        } catch (Exception e) {
+            log.error("find.npd.event, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find npd event fail");
+        }
+    }
+
+    @Override
     public Response<Paging<DoctorPigSalesExportDto>> pagingFindSales(Map<String, Object> map, Integer offset, Integer limit) {
+
         try {
             PageInfo pageInfo = new PageInfo(offset, limit);
             return Response.ok(doctorPigEventDao.findSalesEvent(map, pageInfo.getOffset(), pageInfo.getLimit()));
@@ -481,8 +494,9 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
                 List<Integer> pigTypes = Splitters.splitToInteger((String)map.get("pigTypeId"), Splitters.UNDERSCORE);
                 if (pigTypes.contains(PigType.FATTEN_PIG.getValue())) {
                     list.addAll(doctorGroupEventDao.findFattenSales(map));
-                } else if (pigTypes.contains(PigType.NURSERY_PIGLET.getValue())
-                        || pigTypes.contains(PigType.DELIVER_SOW.getValue())) {
+                } else if (pigTypes.contains(PigType.NURSERY_PIGLET.getValue())){
+                    list.addAll(doctorGroupEventDao.findCareSales(map));
+                } else if(pigTypes.contains(PigType.DELIVER_SOW.getValue())) {
                     list.addAll(doctorGroupEventDao.findNurseSales(map));
                 } else if (pigTypes.contains(PigType.RESERVE.getValue())) {
                     list.addAll(doctorGroupEventDao.findReverseSales(map));
@@ -492,6 +506,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             } else {
                 list.addAll(doctorPigEventDao.findSales(map));
                 list.addAll(doctorGroupEventDao.findFattenSales(map));
+                list.addAll(doctorGroupEventDao.findCareSales(map));
                 list.addAll(doctorGroupEventDao.findNurseSales(map));
                 list.addAll(doctorGroupEventDao.findReverseSales(map));
             }
@@ -596,4 +611,48 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             return Response.fail("find.eventAt.lead.to.status.failed");
         }
     }
+
+    @Override
+    public Response<Date> findMateEventToPigId(Long pigId) {
+        try {
+            return Response.ok(doctorPigEventDao.findMateEventToPigId(pigId));
+        } catch (Exception e) {
+            log.error("find event at lead to pigId failed ,pigId:{, cause:{}",
+                    pigId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.eventAt.lead.to.pigId.failed");
+        }
+    }
+
+
+    @Override
+    public Response<List<Long>> findPigIdsByEvent(Map<String, Object> criteria) {
+        try {
+            return Response.ok(doctorPigEventDao.findPigIdsByEvent(criteria));
+        } catch (Exception e) {
+            log.error("find.pigIds.by.event, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("event:find pigIds by type failed");
+        }
+    }
+
+    @Override
+    public Response<Date> findFarmSowEventAt(Long pigId, Long farmId) {
+        try {
+            return Response.ok(doctorPigEventDao.findFarmSowEventAt(pigId, farmId));
+        } catch (Exception e) {
+            log.error("find event at lead to status failed ,pigId:{}, status:{}, cause:{}",
+                    pigId, farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.eventAt.lead.to.status.failed");
+        }
+    }
+
+    @Override
+    public Response<DoctorPigEvent> getKongHuaiStatus(Long pigId) {
+        return Response.ok(doctorPigEventDao.getKongHuaiStatus(pigId));
+    }
+
+    @Override
+    public Map<String,Object> getBranName(Long pigId, Date date) {
+        return doctorPigEventDao.getBranName(pigId, date);
+    }
+
 }

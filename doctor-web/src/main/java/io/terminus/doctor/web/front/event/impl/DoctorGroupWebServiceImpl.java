@@ -10,7 +10,6 @@ import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
-import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
@@ -235,9 +234,16 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
             Map<String, Object> params = JSON_MAPPER.fromJson(data, JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
 
+
             //3.校验事件的时间
             Date eventAt = DateUtil.toDate((String) params.get("eventAt"));
             checkEventAt(groupId, eventAt);
+
+            //4.新增校验事件为最后一次时间以后(孔景军)
+            DoctorGroupEvent lastEventDate = doctorGroupReadService.findLastEvent(groupId);
+            if(eventAt.getTime()<lastEventDate.getEventAt().getTime()){
+                throw new InvalidException("事件不能小于最后一次时间");
+            }
 
             String groupCode = getGroupCode(groupId);
             //4.根据不同的事件类型调用不同的录入接口
@@ -408,6 +414,11 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         Date eventAt = DateUtil.toDate((String) params.get("eventAt"));
         checkEventAt(groupId, eventAt);
 
+        //批量操作猪群事件，校验新建事件时间小于最后一次事件时间(孔景军)
+        DoctorGroupEvent lastEventDate = doctorGroupReadService.findLastEvent(groupId);
+        if(eventAt.getTime()<lastEventDate.getEventAt().getTime()){
+            throw new InvalidException("事件不能小于最后一次时间");
+        }
         //4.根据不同的事件类型调用不同的录入接口
         return buildGroupEventInfo(eventType, groupDetail, params);
     }
@@ -424,6 +435,9 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                 params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
                 return new DoctorGroupInputInfo(groupDetail, map(putBasicFields(params), DoctorMoveInGroupInput.class));
             case CHANGE:
+                if(params.get("weight") == null){
+                    params.put("weight",0);
+                }
                 checkParam(params, groupDetail.getGroup().getGroupCode());
                 params.put("changeTypeName", getBasicName(getLong(params, "changeTypeId")));
                 params.put("changeReasonName", getChangeReasonName(getLong(params, "changeReasonId")));

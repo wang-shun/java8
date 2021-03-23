@@ -334,8 +334,9 @@ public class StockHandleControllerv2 {
                     }
                     break;
                 case 3:
-                    params.put("warehouseId", warehouseId);
-                    params.put("settlementDate", settlementDate);
+                    params.put("warehouseId",warehouseId);
+                    params.put("orgId",orgId);
+                    params.put("settlementDate",settlementDate);
                     params.put("materialName",materialName);
                     Response<List<Map>> listResponse2 = doctorWarehouseMaterialHandleReadService.monthWarehouseDetail(params);
                     List<Map> result2 = listResponse2.getResult();

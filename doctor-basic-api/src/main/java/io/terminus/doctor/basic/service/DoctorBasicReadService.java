@@ -169,6 +169,9 @@ public interface DoctorBasicReadService {
      */
     Response<List<DoctorCustomer>> findCustomersByFarmId(@NotNull(message = "farmId.not.null") Long farmId);
 
+    // 客户数据分页（陈娟 2018-10-24）
+    Response<Paging<DoctorCustomer>> pagingCustomers(Integer pageNo, Integer pageSize, Map<String, Object> criteria);
+
     /**
      * 分页查询变动原因
      * @param pageNo

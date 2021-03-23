@@ -56,9 +56,9 @@ public class DoctorDepartmentReadServiceImpl implements DoctorDepartmentReadServ
     }
 
     @Override
-    public Response<List<DoctorDepartmentDto>> availableBindDepartment(@NotNull(message = "orgId.not.null") Long orgId) {
+    public Response<List<DoctorDepartmentDto>> availableBindDepartment(@NotNull(message = "orgId.not.null") Long orgId,String name) {
         try {
-            return Response.ok(doctorDepartmentManager.availableBindDepartment(orgId));
+            return Response.ok(doctorDepartmentManager.availableBindDepartment(orgId,name));
         } catch (Exception e) {
             log.error("available bind department failed, orgId:{}, cause:{}",
                     orgId, Throwables.getStackTraceAsString(e));
@@ -94,9 +94,9 @@ public class DoctorDepartmentReadServiceImpl implements DoctorDepartmentReadServ
             Map<Long, List<DoctorFarm>> map = allFarm.stream().collect(Collectors.groupingBy(DoctorFarm::getOrgId));
             List<DoctorDepartmentDto> dtos = map.entrySet().stream().map(entry -> {
                 List<DoctorDepartmentDto> list = entry.getValue().stream().map(doctorFarm ->
-                        new DoctorDepartmentDto(doctorFarm.getId(), doctorFarm.getName(), null, null))
+                        new DoctorDepartmentDto(doctorFarm.getId(), doctorFarm.getName(), null,null,null))
                         .collect(Collectors.toList());
-                return new DoctorDepartmentDto(entry.getKey(), entry.getValue().get(0).getOrgName(), null, list);
+                return new DoctorDepartmentDto(entry.getKey(), entry.getValue().get(0).getOrgName(), null, null,list);
             }).collect(Collectors.toList());
 
             return Response.ok(dtos);

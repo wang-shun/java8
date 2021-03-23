@@ -57,6 +57,7 @@ public class DoctorWarehouseSkuWriteServiceImpl implements DoctorWarehouseSkuWri
         params.put("orgId", doctorWarehouseSku.getOrgId());
         params.put("code", doctorWarehouseSku.getCode());
         params.put("status", WarehouseSkuStatus.NORMAL.getValue());
+
         if (!doctorWarehouseSkuDao.list(params).isEmpty())
             throw new InvalidException("warehouse.sku.code.existed", doctorWarehouseSku.getCode());
 

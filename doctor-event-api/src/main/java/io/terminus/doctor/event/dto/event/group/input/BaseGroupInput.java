@@ -46,7 +46,7 @@ public abstract class BaseGroupInput implements Serializable {
     @NotNull(message = "isAuto.not.null")
     private Integer isAuto;
 
-    @NotNull(message = "creatorId.not.null")
+//    @NotNull(message = "creatorId.not.null")
     private Long creatorId;
 
     private String creatorName;

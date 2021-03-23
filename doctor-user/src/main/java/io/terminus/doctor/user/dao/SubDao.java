@@ -72,8 +72,13 @@ public class SubDao extends MyBatisDao<Sub> {
     }
 
 
-    public List<Sub> findSubsByFarmIdAndStatus(Long farmId, Integer status) {
-        return getSqlSession().selectList(sqlId("findSubsByFarmIdAndStatus"), ImmutableMap.of("farmId", farmId, "status", status));
+    public List<Sub> findSubsByFarmIdAndStatus(Long farmId, Integer status, Long userId) {
+        return getSqlSession().selectList(sqlId("findSubsByFarmIdAndStatus"), ImmutableMap.of("farmId", farmId, "status", status,"userId",userId));
+    }
+
+    // 软件登陆人员是谁，仓库单据操作人就默认是谁，并支持修改 （陈娟 2018-09-13）
+    public Sub findSubsByFarmIdAndStatusAndUserId(Long farmId, Integer status, Long userId) {
+        return getSqlSession().selectOne(sqlId("findSubsByFarmIdAndStatusAndUserId"), ImmutableMap.of("farmId", farmId, "status", status,"userId",userId));
     }
 
     /**
@@ -86,5 +91,15 @@ public class SubDao extends MyBatisDao<Sub> {
 
     public Boolean freezeByUser(Long userId) {
         return getSqlSession().update(sqlId("freezeByUser"), userId) == 1;
+    }
+
+    // 得到导入时猪场里面的账号-公司账号（陈娟 2018-10-10）
+    public Sub selectDefaultUser(Long farmId) {
+        return getSqlSession().selectOne(sqlId("selectDefaultUser"), farmId);
+    }
+
+    // 根据记录操作人的Id得到用户（陈娟 2018-10-10）
+    public Sub findSubsByStatusAndUserId(Integer status, Long userId) {
+        return getSqlSession().selectOne(sqlId("findSubsByStatusAndUserId"), ImmutableMap.of("status", status,"userId",userId));
     }
 }

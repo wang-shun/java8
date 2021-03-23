@@ -22,6 +22,18 @@ import java.util.List;
  */
 public interface DoctorWarehouseMaterialHandleReadService {
 
+    // 删除单据时判断是否有物料已盘点 （陈娟 2018-09-18）
+    Response<String> deleteCheckInventory(Long id);
+
+    // 编辑单据时判断是否有物料已盘点 （陈娟 2018-09-19）
+    Response<DoctorWarehouseMaterialHandle> getMaxInventoryDate(Long warehouseId,Long materialId,Date handleDate);
+
+
+    // 结算误差（陈娟 2018-8-21）
+    Boolean getErrorAmount(Long warehouseId,Long materialId,Date settlementDate);
+
+    Response<DoctorWarehouseMaterialHandle> getLastDocument(Long warehouseId, Long materialId,Date settlementDate);
+
     //盘盈的时候得到最近一次的采购单价
     Response<BigDecimal> getPDPrice(Long warehouseId,Long materialId,String handleDate);
 
@@ -176,10 +188,14 @@ public interface DoctorWarehouseMaterialHandleReadService {
     //<!--得到领料出库的物料名称-->
     Response<List<Map>> getMaterialNameByID(Long id);
 
+
+
     //<!--根据物料名称得到 物料名称，物料编号，厂家，规格，单位，可退数量，备注-->
     Response<List<Map>> getDataByMaterialName(Long id);
 
     //根据id判断是否有退料入库
     Response<Integer> findCountByRelMaterialHandleId(Long id,Long farmId);
 
+    //
+    Response<Date> findSettlementDate(Long orgId);
 }

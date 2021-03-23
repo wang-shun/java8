@@ -184,13 +184,14 @@ public class DoctorWarehouseMaterialHandleManager {
 //        purchaseHandleContext.setStock(stocks.get(0));
 //        purchaseHandleContext.setPurchaseQuantity(Collections.singletonMap(purchases.get(0), handle.getQuantity()));
 //        doctorWarehouseHandlerManager.outStock(stocks.get(0), purchaseHandleContext, null);
-        doctorWarehouseStockMonthlyManager.count(handle.getWarehouseId(),
-                handle.getMaterialId(),
-                handle.getHandleYear(),
-                handle.getHandleMonth(),
-                handle.getQuantity(),
-                handle.getUnitPrice(),
-                false);
+        // 结算表 （陈娟 2018-09-12）
+//        doctorWarehouseStockMonthlyManager.count(handle.getWarehouseId(),
+//                handle.getMaterialId(),
+//                handle.getHandleYear(),
+//                handle.getHandleMonth(),
+//                handle.getQuantity(),
+//                handle.getUnitPrice(),
+//                false);
     }
 
     private void reverseOut(DoctorWarehouseMaterialHandle handle) {
@@ -238,13 +239,14 @@ public class DoctorWarehouseMaterialHandleManager {
         }
 
         doctorWarehouseHandlerManager.inStock(stock.get(0), purchases, null, null, null);
-        doctorWarehouseStockMonthlyManager.count(handle.getWarehouseId(),
-                handle.getMaterialId(),
-                handle.getHandleYear(),
-                handle.getHandleMonth(),
-                handle.getQuantity(),
-                handle.getUnitPrice(),
-                true);
+        // 结算表 （陈娟 2018-09-12）
+//        doctorWarehouseStockMonthlyManager.count(handle.getWarehouseId(),
+//                handle.getMaterialId(),
+//                handle.getHandleYear(),
+//                handle.getHandleMonth(),
+//                handle.getQuantity(),
+//                handle.getUnitPrice(),
+//                true);
     }
 
     @Data

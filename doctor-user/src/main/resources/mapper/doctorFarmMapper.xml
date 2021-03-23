@@ -113,6 +113,12 @@
         WHERE org_id = #{orgId}
         <include refid="singleFrozen"/>
     </select>
+    <!--ysq新增-->
+    <select id="findByOrgId1" parameterType="long" resultMap="DoctorFarmMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE org_id = #{orgId}
+    </select>
 
     <select id="findByOrgIds" parameterType="list" resultMap="DoctorFarmMap" >
         SELECT <include refid="cols_all" />
@@ -242,4 +248,32 @@
             <include refid="singleFrozen"/>
         </where>
     </select>
+
+
+    <!-- 新增查询下属猪场数据存栏 2018年8月28日17:45:30 -->
+    <select id="findSubordinatePig" parameterType="map" resultType="Map">
+        select f.org_name AS orgName,NULL AS record_dt,f.id AS farmId,f.name AS farmName,CONCAT(f.province_name,f.city_name,f.district_name,f.detail_address) AS address,
+				NULL AS legalPerson,NULL AS personPhone,NULL AS head,o.mobile AS contactPhone,f.created_at AS factoryDate,NULL AS construction,NULL AS capacity,
+				IFNULL((select `end` from doctor_report_sows
+						where orz_id = f.id and orz_type = 3 and sum_at = #{sumAt}),0) AS sowAmount,
+				IFNULL((select `end` from doctor_report_boars
+						where orz_id = f.id and orz_type = 3 and sum_at = #{sumAt}),0) AS boarAmount,
+				IFNULL((select `end` from doctor_report_nurseries
+						where orz_id = f.id and orz_type = 3 and sum_at = #{sumAt}),0) AS conservationAmount,
+				IFNULL((select `end` from doctor_report_fattens
+						where orz_id = f.id and orz_type = 3 and sum_at = #{sumAt}),0) AS fatteningAmount,
+				IFNULL((select piglet_end from doctor_report_delivers
+						where orz_id = f.id and orz_type = 3 and sum_at = #{sumAt}),0) AS pigletsAmount
+		from doctor_farms f INNER JOIN doctor_orgs o on f.org_id = o.id GROUP BY f.id
+    </select>
+
+    <!-- 判断猪场编码是否已存在 （陈娟 2018-10-09）-->
+    <select id="findByCode" parameterType="string" resultMap="DoctorFarmMap" >
+        select * from doctor_farms where farm_code = #{farmCode}
+    </select>
+
+    <select id="findFarmsByGroupId" parameterType="long" resultMap="DoctorFarmMap" >
+        select * from doctor_farms where org_id in (select  id from doctor_orgs where parent_id = #{groupId} )
+    </select>
+
 </mapper>

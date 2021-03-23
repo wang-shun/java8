@@ -52,7 +52,7 @@ public interface DoctorWarehouseStockWriteService {
      * @param stockIn
      * @return
      */
-    Response<Long> in(WarehouseStockInDto stockIn);
+    Response<InventoryDto> in(WarehouseStockInDto stockIn);
 
     /**
      * 盘点
@@ -60,7 +60,7 @@ public interface DoctorWarehouseStockWriteService {
      * @param stockInventory
      * @return
      */
-    Response<Long> inventory(WarehouseStockInventoryDto stockInventory);
+    Response<InventoryDto> inventory(WarehouseStockInventoryDto stockInventory);
 
     /**
      * 调拨
@@ -68,7 +68,7 @@ public interface DoctorWarehouseStockWriteService {
      * @param stockTransfer
      * @return
      */
-    Response<Long> transfer(WarehouseStockTransferDto stockTransfer);
+    Response<InventoryDto> transfer(WarehouseStockTransferDto stockTransfer);
 
     /**
      * 出库
@@ -76,7 +76,7 @@ public interface DoctorWarehouseStockWriteService {
      * @param stockOut
      * @return
      */
-    Response<Long> out(WarehouseStockOutDto stockOut);
+    Response<InventoryDto> out(WarehouseStockOutDto stockOut);
 
     /**
      * 退料入库
@@ -84,7 +84,7 @@ public interface DoctorWarehouseStockWriteService {
      * @param stockRefundDto
      * @return
      */
-    Response<Long> refund(WarehouseStockRefundDto stockRefundDto);
+    Response<InventoryDto> refund(WarehouseStockRefundDto stockRefundDto);
 
 
     /**
@@ -93,9 +93,9 @@ public interface DoctorWarehouseStockWriteService {
      * @param formulaDto
      * @return
      */
-    Response<Long> formula(WarehouseFormulaDto formulaDto);
+    Response<InventoryDto> formula(WarehouseFormulaDto formulaDto);
 
-    Response<Long> updateFormula(WarehouseFormulaDto formulaDto);
+    Response<InventoryDto> updateFormula(WarehouseFormulaDto formulaDto);
 
     /**
      * 创建

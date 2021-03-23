@@ -21,6 +21,10 @@ public class DoctorPregChkResultExportDto implements Serializable{
     private String checkResultName;
     private String checkMark;
     private Integer npd;
+    /**
+     * 已配种天数(不存于数据库, 用于前台显示)
+     */
+    private Integer matingDay;
     private String operatorName;
     private String creatorName;
     private Date createdAt;

@@ -15,7 +15,6 @@ import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.model.DoctorBasic;
-import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.warehouseV2.DoctorWarehouseSku;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
@@ -34,36 +33,13 @@ import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.event.BasePigEventInputDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorBoarConditionDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorFosterByDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorConditionDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorDiseaseDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
+import io.terminus.doctor.event.dto.event.sow.*;
+import io.terminus.doctor.event.dto.event.usual.*;
 import io.terminus.doctor.event.enums.DoctorBasicEnums;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorEventModifyLog;
-import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
-import io.terminus.doctor.event.service.DoctorEventModifyLogReadService;
-import io.terminus.doctor.event.service.DoctorEventModifyRequestReadService;
-import io.terminus.doctor.event.service.DoctorEventModifyRequestWriteService;
-import io.terminus.doctor.event.service.DoctorModifyEventService;
-import io.terminus.doctor.event.service.DoctorPigEventReadService;
-import io.terminus.doctor.event.service.DoctorPigEventWriteService;
-import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.event.model.*;
+import io.terminus.doctor.event.service.*;
 import io.terminus.doctor.event.util.EventUtil;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -76,16 +52,11 @@ import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -446,6 +417,14 @@ public class DoctorPigCreateEvents {
 
         log.info("createSowEventInfo, pigId:{}, farmId:{}, eventType:{}, data:{}", pigId, farmId, eventType, sowInfoDtoJson);
 
+       /* JSONObject  jasonObject = JSONObject.fromObject(sowInfoDtoJson);
+        Map maps = (Map)JSONObject.fromObject(sowInfoDtoJson);
+            for (Object map : maps.entrySet()){
+                System.out.println(((Map.Entry)map).getKey()+"     " + ((Map.Entry)map).getValue());
+            }
+
+        sowInfoDtoJson = jasonObject.fromObject(sowInfoDtoJson).toString();*/
+
         BasePigEventInputDto inputDto = eventInput(PigEvent.from(eventType), sowInfoDtoJson, farmId, DoctorPig.PigSex.SOW.getKey(), pigId);
         return RespWithExHelper.orInvalid(doctorPigEventWriteService.pigEventHandle(buildEventInput(inputDto, pigId, PigEvent.from(eventType)), buildBasicInputInfoDto(farmId, PigEvent.from(eventType))));
     }
@@ -653,7 +632,6 @@ public class DoctorPigCreateEvents {
             expectTrue(notEmpty((String) map.get("pigId")), "pig.id.not.null");
         }
         Long realPigId = pigId !=null?pigId:Long.parseLong((String) map.get("pigId"));
-
         DoctorPig doctorPig = RespHelper.or500(doctorPigReadService.findPigById(realPigId));
         expectTrue(notNull(doctorPig), "pig.not.null", realPigId);
 
@@ -697,6 +675,15 @@ public class DoctorPigCreateEvents {
             case CONDITION:
                 if (Objects.equals(pigType, DoctorPig.PigSex.SOW.getKey())) {
                     DoctorConditionDto conditionDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorConditionDto.class);
+                    Date conditionDate = conditionDto.getConditionDate();
+                    Long pigId1 = conditionDto.getPigId();
+                    Map<String,Object> maps = doctorPigEventReadService.getBranName(pigId1, conditionDate);
+                    if(maps.size() != 0){
+                        Long barnId = Long.valueOf(maps.get("barnId").toString());
+                        String barnName = maps.get("barnName").toString();
+                        conditionDto.setBarnId(barnId);
+                        conditionDto.setBarnName(barnName);
+                    }
                     return doctorValidService.valid(conditionDto, doctorPig.getPigCode());
                 } else {
                     DoctorBoarConditionDto boarConditionDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorBoarConditionDto.class);
@@ -766,6 +753,15 @@ public class DoctorPigCreateEvents {
                 return doctorValidService.valid(dto, doctorPig.getPigCode());
             case FARROWING:
                 DoctorFarrowingDto farrowingDto = jsonMapper.fromJson(eventInfoDtoJson, DoctorFarrowingDto.class);
+                if(realPigId != null) {
+                    DoctorPigEvent doctorPigEvent = RespHelper.orServEx(doctorPigEventReadService.findLastFirstMateEvent(realPigId));
+                    Long farrowingDate = farrowingDto.getFarrowingDate().getTime();
+                    Long lastMateDate = doctorPigEvent.getEventAt().getTime();
+                    Long time = (farrowingDate - lastMateDate) / (3600 * 24 * 1000);
+                    if (time < 100) {
+                        throw new InvalidException("分娩时间必须大于配种时间100天");
+                    }
+                }
                 DoctorFarm doctorFarm3 = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
                 if (Objects.equals(doctorFarm3.getIsWeak(), io.terminus.doctor.common.enums.IsOrNot.NO.getKey())) {
                     farrowingDto.setFarrowingLiveCount(farrowingDto.getHealthCount());

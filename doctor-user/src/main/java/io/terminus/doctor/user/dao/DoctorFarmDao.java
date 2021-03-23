@@ -1,11 +1,15 @@
 package io.terminus.doctor.user.dao;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorFarmInformation;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -18,8 +22,17 @@ import java.util.Map;
 @Repository
 public class DoctorFarmDao extends MyBatisDao<DoctorFarm> {
 
+    // 判断猪场编码是否已存在 （陈娟 2018-10-09）
+    public DoctorFarm findByCode(String farmCode) {
+        return sqlSession.selectOne(sqlId("findByCode"), farmCode);
+    }
+
     public List<DoctorFarm> findByOrgId(Long orgId){
         return sqlSession.selectList(sqlId("findByOrgId"), orgId);
+    }
+    //ysq新增
+    public List<DoctorFarm> findByOrgId1(Long orgId){
+        return sqlSession.selectList(sqlId("findByOrgId1"), orgId);
     }
 
     public List<DoctorFarm> findByOrgIds(List<Long> orgIds){
@@ -61,5 +74,13 @@ public class DoctorFarmDao extends MyBatisDao<DoctorFarm> {
 
     public List<DoctorFarm> findByName(String name) {
         return getSqlSession().selectList(sqlId("findByName"), name);
+    }
+
+    public List<DoctorFarmInformation> findSubordinatePig(Date sumAt){
+        return getSqlSession().selectList(sqlId("findSubordinatePig"), ImmutableMap.of("sumAt", DateUtil.toDateString(sumAt)));
+    }
+
+    public List<DoctorFarm> findFarmsByGroupId(Long groupId){
+        return sqlSession.selectList(sqlId("findFarmsByGroupId"), groupId);
     }
 }

@@ -214,6 +214,8 @@ public interface DoctorPigEventReadService {
      */
     Response<Paging<DoctorNpdExportDto>> pagingFindNpd(Map<String, Object> map, Integer offset, Integer limit);
 
+    Response<Map<String, Object>> findNpd(Map<String, Object> map, Integer offset, Integer limit);
+
     /**
      * 查询猪的销售情况
      *
@@ -298,4 +300,25 @@ public interface DoctorPigEventReadService {
      */
     Response<Date> findEventAtLeadToStatus(Long pigId, Integer status);
 
+
+    /**
+     * 查询猪最近初配事件的时间
+     */
+    Response<Date> findMateEventToPigId(Long pigId);
+
+
+
+    /**
+     *                              新增代码
+     * 根据事件筛选出母猪ID
+     * @param criteria
+     * @return
+     */
+    Response<List<Long>> findPigIdsByEvent(Map<String, Object> criteria);
+
+    Response<Date> findFarmSowEventAt(Long pigId, Long farmId);
+
+    Response<DoctorPigEvent> getKongHuaiStatus(Long pigId);
+
+    public Map<String,Object> getBranName(Long pigId, Date date);
 }

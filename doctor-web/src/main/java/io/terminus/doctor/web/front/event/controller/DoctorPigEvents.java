@@ -39,6 +39,7 @@ import io.terminus.doctor.web.front.event.dto.DoctorPigEventExportData;
 import io.terminus.doctor.web.util.TransFromUtil;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -517,7 +518,74 @@ public class DoctorPigEvents {
                     detail.setIsRollback(isRollback);
                     return detail;
                 }).collect(toList());
+        // 合计：不用每页显示合计，根据筛选条件出来的所有数据最后一条显示合计 （陈娟 2018-09-06）
+        Long total = pagingResponse.getResult().getTotal();
+        if(pageNo==null){
+            if(total<=20){
+                List<DoctorGroupEvent> doctorGroupEvents = RespHelper.or500(doctorGroupReadService.getGroupEventsByCriteria(params));
+                DoctorGroupEventDetail detail = this.aggregatedPigs(doctorGroupEvents);
+                groupEventDetailList.add(detail);
+            }
+        }else{
+            if(total<=pageNo*pageSize){
+                List<DoctorGroupEvent> doctorGroupEvents = RespHelper.or500(doctorGroupReadService.getGroupEventsByCriteria(params));
+                DoctorGroupEventDetail detail = this.aggregatedPigs(doctorGroupEvents);
+                groupEventDetailList.add(detail);
+            }
+        }
         return new Paging<>(pagingResponse.getResult().getTotal(), groupEventDetailList);
+    }
+
+    // 猪群合计 （陈娟 2018-09-05）
+    private DoctorGroupEventDetail aggregatedPigs(List<DoctorGroupEvent> doctorGroupEventList){
+        Integer sumQuantity=new Integer(0);// 总猪只数
+        Double sumWeight=new Double(0);// 总重，
+        Long sumAmount=new Long(0);// 总价值，
+        Integer sumBoarQty=new Integer(0);// 公猪数，
+        Integer sumSowQty=new Integer(0);// 母猪数，
+        for (DoctorGroupEvent doctorGroupEvent: doctorGroupEventList) {
+            if(doctorGroupEvent.getQuantity()==null){
+                sumQuantity = sumQuantity + 0;
+            }else{
+                sumQuantity = sumQuantity + doctorGroupEvent.getQuantity();
+            }
+
+            if(doctorGroupEvent.getWeight()==null){
+                sumWeight = sumWeight + 0;
+            }else{
+                sumWeight = sumWeight + doctorGroupEvent.getWeight();
+            }
+
+            if(doctorGroupEvent.getAmount()==null){
+                sumAmount = sumAmount + 0;
+            }else{
+                sumAmount = sumAmount + doctorGroupEvent.getAmount();
+            }
+
+            String extra = doctorGroupEvent.getExtra();
+            //1、使用JSONObject
+            JSONObject jsonObject=JSONObject.fromObject(extra);
+            DoctorGroupEventDetail eventDetail=(DoctorGroupEventDetail)JSONObject.toBean(jsonObject, DoctorGroupEventDetail.class);
+            if(eventDetail.getBoarQty()==null){
+                sumBoarQty = sumBoarQty + 0;
+            }else{
+                sumBoarQty = sumBoarQty + eventDetail.getBoarQty();
+            }
+
+            if(eventDetail.getSowQty()==null){
+                sumSowQty = sumSowQty + 0;
+            }else{
+                sumSowQty = sumSowQty + eventDetail.getSowQty();
+            }
+        }
+
+        DoctorGroupEventDetail detail=new DoctorGroupEventDetail();
+        detail.setSumQuantity(sumQuantity);
+        detail.setSumWeight(sumWeight);
+        detail.setSumAmount(sumAmount);
+        detail.setSumBoarQty(sumBoarQty);
+        detail.setSumSowQty(sumSowQty);
+        return detail;
     }
 
     /**
@@ -560,6 +628,21 @@ public class DoctorPigEvents {
 
         Map<String, Object> criteria = OBJECT_MAPPER.convertValue(pigEventCriteria, Map.class);
         return RespHelper.or500(doctorPigEventReadService.pagingFindNpd(criteria, pageNo, pageSize));
+    }
+
+    /**
+     * ysq
+     * @param pigNpd
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    @RequestMapping(value = "/getNpd", method = RequestMethod.GET)
+    @ResponseBody
+    public Response getNpd(@RequestParam Map<String, String> pigNpd, Integer pageNo, Integer pageSize) {
+
+        Map<String, Object> criteria = OBJECT_MAPPER.convertValue(pigNpd, Map.class);
+        return doctorPigEventReadService.findNpd(criteria, pageNo, pageSize);
     }
 
     public Paging<DoctorNpdExportDto> pagingNpdPigEvent(Map<String, String> pigEventCriteria) {

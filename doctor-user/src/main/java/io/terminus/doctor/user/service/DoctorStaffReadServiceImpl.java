@@ -43,4 +43,12 @@ public class DoctorStaffReadServiceImpl implements DoctorStaffReadService{
             return Response.fail("find.staff.failed");
         }
     }
+    @Override
+    public Long getOrgId(Long farmId){
+        return doctorStaffDao.findOrgIdByFarmId(farmId);
+    }
+    @Override
+    public Long getGroupId(Long orgId){
+        return doctorStaffDao.findGroupIdByFarmId(orgId);
+    }
 }

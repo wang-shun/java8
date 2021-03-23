@@ -16,11 +16,16 @@ import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.NameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import static io.terminus.doctor.common.utils.PostRequest.httpPostWithJson;
+import static io.terminus.doctor.event.enums.PigEvent.*;
 import static io.terminus.doctor.event.handler.DoctorAbstractEventHandler.IGNORE_EVENT;
 import static io.terminus.doctor.event.manager.DoctorPigEventManager.checkAndPublishEvent;
 
@@ -108,6 +113,28 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     @Override
     public Response<Boolean> createPigEvent(DoctorPigEvent doctorPigEvent) {
         try {
+            //通知物联网接口(孔景军)
+            /*
+            当母猪发生转舍、离场、销售、离场事件时，需调用物联网提供的接口，以此通知物联网。(孔景军)
+             */
+            if(doctorPigEvent.getType() == CHG_LOCATION.getKey() || doctorPigEvent.getType() == TO_PREG.getKey() || doctorPigEvent.getType() == TO_MATING.getKey()
+                    || doctorPigEvent.getType() == TO_FARROWING.getKey()  || doctorPigEvent.getType() == REMOVAL.getKey()  || (doctorPigEvent.getType() == PIGLETS_CHG.getKey() && doctorPigEvent.getChangeTypeId()==109) ){
+
+                List<NameValuePair> nameValueList = new ArrayList<>();
+                nameValueList.add(new NameValuePair() {
+                    @Override
+                    public String getName() {
+                        return "pigId";
+                    }
+
+                    @Override
+                    public String getValue() {
+                        return doctorPigEvent.getPigId().toString();
+                    }
+                });
+                String url = "api/iot/pig/sow-leaving";
+                httpPostWithJson(nameValueList,url,null);
+            }
             return Response.ok(doctorPigEventDao.create(doctorPigEvent));
         } catch (Exception e) {
             log.error("create.pig.event.failed, event:{}, basic:{}, cause:{}", doctorPigEvent, Throwables.getStackTraceAsString(e));

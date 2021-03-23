@@ -107,5 +107,37 @@
         WHERE farm_id = #{farmId}
     </select>
 
+    <!--客户数据分页（陈娟 2018-10-24）-->
+    <select id="customerCount" parameterType="map" resultType="Long">
+        SELECT COUNT(1)
+        FROM <include refid="tb"/>
+        WHERE farm_id = #{farmId}
+        <if test="name != null and ''!=name ">
+            and `name` like CONCAT('%',#{name},'%')
+        </if>
+        <if test="mobile != null and ''!=mobile ">
+            and mobile like CONCAT('1',#{mobile},'%')
+        </if>
+        <if test="email != null and ''!=email ">
+            and email like CONCAT('%',#{email},'%')
+        </if>
+    </select>
+
+    <select id="pagingCustomer" parameterType="map" resultMap="DoctorCustomerMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE farm_id = #{farmId}
+        <if test="name != null and ''!=name ">
+            and `name` like CONCAT('%',#{name},'%')
+        </if>
+        <if test="mobile != null and ''!=mobile ">
+            and mobile like CONCAT('1',#{mobile},'%')
+        </if>
+        <if test="email != null and ''!=email ">
+            and email like CONCAT('%',#{email},'%')
+        </if>
+        ORDER BY id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
 
 </mapper>

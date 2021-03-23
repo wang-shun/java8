@@ -3,6 +3,7 @@ package io.terminus.doctor.web.admin.controller;
 import com.google.api.client.util.Maps;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
@@ -16,44 +17,40 @@ import io.terminus.doctor.common.enums.IsOrNot;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.common.utils.ToJsonMapper;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
-import io.terminus.doctor.user.model.DoctorFarm;
-import io.terminus.doctor.user.model.DoctorOrg;
-import io.terminus.doctor.user.model.DoctorServiceReview;
-import io.terminus.doctor.user.model.DoctorServiceStatus;
-import io.terminus.doctor.user.model.DoctorUserDataPermission;
-import io.terminus.doctor.user.service.DoctorFarmReadService;
-import io.terminus.doctor.user.service.DoctorOrgReadService;
-import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
-import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
-import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
-import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
-import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
-import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
-import io.terminus.doctor.user.service.DoctorUserReadService;
-import io.terminus.doctor.user.service.PrimaryUserReadService;
+import io.terminus.doctor.user.model.*;
+import io.terminus.doctor.user.service.*;
 import io.terminus.doctor.web.admin.dto.DoctorGroupUserWithOrgAndFarm;
+import io.terminus.pampas.common.UserUtil;
+import io.terminus.pampas.engine.ThreadVars;
+import io.terminus.parana.auth.model.CompiledTree;
 import io.terminus.parana.common.utils.EncryptUtil;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserWriteService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.AsyncRestOperations;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static com.sun.org.apache.xerces.internal.util.PropertyState.is;
 import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.parana.common.utils.RespHelper.or500;
 
 /**
  * Desc: admin分配权限的api
@@ -90,6 +87,12 @@ public class DoctorAdminUsers {
     private DoctorBarnReadService doctorBarnReadService;
     @RpcConsumer
     private PrimaryUserReadService primaryUserReadService;
+    @RpcConsumer
+    private SubRoleWriteService subRoleWriteService;
+    @RpcConsumer
+    private SubRoleReadService subRoleReadService;
+    @RpcConsumer
+    private PrimaryUserWriteService primaryUserWriteService;
 
     /**
      * 新增集团用户
@@ -316,5 +319,71 @@ public class DoctorAdminUsers {
             return Collections.emptyList();
         }
         return ids.stream().map(map::get).collect(Collectors.toList());
+    }
+
+
+    //孔景军(增加主账号权限)
+    @RequestMapping(value = "/getTree", method = RequestMethod.GET)
+    public String getTree(){
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<CompiledTree> result= restTemplate.getForEntity("https://pig.xrnm.com/api/auth/tree?role=SUB",  CompiledTree.class, ImmutableMap.of( "role", "SUB"));
+        return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(result.getBody());
+    }
+
+
+    /**
+     * 创建账号角色
+     *
+     * @param role 运营角色
+     * @return 角色主键 ID
+     */
+    @RequestMapping(value = "/addRole", method = RequestMethod.PUT)
+    public Long createRole(@RequestBody SubRole role) {
+        role.setAppKey("MOBILE");
+        role.setStatus(1);
+        return or500(subRoleWriteService.createRole(role));
+    }
+
+    /**
+     * 查找角色
+     *
+     * @param
+     * @return 角色主键 ID
+     */
+    @RequestMapping(value = "/findrole", method = RequestMethod.GET)
+    public Paging<SubRole> findrole( @RequestParam(required = false)Integer status,
+                                     @RequestParam(required = false)String roleName,
+                                     @RequestParam(required = false)Integer roleType,
+                                     @RequestParam(required = false)Integer pageNo,
+                                     @RequestParam(required = false)Integer size) {
+        return or500(subRoleReadService.findrole(status,roleName,roleType,pageNo,size));
+    }
+
+    /**
+     * 更新子账号角色
+     *
+     * @param role 角色授权内容
+     * @return 是否更新成功
+     */
+    @RequestMapping(value = "updateRole", method = RequestMethod.PUT)
+    public Boolean updateRole(@RequestBody SubRole role) {
+        if(role.getId() == null){
+            throw new JsonResponseException(500, "sub.role.id.miss");
+        }
+
+        SubRole existRole = io.terminus.parana.common.utils.RespHelper.orServEx(subRoleReadService.findById(role.getId()));
+        if (existRole == null) {
+            throw new JsonResponseException(500, "sub.role.not.exist");
+        }
+
+        role.setId(role.getId());
+        role.setAppKey("MOBILE"); // prevent update
+        or500(subRoleWriteService.updateRole(role));
+
+        //如果角色名称发生了改变, 则更新冗余字段
+        if(!Objects.equals(existRole.getName(), role.getName())){
+            or500(primaryUserWriteService.updateRoleName(role.getId(), role.getName()));
+        }
+        return true;
     }
 }

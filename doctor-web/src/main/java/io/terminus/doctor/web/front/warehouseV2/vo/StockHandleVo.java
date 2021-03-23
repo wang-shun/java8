@@ -30,6 +30,8 @@ public class StockHandleVo extends DoctorWarehouseStockHandle {
 
     private Integer status;
 
+    private Integer hasInventory;
+
     private List<Detail> details;
 
     @Data
@@ -75,5 +77,11 @@ public class StockHandleVo extends DoctorWarehouseStockHandle {
 
         //得到该领料出库的退料入库的数量
         private Integer retreatingCount;
+
+        //判断单据是否已盘点 （陈娟 2018-09-19）
+        private Integer isInventory;
+
+        //注解
+        private String desc;
     }
 }

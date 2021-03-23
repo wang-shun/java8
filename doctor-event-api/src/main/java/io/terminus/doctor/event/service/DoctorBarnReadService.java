@@ -65,6 +65,19 @@ public interface DoctorBarnReadService {
                                                 List<Integer> pigTypes, Integer canOpenGroup,
                                                 Integer status, List<Long> barnIds);
 
+
+
+    /*
+    * 根据farmId和当前用户查猪舍
+    * 冯雨晴 2019.9.18
+    *
+    * */
+    Response<List<Map>> findBarnsByEnumss(@NotNull(message = "farmId.not.null") Long farmId,
+                                          List<Integer> pigTypes,Integer status,
+                                          List<Long> barnIds);
+
+
+
     /**
      * 查询当前猪舍的存栏量
      * @param barnId 猪舍id
@@ -80,6 +93,19 @@ public interface DoctorBarnReadService {
      */
     Response<List<DoctorBarn>> findAvailableBarns(@NotNull(message = "farmId.can.not.be.null") Long farmId,
                                                   @NotNull(message = "groupId.can.not.be.null") Long groupId);
+
+
+
+
+    /**
+     * 根据当前猪舍查询可以转种猪的猪舍
+     * @param farmId  转入的猪场id
+     * @param groupId  当前猪群id
+     * @return  可以转入的猪舍
+     */
+    Response<List<DoctorBarn>> findAvailablePigBarns(@NotNull(message = "farmId.can.not.be.null") Long farmId,
+                                                  @NotNull(message = "groupId.can.not.be.null") Long groupId);
+
     /**
      * 统计每种猪舍类型猪舍数量
      * @param criteria 查询条件
@@ -119,4 +145,8 @@ public interface DoctorBarnReadService {
      * @return 猪舍信息
      */
     Response<IotBarnInfo> findIotBarnInfo(Long barnId);
+    /**
+     * 根据barnId查饲养员-ysq
+     */
+    String fingStaffName(Long barnId);
 }

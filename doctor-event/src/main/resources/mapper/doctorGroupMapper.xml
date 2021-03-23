@@ -378,4 +378,18 @@
             AND (close_at is null or close_at &gt;= #{date})
         </where>
     </select>
+
+    <select id="findGroupByCurrentBarnIdFuzzy" parameterType="map" resultMap="DoctorGroupMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE current_barn_id = #{currentBarnId} AND status = 1
+        <if test="groupCode != null">AND `group_code` like concat('%', #{groupCode}, '%')</if>
+    </select>
+
+    <select id="findGroupQuantityByGroupCode" parameterType="string" resultType="long">
+        select b.quantity
+        from doctor_groups a join doctor_group_tracks b
+        on a.id = b.group_id
+        where a.group_code = #{groupCode}
+    </select>
 </mapper>

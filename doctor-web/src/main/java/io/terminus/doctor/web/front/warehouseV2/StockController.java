@@ -35,6 +35,7 @@ import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.util.CollectionUtils;
@@ -100,6 +101,7 @@ public class StockController {
 
     @RpcConsumer
     private DoctorWarehouseSettlementService doctorWarehouseSettlementService;
+    private final String handleDate = "handleDate";
 
     /**
      * 采购入库
@@ -109,7 +111,7 @@ public class StockController {
      * @return
      */
     @RequestMapping(method = RequestMethod.PUT, value = "in")
-    public Long in(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockInDto stockIn, Errors errors) {
+    public InventoryDto in(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockInDto stockIn, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
@@ -130,6 +132,7 @@ public class StockController {
         Calendar handleDateWithTime = Calendar.getInstance();
         handleDateWithTime.set(stockIn.getHandleDate().get(Calendar.YEAR), stockIn.getHandleDate().get(Calendar.MONTH), stockIn.getHandleDate().get(Calendar.DAY_OF_MONTH));
         stockIn.setHandleDate(handleDateWithTime);
+        stockIn.setIsFormula(false);
 
         return RespHelper.or500(doctorWarehouseStockWriteService.in(stockIn));
     }
@@ -142,7 +145,7 @@ public class StockController {
      * @return
      */
     @RequestMapping(method = RequestMethod.PUT, value = "out")
-    public Long out(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockOutDto stockOut, Errors errors) {
+    public InventoryDto out(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockOutDto stockOut, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
@@ -175,6 +178,7 @@ public class StockController {
         Calendar handleDateWithTime = Calendar.getInstance();
         handleDateWithTime.set(stockOut.getHandleDate().get(Calendar.YEAR), stockOut.getHandleDate().get(Calendar.MONTH), stockOut.getHandleDate().get(Calendar.DAY_OF_MONTH));
         stockOut.setHandleDate(handleDateWithTime);
+        stockOut.setIsFormula(false);
 
         return RespHelper.or500(doctorWarehouseStockWriteService.out(stockOut));
     }
@@ -186,7 +190,7 @@ public class StockController {
      * @return
      */
     @RequestMapping(method = RequestMethod.PUT, value = "refund")
-    public Long refund(@RequestBody
+    public InventoryDto refund(@RequestBody
                        @Validated(AbstractWarehouseStockDetail.StockRefundValid.class)
                                WarehouseStockRefundDto stockRefund,
                        Errors errors) {
@@ -210,7 +214,7 @@ public class StockController {
         Calendar handleDateWithTime = Calendar.getInstance();
         handleDateWithTime.set(stockRefund.getHandleDate().get(Calendar.YEAR), stockRefund.getHandleDate().get(Calendar.MONTH), stockRefund.getHandleDate().get(Calendar.DAY_OF_MONTH));
         stockRefund.setHandleDate(handleDateWithTime);
-
+        stockRefund.setIsFormula(false);
 
         return RespHelper.or500(doctorWarehouseStockWriteService.refund(stockRefund));
     }
@@ -230,7 +234,7 @@ public class StockController {
      * @return
      */
     @RequestMapping(method = RequestMethod.PUT, value = "inventory")
-    public Long inventory(@RequestBody @Validated(AbstractWarehouseStockDetail.StockInventoryValid.class) WarehouseStockInventoryDto stockInventory,
+    public InventoryDto inventory(@RequestBody @Validated(AbstractWarehouseStockDetail.StockInventoryValid.class) WarehouseStockInventoryDto stockInventory,
                           Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
@@ -268,6 +272,7 @@ public class StockController {
         Calendar handleDateWithTime = Calendar.getInstance();
         handleDateWithTime.set(stockInventory.getHandleDate().get(Calendar.YEAR), stockInventory.getHandleDate().get(Calendar.MONTH), stockInventory.getHandleDate().get(Calendar.DAY_OF_MONTH));
         stockInventory.setHandleDate(handleDateWithTime);
+        stockInventory.setIsFormula(false);
 
         return RespHelper.or500(doctorWarehouseStockWriteService.inventory(stockInventory));
     }
@@ -280,7 +285,7 @@ public class StockController {
      * @return
      */
     @RequestMapping(method = RequestMethod.PUT, value = "transfer")
-    public Long transfer(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockTransferDto stockTransfer, Errors errors) {
+    public InventoryDto transfer(@RequestBody @Validated(AbstractWarehouseStockDetail.StockOtherValid.class) WarehouseStockTransferDto stockTransfer, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
@@ -318,17 +323,20 @@ public class StockController {
         Calendar handleDateWithTime = Calendar.getInstance();
         handleDateWithTime.set(stockTransfer.getHandleDate().get(Calendar.YEAR), stockTransfer.getHandleDate().get(Calendar.MONTH), stockTransfer.getHandleDate().get(Calendar.DAY_OF_MONTH));
         stockTransfer.setHandleDate(handleDateWithTime);
+        stockTransfer.setIsFormula(false);
 
         return RespHelper.or500(doctorWarehouseStockWriteService.transfer(stockTransfer));
     }
 
+    //配方
     @RequestMapping(method = RequestMethod.POST, value = "formula")
-    public Long produce(
+    public InventoryDto produce(
             @RequestParam("orgId") Long orgId,
             @RequestParam("warehouseId") Long warehouseId,
             @RequestParam("feedFormulaId") Long feedFormulaId,
             @RequestParam("operatorId") Long operatorId,
             @RequestParam("operatorName") String operatorName,
+            @RequestParam("handleDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Calendar handleDate,
             @RequestParam("materialProduceJson") String materialProduceJson) {
 
 
@@ -337,7 +345,7 @@ public class StockController {
             throw new JsonResponseException("under.settlement");
 
         //会计年月
-        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(new Date());
+        Date settlementDate = doctorWarehouseSettlementService.getSettlementDate(handleDate.getTime());
         //会计年月已经结算后，不允许新增或编辑单据
         if (doctorWarehouseSettlementService.isSettled(orgId, settlementDate))
             throw new JsonResponseException("already.settlement");
@@ -368,11 +376,13 @@ public class StockController {
 //        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
 
         WarehouseFormulaDto formulaDto = new WarehouseFormulaDto();
-//        formulaDto.setFarmId(farmId);
+        formulaDto.setIsFormula(true);// 用来判断是否是配方 （陈娟 2018-09-26）
         formulaDto.setOrgId(orgId);
 //        formulaDto.setFarmName(farm.getName());
         formulaDto.setWarehouseId(warehouseId);
-        formulaDto.setHandleDate(Calendar.getInstance());
+        Calendar handleDateWithTime = Calendar.getInstance();
+        handleDateWithTime.set(handleDate.get(Calendar.YEAR), handleDate.get(Calendar.MONTH), handleDate.get(Calendar.DAY_OF_MONTH));
+        formulaDto.setHandleDate(handleDateWithTime);
         formulaDto.setSettlementDate(settlementDate);
         formulaDto.setOperatorId(operatorId);
         formulaDto.setOperatorName(operatorName);
@@ -405,7 +415,7 @@ public class StockController {
 
     //配方
     @RequestMapping(method = RequestMethod.PUT, value = "formula")
-    public Long formula(@RequestBody @Validated(AbstractWarehouseStockDetail.StockFormulaValid.class) WarehouseFormulaDto formulaDto, Errors errors) {
+    public InventoryDto formula(@RequestBody @Validated(AbstractWarehouseStockDetail.StockFormulaValid.class) WarehouseFormulaDto formulaDto, Errors errors) {
         if (errors.hasErrors())
             throw new JsonResponseException(errors.getFieldError().getDefaultMessage());
 
@@ -425,6 +435,7 @@ public class StockController {
         Calendar handleDateWithTime = Calendar.getInstance();
         handleDateWithTime.set(formulaDto.getHandleDate().get(Calendar.YEAR), formulaDto.getHandleDate().get(Calendar.MONTH), formulaDto.getHandleDate().get(Calendar.DAY_OF_MONTH));
         formulaDto.setHandleDate(handleDateWithTime);
+        formulaDto.setIsFormula(true);
 
         return RespHelper.or500(doctorWarehouseStockWriteService.updateFormula(formulaDto));
     }

@@ -36,9 +36,11 @@ import io.terminus.doctor.move.tools.DoctorImportInputSplitter;
 import io.terminus.doctor.move.tools.DoctorMoveEventExecutor;
 import io.terminus.doctor.user.dao.DoctorFarmMoveErrorDao;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
+import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorFarmMoveError;
 import io.terminus.doctor.user.model.PrimaryUser;
+import io.terminus.doctor.user.model.Sub;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,6 +94,8 @@ public class DoctorMoveAndImportManager {
     private DoctorFarmMoveErrorDao doctorFarmMoveErrorDao;
     @Autowired
     private PrimaryUserDao primaryUserDao;
+    @Autowired
+    private SubDao subDao;
 
     public void movePig(Long moveId, DoctorMoveBasicData moveBasicData) {
 
@@ -358,6 +362,16 @@ public class DoctorMoveAndImportManager {
 
         //3、删除groupEvent
         doctorGroupEventDao.deleteByFarmId(farmId, includePigTypes);
+    }
+
+    // 得到导入时猪场里面的账号-公司账号（陈娟 2018-10-10）
+    public Sub selectDefaultUser(Long farmId) {
+        return subDao.selectDefaultUser(farmId);
+    }
+
+    // 得到记录操作人（陈娟 2018-10-10）
+    public Sub findSubsByStatusAndUserId(Integer status, Long userId) {
+        return subDao.findSubsByStatusAndUserId(status, userId);
     }
 
 }

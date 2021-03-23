@@ -7,76 +7,25 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.event.editHandler.DoctorModifyGroupEventHandler;
 import io.terminus.doctor.event.editHandler.DoctorModifyPigEventHandler;
-import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupAntiepidemicEventHandler;
-import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupChangeEventHandler;
-import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupCloseEventHandler;
-import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupDiseaseEventHandler;
-import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupEventHandlers;
-import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupLiveStockEventHandler;
-import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupMoveInEventHandler;
-import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupNewEventHandler;
-import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTransFarmEventHandler;
-import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTransGroupEventHandler;
-import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupTurnSeedEventHandler;
-import io.terminus.doctor.event.editHandler.group.DoctorModifyGroupWeanEventHandler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmEventV2Handler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgFarmInEventV2Handler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigChgLocationEventHandler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigConditionEventHandler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigDiseaseEventHandler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEntryEventHandler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigEventHandlers;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigFarrowEventHandler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigFosterByEventHandler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigFosterEventHandler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigMatingEventHandler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigPigletsChgEventHandler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigPregCheckEventHandler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigRemoveEventHandler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigSemenEventHandler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigVaccinEventHandler;
-import io.terminus.doctor.event.editHandler.pig.DoctorModifyPigWeanEventHandler;
+import io.terminus.doctor.event.editHandler.group.*;
+import io.terminus.doctor.event.editHandler.pig.*;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
 import io.terminus.doctor.event.handler.DoctorPigEventHandler;
 import io.terminus.doctor.event.handler.DoctorPigEventHandlers;
 import io.terminus.doctor.event.handler.boar.DoctorSemenHandler;
-import io.terminus.doctor.event.handler.group.DoctorAntiepidemicGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorChangeGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorCloseGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorDiseaseGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorGroupEventHandlers;
-import io.terminus.doctor.event.handler.group.DoctorLiveStockGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorMoveInGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorNewGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorTransFarmGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorTransGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorTurnSeedGroupEventHandler;
-import io.terminus.doctor.event.handler.group.DoctorWeanGroupEventHandler;
-import io.terminus.doctor.event.handler.sow.DoctorSowFarrowingHandler;
-import io.terminus.doctor.event.handler.sow.DoctorSowFostersByHandler;
-import io.terminus.doctor.event.handler.sow.DoctorSowFostersHandler;
-import io.terminus.doctor.event.handler.sow.DoctorSowMatingHandler;
-import io.terminus.doctor.event.handler.sow.DoctorSowPigletsChgHandler;
-import io.terminus.doctor.event.handler.sow.DoctorSowPregCheckHandler;
-import io.terminus.doctor.event.handler.sow.DoctorSowWeanHandler;
-import io.terminus.doctor.event.handler.usual.DoctorChgFarmInV2Handler;
-import io.terminus.doctor.event.handler.usual.DoctorChgFarmV2Handler;
-import io.terminus.doctor.event.handler.usual.DoctorChgLocationHandler;
-import io.terminus.doctor.event.handler.usual.DoctorConditionHandler;
-import io.terminus.doctor.event.handler.usual.DoctorDiseaseHandler;
-import io.terminus.doctor.event.handler.usual.DoctorEntryHandler;
-import io.terminus.doctor.event.handler.usual.DoctorRemovalHandler;
-import io.terminus.doctor.event.handler.usual.DoctorVaccinationHandler;
+import io.terminus.doctor.event.handler.group.*;
+import io.terminus.doctor.event.handler.sow.*;
+import io.terminus.doctor.event.handler.usual.*;
 import io.terminus.doctor.user.dto.DoctorDepartmentDto;
 import io.terminus.doctor.user.dto.DoctorDepartmentLinerDto;
 import io.terminus.doctor.user.dto.FarmCriteria;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorFarmInformation;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorDepartmentReadService;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
-import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.parana.msg.impl.MessageAutoConfig;
 import io.terminus.zookeeper.common.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
@@ -91,6 +40,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
+import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -293,10 +244,8 @@ public class ServiceConfiguration {
             public Response<DoctorDepartmentDto> findCliqueTree(Long orgId) {
                 return null;
             }
-
             @Override
-            public Response<List<DoctorDepartmentDto>> availableBindDepartment(Long orgId) {
-                return null;
+            public Response<List<DoctorDepartmentDto>> availableBindDepartment(@NotNull(message = "orgId.not.null") Long orgId, String name) {return null;
             }
 
             @Override
@@ -367,53 +316,30 @@ public class ServiceConfiguration {
             public Response<DoctorFarm> findByNumber(String number) {
                 return null;
             }
+
+            @Override
+            public List<DoctorFarmInformation> findSubordinatePig(Date date) {
+                return null;
+            }
+
+            @Override
+            public List<DoctorOrg> findOrgByParentId(Long parent) {
+                return null;
+            }
+
+            @Override
+            public Response<List<DoctorFarm>> findFarmsByOrgId1(Long orgId) {
+                return null;
+            }
+
+            @Override
+            public Response<List<DoctorFarm>> findFarmsByGroupId( Long groupId) {
+                return null;
+            }
+
         };
     }
 
-    @Bean
-    public DoctorOrgReadService doctorOrgReadService() {
-        return new DoctorOrgReadService() {
 
-            @Override
-            public Response<DoctorOrg> findOrgById(Long orgId) {
-                return null;
-            }
-
-            @Override
-            public Response<List<DoctorOrg>> findOrgByIds(List<Long> orgIds) {
-                return null;
-            }
-
-            @Override
-            public Response<List<DoctorOrg>> findOrgsByUserId(Long userId) {
-                return null;
-            }
-
-            @Override
-            public Response<List<DoctorOrg>> findAllOrgs() {
-                return null;
-            }
-
-            @Override
-            public Response<List<DoctorOrg>> findOrgByParentId(Long parentId) {
-                return null;
-            }
-
-            @Override
-            public Response<List<DoctorOrg>> suggestOrg(String fuzzyName, Integer type) {
-                return null;
-            }
-
-            @Override
-            public Response<Paging<DoctorOrg>> paging(Map<String, Object> criteria, Integer pageSize, Integer pageNo) {
-                return null;
-            }
-
-            @Override
-            public Response<DoctorOrg> findByName(String name) {
-                return null;
-            }
-        };
-    }
 
 }

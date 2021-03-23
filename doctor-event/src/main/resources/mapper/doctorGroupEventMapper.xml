@@ -624,11 +624,11 @@
     </select>
 
     <select id="findOperators" parameterType="map" resultType="io.terminus.doctor.event.dto.event.DoctorEventOperator">
-        SELECT distinct creator_name AS operatorName,  creator_id AS operatorId
+        SELECT distinct operator_name AS operatorName,  operator_id AS operatorId
         FROM
         <include refid="tb"/>
         WHERE status = 1
-        AND creator_id IS NOT NULL
+        AND operator_id IS NOT NULL
         <if test="types != null &amp;&amp; types.size() > 0">
             AND `type` IN
             <foreach collection="types" item="i" open="(" close=")" separator=",">
@@ -791,23 +791,25 @@
         WHERE id = #{id}
     </update>
 
-    <select id="findNurseSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
+    <select id="findCareSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
         select
         a.event_at as salesDate,
-        a.customer_name as client,
-        '7_2' as pigType,
-        "仔猪" as pigTypeName,
+        a.customer_id as customerId,
+        c.name as client,
+        a.pig_type as pigType,
+        "保育猪" as pigTypeName,
         a.barn_name as barnName,
-        sum(a.avg_day_age*a.quantity)/sum(a.quantity) as ages,
-        sum(a.quantity) as pigNumber,
-        sum(a.weight) as pigWeight,
-        sum(a.amount)/sum(a.weight) as pigPrice,
-        sum(a.amount) as pigAmount,
+        a.avg_day_age * a.quantity / a.quantity as ages,
+        a.quantity as pigNumber,
+        a.weight as pigWeight,
+        a.amount / a.weight as pigPrice,
+        a.amount as pigAmount,
         b.breed_id as breedId,
         b.breed_name as breedName
-        from doctor_group_events a left join doctor_groups b on a.group_id = b.id
+        from doctor_group_events a left join doctor_groups b on  a.group_id = b.id
+        left join doctor_customers c on a.customer_id = c.id
         where a.type = 3
-        and a.pig_type in ( 2,7 )
+        and a.pig_type = 2
         and a.change_type_id = 109
         <if test="breedsId != null">AND b.breed_id = #{breedsId}</if>
         <if test="farmId != null">AND a.farm_id = #{farmId}</if>
@@ -817,25 +819,57 @@
         <if test="client != null">AND a.customer_id = #{client}</if>
         <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
-        group by a.group_id, a.event_at, a.customer_id
+        order by a.event_at ASC ;
+    </select>
+
+    <select id="findNurseSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
+        select
+        a.event_at as salesDate,
+        a.customer_id as customerId,
+        c.name as client,
+        a.pig_type as pigType,
+        "仔猪" as pigTypeName,
+        a.barn_name as barnName,
+        a.avg_day_age * a.quantity / a.quantity as ages,
+        a.quantity as pigNumber,
+        a.weight as pigWeight,
+        a.amount/a.weight as pigPrice,
+        a.amount as pigAmount,
+        b.breed_id as breedId,
+        b.breed_name as breedName
+        from doctor_group_events a left join doctor_groups b on a.group_id = b.id
+        left join doctor_customers c on a.customer_id = c.id
+        where a.type = 3
+        and a.pig_type = 7
+        and a.change_type_id = 109
+        <if test="breedsId != null">AND b.breed_id = #{breedsId}</if>
+        <if test="farmId != null">AND a.farm_id = #{farmId}</if>
+        <if test="batch != null">AND a.group_code = #{batch}</if>
+        <if test="barnId != null">AND a.barn_id = #{barnId}</if>
+        <if test="barnName != null">AND a.barn_name = #{barnName}</if>
+        <if test="client != null">AND a.customer_id = #{client}</if>
+        <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
+        <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
         order by a.event_at ASC ;
     </select>
 
     <select id="findReverseSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
         select
         a.event_at as salesDate,
-        a.customer_name as client,
+        a.customer_id as customerId,
+        c.name as client,
         a.pig_type as pigType,
         "后备猪" as pigTypeName,
         a.barn_name as barnName,
-        sum(a.avg_day_age*a.quantity)/sum(a.quantity) as ages,
-        sum(a.quantity) as pigNumber,
-        sum(a.weight) as pigWeight,
-        sum(a.amount)/sum(a.weight) as pigPrice,
-        sum(a.amount) as pigAmount,
+        a.avg_day_age * a.quantity / a.quantity  as ages,
+        a.quantity as pigNumber,
+        a.weight as pigWeight,
+        a.amount / a.weight as pigPrice,
+        a.amount as pigAmount,
         b.breed_id as breedId,
         b.breed_name as breedName
         from doctor_group_events a left join doctor_groups b on a.group_id = b.id
+        left join doctor_customers c on a.customer_id = c.id
         where a.type = 3
         and a.pig_type = 4
         and a.change_type_id = 109
@@ -847,25 +881,26 @@
         <if test="client != null">AND a.customer_id = #{client}</if>
         <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
-        group by a.group_id, a.event_at, a.customer_id
         order by a.event_at ASC ;
     </select>
 
     <select id="findFattenSales" parameterType="map" resultType="io.terminus.doctor.event.dto.DoctorPigSalesExportDto">
         select
         a.event_at as salesDate,
-        a.customer_name as client,
+        a.customer_id as customerId,
+        c.name as client,
         a.pig_type as pigType,
         "育肥猪" as pigTypeName,
         a.barn_name as barnName,
-        sum(a.avg_day_age*a.quantity)/sum(a.quantity) as ages,
-        sum(a.quantity) as pigNumber,
-        sum(a.weight) as pigWeight,
-        sum(a.amount)/sum(a.weight) as pigPrice,
-        sum(a.amount) as pigAmount,
+        a.avg_day_age * a.quantity / a.quantity as ages,
+        a.quantity as pigNumber,
+        a.weight as pigWeight,
+        a.amount / a.weight as pigPrice,
+        a.amount as pigAmount,
         b.breed_id as breedId,
         b.breed_name as breedName
         from doctor_group_events a left join doctor_groups b on a.group_id = b.id
+        left join doctor_customers c on a.customer_id = c.id
         where a.type = 3
         and a.pig_type = 3
         and a.change_type_id = 109
@@ -877,8 +912,7 @@
         <if test="client != null">AND a.customer_id = #{client}</if>
         <if test="startDate != null">AND <![CDATA[ a.event_at >= #{startDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ a.event_at <= #{endDate} ]]> </if>
-        group by a.group_id, a.event_at, a.customer_id
-        order by a.event_at ASC;
+        order by a.event_at ASC ;
     </select>
 
     <sql id="saleCriteria">
@@ -897,4 +931,113 @@
         group by farm_id
     </select>
 
+
+    <select id="findGroupEvents" parameterType="map" resultMap="DoctorGroupEventMap">
+        select * from doctor_group_events where farm_id = #{farmId} and (type=3 or type=4 or type=5 or type=9 or type=10) and group_id=(
+        select group_id from doctor_group_events where rel_pig_event_id = #{relPigEventId} and farm_id = #{farmId}
+        ) and id>(
+        select id from doctor_group_events where rel_pig_event_id = #{relPigEventId} and farm_id = #{farmId}
+        )ORDER BY event_at DESC,id DESC
+    </select>
+
+    <select id="groupList" parameterType="map" resultType="map">
+        select b.id as group_id,b.group_code, b.pig_type, b.current_barn_id, b.current_barn_name, c.staff_id, c.staff_name ,b.open_at as build_event_at,b.close_at as close_event_at
+        from doctor_groups b
+        join doctor_barns c on b.current_barn_id = c.id
+        where b.farm_id = #{farmId} and
+        ((b.status = 1 and date(b.open_at) &lt;= #{time}) or (b.status = -1 and date(b.open_at) &lt;= #{time} and date(b.close_at) >= #{time}))
+        <if test="barn != null">and c.id = #{barn}</if>
+        <if test="groupCode != null and groupCode != ''"> AND b.group_code like CONCAT(CONCAT('%',#{groupCode}),'%')</if>
+        <if test="operatorName != null and operatorName != ''"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
+        <if test="groupType != null">and c.pig_type = #{groupType}</if>
+        <if test="buildBeginGroupTime != null">and date(b.open_at) >= #{buildBeginGroupTime}</if>
+        <if test="buildEndGroupTime != null">and date(b.open_at) &lt;= #{buildEndGroupTime}</if>
+        <if test="closeBeginGroupTime != null">and date(b.close_at) >= #{closeBeginGroupTime}</if>
+        <if test="closeEndGroupTime != null">and date(b.close_at) &lt;= #{closeEndGroupTime}</if>
+    </select>
+    <select id="groupList1" parameterType="map" resultType="map">
+        select b.id as group_id,b.group_code, b.pig_type, b.current_barn_id, b.current_barn_name, c.staff_id, c.staff_name ,b.close_at as close_event_at,b.open_at as build_event_at
+        from doctor_groups b
+        join doctor_barns c on b.current_barn_id = c.id
+        where b.farm_id = #{farmId} and b.status = -1
+        and date(b.close_at) = #{time}
+        <if test="barn != null">and c.id = #{barn}</if>
+        <if test="groupCode != null and groupCode != ''"> AND b.group_code like CONCAT(CONCAT('%',#{groupCode}),'%')</if>
+        <if test="operatorName != null and operatorName != ''"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
+        <if test="groupType != null">and c.pig_type = #{groupType}</if>
+        <if test="buildBeginGroupTime != null">and date(b.open_at) >= #{buildBeginGroupTime}</if>
+        <if test="buildEndGroupTime != null">and date(b.open_at) &lt;= #{buildEndGroupTime}</if>
+        <if test="closeBeginGroupTime != null">and date(b.close_at) >= #{closeBeginGroupTime}</if>
+        <if test="closeEndGroupTime != null">and date(b.close_at) &lt;= #{closeEndGroupTime}</if>
+    </select>
+    <select id="groupList2" parameterType="map" resultType="map">
+        select a.group_id,a.group_code, b.pig_type, b.current_barn_id, b.current_barn_name, c.staff_id, c.staff_name ,a.event_at
+        from doctor_group_events a
+        join doctor_groups b on a.group_id = b.id
+        join doctor_barns c on b.current_barn_id = c.id
+        where a.farm_id = #{farmId} and a.status = 1
+        <if test="time != null">and a.event_at &lt;= #{time}</if>
+        <if test="barn != null">and c.id = #{barn}</if>
+        <if test="groupCode != null"> AND a.group_code like CONCAT(CONCAT('%',#{groupCode}),'%')</if>
+        <if test="operatorName != null"> AND c.staff_name like CONCAT(CONCAT('%',#{operatorName}),'%')</if>
+        <if test="groupType != null">and c.pig_type = #{groupType}</if>
+        <if test="buildBeginGroupTime != null">and a.event_at >= #{buildBeginGroupTime}</if>
+        <if test="buildEndGroupTime != null">and a.event_at &lt;= #{buildEndGroupTime}</if>
+        group by a.group_id
+    </select>
+    <select id="getCunlan" parameterType="map" resultType="Integer">
+        select
+        IFNULL((select sum(quantity) from doctor_group_events where group_id = #{groupId} and status = 1 and event_at &lt;= #{time} and type in (2)),0)
+        -
+        IFNULL((select sum(quantity) from doctor_group_events where type in (3,4,5,9) and status = 1  and event_at &lt;= #{time} and group_id = #{groupId}),0)
+        from dual
+    </select>
+    <select id="getInAvgweight" parameterType="map" resultType="Double">
+       select
+        IFNULL((select sum(weight) from doctor_group_events where group_id = #{groupId} and status = 1 and event_at &lt;= #{time} and type in (2)),0)
+        /
+        IFNULL((select sum(quantity) from doctor_group_events where group_id = #{groupId} and status = 1 and event_at &lt;= #{time} and type in (2)),0)
+        from dual
+    </select>
+    <select id="getOutAvgweight" parameterType="map" resultType="Double">
+        select
+        IFNULL((select sum(weight) from doctor_group_events where group_id = #{groupId} and status = 1 and event_at &lt;= #{time} and type in (3,4,5,9)),0)
+        /
+        IFNULL((select sum(quantity) from doctor_group_events where group_id = #{groupId} and status = 1 and event_at &lt;= #{time} and type in (3,4,5,9)),0)
+        from dual
+    </select>
+    <select id="getAvgDayAge" parameterType="map" resultType="Double">
+      select
+        (IFNULL((select sum((DATEDIFF(#{time},event_at)+avg_day_age)*quantity) from doctor_group_events where type = 2 and status = 1 and group_id = #{groupId}),0)
+        -IFNULL((select sum(quantity*(DATEDIFF(#{time},event_at)+(avg_day_age-(DATEDIFF(updated_at,event_at))))) from doctor_group_events where type in (3,4,5,9) and status = 1 and group_id = #{groupId}),0))
+      from dual
+    </select>
+    <select id="getBuildEventAt" parameterType="map" resultType="Date">
+       select event_at from doctor_group_events where group_id = #{groupId} and type = 1 and status = 1
+    </select>
+    <select id="findEventIncludeTypes1" parameterType="map" resultMap="DoctorGroupEventMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE status = 1
+        AND group_id = #{groupId}
+        and event_at &lt;= #{time}
+        <if test="types != null &amp;&amp; types.size() > 0">
+            AND `type` IN
+            <foreach collection="types" item="i" open="(" close=")" separator=",">
+                #{i}
+            </foreach>
+        </if>
+        ORDER BY date_format(event_at, '%Y-%m-%d') ASC , id ASC
+    </select>
+    <select id="isCloseGroup" parameterType="map" resultType="int">
+         select count(1) from doctor_groups where id = #{groupId} and status = 1
+    </select>
+    <select id="lastEventByGroupId" parameterType="long" resultMap="DoctorGroupEventMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE status = 1
+        AND group_id = #{groupId}
+        and type != 11
+        ORDER BY date_format(event_at, '%Y-%m-%d') DESC, id DESC limit 1
+    </select>
 </mapper>

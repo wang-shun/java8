@@ -18,6 +18,12 @@ import java.util.Map;
  */
 public interface DoctorWarehouseMaterialApplyReadService {
 
+    // 仓库领用明细报表 （陈娟 2018-10-17）
+    Response<Paging<Map>> collarReport(Integer flag,Integer pageNo, Integer pageSize,Long orgId,Long farmId,String startDate,String endDate,Integer materialType,String materialName,Integer pigType,String pigBarnName, String pigGroupName);
+
+    // 仓库领用明细报表导出 （陈娟 2018-10-19）
+    List<Map> collarReportExport(Integer flag,Long orgId,Long farmId,String startDate,String endDate,Integer materialType,String materialName,Integer pigType,String pigBarnName, String pigGroupName);
+
     /**
      * 查询
      *

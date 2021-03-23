@@ -245,9 +245,16 @@ public class DoctorDeliverSynchronizer {
     private Integer farrowNest(Long orzId, Integer orzType, String startAt, String endAt){
         if (Objects.equals(orzType, OrzDimension.FARM.getValue())) {
             return doctorPigStatisticDao.mateLeadToFarrow(orzId, startAt, endAt);
-        } else {
+        } else if (Objects.equals(orzType, OrzDimension.ORG.getValue())) {
             int earlyFarrowNest = 0;
             List<DoctorFarm> farmList = RespHelper.orServEx(doctorFarmReadService.findFarmsByOrgId(orzId));
+            for (DoctorFarm farm: farmList) {
+                earlyFarrowNest += doctorPigStatisticDao.mateLeadToFarrow(farm.getId(), startAt, endAt);
+            }
+            return earlyFarrowNest;
+        }else{
+            int earlyFarrowNest = 0;
+            List<DoctorFarm> farmList = RespHelper.orServEx(doctorFarmReadService.findFarmsByGroupId(orzId));
             for (DoctorFarm farm: farmList) {
                 earlyFarrowNest += doctorPigStatisticDao.mateLeadToFarrow(farm.getId(), startAt, endAt);
             }

@@ -104,4 +104,24 @@ public class SubRoleReadServiceImpl implements SubRoleReadService {
             return Response.fail("sub.role.paging.fail");
         }
     }
+
+    /*
+        孔景军（查找主账号角色）
+     */
+    @Override
+    public Response<Paging<SubRole>> findrole( Integer status, String roleName, Integer roleType, Integer pageNo, Integer size) {
+        try {
+            PageInfo page = new PageInfo(pageNo, size);
+            SubRole criteria = new SubRole();
+            criteria.setRoleType(roleType);
+            criteria.setStatus(status);
+            criteria.setName(roleName);
+            criteria.setAppKey("MOBILE");
+            return Response.ok(subRoleDao.pagingMainRole(page.getOffset(), page.getLimit(), criteria));
+        } catch (Exception e) {
+            log.error("paging seller roles failed, farmId={}, status={}, pageNo={}, size={}, cause:{}",
+                    roleType, status, pageNo, size, Throwables.getStackTraceAsString(e));
+            return Response.fail("sub.role.paging.fail");
+        }
+    }
 }

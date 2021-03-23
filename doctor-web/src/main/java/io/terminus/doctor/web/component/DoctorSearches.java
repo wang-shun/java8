@@ -22,28 +22,16 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.ToJsonMapper;
-import io.terminus.doctor.event.dto.DoctorBarnDto;
-import io.terminus.doctor.event.dto.DoctorGroupDetail;
-import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
-import io.terminus.doctor.event.dto.DoctorSuggestPig;
-import io.terminus.doctor.event.dto.GroupPigPaging;
+import io.terminus.doctor.event.dto.*;
 import io.terminus.doctor.event.dto.msg.DoctorMessageUserDto;
-import io.terminus.doctor.event.dto.search.DoctorGroupCountDto;
-import io.terminus.doctor.event.dto.search.DoctorLiveStockDto;
-import io.terminus.doctor.event.dto.search.DoctorPigCountDto;
-import io.terminus.doctor.event.dto.search.SearchedBarn;
-import io.terminus.doctor.event.dto.search.SearchedBarnDto;
-import io.terminus.doctor.event.dto.search.SearchedGroup;
-import io.terminus.doctor.event.dto.search.SearchedPig;
+import io.terminus.doctor.event.dto.search.*;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.*;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.event.service.DoctorMessageUserReadService;
-import io.terminus.doctor.event.service.DoctorPigEventReadService;
-import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.event.service.*;
+import io.terminus.doctor.user.model.DoctorFarmInformation;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.web.core.export.Exporter;
 import io.terminus.doctor.web.front.event.dto.DoctorSowManagerDto;
@@ -51,6 +39,7 @@ import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -59,12 +48,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.isEmpty;
@@ -95,6 +81,8 @@ public class DoctorSearches {
 
     private final DoctorPigReadService doctorPigReadService;
 
+    private final DoctorFarmReadService doctorFarmReadService;
+
     @RpcConsumer
     private DoctorPigEventReadService doctorPigEventReadService;
 
@@ -111,12 +99,14 @@ public class DoctorSearches {
                           DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
                           DoctorGroupReadService doctorGroupReadService,
                           DoctorMessageUserReadService doctorMessageUserReadService,
-                          DoctorPigReadService doctorPigReadService) {
+                          DoctorPigReadService doctorPigReadService,
+                          DoctorFarmReadService doctorFarmReadService) {
         this.doctorBarnReadService = doctorBarnReadService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorMessageUserReadService = doctorMessageUserReadService;
         this.doctorPigReadService = doctorPigReadService;
+        this.doctorFarmReadService = doctorFarmReadService;
     }
 
     /**
@@ -153,8 +143,8 @@ public class DoctorSearches {
     @RequestMapping(value = "/sowpigs", method = RequestMethod.GET)
     public GroupPigPaging<SearchedPig> searchSowPigs(@RequestParam(required = false) Integer pageNo,
                                              @RequestParam(required = false) Integer pageSize,
-                                             @RequestParam Map<String, String> params) {
-        Paging<SearchedPig> paging = pagePigs(pageNo, pageSize, params, DoctorPig.PigSex.SOW);
+                                             @RequestParam Map<String, String> params) throws ParseException {
+        Paging<SearchedPig> paging = pageSowPigs(pageNo, pageSize, params);
         Long groupCount = getGroupCountWhenFarrow(params);
         return new GroupPigPaging<>(paging, groupCount, paging.getTotal());
     }
@@ -341,7 +331,7 @@ public class DoctorSearches {
 
         Paging<SearchedGroup> paging = pagingGroup(pageNo, pageSize, searchDto);
         Long groupCount = RespHelper.orServEx(doctorGroupReadService.getGroupCount(searchDto));
-        Long sowCount = getSowCountWhenFarrow(searchDto);
+        Long sowCount = getSowCountWhenFarrow(searchDto,Long.valueOf(params.get("farmId")));
         return new GroupPigPaging<>(paging, groupCount, sowCount);
     }
 
@@ -425,14 +415,14 @@ public class DoctorSearches {
     }
 
     //如果是产房，获取一下产房里的母猪数
-    private Long getSowCountWhenFarrow(DoctorGroupSearchDto searchDto) {
+    private Long getSowCountWhenFarrow(DoctorGroupSearchDto searchDto,Long farmId) {
         Long sowCount = 0L;
         if (notEmpty(searchDto.getBarnIdList())) {
             for (Long barnId : searchDto.getBarnIdList()) {
                 DoctorBarn barn = RespHelper.or500(doctorBarnReadService.findBarnById(barnId));
                 if (barn != null && Objects.equals(barn.getPigType(), PigType.DELIVER_SOW.getValue())) {
                     List<DoctorPigTrack> pigTracks = RespHelper.or(doctorPigReadService
-                            .findActivePigTrackByCurrentBarnId(barnId), Collections.emptyList());
+                            .findActivePigTrackByCurrentBarnIds(barnId,farmId), Collections.emptyList());
                     sowCount += pigTracks.size();
                 }
             }
@@ -524,6 +514,9 @@ public class DoctorSearches {
         DoctorBarnDto barnDto = getBarnSearchMap(params);
         if (barnDto.getFarmId() == null) {
             return new Paging<>(0L, Collections.emptyList());
+        }
+        if (barnDto.getStatus() == null){
+            barnDto.setStatus(1);
         }
 
         Paging<DoctorBarn> barns = RespHelper.or500(doctorBarnReadService.pagingBarn(barnDto, pageNo, pageSize));
@@ -748,4 +741,185 @@ public class DoctorSearches {
         }).collect(toList());
         return new Paging<>(paging.getTotal(), list);
     }
+
+
+    // -------------- 新增代码-----------------------
+    @RequestMapping(value = "/notTransitionsSow", method = RequestMethod.GET)
+    public List<Long> notTransitionsSow(@RequestParam Long farmId,@RequestParam Long barnId,
+                                        @RequestParam String status,@RequestParam String pigCode,
+                                        @RequestParam String rfid,@RequestParam Integer isRemoval){
+        Map<String,Object> valueMap = new HashMap<>();
+        valueMap.put("statuses", Splitters.splitToInteger(status, Splitters.UNDERSCORE));
+        if("2".equals(status)){ isRemoval = 1; }
+        return RespHelper.or500(doctorPigReadService.findNotTransitionsSow(farmId,barnId,valueMap,pigCode,rfid,isRemoval));
+    }
+
+    @RequestMapping(value = "/haveTransitionsSow", method = RequestMethod.GET)
+    public List<Long> haveTransitionsSow(@RequestParam Long farmId,@RequestParam Long barnId,
+                                         @RequestParam String pigCode,@RequestParam String rfid){
+        return RespHelper.or500(doctorPigReadService.findHaveTransitionsSow(farmId,barnId,pigCode,rfid));
+    }
+
+    @RequestMapping(value = "/eventTransitionsSow", method = RequestMethod.GET)
+    public List<Long> eventTransitionsSow(@RequestParam Long farmId,@RequestParam Long barnId,
+                                          @RequestParam String status,@RequestParam String pigCode,
+                                          @RequestParam String rfid,@RequestParam String types,
+                                          @RequestParam Integer isRemoval,@RequestParam String beginDate,
+                                          @RequestParam String endDate) throws ParseException {
+        Map<String,Object> valueMap = new HashMap<>();
+        if(status!=null && !"".equals(status)) {
+            valueMap.put("statuses", Splitters.splitToInteger(status, Splitters.UNDERSCORE));
+        }
+        if("2".equals(status)){ isRemoval = 1; }
+        List<Long> notList = RespHelper.or500(doctorPigReadService.findNotTransitionsSow(farmId,barnId,valueMap,pigCode,rfid,isRemoval));
+        if( "13".equals(status) ) {
+            List<Long> haveList = RespHelper.or500(doctorPigReadService.findHaveTransitionsSow(farmId, barnId, pigCode, rfid));
+            notList.addAll(haveList);
+        }
+        Map<String, Object> eventCriteria = Maps.newHashMap();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        if (!Strings.isNullOrEmpty(types)){
+            eventCriteria.put("types", Splitters.splitToInteger(types, Splitters.COMMA));
+        }
+        if(!beginDate.isEmpty()){
+            eventCriteria.put("beginDate",sdf.parse(beginDate));
+        }
+        if(!endDate.isEmpty()){
+            eventCriteria.put("endDate", sdf.parse(endDate));
+        }
+        eventCriteria.put("farmId", farmId);
+        eventCriteria.put("notList",notList);
+        eventCriteria = Params.filterNullOrEmpty(eventCriteria);
+        return RespHelper.or500(doctorPigEventReadService.findPigIdsByEvent(eventCriteria));
+    }
+
+    private Paging<SearchedPig> pageSowPigs (Integer pageNo, Integer pageSize,Map<String, String> params) throws ParseException {
+
+        if (farmIdNotExist(params)) {
+            return new Paging<>(0L, Collections.emptyList());
+        }
+        searchFromMessage(params);
+        Map<String,Object> valueMap = new HashMap<>();
+
+        Long farmId = null;
+        Long barnId = null;
+        Integer isRemoval = null;
+        String pigCode = null;
+        String rfid = null;
+        if(!Strings.isNullOrEmpty(params.get("farmId"))){
+            farmId = Long.parseLong(params.get("farmId"));
+        }
+        if(!Strings.isNullOrEmpty(params.get("barnId"))){
+            barnId = Long.parseLong(params.get("barnId"));
+        }
+        if(!Strings.isNullOrEmpty(params.get("statuses"))){
+            valueMap.put("statuses", Splitters.splitToInteger(params.get("statuses"), Splitters.UNDERSCORE));
+        }
+        if(!Strings.isNullOrEmpty(params.get("q"))){
+            pigCode = params.get("q");
+        }
+        if(!Strings.isNullOrEmpty(params.get("isRemoval"))){
+            isRemoval = Integer.parseInt(params.get("isRemoval"));
+        }
+        if(!Strings.isNullOrEmpty(params.get("rfid"))){
+            rfid = params.get("rfid");
+        }
+
+        String leave = String.valueOf(valueMap.get("statuses"));
+        if(leave!=null && "[2]".equals(leave)){
+            isRemoval = 1;
+        }
+
+        List<Long> notList;
+        if( "13".equals(params.get("statuses")) ){
+            notList = RespHelper.or500(doctorPigReadService.findHaveTransitionsSow(farmId,barnId,pigCode,rfid));
+        }else{
+            notList = RespHelper.or500(doctorPigReadService.findNotTransitionsSow(farmId,barnId,valueMap,pigCode,rfid,isRemoval));
+        }
+        if(notList.size()<=0){
+            return new Paging<>(0L, Collections.emptyList());
+        }
+
+        List<Long> eventList;
+        boolean searchEvent = !Strings.isNullOrEmpty(params.get("types"))
+                || !Strings.isNullOrEmpty(params.get("beginDate"))
+                || !Strings.isNullOrEmpty(params.get("endDate"));
+        if(searchEvent){
+            Map<String, Object> eventCriteria = Maps.newHashMap();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            if (!Strings.isNullOrEmpty(params.get("types"))){
+                eventCriteria.put("types", Splitters.splitToInteger(params.get("types"), Splitters.COMMA));
+            }
+            String beginDate = params.get("beginDate");
+            String endDate = params.get("endDate");
+            if(!beginDate.isEmpty()){
+                eventCriteria.put("beginDate",sdf.parse(beginDate));
+            }
+            if(!endDate.isEmpty()){
+                eventCriteria.put("endDate", sdf.parse(endDate));
+            }
+            eventCriteria.put("farmId", farmId);
+            eventCriteria.put("notList",notList);
+            eventCriteria = Params.filterNullOrEmpty(eventCriteria);
+            eventList = RespHelper.or500(doctorPigEventReadService.findPigIdsByEvent(eventCriteria));
+        }else{
+            eventList = notList;
+        }
+
+        Map<String,Object> objectMap = new HashMap<>();
+        Paging<SearchedPig> paging = null;
+
+        if(eventList.size()>0){
+            objectMap.put("pigIds",eventList);
+            if("[2]".equals(leave)){
+                paging = RespHelper.or500(doctorPigReadService.pagesSowPigById(objectMap, pageNo, pageSize));
+            }else {
+                paging = RespHelper.or500(doctorPigReadService.pagingPig(objectMap, pageNo, pageSize));
+            }
+
+            Long finalFarmId = farmId;
+            paging.getData().forEach(searchedPig -> {
+                Integer status = searchedPig.getStatus();
+                Date eventAt;
+
+                if ( "13".equals(params.get("statuses")) ) {
+                    eventAt = RespHelper.or500(doctorPigEventReadService.findFarmSowEventAt(searchedPig.getId(), finalFarmId));
+
+                }else{
+                    KongHuaiPregCheckResult result = KongHuaiPregCheckResult.from(searchedPig.getStatus());
+                    if (result != null) {
+                        status = PigStatus.KongHuai.getKey();
+                    }
+
+                    if (Objects.equals(status, PigStatus.Pregnancy.getKey())) {
+                        status = PigStatus.Mate.getKey();
+                    }
+
+                    if (status == 4 || status == 7){
+                        eventAt = RespHelper.or500(doctorPigEventReadService.findMateEventToPigId(searchedPig.getId()));
+                    } else {
+                        eventAt = RespHelper.or500(doctorPigEventReadService.findEventAtLeadToStatus(searchedPig.getId(), status));
+                    }
+                }
+
+                Integer statusDay = DateUtil.getDeltaDays(eventAt, new Date()) + 1;
+                searchedPig.setStatusDay(statusDay);
+                if ( "13".equals(params.get("statuses")) ) {
+                    searchedPig.setStatus(13);
+                    searchedPig.setStatusName("已转场");
+                    searchedPig.setFarmId(Long.parseLong(params.get("farmId")));
+                }
+            });
+        }
+
+        log.error("pagePigs:size"+paging.getData().size());
+        return paging;
+    }
+
+    @RequestMapping(value = "/findSubordinatePig",produces="application/json;charset=UTF-8", method = RequestMethod.GET)
+    public String findSubordinatePig(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date date){
+        List<DoctorFarmInformation> farmInformation = doctorFarmReadService.findSubordinatePig(date);
+        return ToJsonMapper.JSON_NON_EMPTY_MAPPER.toJson(farmInformation);
+    }
+
 }

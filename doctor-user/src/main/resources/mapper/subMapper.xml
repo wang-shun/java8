@@ -23,6 +23,7 @@
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
         <result column="frozen" property="frozen"/>
+        <result column="user_type" property="userType"/>
     </resultMap>
 
     <sql id="tb">
@@ -35,11 +36,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-      user_id, user_name, real_name, parent_user_id, parent_user_name, farm_id, role_id, role_name, contact, status, extra_json, created_at, updated_at, frozen
+      user_id, user_name, real_name, parent_user_id, parent_user_name, farm_id, role_id, role_name, contact, status, extra_json, created_at, updated_at, frozen,user_type
     </sql>
 
     <sql id="vals">
-        #{userId}, #{userName}, #{realName}, #{parentUserId}, #{parentUserName}, #{farmId}, #{roleId}, #{roleName}, #{contact}, #{status}, #{extraJson}, now(), now(), frozen
+        #{userId}, #{userName}, #{realName}, #{parentUserId}, #{parentUserName}, #{farmId}, #{roleId}, #{roleName}, #{contact}, #{status}, #{extraJson}, now(), now(), #{frozen},#{userType}
     </sql>
 
     <sql id="criteria">
@@ -53,6 +54,7 @@
         <if test="roleId != null">AND role_id = #{roleId}</if>
         <if test="roleName != null">AND role_name like concat('%', #{roleName}, '%')</if>
         <if test="contact != null">AND contact = #{contact}</if>
+        <if test="userType != null">AND user_type = #{userType}</if>
     </sql>
 
     <sql id="frozen">
@@ -88,6 +90,7 @@
         <if test="status != null">status = #{status},</if>
         <if test="extraJson != null">extra_json = #{extraJson},</if>
         <if test="frozen != null">frozen = #{frozen},</if>
+        <if test="userType != null">user_type = #{userType},</if>
         updated_at = now()
         WHERE id = #{id}
     </update>
@@ -226,6 +229,21 @@
         <where>
             farm_id = #{farmId}
             AND status = #{status}
+            <if test="userId != null">
+            AND  user_id != #{userId}
+            </if>
+            <include refid="frozen"/>
+        </where>
+    </select>
+
+    <!-- 软件登陆人员是谁，仓库单据操作人就默认是谁，并支持修改 （陈娟 2018-09-13） -->
+    <select id="findSubsByFarmIdAndStatusAndUserId" parameterType="map" resultMap="SubMap" >
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            farm_id = #{farmId}
+            AND status = #{status}
+            AND  user_id = #{userId}
             <include refid="frozen"/>
         </where>
     </select>
@@ -236,4 +254,19 @@
         set frozen = 1
         where user_id = #{userId}
     </update>
+
+    <!--得到导入时猪场里面的账号-公司账号（陈娟 2018-10-10）-->
+    <select id="selectDefaultUser" parameterType="Long" resultMap="SubMap">
+        select * from doctor_user_subs where farm_id = #{farmId} and user_type=2
+    </select>
+
+    <!--根据记录操作人的Id得到用户（陈娟 2018-10-10）-->
+    <select id="findSubsByStatusAndUserId" parameterType="map" resultMap="SubMap" >
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where> status = #{status}
+            AND  user_id = #{userId}
+            <include refid="frozen"/>
+        </where>
+    </select>
 </mapper>

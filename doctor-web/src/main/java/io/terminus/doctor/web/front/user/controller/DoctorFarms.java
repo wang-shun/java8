@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.Splitters;
@@ -13,12 +14,7 @@ import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
-import io.terminus.doctor.user.service.DoctorFarmReadService;
-import io.terminus.doctor.user.service.DoctorStaffReadService;
-import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
-import io.terminus.doctor.user.service.DoctorUserProfileReadService;
-import io.terminus.doctor.user.service.DoctorUserReadService;
-import io.terminus.doctor.user.service.PrimaryUserReadService;
+import io.terminus.doctor.user.service.*;
 import io.terminus.doctor.web.core.dto.DoctorBasicDto;
 import io.terminus.doctor.web.core.dto.FarmStaff;
 import io.terminus.doctor.web.core.service.DoctorStatisticReadService;
@@ -34,9 +30,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 
@@ -52,6 +51,7 @@ import static io.terminus.common.utils.Arguments.notNull;
 public class DoctorFarms {
 
     private final DoctorFarmReadService doctorFarmReadService;
+    private final DoctorOrgReadService doctorOrgReadService;
     private final DoctorStaffReadService doctorStaffReadService;
     private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
     private final DoctorUserReadService doctorUserReadService;
@@ -63,11 +63,13 @@ public class DoctorFarms {
 
     @Autowired
     public DoctorFarms(DoctorFarmReadService doctorFarmReadService,
+                       DoctorOrgReadService doctorOrgReadService,
                        DoctorStaffReadService doctorStaffReadService,
                        DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
                        DoctorUserReadService doctorUserReadService,
                        DoctorStatisticReadService doctorStatisticReadService) {
         this.doctorFarmReadService = doctorFarmReadService;
+        this.doctorOrgReadService = doctorOrgReadService;
         this.doctorStaffReadService = doctorStaffReadService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
         this.doctorUserReadService = doctorUserReadService;
@@ -90,7 +92,22 @@ public class DoctorFarms {
      * @return 公司信息
      */
     @RequestMapping(value = "/companyInfo", method = RequestMethod.GET)
-    public DoctorBasicDto getCompanyInfo(@RequestParam(value = "orgId", required = false) Long orgId) {
+    public DoctorBasicDto getCompanyInfo(@RequestParam(value = "orgId", required = false) Long orgId,HttpServletRequest request) {
+        String isshow = null;
+        Cookie[] cookie = request.getCookies();
+        for (int i = 0; i < cookie.length; i++) {
+            Cookie cook = cookie[i];
+            if(cook.getName().equalsIgnoreCase("isshow")){ //获取键
+                isshow = cook.getValue().toString();    //获取值
+            }
+        }
+        Integer userType = doctorOrgReadService.getUserType(UserUtil.getUserId());
+        log.error("=====ishwo="+isshow+"=userType="+userType);
+        if(userType != null) {
+            if (userType == 1 && isshow == null) {
+                return null;
+            }
+        }
         return RespHelper.or500(doctorStatisticReadService.getOrgStatisticByOrg(UserUtil.getUserId(), orgId));
     }
 
@@ -158,9 +175,40 @@ public class DoctorFarms {
      * @param farmId 猪场id
      * @return 员工列表
      */
+    // 软件登陆人员是谁，仓库单据操作人就默认是谁，并支持修改 （陈娟 2018-09-13）
     private List<FarmStaff> transformStaffs(Long farmId) {
-        List<Sub> subList = RespHelper.or500(primaryUserReadService.findSubsByFarmIdAndStatus(farmId, Sub.Status.ACTIVE.value()));
         List<FarmStaff> staffList = Lists.newArrayList();
+        BaseUser currentUser = UserUtil.getCurrentUser();
+        // 得到当前登陆人的信息，置顶
+        Sub subUser = RespHelper.or500(primaryUserReadService.findSubsByFarmIdAndStatusAndUserId(farmId, Sub.Status.ACTIVE.value(), currentUser.getId()));
+        if(subUser!=null&&notNull(subUser)){
+            FarmStaff farmStaff = new FarmStaff();
+            farmStaff.setUserId(subUser.getUserId());
+            farmStaff.setRealName(subUser.getRealName());
+            farmStaff.setStatus(subUser.getStatus());
+            farmStaff.setFarmId(subUser.getFarmId());
+            staffList.add(farmStaff);
+        }else{
+            PrimaryUser primaryUser = RespHelper.or500(primaryUserReadService.findPrimaryByFarmIdAndStatus(farmId, UserStatus.NORMAL.value()));
+            if (primaryUser != null) {
+                FarmStaff farmStaff = new FarmStaff();
+                farmStaff.setFarmId(primaryUser.getRelFarmId());
+                farmStaff.setUserId(primaryUser.getUserId());
+                farmStaff.setStatus(primaryUser.getStatus());
+                Response<UserProfile> userProfileResponse = doctorUserProfileReadService.findProfileByUserId(primaryUser.getUserId());
+                if (userProfileResponse.isSuccess()
+                        && notNull(userProfileResponse.getResult())
+                        && !Strings.isNullOrEmpty(userProfileResponse.getResult().getRealName())) {
+                    farmStaff.setRealName(userProfileResponse.getResult().getRealName());
+                } else {
+                    User user = RespHelper.or500(doctorUserReadService.findById(primaryUser.getUserId()));
+                    farmStaff.setRealName(user.getName());
+                }
+                staffList.add(farmStaff);
+            }
+        }
+
+        List<Sub> subList = RespHelper.or500(primaryUserReadService.findSubsByFarmIdAndStatus(farmId, Sub.Status.ACTIVE.value(),currentUser.getId()));
         if (!Arguments.isNullOrEmpty(subList)) {
             staffList.addAll(subList.stream().map(sub -> {
                 FarmStaff farmStaff = new FarmStaff();
@@ -170,23 +218,6 @@ public class DoctorFarms {
                 farmStaff.setFarmId(sub.getFarmId());
                 return farmStaff;
             }).collect(Collectors.toList()));
-        }
-        PrimaryUser primaryUser = RespHelper.or500(primaryUserReadService.findPrimaryByFarmIdAndStatus(farmId, UserStatus.NORMAL.value()));
-        if (primaryUser != null) {
-            FarmStaff farmStaff = new FarmStaff();
-            farmStaff.setFarmId(primaryUser.getRelFarmId());
-            farmStaff.setUserId(primaryUser.getUserId());
-            farmStaff.setStatus(primaryUser.getStatus());
-            Response<UserProfile> userProfileResponse = doctorUserProfileReadService.findProfileByUserId(primaryUser.getUserId());
-            if (userProfileResponse.isSuccess()
-                    && notNull(userProfileResponse.getResult())
-                    && !Strings.isNullOrEmpty(userProfileResponse.getResult().getRealName())) {
-                farmStaff.setRealName(userProfileResponse.getResult().getRealName());
-            } else {
-                User user = RespHelper.or500(doctorUserReadService.findById(primaryUser.getUserId()));
-                farmStaff.setRealName(user.getName());
-            }
-            staffList.add(farmStaff);
         }
         return staffList;
     }

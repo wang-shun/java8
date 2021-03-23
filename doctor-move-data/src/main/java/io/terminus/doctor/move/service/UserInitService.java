@@ -270,6 +270,14 @@ public class UserInitService {
         primaryUser.setRealName(realName);
         primaryUser.setStatus(UserStatus.NORMAL.value());
         primaryUserDao.create(primaryUser);
+//        Sub sub=new Sub();
+//        sub.setUserId(user.getId());
+//        sub.setUserName(user.getName());
+//        sub.setRealName(Params.get(user.getExtra(), "realName"));
+//        sub.setContact(Params.get(user.getExtra(), "contact"));
+//        sub.setUserType(2);
+//        sub.setStatus(UserStatus.NORMAL.value());
+//        subDao.create(sub);
     }
 
     public List<View_FarmMember> getFarmMember(Long datasourceId) {
@@ -410,7 +418,7 @@ public class UserInitService {
 
     private Map<String, Long> createSubRole(Long farmId, Long primaryUserId, Long dataSourceId){
         final String appKey = "MOBILE";
-        RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, primaryUserId, farmId));
+        RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, farmId));
         // key = roleName, value = roleId
         Map<String, Long> existRole = subRoleDao.findByFarmIdAndStatus(appKey, farmId, 1).stream().collect(Collectors.toMap(SubRole::getName, SubRole::getId));
 
@@ -487,6 +495,7 @@ public class UserInitService {
             sub.setParentUserId(Long.valueOf(Params.get(subUser.getExtra(), "pid")));
             sub.setContact(Params.get(subUser.getExtra(), "contact"));
             sub.setStatus(UserStatus.NORMAL.value());
+            sub.setUserType(3);
             subDao.create(sub);
 
             userWriteService.update(subUser);

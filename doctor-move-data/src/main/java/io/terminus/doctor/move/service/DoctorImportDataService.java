@@ -11,10 +11,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Joiners;
 import io.terminus.common.utils.MapBuilder;
-import io.terminus.doctor.basic.dao.DoctorBasicDao;
-import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
-import io.terminus.doctor.basic.dao.DoctorChangeReasonDao;
-import io.terminus.doctor.basic.dao.DoctorFarmBasicDao;
+import io.terminus.doctor.basic.dao.*;
 import io.terminus.doctor.basic.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
@@ -69,6 +66,7 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorMessageRuleWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
+import io.terminus.doctor.event.util.EventUtil;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
 import io.terminus.doctor.move.dto.DoctorImportSow;
 import io.terminus.doctor.move.util.ImportExcelUtils;
@@ -80,7 +78,6 @@ import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
 import io.terminus.doctor.user.dao.DoctorServiceStatusDao;
 import io.terminus.doctor.user.dao.DoctorStaffDao;
 import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
-import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.dao.SubRoleDao;
 import io.terminus.doctor.user.dao.UserDaoExt;
@@ -118,6 +115,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -186,8 +184,6 @@ public class DoctorImportDataService {
     @Autowired
     private SubDao subDao;
     @Autowired
-    private PrimaryUserDao primaryUserDao;
-    @Autowired
     private DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
     @Autowired
     private DoctorWareHouseTypeWriteService doctorWareHouseTypeWriteService;
@@ -221,6 +217,8 @@ public class DoctorImportDataService {
     private DoctorFarmExportDao doctorFarmExportDao;
     @Autowired
     private DoctorUserManager doctorUserManager;
+    @Autowired
+    private DataAuthDao dataAuthDao;
     /**
      * 根据shit导入所有的猪场数据
      */
@@ -230,7 +228,7 @@ public class DoctorImportDataService {
         try {
             // 猪场和员工
             Object[] result = this.importOrgFarmUser(shit.getFarm(), shit.getStaff());
-            User primaryUser = (User) result[0];
+            User user = (User) result[0];
             farm = (DoctorFarm) result[1];
             Map<String, Long> userMap = doctorMoveBasicService.getSubMap(farm.getOrgId());
 
@@ -254,7 +252,7 @@ public class DoctorImportDataService {
             movePigTypeStatistic(farm);
 
             //最后仓库数据
-            importWarehouse(farm, shit, primaryUser, userMap);
+            importWarehouse(farm, shit, user, userMap);
 
             //猪场基础数据
             importFarmBasics(farm.getId());
@@ -304,17 +302,26 @@ public class DoctorImportDataService {
     @Transactional
     public Object[] importOrgFarmUser(Sheet farmShit, Sheet staffShit) {
         Object[] result = this.importOrgFarm(farmShit);
-        User primaryUser = (User) result[0];
+        User user = (User) result[0];
         DoctorFarm farm = (DoctorFarm) result[1];
-        this.importStaff(staffShit, primaryUser, farm);
+        // 公司账号或者猪场账号必须存在一个（陈娟 2018-10-12）
+        if(user==null){
+            Row row = staffShit.getRow(1);
+            String loginName = ImportExcelUtils.getString(row, 1);
+            if(loginName.equals("")){
+                throw new JsonResponseException("company.account.and.farm.account.is.null");
+            }
+        }
+        this.importStaff(staffShit,farm);
         return result;
     }
 
-    private void importStaff(Sheet staffShit, User primaryUser, DoctorFarm farm) {
+    private void importStaff(Sheet staffShit, DoctorFarm farm) {
         final String appKey = "MOBILE";
         List<SubRole> existRoles = subRoleDao.findByFarmIdAndStatus(appKey, farm.getId(), 1);
         if (existRoles.isEmpty()) {
-            RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, primaryUser.getId(), farm.getId()));
+            // 初始化权限
+            RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey,farm.getId()));
             existRoles = subRoleDao.findByFarmIdAndStatus(appKey, farm.getId(), 1);
         }
         // key = roleName, value = roleId
@@ -347,7 +354,7 @@ public class DoctorImportDataService {
                     } else {
                         subRole = new SubRole();
                         subRole.setName(roleName);
-                        subRole.setUserId(primaryUser.getId());
+//                        subRole.setUserId(user.getId());
                         subRole.setFarmId(farm.getId());
                         subRole.setAppKey(appKey);
                         subRole.setStatus(1);
@@ -360,24 +367,12 @@ public class DoctorImportDataService {
                     subUser.setRoles(roles);
 
                     subUser.setExtra(MapBuilder.<String, String>of()
-                            .put("pid", primaryUser.getId().toString())
+//                            .put("pid", user.getId().toString())
                             .put("contact", contact)
                             .put("realName", realName)
                             .map());
 
-//                    Sub sub = new Sub();
-//                    sub.setUserId(subUser.getId());
-//                    sub.setUserName(subUser.getName());
-//                    sub.setRealName(Params.get(subUser.getExtra(), "realName"));
-//                    sub.setRoleId(subRole.getId());
-//                    sub.setRoleName(subRole.getName());
-//                    sub.setParentUserId(Long.valueOf(Params.get(subUser.getExtra(), "pid")));
-//                    sub.setContact(Params.get(subUser.getExtra(), "contact"));
-//                    sub.setStatus(UserStatus.NORMAL.value());
-//                    subDao.create(sub);
-
                     userWriteService.update(subUser);
-//                    userDaoExt.updateAll(subUser);
                     subUserId = subUser.getId();
                 } else {
                     subUser = new User();
@@ -390,7 +385,7 @@ public class DoctorImportDataService {
                     if (existRole.get(roleName) == null) {
                         SubRole subRole = new SubRole();
                         subRole.setName(roleName);
-                        subRole.setUserId(primaryUser.getId());
+//                        subRole.setUserId(user.getId());
                         subRole.setFarmId(farm.getId());
                         subRole.setAppKey(appKey);
                         subRole.setStatus(1);
@@ -403,7 +398,7 @@ public class DoctorImportDataService {
                     subUser.setRoles(roles);
 
                     subUser.setExtra(MapBuilder.<String, String>of()
-                            .put("pid", primaryUser.getId().toString())
+//                            .put("pid", user.getId().toString())
                             .put("contact", contact)
                             .put("realName", realName)
                             .map());
@@ -414,10 +409,14 @@ public class DoctorImportDataService {
                 io.terminus.doctor.user.model.Sub updateSub = new io.terminus.doctor.user.model.Sub();
                 updateSub.setId(sub.getId());
                 updateSub.setFarmId(farm.getId());
+                updateSub.setUserId(91L);
                 subDao.update(updateSub);
 
                 // 创建子账号员工
-                //this.createStaff(subUser, farm);
+                DoctorStaff doctorStaff = doctorStaffDao.findByFarmIdAndUserId(subUser.getId(), farm.getId());
+                if(isNull(doctorStaff)){
+                    this.createStaff(subUser, farm);
+                }
 
                 //现在是数据权限
                 DoctorUserDataPermission permission = new DoctorUserDataPermission();
@@ -447,14 +446,16 @@ public class DoctorImportDataService {
         Row row1 = farmShit.getRow(1);
         String orgName = ImportExcelUtils.getStringOrThrow(row1, 0);
         String farmName = ImportExcelUtils.getStringOrThrow(row1, 1).replaceAll(" ", "");
-        String loginName = ImportExcelUtils.getStringOrThrow(row1, 2);
-        String mobile = ImportExcelUtils.getStringOrThrow(row1, 3);
-        String realName = ImportExcelUtils.getStringOrThrow(row1, 4);
-        String province = ImportExcelUtils.getStringOrThrow(row1, 5);
-        String city = ImportExcelUtils.getStringOrThrow(row1, 6);
-        String district = ImportExcelUtils.getStringOrThrow(row1, 7);
-        String detail = ImportExcelUtils.getStringOrThrow(row1, 8);
-        String companyMobile = ImportExcelUtils.getString(row1, 9); //集团账号手机号
+        // 新增一列猪场编码导入，切不可为空，不可重复 （陈娟 2018-10-09）
+        String farmCode = ImportExcelUtils.getStringOrThrow(row1, 2);
+        String loginName = ImportExcelUtils.getString(row1, 3);
+        String mobile = ImportExcelUtils.getString(row1, 4);
+        String realName = ImportExcelUtils.getString(row1, 5);
+        String province = ImportExcelUtils.getStringOrThrow(row1, 6);
+        String city = ImportExcelUtils.getStringOrThrow(row1, 7);
+        String district = ImportExcelUtils.getStringOrThrow(row1, 8);
+        String detail = ImportExcelUtils.getStringOrThrow(row1, 9);
+        String companyMobile = ImportExcelUtils.getString(row1, 10); //集团账号手机号
 
         // 公司
         DoctorOrg org = doctorOrgDao.findByName(orgName);
@@ -463,10 +464,17 @@ public class DoctorImportDataService {
             org.setName(orgName);
             org.setMobile(mobile);
             org.setParentId(0L);
-            org.setType(DoctorOrg.Type.CLIQUE.getValue());
+            org.setType(DoctorOrg.Type.ORG.getValue());
             doctorOrgDao.create(org);
-        } else {
-            log.warn("org {} has existed, id = {}", orgName, org.getId());
+//        } else {
+//            log.warn("org {} has existed, id = {}", orgName, org.getId());
+        }
+
+        // 判断猪场编码是否已存在 （陈娟 2018-10-09）
+        DoctorFarm code = doctorFarmDao.findByCode(farmCode);
+        if(code!=null){
+            log.warn("farm code {} has existed", farmCode);
+            throw new JsonResponseException("farm.code.has.been.existed");
         }
 
         // 猪场
@@ -476,7 +484,7 @@ public class DoctorImportDataService {
             farm.setOrgId(org.getId());
             farm.setOrgName(org.getName());
             farm.setName(farmName);
-            farm.setFarmCode(loginName);
+            farm.setFarmCode(farmCode);
             farm.setProvinceId(getAddressId(province, 1));
             farm.setProvinceName(province);
             farm.setCityId(getAddressId(city, farm.getProvinceId()));
@@ -492,58 +500,62 @@ public class DoctorImportDataService {
             throw new JsonResponseException("farm.has.been.existed");
         }
 
-        // 主账号
-        User user = getUser(mobile, loginName, realName);
-        Long userId = user.getId();
+        User user = null;
+        // 如果“猪场”页的“登录名”、“主帐号手机号”、“主帐号真实姓名”等三列都为空，则不用导入公司用户，只需导入猪场数据即可，
+        if(StringUtils.isNotBlank(mobile)&&StringUtils.isNotBlank(loginName)&&StringUtils.isNotBlank(realName)) {
+            // 公司账号
+            user = getUser(mobile, loginName, realName);
+            Long userId = user.getId();
 
-        // 把真实姓名存进 user profile
-        UserProfile userProfile = userProfileDao.findByUserId(userId);
-        userProfile.setRealName(realName);
-        userProfileDao.update(userProfile);
+            // 把真实姓名存进 user profile
+            UserProfile userProfile = userProfileDao.findByUserId(userId);
+            userProfile.setRealName(realName);
+            userProfileDao.update(userProfile);
 
-        //主账户关联猪场id
-        PrimaryUser primaryUser = primaryUserDao.findByUserId(userId);
-        PrimaryUser updatePrimary = new PrimaryUser();
-        updatePrimary.setId(primaryUser.getId());
-        updatePrimary.setRelFarmId(farm.getId());
-        primaryUserDao.update(updatePrimary);
+            // 在员工表里面添加数据
+            DoctorStaff doctorStaff = doctorStaffDao.findByFarmIdAndUserId(user.getId(), farm.getId());
+            if (isNull(doctorStaff)) {
+                this.createStaff(user, farm);
+            }
 
-        DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(userId);
-        if (permission == null) {
-            //创建数据权限
-            permission = new DoctorUserDataPermission();
-            permission.setUserId(userId);
-            permission.setFarmIds(farm.getId().toString());
-            permission.setOrgIdsList(Lists.newArrayList(org.getId()));
-            doctorUserDataPermissionDao.create(permission);
-        } else if (permission.getFarmIdsList() == null || !permission.getFarmIdsList().contains(farm.getId())) {
-            permission.setFarmIds(permission.getFarmIds() + "," + farm.getId());
-            doctorUserDataPermissionDao.update(permission);
-        }
+            DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(userId);
+            if (permission == null) {
+                //创建数据权限
+                permission = new DoctorUserDataPermission();
+                permission.setUserId(userId);
+                permission.setFarmIds(farm.getId().toString());
+                permission.setOrgIdsList(Lists.newArrayList(org.getId()));
+//            permission.setOrgIds(farm.getOrgId().toString());
+                doctorUserDataPermissionDao.create(permission);
+            } else if (permission.getFarmIdsList() == null || !permission.getFarmIdsList().contains(farm.getId())) {
+                permission.setFarmIds(permission.getFarmIds() + "," + farm.getId());
+                doctorUserDataPermissionDao.update(permission);
+            }
 
-        //admin的数据权限
-        createOrUpdateAdminPermission();
+            //admin的数据权限
+            createOrUpdateAdminPermission();
 
-        //集团账号的数据权限
-        createOrUpdateMultiPermission(companyMobile, org.getId(), farm.getId());
+            //集团账号的数据权限
+            createOrUpdateMultiPermission(companyMobile, org.getId(), farm.getId());
 
-        DoctorServiceStatus serviceStatus = doctorServiceStatusDao.findByUserId(userId);
-        if (serviceStatus == null) {
-            //初始化服务状态
-            userInitService.initDefaultServiceStatus(userId);
-        } else {
-            serviceStatus.setPigdoctorStatus(DoctorServiceStatus.Status.OPENED.value());
-            serviceStatus.setPigdoctorReviewStatus(DoctorServiceReview.Status.OK.getValue());
-            doctorServiceStatusDao.update(serviceStatus);
-        }
+            DoctorServiceStatus serviceStatus = doctorServiceStatusDao.findByUserId(userId);
+            if (serviceStatus == null) {
+                //初始化服务状态
+                userInitService.initDefaultServiceStatus(userId);
+            } else {
+                serviceStatus.setPigdoctorStatus(DoctorServiceStatus.Status.OPENED.value());
+                serviceStatus.setPigdoctorReviewStatus(DoctorServiceReview.Status.OK.getValue());
+                doctorServiceStatusDao.update(serviceStatus);
+            }
 
-        DoctorServiceReview review = doctorServiceReviewDao.findByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR);
-        if (review == null) {
-            //初始化服务的申请审批状态
-            userInitService.initServiceReview(userId, mobile, user.getName());
-        } else {
-            review.setStatus(DoctorServiceReview.Status.OK.getValue());
-            doctorServiceReviewDao.update(review);
+            DoctorServiceReview review = doctorServiceReviewDao.findByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR);
+            if (review == null) {
+                //初始化服务的申请审批状态
+                userInitService.initServiceReview(userId, mobile, user.getName());
+            } else {
+                review.setStatus(DoctorServiceReview.Status.OK.getValue());
+                doctorServiceReviewDao.update(review);
+            }
         }
 
         return new Object[]{user, farm};
@@ -568,20 +580,7 @@ public class DoctorImportDataService {
             userExtraMap.put("realName", realName);
             user.setExtra(userExtraMap);
             userWriteService.update(user);
-            userId = user.getId();
 
-            //如果primaryUser不存在新建
-            PrimaryUser primaryUser = primaryUserDao.findByUserId(userId);
-            if (isNull(primaryUser)) {
-                //猪场管理员
-                primaryUser = new PrimaryUser();
-                primaryUser.setUserId(userId);
-                //暂时暂定手机号
-                primaryUser.setUserName(user.getMobile());
-                primaryUser.setRealName(realName);
-                primaryUser.setStatus(UserStatus.NORMAL.value());
-                primaryUserDao.create(primaryUser);
-            }
         }else{
             user = new User();
             user.setMobile(mobile);
@@ -594,6 +593,30 @@ public class DoctorImportDataService {
             userExtraMap.put("realName", realName);
             user.setExtra(userExtraMap);
             userWriteService.create(user);
+        }
+
+        // 猪场的主账号变成公司账号添加到doctor_user_subs表中（陈娟 2018-08-30）
+        // 公司账号farmId为空, roleId默认第一个公司角色（2018-10-15）
+        Sub sub = subDao.findByUserId(user.getId());
+        SubRole companyRole = subRoleDao.getCompanyRole();
+        log.info("=======================companyRole,{}",companyRole);
+        log.info("=======================sub111,{}",sub);
+        sub.setUserId(user.getId());
+        sub.setParentUserId(91L);
+        sub.setContact(user.getMobile());
+        sub.setRoleId(companyRole.getId());
+        sub.setRoleName(companyRole.getName());
+        sub.setStatus(UserStatus.NORMAL.value());
+        sub.setUserType(2);
+        if(isNull(sub)){
+            sub=new Sub();
+            sub.setUserName(user.getName());
+            sub.setRealName(realName);
+            log.info("=======================sub222,{}",sub);
+            subDao.create(sub);
+        }else{
+            log.info("=======================sub333,{}",sub);
+            subDao.update(sub);
         }
         return user;
     }
@@ -645,7 +668,12 @@ public class DoctorImportDataService {
     private void createStaff(User user, DoctorFarm farm) {
         DoctorStaff staff = new DoctorStaff();
         staff.setFarmId(farm.getId());
+        staff.setOrgId(farm.getOrgId());
+        DoctorOrg org = doctorOrgDao.findById(farm.getOrgId());
+        staff.setGroupId(org.getParentId());
         staff.setUserId(user.getId());
+        staff.setUserName(user.getName());
+        staff.setMobile(user.getMobile());
         staff.setStatus(DoctorStaff.Status.PRESENT.value());
         doctorStaffDao.create(staff);
     }
@@ -719,7 +747,7 @@ public class DoctorImportDataService {
      * 导入公猪
      */
     @Transactional
-    private void importBoar(DoctorFarm farm, Map<String, DoctorBarn> barnMap, Map<String, Long> breedMap, Sheet shit) {
+    public void importBoar(DoctorFarm farm, Map<String, DoctorBarn> barnMap, Map<String, Long> breedMap, Sheet shit) {
         for (Row row : shit) {
             if (!canImport(row)) {
                 continue;
@@ -944,7 +972,8 @@ public class DoctorImportDataService {
         event.setPigType(group.getPigType());
         event.setQuantity(groupTrack.getQuantity());
         event.setAvgWeight(avgWeight);
-        event.setWeight(event.getQuantity() * avgWeight);
+//        event.setWeight(event.getQuantity() * avgWeight);
+        event.setWeight(new BigDecimal(event.getQuantity() * avgWeight).setScale(3, BigDecimal.ROUND_HALF_UP).doubleValue());
         event.setDesc("转移类型：仔猪转入#猪只数：" + groupTrack.getQuantity() + "#平均日龄：" + groupTrack.getAvgDayAge() + "#均重：" + avgWeight);
         event.setAvgDayAge(dayAge);
         event.setIsAuto(IsOrNot.YES.getValue());

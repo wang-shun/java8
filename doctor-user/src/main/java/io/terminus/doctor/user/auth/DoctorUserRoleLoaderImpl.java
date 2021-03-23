@@ -68,7 +68,7 @@ public class DoctorUserRoleLoaderImpl implements UserRoleLoader {
             forPrimary(user, roleBuilder);
             forSub(user, roleBuilder);
             forPigScore(user, roleBuilder);
-            forIot(user, roleBuilder);
+//            forIot(user, roleBuilder);
             Set<String> originRoles = new HashSet<>();
             if (user.getRoles() != null) {
                 originRoles.addAll(user.getRoles());

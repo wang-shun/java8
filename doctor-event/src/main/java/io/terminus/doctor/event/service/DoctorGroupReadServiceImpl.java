@@ -383,6 +383,16 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
+    public Response<List<DoctorGroupEvent>> getGroupEventsByCriteria(Map<String, Object> criteria) {
+        try {
+            return Response.ok(doctorGroupEventDao.list(criteria));
+        } catch (Exception e) {
+            log.error("query.group.events.by.criteria.failed, cause {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("query.group.events.by.criteria.failed");
+        }
+    }
+
+    @Override
     public Response<Boolean> isLastEvent(Long groupId, Long eventId) {
         try {
             DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventByGroupId(groupId);
@@ -591,5 +601,27 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             log.error("list open groups by, date:{},cause:{}",date, Throwables.getStackTraceAsString(e));
             return Response.fail("list.open.groups.by.failed");
         }
+    }
+
+    //孔景军
+    @Override
+    public DoctorGroupEvent findLastEvent(Long groupId){
+        return  doctorGroupEventDao.lastEventByGroupId(groupId);
+    }
+
+    /*物联网接口使用（孔景军）*/
+    @Override
+    public Response<List<DoctorGroup>> findGroupByCurrentBarnIdFuzzy(Long barnId,String groupCode) {
+        try {
+            return Response.ok(doctorGroupDao.findGroupByCurrentBarnIdFuzzy(barnId,groupCode));
+        } catch (Exception e) {
+            log.error("find group by current barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.find.fail");
+        }
+    }
+
+    @Override
+    public Long findGroupQuantityByGroupCode(String groupCode) {
+        return doctorGroupDao.findGroupQuantityByGroupCode(groupCode);
     }
 }
